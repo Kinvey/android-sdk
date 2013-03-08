@@ -5,8 +5,7 @@ This library is a standalone library designed for all java evnironments.
 The library acts as a client for the Kinvey REST api and can be used for
 building Android apps and Java6 server applications.
 
-Build
-=======
+## Build
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
@@ -16,8 +15,22 @@ Pre-requisites:
 mvn install
 ```
 
-License
-=======
+### Regenerate Javadocs
+
+```
+rm <devcenter.home>/content/reference/api/android
+cd <project.home> 
+mvn -Ddev javadoc:javadoc install
+```
+
+### Release
+
+```
+mvn -Drelease clean package
+```
+
+
+## License
 
     Copyright 2013 Kinvey, Inc.
 
