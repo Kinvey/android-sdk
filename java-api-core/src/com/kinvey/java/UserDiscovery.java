@@ -54,7 +54,7 @@ public class UserDiscovery {
         @Key("_socialIdentity.facebook.id")
         private String facebookID;
 
-        private UserLookup(){}
+        public UserLookup(){}
 
         public String getId() {
             return id;
