@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.kinvey.sample.kitchensink"
+      android:versionCode="1"
+      android:versionName="1.0">
+
+    <supports-screens android:resizeable="true"
+                      android:smallScreens="true"
+                      android:normalScreens="true"
+                      android:largeScreens="true"
+                      android:anyDensity="true"/>
+
+    <uses-sdk
+            android:minSdkVersion="11"
+            android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission android:name="com.kinvey.sample.kitchensink.permission.C2D_MESSAGE"
+                android:protectionLevel="signature" />
+    <uses-permission android:name="com.kinvey.sample.kitchensink.permission.C2D_MESSAGE" />
+
+
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/ic_launcher"
+                 android:theme="@style/Theme.Sherlock.Light.DarkActionBar"
+                 android:name=".KitchenSinkApplication">
+
+
+        <activity
+                android:name=".KitchenSink"
+                android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".appData.AppDataActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:label="@string/feature_appdata">
+        </activity>
+
+
+        <activity
+                android:name=".file.FileActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:label="@string/feature_file">
+        </activity>
+
+        <activity
+                android:name=".account.LoginActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:noHistory="true"
+                android:label="@string/feature_login">
+        </activity>
+
+        <activity
+                android:name=".push.PushActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:noHistory="true"
+                android:label="@string/feature_login">
+        </activity>
+
+        <!-- required register of push receive -->
+        <receiver android:name="com.kinvey.android.push.PushReceiver" />
+        <service android:name="com.urbanairship.push.PushService"/>
+        <receiver android:name="com.urbanairship.CoreReceiver">
+            <!-- REQUIRED IntentFilter - For Helium and Hybrid -->
+            <intent-filter >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".push.CustomPushReceiver"/>
+        <service android:name="com.urbanairship.push.PushWorkerService"
+                 android:label="Push Notification Worker Service" />
+        <service android:name="com.urbanairship.analytics.EventService"
+                 android:label="Event Service" />
+
+        <provider android:name="com.urbanairship.UrbanAirshipProvider"
+                  android:authorities="com.kinvey.sample.kitchensink.urbanairship.provider"
+                  android:exported="false"
+                  android:multiprocess="true" />
+        <!-- OPTIONAL receiver for custom handling of push messages-->
+        <receiver android:name="com.kinvey.sample.kitchensink.push.CustomPushReceiver" />
+
+    </application>
+
+</manifest>

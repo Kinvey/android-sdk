@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>android-lib</artifactId>
+    <name>AndroidLib</name>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.kinvey</groupId>
+        <artifactId>parent</artifactId>
+        <version>2.0.4</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.urbanairship</groupId>
+            <artifactId>urbanairship-lib</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>android</artifactId>
+                    <groupId>com.google.android</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+
+                <exclusion>
+                    <artifactId>android</artifactId>
+                    <groupId>com.google.android</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-android</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.android.google-play-services</groupId>
+                    <artifactId>google-play-services</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kinvey</groupId>
+            <artifactId>java-api-core</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <finalName>kinvey-android-lib-${project.version}</finalName> 
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <version>${android-maven.version}</version>
+                <configuration>
+                    <sdk>
+                        <path>${env.ANDROID_HOME}</path>
+                        <platform>${android.platform}</platform>
+                    </sdk>
+                </configuration>
+                <extensions>true</extensions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <docletArtifact>
+                        <groupId>com.kinvey</groupId>
+                        <artifactId>doclava-kinvey-custom</artifactId>
+                        <version>1.0.6a</version>
+                    </docletArtifact>
+                    <doclet>com.google.doclava.Doclava</doclet>
+                    <!--
+                      | bootclasspath required by Sun's JVM
+                    -->
+                    <bootclasspath>${sun.boot.class.path}</bootclasspath>
+                    <additionalparam>
+                        -hdf project.name "${project.name}"
+                        -hdf JavaApiCore "JavaApiCore"
+                        -stubs ${project.build.directory}/stubs
+                        -federate JavaApiCore http://localhost:3000/android/reference/api/java/reference/
+                        -federationxml JavaApiCore ${project.basedir}/../java-api-core/target/apidocs/api.xml
+                        -d ${project.build.directory}/apidocs
+                    </additionalparam>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+                    <!--
+                      | Apple's JVM sometimes requires more memory
+                    -->
+                    <additionalJOption>-J-Xmx1024m</additionalJOption>
+                    <overview>src/javadoc/overview.html</overview>
+                    <show>public</show>
+                </configuration>
+            </plugin>
+
+           <!--  <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>my-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+            </plugin> -->
+
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <configuration>
+                                    <tasks>
+                                        <copy todir="${devcenter.home}/content/reference/android/api">
+                                            <fileset dir="${project.build.directory}/apidocs/"/>
+                                        </copy>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

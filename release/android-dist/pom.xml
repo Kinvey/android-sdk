@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>android-dist</artifactId>
+    <name>android packaging for release</name>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>com.kinvey</groupId>
+        <artifactId>release</artifactId>
+        <version>2.0.4</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.urbanairship</groupId>
+            <artifactId>urbanairship-lib</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>android</artifactId>
+                    <groupId>com.google.android</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+
+                <exclusion>
+                    <artifactId>android</artifactId>
+                    <groupId>com.google.android</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-android</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.android.google-play-services</groupId>
+                    <artifactId>google-play-services</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kinvey</groupId>
+            <artifactId>java-api-core</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+<!-- TODO: fails to find this dependency
+        <dependency>
+            <groupId>com.kinvey</groupId>
+            <artifactId>android-lib</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency> -->
+
+
+    </dependencies>
+
+    <build>
+        <finalName>kinvey-android-lib-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-release</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly<goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

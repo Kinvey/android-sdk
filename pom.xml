@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <groupId>com.kinvey</groupId>
+    <artifactId>parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.0.4</version>
+
+    <name>Kinvey (Parent)</name>
+    <description></description>
+    <url>http://kinvey.com</url>
+    <inceptionYear>2013</inceptionYear>
+
+    <modules>
+        <module>java-api-core</module>
+        <module>android-lib</module>
+        <module>samples</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.6</java.version>
+
+        <devcenter.home>${project.basedir}/../../github/devcenter</devcenter.home>
+        <devcenter.baseurl>http://localhost:3000</devcenter.baseurl>
+
+        <android.version>4.0.1.2</android.version>
+        <android.platform>16</android.platform>
+        <android-support.version>r7</android-support.version>
+
+        <android-maven.version>3.3.2</android-maven.version>
+        <junit.version>4.10</junit.version>
+        <google-http-client.version>1.13.1-beta</google-http-client.version>
+        <gson.version>2.1</gson.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>thirdparty</id>
+            <url>http://build.kinvey.com:8081/nexus/content/repositories/thirdparty</url>
+        </repository>
+
+        <repository>
+            <id>google-api-services</id>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.android</groupId>
+                <artifactId>android</artifactId>
+                <version>${android.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.android</groupId>
+                <artifactId>support-v4</artifactId>
+                <version>${android-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.http-client</groupId>
+                <artifactId>google-http-client</artifactId>
+                <version>${google-http-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.http-client</groupId>
+                <artifactId>google-http-client-android</artifactId>
+                <version>${google-http-client.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>1.9.0</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                    <artifactId>android-maven-plugin</artifactId>
+                    <version>${android-maven.version}</version>
+                    <configuration>
+                        <sdk>
+                            <path>${env.ANDROID_HOME}</path>
+                            <platform>${android.platform}</platform>
+                        </sdk>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.7</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+            </plugins>
+
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <modules>
+                <module>release</module>
+            </modules>
+            <properties>
+                <java.core.http>http://devcenter.kinvey.com</java.core.http>
+            </properties>
+        </profile>
+    </profiles>
+</project>

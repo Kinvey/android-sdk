@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>java-api-core</artifactId>
+  <name>JavaApiCore</name>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>com.kinvey</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.4</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  
+  <dependencies>
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+
+    <!-- gson is used in testing-->
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client-gson</artifactId>
+      <version>${google-http-client.version}</version>
+      <scope>test</scope>
+      <exclusions>
+          <exclusion>
+              <artifactId>xpp3</artifactId>
+              <groupId>xpp3</groupId>
+          </exclusion>
+
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>kinvey-java-${project.version}</finalName>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.7</version>
+            <configuration>
+                <docletArtifact>
+                    <groupId>com.kinvey</groupId>
+                    <artifactId>doclava-kinvey-custom</artifactId>
+                    <version>1.0.6a</version>
+                </docletArtifact>
+                <doclet>com.google.doclava.Doclava</doclet>
+                <!--
+                  | bootclasspath required by Sun's JVM
+                -->
+                <bootclasspath>${sun.boot.class.path}</bootclasspath>
+                <additionalparam>
+                    -quiet
+                    -hdf project.name "${project.name}"
+                    -stubs ${project.build.directory}/stubs
+                    -apixml ${project.build.directory}/apidocs/api.xml
+                    -d ${project.build.directory}/apidocs
+                </additionalparam>
+                <useStandardDocletOptions>false</useStandardDocletOptions>
+                <!--
+                  | Apple's JVM sometimes requires more memory
+                -->
+                <additionalJOption>-J-Xmx1024m</additionalJOption>
+                <show>public</show>
+            </configuration>
+        </plugin>
+
+    </plugins>
+  </build>
+
+
+  <profiles>
+        <profile>
+          <id>release</id>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <id>attach-javadocs</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>jar</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </profile>
+
+        <profile>
+            <id>dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                          <execution>
+                            <phase>install</phase>
+                            <configuration>
+                              <tasks>
+                                 <copy todir="${devcenter.home}/content/reference/android/api/java">
+                                    <fileset dir="${project.build.directory}/apidocs/"/>
+                                 </copy>
+                              </tasks>
+                            </configuration>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

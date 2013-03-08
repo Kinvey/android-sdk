@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/ghost_white"
+              android:orientation="vertical">
+    <FrameLayout android:id="@+id/my_content"
+                 android:layout_width="match_parent"
+                 android:layout_height="0dip"
+                 android:layout_weight="1">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                      android:orientation="vertical">
+
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="Caching Policy: "
+                          style="@style/usecase_row_label"/>
+                <Spinner android:id="@+id/appdate_cache_policy_spinner"
+                         style="@style/usecase_row_value"
+                        />
+            </LinearLayout>
+
+            <TextView android:id="@+id/appdate_cache_policy_name"
+                      android:text="Cache_None"
+                      style="@style/usecase_description"/>
+
+            <TextView android:id="@+id/appdata_cache_policy_description"
+                      android:text="Execute service calls without using any cache.  All requests will require a data connection."
+                      style="@style/usecase_description"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="2dp"
+                          android:background="@color/kinvey_orange"/>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="cache size:"
+                          style="@style/usecase_row_label"/>
+                <TextView android:id="@+id/appdata_cache_store_size"
+                          android:text="..."
+                          style="@style/usecase_row_value"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="server size:"
+                          style="@style/usecase_row_label"/>
+                <TextView android:id="@+id/appdata_cache_total_size"
+                          android:text="..."
+                          style="@style/usecase_row_value"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+    <LinearLayout android:id="@+id/my_toolbar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+
+        <Button
+                android:id="@+id/appdata_cache_tryit_button"
+                style="@style/usecase_action_button"
+                android:text="Try it"/>
+    </LinearLayout>
+
+
+</LinearLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
