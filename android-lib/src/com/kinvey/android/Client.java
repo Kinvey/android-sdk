@@ -21,14 +21,12 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.kinvey.android.callback.KinveyPingCallback;
@@ -60,13 +58,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  * </p>
  *
  * <p>
- * This class extends {@link com.kinvey.java.AbstractClient}, the synchronous api layer of the library.
- * This layering of asynchronous and synchronous API access adds to the flexibility and power of the library.  Async
- * methods all require a callback as the final parameter.
- * </p>
- *
- * <p>
- * All callback methods are {@code null}-safe, an the callback will be ignored if null is passed in.
+ * All callback methods are <i>null-safe</i>, the callback will be ignored if {@code null} is passed in.
  * </p>
  *
  * @author edwardf
@@ -80,6 +72,8 @@ public class Client extends AbstractClient {
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
 
+    final static Logger LOGGER = Logger.getLogger(Client.class.getSimpleName());
+
     private Context context = null;
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
@@ -89,8 +83,6 @@ public class Client extends AbstractClient {
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
     private AsyncUser currentUser;
-
-    private static boolean debug;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -119,25 +111,6 @@ public class Client extends AbstractClient {
         if (context != null) {
             this.context = context.getApplicationContext();
         }
-    }
-
-    /**
-     * Add logging for the HttpTransport class to Level.FINEST.
-     * <p>
-     * Request and response log messages will be dumped to LogCat.
-     * </p>
-     */
-    public void enableDebugLogging() {
-        this.debug = true;
-        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
-    }
-
-    /**
-     * Disable logging for the HttpTransport class to Level.FINEST.
-     */
-    public void disableDebugLogging() {
-        this.debug = false;
-        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
     }
 
     /**
@@ -267,18 +240,16 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Builder class for Android AbstractClient.
+     * Create a client for interacting with Kinvey's services from an Android Activity.
+     * <pre>
+     * Client myClient =  new Client.Builder(appKey, appSecret, getContext()).build();
+     * <pre/>
+     * All features of the library are be accessed through an instance of a client.
      * <p/>
+     * It is recommended to maintain a single instance of a {@code Client} while developing with Kinvey, either in an
+     * Activity, a Service, or an Application.
      * <p/>
-     * This can be used to create a client for interacting with Kinvey's services from an Android Activity.
-     * <p/>
-     * AbstractClient myClient =  new AbstractClient.Builder(appKey, appSecret, getContext()).build();
-     * <p/>
-     * All features can be accessed through an instance of a client.
-     * <p/>
-     * It is recommended to maintain a single instance of a AbstractClient while developing with Kinvey, either in an Activity, a Service, or an Application.
-     * <p/>
-     * This is not thread-safe.
+     * This Builder class is not thread-safe.
      */
     public static class Builder extends AbstractClient.Builder {
 

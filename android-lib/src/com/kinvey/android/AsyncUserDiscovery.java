@@ -68,6 +68,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
+     *  </pre>
      *
      * @param firstname a {@link java.lang.String} object.
      * @param lastname a {@link java.lang.String} object.
@@ -99,6 +100,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
+     * </pre>
      *
      * @param username a {@link java.lang.String} object.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
@@ -124,7 +126,8 @@ public class AsyncUserDiscovery extends UserDiscovery {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
-     *
+     * </pre>
+      *
      * @param facebookID a {@link java.lang.String} object.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      * @throws java.io.IOException if any.
@@ -154,6 +157,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
      });
+     * </pre>
      *
      * @param userlookup a UserLookup object.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.

@@ -34,7 +34,6 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
      * <p>Constructor for AsyncClientRequest.</p>
      *
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
-     * @param <T> a T object.
      */
     public AsyncClientRequest(KinveyClientCallback callback) {
         this.callback = callback;

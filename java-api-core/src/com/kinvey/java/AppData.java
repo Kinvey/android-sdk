@@ -168,15 +168,16 @@ public class AppData<T> {
         Save save;
         String sourceID;
 
-        if (entity instanceof LinkedResource) {
-
-            for (String key : ((LinkedResource) entity).getAllFiles().keySet()) {
-                System.out.println("Kinvey - AppData" + " saving a  LinkedResource, " + key);
-                ((GenericJson) entity).put(key,
-                        (uploadAndGetLink(key, ((LinkedResource) entity).getAllFiles().get(key))));
-            }
-
-        }
+        //TODO: add back in once LinkedResource is enabled
+//        if (entity instanceof LinkedResource) {
+//
+//            for (String key : ((LinkedResource) entity).getAllFiles().keySet()) {
+//                System.out.println("Kinvey - AppData" + " saving a  LinkedResource, " + key);
+//                ((GenericJson) entity).put(key,
+//                        (uploadAndGetLink(key, ((LinkedResource) entity).getAllFiles().get(key))));
+//            }
+//
+//        }
         System.out.println("Kinvey - AppData" + " saving the entity");
 
         GenericJson jsonEntity = (GenericJson) entity;
@@ -493,17 +494,18 @@ public class AppData<T> {
         @Override
         public T execute() throws IOException {
             T myEntity = super.execute();
-            if (myClass.isInstance(LinkedResource.class)) {
-                for (String key : ((LinkedResource) myEntity).keySet()) {
-                    if (((LinkedResource) myEntity).get(key).getClass().isInstance(HashMap.class)
-                            && ((HashMap<String,Object>) ((LinkedResource) myEntity).get(key))
-                            .containsKey("_mime-type")) {
-                        LinkedFile file = downloadFile((HashMap<String,String>)(((LinkedResource) myEntity).get(key)));
-                        ((LinkedResource) myEntity).remove(key);
-                        ((LinkedResource) myEntity).put(key,file);
-                    }
-                }
-            }
+            //TODO: rethink LinkedResource
+//            if (myClass.isInstance(LinkedResource.class)) {
+//                for (String key : ((LinkedResource) myEntity).keySet()) {
+//                    if (((LinkedResource) myEntity).get(key).getClass().isInstance(HashMap.class)
+//                            && ((HashMap<String,Object>) ((LinkedResource) myEntity).get(key))
+//                            .containsKey("_mime-type")) {
+//                        LinkedFile file = downloadFile((HashMap<String,String>)(((LinkedResource) myEntity).get(key)));
+//                        ((LinkedResource) myEntity).remove(key);
+//                        ((LinkedResource) myEntity).put(key,file);
+//                    }
+//                }
+//            }
             return myEntity;
         }
 

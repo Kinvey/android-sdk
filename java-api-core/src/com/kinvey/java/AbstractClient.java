@@ -22,6 +22,8 @@ import com.google.api.client.json.JsonObjectParser;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.Credential;
@@ -50,13 +52,14 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public static final String DEFAULT_SERVICE_PATH = "";
 
-    /**
-     *
-     */
+    /** allows for finer grained logging, useful when debugging **/
+    private static boolean enableRequestLogging;
+
 
     private User currentUser;
     private CredentialStore store;
 
+    /** used to synchronized access to the local api wrappers **/
     protected Object lock = new Object();
 
 
@@ -81,13 +84,13 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     /**
-     * Creates a new instance of the AppData class or returns the existing instance.
+     * @return a new instance of the AppData class
      */
     public abstract <T> AppData<T> appData(String collectionName, Class<T> myClass);
 
 
     /**
-     * @return
+     * @return a valid new instance of File api wrapper
      */
     public abstract File file();
 
@@ -162,6 +165,25 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public void initializeRequest(AbstractKinveyClientRequest<?> httpClientRequest)
             throws java.io.IOException {
         super.initializeRequest(httpClientRequest);
+    }
+
+    /**
+     * Add logging for the HttpTransport class to Level.FINEST.
+     * <p>
+     * Request and response log messages will be dumped to LogCat.
+     * </p>
+     */
+    public void enableDebugLogging() {
+        AbstractClient.enableRequestLogging = true;
+        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
+    }
+
+    /**
+     * Disable logging for the HttpTransport class to Level.FINEST.
+     */
+    public void disableDebugLogging() {
+        AbstractClient.enableRequestLogging = false;
+        Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
     }
 
     /**
@@ -256,9 +278,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 KinveyClientRequestInitializer kinveyRequestInitializer) {
             return (Builder) super.setKinveyClientRequestInitializer(kinveyRequestInitializer);
         }
-
-
-
 
 
         protected void loadPropertiesFromDisk(String propFilename){

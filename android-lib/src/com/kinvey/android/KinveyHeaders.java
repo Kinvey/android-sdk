@@ -17,6 +17,7 @@ import android.content.Context;
 import com.google.api.client.util.Key;
 
 /**
+ * Standard Kinvey specific headers are added to all requests.
  * @author m0rganic
  * @since 2.0
  */
