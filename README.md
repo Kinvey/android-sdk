@@ -26,7 +26,7 @@ mvn -Ddev javadoc:javadoc install
 ### Release
 
 ```
-mvn -Drelease clean package
+mvn -Drelease clean install
 ```
 
 

@@ -22,6 +22,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
@@ -264,7 +265,8 @@ public class Client extends AbstractClient {
          * @param context Your Android Application Context
          */
         public Builder(String appKey, String appSecret, Context context) {
-            super(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null, new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
+            super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null
+                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
             this.context = context.getApplicationContext();
             try {
                 this.setCredentialStore(new AndroidCredentialStore(this.context));
@@ -282,7 +284,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            super(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null);
+            super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null);
 
             try {
                 final InputStream in = context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());

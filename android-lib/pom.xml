@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.kinvey</groupId>
         <artifactId>parent</artifactId>
-        <version>2.0.4</version>
+        <version>2.0.6</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -69,6 +69,8 @@
             </exclusions>
         </dependency>
 
+
+
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-android</artifactId>
@@ -83,6 +85,44 @@
                     <groupId>xpp3</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson</artifactId>
+            <version>${google-http-client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>${jackson-core-asl.version}</version>
         </dependency>
 
         <dependency>
