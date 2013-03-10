@@ -18,22 +18,30 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 
 import com.kinvey.android.Client;
+import com.kinvey.java.LinkedResources.LinkedFile;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.samples.statusshare.R;
 import com.kinvey.samples.statusshare.StatusShare;
 import com.kinvey.samples.statusshare.model.UpdateEntity;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author edwardf
  * @since 2.0
  */
-public class ShareFragment extends KinveyFragment {
+public class ShareFragment extends KinveyFragment implements View.OnClickListener {
 
 
     private Boolean mLocked;
@@ -48,24 +56,64 @@ public class ShareFragment extends KinveyFragment {
     private EditText updateText;
     private Bitmap image;
 
-    private ShareFragment() {
+    public ShareFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        getSherlockActivity().invalidateOptionsMenu();
+
+
+        final String[] items = new String[]{"From Camera", "From SD Card"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getSherlockActivity(), android.R.layout.select_dialog_item, items);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getSherlockActivity());
+
+        builder.setTitle("Select Image");
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                if (item == 0) {
+                    ((StatusShare) getSherlockActivity()).startCamera();
+
+
+                    dialog.cancel();
+                } else {
+
+                    ((StatusShare) getSherlockActivity()).startFilePicker();
+                    dialog.cancel();
+
+
+                }
+            }
+        });
+
+        mDialog = builder.create();
 
 
     }
 
-    public static ShareFragment newInstance(Bitmap bitmap, String path) {
-        ShareFragment ret = new ShareFragment();
-        ret.mPath = path;
-        ret.image = bitmap;
-        return ret;
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.image = ((StatusShare) getSherlockActivity()).bitmap;
+        this.mPath = ((StatusShare) getSherlockActivity()).path;
+
+
+        if (this.image != null) {
+            Log.i(Client.TAG, "not setting imageview");
+            mImageView.setImageBitmap(this.image);
+        } else {
+
+            Log.i(Client.TAG, "not setting imageview");
+        }
     }
+//
+//    public static ShareFragment newInstance(Bitmap bitmap, String path) {
+//        ShareFragment ret = new ShareFragment();
+//        ret.mPath = path;
+//        ret.image = bitmap;
+//        return ret;
+//    }
 
 
     @Override
@@ -78,6 +126,8 @@ public class ShareFragment extends KinveyFragment {
 
         mImageView = (ImageView) v.findViewById(R.id.preview);
         updateText = (EditText) v.findViewById(R.id.update);
+
+        mImageView.setOnClickListener(this);
 
 
         mLocked = false;
@@ -112,16 +162,6 @@ public class ShareFragment extends KinveyFragment {
     }
 
 
-    public void toggleLock(View view) {
-        mLocked = !mLocked;
-
-        if (mLocked) {
-            ((ImageButton) view).setImageResource(R.drawable.lock);
-        } else {
-            ((ImageButton) view).setImageResource(R.drawable.unlock);
-        }
-    }
-
     public void doAttachement() {
         mDialog.show();
     }
@@ -130,14 +170,30 @@ public class ShareFragment extends KinveyFragment {
         final ProgressDialog progressDialog = ProgressDialog.show(getSherlockActivity(), "",
                 "Posting. Please wait...", true);
 
-            saveUpdateText(progressDialog);
+
+
+
+
+        //create a file to write bitmap data
+        File f = new File(getSherlockActivity().getCacheDir(), getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
+        try{
+        f.createNewFile();
+        }catch(Exception e ){}
+
+
+
+
+
+
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+
+
+        saveUpdateAttachment(progressDialog, byteArray, getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
     }
 
-
-
-    public void saveUpdateText(ProgressDialog progressDialog) {
-        saveUpdateAttachment(progressDialog, null, null);
-    }
 
     public void saveUpdateAttachment(final ProgressDialog progressDialog, byte[] bytes, String filename) {
         UpdateEntity updateEntity = new UpdateEntity();
@@ -145,23 +201,37 @@ public class ShareFragment extends KinveyFragment {
         updateEntity.getAcl().setGloballyReadable(!mLocked);
 
         android.util.Log.d(Client.TAG, "updateEntity.getMeta().isGloballyReadable() = " + updateEntity.getAcl().isGloballyReadable());
-        getClient().appData("Updates", UpdateEntity.class).save(updateEntity, new KinveyClientCallback<UpdateEntity>() {
 
-            @Override
-            public void onFailure(Throwable e) {
-                e.printStackTrace();
-                progressDialog.dismiss();
-                ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
-            }
+        if (bytes != null && filename != null) {
+            Log.i(Client.TAG, "there is an attachment!");
 
-            @Override
-            public void onSuccess(UpdateEntity updateEntity) {
-                android.util.Log.d(Client.TAG, "postUpdate: SUCCESS _id = " + updateEntity.getId() + ", gr = " + updateEntity.getAcl().isGloballyReadable());
-                progressDialog.dismiss();
-                ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
-            }
 
-        });
+            updateEntity.putFile("attachment", new LinkedFile(bytes, filename));
+
+
+            getClient().appData("Updates", UpdateEntity.class).save(updateEntity, new KinveyClientCallback<UpdateEntity>() {
+
+                @Override
+                public void onSuccess(UpdateEntity result) {
+                    android.util.Log.d(Client.TAG, "postUpdate: SUCCESS _id = " + result.getId() + ", gr = " + result.getAcl().isGloballyReadable());
+                    android.util.Log.d(Client.TAG, "success complete!");
+                    progressDialog.dismiss();
+                    if (getSherlockActivity() != null){
+                        ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable e) {
+                    e.printStackTrace();
+                    progressDialog.dismiss();
+                    ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
+                }
+
+            });
+        } else {
+            Log.i(Client.TAG, "there is no attachment");
+        }
     }
 
 
@@ -182,4 +252,10 @@ public class ShareFragment extends KinveyFragment {
     }
 
 
+    @Override
+    public void onClick(View v) {
+        if (v == mImageView) {
+            doAttachement();
+        }
+    }
 }

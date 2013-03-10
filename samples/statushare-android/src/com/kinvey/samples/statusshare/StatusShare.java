@@ -28,6 +28,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.api.client.http.HttpTransport;
+import com.kinvey.android.Client;
 import com.kinvey.samples.statusshare.fragments.LoginFragment;
 import com.kinvey.samples.statusshare.fragments.ShareFragment;
 import com.kinvey.samples.statusshare.model.Update;
@@ -35,6 +37,7 @@ import com.kinvey.samples.statusshare.model.Update;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Main Activity, it starts login then redirects to list view of status updates.
  *
@@ -43,27 +46,40 @@ import java.util.logging.Level;
  */
 public class StatusShare extends SherlockFragmentActivity {
 
+    private static final Level LOGGING_LEVEL = Level.FINEST;
+
     public static final String TAG = "Kinvey - StatusShare";
     private static final int PICK_FROM_CAMERA = 1;
     private static final int PICK_FROM_FILE = 2;
 
     private List<Update> mUpdates;
+    private Uri mImageCaptureUri;
 
 
 
-    Bitmap bitmap = null;
-    String path = null;
+    public Bitmap bitmap = null;
+    public String path = null;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.status_share);
-        if (bitmap != null && path != null) {
-            replaceFragment(ShareFragment.newInstance(bitmap, path), false);
-        } else{
-            addFragment(new LoginFragment());
-        }
+        Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
+        addFragment(new LoginFragment());
+
+
+
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+//        if (bitmap != null && path != null) {
+//            replaceFragment(ShareFragment.newInstance(bitmap, path), false);
+//        } else{
+//        }
 
     }
 
@@ -111,9 +127,42 @@ public class StatusShare extends SherlockFragmentActivity {
             if (path != null) {
                 bitmap = BitmapFactory.decodeFile(path);
             }
+            Log.i(Client.TAG,  "activity result, bitmap from file is -> " + String.valueOf(bitmap == null)) ;
+
         } else if(requestCode == PICK_FROM_CAMERA){
-            path = data.getData().getPath();
-            bitmap = BitmapFactory.decodeFile(path);
+            path = mImageCaptureUri.getPath();
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inScaled = true;
+            options.inJustDecodeBounds = true;
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            bitmap = BitmapFactory.decodeFile(path, options);
+
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, 200 , 150);
+
+            options.inJustDecodeBounds = false;
+
+            // Decode bitmap with inSampleSize set
+//            bitmap = BitmapFactory.decodeFile(path, options);
+
+            int h = 48; // height in pixels
+            int w = 48; // width in pixels
+            bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(path, options), h, w, true);
+
+
+
+
+
+
+
+
+//            path = data.getData().getPath();
+            bitmap = BitmapFactory.decodeFile(mImageCaptureUri.getPath());
+            Log.i(Client.TAG,  "activity result, bitmap from camera is -> " + String.valueOf(bitmap == null)) ;
+            Log.i(Client.TAG,  "activity result, path from camera is -> " + String.valueOf(path == null)) ;
+
         } else{
             Log.e(TAG, "That's not a valid request code! -> " + requestCode);
         }
@@ -151,7 +200,7 @@ public class StatusShare extends SherlockFragmentActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File file = new File(Environment.getExternalStorageDirectory(),
                 "tmp_avatar_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-        Uri mImageCaptureUri = Uri.fromFile(file);
+        mImageCaptureUri = Uri.fromFile(file);
 
         try {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
@@ -173,6 +222,19 @@ public class StatusShare extends SherlockFragmentActivity {
 
         startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
 
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+
+        int stretch_width = Math.round((float)width / (float)reqWidth);
+        int stretch_height = Math.round((float)height / (float)reqHeight);
+
+        if (stretch_width <= stretch_height) return stretch_height;
+        else return stretch_width;
     }
 }
 

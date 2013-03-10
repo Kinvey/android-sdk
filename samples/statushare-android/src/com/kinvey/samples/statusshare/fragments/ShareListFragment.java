@@ -284,7 +284,7 @@ public class ShareListFragment extends KinveyFragment {
         switch (item.getItemId()) {
 
             case R.id.menu_status_post:
-                ((StatusShare) getSherlockActivity()).addFragment(ShareFragment.newInstance(null, null));
+                ((StatusShare) getSherlockActivity()).addFragment(new ShareFragment());
                 return (true);
         }
 

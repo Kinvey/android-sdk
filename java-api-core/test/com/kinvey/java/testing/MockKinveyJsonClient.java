@@ -20,6 +20,7 @@ import com.google.api.client.testing.http.HttpTesting;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.json.MockJsonFactory;
 
+import com.kinvey.java.File;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyRequestInitializer;
 
@@ -31,6 +32,11 @@ public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
 
     public MockKinveyJsonClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyRequestInitializer kinveyRequestInitializer) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer);
+    }
+
+    @Override
+    public File file() {
+        return null;
     }
 
     public static class Builder extends AbstractKinveyJsonClient.Builder {

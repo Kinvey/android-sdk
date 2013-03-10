@@ -11,36 +11,33 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.java;
+package com.kinvey.java.LinkedResources;
 
-import java.util.Arrays;
+import com.google.api.client.json.GenericJson;
+
+import java.util.HashMap;
 
 /**
  * @author mjsalinger
  * @since 2.0
  */
-public class LinkedFile {
-    private byte[] fileData;
-    private String fileName;
+public abstract class LinkedResource extends GenericJson {
+    private HashMap<String, LinkedFile> files;
 
-    public LinkedFile(byte[] fileData, String fileName) {
-        this.fileData = Arrays.copyOf(fileData, fileData.length);
-        this.fileName = fileName;
+    public LinkedResource() {
+        super();
+        files = new HashMap<String, LinkedFile>();
     }
 
-    public byte[] getFileData() {
-        return Arrays.copyOf(fileData,fileData.length);
+    public void putFile(String key, LinkedFile file) {
+        files.put(key, file);
     }
 
-    public void setFileData(byte[] fileData) {
-        this.fileData = Arrays.copyOf(fileData, fileData.length);;
+    public LinkedFile getFile(String key) {
+        return files.get(key);
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public HashMap<String,LinkedFile> getAllFiles() {
+        return files;
     }
 }

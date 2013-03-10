@@ -13,9 +13,9 @@
  */
 package com.kinvey.samples.statusshare.model;
 
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
+import com.kinvey.java.LinkedResources.LinkedResource;
 import com.kinvey.java.model.KinveyMetaData;
 
 
@@ -25,7 +25,7 @@ import com.kinvey.java.model.KinveyMetaData;
  * @author edwardf
  * @since 2.0
  */
-public class UpdateEntity extends GenericJson {
+public class UpdateEntity extends LinkedResource {
 
     @Key("_id")
     private String id;

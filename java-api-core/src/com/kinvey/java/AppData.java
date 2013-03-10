@@ -1,22 +1,30 @@
+/*
+ * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.kinvey.java;
 
-import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
-import javax.activation.MimetypesFileTypeMap;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.UUID;
 
-import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
+import com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest;
+import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
@@ -29,6 +37,7 @@ import com.kinvey.java.query.MongoQueryFilter;
  *
  * @author mjsalinger
  * @author m0rganic
+ * @author edwardf
  * @since 2.0.2
  */
 public class AppData<T> {
@@ -168,18 +177,6 @@ public class AppData<T> {
         Save save;
         String sourceID;
 
-        //TODO: add back in once LinkedResource is enabled
-//        if (entity instanceof LinkedResource) {
-//
-//            for (String key : ((LinkedResource) entity).getAllFiles().keySet()) {
-//                System.out.println("Kinvey - AppData" + " saving a  LinkedResource, " + key);
-//                ((GenericJson) entity).put(key,
-//                        (uploadAndGetLink(key, ((LinkedResource) entity).getAllFiles().get(key))));
-//            }
-//
-//        }
-        System.out.println("Kinvey - AppData" + " saving the entity");
-
         GenericJson jsonEntity = (GenericJson) entity;
         sourceID = (String) jsonEntity.get(ID_FIELD);
 
@@ -193,30 +190,8 @@ public class AppData<T> {
         return save;
     }
 
-    private HashMap<String,String> uploadAndGetLink(String key, LinkedFile myFile) throws IOException {
-        HashMap<String,String> resourceMap = new HashMap<String, String>();
-        String extension = getFileExtension(myFile.getFileName());
-        InputStreamContent content = new InputStreamContent("application/octet-stream",
-                new ByteArrayInputStream(myFile.getFileData()));
-        content.setCloseInputStream(false);
-        content.setRetrySupported(false);
-        content.setLength(myFile.getFileData().length);
 
-        StringBuilder resourceName = new StringBuilder();
-        resourceName.append(collectionName).append(UUID.randomUUID()).append("-").append(key).append("-")
-                .append(".").append(extension);
 
-        String mimeType = new MimetypesFileTypeMap().getContentType(extension);
-        String fileName = resourceName.toString();
-
-        String uri = this.client.file().getUploadUrl(fileName).execute().getBlobTemporaryUri();
-        this.client.file().upload(fileName, content).execute();
-
-        resourceMap.put("_mime-type", mimeType);
-        resourceMap.put("_loc",fileName);
-        resourceMap.put("_type","resource");
-        return resourceMap;
-    }
 
     private static String getFileExtension(String name) {
         if (name == null) {
@@ -355,7 +330,7 @@ public class AppData<T> {
      * requests.
      *
      */
-    public class Get extends AbstractKinveyCachedClientRequest<T[]> {
+    public class Get extends GetLinkedResourceClientRequest<T[]> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -415,31 +390,6 @@ public class AppData<T> {
         @Override
         public T[] execute() throws IOException {
             return super.execute();
-// TODO: make this asynchonous
-//          T[] myEntities = super.execute();
-//            for (T myEntity : myEntities) {
-//
-//
-//            }
-//            if (myClass.isInstance(LinkedResource.class)) {
-//                for (String key : (String[]) ((LinkedResource) myEntity).keySet().toArray()) {
-//                    if (((LinkedResource) myEntity).get(key).getClass().isInstance(HashMap.class)
-//                            && ((HashMap<String,Object>) ((LinkedResource) myEntity).get(key))
-//                            .containsKey("_mime-type")) {
-//                        LinkedFile file = downloadFile((HashMap<String,String>)(((LinkedResource) myEntity).get(key)));
-//                        ((LinkedResource) myEntity).remove(key);
-//                        ((LinkedResource) myEntity).put(key,file);
-//                    }
-//                }
-//            }
-//            return myEntity;
-        }
-
-        private LinkedFile downloadFile(HashMap<String,String> fileMetaData) throws IOException {
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            client.file().download(fileMetaData.get("_loc")).executeAndDownloadTo(bos);
-            return new LinkedFile(bos.toByteArray(),fileMetaData.get("_loc"));
         }
     }
 
@@ -449,7 +399,7 @@ public class AppData<T> {
      * requests.
      *
      */
-    public class GetEntity extends AbstractKinveyCachedClientRequest<T> {
+    public class GetEntity extends GetLinkedResourceClientRequest<T> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{resolve,resolve_depth,retainReference}";
@@ -486,7 +436,6 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);            
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-
         }
 
 
@@ -494,27 +443,11 @@ public class AppData<T> {
         @Override
         public T execute() throws IOException {
             T myEntity = super.execute();
-            //TODO: rethink LinkedResource
-//            if (myClass.isInstance(LinkedResource.class)) {
-//                for (String key : ((LinkedResource) myEntity).keySet()) {
-//                    if (((LinkedResource) myEntity).get(key).getClass().isInstance(HashMap.class)
-//                            && ((HashMap<String,Object>) ((LinkedResource) myEntity).get(key))
-//                            .containsKey("_mime-type")) {
-//                        LinkedFile file = downloadFile((HashMap<String,String>)(((LinkedResource) myEntity).get(key)));
-//                        ((LinkedResource) myEntity).remove(key);
-//                        ((LinkedResource) myEntity).put(key,file);
-//                    }
-//                }
-//            }
+
             return myEntity;
         }
 
-        private LinkedFile downloadFile(HashMap<String,String> fileMetaData) throws IOException {
 
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            client.file().download(fileMetaData.get("_loc")).executeAndDownloadTo(bos);
-            return new LinkedFile(bos.toByteArray(),fileMetaData.get("_loc"));
-        }
     }
 
     /** used internally **/
@@ -528,7 +461,7 @@ public class AppData<T> {
      * Create / Update requests.
      *
      */
-    public class Save extends AbstractKinveyJsonClientRequest<T> {
+    public class Save extends SaveLinkedResourceClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}";
         @Key
         private String collectionName;
@@ -537,7 +470,7 @@ public class AppData<T> {
 
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
-            super(client, update.toString(), REST_PATH, entity,myClass);
+            super(client, update.toString(), REST_PATH, entity, myClass);
             this.collectionName = AppData.this.collectionName;
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;

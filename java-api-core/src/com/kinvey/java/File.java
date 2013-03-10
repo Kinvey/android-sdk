@@ -87,7 +87,7 @@ public class File {
     /** the client for this api **/
     private AbstractClient client;
 
-    /** the upload request listener, can be {@code null} if hte calling code has not explicitly set it **/
+    /** the upload request listener, can be {@code null} if the calling code has not explicitly set it **/
     private UploaderProgressListener uploadProgressListener;
 
     /** the download request listener, can be {@code null} if the call code has not set it **/

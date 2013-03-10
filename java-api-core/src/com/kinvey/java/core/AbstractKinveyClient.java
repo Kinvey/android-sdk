@@ -18,6 +18,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
+import com.kinvey.java.File;
 
 import java.io.IOException;
 
@@ -73,6 +74,12 @@ public abstract class AbstractKinveyClient {
         httpRequestInitializer == null ? transport.createRequestFactory() : transport
             .createRequestFactory(httpRequestInitializer);
   }
+
+
+    /**
+     * Access to the File service where files of all sizes including images and videos can be uploaded and downloaded.
+     */
+    public abstract File file();
   
 
   /** 
