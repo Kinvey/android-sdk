@@ -28,8 +28,8 @@ public class KitchenSinkApplication extends Application {
     private Client myClient;
 
     // NOTE: When configuring push notifications you have to change the android package name of this app
-    private String pushAppKey = "kid_PTZrfDHZ6";
-    private String pushAppSecret = "2eecf5e8909043f28a90360b01440795";
+    private String pushAppKey = "your_push_key";
+    private String pushAppSecret = "your_push_secret";
 
     @Override
     public void onCreate() {
