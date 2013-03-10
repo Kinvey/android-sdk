@@ -276,11 +276,13 @@ public class KinveyAuthRequest extends GenericJson {
         public Builder setUsernameAndPassword(String username, String password) {
             this.username = username;
             this.password = password;
+            isThirdPartyAuthUsed = false;
             return this;
         }
 
         public Builder setThirdPartyIdentity(ThirdPartyIdentity identity) {
             thirdPartyIdentity = identity;
+            isThirdPartyAuthUsed = true;
             return this;
         }
 
