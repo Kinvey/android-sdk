@@ -24,7 +24,7 @@ import java.util.HashMap;
 /**
  * Implementation of a Client Request, which can upload linked resources.
  * <p>
- * On the call to execute, if a file is a LinkedResource, then this iterates through all the attachments and uploads them.
+ * On the call to execute, if a file is a LinkedGenericJson, then this iterates through all the attachments and uploads them.
  * Once all files have been uploaded, a call to super.execute() is made.
  * </p>
  * <p>
@@ -58,19 +58,19 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
     @Override
     public T execute() throws IOException {
-        //TODO edwardf LinkedResource doesn't support fileInputStream ONLY supports passed in Java.io.File.
+        //TODO edwardf LinkedGenericJson doesn't support fileInputStream ONLY supports passed in Java.io.File.
         //TODO edwardf possible optimization-- if file hasn't changed, don't bother uploading it...? not sure if possible
 
-        if (getJsonContent() instanceof LinkedResource) {
+        if (getJsonContent() instanceof LinkedGenericJson) {
 
 
-            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedResource) getJsonContent()).getAllFiles().keySet().size());
+            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet().size());
 
 
-            for (final String key : ((LinkedResource) getJsonContent()).getAllFiles().keySet()) {
-                System.out.println("Kinvey - LR, " + "saving a LinkedResource: " + key + " -> " + ((LinkedResource) getJsonContent()).getFile(key).getFileName());
+            for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
+                System.out.println("Kinvey - LR, " + "saving a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
 
-                byte[] file = ((LinkedResource) getJsonContent()).getFile(key).getFileData();
+                byte[] file = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileData();
 
                 InputStreamContent mediaContent = null;
                 String mimetype = "application/octet-stream";
@@ -83,10 +83,10 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
                 getAbstractKinveyClient().file().setUploadProgressListener(upload);
 
-                getAbstractKinveyClient().file().upload(((LinkedResource) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
+                getAbstractKinveyClient().file().upload(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
 
 
-                String filename = ((LinkedResource) getJsonContent()).getFile(key).getFileName();
+                String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();
                 //TODO edwardf test various use/edge cases for this MIME type calculation
                 //default to a text file if no file extension on file name.
                 String mime = "txt";

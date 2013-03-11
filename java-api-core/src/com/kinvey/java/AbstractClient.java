@@ -90,7 +90,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
 
     /**
-     * @return a valid new instance of File api wrapper
+     * @return a new instance of File api wrapper
      */
     public abstract File file();
 

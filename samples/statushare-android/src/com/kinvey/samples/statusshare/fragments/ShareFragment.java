@@ -209,7 +209,7 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
             updateEntity.putFile("attachment", new LinkedFile(bytes, filename));
 
 
-            getClient().appData("Updates", UpdateEntity.class).save(updateEntity, new KinveyClientCallback<UpdateEntity>() {
+            getClient().linkedData("Updates", UpdateEntity.class).save(updateEntity, new KinveyClientCallback<UpdateEntity>() {
 
                 @Override
                 public void onSuccess(UpdateEntity result) {
@@ -228,7 +228,7 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
                     ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
                 }
 
-            });
+            }, null, null);
         } else {
             Log.i(Client.TAG, "there is no attachment");
         }

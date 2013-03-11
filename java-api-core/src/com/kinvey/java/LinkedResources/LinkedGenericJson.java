@@ -21,10 +21,10 @@ import java.util.HashMap;
  * @author mjsalinger
  * @since 2.0
  */
-public abstract class LinkedResource extends GenericJson {
+public abstract class LinkedGenericJson extends GenericJson {
     private HashMap<String, LinkedFile> files;
 
-    public LinkedResource() {
+    public LinkedGenericJson() {
         super();
         files = new HashMap<String, LinkedFile>();
     }

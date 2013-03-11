@@ -15,7 +15,7 @@ package com.kinvey.samples.statusshare.model;
 
 import com.google.api.client.util.Key;
 
-import com.kinvey.java.LinkedResources.LinkedResource;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.model.KinveyMetaData;
 
 
@@ -25,7 +25,7 @@ import com.kinvey.java.model.KinveyMetaData;
  * @author edwardf
  * @since 2.0
  */
-public class UpdateEntity extends LinkedResource {
+public class UpdateEntity extends LinkedGenericJson {
 
     @Key("_id")
     private String id;
@@ -41,6 +41,7 @@ public class UpdateEntity extends LinkedResource {
         text = null;
         meta = new KinveyMetaData();
         acl = new KinveyMetaData.AccessControlList();
+        putFile("attachment", null);
 
     }
 

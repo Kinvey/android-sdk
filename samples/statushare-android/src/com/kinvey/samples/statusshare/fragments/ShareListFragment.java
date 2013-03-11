@@ -132,7 +132,7 @@ public class ShareListFragment extends KinveyFragment {
     private void loadUpdates(Query q) {
 
 
-        getClient().appData("Updates", UpdateEntity.class).get(q, new KinveyListCallback<UpdateEntity>() {
+        getClient().linkedData("Updates", UpdateEntity.class).get(q, new KinveyListCallback<UpdateEntity>() {
             @Override
             public void onSuccess(UpdateEntity[] result) {
                 android.util.Log.d(Client.TAG, "Count of updates found: " + result.length);
@@ -154,7 +154,7 @@ public class ShareListFragment extends KinveyFragment {
                 Log.w(Client.TAG, "Error fetching updates data: " + error.getMessage());
                 showListView(true);
             }
-        });
+        }, null, null);
 
     }
 

@@ -18,11 +18,9 @@ package com.kinvey.android;
 import android.content.Context;
 import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
@@ -35,6 +33,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.UrbanAirshipPush;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;
 import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.Credential;
@@ -78,6 +77,7 @@ public class Client extends AbstractClient {
     private Context context = null;
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
+    private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncFile file;
@@ -130,6 +130,24 @@ public class Client extends AbstractClient {
                 appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));
             }
             return appDataInstanceCache.get(collectionName);
+        }
+    }
+
+    /**
+     * Creates a new instance of the LinkedData class or returns the existing instance
+     *
+     */
+    public <T extends LinkedGenericJson> AsyncLinkedData<T> linkedData(String collectionName, Class<T> myClass) {
+        synchronized (lock) {
+
+            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
+            if (linkedDataInstanceCache == null) {
+                linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedData>();
+            }
+            if (!linkedDataInstanceCache.containsKey(collectionName)) {
+                linkedDataInstanceCache.put(collectionName, new AsyncLinkedData(collectionName, myClass, this));
+            }
+            return linkedDataInstanceCache.get(collectionName);
         }
     }
 
@@ -259,6 +277,10 @@ public class Client extends AbstractClient {
         /**
          * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
          * set for the Android Operating System.
+         * <p>
+         * This constructor does NOT support push notification functionality.
+         * If push notifications are necessary, use a properties file and the overloaded constructor.
+         * </p>
          *
          * @param appKey Your Kinvey Application Key
          * @param appSecret Your Kinvey Application Secret
@@ -277,8 +299,18 @@ public class Client extends AbstractClient {
 
 
         /**
-         * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
+         * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
          * set for the Android Operating System.
+         * <p>
+         * This constructor requires a  properties file, containing configuration for your Kinvey Client.
+         * Save this file within your Android project, at:  assets/kinvey.properties
+         * </p>
+         * <p>
+         * This constructor provides support for push notifications.
+         * </p>
+         * <p>
+         * <a href="http://devcenter.kinvey.com/android/guides/getting-started#InitializeClient">Kinvey Guide for initializing Client with a properties file.</a>
+         * </p>
          *
          * @param context - Your Android Application Context
          *
@@ -291,8 +323,11 @@ public class Client extends AbstractClient {
                 super.getProps().load(in);
             } catch (IOException e) {
                 Log.w(TAG, "Couldn't load property, trying another approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
+            } catch (NullPointerException ex){
+                Log.e(TAG, "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                Log.e(TAG, "If you are using push notification or offline storage you must configure your client to load from properties, see our online guides for instructions.");
+                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
             }
 
 

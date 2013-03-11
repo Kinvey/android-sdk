@@ -18,7 +18,7 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest;
-import com.kinvey.java.LinkedResources.LinkedResource;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
@@ -36,7 +36,7 @@ import java.util.List;
  *
  * @author edwardf
  */
-public class LinkedData<T extends LinkedResource> extends AppData<T> {
+public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
     //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
     //TODO edwardf delete support?

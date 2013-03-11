@@ -13,17 +13,14 @@
  */
 package com.kinvey.java.LinkedResources;
 
-import com.google.api.client.http.InputStreamContent;
-import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.core.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
  * Implementation of a Client Request, which can download linked resources.
  * <p>
- * On the call to execute, if a file is a LinkedResource, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
+ * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
  * </p>
  * <p>
@@ -59,15 +56,15 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
     public T execute() throws IOException {
 
 
-        if (getResponseClass().isAssignableFrom(LinkedResource.class)) {
+        if (getResponseClass().isAssignableFrom(LinkedGenericJson.class)) {
             T entity = super.execute();
-            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedResource) entity).getAllFiles().keySet().size());
+            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) entity).getAllFiles().keySet().size());
 
-            for (final String key : ((LinkedResource) entity).getAllFiles().keySet()) {
-                System.out.println("Kinvey - LR, " + "getting a LinkedResource: " + key + " -> " + ((LinkedResource)entity).getFile(key).getFileName());
+            for (final String key : ((LinkedGenericJson) entity).getAllFiles().keySet()) {
+                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson)entity).getFile(key).getFileName());
 
                 getAbstractKinveyClient().file().setDownloaderProgressListener(download);
-                getAbstractKinveyClient().file().download(((LinkedResource)entity).getFile(key).getFileName()).execute();
+                getAbstractKinveyClient().file().download(((LinkedGenericJson)entity).getFile(key).getFileName()).execute();
            }
 
 

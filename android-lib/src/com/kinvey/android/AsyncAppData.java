@@ -152,7 +152,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback<T>
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback)  {
-        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID, null).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
     }
 
     /**
@@ -180,7 +180,7 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void get(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query, null).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute();
     }
 
     /**
@@ -203,7 +203,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyListCallback<T>
      */
     public void get(KinveyListCallback<T> callback) {
-        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback, null).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute();
 
     }
 

@@ -13,25 +13,22 @@
  */
 package com.kinvey.android;
 
-import com.google.api.client.json.GenericJson;
-import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedData;
-import com.kinvey.java.LinkedResources.LinkedResource;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 
 /**
  * @auther edwardf
  *
  */
-public class AsyncLinkedData<T extends LinkedResource> extends LinkedData<T> {
+public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> {
     /**
      * Constructor to instantiate the AppData class.
      *
@@ -60,7 +57,7 @@ public class AsyncLinkedData<T extends LinkedResource> extends LinkedData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download, String[] attachments) throws IOException {
+    public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download, String[] attachments){
         new GetEntity(entityID, callback, download, attachments).execute();
 
     }
@@ -83,7 +80,7 @@ public class AsyncLinkedData<T extends LinkedResource> extends LinkedData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) throws IOException {
+    public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) {
         new Get(new Query(), callback, download, attachments).execute();
     }
 
@@ -105,7 +102,7 @@ public class AsyncLinkedData<T extends LinkedResource> extends LinkedData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void get(KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) throws IOException {
+    public void get(KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) {
         new Get(new Query(), callback, download, attachments).execute();
 
     }
@@ -124,7 +121,7 @@ public class AsyncLinkedData<T extends LinkedResource> extends LinkedData<T> {
      * @return Save object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload, String[] attachments) throws IOException {
+    public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload, String[] attachments) {
         new Save(entity, callback, upload, attachments).execute();
     }
 
