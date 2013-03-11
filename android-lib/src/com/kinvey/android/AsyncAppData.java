@@ -152,7 +152,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback<T>
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback)  {
-        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID, null).execute();
     }
 
     /**
@@ -180,7 +180,7 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void get(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query, null).execute();
     }
 
     /**
@@ -203,7 +203,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyListCallback<T>
      */
     public void get(KinveyListCallback<T> callback) {
-        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback, null).execute();
 
     }
 
@@ -459,26 +459,21 @@ public class AsyncAppData<T> extends AppData<T> {
         }
     }
 
-    private class SaveRequest extends AsyncClientRequest<T>{
+    private class SaveRequest extends AsyncClientRequest<T> {
 
         T entity;
+
 
         public SaveRequest(T entity, KinveyClientCallback<T> callback) {
             super(callback);
             this.entity = entity;
         }
 
-
-
         @Override
         protected T executeAsync() throws IOException {
-            return ((AbstractKinveyClientRequest<T>)AsyncAppData.super.save(entity)).execute();
+            return (AsyncAppData.super.save(entity)).execute();
         }
     }
-
-
-
-
 
 
 }

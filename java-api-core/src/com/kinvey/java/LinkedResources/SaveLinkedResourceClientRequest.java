@@ -18,7 +18,6 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.core.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 

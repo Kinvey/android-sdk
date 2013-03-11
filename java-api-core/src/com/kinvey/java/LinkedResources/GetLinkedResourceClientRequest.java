@@ -36,7 +36,7 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0.7
  */
-public class GetLinkedResourceClientRequest<T> extends AbstractKinveyCachedClientRequest<T> {
+public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientRequest<T> {
 
     private DownloaderProgressListener download;
 

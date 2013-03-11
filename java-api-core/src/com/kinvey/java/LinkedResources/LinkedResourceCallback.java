@@ -13,9 +13,7 @@
  */
 package com.kinvey.java.LinkedResources;
 
-import com.kinvey.java.core.AbstractKinveyJsonClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.*;
 
 import java.io.IOException;
 
@@ -25,7 +23,9 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0.2
  */
-public interface LinkedResourceCallback<T> extends KinveyClientCallback<T>{
+public interface LinkedResourceCallback<T> extends KinveyClientCallback<T> {
+
+
 
 
 

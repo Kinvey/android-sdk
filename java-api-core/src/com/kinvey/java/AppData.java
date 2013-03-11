@@ -23,8 +23,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest;
-import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
+import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
@@ -47,7 +46,7 @@ public class AppData<T> {
     private Class<T> myClass;
     private AbstractClient client;
 
-    private static final String ID_FIELD = "_id";
+    public static final String ID_FIELD = "_id";
 
     private Cache<String , T> cache = null;
     private CachePolicy policy = CachePolicy.NOCACHE;
@@ -168,7 +167,6 @@ public class AppData<T> {
      * Save (create or update) an entity to a collection.
      *
      * @param entity Entity to Save
-     *
      * @return Save object
      * @throws IOException
      */
@@ -185,28 +183,10 @@ public class AppData<T> {
         } else {
             save = new Save(entity, myClass, SaveMode.POST);
         }
-
         client.initializeRequest(save);
         return save;
     }
 
-
-
-
-    private static String getFileExtension(String name) {
-        if (name == null) {
-            return null;
-        }
-
-
-        int extIndex = name.lastIndexOf(".");
-
-        if (extIndex == -1) {
-            return "";
-        } else {
-            return name.substring(name.lastIndexOf(".") + 1);
-        }
-    }
     /**
      * Delete an entity from a collectionby ID.
      *
@@ -330,7 +310,7 @@ public class AppData<T> {
      * requests.
      *
      */
-    public class Get extends GetLinkedResourceClientRequest<T[]> {
+    public class Get extends AbstractKinveyCachedClientRequest<T[]> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -399,7 +379,7 @@ public class AppData<T> {
      * requests.
      *
      */
-    public class GetEntity extends GetLinkedResourceClientRequest<T> {
+    public class GetEntity extends AbstractKinveyCachedClientRequest<T> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{resolve,resolve_depth,retainReference}";
@@ -461,13 +441,12 @@ public class AppData<T> {
      * Create / Update requests.
      *
      */
-    public class Save extends SaveLinkedResourceClientRequest<T> {
+    public class Save extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}";
         @Key
         private String collectionName;
         @Key
         private String entityID;
-
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
             super(client, update.toString(), REST_PATH, entity, myClass);
