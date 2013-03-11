@@ -44,7 +44,7 @@ public class MockKinveyAuthRequest extends KinveyAuthRequest {
     public MockKinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
                                  BasicAuthentication appKeyAuthentication, ThirdPartyIdentity thirdPartyIdentity,
                                  Map<String, Object> metaData) {
-        super(new MockHttpTransport(), new MockJsonFactory(), appKeyAuthentication, thirdPartyIdentity, null);
+        super(new MockHttpTransport(), new MockJsonFactory(), appKeyAuthentication, thirdPartyIdentity, null, true);
     }
 
     @Override
