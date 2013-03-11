@@ -409,6 +409,7 @@ public class User extends GenericJson   {
         public LoginRequest(ThirdPartyIdentity identity) {
             builder.setThirdPartyIdentity(identity);
             builder.setUser(User.this);
+            builder.setCreate(false);
             this.type=LoginType.THIRDPARTY;
         }
 
@@ -442,7 +443,9 @@ public class User extends GenericJson   {
                }
 
             }
-            return initUser(this.request.execute(), userType);
+            KinveyAuthResponse response = this.request.execute();
+            //if (response.)
+            return initUser(response, userType);
         }
     }
 

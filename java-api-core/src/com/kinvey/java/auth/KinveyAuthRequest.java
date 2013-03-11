@@ -39,6 +39,13 @@ import com.kinvey.java.core.KinveyJsonResponseException;
  */
 public class KinveyAuthRequest extends GenericJson {
 
+    //TODO:
+
+    public enum LoginType {
+        IMPLICIT,
+        KINVEY,
+        THIRDPARTY
+    }
     /**
      * used to construct the request body
      */
@@ -56,8 +63,8 @@ public class KinveyAuthRequest extends GenericJson {
         }
     }
 
-    private boolean create = false;
-
+    private boolean create;
+    private LoginType type;
     /**
      * base url used for making authentication requests *
      */
@@ -121,12 +128,13 @@ public class KinveyAuthRequest extends GenericJson {
             this.putAll(user.getUnknownKeys());
         }
         this.create = create;
+        this.type = requestPayload == null ? LoginType.IMPLICIT : LoginType.KINVEY;
     }
 
     protected KinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
                                 BasicAuthentication appKeyAuthentication, ThirdPartyIdentity thirdPartyIdentity,
-                                GenericJson user) {
-        this.transport = transport;
+                                GenericJson user, boolean create) {
+            this.transport = transport;
         this.jsonFactory = jsonFactory;
         this.appKeyAuthentication = appKeyAuthentication;
         this.appKey = appKeyAuthentication.getUsername();
@@ -134,6 +142,8 @@ public class KinveyAuthRequest extends GenericJson {
         if (user != null) {
             this.putAll(user.getUnknownKeys());
         }
+        this.create = create;
+        this.type=LoginType.THIRDPARTY;
     }
 
     /**
@@ -164,6 +174,9 @@ public class KinveyAuthRequest extends GenericJson {
         response = request.execute();
         if (response.isSuccessStatusCode()) {
             return response;
+        } else if (response.getStatusCode() == 404 && this.type == LoginType.THIRDPARTY && this.create == false) {
+            this.create = true;
+            return executeUnparsed();
         }
         throw KinveyJsonResponseException.from(jsonFactory, response);
     }
@@ -270,7 +283,7 @@ public class KinveyAuthRequest extends GenericJson {
             return new KinveyAuthRequest(getTransport()
                     , getJsonFactory()
                     , getAppKeyAuthentication()
-                    , getThirdPartyIdentity(),user);
+                    , getThirdPartyIdentity(),user, this.create);
         }
 
         public Builder setUsernameAndPassword(String username, String password) {
