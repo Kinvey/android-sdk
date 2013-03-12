@@ -16,7 +16,6 @@ package com.kinvey.java;
 
 import com.google.api.client.json.GenericJson;
 
-import com.kinvey.java.UserGroup;
 import com.kinvey.java.core.KinveyMockUnitTest;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class UserGroupTest extends KinveyMockUnitTest {
         UserGroup group = new UserGroup(mockClient, getKinveyRequestInitializer());
 
         try{
-            UserGroup.Update update = group.addUserToGroup("Group1", "user1", "subgroup1");
+            UserGroup.Update update = group.addUserToGroupBlocking("Group1", "user1", "subgroup1");
             assertNotNull(update);
             assertEquals("Group1", ((GenericJson) update.getJsonContent()).get("_id"));
             assertEquals(1, ((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get("users"))).get("list")).size());

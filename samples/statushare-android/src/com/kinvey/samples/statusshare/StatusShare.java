@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Main Activity, it starts login then redirects to list view of status updates.
+/** Main Activity, it starts loginBlocking then redirects to list view of status updates.
  *
  * @author edwardf
  * @since 2.0
@@ -85,8 +85,8 @@ public class StatusShare extends SherlockFragmentActivity {
 
     public void addFragment(SherlockFragment frag) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.fragmentBox, frag, "login");
-        Log.i(StatusShare.TAG, "showing login fragment");
+        ft.add(R.id.fragmentBox, frag, "loginBlocking");
+        Log.i(StatusShare.TAG, "showing loginBlocking fragment");
         ft.commit();
     }
 

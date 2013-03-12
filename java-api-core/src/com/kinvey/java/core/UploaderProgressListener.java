@@ -59,12 +59,12 @@ public interface UploaderProgressListener extends KinveyClientCallback<Void>{
    *
    * <p>
    * This method is called once before and after the initiation request. For media uploads it is
-   * called multiple times depending on how many chunks are uploaded. Once the upload completes it
+   * called multiple times depending on how many chunks are uploaded. Once the uploadBlocking completes it
    * is called one final time.
    * </p>
    *
    * <p>
-   * The upload state can be queried by calling {@link MediaHttpUploader#getUploadState} and the
+   * The uploadBlocking state can be queried by calling {@link MediaHttpUploader#getUploadState} and the
    * progress by calling {@link MediaHttpUploader#getProgress}.
    * </p>
    *

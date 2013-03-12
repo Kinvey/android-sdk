@@ -153,7 +153,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
     /**
      * Use to manually notify the adapter that it's dataset
-     * has changed. Will remove the pendingView and update the
+     * has changed. Will remove the pendingView and updateBlocking the
      * display.
      */
     public void onDataReady() {

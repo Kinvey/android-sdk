@@ -23,7 +23,7 @@ import java.io.IOException;
  * These implementations are required for the Kinvey credentials to be stored in 
  * 
  * addAccount:  Creates an Intent to LoginActivity when a new Account needs to be added
- * getAuthToken:  Attempts login to Kinvey service to retrieve an Auth token for an app
+ * getAuthToken:  Attempts loginBlocking to Kinvey service to retrieveBlocking an Auth token for an app
  *
  */
 public class KinveyAccountAuthenticator extends AbstractAccountAuthenticator {
@@ -86,7 +86,7 @@ public class KinveyAccountAuthenticator extends AbstractAccountAuthenticator {
 		if (password !=null) {
             User ku;
             try {
-			    ku = kinveyClient.user().login(account.name,password).execute();
+			    ku = kinveyClient.user().loginBlocking(account.name, password).execute();
                 // TODO make async
             } catch (IOException ex) {ku=null;}
 			

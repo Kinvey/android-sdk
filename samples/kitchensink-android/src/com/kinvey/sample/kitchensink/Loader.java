@@ -28,7 +28,7 @@ public class Loader {
     public static List<Feature> getFeatureList(){
         ArrayList<Feature> featureList = new ArrayList<Feature>();
 
-        Feature appData = new Feature("App Data", "App Data can be used to store and retrieve objects using Kinvey's BaaS", AppDataActivity.class);
+        Feature appData = new Feature("App Data", "App Data can be used to store and retrieveBlocking objects using Kinvey's BaaS", AppDataActivity.class);
         featureList.add(appData);
 
         Feature files = new Feature("File", "Store large file, images or video", FileActivity.class);

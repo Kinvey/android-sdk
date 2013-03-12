@@ -17,7 +17,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 /**
- * Used in request to client to delete appdata.
+ * Used in request to client to deleteBlocking appdata.
  *
  * @author edwardf
  * @since 2.0

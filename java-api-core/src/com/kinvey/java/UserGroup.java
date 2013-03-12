@@ -233,32 +233,79 @@ public class UserGroup {
 
     //----------public API wrappers
     //Add this user to this group
+    public Update addUserToGroupBlocking(String groupID, String userID, String childGroupID) throws IOException{
+        return update(getUserGroupRequest(groupID, userID, childGroupID));
+    }
+
+    /**
+     * @deprecated Renamed to {@link #addUserToGroupBlocking(String, String, String)}
+     */
+    @Deprecated
     public Update addUserToGroup(String groupID, String userID, String childGroupID) throws IOException{
         return update(getUserGroupRequest(groupID, userID, childGroupID));
     }
 
     //Add this list of users to this group
+    public Update addUserListToGroupBlocking(String groupID, List<String> userIDs, String childGroupID) throws IOException{
+        return update(getUserGroupRequest(groupID, userIDs, childGroupID));
+    }
+
+    /**
+     * @deprecated {@link #addUserListToGroupBlocking(String, java.util.List, String)}
+     */
+    @Deprecated
     public Update addUserListToGroup(String groupID, List<String> userIDs, String childGroupID) throws IOException{
         return update(getUserGroupRequest(groupID, userIDs, childGroupID));
     }
 
     //Add this user to this list of groups
+
+    /**
+     *
+     * @deprecated Renamed to {@link #addUserListToGroupListBlocking(String, java.util.List, java.util.List)}
+     */
+    @Deprecated
     public Update addUserToGroupList(String groupID, String userID, List<String> childGroupID) throws IOException{
         return update(getUserGroupRequest(groupID, userID, childGroupID));
     }
 
     //Add this list of users to this list of groups
+    public Update addUserListToGroupListBlocking(String groupID, List<String> userIDs, List<String> childGroupIDs)
+            throws IOException{
+        return update(getUserGroupRequest(groupID, userIDs, childGroupIDs));
+    }
+
+    /**
+     * @deprecated Renamed to {@link #addUserListToGroupListBlocking(String, java.util.List, java.util.List)}
+     */
+    @Deprecated
     public Update addUserListToGroupList(String groupID, List<String> userIDs, List<String> childGroupIDs)
             throws IOException{
         return update(getUserGroupRequest(groupID, userIDs, childGroupIDs));
     }
 
     //Add all users to this group
+    public Update addAllUsersToGroupBlocking(String groupID, String childGroupID) throws IOException{
+        return update(getUserGroupRequest(groupID, childGroupID));
+    }
+
+    /**
+     * @deprecated {@link #addAllUsersToGroupBlocking(String, String)}
+     */
+    @Deprecated
     public Update addAllUsersToGroup(String groupID, String childGroupID) throws IOException{
         return update(getUserGroupRequest(groupID, childGroupID));
     }
 
     //Add all users to this group, with the other child groups
+    public Update addAllUsersToGroupListBlocking(String groupID, List<String> childGroupIDs) throws IOException{
+        return update(getUserGroupRequest(groupID, childGroupIDs));
+    }
+
+    /**
+     * @deprecated {@link #addAllUsersToGroupListBlocking(String, java.util.List)}
+     */
+    @Deprecated
     public Update addAllUsersToGroupList(String groupID, List<String> childGroupIDs) throws IOException{
         return update(getUserGroupRequest(groupID, childGroupIDs));
     }

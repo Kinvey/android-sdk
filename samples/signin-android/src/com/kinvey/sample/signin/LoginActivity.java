@@ -23,10 +23,10 @@ import android.view.View;
 
 /**
  * 
- * This class handles Kinvey login authentication as well as storage of the User in Android's 
+ * This class handles Kinvey loginBlocking authentication as well as storage of the User in Android's
  * AccountManager.  
  * 
- * The activity extends the Android AccountAuthenticatorActivity and prompts the user for a login (Email Address)
+ * The activity extends the Android AccountAuthenticatorActivity and prompts the user for a loginBlocking (Email Address)
  * and password.  User also has the option to instead authenticate via Facebook or Twitter.  
  */
 public class LoginActivity extends AccountAuthenticatorActivity {
@@ -149,7 +149,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	}
 	
 	/**
-	 * Finishes the login process by creating/updating the account with the Android
+	 * Finishes the loginBlocking process by creating/updating the account with the Android
 	 * AccountManager.  
 	 */
 	private void finishLogin(String authToken) {

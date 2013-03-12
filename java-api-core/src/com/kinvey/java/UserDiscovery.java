@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
@@ -35,9 +34,9 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 public class UserDiscovery {
 
     /**
-     * Construct a user lookup object via {@link com.kinvey.java.UserDiscovery#userLookup()}.
+     * Construct a user lookupBlocking object via {@link com.kinvey.java.UserDiscovery#userLookup()}.
      *
-     * <p>After configuring the lookup set it using {@link UserDiscovery#lookup(com.kinvey.java.UserDiscovery.UserLookup)}</p>
+     * <p>After configuring the lookupBlocking set it using {@link UserDiscovery#lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}</p>
      */
     public class UserLookup extends GenericJson{
 
@@ -131,6 +130,20 @@ public class UserDiscovery {
 
     //some convenience wrappers
 
+    public Lookup lookupByFullNameBlocking(String firstname, String lastname) throws IOException{
+
+        Preconditions.checkNotNull(firstname, "firstname must not be null.");
+        Preconditions.checkNotNull(lastname, "lastname must not be null.");
+        UserLookup lookup = new UserLookup();
+        lookup.setFirstName(firstname);
+        lookup.setLastName(lastname);
+        return lookupBlocking(lookup);
+    }
+
+    /**
+     * @deprecated Renamed to {@link #lookupByFullNameBlocking(String, String)}
+     */
+    @Deprecated
     public Lookup lookupByFullName(String firstname, String lastname) throws IOException{
 
         Preconditions.checkNotNull(firstname, "firstname must not be null.");
@@ -138,24 +151,57 @@ public class UserDiscovery {
         UserLookup lookup = new UserLookup();
         lookup.setFirstName(firstname);
         lookup.setLastName(lastname);
-        return lookup(lookup);
+        return lookupBlocking(lookup);
     }
 
+    public Lookup lookupByUserNameBlocking(String username) throws IOException{
+        Preconditions.checkNotNull(username, "username must not be null.");
+        UserLookup lookup = new UserLookup();
+        lookup.setUsername(username);
+        return lookupBlocking(lookup);
+    }
+    /**
+     * @deprecated Renamed to {@link #lookupByUserNameBlocking(String)}
+     */
+    @Deprecated
     public Lookup lookupByUserName(String username) throws IOException{
         Preconditions.checkNotNull(username, "username must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setUsername(username);
-        return lookup(lookup);
+        return lookupBlocking(lookup);
     }
 
+    public Lookup lookupByFacebookIDBlocking(String facebookID) throws IOException{
+        Preconditions.checkNotNull(facebookID, "facebookID must not be null.");
+        UserLookup lookup = new UserLookup();
+        lookup.setFacebookID(facebookID);
+        return lookupBlocking(lookup);
+    }
+    /**
+     * @deprecated Renamed to {@link #lookupByFacebookIDBlocking(String)}
+     */
+    @Deprecated
     public Lookup lookupByFacebookID(String facebookID) throws IOException{
         Preconditions.checkNotNull(facebookID, "facebookID must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setFacebookID(facebookID);
-        return lookup(lookup);
+        return lookupBlocking(lookup);
     }
 
 
+    public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
+
+        Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
+        Lookup lookup = new Lookup(userlookup);
+        client.initializeRequest(lookup);
+        return lookup;
+
+    }
+
+    /**
+     * @deprecated Renamed to {@link #lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}
+     */
+    @Deprecated
     public Lookup lookup(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");

@@ -18,16 +18,16 @@ import com.kinvey.java.core.*;
 import java.io.IOException;
 
 /**
- * Implementation of a Client Request, which can download linked resources.
+ * Implementation of a Client Request, which can downloadBlocking linked resources.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
  * </p>
  * <p>
- * This class is currently EXCLUSIVELY for an appData get request, as it relies a call to super.execute()
+ * This class is currently EXCLUSIVELY for an appData getBlocking request, as it relies a call to super.execute()
  * </p>
  * <p>
- * call setDownloadProgressListener to get callbacks for all file downloads.
+ * call setDownloadProgressListener to getBlocking callbacks for all file downloads.
  * </p>
  *
  * @author edwardf
@@ -58,13 +58,13 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
         if (getResponseClass().isAssignableFrom(LinkedGenericJson.class)) {
             T entity = super.execute();
-            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) entity).getAllFiles().keySet().size());
+            System.out.println("Kinvey - LR, " + "linked resource found, file countBlocking at: " + ((LinkedGenericJson) entity).getAllFiles().keySet().size());
 
             for (final String key : ((LinkedGenericJson) entity).getAllFiles().keySet()) {
                 System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson)entity).getFile(key).getFileName());
 
                 getAbstractKinveyClient().file().setDownloaderProgressListener(download);
-                getAbstractKinveyClient().file().download(((LinkedGenericJson)entity).getFile(key).getFileName()).execute();
+                getAbstractKinveyClient().file().downloadBlocking(((LinkedGenericJson) entity).getFile(key).getFileName()).execute();
            }
 
 

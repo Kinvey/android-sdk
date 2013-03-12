@@ -152,7 +152,7 @@ public class KinveyAuthRequest extends GenericJson {
     private GenericUrl buildHttpRequestUrl() {
         // we hit different end points depending on whether 3rd party auth is utilize
         return new GenericUrl(UriTemplate.expand(BASE_URL
-                , "/user/{appKey}/" + (this.create ? "" : "login")
+                , "/user/{appKey}/" + (this.create ? "" : "loginBlocking")
                 , this
                 , true));
     }
@@ -332,7 +332,7 @@ public class KinveyAuthRequest extends GenericJson {
         }
 
         /**
-         * @return appkey and appsecret RequestInitializer used to create the BasicAuthentication for the POST request
+         * @return appkey and appsecret RequestInitializer used to createBlocking the BasicAuthentication for the POST request
          */
         public BasicAuthentication getAppKeyAuthentication() {
             return appKeyAuthentication;

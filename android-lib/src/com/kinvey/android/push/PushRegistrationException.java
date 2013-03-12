@@ -19,7 +19,7 @@ package com.kinvey.android.push;
  */
 public class PushRegistrationException extends RuntimeException {
     public PushRegistrationException() {
-        super("There was an error while attempting to save push_legacy id registration information");
+        super("There was an error while attempting to saveBlocking push_legacy id registration information");
     }
 
     /**

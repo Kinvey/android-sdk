@@ -16,8 +16,6 @@ package com.kinvey.java;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
-import com.kinvey.java.AppData;
-import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyMockUnitTest;
 
 import java.io.IOException;
@@ -153,7 +151,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     public void testGet() throws IOException {
         AppData<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        AppData.GetEntity myGet = appData.getEntity(entityID);
+        AppData.GetEntity myGet = appData.getEntityBlocking(entityID);
         assertNotNull(myGet);
         assertEquals("myEntity", myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -162,7 +160,7 @@ public class AppDataTest extends KinveyMockUnitTest {
 
     public void testGetWithNoEntityID() throws IOException {
         AppData<Entity> appData = getGenericAppData(Entity.class);
-        AppData.Get myGet = appData.get();
+        AppData.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection", myGet.get("collectionName"));
@@ -172,7 +170,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     public void testGetWithArrayType() throws IOException {
         Entity[] entityList = new Entity[]{};
         AppData<Entity[]> appData = getGenericAppData(entityList.getClass());
-        AppData.Get myGet = appData.get();
+        AppData.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -182,7 +180,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     public void testSave() throws IOException {
         AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
-        AppData<Entity>.Save mySave = appData.save(entity);
+        AppData<Entity>.Save mySave = appData.saveBlocking(entity);
         assertNotNull(mySave);
         assertEquals("myEntity", ((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name", ((GenericJson) mySave.getJsonContent()).get("Name"));
@@ -193,7 +191,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = null;
         try {
-            AppData<Entity>.Save mySave = appData.save(entity);
+            AppData<Entity>.Save mySave = appData.saveBlocking(entity);
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
@@ -202,7 +200,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         AppData<EntityNoID> appData = getGenericAppData(EntityNoID.class);
         EntityNoID entity = new EntityNoID("My Name");
 
-        AppData<EntityNoID>.Save mySave= appData.save(entity);
+        AppData<EntityNoID>.Save mySave= appData.saveBlocking(entity);
         assertNull(((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name",((GenericJson) mySave.getJsonContent()).get("Name"));
         assertEquals("POST",mySave.getRequestMethod());
@@ -211,7 +209,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     public void testDelete() throws IOException {
         AppData<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        AppData.Delete myDelete = appData.delete(entityID);
+        AppData.Delete myDelete = appData.deleteBlocking(entityID);
         assertNotNull(myDelete);
         assertEquals("myEntity", myDelete.get("entityID"));
         assertEquals("myCollection",myDelete.get("collectionName"));
@@ -222,7 +220,7 @@ public class AppDataTest extends KinveyMockUnitTest {
 //        AppData<Entity> appData = getGenericAppData(Entity.class);
 //        String entityID = "myEntity";
 //        try {
-//            AppData<Entity>.Delete<Entity> myDelete = appData.delete(null);   TODO now ambigious because of query support...
+//            AppData<Entity>.Delete<Entity> myDelete = appData.deleteBlocking(null);   TODO now ambigious because of query support...
 //            fail("NullPointerException should be thrown.");
 //        } catch (NullPointerException ex) {}
 //
@@ -233,7 +231,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.count(fields,null);
+        AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -256,7 +254,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.count(fields,query);
+        AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -281,7 +279,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.sum(fields,"total",null);
+        AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -304,7 +302,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.sum(fields,"total",query);
+        AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -329,14 +327,14 @@ public class AppDataTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.max(fields,"total",null);
+        AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","-Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.maxBlocking(out._result, doc.total);}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -352,7 +350,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.max(fields,"total",query);
+        AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -360,7 +358,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","-Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.maxBlocking(out._result, doc.total);}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 
@@ -377,14 +375,14 @@ public class AppDataTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.min(fields,"total",null);
+        AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.minBlocking(out._result, doc.total);}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -400,7 +398,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.min(fields,"total",query);
+        AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -408,7 +406,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.minBlocking(out._result, doc.total);}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 
@@ -425,16 +423,16 @@ public class AppDataTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.average(fields,"total",null);
+        AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result",0);
 
-        String expectedReduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-            "out._result =(out._result * count + doc.total) " +
-                    "/ (count + 1); out._kcs_count = count+1;}";
+        String expectedReduce = "function(doc,out){ var countBlocking = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
+            "out._result =(out._result * countBlocking + doc.total) " +
+                    "/ (countBlocking + 1); out._kcs_count = countBlocking+1;}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -450,7 +448,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.average(fields,"total",query);
+        AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -458,9 +456,9 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result",0);
 
-        String expectedReduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-                "out._result =(out._result * count + doc.total) " +
-                "/ (count + 1); out._kcs_count = count+1;}";
+        String expectedReduce = "function(doc,out){ var countBlocking = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
+                "out._result =(out._result * countBlocking + doc.total) " +
+                "/ (countBlocking + 1); out._kcs_count = countBlocking+1;}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 

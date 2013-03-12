@@ -23,7 +23,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-import com.kinvey.java.File;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.HttpTesting;
 
@@ -50,9 +49,9 @@ public class FileTest extends KinveyMockUnitTest {
     @Test
     public void uploadUrlEndpointMatches() throws IOException {
         File fileApi = new File(super.mockClient);
-        File.Upload upload = fileApi.upload("testfilename.txt", mockContent);
+        File.Upload upload = fileApi.uploadBlocking("testfilename.txt", mockContent);
         HttpRequest request = upload.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//upload-loc/testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//uploadBlocking-loc/testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -60,9 +59,9 @@ public class FileTest extends KinveyMockUnitTest {
     @Test
     public void downloadUrlEndpointMatches() throws IOException {
         File fileApi = new File(super.mockClient);
-        File.Download download = fileApi.download("testfilename.txt");
+        File.Download download = fileApi.downloadBlocking("testfilename.txt");
         HttpRequest request = download.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//download-loc/testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//downloadBlocking-loc/testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -70,10 +69,10 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileUploadInitializer() {
         fileApiUnderTest = new File(super.mockClient);
         try {
-            fileApiUnderTest.upload("testfilename.txt", mockContent);
+            fileApiUnderTest.uploadBlocking("testfilename.txt", mockContent);
 
         } catch (IOException e) {
-            fail("file api should not be throw exception on upload");
+            fail("file api should not be throw exception on uploadBlocking");
         }
     }
 
@@ -81,7 +80,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void uploadShouldThrowNpeOnNullFilename() {
         fileApiUnderTest = new File(super.mockClient);
         try {
-            fileApiUnderTest.upload(null, mock(AbstractInputStreamContent.class));
+            fileApiUnderTest.uploadBlocking(null, mock(AbstractInputStreamContent.class));
             fail("file api should throw exception on null filename");
         } catch (IOException e) {
             fail("file api should throw a NullPointerException on null filename");
@@ -95,9 +94,9 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileDownloadInitializer() {
         fileApiUnderTest = new File(super.mockClient);
         try {
-            fileApiUnderTest.download("testfilename.txt");
+            fileApiUnderTest.downloadBlocking("testfilename.txt");
         } catch (IOException e) {
-            fail("file api should not throw an exception on download");
+            fail("file api should not throw an exception on downloadBlocking");
         }
 
     }
@@ -106,7 +105,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void downloadShouldThrowNpeOnNullFilename() {
         fileApiUnderTest = new File(super.mockClient);
         try {
-            fileApiUnderTest.download(null);
+            fileApiUnderTest.downloadBlocking(null);
             fail("file api should throw exception on null filename");
         } catch (IOException e) {
             fail("file api should throw a NullPointerException on null filename");
@@ -119,9 +118,9 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileDelete() {
         fileApiUnderTest = new File(super.mockClient);
         try {
-            fileApiUnderTest.delete("testfilename.txt");
+            fileApiUnderTest.deleteBlocking("testfilename.txt");
         } catch (IOException e) {
-            fail("file api should not throw an exception on delete");
+            fail("file api should not throw an exception on deleteBlocking");
         }
     }
 

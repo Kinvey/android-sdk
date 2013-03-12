@@ -18,7 +18,7 @@ import java.io.IOException;
 
 
 /**
- * Set the caching policy on AppData to get different desired behavior for you app.
+ * Set the caching policy on AppData to getBlocking different desired behavior for you app.
  *
  * @author edwardf
  * @since 2.0
@@ -35,7 +35,7 @@ public enum CachePolicy{
     },
 
     /**
-     * This policy will only retrieve data from the cache, and will not use any network connection.
+     * This policy will only retrieveBlocking data from the cache, and will not use any network connection.
      */
     CACHEONLY{
         public <T> T execute(AbstractKinveyCachedClientRequest<T> cachedRequest) throws IOException{
@@ -44,7 +44,7 @@ public enum CachePolicy{
     },
 
     /**
-     * This policy will first attempt to retrieve data from the cache.  If the data has been cached, it will be returned.
+     * This policy will first attempt to retrieveBlocking data from the cache.  If the data has been cached, it will be returned.
      * If the data does not exist in the cache, the data will be retrieved from Kinvey's Backend and the cache will be updated.
      */
     CACHEFIRST{
@@ -60,7 +60,7 @@ public enum CachePolicy{
     },
 
     /**
-     * This policy will first attempt to retrieve data from the cache.  If the data has been cached, it will be returned.
+     * This policy will first attempt to retrieveBlocking data from the cache.  If the data has been cached, it will be returned.
      * If the data does not exist in the cache, the data will be retrieved from Kinvey's Backend but the cache will not
      * be updated with the new results.
      */
@@ -95,7 +95,7 @@ public enum CachePolicy{
     },
 
     /**
-     * This policy will first retrieve an element from the cache, and then it will attempt to execute the request on line.
+     * This policy will first retrieveBlocking an element from the cache, and then it will attempt to execute the request on line.
      * This caching policy will make two calls to the KinveyClientCallback, either onSuccess or onFailure for both
      * executing on the cache as well as executing online.
      */

@@ -124,13 +124,29 @@ public class AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities.  Pass null to entityID to return all entities
+     * Method to getBlocking an entity or entities.  Pass null to entityID to return all entities
      * in a collection.
      *
-     * @param entityID entityID to get
+     * @param entityID entityID to getBlocking
      * @return Get object
      * @throws java.io.IOException
      */
+    public GetEntity getEntityBlocking(String entityID) throws IOException {
+        GetEntity getEntity = new GetEntity(entityID, myClass);
+        client.initializeRequest(getEntity);
+        return getEntity;
+    }
+
+    /**
+     * Method to getBlocking an entity or entities.  Pass null to entityID to return all entities
+     * in a collection.
+     *
+     * @param entityID entityID to getBlocking
+     * @return Get object
+     * @throws java.io.IOException
+     * @deprecated Renamed to {@link #getEntityBlocking(String)}
+     */
+    @Deprecated
     public GetEntity getEntity(String entityID) throws IOException {
         GetEntity getEntity = new GetEntity(entityID, myClass);
         client.initializeRequest(getEntity);
@@ -138,13 +154,30 @@ public class AppData<T> {
     }
 
     /**
-     * Method to get a query of entities.  Pass an empty query to return all entities
+     * Method to getBlocking a query of entities.  Pass an empty query to return all entities
      * in a collection.
      *
-     * @param query Query to get
+     * @param query Query to getBlocking
      * @return Get object
      * @throws java.io.IOException
      */
+    public Get getBlocking(Query query) throws IOException {
+        Preconditions.checkNotNull(query);
+        Get get = new Get(query, Array.newInstance(myClass,0).getClass());
+        client.initializeRequest(get);
+        return get;
+    }
+
+    /**
+     * Method to getBlocking a query of entities.  Pass an empty query to return all entities
+     * in a collection.
+     *
+     * @param query Query to getBlocking
+     * @return Get object
+     * @deprecated Renamed to {@link #getBlocking(Query)}
+     * @throws java.io.IOException
+     */
+    @Deprecated
     public Get get(Query query) throws IOException {
         Preconditions.checkNotNull(query);
         Get get = new Get(query, Array.newInstance(myClass,0).getClass());
@@ -153,23 +186,61 @@ public class AppData<T> {
     }
 
     /**
-     * Method to get all entities in a collection.
+     * Method to getBlocking all entities in a collection.
      *
      * @return Get Object
      * @throws IOException
      */
 
-    public Get get() throws IOException {
-        return get(new Query());
+    public Get getBlocking() throws IOException {
+        return getBlocking(new Query());
     }
 
     /**
-     * Save (create or update) an entity to a collection.
+     * Method to getBlocking all entities in a collection.
+     *
+     * @return Get Object
+     * @throws IOException
+     * @deprecated Renamed to {@link #getBlocking()}
+     */
+    @Deprecated
+    public Get get() throws IOException {
+        return getBlocking(new Query());
+    }
+
+    /**
+     * Save (createBlocking or updateBlocking) an entity to a collection.
      *
      * @param entity Entity to Save
      * @return Save object
      * @throws IOException
      */
+    public Save saveBlocking(T entity) throws IOException {
+
+        Save save;
+        String sourceID;
+
+        GenericJson jsonEntity = (GenericJson) entity;
+        sourceID = (String) jsonEntity.get(ID_FIELD);
+
+        if (sourceID != null) {
+            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
+        } else {
+            save = new Save(entity, myClass, SaveMode.POST);
+        }
+        client.initializeRequest(save);
+        return save;
+    }
+
+    /**
+     * Save (createBlocking or updateBlocking) an entity to a collection.
+     *
+     * @param entity Entity to Save
+     * @return Save object
+     * @throws IOException
+     * @deprecated Renamed to {@link #saveBlocking(Object)}
+     */
+    @Deprecated
     public Save save(T entity) throws IOException {
 
         Save save;
@@ -188,12 +259,28 @@ public class AppData<T> {
     }
 
     /**
-     * Delete an entity from a collectionby ID.
+     * Delete an entity from a collection by ID.
      *
-     * @param entityID entityID to delete
+     * @param entityID entityID to deleteBlocking
      * @return Delete object
      * @throws IOException
      */
+    public Delete deleteBlocking(String entityID) throws IOException {
+        Preconditions.checkNotNull(entityID);
+        Delete delete = new Delete(entityID);
+        client.initializeRequest(delete);
+        return delete;
+    }
+
+    /**
+     * Delete an entity from a collection by ID.
+     *
+     * @param entityID entityID to deleteBlocking
+     * @return Delete object
+     * @throws IOException
+     * @deprecated Renamed to {@link #deleteBlocking(String)}
+     */
+    @Deprecated
     public Delete delete(String entityID) throws IOException {
         Preconditions.checkNotNull(entityID);
         Delete delete = new Delete(entityID);
@@ -204,10 +291,26 @@ public class AppData<T> {
     /**
      * Delete an entity from a collection by Query.
      *
-     * @param query query for entities to delete
+     * @param query query for entities to deleteBlocking
      * @return Delete object
      * @throws IOException
      */
+    public Delete deleteBlocking(Query query) throws IOException {
+        Preconditions.checkNotNull(query);
+        Delete delete = new Delete(query);
+        client.initializeRequest(delete);
+        return delete;
+    }
+
+    /**
+     * Delete an entity from a collection by Query.
+     *
+     * @param query query for entities to deleteBlocking
+     * @return Delete object
+     * @throws IOException
+     * @deprecated Renamed to {@link #deleteBlocking(String)}
+     */
+    @Deprecated
     public Delete delete(Query query) throws IOException {
         Preconditions.checkNotNull(query);
         Delete delete = new Delete(query);
@@ -223,6 +326,21 @@ public class AppData<T> {
      * @return Aggregate object
      * @throws IOException
      */
+    public Aggregate countBlocking(ArrayList<String> fields, Query query) throws IOException {
+        Preconditions.checkNotNull(fields);
+        return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, query);
+    }
+
+    /**
+     * Retrieve a group by COUNT on a collection or filtered collection
+     *
+     * @param fields fields to group by
+     * @param query  optional query to filter by (null for all records in a collection)
+     * @return Aggregate object
+     * @throws IOException
+     * @deprecated Renamed to {@link #countBlocking(java.util.ArrayList, Query)}
+     */
+    @Deprecated
     public Aggregate count(ArrayList<String> fields, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, query);
@@ -232,11 +350,28 @@ public class AppData<T> {
      * Retrieve a group by SUM on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param sumField field to sum
+     * @param sumField field to sumBlocking
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
      */
+    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Query query) throws IOException {
+        Preconditions.checkNotNull(fields);
+        Preconditions.checkNotNull(sumField);
+        return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, query);
+    }
+
+    /**
+     * Retrieve a group by SUM on a collection or filtered collection
+     *
+     * @param fields fields to group by
+     * @param sumField field to sumBlocking
+     * @param query optional query to filter by (null for all records in a collection)
+     * @return
+     * @throws IOException
+     * @deprecated Renamed to {@link #sumBlocking(java.util.ArrayList, String, Query)}
+     */
+    @Deprecated
     public Aggregate sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(sumField);
@@ -247,11 +382,28 @@ public class AppData<T> {
      * Retrieve a group by MAX on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param maxField field to obtain max value from
+     * @param maxField field to obtain maxBlocking value from
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
      */
+    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Query query) throws IOException {
+        Preconditions.checkNotNull(fields);
+        Preconditions.checkNotNull(maxField);
+        return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField, query);
+    }
+
+    /**
+     * Retrieve a group by MAX on a collection or filtered collection
+     *
+     * @param fields fields to group by
+     * @param maxField field to obtain maxBlocking value from
+     * @param query optional query to filter by (null for all records in a collection)
+     * @return
+     * @throws IOException
+     * @deprecated Renamed to {@link #maxBlocking(java.util.ArrayList, String, Query)}
+     */
+    @Deprecated
     public Aggregate max(ArrayList<String> fields, String maxField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(maxField);
@@ -267,6 +419,22 @@ public class AppData<T> {
      * @return
      * @throws IOException
      */
+    public Aggregate minBlocking(ArrayList<String> fields, String minField, Query query) throws IOException {
+        Preconditions.checkNotNull(fields);
+        Preconditions.checkNotNull(minField);
+        return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, query);
+    }
+
+    /**
+     * Retrieve a group by MIN on a collection or filtered collection
+     *
+     * @param fields fields to group by
+     * @param minField field to obtain MIN value from
+     * @param query optional query to filter by (null for all records in a collection)
+     * @return
+     * @throws IOException
+     * @deprecated Renamed to {@link #minBlocking(java.util.ArrayList, String, Query)}
+     */
     public Aggregate min(ArrayList<String> fields, String minField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(minField);
@@ -277,11 +445,28 @@ public class AppData<T> {
      * Retrieve a group by AVERAGE on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param averageField field to average
+     * @param averageField field to averageBlocking
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
      */
+    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Query query) throws IOException {
+        Preconditions.checkNotNull(fields);
+        Preconditions.checkNotNull(averageField);
+        return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, query);
+    }
+
+    /**
+     * Retrieve a group by AVERAGE on a collection or filtered collection
+     *
+     * @param fields fields to group by
+     * @param averageField field to averageBlocking
+     * @param query optional query to filter by (null for all records in a collection)
+     * @return
+     * @throws IOException
+     * @deprecated Renamed to {@link #averageBlocking(java.util.ArrayList, String, Query)}
+     */
+    @Deprecated
     public Aggregate average(ArrayList<String> fields, String averageField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(averageField);
@@ -289,7 +474,7 @@ public class AppData<T> {
     }
 
     /**
-     * Private helper method to create AggregateEntity and return an intialize Aggregate Request Object
+     * Private helper method to createBlocking AggregateEntity and return an intialize Aggregate Request Object
      * @param fields fields to group by
      * @param type Type of aggregation
      * @param aggregateField Field to aggregate on

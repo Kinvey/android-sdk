@@ -16,7 +16,7 @@ package com.kinvey.java.auth;
 import java.io.IOException;
 
 /**
- * A mechanism to store, retrieve and purge credentials from memory and disk
+ * A mechanism to store, retrieveBlocking and purge credentials from memory and disk
  */
 public interface CredentialStore {
 

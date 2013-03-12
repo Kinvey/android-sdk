@@ -116,9 +116,28 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract ClientUsers getClientUsers();
 
+    /**
+     * Pings the Kinvey backend service with a logged in user.
+     *
+     * @return true if service is reachable and user is logged in, false if not
+     * @throws IOException
+     */
+    public boolean pingBlocking() throws IOException {
+        Util util = new Util(this);
+        return util.pingBlocking().executeUnparsed().getStatusCode() == 200;
+    }
+
+    /**
+     * Pings the Kinvey backend service with a logged in user.
+     *
+     * @return true if service is reachable and user is logged in, false if not
+     * @throws IOException
+     * @deprecated Renamed to {@link #pingBlocking()}
+     */
+    @Deprecated
     public boolean ping() throws IOException {
         Util util = new Util(this);
-        return util.ping().executeUnparsed().getStatusCode() == 200;
+        return util.pingBlocking().executeUnparsed().getStatusCode() == 200;
     }
 
     protected void setCurrentUser(User user) {

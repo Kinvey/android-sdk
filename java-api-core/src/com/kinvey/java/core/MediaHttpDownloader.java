@@ -53,7 +53,7 @@ public class MediaHttpDownloader {
      * Download state associated with the Media HTTP downloader.
      */
     public enum DownloadState {
-        /** The download process has not started yet. */
+        /** The downloadBlocking process has not started yet. */
         NOT_STARTED,
 
         /** Set before the initiation request is sent. */
@@ -83,16 +83,16 @@ public class MediaHttpDownloader {
 
     /**
      * Determines whether the back off policy is enabled or disabled. If value is set to {@code false}
-     * then server errors are not handled and the download process will fail if a server error is
+     * then server errors are not handled and the downloadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     private boolean backOffPolicyEnabled = true;
 
     /**
-     * Determines whether direct media download is enabled or disabled. If value is set to
-     * {@code true} then a direct download will be done where the whole media content is downloaded in
-     * a single request. If value is set to {@code false} then the download uses the resumable media
-     * download protocol to download in data chunks. Defaults to {@code false}.
+     * Determines whether direct media downloadBlocking is enabled or disabled. If value is set to
+     * {@code true} then a direct downloadBlocking will be done where the whole media content is downloaded in
+     * a single request. If value is set to {@code false} then the downloadBlocking uses the resumable media
+     * downloadBlocking protocol to downloadBlocking in data chunks. Defaults to {@code false}.
      */
     private boolean directDownloadEnabled = false;
 
@@ -102,7 +102,7 @@ public class MediaHttpDownloader {
     private DownloaderProgressListener progressListener;
 
     /**
-     * Maximum size of individual chunks that will get downloaded by single HTTP requests. The default
+     * Maximum size of individual chunks that will getBlocking downloaded by single HTTP requests. The default
      * value is {@link #MAXIMUM_CHUNK_SIZE}.
      */
     private int chunkSize = MAXIMUM_CHUNK_SIZE;
@@ -120,7 +120,7 @@ public class MediaHttpDownloader {
     private long bytesDownloaded;
 
     /**
-     * The last byte position of the media file we want to download, default value is {@code -1}.
+     * The last byte position of the media file we want to downloadBlocking, default value is {@code -1}.
      *
      * <p>
      * If its value is {@code -1} it means there is no upper limit on the byte position.
@@ -151,7 +151,7 @@ public class MediaHttpDownloader {
     public static class DownloadUrlResponse extends UriLocResponse {
 
         /**
-         * @return the string representing the remote location of the file to download
+         * @return the string representing the remote location of the file to downloadBlocking
          */
         public String getDownloadLoc() {
             return super.getBlobTemporaryUri();
@@ -166,7 +166,7 @@ public class MediaHttpDownloader {
 
     /**
      *
-     * Executes a direct media download or a resumable media download.
+     * Executes a direct media downloadBlocking or a resumable media downloadBlocking.
      *
      * <p>
      * This method does not close the given output stream.
@@ -174,7 +174,7 @@ public class MediaHttpDownloader {
      *
      * <p>
      * This method is not reentrant. A new instance of {@link MediaHttpDownloader} must be
-     * instantiated before download called be called again.
+     * instantiated before downloadBlocking called be called again.
      * </p>
      *
      * @param initiationClientRequest request object used to request unique uri from kinvey
@@ -186,7 +186,7 @@ public class MediaHttpDownloader {
         Preconditions.checkArgument(downloadState == DownloadState.NOT_STARTED);
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
 
-        // Make initial request to get the unique upload URL.
+        // Make initial request to getBlocking the unique uploadBlocking URL.
         DownloadUrlResponse initialResponse = executeDownloadInitiation(initiationClientRequest);
         GenericUrl downloadUrl;
         downloadUrl = new GenericUrl(initialResponse.getDownloadLoc());
@@ -264,8 +264,8 @@ public class MediaHttpDownloader {
      * Sets the total number of bytes that have been downloaded of the media resource.
      *
      * <p>
-     * If a download was aborted mid-way due to a connection failure then users can resume the
-     * download from the point where it left off.
+     * If a downloadBlocking was aborted mid-way due to a connection failure then users can resume the
+     * downloadBlocking from the point where it left off.
      * </p>
      *
      * <p>
@@ -282,11 +282,11 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Sets the content range of the next download request. Eg: bytes=firstBytePos-lastBytePos.
+     * Sets the content range of the next downloadBlocking request. Eg: bytes=firstBytePos-lastBytePos.
      *
      * <p>
-     * If a download was aborted mid-way due to a connection failure then users can resume the
-     * download from the point where it left off.
+     * If a downloadBlocking was aborted mid-way due to a connection failure then users can resume the
+     * downloadBlocking from the point where it left off.
      * </p>
      *
      * <p>
@@ -321,20 +321,20 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Returns whether direct media download is enabled or disabled. If value is set to {@code true}
-     * then a direct download will be done where the whole media content is downloaded in a single
-     * request. If value is set to {@code false} then the download uses the resumable media download
-     * protocol to download in data chunks. Defaults to {@code false}.
+     * Returns whether direct media downloadBlocking is enabled or disabled. If value is set to {@code true}
+     * then a direct downloadBlocking will be done where the whole media content is downloaded in a single
+     * request. If value is set to {@code false} then the downloadBlocking uses the resumable media downloadBlocking
+     * protocol to downloadBlocking in data chunks. Defaults to {@code false}.
      */
     public boolean isDirectDownloadEnabled() {
         return directDownloadEnabled;
     }
 
     /**
-     * Returns whether direct media download is enabled or disabled. If value is set to {@code true}
-     * then a direct download will be done where the whole media content is downloaded in a single
-     * request. If value is set to {@code false} then the download uses the resumable media download
-     * protocol to download in data chunks. Defaults to {@code false}.
+     * Returns whether direct media downloadBlocking is enabled or disabled. If value is set to {@code true}
+     * then a direct downloadBlocking will be done where the whole media content is downloaded in a single
+     * request. If value is set to {@code false} then the downloadBlocking uses the resumable media downloadBlocking
+     * protocol to downloadBlocking in data chunks. Defaults to {@code false}.
      */
     public MediaHttpDownloader setDirectDownloadEnabled(boolean directDownloadEnabled) {
         this.directDownloadEnabled = directDownloadEnabled;
@@ -359,7 +359,7 @@ public class MediaHttpDownloader {
 
     /**
      * Sets whether the back off policy is enabled or disabled. If value is set to {@code false} then
-     * server errors are not handled and the download process will fail if a server error is
+     * server errors are not handled and the downloadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     public MediaHttpDownloader setBackOffPolicyEnabled(boolean backOffPolicyEnabled) {
@@ -369,7 +369,7 @@ public class MediaHttpDownloader {
 
     /**
      * Returns whether the back off policy is enabled or disabled. If value is set to {@code false}
-     * then server errors are not handled and the download process will fail if a server error is
+     * then server errors are not handled and the downloadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     public boolean isBackOffPolicyEnabled() {
@@ -382,7 +382,7 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Sets the maximum size of individual chunks that will get downloaded by single HTTP requests.
+     * Sets the maximum size of individual chunks that will getBlocking downloaded by single HTTP requests.
      * The default value is {@link #MAXIMUM_CHUNK_SIZE}.
      *
      * <p>
@@ -396,7 +396,7 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Returns the maximum size of individual chunks that will get downloaded by single HTTP requests.
+     * Returns the maximum size of individual chunks that will getBlocking downloaded by single HTTP requests.
      * The default value is {@link #MAXIMUM_CHUNK_SIZE}.
      */
     public int getChunkSize() {
@@ -413,7 +413,7 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Gets the last byte position of the media file we want to download or {@code -1} if there is no
+     * Gets the last byte position of the media file we want to downloadBlocking or {@code -1} if there is no
      * upper limit on the byte position.
      *
      * @return the last byte position
@@ -424,7 +424,7 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Sets the download state and notifies the progress listener.
+     * Sets the downloadBlocking state and notifies the progress listener.
      *
      * @param downloadState value to set to
      */
@@ -436,19 +436,19 @@ public class MediaHttpDownloader {
     }
 
     /**
-     * Gets the current download state of the downloader.
+     * Gets the current downloadBlocking state of the downloader.
      *
-     * @return the download state
+     * @return the downloadBlocking state
      */
     public DownloadState getDownloadState() {
         return downloadState;
     }
 
     /**
-     * Gets the download progress denoting the percentage of bytes that have been downloaded,
+     * Gets the downloadBlocking progress denoting the percentage of bytes that have been downloaded,
      * represented between 0.0 (0%) and 1.0 (100%).
      *
-     * @return the download progress
+     * @return the downloadBlocking progress
      */
     public double getProgress() {
         return mediaContentLength == 0 ? 0 : (double) bytesDownloaded / mediaContentLength;

@@ -89,7 +89,7 @@ public class GeoTag extends SherlockActivity implements
             mKinveyClient = new Client.Builder(appKey, appSecret, this).build();
 
 //            ma = mKinveyClient.mappeddata(GeoTagEntity.class, COLLECTION_NAME);
-            // fire off the ping call to ensure we can communicate with Kinvey
+            // fire off the pingBlocking call to ensure we can communicate with Kinvey
             testKinveyService();
         }
 
@@ -260,19 +260,19 @@ public class GeoTag extends SherlockActivity implements
     }
 
     public void addNoteToLocation(LatLng loc, String note) {
-        // update UI
+        // updateBlocking UI
         if (mCurMarker != null && mCurMarker.isVisible()) {
             mCurMarker.setTitle(note);
             mCurMarker.showInfoWindow();
         }
-        // update kinvey
-        // first create an entity to put into the collection
+        // updateBlocking kinvey
+        // first createBlocking an entity to put into the collection
         GeoTagEntity curTag = new GeoTagEntity();
         curTag.setNote(note);
         curTag.setCoords(convertLatLngToLocation(loc));
         // let Kinvey auto-generate an ID for this entity
 
-        // then save the entity to kinvey
+        // then saveBlocking the entity to kinvey
         mKinveyClient.appData(COLLECTION_NAME, GeoTagEntity.class).save(curTag, new KinveyClientCallback<GeoTagEntity>() {
             @Override
             public void onSuccess(GeoTagEntity result) {
@@ -296,7 +296,7 @@ public class GeoTag extends SherlockActivity implements
     }
 
     public void getNotesOnScreen() {
-        // first get world coordinates that are being drawn on screen
+        // first getBlocking world coordinates that are being drawn on screen
         LatLng topleft = mMap.getMap().getProjection().getVisibleRegion().farLeft;
         LatLng btmRight = mMap.getMap().getProjection().getVisibleRegion().nearRight;
         // now that we have a bounding box of what's on screen, use a
@@ -305,7 +305,7 @@ public class GeoTag extends SherlockActivity implements
 
         geoquery.withinBox("_geoloc", topleft.latitude, topleft.longitude, btmRight.latitude, btmRight.longitude);
 
-//        mKinveyClient.appData(COLLECTION_NAME, GeoTagEntity.class).get(geoquery, new KinveyListCallback<GeoTagEntity>() {
+//        mKinveyClient.appData(COLLECTION_NAME, GeoTagEntity.class).getBlocking(geoquery, new KinveyListCallback<GeoTagEntity>() {
 //            @Override
 //            public void onSuccess(List<GeoTagEntity> result) {
 //                String msg = "query successfull, with a size of -> " + result.size();
@@ -340,14 +340,14 @@ public class GeoTag extends SherlockActivity implements
         mKinveyClient.ping(new KinveyPingCallback() {
             @Override
             public void onSuccess(Boolean result) {
-                Toast.makeText(GeoTag.this, "kinvey ping success!",
+                Toast.makeText(GeoTag.this, "kinvey pingBlocking success!",
                         Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onFailure(Throwable error) {
                 Toast.makeText(GeoTag.this,
-                        "kinvey ping failed, check res/strings for appkey and appsecret",
+                        "kinvey pingBlocking failed, check res/strings for appkey and appsecret",
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -355,13 +355,13 @@ public class GeoTag extends SherlockActivity implements
 //
 //            public void onFailure(Throwable t) {
 //                Toast.makeText(GeoTag.this,
-//                        "kinvey ping failed, check assets/kinvey.properties",
+//                        "kinvey pingBlocking failed, check assets/kinvey.properties",
 //                        Toast.LENGTH_LONG).show();
 //            }
 //
 //            @Override
 //            public void onSuccess(Boolean b) {
-//                Toast.makeText(GeoTag.this, "kinvey ping success!",
+//                Toast.makeText(GeoTag.this, "kinvey pingBlocking success!",
 //                        Toast.LENGTH_LONG).show();
 //            }
 //

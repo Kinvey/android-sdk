@@ -236,12 +236,12 @@ public class PullToRefreshListView extends ListView {
             // If scroll reaches the trigger line, start refreshing
             if (height > mHeaderHeight && !mArrowUp) {
                 mArrow.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.rotate));
-                mText.setText("Release to update");
+                mText.setText("Release to updateBlocking");
                 rotateArrow();
                 mArrowUp = true;
             } else if (height < mHeaderHeight && mArrowUp) {
                 mArrow.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.rotate));
-                mText.setText("Pull down to update");
+                mText.setText("Pull down to updateBlocking");
                 rotateArrow();
                 mArrowUp = false;
             }

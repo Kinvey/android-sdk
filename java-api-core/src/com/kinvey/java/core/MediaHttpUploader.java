@@ -78,7 +78,7 @@ public class MediaHttpUploader {
      * Upload state associated with the Media HTTP uploader.
      */
     public enum UploadState {
-        /** The upload process has not started yet. */
+        /** The uploadBlocking process has not started yet. */
         NOT_STARTED,
 
         /** Set before the initiation request is sent. */
@@ -143,8 +143,8 @@ public class MediaHttpUploader {
      * The HTTP method used for the initiation request.
      *
      * <p>
-     * Can only be {@link HttpMethods#POST} (for media upload) or {@link HttpMethods#PUT} (for media
-     * update). The default value is {@link HttpMethods#POST}.
+     * Can only be {@link HttpMethods#POST} (for media uploadBlocking) or {@link HttpMethods#PUT} (for media
+     * updateBlocking). The default value is {@link HttpMethods#POST}.
      * </p>
      */
     private String initiationRequestMethod = HttpMethods.POST;
@@ -153,7 +153,7 @@ public class MediaHttpUploader {
     private HttpHeaders initiationHeaders = new HttpHeaders();
 
     /**
-     * The HTTP request object that is currently used to send upload requests or {@code null} before
+     * The HTTP request object that is currently used to send uploadBlocking requests or {@code null} before
      * {@link #upload}.
      */
     private HttpRequest currentRequest;
@@ -163,16 +163,16 @@ public class MediaHttpUploader {
 
     /**
      * Determines whether the back off policy is enabled or disabled. If value is set to {@code false}
-     * then server errors are not handled and the upload process will fail if a server error is
+     * then server errors are not handled and the uploadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     private boolean backOffPolicyEnabled = true;
 
     /**
-     * Determines whether direct media upload is enabled or disabled. If value is set to {@code true}
-     * then a direct upload will be done where the whole media content is uploaded in a single request
-     * If value is set to {@code false} then the upload uses the resumable media upload protocol to
-     * upload in data chunks. Defaults to {@code false}.
+     * Determines whether direct media uploadBlocking is enabled or disabled. If value is set to {@code true}
+     * then a direct uploadBlocking will be done where the whole media content is uploaded in a single request
+     * If value is set to {@code false} then the uploadBlocking uses the resumable media uploadBlocking protocol to
+     * uploadBlocking in data chunks. Defaults to {@code false}.
      */
     private boolean directUploadEnabled;
 
@@ -189,7 +189,7 @@ public class MediaHttpUploader {
     private long bytesUploaded;
 
     /**
-     * Maximum size of individual chunks that will get uploaded by single HTTP requests. The default
+     * Maximum size of individual chunks that will getBlocking uploaded by single HTTP requests. The default
      * value is {@link #DEFAULT_CHUNK_SIZE}.
      */
     private int chunkSize = DEFAULT_CHUNK_SIZE;
@@ -201,7 +201,7 @@ public class MediaHttpUploader {
 
     /**
      * The content buffer of the current request or {@code null} for none. It is used for resumable
-     * media upload when the media content length is not specified. It is instantiated for every
+     * media uploadBlocking when the media content length is not specified. It is instantiated for every
      * request in {@link #setContentAndHeadersOnCurrentRequest} and is set to {@code null} when the
      * request is completed in {@link #upload}.
      */
@@ -221,7 +221,7 @@ public class MediaHttpUploader {
      *
      * <p>
      * The input stream received by calling {@link AbstractInputStreamContent#getInputStream} is
-     * closed when the upload process is successfully completed. For resumable uploads, when the
+     * closed when the uploadBlocking process is successfully completed. For resumable uploads, when the
      * media content length is known, if the input stream has {@link InputStream#markSupported} as
      * {@code false} then it is wrapped in an {@link BufferedInputStream} to support the
      * {@link InputStream#mark} and {@link InputStream#reset} methods required for handling server
@@ -244,12 +244,12 @@ public class MediaHttpUploader {
 
     /**
      *
-     * Executes a direct media upload or resumable media upload conforming to the specifications
+     * Executes a direct media uploadBlocking or resumable media uploadBlocking conforming to the specifications
      * listed <a href='http://code.google.com/apis/gdata/docs/resumable_upload.html'>here.</a>
      *
      * <p>
      * This method is not reentrant. A new instance of {@link MediaHttpUploader} must be instantiated
-     * before upload called be called again.
+     * before uploadBlocking called be called again.
      * </p>
      *
      * <p>
@@ -270,7 +270,7 @@ public class MediaHttpUploader {
      * </p>
      *
      * <pre>
-     HttpResponse response = batch.upload(initiationRequestUrl);
+     HttpResponse response = batch.uploadBlocking(initiationRequestUrl);
      try {
      // process the HTTP response object
      } finally {
@@ -286,7 +286,7 @@ public class MediaHttpUploader {
         Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
         updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
 
-        // Make initial request to get the unique upload URL.
+        // Make initial request to getBlocking the unique uploadBlocking URL.
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
             // If the initiation request is not successful return it immediately.
@@ -300,7 +300,7 @@ public class MediaHttpUploader {
             initialResponse.disconnect();
         }
 
-        // Convert media content into a byte stream to upload in chunks.
+        // Convert media content into a byte stream to uploadBlocking in chunks.
         contentInputStream = mediaContent.getInputStream();
         if (!contentInputStream.markSupported() && getMediaContentLength() >= 0) {
             // If we know the media content length then wrap the stream into a Buffered input stream to
@@ -341,7 +341,7 @@ public class MediaHttpUploader {
                     return response;
                 }
 
-                // Check to see if the upload URL has changed on the server.
+                // Check to see if the uploadBlocking URL has changed on the server.
                 String updatedUploadUrl = response.getHeaders().getLocation();
                 if (updatedUploadUrl != null) {
                     uploadUrl = new GenericUrl(updatedUploadUrl);
@@ -392,7 +392,7 @@ public class MediaHttpUploader {
     }
 
     /**
-     * This method sends a GET request with empty content to get the unique upload URL.
+     * This method sends a GET request with empty content to getBlocking the unique uploadBlocking URL.
      */
     private HttpResponse executeUploadInitiation(AbstractKinveyClientRequest abstractKinveyClientRequest) throws IOException {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED);
@@ -423,7 +423,7 @@ public class MediaHttpUploader {
 //    }
 
     /**
-     * Sets the HTTP media content chunk and the required headers that should be used in the upload
+     * Sets the HTTP media content chunk and the required headers that should be used in the uploadBlocking
      * request.
      *
      * @param bytesWritten The number of bytes that have been successfully uploaded on the server
@@ -507,10 +507,10 @@ public class MediaHttpUploader {
 //    /**
 //     * The call back method that will be invoked by
 //     * {@link MediaUploadExponentialBackOffPolicy#getNextBackOffMillis} if it encounters a server
-//     * error. This method should only be used as a call back method after {@link #upload} is invoked.
+//     * error. This method should only be used as a call back method after {@link #uploadBlocking} is invoked.
 //     *
 //     * <p>
-//     * This method will query the current status of the upload to find how many bytes were
+//     * This method will query the current status of the uploadBlocking to find how many bytes were
 //     * successfully uploaded before the server error occurred. It will then adjust the HTTP Request
 //     * object used by the BackOffPolicy to contain the correct range header and media content chunk.
 //     * </p>
@@ -519,7 +519,7 @@ public class MediaHttpUploader {
 //        Preconditions.checkNotNull(currentRequest, "The current request should not be null");
 //
 //        // TODO(rmistry): Handle timeouts here similar to how server errors are handled.
-//        // Query the current status of the upload by issuing an empty POST request on the upload URI.
+//        // Query the current status of the uploadBlocking by issuing an empty POST request on the uploadBlocking URI.
 //        HttpRequest request = requestFactory.buildPutRequest(currentRequest.getUrl(), null);
 //        addMethodOverride(request); // needed for PUT
 //
@@ -533,14 +533,14 @@ public class MediaHttpUploader {
 //        try {
 //            long bytesWritten = getNextByteIndex(response.getHeaders().getRange());
 //
-//            // Check to see if the upload URL has changed on the server.
+//            // Check to see if the uploadBlocking URL has changed on the server.
 //            String updatedUploadUrl = response.getHeaders().getLocation();
 //            if (updatedUploadUrl != null) {
 //                currentRequest.setUrl(new GenericUrl(updatedUploadUrl));
 //            }
 //
 //            if (getMediaContentLength() >= 0) {
-//                // The current position of the input stream is likely incorrect because the upload was
+//                // The current position of the input stream is likely incorrect because the uploadBlocking was
 //                // interrupted. Reset the position and skip ahead to the correct spot.
 //                // We do not need to do this when the media content length is unknown because we store the
 //                // last chunk in a byte buffer.
@@ -596,7 +596,7 @@ public class MediaHttpUploader {
 
     /**
      * Sets whether the back off policy is enabled or disabled. If value is set to {@code false} then
-     * server errors are not handled and the upload process will fail if a server error is
+     * server errors are not handled and the uploadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     public MediaHttpUploader setBackOffPolicyEnabled(boolean backOffPolicyEnabled) {
@@ -606,7 +606,7 @@ public class MediaHttpUploader {
 
     /**
      * Returns whether the back off policy is enabled or disabled. If value is set to {@code false}
-     * then server errors are not handled and the upload process will fail if a server error is
+     * then server errors are not handled and the uploadBlocking process will fail if a server error is
      * encountered. Defaults to {@code true}.
      */
     public boolean isBackOffPolicyEnabled() {
@@ -614,10 +614,10 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Sets whether direct media upload is enabled or disabled. If value is set to {@code true} then a
-     * direct upload will be done where the whole media content is uploaded in a single request. If
-     * value is set to {@code false} then the upload uses the resumable media upload protocol to
-     * upload in data chunks. Defaults to {@code false}.
+     * Sets whether direct media uploadBlocking is enabled or disabled. If value is set to {@code true} then a
+     * direct uploadBlocking will be done where the whole media content is uploaded in a single request. If
+     * value is set to {@code false} then the uploadBlocking uses the resumable media uploadBlocking protocol to
+     * uploadBlocking in data chunks. Defaults to {@code false}.
      *
      * @since 1.9
      */
@@ -627,10 +627,10 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Returns whether direct media upload is enabled or disabled. If value is set to {@code true}
-     * then a direct upload will be done where the whole media content is uploaded in a single
-     * request. If value is set to {@code false} then the upload uses the resumable media upload
-     * protocol to upload in data chunks. Defaults to {@code false}.
+     * Returns whether direct media uploadBlocking is enabled or disabled. If value is set to {@code true}
+     * then a direct uploadBlocking will be done where the whole media content is uploaded in a single
+     * request. If value is set to {@code false} then the uploadBlocking uses the resumable media uploadBlocking
+     * protocol to uploadBlocking in data chunks. Defaults to {@code false}.
      *
      * @since 1.9
      */
@@ -654,7 +654,7 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Sets the maximum size of individual chunks that will get uploaded by single HTTP requests. The
+     * Sets the maximum size of individual chunks that will getBlocking uploaded by single HTTP requests. The
      * default value is {@link #DEFAULT_CHUNK_SIZE}.
      *
      * <p>
@@ -675,7 +675,7 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Returns the maximum size of individual chunks that will get uploaded by single HTTP requests.
+     * Returns the maximum size of individual chunks that will getBlocking uploaded by single HTTP requests.
      * The default value is {@link #DEFAULT_CHUNK_SIZE}.
      */
     public int getChunkSize() {
@@ -722,8 +722,8 @@ public class MediaHttpUploader {
      * Sets the HTTP method used for the initiation request.
      *
      * <p>
-     * Can only be {@link HttpMethods#POST} (for media upload) or {@link HttpMethods#PUT} (for media
-     * update). The default value is {@link HttpMethods#POST}.
+     * Can only be {@link HttpMethods#POST} (for media uploadBlocking) or {@link HttpMethods#PUT} (for media
+     * updateBlocking). The default value is {@link HttpMethods#POST}.
      * </p>
      *
      * @since 1.12
@@ -773,7 +773,7 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Sets the upload state and notifies the progress listener.
+     * Sets the uploadBlocking state and notifies the progress listener.
      *
      * @param uploadState value to set to
      */
@@ -785,16 +785,16 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Gets the current upload state of the uploader.
+     * Gets the current uploadBlocking state of the uploader.
      *
-     * @return the upload state
+     * @return the uploadBlocking state
      */
     public UploadState getUploadState() {
         return uploadState;
     }
 
     /**
-     * Gets the upload progress denoting the percentage of bytes that have been uploaded, represented
+     * Gets the uploadBlocking progress denoting the percentage of bytes that have been uploaded, represented
      * between 0.0 (0%) and 1.0 (100%).
      *
      * <p>
@@ -804,7 +804,7 @@ public class MediaHttpUploader {
      *
      * @throws IllegalArgumentException if the specified {@link AbstractInputStreamContent} has no
      *         content length
-     * @return the upload progress
+     * @return the uploadBlocking progress
      */
     public double getProgress() throws IOException {
         Preconditions.checkArgument(getMediaContentLength() >= 0, "Cannot call getProgress() if " +

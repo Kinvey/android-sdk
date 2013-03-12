@@ -39,25 +39,25 @@ import com.kinvey.java.model.UriLocResponse;
  *
  * <p>
  * The callback mechanism for this api is extended to include the {@link UploaderProgressListener#progressChanged(com.kinvey.java.core.MediaHttpUploader)}
- * method, which receives notifications as the upload process transitions through and progresses with the upload.
+ * method, which receives notifications as the uploadBlocking process transitions through and progresses with the uploadBlocking.
  * process.
  * </p>
  *
  * <p>
  * Sample usage:
  * <pre>
- *    mKinveyClient.file().upload(file,  new UploaderProgressListener() {
+ *    mKinveyClient.file().uploadBlocking(file,  new UploaderProgressListener() {
  *        @Override
  *        public void onSuccess(Void result) {
- *            Log.i(TAG, "successfully upload file");
+ *            Log.i(TAG, "successfully uploadBlocking file");
  *        }
  *        @Override
  *        public void onFailure(Throwable error) {
- *            Log.e(TAG, "failed to upload file.", error);
+ *            Log.e(TAG, "failed to uploadBlocking file.", error);
  *        }
  *        @Override
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
- *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
+ *            Log.i(TAG, "uploadBlocking progress: " + uploader.getUploadState());
  *            switch (uploader.getUploadState()) {
  *                case INITIATION_STARTED:
  *                    Log.i(TAG, "Initiation Started");
@@ -87,10 +87,10 @@ public class File {
     /** the client for this api **/
     private AbstractClient client;
 
-    /** the upload request listener, can be {@code null} if the calling code has not explicitly set it **/
+    /** the uploadBlocking request listener, can be {@code null} if the calling code has not explicitly set it **/
     private UploaderProgressListener uploadProgressListener;
 
-    /** the download request listener, can be {@code null} if the call code has not set it **/
+    /** the downloadBlocking request listener, can be {@code null} if the call code has not set it **/
     private DownloaderProgressListener downloaderProgressListener;
 
     /**
@@ -107,7 +107,7 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieve a temporary url for purposes of downloading a given file already known to Kinvey.
+     * Constructs a request to retrieveBlocking a temporary url for purposes of downloading a given file already known to Kinvey.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetDownloadUrl#execute()}.
      * </p>
@@ -115,6 +115,23 @@ public class File {
      * @return request for which the temporary url can be retrieved
      * @throws IOException if initializing the request fails
      */
+    public GetDownloadUrl getDownloadUrlBlocking(String fileName) throws IOException {
+        GetDownloadUrl getDownloadUrl = new GetDownloadUrl(fileName);
+        client.initializeRequest(getDownloadUrl);
+        return getDownloadUrl;
+    }
+
+    /**
+     * Constructs a request to retrieveBlocking a temporary url for purposes of downloading a given file already known to Kinvey.
+     * <p>
+     * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetDownloadUrl#execute()}.
+     * </p>
+     * @param fileName name of the file for which kinvey service is aware
+     * @return request for which the temporary url can be retrieved
+     * @throws IOException if initializing the request fails
+     * @deprecated Renamed to {@link #getDownloadUrlBlocking(String)}
+     */
+    @Deprecated
     public GetDownloadUrl getDownloadUrl(String fileName) throws IOException {
         GetDownloadUrl getDownloadUrl = new GetDownloadUrl(fileName);
         client.initializeRequest(getDownloadUrl);
@@ -122,16 +139,34 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieve a temporary url for purposes of uploading a given file.
+     * Constructs a request to retrieveBlocking a temporary url for purposes of uploading a given file.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetUploadUrl#execute()}.
      * </p>
      *
      * @param fileName the name of the file used in metadata
-     * @return valid request for which the temporary upload url can be retrieved
+     * @return valid request for which the temporary uploadBlocking url can be retrieved
      * @throws IOException if initializing the request fails
      */
-    public GetUploadUrl getUploadUrl (String fileName) throws IOException {
+    public GetUploadUrl getUploadUrlBlocking(String fileName) throws IOException {
+        GetUploadUrl getUploadUrl = new GetUploadUrl(fileName);
+        client.initializeRequest(getUploadUrl);
+        return getUploadUrl;
+    }
+
+    /**
+     * Constructs a request to retrieveBlocking a temporary url for purposes of uploading a given file.
+     * <p>
+     * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetUploadUrl#execute()}.
+     * </p>
+     *
+     * @param fileName the name of the file used in metadata
+     * @return valid request for which the temporary uploadBlocking url can be retrieved
+     * @throws IOException if initializing the request fails
+     * @deprecated Renamed to {@link #getUploadUrlBlocking(String)}
+     */
+    @Deprecated
+    public GetUploadUrl getUploadUrl(String fileName) throws IOException {
         GetUploadUrl getUploadUrl = new GetUploadUrl(fileName);
         client.initializeRequest(getUploadUrl);
         return getUploadUrl;
@@ -142,9 +177,25 @@ public class File {
      *
      * @param fileName the filename used for the metadata
      * @param content the input stream from which the file contents will be sourced
-     * @return a valid request to be executed for the upload operation to Kinvey
+     * @return a valid request to be executed for the uploadBlocking operation to Kinvey
      * @throws IOException if initializing the request fails
      */
+    public Upload uploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
+        Upload upload = new Upload(fileName, content, uploadProgressListener);
+        client.initializeRequest(upload);
+        return upload;
+    }
+
+    /**
+     * Uploads a given file and its contents to the Kinvey file service.
+     *
+     * @param fileName the filename used for the metadata
+     * @param content the input stream from which the file contents will be sourced
+     * @return a valid request to be executed for the uploadBlocking operation to Kinvey
+     * @throws IOException if initializing the request fails
+     * @deprecated Renamed to {@link #uploadBlocking(String, com.google.api.client.http.AbstractInputStreamContent)}
+     */
+    @Deprecated
     public Upload upload(String fileName, AbstractInputStreamContent content) throws IOException {
         Upload upload = new Upload(fileName, content, uploadProgressListener);
         client.initializeRequest(upload);
@@ -158,9 +209,27 @@ public class File {
      * </p>
      *
      * @param filename the name used in metadata for downloadable file.
-     * @return a valid request to be executed for the download operation from Kinvey file service
+     * @return a valid request to be executed for the downloadBlocking operation from Kinvey file service
      * @throws IOException
      */
+    public Download downloadBlocking(String filename) throws IOException {
+        Download download = new Download(filename, downloaderProgressListener);
+        client.initializeRequest(download);
+        return download;
+    }
+
+    /**
+     * Download a given file from the Kinvey file service.
+     * <p>
+     *
+     * </p>
+     *
+     * @param filename the name used in metadata for downloadable file.
+     * @return a valid request to be executed for the downloadBlocking operation from Kinvey file service
+     * @throws IOException
+     * @deprecated Renamed to {@link #downloadBlocking(String)}
+     */
+    @Deprecated
     public Download download(String filename) throws IOException {
         Download download = new Download(filename, downloaderProgressListener);
         client.initializeRequest(download);
@@ -174,6 +243,21 @@ public class File {
      * @return a valid DELETE request to be executed
      * @throws IOException
      */
+    public Delete deleteBlocking(String filename) throws IOException {
+        Delete delete = new Delete(filename);
+        client.initializeRequest(delete);
+        return delete;
+    }
+
+    /**
+     * Deletes the given file from the Kinvey file service.
+     *
+     * @param filename the name of used in metadata to refer to the file
+     * @return a valid DELETE request to be executed
+     * @throws IOException
+     * @deprecated Rename to {@link #deleteBlocking(String)}
+     */
+    @Deprecated
     public Delete delete(String filename) throws IOException {
         Delete delete = new Delete(filename);
         client.initializeRequest(delete);
@@ -181,14 +265,14 @@ public class File {
     }
 
     /**
-     * @param uploadProgressListener the listener to receive notifications as the upload progresses
+     * @param uploadProgressListener the listener to receive notifications as the uploadBlocking progresses
      */
     public void setUploadProgressListener(UploaderProgressListener uploadProgressListener) {
         this.uploadProgressListener = uploadProgressListener;
     }
 
     /**
-     * @param downloaderProgressListener the listener to receive notifications as the download progresses
+     * @param downloaderProgressListener the listener to receive notifications as the downloadBlocking progresses
      */
     public void setDownloaderProgressListener(DownloaderProgressListener downloaderProgressListener) {
         this.downloaderProgressListener = downloaderProgressListener;
@@ -196,11 +280,11 @@ public class File {
 
 
     /**
-     * GET a temporary url for download.
+     * GET a temporary url for downloadBlocking.
      */
     public class GetDownloadUrl extends AbstractKinveyJsonClientRequest<UriLocResponse> {
 
-        private final static String REST_URL = "blob/{appKey}/download-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/downloadBlocking-loc/{fileName}";
 
         @Key
         private final String fileName;
@@ -218,7 +302,7 @@ public class File {
      */
     public class GetUploadUrl extends AbstractKinveyJsonClientRequest<UriLocResponse> {
 
-        private final static String REST_URL = "blob/{appKey}/upload-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/uploadBlocking-loc/{fileName}";
 
         @Key
         private final String fileName;
@@ -230,11 +314,11 @@ public class File {
     }
 
     /**
-     * Initiate an upload of a particular file and its contents.
+     * Initiate an uploadBlocking of a particular file and its contents.
      */
     public class Upload extends AbstractKinveyJsonClientRequest<Void> {
 
-        private final static String REST_URL = "blob/{appKey}/upload-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/uploadBlocking-loc/{fileName}";
 
         @Key
         private String fileName;
@@ -247,11 +331,11 @@ public class File {
     }
 
     /**
-     * Initiate a download of a particular file already known to Kinvey.
+     * Initiate a downloadBlocking of a particular file already known to Kinvey.
      */
     public class Download extends AbstractKinveyJsonClientRequest<Void> {
 
-        private final static String REST_URL = "blob/{appKey}/download-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/downloadBlocking-loc/{fileName}";
 
         @Key
         private String fileName;
@@ -264,7 +348,7 @@ public class File {
     }
 
     /**
-     * Initiate a delete of a particular file already known to Kinvey.
+     * Initiate a deleteBlocking of a particular file already known to Kinvey.
      * <p>
      * {@link com.kinvey.java.core.AbstractKinveyJsonClientRequest#executeUnparsed()} is overridden to first GET
      * the URI for which the file should be deleted.

@@ -238,7 +238,7 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Performs an authenticated ping against the configured Kinvey backend.
+     * Performs an authenticated pingBlocking against the configured Kinvey backend.
      *
      * @param callback object to be notified when request completes
      */
@@ -254,7 +254,7 @@ public class Client extends AbstractClient {
 
         @Override
         protected Boolean executeAsync() throws IOException {
-            return Client.this.ping();
+            return Client.this.pingBlocking();
         }
     }
 
@@ -275,7 +275,7 @@ public class Client extends AbstractClient {
         private Context context = null;
 
         /**
-         * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
+         * Use this constructor to createBlocking a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
          * set for the Android Operating System.
          * <p>
          * This constructor does NOT support push notification functionality.
@@ -299,7 +299,7 @@ public class Client extends AbstractClient {
 
 
         /**
-         * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
+         * Use this constructor to createBlocking a Client.Builder, which can be used to build a Kinvey Client with defaults
          * set for the Android Operating System.
          * <p>
          * This constructor requires a  properties file, containing configuration for your Kinvey Client.
@@ -395,7 +395,7 @@ public class Client extends AbstractClient {
             try {
                 client.user().login(credential).execute();
             } catch (IOException ex) {
-                Log.e(TAG, "Could not retrieve user Credentials");
+                Log.e(TAG, "Could not retrieveBlocking user Credentials");
             }
 
             client.user().retrieveMetadata(new KinveyUserCallback() {

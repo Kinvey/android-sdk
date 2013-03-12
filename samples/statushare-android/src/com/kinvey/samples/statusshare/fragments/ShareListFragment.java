@@ -95,7 +95,7 @@ public class ShareListFragment extends KinveyFragment {
 
         Query q = getClient().query();
 
-        Log.i(Client.TAG, "about to retrieve all users");
+        Log.i(Client.TAG, "about to retrieveBlocking all users");
 
 
         getClient().user().retrieve(q, new KinveyListCallback<User>() {
@@ -178,12 +178,12 @@ public class ShareListFragment extends KinveyFragment {
 
         for (UpdateEntity updateEntity : shareList) {
 
-            Log.i(Client.TAG, "update  -> " + updateEntity.toString());
-            Log.i(Client.TAG, "update  -> " + updateEntity.getMeta().getLastModifiedTime());
+            Log.i(Client.TAG, "updateBlocking  -> " + updateEntity.toString());
+            Log.i(Client.TAG, "updateBlocking  -> " + updateEntity.getMeta().getLastModifiedTime());
 
 
             Update update = new Update(updateEntity.getText(), updateEntity.getAcl(), updateEntity.getMeta(), mFriends, getCalendar());
-            Log.i(StatusShare.TAG, "Adding update: " + update.getText() + " - " + update.getSince() + " - " + update.getAuthorName() + " - " + update.getAuthor());
+            Log.i(StatusShare.TAG, "Adding updateBlocking: " + update.getText() + " - " + update.getSince() + " - " + update.getAuthorName() + " - " + update.getAuthor());
 
             getUpdates().add(update);
         }
@@ -200,9 +200,9 @@ public class ShareListFragment extends KinveyFragment {
 
 
 //                Intent newIntent = new Intent(getSherlockActivity(), AuthorViewActivity.class);
-//                newIntent.putExtra("authorId", mUpdates.get(position).getAuthor());
-//                newIntent.putExtra("authorName", mUpdates.get(position).getAuthorName());
-                    //android.util.Log.d(TAG, "Click on: " + position + " - " + id + " - " + mUpdates.get(position).getAuthorName());
+//                newIntent.putExtra("authorId", mUpdates.getBlocking(position).getAuthor());
+//                newIntent.putExtra("authorName", mUpdates.getBlocking(position).getAuthorName());
+                    //android.util.Log.d(TAG, "Click on: " + position + " - " + id + " - " + mUpdates.getBlocking(position).getAuthorName());
                     ((StatusShare) getSherlockActivity()).replaceFragment(UserFragment.newInstance(getUpdates().get(position)), true);
 //                HomeActivity.this.startActivity(newIntent);
                 }
@@ -223,7 +223,7 @@ public class ShareListFragment extends KinveyFragment {
 //                    mListView.completeRefreshing();
 
 
-//                getClient().appData("Updates", UpdateEntity.class).get(q, new KinveyListCallback<UpdateEntity>() {
+//                getClient().appData("Updates", UpdateEntity.class).getBlocking(q, new KinveyListCallback<UpdateEntity>() {
 //                    @Override
 //                    public void onSuccess(List<UpdateEntity> result) {
 //                        android.util.Log.d(AbstractClient.TAG, "Count of updates found: " + result.size());
@@ -232,9 +232,9 @@ public class ShareListFragment extends KinveyFragment {
 //
 //
 //                        for (UpdateEntity updateEntity : result) {
-//                            Update update = new Update(updateEntity.getText(), updateEntity, mFriends, getCalendar());
-//                            update.lmt = updateEntity.getLastModifiedTime();
-//                            getUpdates().add(0, update);
+//                            Update updateBlocking = new Update(updateEntity.getText(), updateEntity, mFriends, getCalendar());
+//                            updateBlocking.lmt = updateEntity.getLastModifiedTime();
+//                            getUpdates().add(0, updateBlocking);
 //                        }
 //
 //

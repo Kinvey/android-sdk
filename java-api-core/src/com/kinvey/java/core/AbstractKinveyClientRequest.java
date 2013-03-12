@@ -193,7 +193,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * Sets up this request object to be used for uploading media.
      *
      * @param content data to be uploaded
-     * @param progressListener an object to be notified of the different state changes as the upload progresses.
+     * @param progressListener an object to be notified of the different state changes as the uploadBlocking progresses.
      *                         Optional {@code null} can be passed in.
      */
     protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
@@ -310,7 +310,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 throw newExceptionOnError(response);
             }
         } else {
-            // execute upload procedure
+            // execute uploadBlocking procedure
             response = uploader.upload(this);
         }
         return response;

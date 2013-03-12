@@ -35,7 +35,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * </p>
  *
  * <p>
- * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, login, and
+ * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, loginBlocking, and
  * user creation, or the general-purpose {@link com.kinvey.java.core.KinveyClientCallback} used for User data retrieval,
  * updating, and management.
  * </p>
@@ -44,7 +44,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * Login sample:
  * <pre>
     public void submit(View view) {
-        kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+        kinveyClient.user().loginBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                 new KinveyUserCallback() {
             public void onFailure(Throwable t) {
                 CharSequence text = "Wrong username or password.";
@@ -67,7 +67,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <pre>
     User user = kinveyClient.getActiveUser();
     user.put("fav_food", "bacon");
-    user.update(new KinveyClientCallback<User.Update>() {
+    user.updateBlocking(new KinveyClientCallback<User.Update>() {
 
         public void onFailure(Throwable e) { ... }
 
@@ -99,7 +99,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous implicit user login.
+     * Asynchronous implicit user loginBlocking.
      * <p>
      * Constructs an asynchronous request to log in an implicit (non-named) user and returns the associated User object
      * via a KinveyUserCallback.
@@ -107,7 +107,7 @@ public class AsyncUser extends User {
      * <p>
      *     Sample Usage:
      * <pre>
-        kinveyClient.user().login(new KinveyUserCallback() {
+        kinveyClient.user().loginBlocking(new KinveyUserCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) {
                 CharSequence text = "Welcome back!";
@@ -122,7 +122,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Kinvey user login.
+     * Asynchronous Kinvey user loginBlocking.
      * <p>
      * Constructs an asynchronous request to log in a Kinvey user with username and password, and returns the associated
      * User object via a KinveyUserCallback.
@@ -131,7 +131,7 @@ public class AsyncUser extends User {
      * <p>
        Sample Usage:
      * <pre>
-            kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+            kinveyClient.user().loginBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                     new KinveyUserCallback() {
             public void onFailure(Throwable t) {
                     CharSequence text = "Wrong username or password.";
@@ -157,7 +157,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Facebook login.
+     * Asynchronous Facebook loginBlocking.
      * <p>Constructs an asynchronous request to log in a Facebook user and returns the associated User object via a
      * KinveyUserCallback.  A valid Facebook access token must be obtained via the Facebook OAuth API and passed to this
      * method.
@@ -165,11 +165,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-            kinveyClient.user().loginFacebook(accessToken, new KinveyUserCallback() {
+            kinveyClient.user().loginFacebookBlocking(accessToken, new KinveyUserCallback() {
 
                 public void onFailure(Throwable e) {
                     error(progressDialog, "Kinvey: " + e.getMessage());
-                    Log.e(TAG, "failed Kinvey facebook login", e);
+                    Log.e(TAG, "failed Kinvey facebook loginBlocking", e);
                 }
 
                 public void onSuccess(User u) {
@@ -187,7 +187,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Google login.
+     * Asynchronous Google loginBlocking.
      *
      * <p>
      * Constructs an asynchronous request to log in a Google user and returns the associated User object via a
@@ -197,11 +197,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-            kinveyClient.user().loginGoogle(accessToken, new KinveyUserCallback() {
+            kinveyClient.user().loginGoogleBlocking(accessToken, new KinveyUserCallback() {
 
                 public void onFailure(Throwable e) {
                     error(progressDialog, "Kinvey: " + e.getMessage());
-                    Log.e(TAG, "failed Kinvey facebook login", e);
+                    Log.e(TAG, "failed Kinvey facebook loginBlocking", e);
                 }
 
                 public void onSuccess(User u) {
@@ -219,7 +219,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Twitter login.
+     * Asynchronous Twitter loginBlocking.
      *
      * <p>
      * Constructs an asynchronous request to log in a Twitter user and returns the associated User object via a
@@ -229,11 +229,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginTwitter(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
+        kinveyClient.user().loginTwitterBlocking(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
                 new KinveyUserCallback() {
 
             public void onFailure(Throwable e) {
-                Log.e(TAG, "Failed Kinvey login", e)
+                Log.e(TAG, "Failed Kinvey loginBlocking", e)
             };
 
             public void onSuccess(User r) {
@@ -253,7 +253,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     *  Asynchronous Linked In login.
+     *  Asynchronous Linked In loginBlocking.
      *
      * <p>
      * Constructs an asynchronous request to log in a Linked In user and returns the associated User object via a
@@ -263,11 +263,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginLinkedIn(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
+        kinveyClient.user().loginLinkedInBlocking(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
                 new KinveyUserCallback() {
 
         public void onFailure(Throwable e) {
-            Log.e(TAG, "Failed Kinvey login", e)
+            Log.e(TAG, "Failed Kinvey loginBlocking", e)
         };
 
         public void onSuccess(User r) {
@@ -301,9 +301,9 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous method to create a new Kinvey User.
+     * Asynchronous method to createBlocking a new Kinvey User.
      * <p>
-     * Constructs an asynchronous request to create a Kinvey user with username and password, and returns the associated
+     * Constructs an asynchronous request to createBlocking a Kinvey user with username and password, and returns the associated
      * User object via a KinveyUserCallback.  All metadata that is added to the user object prior to creating the user
      * will be persisted to the Kinvey backend.
      * </p>
@@ -313,11 +313,11 @@ public class AsyncUser extends User {
      * <pre>
         kinveyClient.user().put("State","MA");
         kinveyClient.user().put("Age", 25);
-        kinveyClient.user().create(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+        kinveyClient.user().createBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                 new KinveyUserCallback() {
 
             public void onFailure(Throwable t) {
-                CharSequence text = "Unable to create account.";
+                CharSequence text = "Unable to createBlocking account.";
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             }
 
@@ -351,7 +351,7 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Delete the current user from the Kinvey backend
      * <p>
-     * Constructs an asynchronous request to delete the current Kinvey user.  The hardDelete flag determines whether
+     * Constructs an asynchronous request to deleteBlocking the current Kinvey user.  The hardDelete flag determines whether
      * the user is simply marked as inactive or completely erased from the Kinvey backend.
      * </p>
      * <p>
@@ -359,7 +359,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.delete(new KinveyClientCallback<User.Delete>() {
+        user.deleteBlocking(new KinveyClientCallback<User.Delete>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -386,7 +386,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.retrieve(new KinveyClientCallback<User.Retrieve>() {
+        user.retrieveBlocking(new KinveyClientCallback<User.Retrieve>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -404,14 +404,14 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Retrieve users via a Query
      * <p>
-     * Constructs an asynchronous request to retrieve User objects via a Query.
+     * Constructs an asynchronous request to retrieveBlocking User objects via a Query.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
          User user = kinveyClient.getActiveUser();
-         user.retrieve(Query query, new KinveyClientCallback<User.Retrieve>() {
+         user.retrieveBlocking(Query query, new KinveyClientCallback<User.Retrieve>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -430,14 +430,14 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Save the current user
      * <p>
-     * Constructs an asynchronous request to save the current Kinvey user.
+     * Constructs an asynchronous request to saveBlocking the current Kinvey user.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.update(new KinveyClientCallback<User.Update>() {
+        user.updateBlocking(new KinveyClientCallback<User.Update>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -461,7 +461,7 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
-        kinveyClient.resetPassword(new KinveyClientCallback<User>() {
+        kinveyClient.resetPasswordBlocking(new KinveyClientCallback<User>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -484,7 +484,7 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
-        kinveyClient.sendEmailVerification(new KinveyClientCallback<User>() {
+        kinveyClient.sendEmailVerificationBlocking(new KinveyClientCallback<User>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -521,7 +521,7 @@ public class AsyncUser extends User {
 
         String pushId = getClient().push().getPushId();
         if (pushId != null) {
-            // need to retrieve any existing properties to append apid
+            // need to retrieveBlocking any existing properties to append apid
             final Object obj = this.get("_apids");
             final ArrayList<String> apidList = new ArrayList<String>();
             if (obj == null) {
@@ -547,7 +547,7 @@ public class AsyncUser extends User {
             // TODO:  Set PushID attribute
             this.put("_apids", apidList);
             try {
-                this.update();
+                this.updateBlocking();
             } catch (IOException ex) {}
             // TODO:  Implement callbacks for User Update on separate thread - still async for now
         }
@@ -622,7 +622,7 @@ public class AsyncUser extends User {
 
         String pushId = getClient().push().getPushId();
         if (pushId != null) {
-            // need to retrieve any existing properties to append apid
+            // need to retrieveBlocking any existing properties to append apid
             final Object obj = this.get("_apids");
             final ArrayList<String> apidList = new ArrayList<String>();
             if (obj != null) {
@@ -645,7 +645,7 @@ public class AsyncUser extends User {
             // TODO:  Set PushID attribute
             this.put("_apids", apidList);
             try {
-                this.update();
+                this.updateBlocking();
             } catch (IOException ex) {}
             // TODO:  Implement callbacks for User Update on separate thread - still async for now
 
@@ -701,17 +701,17 @@ public class AsyncUser extends User {
         protected User executeAsync() throws IOException {
             switch(this.type) {
                 case IMPLICIT:
-                    return AsyncUser.this.login().execute();
+                    return AsyncUser.this.loginBlocking().execute();
                 case KINVEY:
-                    return AsyncUser.this.login(username, password).execute();
+                    return AsyncUser.this.loginBlocking(username, password).execute();
                 case FACEBOOK:
-                    return AsyncUser.this.loginFacebook(accessToken).execute();
+                    return AsyncUser.this.loginFacebookBlocking(accessToken).execute();
                 case GOOGLE:
-                    return AsyncUser.this.loginGoogle(accessToken).execute();
+                    return AsyncUser.this.loginGoogleBlocking(accessToken).execute();
                 case TWITTER:
-                    return AsyncUser.this.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                    return AsyncUser.this.loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case LINKED_IN:
-                    return AsyncUser.this.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                    return AsyncUser.this.loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case CREDENTIALSTORE:
                     return AsyncUser.this.login(credential).execute();
             }
@@ -731,7 +731,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User executeAsync() throws IOException {
-            return AsyncUser.this.create(username,password).execute();
+            return AsyncUser.this.createBlocking(username, password).execute();
         }
     }
 
@@ -745,7 +745,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User.Delete executeAsync() throws IOException {
-            return AsyncUser.this.delete(hardDelete);
+            return AsyncUser.this.deleteBlocking(hardDelete);
         }
     }
 
@@ -765,9 +765,9 @@ public class AsyncUser extends User {
         @Override
         public T executeAsync() throws IOException {
             if (query == null){
-                return (T) AsyncUser.this.retrieve().execute();
+                return (T) AsyncUser.this.retrieveBlocking().execute();
             }else{
-                return (T) AsyncUser.this.retrieve(query).execute();
+                return (T) AsyncUser.this.retrieveBlocking(query).execute();
             }
 
         }
@@ -807,7 +807,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User executeAsync() throws IOException {
-            return AsyncUser.this.retrieveMetadata();
+            return AsyncUser.this.retrieveMetadataBlocking();
         }
     }
 
@@ -819,7 +819,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User.Update executeAsync() throws IOException {
-            return AsyncUser.this.update();
+            return AsyncUser.this.updateBlocking();
         }
     }
 
@@ -831,7 +831,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User.ResetPassword executeAsync() throws IOException {
-            return AsyncUser.this.resetPassword();
+            return AsyncUser.this.resetPasswordBlocking();
         }
     }
 
@@ -843,7 +843,7 @@ public class AsyncUser extends User {
 
         @Override
         protected User.EmailVerification executeAsync() throws IOException {
-            return AsyncUser.this.sendEmailVerification();
+            return AsyncUser.this.sendEmailVerificationBlocking();
         }
     }
 }

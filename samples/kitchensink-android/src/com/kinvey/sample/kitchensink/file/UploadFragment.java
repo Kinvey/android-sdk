@@ -176,23 +176,23 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
             try {
                 save(text, target);
 
-                //Call the kinvey specific task to perform upload
+                //Call the kinvey specific task to perform uploadBlocking
                 getApplicationContext().getClient().file().upload(getTarget(), new UploaderProgressListener() {
                     @Override
                     public void onSuccess(Void result) {
-                        Log.i(KitchenSink.TAG, "successfully upload: " + getTarget().length() + " byte file.");
+                        Log.i(KitchenSink.TAG, "successfully uploadBlocking: " + getTarget().length() + " byte file.");
                         Toast.makeText(getSherlockActivity(), "Upload finished.", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        Log.e(KitchenSink.TAG, "failed to upload: " + getTarget().length() + " byte file.", error);
+                        Log.e(KitchenSink.TAG, "failed to uploadBlocking: " + getTarget().length() + " byte file.", error);
                         boom((Exception) error);
                     }
 
                     @Override
                     public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                        Log.i(KitchenSink.TAG, "upload progress: " + uploader.getUploadState());
+                        Log.i(KitchenSink.TAG, "uploadBlocking progress: " + uploader.getUploadState());
 
                         final String state = new String(uploader.getUploadState().toString());
 

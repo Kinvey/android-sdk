@@ -39,7 +39,7 @@ import java.util.List;
 public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
     //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
-    //TODO edwardf delete support?
+    //TODO edwardf deleteBlocking support?
     //TODO edwardf enhance GET support with KinveyReferences (resove, resolve_depth, retain), only needs wrappers
 
 
@@ -55,17 +55,17 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
+     * This method will downloadBlocking all associated Linked Resources and could take a long time.  For more control when handling
      * a large number of Linked Resources, try using an overloaded variation of this method.
      * </p>
      *
-     * @param entityID entityID to get
+     * @param entityID entityID to getBlocking
      * @param download - used for progress updates as associated files are downloaded.
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
@@ -78,19 +78,19 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download a subset of associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking a subset of associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only download Linked Resources for the fields declared in the resources array.
+     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
-     * @param entityID entityID to get
+     * @param entityID entityID to getBlocking
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieve
+     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
@@ -102,17 +102,17 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
+     * This method will downloadBlocking all associated Linked Resources and could take a long time.  For more control when handling
      * a large number of Linked Resources, try using an overloaded variation of this method.
      * </p>
      *
-     * @param query query for entities to retrieve
+     * @param query query for entities to retrieveBlocking
      * @param download - used for progress updates as associated files are downloaded.
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
@@ -126,19 +126,19 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only download Linked Resources for the fields declared in the resources array.
+     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
-     * @param query query for entities to retrieve
+     * @param query query for entities to retrieveBlocking
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieve
+     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
@@ -151,13 +151,13 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
+     * This method will downloadBlocking all associated Linked Resources and could take a long time.  For more control when handling
      * a large number of Linked Resources, try using an overloaded variation of this method.
      * </p>
      *
@@ -170,18 +170,18 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieveBlocking callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only download Linked Resources for the fields declared in the resources array.
+     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieve
+     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
@@ -190,9 +190,9 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Save (create or update) an entity to a collection and upload ALL associated Linked Resources.
+     * Save (createBlocking or updateBlocking) an entity to a collection and uploadBlocking ALL associated Linked Resources.
      * <p>
-     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
+     * This method will downloadBlocking all associated Linked Resources and could take a long time.  For more control when handling
      * a large number of Linked Resources, try using an overloaded variation of this method.
      * </p>
      *
@@ -221,15 +221,15 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Save (create or update) an entity to a collection and upload ALL associated Linked Resources.
+     * Save (createBlocking or updateBlocking) an entity to a collection and uploadBlocking ALL associated Linked Resources.
      * <p>
-     * This method will only upload Linked Resources for the fields declared in the resources array.
+     * This method will only uploadBlocking Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
      * @param entity Entity to Save
      * @param upload - Listener for uploading Linked Resources, can be null.
-     * @param attachments - array of JSON keys of resources to retrieve
+     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Save object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */

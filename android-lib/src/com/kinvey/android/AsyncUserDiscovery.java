@@ -38,7 +38,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  * Sample Usage:
  * <pre>
     public void submit(View view) {
-    kinveyClient.userDiscovery().lookupByUserName(username, new KinveyClientCallback<User> () {
+    kinveyClient.userDiscovery().lookupByUserNameBlocking(username, new KinveyClientCallback<User> () {
         public void onFailure(Throwable t) { ... }
         public void onSuccess(User[] u) { ... }
     });
@@ -56,7 +56,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     }
 
     /**
-     * Asynchronous user lookup by first and last name
+     * Asynchronous user lookupBlocking by first and last name
      * <p>
      * Constructs an asynchronous request to find a user by first and last name, and returns the associated User object
      * via a KinveyClientCallback.
@@ -64,7 +64,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userDiscovery().lookupByFullName("John","Smith", new KinveyClientCallback<User>() {
+        kinveyClient.userDiscovery().lookupByFullNameBlocking("John","Smith", new KinveyClientCallback<User>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
@@ -88,7 +88,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
 
 
     /**
-     * Asynchronous user lookup by username
+     * Asynchronous user lookupBlocking by username
      * <p>
      * Constructs an asynchronous request to find a user by username, and returns the associated User object
      * via a KinveyClientCallback.
@@ -96,7 +96,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userDiscovery().lookupByFullName("jsmith", new KinveyClientCallback<User>() {
+        kinveyClient.userDiscovery().lookupByFullNameBlocking("jsmith", new KinveyClientCallback<User>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
@@ -114,7 +114,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     }
 
      /**
-     * Asynchronous user lookup by Facebook ID
+     * Asynchronous user lookupBlocking by Facebook ID
      * <p>
      * Constructs an asynchronous request to find a user by facebook ID, and returns the associated User object
      * via a KinveyClientCallback.
@@ -122,7 +122,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userDiscovery().lookupByFacebookID("jsmith", new KinveyClientCallback<User>() {
+        kinveyClient.userDiscovery().lookupByFacebookIDBlocking("jsmith", new KinveyClientCallback<User>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
         });
@@ -141,7 +141,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
 
 
     /**
-     * Asynchronous user lookup method
+     * Asynchronous user lookupBlocking method
      * <p>
      * Constructs an asynchronous request to find a user, and returns the associated User object
      * via a KinveyClientCallback.   Requests are constructed with a {@link com.google.api.client.json.GenericJson}
@@ -151,9 +151,9 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
-        UserLookup lookup = kinveyClient.userDiscovery().userLookup();
-        lookup.put("age",21);
-        kinveyClient.userDiscovery().lookup(lookup, new KinveyClientCallback<User> {
+        UserLookup lookupBlocking = kinveyClient.userDiscovery().userLookup();
+        lookupBlocking.put("age",21);
+        kinveyClient.userDiscovery().lookupBlocking(lookupBlocking, new KinveyClientCallback<User> {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) { ... }
      });
@@ -180,7 +180,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
         }
 
         protected UserLookup executeAsync() throws IOException {
-            return AsyncUserDiscovery.this.lookup(userLookup).execute();
+            return AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
         }
     }
 }

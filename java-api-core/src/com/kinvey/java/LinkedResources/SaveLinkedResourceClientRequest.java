@@ -22,16 +22,16 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * Implementation of a Client Request, which can upload linked resources.
+ * Implementation of a Client Request, which can uploadBlocking linked resources.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then this iterates through all the attachments and uploads them.
  * Once all files have been uploaded, a call to super.execute() is made.
  * </p>
  * <p>
- * This class is currently EXCLUSIVELY for an appData save request, as it relies a call to super.execute()
+ * This class is currently EXCLUSIVELY for an appData saveBlocking request, as it relies a call to super.execute()
  * </p>
  * <p>
- * call setUploadProgressListener to get callbacks for all file uploads.
+ * call setUploadProgressListener to getBlocking callbacks for all file uploads.
  * </p>
  *
  * @author edwardf
@@ -64,7 +64,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
         if (getJsonContent() instanceof LinkedGenericJson) {
 
 
-            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet().size());
+            System.out.println("Kinvey - LR, " + "linked resource found, file countBlocking at: " + ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet().size());
 
 
             for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
@@ -83,7 +83,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
                 getAbstractKinveyClient().file().setUploadProgressListener(upload);
 
-                getAbstractKinveyClient().file().upload(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
+                getAbstractKinveyClient().file().uploadBlocking(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
 
 
                 String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();

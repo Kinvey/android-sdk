@@ -15,7 +15,6 @@ package com.kinvey.java;
 
 import java.io.IOException;
 
-import com.kinvey.java.User;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.MockKinveyAuthRequest;
@@ -60,7 +59,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testLoginKinveyUserNullUsername() throws IOException {
         initializeUser();
         try {
-            currentUser.login(null,"myPassword").execute();
+            currentUser.loginBlocking(null, "myPassword").execute();
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
@@ -68,7 +67,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testLoginKinveyUserNullPassword() throws IOException {
         initializeUser();
         try {
-            currentUser.login("myUserName", null).execute();
+            currentUser.loginBlocking("myUserName", null).execute();
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
@@ -102,7 +101,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testDeleteHardDeleteTrue() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.Delete del = currentUser.delete(true);
+        User.Delete del = currentUser.deleteBlocking(true);
         assertEquals(currentUser.getId(), del.get("userID").toString());
         assertEquals(true,del.get("hard"));
     }
@@ -110,7 +109,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testDeleteHardDeleteFalse() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.Delete del = currentUser.delete(false);
+        User.Delete del = currentUser.deleteBlocking(false);
         assertEquals(currentUser.getId(),del.get("userID").toString());
         assertEquals(false,del.get("hard"));
         assertEquals("DELETE",del.getRequestMethod());
@@ -119,7 +118,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testDeleteNullUser() throws IOException {
         initializeUser();
         try {
-            User.Delete del = currentUser.delete(true);
+            User.Delete del = currentUser.deleteBlocking(true);
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
@@ -127,7 +126,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testRetrieve() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.Retrieve ret = currentUser.retrieve();
+        User.Retrieve ret = currentUser.retrieveBlocking();
         assertEquals(currentUser.getId(),ret.get("userID").toString());
         assertEquals("GET", ret.getRequestMethod());
     }
@@ -135,7 +134,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testRetrieveNullUser() throws IOException {
         initializeUser();
         try {
-            User.Retrieve ret = currentUser.retrieve();
+            User.Retrieve ret = currentUser.retrieveBlocking();
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
@@ -143,7 +142,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testUpdate() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.Update update = currentUser.update();
+        User.Update update = currentUser.updateBlocking();
         assertEquals(currentUser.getId(),update.get("userID").toString());
         assertEquals("PUT", update.getRequestMethod());
     }
@@ -151,7 +150,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testUpdateNullUser() throws IOException {
         initializeUser();
         try {
-            User.Update update = currentUser.update();
+            User.Update update = currentUser.updateBlocking();
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
@@ -159,7 +158,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testResetPassword() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.ResetPassword pwd = currentUser.resetPassword();
+        User.ResetPassword pwd = currentUser.resetPasswordBlocking();
         assertEquals(currentUser.getId(),pwd.get("userID").toString());
         assertEquals("POST", pwd.getRequestMethod());
     }
@@ -167,7 +166,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testResetPasswordNullUser() throws IOException {
         initializeUser();
         try {
-            User.ResetPassword pwd = currentUser.resetPassword();
+            User.ResetPassword pwd = currentUser.resetPasswordBlocking();
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
@@ -175,7 +174,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testEmailVerification() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.EmailVerification email = currentUser.sendEmailVerification();
+        User.EmailVerification email = currentUser.sendEmailVerificationBlocking();
         assertEquals(currentUser.getId(),email.get("userID").toString());
         assertEquals("POST", email.getRequestMethod());
     }
@@ -183,7 +182,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testEmailVerificationNullUser() throws IOException {
         initializeUser();
         try {
-            User.EmailVerification email = currentUser.sendEmailVerification();
+            User.EmailVerification email = currentUser.sendEmailVerificationBlocking();
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }

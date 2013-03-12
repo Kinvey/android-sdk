@@ -174,7 +174,7 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
 
 
 
-        //create a file to write bitmap data
+        //createBlocking a file to write bitmap data
         File f = new File(getSherlockActivity().getCacheDir(), getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
         try{
         f.createNewFile();

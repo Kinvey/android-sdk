@@ -69,7 +69,7 @@ public class DeleteFragment extends UseCaseFragment implements View.OnClickListe
 
             @Override
             public void onFailure(Throwable error) {
-                Log.e(KitchenSink.TAG, "failed to delete: " + getTarget().getName() + " file.", error);
+                Log.e(KitchenSink.TAG, "failed to deleteBlocking: " + getTarget().getName() + " file.", error);
                 Toast.makeText(getSherlockActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
