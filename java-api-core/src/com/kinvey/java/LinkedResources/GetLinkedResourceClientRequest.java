@@ -15,16 +15,16 @@ package com.kinvey.java.LinkedResources;
 
 import com.kinvey.java.core.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Implementation of a Client Request, which can downloadBlocking linked resources.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
- * </p>
- * <p>
- * This class is currently EXCLUSIVELY for an appData getBlocking request, as it relies a call to super.execute()
  * </p>
  * <p>
  * call setDownloadProgressListener to getBlocking callbacks for all file downloads.
@@ -52,29 +52,62 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
     }
 
+
     @Override
     public T execute() throws IOException {
 
+        T entity = super.execute();
 
-        if (getResponseClass().isAssignableFrom(LinkedGenericJson.class)) {
-            T entity = super.execute();
-            System.out.println("Kinvey - LR, " + "linked resource found, file countBlocking at: " + ((LinkedGenericJson) entity).getAllFiles().keySet().size());
-
-            for (final String key : ((LinkedGenericJson) entity).getAllFiles().keySet()) {
-                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson)entity).getFile(key).getFileName());
-
-                getAbstractKinveyClient().file().setDownloaderProgressListener(download);
-                getAbstractKinveyClient().file().downloadBlocking(((LinkedGenericJson) entity).getFile(key).getFileName()).execute();
-           }
-
-
+        if (entity instanceof LinkedGenericJson[]){
+            System.out.println("Kinvey - LR, " + "linked resource array found");
+            LinkedGenericJson[] casted = (LinkedGenericJson[]) entity;
+            for (LinkedGenericJson ent : casted){
+                downloadResources(ent);
+            }
             return entity;
-        } else {
-            return super.execute();
-        }
+
+
+            }else if (entity instanceof LinkedGenericJson){
+                System.out.println("Kinvey - LR, " + "linked resource instance found");
+                downloadResources((LinkedGenericJson) entity);
+                return entity;
+
+            }else{
+                System.out.println("Kinvey - LR, " + "not a linked resource, behaving as usual!");
+                return entity;
+
+            }
+
 
 
     }
+
+    private void downloadResources(LinkedGenericJson entity) throws IOException{
+        System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + entity.getAllFiles().keySet().size());
+//        String location;
+        OutputStream out;
+        java.io.File f;
+        for (String key : (entity).getAllFiles().keySet()) {
+
+            System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((Map) entity.get(key)).get("_loc").toString());
+
+//            location =(String) ((Map)entity.get(key)).get("_loc");
+
+            if (entity.getFile(key) == null){
+                entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+            }
+
+
+            entity.getFile(key).setOutput(new ByteArrayOutputStream());
+
+            getAbstractKinveyClient().file().setDownloaderProgressListener(download);
+            getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
+
+        }
+
+    }
+
+
 
     public DownloaderProgressListener getDownloadProgressListener() {
         return download;

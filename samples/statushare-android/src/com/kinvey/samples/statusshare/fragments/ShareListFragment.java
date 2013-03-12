@@ -178,12 +178,12 @@ public class ShareListFragment extends KinveyFragment {
 
         for (UpdateEntity updateEntity : shareList) {
 
-            Log.i(Client.TAG, "updateBlocking  -> " + updateEntity.toString());
-            Log.i(Client.TAG, "updateBlocking  -> " + updateEntity.getMeta().getLastModifiedTime());
+            Log.i(Client.TAG, "update -> " + updateEntity.toString());
+            Log.i(Client.TAG, "update -> " + updateEntity.getMeta().getLastModifiedTime());
 
 
             Update update = new Update(updateEntity.getText(), updateEntity.getAcl(), updateEntity.getMeta(), mFriends, getCalendar());
-            Log.i(StatusShare.TAG, "Adding updateBlocking: " + update.getText() + " - " + update.getSince() + " - " + update.getAuthorName() + " - " + update.getAuthor());
+            Log.i(StatusShare.TAG, "Adding update: " + update.getText() + " - " + update.getSince() + " - " + update.getAuthorName() + " - " + update.getAuthor());
 
             getUpdates().add(update);
         }

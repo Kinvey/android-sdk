@@ -47,10 +47,10 @@ public class UpdateAdapter extends ArrayAdapter<Update> {
         }
         holder = (UpdateViewHolder) convertView.getTag();
 
-        if (rowData.getAvatar() != null){
-            mAvatar = holder.getAvatar();
-            mAvatar.setImageBitmap(rowData.getAvatar());
-        }
+//        if (rowData.getAvatar() != null){
+//            mAvatar = holder.getAvatar();
+//            mAvatar.setImageBitmap(rowData.getAvatar());
+//        }
 
         if (rowData.getText() != null){
             mBlurb = holder.getBlurb();
@@ -66,11 +66,11 @@ public class UpdateAdapter extends ArrayAdapter<Update> {
             mWhen.setText(rowData.getSince());
 
         }
-//        if (rowData.getThumbnail() != null){
-//            mAttachment = holder.getAttachment();
-//            mAttachment.setImageBitmap(rowData.getThumbnail());
-//
-//        }
+        if (rowData.getAvatar() != null){
+            mAttachment = holder.getAvatar();
+            mAttachment.setImageBitmap(rowData.getAvatar());
+
+        }
 
 
 

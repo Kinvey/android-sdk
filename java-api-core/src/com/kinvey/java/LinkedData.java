@@ -28,11 +28,11 @@ import java.lang.reflect.Array;
 import java.util.List;
 
 /**
- * Extension of the AppData API, offering support for associating files with an entity.
+ * Subset of the AppData API, offering support for downloading and uploading associated files with an entity.
  * <p>
- * Files are automatically downloaded and uploaded, and behavaior can be customized through overloaded methods.
+ * Files are automatically downloaded and uploaded when the entity is saved or retrieved.  To enable this functionality
+ * ensure your Entity extends {@code LinkedGenericJson} instead of the usual {@code GenericJson}
  * </p>
- *
  *
  * @author edwardf
  */
@@ -70,7 +70,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public GetEntity getEntity(String entityID, DownloaderProgressListener download) throws IOException {
+    public GetEntity getEntityBlocking(String entityID, DownloaderProgressListener download) throws IOException {
         GetEntity getEntity = new GetEntity(entityID, getCurrentClass());
         getEntity.setDownloadProgressListener(download);
         getClient().initializeRequest(getEntity);
@@ -94,7 +94,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public GetEntity getEntity(String entityID, DownloaderProgressListener download, String[] attachments) throws IOException {
+    public GetEntity getEntityBlocking(String entityID, DownloaderProgressListener download, String[] attachments) throws IOException {
         GetEntity getEntity = new GetEntity(entityID, getCurrentClass());
         getEntity.setDownloadProgressListener(download);
         getClient().initializeRequest(getEntity);
@@ -117,7 +117,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Get get(Query query, DownloaderProgressListener download) throws IOException {
+    public Get getBlocking(Query query, DownloaderProgressListener download) throws IOException {
         Preconditions.checkNotNull(query);
         Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass());
         get.setDownloadProgressListener(download);
@@ -142,7 +142,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Get get(Query query, DownloaderProgressListener download, String[] attachments) throws IOException {
+    public Get getBlocking(Query query, DownloaderProgressListener download, String[] attachments) throws IOException {
         Preconditions.checkNotNull(query);
         Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass());
         get.setDownloadProgressListener(download);
@@ -165,8 +165,8 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Get get(DownloaderProgressListener download) throws IOException {
-        return get(new Query(), download);
+    public Get getBlocking(DownloaderProgressListener download) throws IOException {
+        return getBlocking(new Query(), download);
     }
 
     /**
@@ -185,8 +185,8 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Get get(DownloaderProgressListener download, String[] attachments) throws IOException {
-        return get(new Query(), download);
+    public Get getBlocking(DownloaderProgressListener download, String[] attachments) throws IOException {
+        return getBlocking(new Query(), download);
     }
 
     /**
@@ -202,7 +202,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Save object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Save save(T entity, UploaderProgressListener upload) throws IOException {
+    public Save saveBlocking(T entity, UploaderProgressListener upload) throws IOException {
 
         Save save;
         String sourceID;
@@ -233,7 +233,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @return Save object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public Save save(T entity, UploaderProgressListener upload, String[] attachments) throws IOException {
+    public Save saveBlocking(T entity, UploaderProgressListener upload, String[] attachments) throws IOException {
 
         Save save;
         String sourceID;

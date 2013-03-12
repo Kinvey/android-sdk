@@ -15,6 +15,7 @@ package com.kinvey.samples.statusshare.model;
 
 import com.google.api.client.util.Key;
 
+import com.kinvey.java.LinkedResources.LinkedFile;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.model.KinveyMetaData;
 

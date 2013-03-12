@@ -18,7 +18,9 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.core.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 /**
@@ -26,9 +28,6 @@ import java.util.HashMap;
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then this iterates through all the attachments and uploads them.
  * Once all files have been uploaded, a call to super.execute() is made.
- * </p>
- * <p>
- * This class is currently EXCLUSIVELY for an appData saveBlocking request, as it relies a call to super.execute()
  * </p>
  * <p>
  * call setUploadProgressListener to getBlocking callbacks for all file uploads.
@@ -58,7 +57,6 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
     @Override
     public T execute() throws IOException {
-        //TODO edwardf LinkedGenericJson doesn't support fileInputStream ONLY supports passed in Java.io.File.
         //TODO edwardf possible optimization-- if file hasn't changed, don't bother uploading it...? not sure if possible
 
         if (getJsonContent() instanceof LinkedGenericJson) {
@@ -70,13 +68,14 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
             for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
                 System.out.println("Kinvey - LR, " + "saving a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
 
-                byte[] file = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileData();
+//                byte[] file = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileData();
+                InputStream in =  ((LinkedGenericJson) getJsonContent()).getFile(key).getInput();
 
                 InputStreamContent mediaContent = null;
                 String mimetype = "application/octet-stream";
-                if (file != null) {
-                    mediaContent = new InputStreamContent(mimetype, new ByteArrayInputStream(file));
-                    mediaContent.setLength(file.length);
+                if (in != null) {
+                    mediaContent = new InputStreamContent(mimetype, in);
+//                    mediaContent.setLength(in.);
                 }
                 mediaContent.setCloseInputStream(false);
                 mediaContent.setRetrySupported(false);
@@ -99,11 +98,9 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                 resourceMap.put("_loc", filename);
                 resourceMap.put("_type","resource");
                 ((GenericJson) getJsonContent()).put(key, resourceMap);
-
             }
 
             System.out.println("Kinvey - LR, " + "saving the entity!");
-
             return super.execute();
         } else {
             return super.execute();

@@ -125,6 +125,9 @@ public class PullToRefreshListView extends ListView {
 
     @Override
     public boolean dispatchTouchEvent(final MotionEvent ev) {
+        if (getAdapter() == null || getAdapter().getCount() == 0){
+            return true;
+        }
         if (ev.getAction() == MotionEvent.ACTION_MOVE && getFirstVisiblePosition() == 0) {
             float direction = ev.getY() - mHistoricalY;
             int height = (int) (ev.getY() - mY) / 2 + mInitialHeight;

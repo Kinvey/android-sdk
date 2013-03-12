@@ -48,7 +48,7 @@ public class Update {
     private String authorName;
     private Bitmap avatar;
     private String since;
-    private Bitmap thumbnail;
+//    private Bitmap thumbnail;
     private Date date;
     public String lmt;
 
@@ -59,7 +59,7 @@ public class Update {
         authorName = null;
         avatar = null;
         since = null;
-        thumbnail = null;
+//        thumbnail = null;
         date = null;
     }
 
@@ -129,18 +129,18 @@ public class Update {
         }
     }
 
-    public Bitmap getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(Bitmap t) {
-        thumbnail = t;
-    }
-
-    public void setThumbnail(String url) {
-        thumbnail = null;
-//        new GetThumbnailTask().execute(url);
-    }
+//    public Bitmap getThumbnail() {
+//        return thumbnail;
+//    }
+//
+//    public void setThumbnail(Bitmap t) {
+//        thumbnail = t;
+//    }
+//
+//    public void setThumbnail(String url) {
+//        thumbnail = null;
+////        new GetThumbnailTask().execute(url);
+//    }
 
     public Date getDate() {
         return date;

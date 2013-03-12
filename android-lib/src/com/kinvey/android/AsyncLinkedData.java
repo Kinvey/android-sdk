@@ -143,7 +143,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T[] executeAsync() throws IOException {
-            return AsyncLinkedData.this.get(this.query, this.progress, this.attachments).execute();
+            return AsyncLinkedData.this.getBlocking(this.query, this.progress, this.attachments).execute();
         }
     }
     private class GetEntity extends AsyncClientRequest<T> {
@@ -161,7 +161,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T executeAsync() throws IOException {
-            return AsyncLinkedData.this.getEntity(this.entityID, this.progress, this.attachments).execute();
+            return AsyncLinkedData.this.getEntityBlocking(this.entityID, this.progress, this.attachments).execute();
         }
     }
     private class Save extends AsyncClientRequest<T> {
@@ -179,7 +179,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T executeAsync() throws IOException {
-            return AsyncLinkedData.this.save(this.entity, this.progress, this.attachments).execute();
+            return AsyncLinkedData.this.saveBlocking(this.entity, this.progress, this.attachments).execute();
         }
     }
 

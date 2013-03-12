@@ -14,30 +14,23 @@
 package com.kinvey.java.LinkedResources;
 
 
-import java.util.Arrays;
+import java.io.*;
 
 /**
  * @author mjsalinger
+ * @author edwardf
  * @since 2.0
  */
 public class LinkedFile {
-    private byte[] fileData;
-    private String fileName;
 
-    public LinkedFile(byte[] fileData, String fileName) {
-        this.fileData = Arrays.copyOf(fileData, fileData.length);
+    private String fileName;
+    private ByteArrayInputStream input = null;
+    private ByteArrayOutputStream output = null;
+
+    public LinkedFile(String fileName) {
         this.fileName = fileName;
     }
 
-
-
-    public byte[] getFileData() {
-        return fileData;
-    }
-
-    public void setFileData(byte[] fileData) {
-        this.fileData = Arrays.copyOf(fileData, fileData.length);
-    }
 
     public String getFileName() {
         return fileName;
@@ -45,5 +38,21 @@ public class LinkedFile {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public ByteArrayInputStream getInput() {
+        return input;
+    }
+
+    public void setInput(ByteArrayInputStream input) {
+        this.input = input;
+    }
+
+    public ByteArrayOutputStream getOutput() {
+        return output;
+    }
+
+    public void setOutput(ByteArrayOutputStream output) {
+        this.output = output;
     }
 }

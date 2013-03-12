@@ -33,9 +33,7 @@ import com.kinvey.samples.statusshare.R;
 import com.kinvey.samples.statusshare.StatusShare;
 import com.kinvey.samples.statusshare.model.UpdateEntity;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * @author edwardf
@@ -189,6 +187,12 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
+        try{
+            stream.close();
+        }catch (IOException e){
+
+        }
+
 
 
         saveUpdateAttachment(progressDialog, byteArray, getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
@@ -204,9 +208,10 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
 
         if (bytes != null && filename != null) {
             Log.i(Client.TAG, "there is an attachment!");
+            //TODO edwardf this is sloppy.  Once it works clean up stream management.
 
-
-            updateEntity.putFile("attachment", new LinkedFile(bytes, filename));
+            updateEntity.putFile("attachment", new LinkedFile(filename));
+            updateEntity.getFile("attachment").setInput(new ByteArrayInputStream(bytes));
 
 
             getClient().linkedData("Updates", UpdateEntity.class).save(updateEntity, new KinveyClientCallback<UpdateEntity>() {

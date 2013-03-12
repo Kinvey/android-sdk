@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="@string/desc_avatar"
+            android:contentDescription="@string/desc_avatar" android:src="@drawable/camera"
             android:padding="8dp"/>
 
     <TextView
