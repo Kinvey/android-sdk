@@ -37,6 +37,7 @@ public class TestDrive extends Activity {
         bar.setIndeterminate(true);
 
         kinveyClient = new Client.Builder(appKey, appSecret, this).build();
+
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
             kinveyClient.user().login(new KinveyUserCallback() {
