@@ -11,11 +11,6 @@ import android.app.Application;
 public class UserLogin extends Application {
     private Client service;
 
-    // Enter your Kinvey app credentials
-    private static final String APP_KEY = "your_app_key";
-    private static final String APP_SECRET = "your_app_secret";
-
-    
     // Application Constants
     public static final String AUTHTOKEN_TYPE = "com.kinvey.myapplogin";
     public static final String ACCOUNT_TYPE = "com.kinvey.myapplogin";
@@ -30,7 +25,7 @@ public class UserLogin extends Application {
 
     private void initialize() {
 		// Enter your app credentials here
-		service = new Client.Builder(APP_KEY, APP_SECRET, this).build();
+		service = new Client.Builder(this).build();
     }
 
     public Client getKinveyService() {

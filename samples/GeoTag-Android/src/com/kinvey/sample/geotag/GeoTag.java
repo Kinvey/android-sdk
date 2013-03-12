@@ -47,9 +47,6 @@ import com.kinvey.java.query.MongoQueryFilter;
 public class GeoTag extends SherlockActivity implements
         OnMapClickListener, OnInfoWindowClickListener {
 
-    private static final String appKey = "your_app_key";
-    private static final String appSecret = "you_app_secret";
-
     // reference the View object which renders the map itself
     private MapView mMap = null;
     // reference the dialog used to allow user users to edit a note
@@ -86,7 +83,7 @@ public class GeoTag extends SherlockActivity implements
 
             setListeners();
 
-            mKinveyClient = new Client.Builder(appKey, appSecret, this).build();
+            mKinveyClient = new Client.Builder(this).build();
 
 //            ma = mKinveyClient.mappeddata(GeoTagEntity.class, COLLECTION_NAME);
             // fire off the pingBlocking call to ensure we can communicate with Kinvey

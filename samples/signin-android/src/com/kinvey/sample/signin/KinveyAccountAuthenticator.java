@@ -31,15 +31,11 @@ public class KinveyAccountAuthenticator extends AbstractAccountAuthenticator {
 	private Client kinveyClient;
 	private static final String TAG = KinveyAccountAuthenticator.class.getSimpleName();
 	private final Context mContext;
-	
-	// Enter your Kinvey app credentials
-    private static final String APP_KEY = "your_app_key";
-    private static final String APP_SECRET = "your_app_secret";
-	
+
 	public KinveyAccountAuthenticator(Context context) {
 		super(context);
 		mContext = context;
-		kinveyClient = new Client.Builder(APP_KEY,APP_SECRET, mContext).build();
+		kinveyClient = new Client.Builder(mContext).build();
 		// TODO:  Need to solve how to pass KinveyService context through the AccountAuthenticator,
 	}
 

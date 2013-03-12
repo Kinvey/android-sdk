@@ -23,10 +23,6 @@ public class TestDrive extends Activity {
 
     private ProgressBar bar;
 
-
-    private String appKey="your_app_key";
-    private String appSecret="your_app_secret";
-
 	private Client kinveyClient;
 
     @Override
@@ -36,7 +32,7 @@ public class TestDrive extends Activity {
         bar = (ProgressBar) findViewById(R.id.refresh_progress);
         bar.setIndeterminate(true);
 
-        kinveyClient = new Client.Builder(appKey, appSecret, this).build();
+        kinveyClient = new Client.Builder(this).build();
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
             kinveyClient.user().login(new KinveyUserCallback() {
