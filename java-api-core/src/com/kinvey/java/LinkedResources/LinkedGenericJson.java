@@ -32,6 +32,9 @@ public abstract class LinkedGenericJson extends GenericJson {
     public void putFile(String key, LinkedFile file) {
         files.put(key, file);
     }
+    public void putFile(String key) {
+        files.put(key, null);
+    }
 
     public LinkedFile getFile(String key) {
         return files.get(key);

@@ -53,12 +53,11 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      *
      * @param entityID entityID to getBlocking
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download, String[] attachments){
-        new GetEntity(entityID, callback, download, attachments).execute();
+    public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download){
+        new GetEntity(entityID, callback, download, null).execute();
 
     }
 
@@ -76,12 +75,11 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      *
      * @param query query for entities to retrieveBlocking
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) {
-        new Get(new Query(), callback, download, attachments).execute();
+    public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download) {
+        new Get(new Query(), callback, download, null).execute();
     }
 
 
@@ -98,12 +96,11 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * </p>
      *
      * @param download - used for progress updates as associated files are downloaded.
-     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void get(KinveyListCallback<T> callback, DownloaderProgressListener download, String[] attachments) {
-        new Get(new Query(), callback, download, attachments).execute();
+    public void get(KinveyListCallback<T> callback, DownloaderProgressListener download) {
+        new Get(new Query(), callback, download, null).execute();
 
     }
 
@@ -117,12 +114,11 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      *
      * @param entity Entity to Save
      * @param upload - Listener for uploading Linked Resources, can be null.
-     * @param attachments - array of JSON keys of resources to retrieveBlocking
      * @return Save object
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
-    public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload, String[] attachments) {
-        new Save(entity, callback, upload, attachments).execute();
+    public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload) {
+        new Save(entity, callback, upload, null).execute();
     }
 
 

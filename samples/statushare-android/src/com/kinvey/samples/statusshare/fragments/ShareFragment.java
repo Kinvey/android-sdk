@@ -233,7 +233,22 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
                     ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
                 }
 
-            }, null, null);
+            }, new UploaderProgressListener() {
+                        @Override
+                        public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+                    });
         } else {
             Log.i(Client.TAG, "there is no attachment");
         }

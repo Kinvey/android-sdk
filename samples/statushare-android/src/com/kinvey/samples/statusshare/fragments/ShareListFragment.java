@@ -154,7 +154,7 @@ public class ShareListFragment extends KinveyFragment {
                 Log.w(Client.TAG, "Error fetching updates data: " + error.getMessage());
                 showListView(true);
             }
-        }, null, null);
+        }, null);
 
     }
 

@@ -42,7 +42,7 @@ public class UpdateEntity extends LinkedGenericJson {
         text = null;
         meta = new KinveyMetaData();
         acl = new KinveyMetaData.AccessControlList();
-        putFile("attachment", null);
+        putFile("attachment");
 
     }
 
