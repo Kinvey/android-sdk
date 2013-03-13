@@ -284,7 +284,7 @@ public class File {
      */
     public class GetDownloadUrl extends AbstractKinveyJsonClientRequest<UriLocResponse> {
 
-        private final static String REST_URL = "blob/{appKey}/downloadBlocking-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/download-loc/{fileName}";
 
         @Key
         private final String fileName;
@@ -302,7 +302,7 @@ public class File {
      */
     public class GetUploadUrl extends AbstractKinveyJsonClientRequest<UriLocResponse> {
 
-        private final static String REST_URL = "blob/{appKey}/uploadBlocking-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/upload-loc/{fileName}";
 
         @Key
         private final String fileName;
@@ -318,7 +318,7 @@ public class File {
      */
     public class Upload extends AbstractKinveyJsonClientRequest<Void> {
 
-        private final static String REST_URL = "blob/{appKey}/uploadBlocking-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/upload-loc/{fileName}";
 
         @Key
         private String fileName;
@@ -335,7 +335,7 @@ public class File {
      */
     public class Download extends AbstractKinveyJsonClientRequest<Void> {
 
-        private final static String REST_URL = "blob/{appKey}/downloadBlocking-loc/{fileName}";
+        private final static String REST_URL = "blob/{appKey}/download-loc/{fileName}";
 
         @Key
         private String fileName;
