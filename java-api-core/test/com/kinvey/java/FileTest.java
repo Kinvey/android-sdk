@@ -51,7 +51,7 @@ public class FileTest extends KinveyMockUnitTest {
         File fileApi = new File(super.mockClient);
         File.Upload upload = fileApi.uploadBlocking("testfilename.txt", mockContent);
         HttpRequest request = upload.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//uploadBlocking-loc/testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//upload-loc/testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -61,7 +61,7 @@ public class FileTest extends KinveyMockUnitTest {
         File fileApi = new File(super.mockClient);
         File.Download download = fileApi.downloadBlocking("testfilename.txt");
         HttpRequest request = download.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//downloadBlocking-loc/testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//download-loc/testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -72,7 +72,7 @@ public class FileTest extends KinveyMockUnitTest {
             fileApiUnderTest.uploadBlocking("testfilename.txt", mockContent);
 
         } catch (IOException e) {
-            fail("file api should not be throw exception on uploadBlocking");
+            fail("file api should not be throw exception on upload");
         }
     }
 
@@ -96,7 +96,7 @@ public class FileTest extends KinveyMockUnitTest {
         try {
             fileApiUnderTest.downloadBlocking("testfilename.txt");
         } catch (IOException e) {
-            fail("file api should not throw an exception on downloadBlocking");
+            fail("file api should not throw an exception on download");
         }
 
     }
@@ -120,7 +120,7 @@ public class FileTest extends KinveyMockUnitTest {
         try {
             fileApiUnderTest.deleteBlocking("testfilename.txt");
         } catch (IOException e) {
-            fail("file api should not throw an exception on deleteBlocking");
+            fail("file api should not throw an exception on delete");
         }
     }
 
