@@ -547,7 +547,7 @@ public class AsyncUser extends User {
             // TODO:  Set PushID attribute
             this.put("_apids", apidList);
             try {
-                this.update();
+                this.update().execute();
             } catch (IOException ex) {}
             // TODO:  Implement callbacks for User Update on separate thread - still async for now
         }
@@ -645,7 +645,7 @@ public class AsyncUser extends User {
             // TODO:  Set PushID attribute
             this.put("_apids", apidList);
             try {
-                this.update();
+                this.update().execute();
             } catch (IOException ex) {}
             // TODO:  Implement callbacks for User Update on separate thread - still async for now
 
