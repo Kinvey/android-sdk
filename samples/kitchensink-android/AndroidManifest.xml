@@ -66,10 +66,17 @@
         </activity>
 
         <activity
-                android:name=".push.PushActivity"
+            android:name=".push.PushActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:noHistory="true"
+            android:label="@string/feature_login">
+    </activity>
+
+        <activity
+                android:name=".offline.OfflineActivity"
                 android:windowSoftInputMode="adjustResize"
                 android:noHistory="true"
-                android:label="@string/feature_login">
+                android:label="@string/feature_offline">
         </activity>
 
         <!-- required register of push receive -->

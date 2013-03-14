@@ -13,6 +13,7 @@ package com.kinvey.sample.kitchensink;
 
 import com.kinvey.sample.kitchensink.appData.AppDataActivity;
 import com.kinvey.sample.kitchensink.file.FileActivity;
+import com.kinvey.sample.kitchensink.offline.OfflineActivity;
 import com.kinvey.sample.kitchensink.push.PushActivity;
 
 import java.util.ArrayList;
@@ -36,6 +37,9 @@ public class Loader {
 
         Feature push = new Feature("Push", "Enable Push notifications using Urban Airship", PushActivity.class);
         featureList.add(push);
+
+        Feature offline = new Feature("Offline", "Maintain entities while the device is offline, and sync when a connection is restored.", OfflineActivity.class);
+        featureList.add(offline);
 
         return featureList;
     }

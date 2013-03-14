@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.offline.OfflineAppData;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.UrbanAirshipPush;
 import com.kinvey.java.AbstractClient;
@@ -78,6 +79,7 @@ public class Client extends AbstractClient {
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
     private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
+    private ConcurrentHashMap<String, OfflineAppData> offlineInstanceCache;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncFile file;
@@ -148,6 +150,23 @@ public class Client extends AbstractClient {
                 linkedDataInstanceCache.put(collectionName, new AsyncLinkedData(collectionName, myClass, this));
             }
             return linkedDataInstanceCache.get(collectionName);
+        }
+    }
+
+    /**
+     * Creates a new instance of the Offline AppData class or returns the existing instance.
+     */
+    public <T> OfflineAppData<T> offlineAppData(String collectionName, Class<T> myClass, Context applicationContext) {
+        synchronized (lock) {
+
+            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
+            if (offlineInstanceCache == null) {
+                offlineInstanceCache = new ConcurrentHashMap<String, OfflineAppData>();
+            }
+            if (!offlineInstanceCache.containsKey(collectionName)) {
+                offlineInstanceCache.put(collectionName, new OfflineAppData(collectionName, myClass, this, applicationContext));
+            }
+            return offlineInstanceCache.get(collectionName);
         }
     }
 

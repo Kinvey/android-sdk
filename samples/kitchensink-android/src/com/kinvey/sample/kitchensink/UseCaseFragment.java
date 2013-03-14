@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.android.Client;
 
 /**
  * @author edwardf
@@ -81,6 +82,10 @@ public abstract class UseCaseFragment extends SherlockFragment {
 
     public KitchenSinkApplication getApplicationContext(){
         return ((FeatureActivity) getSherlockActivity()).getApplicationContext();
+    }
+
+    public Client getClient(){
+        return ((FeatureActivity) getSherlockActivity()).getApplicationContext().getClient();
     }
 
 

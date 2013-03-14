@@ -10,6 +10,8 @@
     <string name="feature_file">File</string>
     <string name="feature_push">Push</string>
     <string name="feature_login">Login</string>
+    <string name="feature_offline">Offline</string>
+
 
     <string name="file_delete_description">You can delete the sample.txt file from the Kinvey service </string>
     <string name="file_download_description">You can download the contents of sample.txt to the internal SDCARD. </string>
