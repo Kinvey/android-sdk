@@ -59,9 +59,9 @@ public class OfflineAppDataService extends IntentService {
     //TODO NOTE this class cannot maintain ANY state!  It is GC REGULARLY!
 
     //The number of milliseconds between each batch of client requests being executed.
-    private long staggerTime = 1000L;
+    private long staggerTime;
     //a flag indicating if the service should only execute calls on WIFI or if any network will suffice.
-    private boolean requireWIFI = false;
+    private boolean requireWIFI;
     //The size of a batch, indicating how many async requests are executed at the same time.
     private int batchSize = 3;
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.

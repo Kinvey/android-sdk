@@ -21,7 +21,6 @@ import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -71,7 +70,7 @@ public class OfflineStore<T> {
 
     private Context context;
 
-    private ExecutorSettings settings;
+    private OfflineExecutorSettings settings;
 
 
 
@@ -86,12 +85,18 @@ public class OfflineStore<T> {
 //        this.requestStore = new LinkedList<RequestInfo>();
         this.collectionName = collectionName;
         this.context = context;
-        loadOrCreateStore(context);
+        loadOfflineSettings();
+        loadOrCreateStore();
         Log.v(Client.TAG,  "Offline Store constructor finished.");
 
     }
 
-    private void loadOrCreateStore(Context context) {
+    private void loadOfflineSettings() {
+        this.settings = new OfflineExecutorSettings(this.context);
+    }
+
+
+    private void loadOrCreateStore() {
         Log.v(Client.TAG, "Loading or Creating Store!");
 
         FileInputStream fis = null;
@@ -100,10 +105,9 @@ public class OfflineStore<T> {
         } catch (FileNotFoundException e) {
             //Offline store doesn't exist so we need to create it.
             Log.v(Client.TAG, "offline store file doesn't exist, creating it!");
-            this.settings = new ExecutorSettings();
             this.dataStore = new HashMap<String, T>();
             this.requestStore = new LinkedList<RequestInfo>();
-            writeStore(context);
+            writeStore(this.context);
             return;
         }
         Log.v(Client.TAG, "offline store already exists, so attempting to load");
@@ -111,7 +115,6 @@ public class OfflineStore<T> {
         ObjectInputStream ois = null;
         try {
             ois = new ObjectInputStream(fis);
-            this.settings = (ExecutorSettings) ois.readObject();
             this.dataStore = (HashMap<String, T>) ois.readObject();
             this.requestStore = (Queue<RequestInfo>) ois.readObject();
             Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
@@ -143,7 +146,7 @@ public class OfflineStore<T> {
         try {
             FileOutputStream out = context.openFileOutput((FILENAME + collectionName), Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(out);
-            os.writeObject(this.settings);
+            settings.savePreferences();
             os.writeObject(this.dataStore);
             os.writeObject(this.requestStore);
             Log.v(Client.TAG, "wrote datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
@@ -258,11 +261,11 @@ public class OfflineStore<T> {
         return this.requestStore.poll();
     }
 
-    public ExecutorSettings getSettings() {
+    public OfflineExecutorSettings getSettings() {
         return settings;
     }
 
-    public void setSettings(ExecutorSettings settings) {
+    public void setSettings(OfflineExecutorSettings settings) {
         this.settings = settings;
     }
 
@@ -299,80 +302,6 @@ public class OfflineStore<T> {
         }
 
     }
-
-
-    public static class ExecutorSettings implements Serializable {
-
-        //The number of milliseconds between each batch of client requests being executed.
-        private long staggerTime = 1000L;
-        //a flag indicating if the service should only execute calls on WIFI or if any network will suffice.
-        private boolean requireWIFI = false;
-        //The size of a batch, indicating how many async requests are executed at the same time.
-        private int batchSize = 3;
-        //a flag indicating if there is any pending work, currently tied to an OfflineStore.
-        private boolean needsSync = false;
-
-        //a list of RequestInfo of the client requests that succeeded.
-        private ArrayList<OfflineStore.RequestInfo> successfulCalls;
-        //a list of RequestInfo of the client requests that failed.
-        private ArrayList<OfflineStore.RequestInfo> failedCalls;
-
-        public ExecutorSettings(){
-            this.successfulCalls = new ArrayList<RequestInfo>();
-            this.failedCalls = new ArrayList<RequestInfo>();
-        }
-
-
-        public long getStaggerTime() {
-            return staggerTime;
-        }
-
-        public void setStaggerTime(long staggerTime) {
-            this.staggerTime = staggerTime;
-        }
-
-        public boolean isRequireWIFI() {
-            return requireWIFI;
-        }
-
-        public void setRequireWIFI(boolean requireWIFI) {
-            this.requireWIFI = requireWIFI;
-        }
-
-        public int getBatchSize() {
-            return batchSize;
-        }
-
-        public void setBatchSize(int batchSize) {
-            this.batchSize = batchSize;
-        }
-
-        public boolean isNeedsSync() {
-            return needsSync;
-        }
-
-        public void setNeedsSync(boolean needsSync) {
-            this.needsSync = needsSync;
-        }
-
-        public ArrayList<RequestInfo> getSuccessfulCalls() {
-            return successfulCalls;
-        }
-
-        public void setSuccessfulCalls(ArrayList<RequestInfo> successfulCalls) {
-            this.successfulCalls = successfulCalls;
-        }
-
-        public ArrayList<RequestInfo> getFailedCalls() {
-            return failedCalls;
-        }
-
-        public void setFailedCalls(ArrayList<RequestInfo> failedCalls) {
-            this.failedCalls = failedCalls;
-        }
-    }
-
-
 
     private static String generateMongoDBID() {
         //from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
