@@ -25,7 +25,6 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import sun.org.mozilla.javascript.internal.xml.XMLObject;
 
 import java.util.ArrayList;
 
