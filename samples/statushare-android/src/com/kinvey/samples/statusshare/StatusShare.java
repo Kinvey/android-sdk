@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -51,6 +52,7 @@ public class StatusShare extends SherlockFragmentActivity {
     public static final String TAG = "Kinvey - StatusShare";
     private static final int PICK_FROM_CAMERA = 1;
     private static final int PICK_FROM_FILE = 2;
+    private static final int THUMBNAIL_SIZE = 64;
 
     private List<Update> mUpdates;
     private Uri mImageCaptureUri;
@@ -58,6 +60,7 @@ public class StatusShare extends SherlockFragmentActivity {
 
 
     public Bitmap bitmap = null;
+    public Bitmap thumbnail = null;
     public String path = null;
 
 
@@ -85,8 +88,8 @@ public class StatusShare extends SherlockFragmentActivity {
 
     public void addFragment(SherlockFragment frag) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.fragmentBox, frag, "loginBlocking");
-        Log.i(StatusShare.TAG, "showing loginBlocking fragment");
+        ft.add(R.id.fragmentBox, frag, "login");
+        Log.i(StatusShare.TAG, "showing login fragment");
         ft.commit();
     }
 
@@ -136,6 +139,7 @@ public class StatusShare extends SherlockFragmentActivity {
             options.inScaled = true;
             options.inJustDecodeBounds = true;
 
+
             // First decode with inJustDecodeBounds=true to check dimensions
             bitmap = BitmapFactory.decodeFile(path, options);
 
@@ -147,19 +151,11 @@ public class StatusShare extends SherlockFragmentActivity {
             // Decode bitmap with inSampleSize set
 //            bitmap = BitmapFactory.decodeFile(path, options);
 
-            int h = 48; // height in pixels
-            int w = 48; // width in pixels
-            bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(path, options), h, w, true);
+            int h = 64; // height in pixels
+            int w = 64; // width in pixels
+            bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(path, options), h, w, false);
 
-
-
-
-
-
-
-
-//            path = data.getData().getPath();
-            bitmap = BitmapFactory.decodeFile(mImageCaptureUri.getPath());
+            //bitmap = BitmapFactory.decodeFile(mImageCaptureUri.getPath());
             Log.i(Client.TAG,  "activity result, bitmap from camera is -> " + String.valueOf(bitmap == null)) ;
             Log.i(Client.TAG,  "activity result, path from camera is -> " + String.valueOf(path == null)) ;
 
@@ -212,6 +208,26 @@ public class StatusShare extends SherlockFragmentActivity {
         }
 
 
+    }
+
+    private Camera.Size getSmallestPictureSize(Camera.Parameters parameters) {
+        Camera.Size result=null;
+
+        for (Camera.Size size : parameters.getSupportedPictureSizes()) {
+            if (result == null) {
+                result=size;
+            }
+            else {
+                int resultArea=result.width * result.height;
+                int newArea=size.width * size.height;
+
+                if (newArea < resultArea) {
+                    result=size;
+                }
+            }
+        }
+
+        return(result);
     }
 
     public void startFilePicker(){

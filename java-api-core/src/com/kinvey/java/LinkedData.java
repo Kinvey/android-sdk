@@ -208,7 +208,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         String sourceID;
 
         GenericJson jsonEntity = (GenericJson) entity;
-        sourceID = (String) jsonEntity.get(ID_FIELD);
+        sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         if (sourceID != null) {
             save = new Save(entity, getCurrentClass(), sourceID, SaveMode.PUT);
@@ -239,7 +239,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         String sourceID;
 
         GenericJson jsonEntity = (GenericJson) entity;
-        sourceID = (String) jsonEntity.get(ID_FIELD);
+        sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         if (sourceID != null) {
             save = new Save(entity, getCurrentClass(), sourceID, SaveMode.PUT);

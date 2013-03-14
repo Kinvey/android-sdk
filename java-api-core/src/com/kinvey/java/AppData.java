@@ -46,7 +46,7 @@ public class AppData<T> {
     private Class<T> myClass;
     private AbstractClient client;
 
-    public static final String ID_FIELD = "_id";
+    public static final String ID_FIELD_NAME = "_id";
 
     private Cache<String , T> cache = null;
     private CachePolicy policy = CachePolicy.NOCACHE;
@@ -221,7 +221,7 @@ public class AppData<T> {
         String sourceID;
 
         GenericJson jsonEntity = (GenericJson) entity;
-        sourceID = (String) jsonEntity.get(ID_FIELD);
+        sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         if (sourceID != null) {
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
@@ -247,7 +247,7 @@ public class AppData<T> {
         String sourceID;
 
         GenericJson jsonEntity = (GenericJson) entity;
-        sourceID = (String) jsonEntity.get(ID_FIELD);
+        sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         if (sourceID != null) {
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);

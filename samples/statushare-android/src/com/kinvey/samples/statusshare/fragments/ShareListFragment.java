@@ -97,7 +97,7 @@ public class ShareListFragment extends KinveyFragment {
 
         Log.i(Client.TAG, "about to retrieveBlocking all users");
 
-
+        // TODO:  Limit user query - link user collection to data retrieved
         getClient().user().retrieve(q, new KinveyListCallback<User>() {
             @Override
             public void onFailure(Throwable t) {
