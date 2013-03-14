@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 
@@ -24,6 +25,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import sun.org.mozilla.javascript.internal.xml.XMLObject;
 
 import java.util.ArrayList;
 
@@ -45,14 +47,11 @@ import java.util.ArrayList;
  * The size of this batch represents the number of service calls to kick off at the same time, and is configurable.
  *
  * This Service also supports staggering calls, so that there is a delay between kicking off batches.
- *
- *
- *
  */
 public class OfflineAppDataService extends IntentService {
 
     //Intent used to acknowledge offline sync.
-    public static final String ACTION_OFFLINE_SYNC = "ACTION_OFFLINE_SYNC";
+    public static final String ACTION_OFFLINE_SYNC = "com.kinvey.android.ACTION_OFFLINE_SYNC";
 
 
 
@@ -78,11 +77,27 @@ public class OfflineAppDataService extends IntentService {
     private String appSecret;
 //
 //    //Every call to Kinvey's AppData API needs an associated collection and response class.
-    private String collectionName;
+    private String collectionName = "OfflineTest";  //TODO cannot hardcode!
     private Class responseClass;
 
     public OfflineAppDataService() {
         super("Kinvey - Executor Service");
+
+    }
+
+
+    public void onCreate() {
+        super.onCreate();
+        Log.d(Client.TAG, "Offline Executor created");
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, startId, startId);
+        Log.i("LocalService", "Received start id " + startId + ": " + intent);
+
+        return START_STICKY;
     }
 
     /**
@@ -94,6 +109,7 @@ public class OfflineAppDataService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.i(Client.TAG, "Offline Executor Intent received ->" + intent.getAction());
         String action = intent.getAction();
         if (action == null) {
             return;
@@ -102,7 +118,7 @@ public class OfflineAppDataService extends IntentService {
         if (action.equals(ACTION_OFFLINE_SYNC)) {
             this.needsSync = true;
             if (isOnline()) {
-                OfflineStore curStore = new OfflineStore(getApplicationContext(), collectionName);
+//                OfflineStore curStore = new OfflineStore(getApplicationContext(), collectionName);
                 getFromStoreAndExecute();
             }
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -135,9 +151,10 @@ public class OfflineAppDataService extends IntentService {
      * using Kinvey's AbstractClient appData API and manage the response internally.
      */
     private <T> void getFromStoreAndExecute() {
+        Log.v(Client.TAG, "About to get from store and execute.");
 
         final OfflineStore curStore = new OfflineStore(getApplicationContext(), collectionName);
-        Client client = new Client.Builder(appKey, appSecret, getApplicationContext()).build();
+        Client client = new Client.Builder(getApplicationContext()).build();
 //        client.appData(collectionName, responseClass);
 
         for (int i = 0; i < batchSize; i++) {
@@ -148,9 +165,12 @@ public class OfflineAppDataService extends IntentService {
                 //if a call to pop() on the store returns null, then there is nothing left in the queue
                 //so syncing is done.
                 this.needsSync = false;
+                Log.v(Client.TAG, "Nothing to execute!");
                 this.stopSelf();
                 return;
             }
+
+            Log.v(Client.TAG, "request to execute of type: " + cur.getHttpVerb());
 
             if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
                 client.appData(collectionName, responseClass).save(curStore.GetEntityFromDataStore(cur.getEntityID()), new RequestInfoCallback<T>(cur) {
@@ -186,6 +206,7 @@ public class OfflineAppDataService extends IntentService {
 
                         OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo());
                         curStore.addToStore(((GenericJson) result).get("_id").toString(), result);
+
                     }
 
                     @Override
@@ -224,8 +245,11 @@ public class OfflineAppDataService extends IntentService {
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            Log.v(Client.TAG, "Kinvey Sync Execution is gonna happen!  Device connected.");
             return true;
         }
+        Log.v(Client.TAG, "Kinvey Sync Execution is not happening, device is offline.");
+
         return false;
 
 

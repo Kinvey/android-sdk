@@ -40,8 +40,14 @@ import java.io.*;
  */
 public class OfflineEntity extends GenericJson implements Serializable{
 
+    static final long serialVersionUID =5305109690724274634L;
+
     @Key("_id")
     private String id;
+
+    @Key("Test")
+    private String test = "This is a hard-coded test!";
+
 
     public OfflineEntity(){}
 
@@ -52,5 +58,11 @@ public class OfflineEntity extends GenericJson implements Serializable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTest(){return this.test;}
+
+    public void setTest(String t){
+        this.test = t;
     }
 }

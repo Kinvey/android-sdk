@@ -123,7 +123,6 @@ public class Client extends AbstractClient {
      */
     public <T> AsyncAppData<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
-
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {
                 appDataInstanceCache = new ConcurrentHashMap<String, AsyncAppData>();
@@ -141,7 +140,6 @@ public class Client extends AbstractClient {
      */
     public <T extends LinkedGenericJson> AsyncLinkedData<T> linkedData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
-
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (linkedDataInstanceCache == null) {
                 linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedData>();

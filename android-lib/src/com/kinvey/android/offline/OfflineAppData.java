@@ -15,6 +15,7 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 
+import android.content.Intent;
 import android.util.Log;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -46,6 +47,8 @@ public class OfflineAppData<T> {
     private Class<T> myClass;
     private AbstractClient client;
 
+    private Context context;
+
 
     /**
      * Constructor to instantiate the Offline AppData class.
@@ -54,11 +57,12 @@ public class OfflineAppData<T> {
      * @param myClass        Class Type to marshall data between.
      */
     public OfflineAppData(String collectionName, Class myClass, AbstractClient client, Context context) {
+        Log.v(Client.TAG,  "OfflineAppData API Constructor called");
         this.collectionName = collectionName;
         this.myClass = myClass;
         this.client = client;
         this.store = new OfflineStore(context, collectionName);
-        Log.v(Client.TAG,  "OfflineAppData API Constructor called");
+        this.context = context;
     }
 
 
@@ -72,6 +76,7 @@ public class OfflineAppData<T> {
     public void getEntity(String entityID, KinveyClientCallback<T> callback){
         //TODO revist this
         this.store.get(entityID, callback);
+
     }
 
 
@@ -85,6 +90,13 @@ public class OfflineAppData<T> {
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
         this.store.save(entity, callback);
+
+
+
+        Intent i = new Intent(this.context, OfflineAppDataService.class);
+        i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
+        this.context.startService(i);
+        Log.v(Client.TAG, "sent broadcast for offline sync!");
 
     }
 

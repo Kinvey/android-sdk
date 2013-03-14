@@ -102,6 +102,19 @@
         <!-- OPTIONAL receiver for custom handling of push messages-->
         <receiver android:name="com.kinvey.sample.kitchensink.push.CustomPushReceiver" />
 
+        <service android:name="com.kinvey.android.offline.OfflineAppDataService"
+                 android:label="Kinvey Offline Sync Execution Service" >
+            <intent-filter>
+                <action android:name="com.kinvey.android.ACTION_OFFLINE_SYNC" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+
+
+
+            </intent-filter>
+
+        </service>
+
     </application>
 
 </manifest>
