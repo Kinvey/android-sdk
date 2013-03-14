@@ -68,10 +68,10 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
         //
         Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
 
-        //createBlocking kinvey client and init appdata here.
+        //create kinvey client and init appdata here.
 //        AbstractClient.initialize(appKey, appSecret, getApplicationContext());//.appData(collectionName, MyEntity.class);
 //        try {
-//            AbstractClient.getInstance().user().loginBlocking();
+//            AbstractClient.getInstance().user().login();
 //        } catch(IOException ex) {
 //            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
 //            Logger.getLogger(HttpTransport.class.getName()).log(Level.SEVERE, ex.getMessage());

@@ -220,7 +220,7 @@ public class AppDataTest extends KinveyMockUnitTest {
 //        AppData<Entity> appData = getGenericAppData(Entity.class);
 //        String entityID = "myEntity";
 //        try {
-//            AppData<Entity>.Delete<Entity> myDelete = appData.deleteBlocking(null);   TODO now ambigious because of query support...
+//            AppData<Entity>.Delete<Entity> myDelete = appData.delete(null);   TODO now ambigious because of query support...
 //            fail("NullPointerException should be thrown.");
 //        } catch (NullPointerException ex) {}
 //
@@ -334,7 +334,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","-Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.maxBlocking(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -358,7 +358,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","-Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.maxBlocking(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 
@@ -382,7 +382,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.minBlocking(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -406,7 +406,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result","Infinity");
 
-        String expectedReduce = "function(doc,out){ out._result = Math.minBlocking(out._result, doc.total);}";
+        String expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 
@@ -430,9 +430,9 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result",0);
 
-        String expectedReduce = "function(doc,out){ var countBlocking = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-            "out._result =(out._result * countBlocking + doc.total) " +
-                    "/ (countBlocking + 1); out._kcs_count = countBlocking+1;}";
+        String expectedReduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
+            "out._result =(out._result * count + doc.total) " +
+                    "/ (count + 1); out._kcs_count = count+1;}";
 
         assertNotNull(myAggregate);
         assertEquals(expectedFields, ((GenericJson) myAggregate.getJsonContent()).get("key"));
@@ -456,9 +456,9 @@ public class AppDataTest extends KinveyMockUnitTest {
         HashMap<String,Object> expectedInitial = new HashMap<String,Object>();
         expectedInitial.put("_result",0);
 
-        String expectedReduce = "function(doc,out){ var countBlocking = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-                "out._result =(out._result * countBlocking + doc.total) " +
-                "/ (countBlocking + 1); out._kcs_count = countBlocking+1;}";
+        String expectedReduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
+                "out._result =(out._result * count + doc.total) " +
+                "/ (count + 1); out._kcs_count = count+1;}";
 
         String expectedCondition="{city=boston, age={$gt=18, $lt=21}}";
 

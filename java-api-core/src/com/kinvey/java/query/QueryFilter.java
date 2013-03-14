@@ -169,7 +169,7 @@ public interface QueryFilter {
         public void resetFilter();
 
         /**
-         * Helper method to getBlocking the concrete operator value from the passed in Operator
+         * Helper method to get the concrete operator value from the passed in Operator
          *
          * @param operator
          * @return

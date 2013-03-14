@@ -130,23 +130,23 @@ public class UserFragment extends KinveyFragment {
 //                    byte[] bytes = updateEntity.getFile("attachment2").getFileData();
 //                    Bitmap bMap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 //
-//                    updateBlocking.setThumbnail(bMap);
+//                    update.setThumbnail(bMap);
 //                    }
 
 
                     //-------
 //                    GenericJson attachment = updateEntity.getAttachment();
-//                    if (attachment != null && attachment.getBlocking("_loc") != null) {
+//                    if (attachment != null && attachment.get("_loc") != null) {
 //                        //android.util.Log.d(TAG, "_loc: " + attachment.getString("_loc"));
 //
-//                        getClient().file().getDownloadUrlBlocking(attachment.getBlocking("_loc").toString(), new KinveyUriCallback() {
+//                        getClient().file().getDownloadUrl(attachment.get("_loc").toString(), new KinveyUriCallback() {
 //
 //
 //                            @Override
 //                            public void onSuccess(UriLocResponse result) {
 //                                //String uri =  mSharedClient.resource(attachment.getString("_loc")).getUriForResource();
 //
-//                                updateBlocking.setThumbnail(result.getBlobTemporaryUri());
+//                                update.setThumbnail(result.getBlobTemporaryUri());
 //                            }
 //
 //                            @Override
@@ -156,7 +156,7 @@ public class UserFragment extends KinveyFragment {
 //                        });
 ////                            String uri =  mSharedClient.resource(attachment.getString("_loc")).getUriForResource();
 //                        //android.util.Log.d(TAG, "uri: " + uri);
-////                            updateBlocking.setThumbnail(uri);
+////                            update.setThumbnail(uri);
 //                    }
 ////                    } catch (JSONException e) {
 ////                        e.printStackTrace();
@@ -189,9 +189,9 @@ public class UserFragment extends KinveyFragment {
 //                //android.util.Log.v(TAG, "Count of Author updates found: " + updateEntities.size());
 //
 //                for (UpdateEntity updateEntity : updateEntities) {
-//                    Update updateBlocking = new Update(updateEntity.getText(), updateEntity.getMeta(), null, mCalendar);
-//                    updateBlocking.setAuthorName(mFriend.getName());
-//                    updateBlocking.setAvatar(mFriend.getAvatar());
+//                    Update update = new Update(updateEntity.getText(), updateEntity.getMeta(), null, mCalendar);
+//                    update.setAuthorName(mFriend.getName());
+//                    update.setAvatar(mFriend.getAvatar());
 //
 //                    try {
 //                        JSONObject attachment = updateEntity.getAttachment();
@@ -199,7 +199,7 @@ public class UserFragment extends KinveyFragment {
 //                            //android.util.Log.d(TAG, "_loc: " + attachment.getString("_loc"));
 //                            String uri =  mSharedClient.resource(attachment.getString("_loc")).getUriForResource();
 //                            //android.util.Log.d(TAG, "uri: " + uri);
-//                            updateBlocking.setThumbnail(uri);
+//                            update.setThumbnail(uri);
 //                        }
 //                    } catch (JSONException e) {
 //                        e.printStackTrace();
@@ -207,7 +207,7 @@ public class UserFragment extends KinveyFragment {
 //                        e.printStackTrace();
 //                    }
 //
-//                    mUpdates.add(updateBlocking);
+//                    mUpdates.add(update);
 //                }
 //
 //                lv.setAdapter(new EndlessUpdateAdapter(AuthorViewActivity.this, mUpdates));

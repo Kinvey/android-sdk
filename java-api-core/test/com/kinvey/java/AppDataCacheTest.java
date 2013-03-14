@@ -45,7 +45,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         int cachesize = 5;
-        //createBlocking cache of size 5
+        //create cache of size 5
         cache = new TestCache<String, CachedEntity>(cachesize);
         // but try to add ten elements
         for (int i = 0; i < cachesize * 2; i++){
@@ -68,7 +68,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ent = new CachedEntity();
         ent.setTitle("Title");
         ent.setName("Name");
-        //put entity in the cache, then getBlocking it from the cache
+        //put entity in the cache, then get it from the cache
         cache.put(kinveyUrl("Title"), ent);
 
         appData.setCache(cache, CachePolicy.CACHEONLY);
@@ -80,7 +80,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
             fail("IOException -> " + e);
         }
 
-        Assert.assertNotNull( "Couldn't getBlocking object from cache!", ret);
+        Assert.assertNotNull( "Couldn't get object from cache!", ret);
         Assert.assertEquals("Name", ret.getName());
         Assert.assertEquals("Title", ret.getTitle());
     }
@@ -112,7 +112,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ent = new CachedEntity();
         ent.setTitle("Title");
         ent.setName("Name");
-        //put entity in the cache, then getBlocking it from the cache
+        //put entity in the cache, then get it from the cache
         cache.put(kinveyUrl("Title"), ent);
 
         appData.setCache(cache, CachePolicy.CACHEFIRST_NOREFRESH);
@@ -124,7 +124,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
             fail("IOException -> " + e);
         }
 
-        Assert.assertNotNull( "Couldn't getBlocking object from cache!", ret);
+        Assert.assertNotNull( "Couldn't get object from cache!", ret);
         Assert.assertEquals("Name", ret.getName());
         Assert.assertEquals("Title", ret.getTitle());
     }
@@ -169,7 +169,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
             fail("IOException -> " + e);
         }
 
-        Assert.assertNotNull( "Couldn't getBlocking object from cache!", ret);
+        Assert.assertNotNull( "Couldn't get object from cache!", ret);
         Assert.assertEquals("Name", ret.getName());
         Assert.assertEquals("Title", ret.getTitle());
     }
@@ -213,7 +213,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
             fail("IOException -> " + e);
         }
 
-        Assert.assertNull("Shouldn't be able to getBlocking cached objact with policy NOCACHE", ret);
+        Assert.assertNull("Shouldn't be able to get cached objact with policy NOCACHE", ret);
     }
 
     public void testNetworkFirstWithEntity(){
@@ -236,7 +236,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
             fail("IOException -> " + e);
         }
 
-        Assert.assertNotNull( "Couldn't getBlocking object from cache!", ret);
+        Assert.assertNotNull( "Couldn't get object from cache!", ret);
         Assert.assertEquals("Name", ret.getName());
         Assert.assertEquals("Title", ret.getTitle());
     }
@@ -306,7 +306,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
                 @Override
                 public void onSuccess(Object result) {
                     if (!fired){
-                        Assert.assertNotNull("Couldn't getBlocking object from cache!", result);
+                        Assert.assertNotNull("Couldn't get object from cache!", result);
                     }else{
                         Assert.assertNull("Second callback, from online, should return null!", result);
 

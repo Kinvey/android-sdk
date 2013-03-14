@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
  * Used to provide credentials to Kinvey for authorization to a 3rd party authenticated user.
  *
  * <p>
- * Use {@link ThirdPartyIdentity#createThirdPartyIdentity(com.kinvey.java.auth.ThirdPartyIdentity.Type, String...)} to createBlocking new instance.
+ * Use {@link ThirdPartyIdentity#createThirdPartyIdentity(com.kinvey.java.auth.ThirdPartyIdentity.Type, String...)} to create new instance.
  * </p>
  *
  * <p>

@@ -124,7 +124,7 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 			Log.e(TAG, message,e);
 		}	
-			Log.i(TAG, "Starting task to retrieveBlocking request token.");
+			Log.i(TAG, "Starting task to retrieve request token.");
 			
 			showProgress();
 			
@@ -165,7 +165,7 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 	}
 	
 	/**
-	 * Finishes the loginBlocking process by creating/updating the account with the Android
+	 * Finishes the login process by creating/updating the account with the Android
 	 * AccountManager.  
 	 */
 	private void finishLogin(String authToken, String password) {
@@ -223,7 +223,7 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
     } 
 	
     /**
-     * AsyncTask to retrieveBlocking the Request Token
+     * AsyncTask to retrieve the Request Token
      */
 	private class OAuthRequestTokenTask extends AsyncTask<Void, Void, Void> {
 		
@@ -247,7 +247,7 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_FROM_BACKGROUND);
 				context.startActivity(intent);
 			} catch (Exception e) {
-				Log.e(TAG, "Error during OAUth retrieveBlocking request token", e);
+				Log.e(TAG, "Error during OAUth retrieve request token", e);
 			}
 			return null;
 
@@ -255,7 +255,7 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 	 }
 	 
 	/**
-	 * AsyncTask to retrieveBlocking the Access Token
+	 * AsyncTask to retrieve the Access Token
 	 */
 	public class RetrieveAccessTokenTask extends AsyncTask<Uri, Void, Void> {
 

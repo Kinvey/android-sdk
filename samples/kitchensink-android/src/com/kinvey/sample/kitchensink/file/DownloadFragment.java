@@ -64,7 +64,7 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
     private void download(File target) throws IOException {
         FileOutputStream fos= new FileOutputStream(target);
 
-        // call kinvey specific task to perform downloadBlocking
+        // call kinvey specific task to perform download
         getApplicationContext().getClient().file().download(FileActivity.FILENAME, fos, new DownloaderProgressListener() {
             @Override
             public void progressChanged(MediaHttpDownloader downloader) throws IOException {
@@ -82,13 +82,13 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
 
             @Override
             public void onSuccess(Void result) {
-                Log.i(KitchenSink.TAG, "successfully downloadBlocking: " + getTarget().getName() + " file.");
+                Log.i(KitchenSink.TAG, "successfully download: " + getTarget().getName() + " file.");
                 Toast.makeText(getSherlockActivity(), "Download finished.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Log.e(KitchenSink.TAG, "failed to downloadBlocking: "+ getTarget().getName()+" file.", error);
+                Log.e(KitchenSink.TAG, "failed to download: "+ getTarget().getName()+" file.", error);
                 Toast.makeText(getSherlockActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

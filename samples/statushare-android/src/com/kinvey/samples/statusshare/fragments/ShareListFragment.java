@@ -95,7 +95,7 @@ public class ShareListFragment extends KinveyFragment {
 
         Query q = getClient().query();
 
-        Log.i(Client.TAG, "about to retrieveBlocking all users");
+        Log.i(Client.TAG, "about to retrieve all users");
 
         // TODO:  Limit user query - link user collection to data retrieved
         getClient().user().retrieve(q, new KinveyListCallback<User>() {
@@ -200,9 +200,9 @@ public class ShareListFragment extends KinveyFragment {
 
 
 //                Intent newIntent = new Intent(getSherlockActivity(), AuthorViewActivity.class);
-//                newIntent.putExtra("authorId", mUpdates.getBlocking(position).getAuthor());
-//                newIntent.putExtra("authorName", mUpdates.getBlocking(position).getAuthorName());
-                    //android.util.Log.d(TAG, "Click on: " + position + " - " + id + " - " + mUpdates.getBlocking(position).getAuthorName());
+//                newIntent.putExtra("authorId", mUpdates.get(position).getAuthor());
+//                newIntent.putExtra("authorName", mUpdates.get(position).getAuthorName());
+                    //android.util.Log.d(TAG, "Click on: " + position + " - " + id + " - " + mUpdates.get(position).getAuthorName());
                     ((StatusShare) getSherlockActivity()).replaceFragment(UserFragment.newInstance(getUpdates().get(position)), true);
 //                HomeActivity.this.startActivity(newIntent);
                 }
@@ -223,7 +223,7 @@ public class ShareListFragment extends KinveyFragment {
 //                    mListView.completeRefreshing();
 
 
-//                getClient().appData("Updates", UpdateEntity.class).getBlocking(q, new KinveyListCallback<UpdateEntity>() {
+//                getClient().appData("Updates", UpdateEntity.class).get(q, new KinveyListCallback<UpdateEntity>() {
 //                    @Override
 //                    public void onSuccess(List<UpdateEntity> result) {
 //                        android.util.Log.d(AbstractClient.TAG, "Count of updates found: " + result.size());
@@ -232,9 +232,9 @@ public class ShareListFragment extends KinveyFragment {
 //
 //
 //                        for (UpdateEntity updateEntity : result) {
-//                            Update updateBlocking = new Update(updateEntity.getText(), updateEntity, mFriends, getCalendar());
-//                            updateBlocking.lmt = updateEntity.getLastModifiedTime();
-//                            getUpdates().add(0, updateBlocking);
+//                            Update update = new Update(updateEntity.getText(), updateEntity, mFriends, getCalendar());
+//                            update.lmt = updateEntity.getLastModifiedTime();
+//                            getUpdates().add(0, update);
 //                        }
 //
 //

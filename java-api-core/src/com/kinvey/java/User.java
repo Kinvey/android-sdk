@@ -115,10 +115,10 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Method to initialize the User after loginBlocking, createBlocking a credential,
+     * Method to initialize the User after login, create a credential,
      * and add it to the KinveyClientRequestInitializer
      *
-     * @param response KinveyAuthResponse object containing the loginBlocking response
+     * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
      */
     private User initUser(KinveyAuthResponse response, String userType) throws IOException {
@@ -144,7 +144,7 @@ public class User extends GenericJson   {
 
     /**
      * Login with the implicit user.  If implicit user does not exist, the user is created.  After calling this method,
-     * the application should retrieveBlocking and store the userID using getId()
+     * the application should retrieve and store the userID using getId()
      *
      * @return LoginRequest object
      * @throws IOException
@@ -155,7 +155,7 @@ public class User extends GenericJson   {
 
     /**
      * Login with the implicit user.  If implicit user does not exist, the user is created.  After calling this method,
-     * the application should retrieveBlocking and store the userID using getId()
+     * the application should retrieve and store the userID using getId()
      *
      * @return LoginRequest object
      * @throws IOException
@@ -197,10 +197,10 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Method to loginBlocking via third party OAuth credentials
+     * Method to login via third party OAuth credentials
      *
      * @param thirdPartyType ThirdPartyIdentity Type enum
-     * @param args Associated Keys for OAuth loginBlocking
+     * @param args Associated Keys for OAuth login
      *             OAuth 2 providers (Google, Facebook) AccessToken
      *             OAuth 1a providers (LinkedIn, Twitter) Access Token, Access Secret, Consumer Key, Consumer Secret
      * @return LoginRequest object
@@ -243,7 +243,7 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Convenience Method to retrieveBlocking Metadata.
+     * Convenience Method to retrieve Metadata.
      *
      * @return Current user object with refreshed metadata
      * @throws IOException
@@ -257,7 +257,7 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Convenience Method to retrieveBlocking Metadata.
+     * Convenience Method to retrieve Metadata.
      *
      * @return Current user object with refreshed metadata
      * @throws IOException

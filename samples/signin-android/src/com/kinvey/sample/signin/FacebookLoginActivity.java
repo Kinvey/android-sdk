@@ -104,7 +104,7 @@ public class FacebookLoginActivity extends AccountAuthenticatorActivity {
 
 					@Override
 					public void onCancel() {
-						Toast.makeText(FacebookLoginActivity.this, "FB loginBlocking cancelled",
+						Toast.makeText(FacebookLoginActivity.this, "FB login cancelled",
 								Toast.LENGTH_LONG).show();
 					}
 				});
@@ -162,7 +162,7 @@ public class FacebookLoginActivity extends AccountAuthenticatorActivity {
 	}
 	
 	/**
-	 * Finishes the loginBlocking process by creating/updating the account with the Android
+	 * Finishes the login process by creating/updating the account with the Android
 	 * AccountManager.  
 	 */
 	private void finishLogin(String authToken, String password) {

@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Main Activity, it starts loginBlocking then redirects to list view of status updates.
+/** Main Activity, it starts login then redirects to list view of status updates.
  *
  * @author edwardf
  * @since 2.0

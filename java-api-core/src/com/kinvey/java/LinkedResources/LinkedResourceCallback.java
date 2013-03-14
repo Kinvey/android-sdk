@@ -18,7 +18,7 @@ import com.kinvey.java.core.*;
 import java.io.IOException;
 
 /**
- * Implementation of a Client Request, which can downloadBlocking or uploadBlocking linked resources.
+ * Implementation of a Client Request, which can download or upload linked resources.
  *
  * @author edwardf
  * @since 2.0.2

@@ -39,7 +39,7 @@ import com.kinvey.java.model.UriLocResponse;
  *
  * <p>
  * The callback mechanism for this api is extended to include the {@link UploaderProgressListener#progressChanged(com.kinvey.java.core.MediaHttpUploader)}
- * method, which receives notifications as the uploadBlocking process transitions through and progresses with the uploadBlocking.
+ * method, which receives notifications as the upload process transitions through and progresses with the upload.
  * process.
  * </p>
  *
@@ -49,15 +49,15 @@ import com.kinvey.java.model.UriLocResponse;
  *    mKinveyClient.file().uploadBlocking(file,  new UploaderProgressListener() {
  *        @Override
  *        public void onSuccess(Void result) {
- *            Log.i(TAG, "successfully uploadBlocking file");
+ *            Log.i(TAG, "successfully upload file");
  *        }
  *        @Override
  *        public void onFailure(Throwable error) {
- *            Log.e(TAG, "failed to uploadBlocking file.", error);
+ *            Log.e(TAG, "failed to upload file.", error);
  *        }
  *        @Override
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
- *            Log.i(TAG, "uploadBlocking progress: " + uploader.getUploadState());
+ *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
  *            switch (uploader.getUploadState()) {
  *                case INITIATION_STARTED:
  *                    Log.i(TAG, "Initiation Started");
@@ -87,10 +87,10 @@ public class File {
     /** the client for this api **/
     private AbstractClient client;
 
-    /** the uploadBlocking request listener, can be {@code null} if the calling code has not explicitly set it **/
+    /** the upload request listener, can be {@code null} if the calling code has not explicitly set it **/
     private UploaderProgressListener uploadProgressListener;
 
-    /** the downloadBlocking request listener, can be {@code null} if the call code has not set it **/
+    /** the download request listener, can be {@code null} if the call code has not set it **/
     private DownloaderProgressListener downloaderProgressListener;
 
     /**
@@ -107,7 +107,7 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of downloading a given file already known to Kinvey.
+     * Constructs a request to retrieve a temporary url for purposes of downloading a given file already known to Kinvey.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetDownloadUrl#execute()}.
      * </p>
@@ -122,7 +122,7 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of downloading a given file already known to Kinvey.
+     * Constructs a request to retrieve a temporary url for purposes of downloading a given file already known to Kinvey.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetDownloadUrl#execute()}.
      * </p>
@@ -139,13 +139,13 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of uploading a given file.
+     * Constructs a request to retrieve a temporary url for purposes of uploading a given file.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetUploadUrl#execute()}.
      * </p>
      *
      * @param fileName the name of the file used in metadata
-     * @return valid request for which the temporary uploadBlocking url can be retrieved
+     * @return valid request for which the temporary upload url can be retrieved
      * @throws IOException if initializing the request fails
      */
     public GetUploadUrl getUploadUrlBlocking(String fileName) throws IOException {
@@ -155,13 +155,13 @@ public class File {
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of uploading a given file.
+     * Constructs a request to retrieve a temporary url for purposes of uploading a given file.
      * <p>
      * The url expires within 30 secs. of calling {@link com.kinvey.java.File.GetUploadUrl#execute()}.
      * </p>
      *
      * @param fileName the name of the file used in metadata
-     * @return valid request for which the temporary uploadBlocking url can be retrieved
+     * @return valid request for which the temporary upload url can be retrieved
      * @throws IOException if initializing the request fails
      * @deprecated Renamed to {@link #getUploadUrlBlocking(String)}
      */
@@ -177,7 +177,7 @@ public class File {
      *
      * @param fileName the filename used for the metadata
      * @param content the input stream from which the file contents will be sourced
-     * @return a valid request to be executed for the uploadBlocking operation to Kinvey
+     * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
     public Upload uploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
@@ -191,7 +191,7 @@ public class File {
      *
      * @param fileName the filename used for the metadata
      * @param content the input stream from which the file contents will be sourced
-     * @return a valid request to be executed for the uploadBlocking operation to Kinvey
+     * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      * @deprecated Renamed to {@link #uploadBlocking(String, com.google.api.client.http.AbstractInputStreamContent)}
      */
@@ -209,7 +209,7 @@ public class File {
      * </p>
      *
      * @param filename the name used in metadata for downloadable file.
-     * @return a valid request to be executed for the downloadBlocking operation from Kinvey file service
+     * @return a valid request to be executed for the download operation from Kinvey file service
      * @throws IOException
      */
     public Download downloadBlocking(String filename) throws IOException {
@@ -225,7 +225,7 @@ public class File {
      * </p>
      *
      * @param filename the name used in metadata for downloadable file.
-     * @return a valid request to be executed for the downloadBlocking operation from Kinvey file service
+     * @return a valid request to be executed for the download operation from Kinvey file service
      * @throws IOException
      * @deprecated Renamed to {@link #downloadBlocking(String)}
      */
@@ -265,14 +265,14 @@ public class File {
     }
 
     /**
-     * @param uploadProgressListener the listener to receive notifications as the uploadBlocking progresses
+     * @param uploadProgressListener the listener to receive notifications as the upload progresses
      */
     public void setUploadProgressListener(UploaderProgressListener uploadProgressListener) {
         this.uploadProgressListener = uploadProgressListener;
     }
 
     /**
-     * @param downloaderProgressListener the listener to receive notifications as the downloadBlocking progresses
+     * @param downloaderProgressListener the listener to receive notifications as the download progresses
      */
     public void setDownloaderProgressListener(DownloaderProgressListener downloaderProgressListener) {
         this.downloaderProgressListener = downloaderProgressListener;
@@ -280,7 +280,7 @@ public class File {
 
 
     /**
-     * GET a temporary url for downloadBlocking.
+     * GET a temporary url for download.
      */
     public class GetDownloadUrl extends AbstractKinveyJsonClientRequest<UriLocResponse> {
 
@@ -314,7 +314,7 @@ public class File {
     }
 
     /**
-     * Initiate an uploadBlocking of a particular file and its contents.
+     * Initiate an upload of a particular file and its contents.
      */
     public class Upload extends AbstractKinveyJsonClientRequest<Void> {
 
@@ -331,7 +331,7 @@ public class File {
     }
 
     /**
-     * Initiate a downloadBlocking of a particular file already known to Kinvey.
+     * Initiate a download of a particular file already known to Kinvey.
      */
     public class Download extends AbstractKinveyJsonClientRequest<Void> {
 
@@ -348,7 +348,7 @@ public class File {
     }
 
     /**
-     * Initiate a deleteBlocking of a particular file already known to Kinvey.
+     * Initiate a delete of a particular file already known to Kinvey.
      * <p>
      * {@link com.kinvey.java.core.AbstractKinveyJsonClientRequest#executeUnparsed()} is overridden to first GET
      * the URI for which the file should be deleted.

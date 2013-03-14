@@ -30,7 +30,7 @@ import com.kinvey.java.User;
 import com.kinvey.samples.statusshare.R;
 import com.kinvey.samples.statusshare.StatusShare;
 
-/** Allow user to loginBlocking.
+/** Allow user to login.
  *
  *
 * @author edwardf

@@ -37,25 +37,25 @@ import com.kinvey.java.model.UriLocResponse;
  *
  * <p>
  * The callback mechanism for this api is extended to include the {@link UploaderProgressListener#progressChanged(com.kinvey.java.core.MediaHttpUploader)}
- * method, which receives notifications as the uploadBlocking process transitions through and progresses with the uploadBlocking.
+ * method, which receives notifications as the upload process transitions through and progresses with the upload.
  * process.
  * </p>
  *
  * <p>
  * Sample usage:
  * <pre>
- *    mKinveyClient.file().uploadBlocking(file,  new UploaderProgressListener() {
+ *    mKinveyClient.file().upload(file,  new UploaderProgressListener() {
  *        @Override
  *        public void onSuccess(Void result) {
- *            Log.i(TAG, "successfully uploadBlocking file");
+ *            Log.i(TAG, "successfully upload file");
  *        }
  *        @Override
  *        public void onFailure(Throwable error) {
- *            Log.e(TAG, "failed to uploadBlocking file.", error);
+ *            Log.e(TAG, "failed to upload file.", error);
  *        }
  *        @Override
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
- *            Log.i(TAG, "uploadBlocking progress: " + uploader.getUploadState());
+ *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
  *            switch (uploader.getUploadState()) {
  *                case INITIATION_STARTED:
  *                    Log.i(TAG, "Initiation Started");
@@ -101,26 +101,26 @@ public class AsyncFile extends File {
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of downloading a given file already known to Kinvey.
+     * Constructs a request to retrieve a temporary url for purposes of downloading a given file already known to Kinvey.
      * <p>
      * The url expires within 60 secs. of calling execute on the request returned.
      * </p>
      *
      * @param fileName name of the file for which kinvey service is aware
-     * @param callback an implementation of a client callback to getBlocking results on the UI thread from the async call.
+     * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void getDownloadUrl(String fileName, KinveyClientCallback<UriLocResponse> callback) {
         new GetDownloadUrl(fileName, callback).execute();
     }
 
     /**
-     * Constructs a request to retrieveBlocking a temporary url for purposes of uploading a given file.
+     * Constructs a request to retrieve a temporary url for purposes of uploading a given file.
      * <p>
      * The url expires within 60 secs. of calling execute on the request returned.
      * </p>
      *
      * @param fileName the name of the file used in metadata
-     * @param callback an implementation of a client callback to getBlocking results on the UI thread from the async call.
+     * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void getUploadUrl(String fileName, KinveyClientCallback<UriLocResponse> callback) {
         new GetUploadUrl(fileName, callback).execute();
@@ -177,7 +177,7 @@ public class AsyncFile extends File {
      *
      * @param name name to refer to the blob when stored with the file service endpoint
      * @param inputStream  stream to be uploaded
-     * @param listener an implementation of a client listener to getBlocking results on the UI thread from the async call.
+     * @param listener an implementation of a client listener to get results on the UI thread from the async call.
      */
     public void upload(String name, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
@@ -217,7 +217,7 @@ public class AsyncFile extends File {
      * </pre>
      *
      * @param filename the name used in metadata for downloadable file.
-     * @param listener an implementation of a client listener to getBlocking results on the UI thread from the async call.
+     * @param listener an implementation of a client listener to get results on the UI thread from the async call.
      * @param out a {@link java.io.OutputStream} object.
      */
     public void download(String filename, OutputStream out, DownloaderProgressListener listener) {
@@ -229,7 +229,7 @@ public class AsyncFile extends File {
      * Deletes the given file from the Kinvey file service.
      *
      * @param filename the name of used in metadata to refer to the file
-     * @param callback an implementation of a client callback to getBlocking results on the UI thread from the async call.
+     * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void delete(String filename, KinveyClientCallback<Void> callback) {
         new FileDelete(filename, callback).execute();
@@ -237,7 +237,7 @@ public class AsyncFile extends File {
 
 
     /**
-     * GET a temporary url for downloadBlocking.
+     * GET a temporary url for download.
      */
     private class GetDownloadUrl extends AsyncClientRequest<UriLocResponse> {
 

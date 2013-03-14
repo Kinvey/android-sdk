@@ -49,7 +49,7 @@ public class EndlessUpdateAdapter extends EndlessAdapter {
         Query q = new Query();
         q.setSkip(getWrappedAdapter().getCount());
 
-        //getBlocking
+        //get
 
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -223,7 +223,7 @@ public class EndlessUpdateAdapter extends EndlessAdapter {
 //
 //        // Transfer the test data from the data object
 //        // to the view objects
-//        Update currentUpdate = (Update) updates.getBlocking(position);
+//        Update currentUpdate = (Update) updates.get(position);
 //        updateView.avatar.setImageBitmap(currentUpdate.getAvatar());
 //        updateView.text.setText(currentUpdate.getText());
 //        updateView.author.setText(currentUpdate.getAuthorName());

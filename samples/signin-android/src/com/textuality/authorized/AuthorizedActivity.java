@@ -37,9 +37,9 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 /**
  * Provides GET (and eventually POST) methods that are authorized using an OAuth2 token requested on 
  *  behalf of a specified Google account.  
- * To use it you have to subclass it, which gives you a getBlocking() method, see below.  It's asynchronous,
+ * To use it you have to subclass it, which gives you a get() method, see below.  It's asynchronous,
  *  so you also have to pass in a ResponseHandler object.  
- * The OAuth processes may require firing off one or more Activities to getBlocking user approval, so this class
+ * The OAuth processes may require firing off one or more Activities to get user approval, so this class
  *  needs its OnActivityResult to be called.  So if you implement OnActivityResult, you have to start with 
  *  @Override
  *  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -49,7 +49,7 @@ public class AuthorizedActivity extends Activity {
     private static final int REQUEST_CODE = new Random().nextInt(1000000000);
     public static final String TAG = "AuthorizedActivity";
 
-    // This is required because you might have to dispatch off to another activity and getBlocking a token back in
+    // This is required because you might have to dispatch off to another activity and get a token back in
     //  onActivityResult, and you can�t serialize the ResponseHandler argument in Intent extras.
     // It means that you can�t really have more than one request at a time in play. 
     private Request mRequest;
@@ -80,7 +80,7 @@ public class AuthorizedActivity extends Activity {
      * Perform an HTTP GET on a resource with OAuth2 authorization.  
      *  This is asynchronous; results will be returned via the handler.
      * 
-     * @param uriString The URI to GET
+     * @param uri The URI to GET
      * @param email The email address associated with a Google account on the device, for authorization
      * @param scope The scope which identifies the resource, for authorization
      * @param headers Any HTTP headers which are to be transmitted with the GET request
@@ -129,7 +129,7 @@ public class AuthorizedActivity extends Activity {
             }
             
         }  catch (IOException ioEx) {
-            // Something is stressed out; the auth servers are by definition high-traffic and you can't countBlocking on
+            // Something is stressed out; the auth servers are by definition high-traffic and you can't count on
             //  100% success. But it would be bad to retry instantly, so back off
             if (backoff.shouldRetry()) {
                 backoff.backoff(); 

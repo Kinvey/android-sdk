@@ -35,7 +35,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * </p>
  *
  * <p>
- * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, loginBlocking, and
+ * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, login, and
  * user creation, or the general-purpose {@link com.kinvey.java.core.KinveyClientCallback} used for User data retrieval,
  * updating, and management.
  * </p>
@@ -44,7 +44,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * Login sample:
  * <pre>
     public void submit(View view) {
-        kinveyClient.user().loginBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+        kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                 new KinveyUserCallback() {
             public void onFailure(Throwable t) {
                 CharSequence text = "Wrong username or password.";
@@ -67,7 +67,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <pre>
     User user = kinveyClient.getActiveUser();
     user.put("fav_food", "bacon");
-    user.updateBlocking(new KinveyClientCallback<User.Update>() {
+    user.update(new KinveyClientCallback<User.Update>() {
 
         public void onFailure(Throwable e) { ... }
 
@@ -99,7 +99,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous implicit user loginBlocking.
+     * Asynchronous implicit user login.
      * <p>
      * Constructs an asynchronous request to log in an implicit (non-named) user and returns the associated User object
      * via a KinveyUserCallback.
@@ -107,7 +107,7 @@ public class AsyncUser extends User {
      * <p>
      *     Sample Usage:
      * <pre>
-        kinveyClient.user().loginBlocking(new KinveyUserCallback() {
+        kinveyClient.user().login(new KinveyUserCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User u) {
                 CharSequence text = "Welcome back!";
@@ -122,7 +122,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Kinvey user loginBlocking.
+     * Asynchronous Kinvey user login.
      * <p>
      * Constructs an asynchronous request to log in a Kinvey user with username and password, and returns the associated
      * User object via a KinveyUserCallback.
@@ -131,7 +131,7 @@ public class AsyncUser extends User {
      * <p>
        Sample Usage:
      * <pre>
-            kinveyClient.user().loginBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+            kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                     new KinveyUserCallback() {
             public void onFailure(Throwable t) {
                     CharSequence text = "Wrong username or password.";
@@ -157,7 +157,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Facebook loginBlocking.
+     * Asynchronous Facebook login.
      * <p>Constructs an asynchronous request to log in a Facebook user and returns the associated User object via a
      * KinveyUserCallback.  A valid Facebook access token must be obtained via the Facebook OAuth API and passed to this
      * method.
@@ -165,11 +165,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-            kinveyClient.user().loginFacebookBlocking(accessToken, new KinveyUserCallback() {
+            kinveyClient.user().loginFacebook(accessToken, new KinveyUserCallback() {
 
                 public void onFailure(Throwable e) {
                     error(progressDialog, "Kinvey: " + e.getMessage());
-                    Log.e(TAG, "failed Kinvey facebook loginBlocking", e);
+                    Log.e(TAG, "failed Kinvey facebook login", e);
                 }
 
                 public void onSuccess(User u) {
@@ -187,7 +187,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Google loginBlocking.
+     * Asynchronous Google login.
      *
      * <p>
      * Constructs an asynchronous request to log in a Google user and returns the associated User object via a
@@ -197,11 +197,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-            kinveyClient.user().loginGoogleBlocking(accessToken, new KinveyUserCallback() {
+            kinveyClient.user().loginGoogle(accessToken, new KinveyUserCallback() {
 
                 public void onFailure(Throwable e) {
                     error(progressDialog, "Kinvey: " + e.getMessage());
-                    Log.e(TAG, "failed Kinvey facebook loginBlocking", e);
+                    Log.e(TAG, "failed Kinvey facebook login", e);
                 }
 
                 public void onSuccess(User u) {
@@ -219,7 +219,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous Twitter loginBlocking.
+     * Asynchronous Twitter login.
      *
      * <p>
      * Constructs an asynchronous request to log in a Twitter user and returns the associated User object via a
@@ -229,11 +229,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginTwitterBlocking(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
+        kinveyClient.user().loginTwitter(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
                 new KinveyUserCallback() {
 
             public void onFailure(Throwable e) {
-                Log.e(TAG, "Failed Kinvey loginBlocking", e)
+                Log.e(TAG, "Failed Kinvey login", e)
             };
 
             public void onSuccess(User r) {
@@ -253,7 +253,7 @@ public class AsyncUser extends User {
     }
 
     /**
-     *  Asynchronous Linked In loginBlocking.
+     *  Asynchronous Linked In login.
      *
      * <p>
      * Constructs an asynchronous request to log in a Linked In user and returns the associated User object via a
@@ -263,11 +263,11 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginLinkedInBlocking(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
+        kinveyClient.user().loginLinkedIn(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
                 new KinveyUserCallback() {
 
         public void onFailure(Throwable e) {
-            Log.e(TAG, "Failed Kinvey loginBlocking", e)
+            Log.e(TAG, "Failed Kinvey login", e)
         };
 
         public void onSuccess(User r) {
@@ -301,9 +301,9 @@ public class AsyncUser extends User {
     }
 
     /**
-     * Asynchronous method to createBlocking a new Kinvey User.
+     * Asynchronous method to create a new Kinvey User.
      * <p>
-     * Constructs an asynchronous request to createBlocking a Kinvey user with username and password, and returns the associated
+     * Constructs an asynchronous request to create a Kinvey user with username and password, and returns the associated
      * User object via a KinveyUserCallback.  All metadata that is added to the user object prior to creating the user
      * will be persisted to the Kinvey backend.
      * </p>
@@ -313,11 +313,11 @@ public class AsyncUser extends User {
      * <pre>
         kinveyClient.user().put("State","MA");
         kinveyClient.user().put("Age", 25);
-        kinveyClient.user().createBlocking(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+        kinveyClient.user().create(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
                 new KinveyUserCallback() {
 
             public void onFailure(Throwable t) {
-                CharSequence text = "Unable to createBlocking account.";
+                CharSequence text = "Unable to create account.";
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             }
 
@@ -351,7 +351,7 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Delete the current user from the Kinvey backend
      * <p>
-     * Constructs an asynchronous request to deleteBlocking the current Kinvey user.  The hardDelete flag determines whether
+     * Constructs an asynchronous request to delete the current Kinvey user.  The hardDelete flag determines whether
      * the user is simply marked as inactive or completely erased from the Kinvey backend.
      * </p>
      * <p>
@@ -359,7 +359,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.deleteBlocking(new KinveyClientCallback<User.Delete>() {
+        user.delete(new KinveyClientCallback<User.Delete>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -386,7 +386,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.retrieveBlocking(new KinveyClientCallback<User.Retrieve>() {
+        user.retrieve(new KinveyClientCallback<User.Retrieve>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -404,14 +404,14 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Retrieve users via a Query
      * <p>
-     * Constructs an asynchronous request to retrieveBlocking User objects via a Query.
+     * Constructs an asynchronous request to retrieve User objects via a Query.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
          User user = kinveyClient.getActiveUser();
-         user.retrieveBlocking(Query query, new KinveyClientCallback<User.Retrieve>() {
+         user.retrieve(Query query, new KinveyClientCallback<User.Retrieve>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -430,14 +430,14 @@ public class AsyncUser extends User {
     /**
      * Asynchronous Call to Save the current user
      * <p>
-     * Constructs an asynchronous request to saveBlocking the current Kinvey user.
+     * Constructs an asynchronous request to save the current Kinvey user.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.updateBlocking(new KinveyClientCallback<User.Update>() {
+        user.update(new KinveyClientCallback<User.Update>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -461,7 +461,7 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
-        kinveyClient.resetPasswordBlocking(new KinveyClientCallback<User>() {
+        kinveyClient.resetPassword(new KinveyClientCallback<User>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -484,7 +484,7 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
-        kinveyClient.sendEmailVerificationBlocking(new KinveyClientCallback<User>() {
+        kinveyClient.sendEmailVerification(new KinveyClientCallback<User>() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -521,7 +521,7 @@ public class AsyncUser extends User {
 
         String pushId = getClient().push().getPushId();
         if (pushId != null) {
-            // need to retrieveBlocking any existing properties to append apid
+            // need to retrieve any existing properties to append apid
             final Object obj = this.get("_apids");
             final ArrayList<String> apidList = new ArrayList<String>();
             if (obj == null) {
@@ -622,7 +622,7 @@ public class AsyncUser extends User {
 
         String pushId = getClient().push().getPushId();
         if (pushId != null) {
-            // need to retrieveBlocking any existing properties to append apid
+            // need to retrieve any existing properties to append apid
             final Object obj = this.get("_apids");
             final ArrayList<String> apidList = new ArrayList<String>();
             if (obj != null) {

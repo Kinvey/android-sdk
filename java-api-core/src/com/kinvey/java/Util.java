@@ -42,7 +42,7 @@ public class Util {
     }
 
     /**
-     * Method to pingBlocking service.
+     * Method to ping service.
      *
      * @return Ping object
      * @throws java.io.IOException
@@ -54,7 +54,7 @@ public class Util {
     }
 
     /**
-     * Method to pingBlocking service.
+     * Method to ping service.
      *
      * @return Ping object
      * @throws java.io.IOException

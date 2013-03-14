@@ -332,7 +332,7 @@ public class KinveyAuthRequest extends GenericJson {
         }
 
         /**
-         * @return appkey and appsecret RequestInitializer used to createBlocking the BasicAuthentication for the POST request
+         * @return appkey and appsecret RequestInitializer used to create the BasicAuthentication for the POST request
          */
         public BasicAuthentication getAppKeyAuthentication() {
             return appKeyAuthentication;

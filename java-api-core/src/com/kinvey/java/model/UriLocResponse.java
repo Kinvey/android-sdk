@@ -18,7 +18,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 /**
- * Generic blob service response object for uploadBlocking and downloadBlocking url requests.
+ * Generic blob service response object for upload and download url requests.
  *
  */
 public class UriLocResponse extends GenericJson {

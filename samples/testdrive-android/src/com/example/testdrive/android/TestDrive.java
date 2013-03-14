@@ -68,7 +68,7 @@ public class TestDrive extends Activity {
             @Override
             public void onFailure(Throwable error) {
                 bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.getEntityBlocking Failure", error);
+                Log.e(TAG, "AppData.getEntity Failure", error);
                 Toast.makeText(TestDrive.this, "Get Entity error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -91,7 +91,7 @@ public class TestDrive extends Activity {
             @Override
             public void onFailure(Throwable error) {
                 bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.getBlocking by Query Failure", error);
+                Log.e(TAG, "AppData.get by Query Failure", error);
                 Toast.makeText(TestDrive.this, "Get by Query error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -112,7 +112,7 @@ public class TestDrive extends Activity {
             @Override
             public void onFailure(Throwable error) {
                 bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.getBlocking all Failure", error);
+                Log.e(TAG, "AppData.get all Failure", error);
                 Toast.makeText(TestDrive.this, "Get All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -133,7 +133,7 @@ public class TestDrive extends Activity {
             @Override
             public void onFailure(Throwable error) {
                 bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.saveBlocking Failure", error);
+                Log.e(TAG, "AppData.save Failure", error);
                 Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -151,7 +151,7 @@ public class TestDrive extends Activity {
             @Override
             public void onFailure(Throwable error) {
                 bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.deleteBlocking Failure", error);
+                Log.e(TAG, "AppData.delete Failure", error);
                 Toast.makeText(TestDrive.this, "Delete error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

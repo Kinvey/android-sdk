@@ -54,11 +54,11 @@ public interface DownloaderProgressListener extends KinveyClientCallback<Void> {
    *
    * <p>
    * This method is called multiple times depending on how many chunks are downloaded. Once the
-   * downloadBlocking completes it is called one final time.
+   * download completes it is called one final time.
    * </p>
    *
    * <p>
-   * The downloadBlocking state can be queried by calling {@link MediaHttpDownloader#getDownloadState} and
+   * The download state can be queried by calling {@link MediaHttpDownloader#getDownloadState} and
    * the progress by calling {@link MediaHttpDownloader#getProgress}.
    * </p>
    *

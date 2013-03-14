@@ -30,7 +30,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  * </p>
  *
  * <p>
- * This API is used to createBlocking and manage user groups for role-based permissions.  Methods in this API return results via a
+ * This API is used to create and manage user groups for role-based permissions.  Methods in this API return results via a
  * {@link com.kinvey.java.core.KinveyClientCallback}.
  * </p>
  *
@@ -38,7 +38,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  * Sample Usage:
  * <pre>
     public void submit(View view) {
-        kinveyClient.userGroup().addUserToGroupBlocking("13", "15", null new KinveyClientCallback<UserGroupResponse> () {
+        kinveyClient.userGroup().addUserToGroup("13", "15", null new KinveyClientCallback<UserGroupResponse> () {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse u) { ... }
         });
@@ -68,7 +68,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addUserToGroupBlocking("13", "14", null, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addUserToGroup("13", "14", null, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -94,7 +94,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addUserListToGroupBlocking("13", userIDList, null, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addUserListToGroup("13", userIDList, null, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -119,7 +119,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addUserToGroupListBlocking("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addUserToGroupList("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -144,7 +144,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addUserListToGroupListBlocking("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addUserListToGroupList("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -169,7 +169,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addAllUsersToGroupBlocking("13", "125", new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addAllUsersToGroup("13", "125", new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -193,7 +193,7 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().addAllUsersToGroupListBlocking("13", myGroupIDs, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().addAllUsersToGroupList("13", myGroupIDs, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -209,7 +209,7 @@ public class AsyncUserGroup extends UserGroup {
     }
 
     /**
-     * Asynchronous request to createBlocking a user group
+     * Asynchronous request to create a user group
      * <p>
      * Constructs an asynchronous request to createa a user group. Takes a UserGroupRequest object and returns a UserGroupResponse via
      * a KinveyClientCallback.
@@ -218,12 +218,12 @@ public class AsyncUserGroup extends UserGroup {
      * Sample Usage:
      * <pre>
         UserGroup request = kinveyClient.userGroup().getUserGroupRequest(myGroupID, myChildGroupID);
-        kinveyClient.userGroup().createBlocking(request, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().create(request, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
          });
      *
-     * @param group a UserGroupRequest object containing the group to createBlocking.
+     * @param group a UserGroupRequest object containing the group to create.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      * @param <T> a T object.
      */
@@ -232,20 +232,20 @@ public class AsyncUserGroup extends UserGroup {
     }
 
     /**
-     * Asynchronous request to retrieveBlocking a user group
+     * Asynchronous request to retrieve a user group
      * <p>
-     * Constructs an asynchronous request to retrieveBlocking a user group. Returns a UserGroupResponse via
+     * Constructs an asynchronous request to retrieve a user group. Returns a UserGroupResponse via
      * a KinveyClientCallback.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().retrieveBlocking(myGroupID, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().retrieve(myGroupID, new KinveyClientCallback<UserGroupResponse>() {
              public void onFailure(Throwable t) { ... }
              public void onSuccess(UserGroupResponse r) { ... }
      });
      *
-     * @param groupID a {@link java.lang.String} group ID to retrieveBlocking.
+     * @param groupID a {@link java.lang.String} group ID to retrieve.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      * @param <T> a T object.
      */
@@ -254,16 +254,16 @@ public class AsyncUserGroup extends UserGroup {
     }
 
     /**
-     * Asynchronous request to updateBlocking a user group
+     * Asynchronous request to update a user group
      * <p>
-     * Constructs an asynchronous request to retrieveBlocking a user group. Returns a UserGroupResponse via
+     * Constructs an asynchronous request to retrieve a user group. Returns a UserGroupResponse via
      * a KinveyClientCallback.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
         UserGroup request = kinveyClient.userGroup().getUserGroupRequest(myGroupID, myChildGroupID);
-        kinveyClient.userGroup().updateBlocking(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().update(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
              public void onFailure(Throwable t) { ... }
              public void onSuccess(UserGroupResponse r) { ... }
         });
@@ -277,15 +277,15 @@ public class AsyncUserGroup extends UserGroup {
     }
 
     /**
-     * Asynchronous request to deleteBlocking a user group
+     * Asynchronous request to delete a user group
      * <p>
-     * Constructs an asynchronous request to deleteBlocking a user group. Returns a UserGroupResponse via
+     * Constructs an asynchronous request to delete a user group. Returns a UserGroupResponse via
      * a KinveyClientCallback.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.userGroup().deleteBlocking(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
+        kinveyClient.userGroup().delete(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });

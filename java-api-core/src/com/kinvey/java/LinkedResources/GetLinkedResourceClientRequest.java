@@ -21,13 +21,13 @@ import java.io.OutputStream;
 import java.util.Map;
 
 /**
- * Implementation of a Client Request, which can downloadBlocking linked resources.
+ * Implementation of a Client Request, which can download linked resources.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
  * </p>
  * <p>
- * call setDownloadProgressListener to getBlocking callbacks for all file downloads.
+ * call setDownloadProgressListener to get callbacks for all file downloads.
  * </p>
  *
  * @author edwardf

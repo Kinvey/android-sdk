@@ -17,7 +17,7 @@ import android.widget.Toast;
 /**
  * Activity for registering new accounts.  This prompts a user for a user name (email address),
  * First and Last name, and a password. After validation, it creates a new KinveyUser and redirects 
- * the user back to the loginBlocking page for Authentication.
+ * the user back to the login page for Authentication.
  */
 public class RegisterNewAccountActivity extends Activity {
 
@@ -78,9 +78,9 @@ public class RegisterNewAccountActivity extends Activity {
 	}
 	
 	/**
-	 * Calls the createUserWithUsername method of the KinveyClient to createBlocking a new user.
+	 * Calls the createUserWithUsername method of the KinveyClient to create a new user.
 	 * After sign-up is successful, the First and Last name are added to the user, and
-	 * an Intent is instantiated to bring the user back to the loginBlocking page to confirm
+	 * an Intent is instantiated to bring the user back to the login page to confirm
 	 * authentication.  
 	 * 
 	 * Note that a user is not Authorized here to the Android Account Manager, but rather
@@ -96,7 +96,7 @@ public class RegisterNewAccountActivity extends Activity {
             }
 
             public void onSuccess(User u) {
-                CharSequence text = "Welcome," + u.get("username") + ".  Your account has been registered.  Please loginBlocking to confirm your credentials.";
+                CharSequence text = "Welcome," + u.get("username") + ".  Your account has been registered.  Please login to confirm your credentials.";
                 u.put("email", u.get("username"));
                 u.put("firstname", mEditFirstName.getText().toString());
                 u.put("lastname", mEditLastName.getText().toString());

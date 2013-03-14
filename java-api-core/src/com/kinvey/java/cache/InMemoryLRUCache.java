@@ -23,7 +23,7 @@ import java.util.Map;
  * </p>
  *
  * <p>
- * This interface is thread-safe. All accessors (getBlocking/put) are synchronized on the cache object itself.
+ * This interface is thread-safe. All accessors (get/put) are synchronized on the cache object itself.
  * </p>
  * @author edwardf
  * @since 2.0
@@ -94,7 +94,7 @@ public class InMemoryLRUCache<String, V> implements Cache<String, V> {
      *
      * This method is threadsafe through java's synchronization.
      *
-     * @param key - the Key of the value to retrieveBlocking
+     * @param key - the Key of the value to retrieve
      * @return
      */
     @Override

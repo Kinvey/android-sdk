@@ -35,7 +35,7 @@ public class CredentialManager {
 
     /**
      *
-     * @param userId a valid userId to retrieveBlocking the credential from storage
+     * @param userId a valid userId to retrieve the credential from storage
      * @return a credential object if one is found otherwise {@code null} is returned
      * @throws IOException error in access the low-level storage mechanism
      */

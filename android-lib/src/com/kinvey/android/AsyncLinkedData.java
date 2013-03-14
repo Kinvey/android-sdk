@@ -41,17 +41,17 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
 
     /**
-     * Method to getBlocking an entity or entities and downloadBlocking a subset of associated Linked Resources.
+     * Method to get an entity or entities and download a subset of associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieveBlocking callback information about the File downloads.
+     * to retrieve callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
+     * This method will only download Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
-     * @param entityID entityID to getBlocking
+     * @param entityID entityID to get
      * @param download - used for progress updates as associated files are downloaded.
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
@@ -63,17 +63,17 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
 
     /**
-     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
+     * Method to get an entity or entities and download ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieveBlocking callback information about the File downloads.
+     * to retrieve callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
+     * This method will only download Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
-     * @param query query for entities to retrieveBlocking
+     * @param query query for entities to retrieve
      * @param download - used for progress updates as associated files are downloaded.
      * @return Get object
      * @throws java.io.IOException - if there is an issue executing the client requests
@@ -85,13 +85,13 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
 
     /**
-     * Method to getBlocking an entity or entities and downloadBlocking ALL associated Linked Resources.
+     * Method to get an entity or entities and download ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieveBlocking callback information about the File downloads.
+     * to retrieve callback information about the File downloads.
      * </p>
      * <p>
-     * This method will only downloadBlocking Linked Resources for the fields declared in the resources array.
+     * This method will only download Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
@@ -106,9 +106,9 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
 
     /**
-     * Save (createBlocking or updateBlocking) an entity to a collection and uploadBlocking ALL associated Linked Resources.
+     * Save (create or update) an entity to a collection and upload ALL associated Linked Resources.
      * <p>
-     * This method will only uploadBlocking Linked Resources for the fields declared in the resources array.
+     * This method will only upload Linked Resources for the fields declared in the resources array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *

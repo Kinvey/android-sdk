@@ -86,7 +86,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Com
 
                     @Override
                     public void onFailure(Throwable error) {
-                        AndroidUtil.toast(LoginActivity.this, "couldn't loginBlocking -> " + error.getMessage());
+                        AndroidUtil.toast(LoginActivity.this, "couldn't login -> " + error.getMessage());
                     }
 
                 });
@@ -101,7 +101,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Com
 
                     @Override
                     public void onFailure(Throwable error) {
-                        AndroidUtil.toast(LoginActivity.this, "couldn't loginBlocking -> " + error.getMessage());
+                        AndroidUtil.toast(LoginActivity.this, "couldn't login -> " + error.getMessage());
                     }
                 });
 

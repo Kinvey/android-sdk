@@ -72,17 +72,17 @@ public class AggregateEntity extends GenericJson {
                 break;
             case MIN:
                 initial.put("_result","Infinity");
-                reduce = "function(doc,out){ out._result = Math.minBlocking(out._result, doc."+aggregateField+");}";
+                reduce = "function(doc,out){ out._result = Math.min(out._result, doc."+aggregateField+");}";
                 break;
             case MAX:
                 initial.put("_result","-Infinity");
-                reduce = "function(doc,out){ out._result = Math.maxBlocking(out._result, doc."+aggregateField+");}";
+                reduce = "function(doc,out){ out._result = Math.max(out._result, doc."+aggregateField+");}";
                 break;
             case AVERAGE:
                 initial.put("_result",0);
-                reduce = "function(doc,out){ var countBlocking = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-                        "out._result =(out._result * countBlocking + doc."+aggregateField+") " +
-                        "/ (countBlocking + 1); out._kcs_count = countBlocking+1;}";
+                reduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
+                        "out._result =(out._result * count + doc."+aggregateField+") " +
+                        "/ (count + 1); out._kcs_count = count+1;}";
                 break;
         }
 

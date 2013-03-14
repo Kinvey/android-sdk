@@ -63,7 +63,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * Entity Set sample:
  * <pre>
  *    AppData<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
- *    myAppData.getBlocking(appData().query, new KinveyUserCallback() {
+ *    myAppData.get(appData().query, new KinveyUserCallback() {
  *        public void onFailure(Throwable t) { ... }
  *        public void onSuccess(EventEntity[] entities) { ... }
  *    });
@@ -140,7 +140,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).getBlocking("123",
+     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
      *                new KinveyClientCallback<EventEntity> {
      *            public void onFailure(Throwable t) { ... }
      *            public void onSuccess(EventEntity entity) { ... }
@@ -168,7 +168,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *        Query myQuery = new Query();
      *        myQuery.equals("age",21);
-     *        myAppData.getBlocking(myQuery, new KinveyListCallback<EventEntity> {
+     *        myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
      *            public void onFailure(Throwable t) { ... }
      *            public void onSuccess(EventEntity[] entities) { ... }
      *        });
@@ -193,7 +193,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Sample Usage:
      * <pre>
      *         AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *         myAppData.getBlocking(new KinveyListCallback<EventEntity> {
+     *         myAppData.get(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
      *         });
@@ -208,23 +208,23 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to saveBlocking or updateBlocking an entity to a collection.
+     * Asynchronous request to save or update an entity to a collection.
      * <p>
-     * Constructs an asynchronous request to saveBlocking an entity of type T to a collection.  Creates the entity if it doesn't exist, updates it if it does exist.
+     * Constructs an asynchronous request to save an entity of type T to a collection.  Creates the entity if it doesn't exist, updates it if it does exist.
      * If an "_id" property is not present, the Kinvey backend will generate one.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      *         AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *         myAppData.saveBlocking(entityID, new KinveyClientCallback<EventEntity> {
+     *         myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
      *             public void onFailure(Throwable t) { ... }
      *             public void onSuccess(EventEntity[] entities) { ... }
      *         });
      * </pre>
      * </p>
      *
-     * @param entity The entity to saveBlocking
+     * @param entity The entity to save
      * @param callback KinveyClientCallback<T>
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
@@ -234,24 +234,24 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to deleteBlocking an entity to a collection.
+     * Asynchronous request to delete an entity to a collection.
      * <p>
-     * Creates an asynchronous request to deleteBlocking a group of entities from a collection based on a Query object.  Uses KinveyDeleteCallback to return a
+     * Creates an asynchronous request to delete a group of entities from a collection based on a Query object.  Uses KinveyDeleteCallback to return a
      * {@link com.kinvey.java.model.KinveyDeleteResponse}.  Queries can be constructed with {@link com.kinvey.java.Query}.
-     * An empty Query object will deleteBlocking all items in the collection.
+     * An empty Query object will delete all items in the collection.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *        myAppData.deleteBlocking(myQuery, new KinveyDeleteCallback {
+     *        myAppData.delete(myQuery, new KinveyDeleteCallback {
      *            public void onFailure(Throwable t) { ... }
      *            public void onSuccess(EventEntity[] entities) { ... }
      *     });
      * </pre>
      * </p>
      *
-     * @param entityID the ID to deleteBlocking
+     * @param entityID the ID to delete
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
@@ -259,9 +259,9 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to deleteBlocking a collection of entites from a collection by Query.
+     * Asynchronous request to delete a collection of entites from a collection by Query.
      * <p>
-     * Creates an asynchronous request to deleteBlocking an entity from a  collection by Entity ID.  Uses KinveyDeleteCallback to return a
+     * Creates an asynchronous request to delete an entity from a  collection by Entity ID.  Uses KinveyDeleteCallback to return a
      * {@link com.kinvey.java.model.KinveyDeleteResponse}.
      * </p>
      * <p>
@@ -270,7 +270,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *         Query myQuery = new Query();
      *         myQuery.equals("age",21);
-     *        myAppData.deleteBlocking(myQuery, new KinveyDeleteCallback {
+     *        myAppData.delete(myQuery, new KinveyDeleteCallback {
      *            public void onFailure(Throwable t) { ... }
      *            public void onSuccess(EventEntity[] entities) { ... }
      *        });
@@ -286,10 +286,10 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to retrieveBlocking a group by COUNT on a collection or filtered collection.
+     * Asynchronous request to retrieve a group by COUNT on a collection or filtered collection.
      *
      * <p>
-     * Generates an asynchronous request to group a collection and provide a countBlocking of records based on a field or
+     * Generates an asynchronous request to group a collection and provide a count of records based on a field or
      * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
      * </p>
      * <p>
@@ -298,7 +298,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *        ArrayList<String> fields = new ArrayList<String>();
      *        fields.add("userName");
-     *        aggregate.countBlocking(fields, null, new KinveyClientCallback<EventEntity>() {
+     *        aggregate.count(fields, null, new KinveyClientCallback<EventEntity>() {
      *            public void onSuccess(EventEntity event) { ... }
      *            public void onFailure(Throwable T) {...}
      *        });
@@ -343,10 +343,10 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to retrieveBlocking a group by MAX on a collection or filtered collection
+     * Asynchronous request to retrieve a group by MAX on a collection or filtered collection
      *
      * <p>
-     * Generates an asynchronous request to group a collection and provide the maxBlocking value of records based on a field or
+     * Generates an asynchronous request to group a collection and provide the max value of records based on a field or
      * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
      * </p>
      * <p>
@@ -355,7 +355,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *        ArrayList<String> fields = new ArrayList<String>();
      *        fields.add("userName");
-     *        aggregate.maxBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *        aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
      *             public void onSuccess(EventEntity event) { ... }
      *             public void onFailure(Throwable T) {...}
      *        });
@@ -363,7 +363,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param fields ArrayList of fields to aggregate on
-     * @param maxField Field to getBlocking the maxBlocking value from
+     * @param maxField Field to get the max value from
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
@@ -372,9 +372,9 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to retrieveBlocking a group by MIN on a collection or filtered collection
+     * Asynchronous request to retrieve a group by MIN on a collection or filtered collection
      * <p>
-     * Generates an asynchronous request to group a collection and provide the minBlocking value of records based on a field or
+     * Generates an asynchronous request to group a collection and provide the min value of records based on a field or
      * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
      * </p>
      * <p>
@@ -383,7 +383,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *        ArrayList<String> fields = new ArrayList<String>();
      *        fields.add("userName");
-     *        aggregate.minBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *        aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
      *            public void onSuccess(EventEntity event) { ... }
      *            public void onFailure(Throwable T) {...}
      *        });
@@ -391,7 +391,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param fields ArrayList of fields to aggregate on
-     * @param minField Field to getBlocking the minBlocking value from
+     * @param minField Field to get the min value from
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
@@ -400,9 +400,9 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
-     * Asynchronous request to retrieveBlocking a group by AVERAGE on a collection or filtered collection
+     * Asynchronous request to retrieve a group by AVERAGE on a collection or filtered collection
      * <p>
-     * Generates an asynchronous request to group a collection and provide the averageBlocking value of records based on a field or
+     * Generates an asynchronous request to group a collection and provide the average value of records based on a field or
      * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
      * </p>
      * <p>
@@ -411,7 +411,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *        ArrayList<String> fields = new ArrayList<String>();
      *        fields.add("userName");
-     *        aggregate.averageBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *        aggregate.average(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
      *            public void onSuccess(EventEntity event) { ... }
      *            public void onFailure(Throwable T) {...}
      *        });
@@ -419,7 +419,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param fields ArrayList of fields to aggregate on
-     * @param averageField Field to getBlocking the maxBlocking value from
+     * @param averageField Field to get the maxBlocking value from
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */

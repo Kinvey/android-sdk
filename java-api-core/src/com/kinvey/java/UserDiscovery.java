@@ -34,9 +34,9 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 public class UserDiscovery {
 
     /**
-     * Construct a user lookupBlocking object via {@link com.kinvey.java.UserDiscovery#userLookup()}.
+     * Construct a user lookup object via {@link com.kinvey.java.UserDiscovery#userLookup()}.
      *
-     * <p>After configuring the lookupBlocking set it using {@link UserDiscovery#lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}</p>
+     * <p>After configuring the lookup set it using {@link UserDiscovery#lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}</p>
      */
     public class UserLookup extends GenericJson{
 
@@ -103,9 +103,6 @@ public class UserDiscovery {
             this.facebookID = facebookID;
         }
     }
-
-
-
 
     private AbstractClient client;
     private KinveyClientRequestInitializer requestInitializer;

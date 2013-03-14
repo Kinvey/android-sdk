@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * Launch Activity checks to see if a KinveyUser exists as a
  * in the Android native AccountManager.  If user exists,  
  * a welcome message is displayed.  Otherwise, user is 
- * re-directed to the loginBlocking screen.
+ * re-directed to the login screen.
  * 
  * Kinvey user credentials can be created by creating an 
  * account and logging in directly, logging in via 

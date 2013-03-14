@@ -88,9 +88,9 @@ public class Friend {
                 avatar = BitmapFactory.decodeStream((InputStream) new URL(
                         params[0]).getContent());
             } catch (MalformedURLException e) {
-                Log.e(TAG, "url for avatar downloadBlocking is bad", e);
+                Log.e(TAG, "url for avatar download is bad", e);
             } catch (IOException e) {
-                Log.e(TAG, "failed to downloadBlocking avatar", e);
+                Log.e(TAG, "failed to download avatar", e);
             }
 
             return null;

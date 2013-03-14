@@ -124,10 +124,10 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking an entity or entities.  Pass null to entityID to return all entities
+     * Method to get an entity or entities.  Pass null to entityID to return all entities
      * in a collection.
      *
-     * @param entityID entityID to getBlocking
+     * @param entityID entityID to get
      * @return Get object
      * @throws java.io.IOException
      */
@@ -138,10 +138,10 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking an entity or entities.  Pass null to entityID to return all entities
+     * Method to get an entity or entities.  Pass null to entityID to return all entities
      * in a collection.
      *
-     * @param entityID entityID to getBlocking
+     * @param entityID entityID to get
      * @return Get object
      * @throws java.io.IOException
      * @deprecated Renamed to {@link #getEntityBlocking(String)}
@@ -154,10 +154,10 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking a query of entities.  Pass an empty query to return all entities
+     * Method to get a query of entities.  Pass an empty query to return all entities
      * in a collection.
      *
-     * @param query Query to getBlocking
+     * @param query Query to get
      * @return Get object
      * @throws java.io.IOException
      */
@@ -169,10 +169,10 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking a query of entities.  Pass an empty query to return all entities
+     * Method to get a query of entities.  Pass an empty query to return all entities
      * in a collection.
      *
-     * @param query Query to getBlocking
+     * @param query Query to get
      * @return Get object
      * @deprecated Renamed to {@link #getBlocking(Query)}
      * @throws java.io.IOException
@@ -186,7 +186,7 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking all entities in a collection.
+     * Method to get all entities in a collection.
      *
      * @return Get Object
      * @throws IOException
@@ -197,7 +197,7 @@ public class AppData<T> {
     }
 
     /**
-     * Method to getBlocking all entities in a collection.
+     * Method to get all entities in a collection.
      *
      * @return Get Object
      * @throws IOException
@@ -209,7 +209,7 @@ public class AppData<T> {
     }
 
     /**
-     * Save (createBlocking or updateBlocking) an entity to a collection.
+     * Save (create or update) an entity to a collection.
      *
      * @param entity Entity to Save
      * @return Save object
@@ -233,7 +233,7 @@ public class AppData<T> {
     }
 
     /**
-     * Save (createBlocking or updateBlocking) an entity to a collection.
+     * Save (create or update) an entity to a collection.
      *
      * @param entity Entity to Save
      * @return Save object
@@ -261,7 +261,7 @@ public class AppData<T> {
     /**
      * Delete an entity from a collection by ID.
      *
-     * @param entityID entityID to deleteBlocking
+     * @param entityID entityID to delete
      * @return Delete object
      * @throws IOException
      */
@@ -275,7 +275,7 @@ public class AppData<T> {
     /**
      * Delete an entity from a collection by ID.
      *
-     * @param entityID entityID to deleteBlocking
+     * @param entityID entityID to delete
      * @return Delete object
      * @throws IOException
      * @deprecated Renamed to {@link #deleteBlocking(String)}
@@ -291,7 +291,7 @@ public class AppData<T> {
     /**
      * Delete an entity from a collection by Query.
      *
-     * @param query query for entities to deleteBlocking
+     * @param query query for entities to delete
      * @return Delete object
      * @throws IOException
      */
@@ -305,7 +305,7 @@ public class AppData<T> {
     /**
      * Delete an entity from a collection by Query.
      *
-     * @param query query for entities to deleteBlocking
+     * @param query query for entities to delete
      * @return Delete object
      * @throws IOException
      * @deprecated Renamed to {@link #deleteBlocking(String)}
@@ -350,7 +350,7 @@ public class AppData<T> {
      * Retrieve a group by SUM on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param sumField field to sumBlocking
+     * @param sumField field to sum
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -365,7 +365,7 @@ public class AppData<T> {
      * Retrieve a group by SUM on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param sumField field to sumBlocking
+     * @param sumField field to sum
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -382,7 +382,7 @@ public class AppData<T> {
      * Retrieve a group by MAX on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param maxField field to obtain maxBlocking value from
+     * @param maxField field to obtain max value from
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -397,7 +397,7 @@ public class AppData<T> {
      * Retrieve a group by MAX on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param maxField field to obtain maxBlocking value from
+     * @param maxField field to obtain max value from
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -445,7 +445,7 @@ public class AppData<T> {
      * Retrieve a group by AVERAGE on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param averageField field to averageBlocking
+     * @param averageField field to average
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -460,7 +460,7 @@ public class AppData<T> {
      * Retrieve a group by AVERAGE on a collection or filtered collection
      *
      * @param fields fields to group by
-     * @param averageField field to averageBlocking
+     * @param averageField field to average
      * @param query optional query to filter by (null for all records in a collection)
      * @return
      * @throws IOException
@@ -474,7 +474,7 @@ public class AppData<T> {
     }
 
     /**
-     * Private helper method to createBlocking AggregateEntity and return an intialize Aggregate Request Object
+     * Private helper method to create AggregateEntity and return an intialize Aggregate Request Object
      * @param fields fields to group by
      * @param type Type of aggregation
      * @param aggregateField Field to aggregate on
