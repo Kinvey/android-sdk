@@ -94,9 +94,6 @@ public class OfflineAppData<T> implements Observer{
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
         this.store.save(entity, callback);
-
-
-
         Intent i = new Intent(this.context, OfflineAppDataService.class);
         i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
         this.context.startService(i);
@@ -136,6 +133,8 @@ public class OfflineAppData<T> implements Observer{
     @Override
     public void update(Observable observable, Object o) {
         Log.v(Client.TAG, "Observerable changed! -> " + observable + " and " + o);
+
+
     }
 }
 

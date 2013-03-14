@@ -13,24 +13,16 @@
  */
 package com.kinvey.sample.kitchensink.offline;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.text.TextUtils;
+
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.kinvey.android.Client;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.core.UploaderProgressListener;
-import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
-import com.kinvey.sample.kitchensink.file.FileActivity;
 
 import java.io.*;
 

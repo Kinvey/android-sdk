@@ -21,10 +21,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * <p>OfflineStore class.</p>
@@ -73,6 +70,10 @@ public class OfflineStore<T> extends Observable {
 
     private OfflineExecutorSettings settings;
 
+    //a list of RequestInfo of the client requests that succeeded.
+    private ArrayList<RequestInfo> successfulCalls;
+    //a list of RequestInfo of the client requests that failed.
+    private ArrayList<RequestInfo> failedCalls;
 
 
     /**
@@ -108,6 +109,8 @@ public class OfflineStore<T> extends Observable {
             Log.v(Client.TAG, "offline store file doesn't exist, creating it!");
             this.dataStore = new HashMap<String, T>();
             this.requestStore = new LinkedList<RequestInfo>();
+            this.successfulCalls = new ArrayList<RequestInfo>();
+            this.failedCalls = new ArrayList<RequestInfo>();
             writeStore(this.context);
             return;
         }
@@ -118,6 +121,8 @@ public class OfflineStore<T> extends Observable {
             ois = new ObjectInputStream(fis);
             this.dataStore = (HashMap<String, T>) ois.readObject();
             this.requestStore = (Queue<RequestInfo>) ois.readObject();
+            this.successfulCalls = (ArrayList<RequestInfo>) ois.readObject();
+            this.failedCalls = (ArrayList<RequestInfo>) ois.readObject();
             Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (IOException e) {
@@ -150,6 +155,8 @@ public class OfflineStore<T> extends Observable {
             settings.savePreferences();
             os.writeObject(this.dataStore);
             os.writeObject(this.requestStore);
+            os.writeObject(this.successfulCalls);
+            os.writeObject(this.failedCalls);
             Log.v(Client.TAG, "wrote datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (FileNotFoundException e) {
@@ -179,8 +186,6 @@ public class OfflineStore<T> extends Observable {
         //if entity is null, call onFailure?
 
         addToQueue("GET", entityID);
-//        RequestInfo req = new RequestInfo("GET", entityID);
-//        this.requestStore.add(req);
     }
 
 
@@ -216,11 +221,6 @@ public class OfflineStore<T> extends Observable {
         addToQueue("PUT", id);
 
         addToStore(id, entity);
-
-//        RequestInfo req = new RequestInfo("PUT", id);
-//        this.requestStore.add(req);
-//        this.dataStore.put(id, entity);
-
         T curState = this.dataStore.get(id);
         if (callback != null){
             callback.onSuccess(curState);
@@ -240,8 +240,6 @@ public class OfflineStore<T> extends Observable {
      */
     public void addToStore(String entityID, T toAdd){
         this.dataStore.put(entityID, toAdd);
-        setChanged();
-        notifyObservers();
     }
 
 
@@ -256,9 +254,6 @@ public class OfflineStore<T> extends Observable {
      */
     public void addToQueue(String httpVerb, String entityID){
         this.requestStore.add(new RequestInfo(httpVerb, entityID));
-        setChanged();
-        notifyObservers();
-
     }
 
 
@@ -275,11 +270,8 @@ public class OfflineStore<T> extends Observable {
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
         T curState = this.dataStore.get(entityID);
-//        RequestInfo req = new RequestInfo("DELETE", entityID);
         addToQueue("Delete", entityID);
         addToStore(entityID, null);
-//        this.requestStore.add(req);
-//        this.dataStore.put(entityID, null);
     }
 
     /**
@@ -367,5 +359,25 @@ public class OfflineStore<T> extends Observable {
 
     public int getEntityStoreCount(){
         return this.dataStore.size();
+    }
+
+    public void notifyExecution(boolean success, OfflineStore.RequestInfo info) {
+        if (successfulCalls == null) {
+            this.successfulCalls = new ArrayList<OfflineStore.RequestInfo>();
+
+        }
+        if (failedCalls == null) {
+            this.failedCalls = new ArrayList<OfflineStore.RequestInfo>();
+        }
+
+
+        if (success) {
+            this.successfulCalls.add(info);
+        } else {
+            this.failedCalls.add(info);
+        }
+        setChanged();
+        notifyObservers(success);
+
     }
 }

@@ -65,10 +65,6 @@ public class OfflineAppDataService extends IntentService {
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.
     private boolean needsSync = false;
 
-    //a list of RequestInfo of the client requests that succeeded.
-    private ArrayList<OfflineStore.RequestInfo> successfulCalls;
-    //a list of RequestInfo of the client requests that failed.
-    private ArrayList<OfflineStore.RequestInfo> failedCalls;
 
 
     //This class maintains it's own Kinvey AbstractClient-- which needs an AppKey and an AppSecret.
@@ -117,7 +113,6 @@ public class OfflineAppDataService extends IntentService {
         if (action.equals(ACTION_OFFLINE_SYNC)) {
             this.needsSync = true;
             if (isOnline()) {
-//                OfflineStore curStore = new OfflineStore(getApplicationContext(), collectionName);
                 getFromStoreAndExecute();
             }
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -175,12 +170,12 @@ public class OfflineAppDataService extends IntentService {
                 client.appData(collectionName, responseClass).save(curStore.GetEntityFromDataStore(cur.getEntityID()), new RequestInfoCallback<T>(cur) {
                     @Override
                     public void onSuccess(T result) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
                     }
                 });
             } else if (cur.getHttpVerb().equals("DELETE")) {
@@ -188,12 +183,12 @@ public class OfflineAppDataService extends IntentService {
 
                     @Override
                     public void onSuccess(KinveyDeleteResponse result) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
                     }
                 });
 
@@ -203,38 +198,27 @@ public class OfflineAppDataService extends IntentService {
                     @Override
                     public void onSuccess(T result) {
 
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
+
                         curStore.addToStore(((GenericJson) result).get("_id").toString(), result);
+                        //TODO edwardf ^^ this is too simple and will cause issues with conflicts.
 
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo());
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
                     }
                 });
 
             } else {
-                Preconditions.checkState(false, "Unsupported Http Verb in the store");
+                Preconditions.checkNotNull(null, "Unsupported Http Verb in the store");
             }
         }
     }
 
-    private void storeCompletedRequestInfo(boolean success, OfflineStore.RequestInfo info) {
-        if (successfulCalls == null) {
-            this.successfulCalls = new ArrayList<OfflineStore.RequestInfo>();
-        }
-        if (failedCalls == null) {
-            this.failedCalls = new ArrayList<OfflineStore.RequestInfo>();
-        }
-
-
-        if (success) {
-            this.successfulCalls.add(info);
-        } else {
-            this.failedCalls.add(info);
-        }
-
+    private void storeCompletedRequestInfo(boolean success, OfflineStore.RequestInfo info, OfflineStore store) {
+        store.notifyExecution(success, info);
     }
 
 
