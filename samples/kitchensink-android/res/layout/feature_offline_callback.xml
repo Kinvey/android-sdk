@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:orientation="vertical">
+
+
+
+
+        <LinearLayout style="@style/usecase_row">
+            <Button android:text="Save" android:id="@+id/offline_save_button"
+                      style="@style/usecase_row_label"/>
+
+
+            <EditText android:id="@+id/offline_save_id"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/usecase_row">
+            <TextView style="@style/usecase_row_label" android:text="_id: "/>
+
+
+            <TextView android:id="@+id/offline_save_callback_id"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/usecase_row">
+            <Button android:text="Get"  android:id="@+id/offline_get_button"
+                    style="@style/usecase_row_label"/>
+
+
+            <EditText android:id="@+id/offline_get_id"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/usecase_row">
+            <TextView style="@style/usecase_row_label" android:text="_id: "/>
+
+
+            <TextView android:id="@+id/offline_get_callback_id"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/usecase_row">
+            <TextView style="@style/usecase_row_label" android:text="Entity count: "/>
+
+
+            <TextView android:id="@+id/offline_store_entity_count"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/usecase_row">
+            <TextView style="@style/usecase_row_label" android:text="Queue Size: "/>
+
+
+            <TextView android:id="@+id/offline_store_queue_size"
+                      style="@style/usecase_row_value"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

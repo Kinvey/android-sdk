@@ -23,6 +23,8 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
 /** This class allows for managing a collection while the client is offline, and syncing with Kinvey when a connection is restored.
  * </p>
@@ -39,7 +41,7 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0
  */
-public class OfflineAppData<T> {
+public class OfflineAppData<T> implements Observer{
 
     private OfflineStore store;
 
@@ -48,6 +50,7 @@ public class OfflineAppData<T> {
     private AbstractClient client;
 
     private Context context;
+    private KinveyOfflineCallback callback;
 
 
     /**
@@ -62,6 +65,7 @@ public class OfflineAppData<T> {
         this.myClass = myClass;
         this.client = client;
         this.store = new OfflineStore(context, collectionName);
+        this.store.addObserver(this);
         this.context = context;
     }
 
@@ -121,9 +125,18 @@ public class OfflineAppData<T> {
     }
 
 
+    public void setCallback(KinveyOfflineCallback callback) {
+        this.callback = callback;
+    }
 
+    public KinveyOfflineCallback getCallback() {
+        return callback;
+    }
 
-
+    @Override
+    public void update(Observable observable, Object o) {
+        Log.v(Client.TAG, "Observerable changed! -> " + observable + " and " + o);
+    }
 }
 
 

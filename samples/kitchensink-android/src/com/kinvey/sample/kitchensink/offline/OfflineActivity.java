@@ -31,6 +31,8 @@ public class OfflineActivity extends FeatureActivity {
     public List<UseCaseFragment> getFragments() {
         return Arrays.asList(new UseCaseFragment[]{
                 new BasicOfflineFragment(),
+                new OfflineCallbackFragment(),
 
-        });    }
+        });
+    }
 }

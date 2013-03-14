@@ -23,6 +23,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Observable;
 import java.util.Queue;
 
 /**
@@ -44,7 +45,7 @@ import java.util.Queue;
  * queue REST requests for later online execution.
  * @version $Id: $
  */
-public class OfflineStore<T> {
+public class OfflineStore<T> extends Observable {
 
     /**
      * The datastore maps an Entity's _id to an instance of an entity.  This represents the latest local state of the Entity,
@@ -59,8 +60,8 @@ public class OfflineStore<T> {
      */
     private Queue<RequestInfo> requestStore;
 
-    //Query and aggregate support require another two HashMaps, mapping a String to a List of Strings.
-    //The String is the query(aggregrate) itself, and the list of Strings represent all _ids associated with the query(aggregate).
+    //Query and aggregate support require another two HashMaps, one for each, mapping a String to a List of Strings.
+    //The String Key is the query(aggregrate) itself, and the list of Strings (Value) represent all _ids associated with the query/aggregate.
 
     //When persisting to disk the Collection name is appended to form a unique file name in local storage
     private static final String FILENAME = "Kinvey_offline_";
@@ -177,8 +178,9 @@ public class OfflineStore<T> {
         }
         //if entity is null, call onFailure?
 
-        RequestInfo req = new RequestInfo("GET", entityID);
-        this.requestStore.add(req);
+        addToQueue("GET", entityID);
+//        RequestInfo req = new RequestInfo("GET", entityID);
+//        this.requestStore.add(req);
     }
 
 
@@ -211,9 +213,13 @@ public class OfflineStore<T> {
         }
         Log.v(Client.TAG, "offline saving -> " + id);
 
-        RequestInfo req = new RequestInfo("PUT", id);
-        this.requestStore.add(req);
-        this.dataStore.put(id, entity);
+        addToQueue("PUT", id);
+
+        addToStore(id, entity);
+
+//        RequestInfo req = new RequestInfo("PUT", id);
+//        this.requestStore.add(req);
+//        this.dataStore.put(id, entity);
 
         T curState = this.dataStore.get(id);
         if (callback != null){
@@ -224,13 +230,35 @@ public class OfflineStore<T> {
 
 
     /**
-     * put an entity directly in the store
+     * put an entity directly in the data store.
+     * <p>
+     * This method will notify all observers.
+     * </p>
      *
      * @param entityID - the unique id is used as a key
      * @param toAdd - the entity to put in the store.
      */
     public void addToStore(String entityID, T toAdd){
         this.dataStore.put(entityID, toAdd);
+        setChanged();
+        notifyObservers();
+    }
+
+
+    /**
+     * put an entity directly in the request queue for later execution.
+     * <p>
+     * This method will notify all observers.
+     * </p>
+     *
+     * @param httpVerb - The verb of the pending request.
+     * @param entityID - the ID of the entity to apply this verb too
+     */
+    public void addToQueue(String httpVerb, String entityID){
+        this.requestStore.add(new RequestInfo(httpVerb, entityID));
+        setChanged();
+        notifyObservers();
+
     }
 
 
@@ -247,9 +275,11 @@ public class OfflineStore<T> {
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
         T curState = this.dataStore.get(entityID);
-        RequestInfo req = new RequestInfo("DELETE", entityID);
-        this.requestStore.add(req);
-        this.dataStore.put(entityID, null);
+//        RequestInfo req = new RequestInfo("DELETE", entityID);
+        addToQueue("Delete", entityID);
+        addToStore(entityID, null);
+//        this.requestStore.add(req);
+//        this.dataStore.put(entityID, null);
     }
 
     /**
