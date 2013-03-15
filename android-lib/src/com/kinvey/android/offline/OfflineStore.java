@@ -94,7 +94,7 @@ public class OfflineStore<T> extends Observable {
     }
 
     private void loadOfflineSettings() {
-        this.settings = new OfflineExecutorSettings(this.context);
+        this.settings = OfflineExecutorSettings.getInstance(context);
     }
 
 

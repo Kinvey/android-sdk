@@ -41,10 +41,13 @@ public class OfflineExecutorSettings implements Serializable {
     private int batchSize = 3;
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.
     private boolean needsSync = false;
+    private static OfflineExecutorSettings _instance;
 
     private SharedPreferences preferences;
 
-    public OfflineExecutorSettings(Context context){
+    protected Object lock = new Object();
+
+    private OfflineExecutorSettings(Context context){
         preferences = context.getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
         staggerTime = preferences.getLong(STAGGER_TIME_PREFERENCE, 1000L);
         requireWIFI = preferences.getBoolean(REQUIRE_WIFI_PREFERENCE,false);
@@ -52,44 +55,71 @@ public class OfflineExecutorSettings implements Serializable {
         needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE,false);
     }
 
+    public static OfflineExecutorSettings getInstance(Context context) {
+        synchronized (OfflineExecutorSettings.class) {
+            if (_instance == null) {
+                _instance = new OfflineExecutorSettings(context);
+            }
+        }
+        return _instance;
+    }
+
     public long getStaggerTime() {
-        return staggerTime;
+        synchronized(lock) {
+            return staggerTime;
+        }
     }
 
     public void setStaggerTime(long staggerTime) {
-        this.staggerTime = staggerTime;
+        synchronized (lock) {
+            this.staggerTime = staggerTime;
+        }
     }
 
     public boolean isRequireWIFI() {
-        return requireWIFI;
+        synchronized (lock) {
+            return requireWIFI;
+        }
     }
 
     public void setRequireWIFI(boolean requireWIFI) {
-        this.requireWIFI = requireWIFI;
+        synchronized (lock) {
+            this.requireWIFI = requireWIFI;
+        }
     }
 
     public int getBatchSize() {
-        return batchSize;
+        synchronized (lock) {
+            return batchSize;
+        }
     }
 
     public void setBatchSize(int batchSize) {
-        this.batchSize = batchSize;
+        synchronized (lock) {
+            this.batchSize = batchSize;
+        }
     }
 
     public boolean isNeedsSync() {
-        return needsSync;
+        synchronized (lock) {
+            return needsSync;
+        }
     }
 
     public void setNeedsSync(boolean needsSync) {
-        this.needsSync = needsSync;
+        synchronized (lock) {
+            this.needsSync = needsSync;
+        }
     }
 
     public void savePreferences() {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putLong(STAGGER_TIME_PREFERENCE, 1000L);
-        editor.putBoolean(REQUIRE_WIFI_PREFERENCE,false);
-        editor.putInt(BATCH_SIZE_PREFERENCE,3);
-        editor.putBoolean(NEEDS_SYNC_PREFERENCE,false);
-        editor.commit();
+        synchronized (lock) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putLong(STAGGER_TIME_PREFERENCE, 1000L);
+            editor.putBoolean(REQUIRE_WIFI_PREFERENCE,false);
+            editor.putInt(BATCH_SIZE_PREFERENCE,3);
+            editor.putBoolean(NEEDS_SYNC_PREFERENCE,false);
+            editor.commit();
+        }
     }
 }

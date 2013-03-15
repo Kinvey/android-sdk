@@ -61,16 +61,10 @@ public class OfflineAppDataService extends IntentService {
     //a flag indicating if the service should only execute calls on WIFI or if any network will suffice.
     private boolean requireWIFI;
     //The size of a batch, indicating how many async requests are executed at the same time.
-    private int batchSize = 3;
+    private int batchSize;
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.
-    private boolean needsSync = false;
+    private boolean needsSync;
 
-
-
-    //This class maintains it's own Kinvey AbstractClient-- which needs an AppKey and an AppSecret.
-    private String appKey;
-    private String appSecret;
-//
 //    //Every call to Kinvey's AppData API needs an associated collection and response class.
     private String collectionName = "OfflineTest";  //TODO cannot hardcode!
     private Class responseClass;
@@ -83,6 +77,11 @@ public class OfflineAppDataService extends IntentService {
 
     public void onCreate() {
         super.onCreate();
+        OfflineExecutorSettings settings = OfflineExecutorSettings.getInstance(this);
+        batchSize = settings.getBatchSize();
+        requireWIFI = settings.isRequireWIFI();
+        staggerTime = settings.getStaggerTime();
+        needsSync = settings.isNeedsSync();
         Log.d(Client.TAG, "Offline Executor created");
     }
 
