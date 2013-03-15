@@ -55,7 +55,7 @@ public class OfflineStore<T> extends Observable {
      * <p/>
      * The RequestInfo class maintains an HTTP Verb as well as a String _id of the associated entity.
      */
-    private Queue<RequestInfo> requestStore;
+    private Queue<OfflineRequestInfo> requestStore;
 
     //Query and aggregate support require another two HashMaps, one for each, mapping a String to a List of Strings.
     //The String Key is the query(aggregrate) itself, and the list of Strings (Value) represent all _ids associated with the query/aggregate.
@@ -71,9 +71,9 @@ public class OfflineStore<T> extends Observable {
     private OfflineExecutorSettings settings;
 
     //a list of RequestInfo of the client requests that succeeded.
-    private ArrayList<RequestInfo> successfulCalls;
+    private ArrayList<OfflineRequestInfo> successfulCalls;
     //a list of RequestInfo of the client requests that failed.
-    private ArrayList<RequestInfo> failedCalls;
+    private ArrayList<OfflineRequestInfo> failedCalls;
 
 
     /**
@@ -108,9 +108,9 @@ public class OfflineStore<T> extends Observable {
             //Offline store doesn't exist so we need to create it.
             Log.v(Client.TAG, "offline store file doesn't exist, creating it!");
             this.dataStore = new HashMap<String, T>();
-            this.requestStore = new LinkedList<RequestInfo>();
-            this.successfulCalls = new ArrayList<RequestInfo>();
-            this.failedCalls = new ArrayList<RequestInfo>();
+            this.requestStore = new LinkedList<OfflineRequestInfo>();
+            this.successfulCalls = new ArrayList<OfflineRequestInfo>();
+            this.failedCalls = new ArrayList<OfflineRequestInfo>();
             writeStore(this.context);
             return;
         }
@@ -120,9 +120,9 @@ public class OfflineStore<T> extends Observable {
         try {
             ois = new ObjectInputStream(fis);
             this.dataStore = (HashMap<String, T>) ois.readObject();
-            this.requestStore = (Queue<RequestInfo>) ois.readObject();
-            this.successfulCalls = (ArrayList<RequestInfo>) ois.readObject();
-            this.failedCalls = (ArrayList<RequestInfo>) ois.readObject();
+            this.requestStore = (Queue<OfflineRequestInfo>) ois.readObject();
+            this.successfulCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
+            this.failedCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
             Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (IOException e) {
@@ -253,7 +253,7 @@ public class OfflineStore<T> extends Observable {
      * @param entityID - the ID of the entity to apply this verb too
      */
     public void addToQueue(String httpVerb, String entityID){
-        this.requestStore.add(new RequestInfo(httpVerb, entityID));
+        this.requestStore.add(new OfflineRequestInfo(httpVerb, entityID));
     }
 
 
@@ -279,7 +279,7 @@ public class OfflineStore<T> extends Observable {
      *
      * @return information about the first client request that has been queued OR {@code null} if empty.
      */
-    public RequestInfo pop() {
+    public OfflineRequestInfo pop() {
         return this.requestStore.poll();
     }
 
@@ -292,38 +292,9 @@ public class OfflineStore<T> extends Observable {
     }
 
 
-    /**
-     * This public static class maintains information about the client request.
-     * <p/>
-     * This stores the relationship between an Http Verb and and an associated entity's ID.
-     * <p/>
-     * myRequest.verb represents the HTTP verb as a String ("GET", "PUT", "DELETE", "POST");
-     * myRequest.id represents the id of the entity, which might be stored in the local store.
-     */
-    public static class RequestInfo implements Serializable {
 
-        private static final long serialVersionUID = -444939394072970523L;
 
-        //The Http verb of the client request ("GET", "PUT", "DELETE", "POST");
-        private String verb;
 
-        //The id of the entity, assuming it is in the store.
-        private String id;
-
-        public RequestInfo(String httpVerb, String entityID) {
-            this.verb = httpVerb;
-            this.id = entityID;
-        }
-
-        public String getHttpVerb() {
-            return this.verb;
-        }
-
-        public String getEntityID() {
-            return this.id;
-        }
-
-    }
 
     private static String generateMongoDBID() {
         //from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
@@ -361,23 +332,16 @@ public class OfflineStore<T> extends Observable {
         return this.dataStore.size();
     }
 
-    public void notifyExecution(boolean success, OfflineStore.RequestInfo info) {
-        if (successfulCalls == null) {
-            this.successfulCalls = new ArrayList<OfflineStore.RequestInfo>();
-
-        }
-        if (failedCalls == null) {
-            this.failedCalls = new ArrayList<OfflineStore.RequestInfo>();
-        }
-
-
+    public void notifyExecution(boolean success, OfflineRequestInfo info) {
         if (success) {
             this.successfulCalls.add(info);
         } else {
             this.failedCalls.add(info);
         }
+        writeStore(this.context);
         setChanged();
-        notifyObservers(success);
+        //TODO edwardf response is set as null!! Think through passing back an Object of type <T> (delete?)
+        notifyObservers(new OfflineResponseInfo(info, null, success));
 
     }
 }

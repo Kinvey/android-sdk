@@ -21,8 +21,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.R;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.KinveyOfflineCallback;
+import com.kinvey.android.offline.KinveyOfflineSyncCallback;
 import com.kinvey.android.offline.OfflineAppData;
+import com.kinvey.android.offline.OfflineResponseInfo;
+import com.kinvey.android.offline.OfflineStore;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -30,7 +32,7 @@ import com.kinvey.sample.kitchensink.UseCaseFragment;
  * @author edwardf
  * @since 2.0
  */
-public class OfflineCallbackFragment extends UseCaseFragment implements View.OnClickListener, KinveyOfflineCallback {
+public class OfflineCallbackFragment extends UseCaseFragment implements View.OnClickListener, KinveyOfflineSyncCallback {
 
 
     private Button saveButton;
@@ -66,7 +68,17 @@ public class OfflineCallbackFragment extends UseCaseFragment implements View.OnC
         getButton.setOnClickListener(this);
 
         offline = getClient().offlineAppData(collectionName, OfflineEntity.class);
-        offline.setCallback(this);
+        offline.setCallback(new KinveyOfflineSyncCallback() {
+            @Override
+            public void onSuccess(OfflineResponseInfo responseInfo) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onFailure(OfflineResponseInfo responseInfo) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
     }
 
     @Override
@@ -117,12 +129,12 @@ public class OfflineCallbackFragment extends UseCaseFragment implements View.OnC
     }
 
     @Override
-    public void onSuccess(String httpVerb, String entityID) {
+    public void onSuccess(OfflineResponseInfo responseInfo) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void onFailure(String httpVerb, String entityID) {
+    public void onFailure(OfflineResponseInfo responseInfo) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

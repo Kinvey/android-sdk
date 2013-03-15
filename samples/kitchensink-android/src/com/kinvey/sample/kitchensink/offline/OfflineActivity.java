@@ -15,9 +15,6 @@ package com.kinvey.sample.kitchensink.offline;
 
 import com.kinvey.sample.kitchensink.FeatureActivity;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
-import com.kinvey.sample.kitchensink.file.DeleteFragment;
-import com.kinvey.sample.kitchensink.file.DownloadFragment;
-import com.kinvey.sample.kitchensink.file.UploadFragment;
 
 import java.util.Arrays;
 import java.util.List;

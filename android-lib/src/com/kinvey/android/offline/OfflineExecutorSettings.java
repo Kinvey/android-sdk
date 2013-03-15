@@ -19,7 +19,6 @@ import android.content.SharedPreferences;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import com.kinvey.android.offline.OfflineStore.RequestInfo;
 
 /**
  * @author mjsalinger

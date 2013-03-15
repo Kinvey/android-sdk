@@ -50,7 +50,7 @@ public class OfflineAppData<T> implements Observer{
     private AbstractClient client;
 
     private Context context;
-    private KinveyOfflineCallback callback;
+    private KinveyOfflineSyncCallback callback;
 
 
     /**
@@ -122,11 +122,11 @@ public class OfflineAppData<T> implements Observer{
     }
 
 
-    public void setCallback(KinveyOfflineCallback callback) {
+    public void setCallback(KinveyOfflineSyncCallback callback) {
         this.callback = callback;
     }
 
-    public KinveyOfflineCallback getCallback() {
+    public KinveyOfflineSyncCallback getCallback() {
         return callback;
     }
 

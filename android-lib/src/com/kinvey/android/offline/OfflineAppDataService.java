@@ -152,7 +152,7 @@ public class OfflineAppDataService extends IntentService {
 
         for (int i = 0; i < batchSize; i++) {
 
-            OfflineStore.RequestInfo cur = curStore.pop();
+            OfflineRequestInfo cur = curStore.pop();
 
             if(cur == null){
                 //if a call to pop() on the store returns null, then there is nothing left in the queue
@@ -216,7 +216,7 @@ public class OfflineAppDataService extends IntentService {
         }
     }
 
-    private void storeCompletedRequestInfo(boolean success, OfflineStore.RequestInfo info, OfflineStore store) {
+    private void storeCompletedRequestInfo(boolean success, OfflineRequestInfo info, OfflineStore store) {
         store.notifyExecution(success, info);
     }
 
@@ -242,14 +242,14 @@ public class OfflineAppDataService extends IntentService {
 
     private abstract class RequestInfoCallback<T> implements KinveyClientCallback<T> {
 
-        private OfflineStore.RequestInfo info;
+        private OfflineRequestInfo info;
 
-        public RequestInfoCallback(OfflineStore.RequestInfo info) {
+        public RequestInfoCallback(OfflineRequestInfo info) {
             super();
             this.info = info;
         }
 
-        public OfflineStore.RequestInfo getInfo() {
+        public OfflineRequestInfo getInfo() {
             return this.info;
         }
 
@@ -258,14 +258,14 @@ public class OfflineAppDataService extends IntentService {
 
     private abstract class DeleteRequestInfoCallback implements KinveyDeleteCallback {
 
-        private OfflineStore.RequestInfo info;
+        private OfflineRequestInfo info;
 
-        public DeleteRequestInfoCallback(OfflineStore.RequestInfo info) {
+        public DeleteRequestInfoCallback(OfflineRequestInfo info) {
             super();
             this.info = info;
         }
 
-        public OfflineStore.RequestInfo getInfo() {
+        public OfflineRequestInfo getInfo() {
             return this.info;
         }
 

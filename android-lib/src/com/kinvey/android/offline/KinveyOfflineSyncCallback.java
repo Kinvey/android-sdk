@@ -15,11 +15,11 @@ package com.kinvey.android.offline;
 /**
  * @author edwardf
  */
-public interface KinveyOfflineCallback {
+public interface KinveyOfflineSyncCallback {
 
-    public void onSuccess(String httpVerb, String entityID);
+    public void onSuccess(OfflineResponseInfo responseInfo);
 
-    public void onFailure(String httpVerb, String entityID);
+    public void onFailure(OfflineResponseInfo responseInfo);
 
 
 
