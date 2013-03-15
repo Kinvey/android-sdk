@@ -136,7 +136,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * @param facebookID a {@link java.lang.String} object.
      * @param callback a {@link com.kinvey.android.callback.KinveyUserListCallback} object.
      */
-    public <T> void lookupByFacebookID(String facebookID, KinveyUserListCallback callback) {
+    public void lookupByFacebookID(String facebookID, KinveyUserListCallback callback) {
         Preconditions.checkNotNull(facebookID, "facebookID must not be null.");
         UserLookup userCollectionLookup = userLookup();
         userCollectionLookup.setFacebookID(facebookID);
@@ -166,7 +166,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * @param userlookup a UserLookup object.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      */
-    public <T> void lookup(UserLookup userlookup, KinveyUserListCallback callback) {
+    public void lookup(UserLookup userlookup, KinveyUserListCallback callback) {
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
         new Lookup(userlookup, callback).execute();
