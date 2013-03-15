@@ -173,7 +173,7 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
 
 
         //create a file to write bitmap data
-        File f = new File(getSherlockActivity().getCacheDir(), getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
+        File f = new File(getSherlockActivity().getCacheDir(), getClient().user() + "_attachment_" + System.currentTimeMillis() + ".png");
         try{
         f.createNewFile();
         }catch(Exception e ){}
@@ -195,7 +195,7 @@ public class ShareFragment extends KinveyFragment implements View.OnClickListene
 
 
 
-        saveUpdateAttachment(progressDialog, byteArray, getClient().getClientUsers().getCurrentUser() + "_attachment_" + System.currentTimeMillis() + ".png");
+        saveUpdateAttachment(progressDialog, byteArray, getClient().user() + "_attachment_" + System.currentTimeMillis() + ".png");
     }
 
 

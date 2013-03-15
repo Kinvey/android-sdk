@@ -114,6 +114,8 @@ public class AsyncUser extends User {
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             }
         });
+     * </pre>
+     * </p>
      *
      * @param callback An implementation of the AbstractClient Callback that returns a valid user object
      */

@@ -121,6 +121,32 @@ public class Client extends AbstractClient {
      *
      * Creates a new instance of the AppData class or returns the existing instance.
      */
+
+    /**
+     * AppData factory method
+     * <p>
+     * Returns an instance of {@link com.kinvey.java.AppData} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of {@link AsyncAppData} is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.AppData}.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+        AppData<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
+     }
+     });
+     * </pre>
+     * </p>
+     *
+     * @param collectionName The name of the collection
+     * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
+     *                for saving and fetching of data
+     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @return Instance of {@link com.kinvey.java.AppData} for the defined collection
+     */
     public <T> AsyncAppData<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
@@ -135,8 +161,28 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Creates a new instance of the LinkedData class or returns the existing instance
+     * LinkedData factory method
+     * <p>
+     * Returns an instance of {@link AsyncLinkedData} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of LinkedData is created per collection.  The method is Generic and takes an instance of a
+     * {@link LinkedGenericJson} entity type that is used for fetching/saving of {@link AsyncLinkedData}.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     LinkedData<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
+     }
+     });
+     * </pre>
+     * </p>
      *
+     * @param collectionName The name of the collection
+     * @param myClass The class that defines the entity of type {@link LinkedGenericJson} used for saving and fetching of data
+     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @return Instance of {@link AsyncLinkedData} for the defined collection
      */
     public <T extends LinkedGenericJson> AsyncLinkedData<T> linkedData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
@@ -152,7 +198,29 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Creates a new instance of the Offline AppData class or returns the existing instance.
+     * OfflineAppData factory method
+     * <p>
+     * Returns an instance of {@link OfflineAppData} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of {@link OfflineAppData} is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link OfflineAppData}.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     OfflineAppData<myEntity> myAppData = kinveyClient.offlineAppData("entityCollection", myEntity.class);
+     }
+     });
+     * </pre>
+     * </p>
+     *
+     * @param collectionName The name of the collection
+     * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
+     *                for saving and fetching of data
+     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @return Instance of {@link OfflineAppData} for the defined collection
      */
     public <T> OfflineAppData<T> offlineAppData(String collectionName, Class<T> myClass, Context applicationContext) {
         synchronized (lock) {
@@ -169,9 +237,24 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * {@inheritDoc}
+     * File factory method
+     * <p>
+     * Returns an instance of {@link com.kinvey.java.File} for uploading and downloading of files.  Only one instance is created for each
+     * instance of the Kinvey client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     File myFile = kinveyClient.file();
+     }
+     });
+     * </pre>
+     * </p>
      *
-     * Access to the File service where files of all sizes including images and videos can be uploaded and downloaded.
+     * @return Instance of {@link com.kinvey.java.File} for the defined collection
      */
     @Override
     public AsyncFile file() {
@@ -183,7 +266,26 @@ public class Client extends AbstractClient {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * UserDiscovery factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.UserDiscovery} used for searching for users. Only one instance of
+     * UserDiscovery is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     UserDiscovery myUserDiscovery = kinveyClient.userDiscovery();
+     }
+     });
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
+     */
     @Override
     public AsyncUserDiscovery userDiscovery() {
         synchronized (lock) {
@@ -195,7 +297,26 @@ public class Client extends AbstractClient {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * UserGroup factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.UserGroup} used for managing user groups. Only one instance of
+     * UserGroup is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     UserGroup myUserGroup = kinveyClient.userGroup();
+     }
+     });
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserGroup} for the defined collection
+     */
     @Override
     public AsyncUserGroup userGroup() {
         synchronized (lock) {
@@ -210,7 +331,7 @@ public class Client extends AbstractClient {
 
     /** {@inheritDoc} */
     @Override
-    public ClientUsers getClientUsers() {
+    protected ClientUsers getClientUsers() {
         synchronized (lock) {
             if (this.clientUsers == null) {
                 this.clientUsers = AndroidClientUsers.getClientUsers(this.context);
@@ -225,7 +346,26 @@ public class Client extends AbstractClient {
         return (user != null && !user.isEmpty());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * User factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.User} that contains the current active user.  If no active user context
+     * has been established, the {@link com.kinvey.java.User} object returned will be instantiated and empty.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     User currentUser = kinveyClient.currentUser();
+     }
+     });
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.User} for the defined collection
+     */
     @Override
     public AsyncUser user() {
         synchronized (lock) {
@@ -241,9 +381,24 @@ public class Client extends AbstractClient {
 
 
     /**
-     * <p>push</p>
+     * Push factory method
+     * <p>
+     * Returns the instance of {@link AbstractPush} used for configuring Push. Only one instance of
+     * {@link AbstractPush} is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     AbstractPush myPush = kinveyClient.push();
+     }
+     });
+     * </pre>
+     * </p>
      *
-     * @return a {@link com.kinvey.android.push.AbstractPush} object.
+     * @return Instance of {@link AbstractPush} for the defined collection
      */
     public AbstractPush push() {
         synchronized (lock) {
@@ -255,9 +410,22 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * Performs an authenticated ping against the configured Kinvey backend.
+     * Asynchronous Ping service method
+     * <p>
+     * Performs an authenticated ping against the configured Kinvey backend.  This method must be executed in the context
+     * of a logged-in active user.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+        kinveyClient.ping(new KinveyPingCallback() {
+            onSuccess(Boolean result) { ... }
+            onFailure(Throwable error) { ... }
+        }
+     * </pre>
+     * </p>
      *
-     * @param callback object to be notified when request completes
+     * @param callback object of type {@link KinveyPingCallback} to be notified when request completes
      */
     public void ping(KinveyPingCallback callback) {
         new Ping(callback).execute();

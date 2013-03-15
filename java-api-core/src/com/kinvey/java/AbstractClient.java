@@ -84,6 +84,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     /**
+     *
+     *
      * @return a new instance of the AppData class
      */
     public abstract <T> AppData<T> appData(String collectionName, Class<T> myClass);
@@ -114,7 +116,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         }
     }
 
-    public abstract ClientUsers getClientUsers();
+    protected abstract ClientUsers getClientUsers();
 
     /**
      * Pings the Kinvey backend service with a logged in user.
