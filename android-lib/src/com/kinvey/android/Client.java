@@ -216,13 +216,14 @@ public class Client extends AbstractClient {
      * </pre>
      * </p>
      *
+     *
+     *
      * @param collectionName The name of the collection
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
-     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
      * @return Instance of {@link OfflineAppData} for the defined collection
      */
-    public <T> OfflineAppData<T> offlineAppData(String collectionName, Class<T> myClass, Context applicationContext) {
+    public <T> OfflineAppData<T> offlineAppData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
 
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
@@ -230,7 +231,7 @@ public class Client extends AbstractClient {
                 offlineInstanceCache = new ConcurrentHashMap<String, OfflineAppData>();
             }
             if (!offlineInstanceCache.containsKey(collectionName)) {
-                offlineInstanceCache.put(collectionName, new OfflineAppData(collectionName, myClass, this, applicationContext));
+                offlineInstanceCache.put(collectionName, new OfflineAppData(collectionName, myClass, this, context));
             }
             return offlineInstanceCache.get(collectionName);
         }

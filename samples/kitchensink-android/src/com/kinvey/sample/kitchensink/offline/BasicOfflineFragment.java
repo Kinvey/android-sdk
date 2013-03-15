@@ -79,7 +79,7 @@ public class BasicOfflineFragment extends UseCaseFragment implements View.OnClic
     }
 
     private void saveOffline() {
-        getClient().offlineAppData(collectionName, OfflineEntity.class, getApplicationContext()).save(new OfflineEntity(), new KinveyClientCallback<OfflineEntity>() {
+        getClient().offlineAppData(collectionName, OfflineEntity.class).save(new OfflineEntity(), new KinveyClientCallback<OfflineEntity>() {
             @Override
             public void onSuccess(OfflineEntity result) {
                 Log.i(Client.TAG, "entity saved offline");
@@ -102,8 +102,8 @@ public class BasicOfflineFragment extends UseCaseFragment implements View.OnClic
     }
 
     private void updateStoreState() {
-        String qs = String.valueOf(getClient().offlineAppData(collectionName, OfflineEntity.class, getApplicationContext()).getQueueSize());
-        String ec = String.valueOf(getClient().offlineAppData(collectionName, OfflineEntity.class, getApplicationContext()).getEntityCount());
+        String qs = String.valueOf(getClient().offlineAppData(collectionName, OfflineEntity.class).getQueueSize());
+        String ec = String.valueOf(getClient().offlineAppData(collectionName, OfflineEntity.class).getEntityCount());
 
         queueSize.setText(qs);
         storeSize.setText(ec);
