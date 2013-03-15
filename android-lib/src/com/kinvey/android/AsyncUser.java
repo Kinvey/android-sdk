@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.kinvey.android.callback.KinveyUserCallback;
 
+import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -361,7 +362,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.delete(new KinveyClientCallback<User.Delete>() {
+        user.delete(new KinveyUserDeleteCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
@@ -370,10 +371,9 @@ public class AsyncUser extends User {
      * </pre>
      *
      * @param hardDelete Erases user from Kinvey backend if true; inactivates the user if false.
-     * @param callback KinveyClientCallback containing a deleted User instance.
-     * @param <T>
+     * @param callback {@link KinveyUserDeleteCallback} containing a deleted User instance.
      */
-    public<T> void delete(Boolean hardDelete, KinveyClientCallback<T> callback) {
+    public void delete(Boolean hardDelete, KinveyUserDeleteCallback callback) {
         // TODO:  Check callback
         new Delete(hardDelete, callback).execute();
     }
@@ -737,17 +737,18 @@ public class AsyncUser extends User {
         }
     }
 
-    private class Delete extends AsyncClientRequest<User.Delete> {
+    private class Delete extends AsyncClientRequest<Void> {
         boolean hardDelete;
 
-        private Delete(boolean hardDelete, KinveyClientCallback callback) {
+        private Delete(boolean hardDelete, KinveyUserDeleteCallback callback) {
             super(callback);
             this.hardDelete = hardDelete;
         }
 
         @Override
-        protected User.Delete executeAsync() throws IOException {
-            return AsyncUser.this.deleteBlocking(hardDelete);
+        protected Void executeAsync() throws IOException {
+            AsyncUser.this.deleteBlocking(hardDelete).execute();
+            return null;
         }
     }
 

@@ -142,6 +142,11 @@ public class User extends GenericJson   {
         return this;
     }
 
+    private void removeFromStore(String userID) {
+        CredentialManager credentialManager = new CredentialManager(client.getStore());
+        credentialManager.removeCredential(userID);
+    }
+
     /**
      * Login with the implicit user.  If implicit user does not exist, the user is created.  After calling this method,
      * the application should retrieve and store the userID using getId()
@@ -675,14 +680,15 @@ public class User extends GenericJson   {
             CredentialManager manager = new CredentialManager();
             manager.removeCredential(getId());
             client.setCurrentUser(null);
+            ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setCredential(null);
         }
     }
 
     /**
-     * Delete Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
+     * Delete Request Class, extends AbstractKinveyJsonClientRequest<Void>.  Constructs the HTTP request object for
      * Delete User requests.
      */
-    public class Delete extends AbstractKinveyJsonClientRequest<User> {
+    public class Delete extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "user/{appKey}/{userID}?hard={hard}";
 
         @Key
@@ -692,9 +698,18 @@ public class User extends GenericJson   {
         private String userID;
 
         Delete(String userID, boolean hard) {
-            super(client, "DELETE", REST_PATH, null, User.class);
+            super(client, "DELETE", REST_PATH, null, Void.class);
             this.userID = userID;
             this.hard = hard;
+        }
+
+        @Override
+        public Void execute() throws IOException {
+            super.execute();
+            removeFromStore(userID);
+            logout();
+
+            return null;
         }
     }
 
