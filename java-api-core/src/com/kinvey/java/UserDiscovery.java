@@ -19,9 +19,11 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.model.UserLookup;
 
 /**
  * <p>Get access to immutable user data for the app.</p>
@@ -33,80 +35,14 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  */
 public class UserDiscovery {
 
-    /**
-     * Construct a user lookup object via {@link com.kinvey.java.UserDiscovery#userLookup()}.
-     *
-     * <p>After configuring the lookup set it using {@link UserDiscovery#lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}</p>
-     */
-    public class UserLookup extends GenericJson{
-
-        @Key("_id")
-        private String id;
-        @Key
-        private String username;
-        @Key("first_name")
-        private String firstName;
-        @Key("last_name")
-        private String lastName;
-        @Key
-        private String email;
-        @Key("_socialIdentity.facebook.id")
-        private String facebookID;
-
-        public UserLookup(){}
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getFacebookID() {
-            return facebookID;
-        }
-
-        public void setFacebookID(String facebookID) {
-            this.facebookID = facebookID;
-        }
-    }
-
     private AbstractClient client;
     private KinveyClientRequestInitializer requestInitializer;
 
+    /**
+     * Factory method to return a new UserLookup object
+     *
+     * @return
+     */
     public UserLookup userLookup() {
         return new UserLookup();
     }
@@ -189,30 +125,30 @@ public class UserDiscovery {
     public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup);
+        Lookup lookup = new Lookup(userlookup, Array.newInstance(User.class,0).getClass());
         client.initializeRequest(lookup);
         return lookup;
 
     }
 
     /**
-     * @deprecated Renamed to {@link #lookupBlocking(com.kinvey.java.UserDiscovery.UserLookup)}
+     * @deprecated Renamed to {@link #lookupBlocking(com.kinvey.java.model.UserLookup)}
      */
     @Deprecated
     public Lookup lookup(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup);
+        Lookup lookup = new Lookup(userlookup, Array.newInstance(User.class,0).getClass());
         client.initializeRequest(lookup);
         return lookup;
 
     }
 
-    public class Lookup extends AbstractKinveyJsonClientRequest<UserLookup> {
+    public class Lookup extends AbstractKinveyJsonClientRequest<User[]> {
         private static final String REST_PATH = "user/{appKey}/_lookup";
 
-        Lookup(UserLookup lookup) {
-            super(client, "POST", REST_PATH, lookup, UserLookup.class);
+        Lookup(UserLookup lookup, Class myClass) {
+            super(client, "POST", REST_PATH, lookup, myClass);
         }
     }
 }
