@@ -23,25 +23,28 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-/** This class allows for managing a collection while the client is offline, and syncing with Kinvey when a connection is restored.
+/**
+ * This class allows for managing a collection while the client is offline, and syncing with Kinvey when a connection is restored.
  * </p>
  * The OfflineStore class maintains the latest state of all Entities, as well as a queue of all REST requests made while offline.
  * </p>
  * When there are requests in the queue, an Android Service will be started to pull these requests and send them to Kinvey.
  * </p>
- * provides offline storage for data, queueing up REST requests, executing those requests, and updating the offline store with results.
+ * This class provides offline storage for data, queueing up REST requests, executing those requests, and updating the offline store with results.
  * </p>
  * </p>
  * NOTE while the offline data store is persistent, it will be empty when it is first created and needs to be seeded--
  * take this into consideration when designing an app to function offline.  This initial seeding can happen by calling save on offlineAppData
  * </p>
+ *
  * @author edwardf
  * @since 2.0
  */
-public class OfflineAppData<T> implements Observer{
+public class OfflineAppData<T> implements Observer {
 
     private OfflineStore store;
 
@@ -50,7 +53,7 @@ public class OfflineAppData<T> implements Observer{
     private AbstractClient client;
 
     private Context context;
-    private KinveyOfflineSyncCallback callback;
+    private KinveySyncCallback callback;
 
 
     /**
@@ -60,7 +63,7 @@ public class OfflineAppData<T> implements Observer{
      * @param myClass        Class Type to marshall data between.
      */
     public OfflineAppData(String collectionName, Class myClass, AbstractClient client, Context context) {
-        Log.v(Client.TAG,  "OfflineAppData API Constructor called");
+        Log.v(Client.TAG, "OfflineAppData API Constructor called");
         this.collectionName = collectionName;
         this.myClass = myClass;
         this.client = client;
@@ -70,29 +73,29 @@ public class OfflineAppData<T> implements Observer{
     }
 
 
-    /**Get an entity or entities from an offline collection.  Pass null to entityID to return all entities
+    /**
+     * Get an entity or entities from an offline collection.  Pass null to entityID to return all entities
      * in a collection.
      *
      * @param entityID entityID to get
      * @return Get object
      * @throws java.io.IOException
      */
-    public void getEntity(String entityID, KinveyClientCallback<T> callback){
+    public void getEntity(String entityID, KinveyClientCallback<T> callback) {
         //TODO revist this
         this.store.get(entityID, callback);
 
     }
 
 
-
-    /** Save (create or update) an entity to an offline collection.
+    /**
+     * Save (create or update) an entity to an offline collection.
      *
      * @param entity Entity to Save
-     *
      * @return Save object
      * @throws IOException
      */
-    public void save(T entity, KinveyClientCallback<T> callback)  {
+    public void save(T entity, KinveyClientCallback<T> callback) {
         this.store.save(entity, callback);
         Intent i = new Intent(this.context, OfflineAppDataService.class);
         i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
@@ -102,7 +105,8 @@ public class OfflineAppData<T> implements Observer{
     }
 
 
-    /** Delete an entity from an offline collection.
+    /**
+     * Delete an entity from an offline collection.
      *
      * @param entityID entityID to delete
      * @return Delete object
@@ -113,29 +117,74 @@ public class OfflineAppData<T> implements Observer{
 
     }
 
-    public int getQueueSize(){
+    /**
+     * Get how many requests are queued up for execution when a connection is restored.
+     * @return size of internal queue representing count of pending calls.
+     */
+    public int getQueueSize() {
         return this.store.getRequestStoreCount();
     }
 
-    public int getEntityCount(){
+    /**
+     * Get how many entities are locally persisted to disk
+     * @return the size of the internal store maintaining offline entities.
+     */
+    public int getEntityCount() {
         return this.store.getEntityStoreCount();
     }
 
-
-    public void setCallback(KinveyOfflineSyncCallback callback) {
+    /**
+     * Set a callback to retrieve updates on live execution of requests in background
+     *
+     * @param callback instance of a callback to receive updates.
+     */
+    public void setCallback(KinveySyncCallback callback) {
         this.callback = callback;
     }
 
-    public KinveyOfflineSyncCallback getCallback() {
+    /**
+     * Get the set callback which retrieves live updates from execution
+     *
+     * @return {@code null} or current instance of callback
+     */
+    protected KinveySyncCallback getCallback() {
         return callback;
     }
 
+    /**
+     * Called by the {@code com.kinvey.android.offline.OfflineStore} when an update occurs.
+     *
+     * @param observable - the Offline Store
+     * @param o - the Request Info of the update.
+     */
     @Override
     public void update(Observable observable, Object o) {
         Log.v(Client.TAG, "Observerable changed! -> " + observable + " and " + o);
+        if (callback == null) {
+            return;
+        }
 
 
     }
+
+    /**
+     * Get a list of requests executed by the background executor which were successful.
+     * @return list of successful offline requests
+     */
+    public List<OfflineRequestInfo> getSuccessfulCalls() {
+        return this.store.getSuccessfulCalls();
+
+
+    }
+
+    /**
+     * Get a list of requests executed by the background executor which failed.
+     * @return list of failed offline requests
+     */
+    public List<OfflineRequestInfo> getFailedCalls() {
+        return this.store.getFailedCalls();
+    }
+
 }
 
 

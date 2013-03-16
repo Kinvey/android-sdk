@@ -13,12 +13,25 @@ package com.kinvey.android.offline;
 
 
 /**
+ * This class provides callbacks from requests executed by the Offline API.
+ * <p>
+ * See the {@class com.kinvey.android.offline.OfflineResponseInfo} class for details about how offline requests are managed internally.
+ * </p>
+ *
  * @author edwardf
  */
-public interface KinveyOfflineSyncCallback {
+public interface KinveySyncCallback {
 
+    /**
+     * Used to indicate successful execution of a request by the background service.
+     * @param responseInfo - Information about the request
+     */
     public void onSuccess(OfflineResponseInfo responseInfo);
 
+    /**
+     * Used to indicate the failed execution of a request by the background service.
+     * @param responseInfo - Information about the request and failure.
+     */
     public void onFailure(OfflineResponseInfo responseInfo);
 
 

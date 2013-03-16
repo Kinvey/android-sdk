@@ -33,15 +33,24 @@ public class OfflineRequestInfo implements Serializable {
     //The id of the entity, assuming it is in the store.
     private String id;
 
+
     public OfflineRequestInfo(String httpVerb, String entityID) {
         this.verb = httpVerb;
         this.id = entityID;
     }
 
+    /**
+     * Get the HTTP VERB used by this request.
+     * @return the HTTP Verb used by this request
+     */
     public String getHttpVerb() {
         return this.verb;
     }
 
+    /**
+     * Get the entity used by this request.
+     * @return the _id of the entity affected by this request
+     */
     public String getEntityID() {
         return this.id;
     }

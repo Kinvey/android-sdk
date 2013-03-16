@@ -17,14 +17,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 
 /**
  * @author mjsalinger
  * @since 2.0
  */
-public class OfflineExecutorSettings implements Serializable {
+public class OfflineSettings implements Serializable {
 
     // Preference Constants
     public static final String BATCH_SIZE_PREFERENCE = "batchSize";
@@ -40,13 +39,13 @@ public class OfflineExecutorSettings implements Serializable {
     private int batchSize = 3;
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.
     private boolean needsSync = false;
-    private static OfflineExecutorSettings _instance;
+    private static OfflineSettings _instance;
 
     private SharedPreferences preferences;
 
     protected Object lock = new Object();
 
-    private OfflineExecutorSettings(Context context){
+    private OfflineSettings(Context context){
         preferences = context.getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
         staggerTime = preferences.getLong(STAGGER_TIME_PREFERENCE, 1000L);
         requireWIFI = preferences.getBoolean(REQUIRE_WIFI_PREFERENCE,false);
@@ -54,10 +53,10 @@ public class OfflineExecutorSettings implements Serializable {
         needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE,false);
     }
 
-    public static OfflineExecutorSettings getInstance(Context context) {
-        synchronized (OfflineExecutorSettings.class) {
+    public static OfflineSettings getInstance(Context context) {
+        synchronized (OfflineSettings.class) {
             if (_instance == null) {
-                _instance = new OfflineExecutorSettings(context);
+                _instance = new OfflineSettings(context);
             }
         }
         return _instance;

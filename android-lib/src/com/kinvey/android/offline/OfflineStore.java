@@ -25,21 +25,19 @@ import java.util.*;
 
 /**
  * <p>OfflineStore class.</p>
+ * <p>
+ * The instance can be accessed through OfflineStore.getInstance().
+ * It maintains both the latest state of all entities as well as a queue of REST requests made while offline.
+ * </p>
+ * <p>
+ * The store persists to disk, and this class provides methods to force reading and writing.This class does two things:
+ * </p>
+ * <p>
+ * store a copy of the local state of data and queue REST requests for later online execution.
+ * </p>
  *
  * @author edwardf
  * @since 2.0
- *
- *
- * The instance can be accessed through OfflineStore.getInstance().
- * It maintains both the latest state of all entities as well as a queue of REST requests made while offline.
- *
- * The store persists to disk, and this class provides methods to force reading and writing.
- *
- * This class does two things:
- *
- * store a copy of the local state of data.
- *
- * queue REST requests for later online execution.
  * @version $Id: $
  */
 public class OfflineStore<T> extends Observable {
@@ -68,7 +66,7 @@ public class OfflineStore<T> extends Observable {
 
     private Context context;
 
-    private OfflineExecutorSettings settings;
+    private OfflineSettings settings;
 
     //a list of RequestInfo of the client requests that succeeded.
     private ArrayList<OfflineRequestInfo> successfulCalls;
@@ -94,7 +92,7 @@ public class OfflineStore<T> extends Observable {
     }
 
     private void loadOfflineSettings() {
-        this.settings = OfflineExecutorSettings.getInstance(context);
+        this.settings = OfflineSettings.getInstance(context);
     }
 
 
@@ -283,11 +281,11 @@ public class OfflineStore<T> extends Observable {
         return this.requestStore.poll();
     }
 
-    public OfflineExecutorSettings getSettings() {
+    public OfflineSettings getSettings() {
         return settings;
     }
 
-    public void setSettings(OfflineExecutorSettings settings) {
+    public void setSettings(OfflineSettings settings) {
         this.settings = settings;
     }
 
@@ -344,4 +342,16 @@ public class OfflineStore<T> extends Observable {
         notifyObservers(new OfflineResponseInfo(info, null, success));
 
     }
+
+    public ArrayList<OfflineRequestInfo> getFailedCalls() {
+        return failedCalls;
+    }
+
+
+
+    public ArrayList<OfflineRequestInfo> getSuccessfulCalls() {
+        return successfulCalls;
+    }
+
+
 }

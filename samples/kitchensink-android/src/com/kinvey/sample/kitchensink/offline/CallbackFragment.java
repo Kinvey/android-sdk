@@ -21,10 +21,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.R;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.KinveyOfflineSyncCallback;
+import com.kinvey.android.offline.KinveySyncCallback;
 import com.kinvey.android.offline.OfflineAppData;
 import com.kinvey.android.offline.OfflineResponseInfo;
-import com.kinvey.android.offline.OfflineStore;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -32,7 +31,7 @@ import com.kinvey.sample.kitchensink.UseCaseFragment;
  * @author edwardf
  * @since 2.0
  */
-public class OfflineCallbackFragment extends UseCaseFragment implements View.OnClickListener, KinveyOfflineSyncCallback {
+public class CallbackFragment extends UseCaseFragment implements View.OnClickListener, KinveySyncCallback {
 
 
     private Button saveButton;
@@ -68,7 +67,7 @@ public class OfflineCallbackFragment extends UseCaseFragment implements View.OnC
         getButton.setOnClickListener(this);
 
         offline = getClient().offlineAppData(collectionName, OfflineEntity.class);
-        offline.setCallback(new KinveyOfflineSyncCallback() {
+        offline.setCallback(new KinveySyncCallback() {
             @Override
             public void onSuccess(OfflineResponseInfo responseInfo) {
                 //To change body of implemented methods use File | Settings | File Templates.
@@ -79,6 +78,8 @@ public class OfflineCallbackFragment extends UseCaseFragment implements View.OnC
                 //To change body of implemented methods use File | Settings | File Templates.
             }
         });
+
+
     }
 
     @Override

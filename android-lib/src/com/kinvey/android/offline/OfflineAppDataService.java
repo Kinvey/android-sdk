@@ -26,8 +26,6 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
-import java.util.ArrayList;
-
 /**
  * @author edwardf
  * @since 2.0
@@ -77,7 +75,7 @@ public class OfflineAppDataService extends IntentService {
 
     public void onCreate() {
         super.onCreate();
-        OfflineExecutorSettings settings = OfflineExecutorSettings.getInstance(this);
+        OfflineSettings settings = OfflineSettings.getInstance(this);
         batchSize = settings.getBatchSize();
         requireWIFI = settings.isRequireWIFI();
         staggerTime = settings.getStaggerTime();

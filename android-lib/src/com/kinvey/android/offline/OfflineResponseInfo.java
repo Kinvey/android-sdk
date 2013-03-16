@@ -16,13 +16,7 @@ package com.kinvey.android.offline;
 import java.io.Serializable;
 
 /**
- * This public static class maintains information about the client Response.
- * <p>
- * See the above RequestInfo-- this class maintains the RequestInfo of the request which resulted in this response.
- * </p>
- * <p>
- * This class also maintains the response of the request.
- * </p>
+ * This class maintains information about a response from a request executed by the offline sync service.
  *
  * myResponse.getRequest().getHTTPVerb() represents the HTTP verb as a String ("GET", "PUT", "DELETE", "POST");
  * myResponse.getRequest().getEntityID() represents the id of the entity, which might be stored in the local store.
@@ -42,7 +36,11 @@ public class OfflineResponseInfo implements Serializable {
         this.success = success;
     }
 
-
+    /**
+     * Get the RequestInfo which resulted in this response
+     *
+     * @return the request associated with thsi response
+     */
     public OfflineRequestInfo getRequest() {
         return request;
     }
@@ -51,6 +49,11 @@ public class OfflineResponseInfo implements Serializable {
         this.request = request;
     }
 
+    /**
+     * Get the JSON response as a String directly.
+     *
+     * @return the JSON response.
+     */
     public String getResponse() {
         return response;
     }
@@ -59,6 +62,10 @@ public class OfflineResponseInfo implements Serializable {
         this.response = response;
     }
 
+    /**
+     * Indication of if this request was a success or failure
+     * @return true if success, false if failed.
+     */
     public boolean isSuccess() {
         return success;
     }
