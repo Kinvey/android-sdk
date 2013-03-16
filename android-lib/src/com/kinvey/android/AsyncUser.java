@@ -118,7 +118,7 @@ public class AsyncUser extends User {
      * </pre>
      * </p>
      *
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(KinveyUserCallback callback) {
         new Login(callback).execute();
@@ -153,7 +153,7 @@ public class AsyncUser extends User {
      *
      * @param userid userID of the Kinvey User
      * @param password password of the Kinvey user
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(String userid, String password, KinveyUserCallback callback) {
         new Login(userid, password, callback).execute();
@@ -183,7 +183,7 @@ public class AsyncUser extends User {
      * </p>
      *
      * @param accessToken Facebook-generated access token.
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginFacebook(String accessToken, KinveyUserCallback callback) {
         new Login(accessToken, LoginType.FACEBOOK, callback).execute();
@@ -215,7 +215,7 @@ public class AsyncUser extends User {
      * </p>
      *
      * @param accessToken Google-generated access token.
-     * @param callback KinveyUserCallback
+     * @param callback {@link KinveyUserCallback} that contains a valid logged in user
      */
     public void loginGoogle(String accessToken, KinveyUserCallback callback)  {
         new Login(accessToken, LoginType.GOOGLE, callback).execute();
@@ -248,7 +248,7 @@ public class AsyncUser extends User {
      * @param accessSecret Twitter-generated access secret
      * @param consumerKey Twitter supplied developer consumer key
      * @param consumerSecret Twitter supplied developer consumer secret
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                              KinveyUserCallback callback)  {
@@ -282,7 +282,7 @@ public class AsyncUser extends User {
      * @param accessSecret Linked In-generated access secret
      * @param consumerKey Linked In supplied developer consumer key
      * @param consumerSecret Linked In supplied developer consumer secret
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                               KinveyUserCallback callback) {
@@ -334,7 +334,7 @@ public class AsyncUser extends User {
      *
      * @param username username of the Kinvey User
      * @param password password of the Kinvey user
-     * @param callback An implementation of the AbstractClient Callback that returns a valid user object
+     * @param callback {@link KinveyUserCallback} containing a new User instance.
      */
     public void create(String username, String password, KinveyUserCallback callback) {
         Log.v(Client.TAG, "creating");
@@ -371,7 +371,7 @@ public class AsyncUser extends User {
      * </pre>
      *
      * @param hardDelete Erases user from Kinvey backend if true; inactivates the user if false.
-     * @param callback {@link KinveyUserDeleteCallback} containing a deleted User instance.
+     * @param callback {@link KinveyUserDeleteCallback}.
      */
     public void delete(Boolean hardDelete, KinveyUserDeleteCallback callback) {
         // TODO:  Check callback
@@ -387,7 +387,7 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
-        User user = kinveyClient.getActiveUser();
+        User user = kinveyClient.user();
         user.retrieve(new KinveyUserCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
@@ -396,7 +396,7 @@ public class AsyncUser extends User {
         });
      * </pre>
      *
-     * @param callback KinveyClientCallback containing a refreshed User instance.
+     * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
      * @param <T>
      */
     public<T> void retrieve(KinveyClientCallback<T> callback) {
@@ -412,7 +412,7 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
-         User user = kinveyClient.getActiveUser();
+         User user = kinveyClient.user();
          user.retrieve(Query query, new KinveyUserListCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
@@ -421,7 +421,7 @@ public class AsyncUser extends User {
         });
      * </pre>
      *
-     * @param callback KinveyClientCallback for retrieved users.
+     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users.
      * @param <T>
      */
     public<T> void retrieve(Query q, KinveyClientCallback<T> callback) {
@@ -438,19 +438,19 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
-        User user = kinveyClient.getActiveUser();
-        user.update(new KinveyClientCallback<User.Update>() {
+        User user = kinveyClient.user();
+        user.update(new KinveyUserCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
-            public void onSuccess(Void v) { ... }
+            public void onSuccess(User result) { ... }
         });
      * </pre>
      *
-     * @param callback KinveyClientCallback containing an updated User instance.
+     * @param callback {@link KinveyUserCallback} containing an updated User instance.
      * @param <T>
      */
-    public<T> void update(KinveyClientCallback<T> callback) {
+    public<T> void update(KinveyUserCallback callback) {
         new Update(callback).execute();
     }
 
@@ -814,15 +814,15 @@ public class AsyncUser extends User {
         }
     }
 
-    private class Update extends AsyncClientRequest<User.Update> {
+    private class Update extends AsyncClientRequest<User> {
 
         private Update(KinveyClientCallback callback) {
             super(callback);
         }
 
         @Override
-        protected User.Update executeAsync() throws IOException {
-            return AsyncUser.this.updateBlocking();
+        protected User executeAsync() throws IOException {
+            return AsyncUser.this.updateBlocking().execute();
         }
     }
 
