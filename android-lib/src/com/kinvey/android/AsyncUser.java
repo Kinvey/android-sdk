@@ -388,11 +388,11 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
         User user = kinveyClient.getActiveUser();
-        user.retrieve(new KinveyClientCallback<User.Retrieve>() {
+        user.retrieve(new KinveyUserCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
-            public void onSuccess(Void v) { ... }
+            public void onSuccess(User result) { ... }
         });
      * </pre>
      *
@@ -413,11 +413,11 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
          User user = kinveyClient.getActiveUser();
-         user.retrieve(Query query, new KinveyClientCallback<User.Retrieve>() {
+         user.retrieve(Query query, new KinveyUserListCallback() {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
-            public void onSuccess(Void v) { ... }
+            public void onSuccess(User[] result) { ... }
         });
      * </pre>
      *

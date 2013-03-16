@@ -18,6 +18,7 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
@@ -56,6 +57,8 @@ public class User extends GenericJson   {
 
     @Key("username")
     private String username;
+
+    private Class thisClass = User.class;
 
     public String getId(){
         return this.id;
@@ -476,7 +479,7 @@ public class User extends GenericJson   {
      */
     public Retrieve<User> retrieveBlocking() throws IOException{
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        Retrieve<User> retrieve = new Retrieve(this.getId(), User.class);
+        Retrieve<User> retrieve = new Retrieve(this.getId(), thisClass);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -491,7 +494,7 @@ public class User extends GenericJson   {
     @Deprecated
     public Retrieve<User> retrieve() throws IOException{
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        Retrieve<User> retrieve = new Retrieve(this.getId(), User.class);
+        Retrieve<User> retrieve = new Retrieve(this.getId(), thisClass);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -504,7 +507,7 @@ public class User extends GenericJson   {
      */
     public Retrieve<User[]> retrieveBlocking(Query query) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        Retrieve<User[]> retrieve = new Retrieve(query, User[].class);
+        Retrieve<User[]> retrieve = new Retrieve(query, Array.newInstance(thisClass,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -519,7 +522,7 @@ public class User extends GenericJson   {
     @Deprecated
     public Retrieve<User[]> retrieve(Query query) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        Retrieve<User[]> retrieve = new Retrieve(query, User[].class);
+        Retrieve<User[]> retrieve = new Retrieve(query, Array.newInstance(thisClass,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
