@@ -113,10 +113,10 @@ public class OfflineSettings implements Serializable {
     public void savePreferences() {
         synchronized (lock) {
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putLong(STAGGER_TIME_PREFERENCE, 1000L);
-            editor.putBoolean(REQUIRE_WIFI_PREFERENCE,false);
-            editor.putInt(BATCH_SIZE_PREFERENCE,3);
-            editor.putBoolean(NEEDS_SYNC_PREFERENCE,false);
+            editor.putLong(STAGGER_TIME_PREFERENCE, staggerTime);
+            editor.putBoolean(REQUIRE_WIFI_PREFERENCE,requireWIFI);
+            editor.putInt(BATCH_SIZE_PREFERENCE,batchSize);
+            editor.putBoolean(NEEDS_SYNC_PREFERENCE,needsSync);
             editor.commit();
         }
     }
