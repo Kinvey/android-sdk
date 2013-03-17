@@ -72,6 +72,14 @@ public class OfflineAppData<T> implements Observer {
         this.context = context;
     }
 
+    /**
+     * Gets the instance of the OfflineSettings singleotn class
+     *
+     * @return OfflineSettings instance
+     */
+    public OfflineSettings offlineSettings() {
+        return OfflineSettings.getInstance(context);
+    }
 
     /**
      * Get an entity or entities from an offline collection.  Pass null to entityID to return all entities

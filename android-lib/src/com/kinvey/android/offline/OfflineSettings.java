@@ -68,10 +68,11 @@ public class OfflineSettings implements Serializable {
         }
     }
 
-    public void setStaggerTime(long staggerTime) {
+    public OfflineSettings setStaggerTime(long staggerTime) {
         synchronized (lock) {
             this.staggerTime = staggerTime;
         }
+        return this;
     }
 
     public boolean isRequireWIFI() {
@@ -80,10 +81,11 @@ public class OfflineSettings implements Serializable {
         }
     }
 
-    public void setRequireWIFI(boolean requireWIFI) {
+    public OfflineSettings setRequireWIFI(boolean requireWIFI) {
         synchronized (lock) {
             this.requireWIFI = requireWIFI;
         }
+        return this;
     }
 
     public int getBatchSize() {
@@ -92,10 +94,11 @@ public class OfflineSettings implements Serializable {
         }
     }
 
-    public void setBatchSize(int batchSize) {
+    public OfflineSettings setBatchSize(int batchSize) {
         synchronized (lock) {
             this.batchSize = batchSize;
         }
+        return this;
     }
 
     public boolean isNeedsSync() {
@@ -104,10 +107,11 @@ public class OfflineSettings implements Serializable {
         }
     }
 
-    public void setNeedsSync(boolean needsSync) {
+    public OfflineSettings setNeedsSync(boolean needsSync) {
         synchronized (lock) {
             this.needsSync = needsSync;
         }
+        return this;
     }
 
     public void savePreferences() {
