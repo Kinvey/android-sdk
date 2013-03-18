@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/ghost_white"
+              android:orientation="vertical">
+    <FrameLayout android:id="@+id/my_content"
+                 android:layout_width="match_parent"
+                 android:layout_height="0dip"
+                 android:layout_weight="1">
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical">
+
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="User ID:"
+                          style="@style/usecase_row_label"/>
+                <EditText android:id="@+id/login_user_name"
+                          style="@style/usecase_row_label"/>
+            </LinearLayout>
+
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="Password"
+                          style="@style/usecase_row_label"/>
+                <EditText android:id="@+id/login_user_password"
+                          android:inputType="textPassword"
+                          style="@style/usecase_row_label"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row"
+                          android:gravity="right"
+                          android:orientation="horizontal">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/ebony"
+                          android:text="implicit login"/>
+
+                <CheckBox android:id="@+id/login_anon_checkbox"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </FrameLayout>
+    <LinearLayout android:id="@+id/my_toolbar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+        <Button
+                android:id="@+id/login_button"
+                style="@style/usecase_action_button"
+                android:text="Log in"/>
+    </LinearLayout>
+
+
+</LinearLayout>
