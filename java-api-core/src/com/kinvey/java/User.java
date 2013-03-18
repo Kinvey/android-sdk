@@ -771,14 +771,14 @@ public class User extends GenericJson   {
      * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object
      * for ResetPassword User requests.
      */
-    public class ResetPassword extends AbstractKinveyJsonClientRequest<User> {
+    public class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate";
 
         @Key
         private String userID;
 
         ResetPassword(String userID) {
-            super(client, "POST", REST_PATH, userID,  User.class);
+            super(client, "POST", REST_PATH, userID,  Void.class);
             this.userID = userID;
         }
     }
@@ -787,14 +787,14 @@ public class User extends GenericJson   {
      * EmailVerification Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request
      * object for EmailVerification requests.
      */
-    public class EmailVerification extends AbstractKinveyJsonClientRequest<User> {
+    public class EmailVerification extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-email-verification-initiate";
 
         @Key
         private String userID;
 
         EmailVerification(String userID) {
-            super(client, "POST", REST_PATH, userID, User.class);
+            super(client, "POST", REST_PATH, userID, Void.class);
             this.userID = userID;
         }
     }

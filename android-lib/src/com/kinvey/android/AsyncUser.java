@@ -21,6 +21,7 @@ import android.util.Log;
 import com.kinvey.android.callback.KinveyUserCallback;
 
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
+import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -470,18 +471,17 @@ public class AsyncUser extends User {
             public void onSuccess() { ... }
         });
      * </pre></p>
-     * @param callback KinveyClientCallback
-     * @param <T>
+     * @param callback {@link KinveyUserManagementCallback}
      */
-    public<T> void resetPassword(KinveyClientCallback<T> callback) {
+    public void resetPassword(KinveyUserManagementCallback callback) {
         new ResetPassword(callback).execute();
     }
 
     /**
-     * Asynchronous Call to initiate a Password Reset request
+     * Asynchronous Call to initiate an Email Verification request
      * <p>
-     * The reset password request initiates a server-side process to reset a user's password.  Once executed, a
-     * success callback is initiated.  The user is then emailed by the server to receive the password reset.  The user's
+     * The email verification request initiates a server-side process to verify a user's email.  Once executed, a
+     * success callback is initiated.  The user is then emailed by the server to receive the email verification.  The user's
      * email address must be stored in a property named 'email' in the User collection.
      * </p>
      * <p>Sample Usage:
@@ -490,13 +490,12 @@ public class AsyncUser extends User {
             @Override
             public void onFailure(Throwable e) { ... }
             @Override
-            public void onSuccess() { ... }
+            public void onSuccess(Void result) { ... }
         });
      * </pre></p>
-     * @param callback KinveyClientCallback
-     * @param <T>
+     * @param callback {@link com.kinvey.android.callback.KinveyUserManagementCallback}
      */
-    public<T> void sendEmailVerification(KinveyClientCallback<T> callback) {
+    public void sendEmailVerification(KinveyUserManagementCallback callback) {
         new EmailVerification(callback).execute();
     }
 
@@ -826,27 +825,29 @@ public class AsyncUser extends User {
         }
     }
 
-    private class ResetPassword extends AsyncClientRequest<User.ResetPassword> {
+    private class ResetPassword extends AsyncClientRequest<Void> {
 
         private ResetPassword(KinveyClientCallback callback) {
             super(callback);
         }
 
         @Override
-        protected User.ResetPassword executeAsync() throws IOException {
-            return AsyncUser.this.resetPasswordBlocking();
+        protected Void executeAsync() throws IOException {
+            AsyncUser.this.resetPasswordBlocking();
+            return null;
         }
     }
 
-    private class EmailVerification extends AsyncClientRequest<User.EmailVerification> {
+    private class EmailVerification extends AsyncClientRequest<Void> {
 
         private EmailVerification(KinveyClientCallback callback) {
             super(callback);
         }
 
         @Override
-        protected User.EmailVerification executeAsync() throws IOException {
-            return AsyncUser.this.sendEmailVerificationBlocking();
+        protected Void executeAsync() throws IOException {
+            AsyncUser.this.sendEmailVerificationBlocking();
+            return null;
         }
     }
 }
