@@ -51,6 +51,7 @@ public class OfflineSettings implements Serializable {
         requireWIFI = preferences.getBoolean(REQUIRE_WIFI_PREFERENCE,false);
         batchSize = preferences.getInt(BATCH_SIZE_PREFERENCE,3);
         needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE,false);
+        savePreferences();
     }
 
     public static OfflineSettings getInstance(Context context) {

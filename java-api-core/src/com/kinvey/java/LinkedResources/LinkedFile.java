@@ -31,6 +31,17 @@ public class LinkedFile {
         this.fileName = fileName;
     }
 
+    public LinkedFile(String fileName, ByteArrayInputStream input) {
+        this.fileName = fileName;
+        this.input = input;
+    }
+
+    public LinkedFile(String fileName, ByteArrayOutputStream output){
+        this.fileName = fileName;
+        this.output = output;
+    }
+
+
 
     public String getFileName() {
         return fileName;

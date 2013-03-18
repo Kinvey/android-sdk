@@ -70,6 +70,8 @@ public class OfflineAppData<T> implements Observer {
         this.store = new OfflineStore(context, collectionName);
         this.store.addObserver(this);
         this.context = context;
+
+
     }
 
     /**
@@ -90,7 +92,6 @@ public class OfflineAppData<T> implements Observer {
      * @throws java.io.IOException
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback) {
-        //TODO revist this
         this.store.get(entityID, callback);
 
     }
@@ -108,7 +109,7 @@ public class OfflineAppData<T> implements Observer {
         Intent i = new Intent(this.context, OfflineAppDataService.class);
         i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
         this.context.startService(i);
-        Log.v(Client.TAG, "sent broadcast for offline sync!");
+        Log.v(Client.TAG, "sent intent for offline sync!");
 
     }
 
