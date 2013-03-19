@@ -45,7 +45,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     /**
      * The default encoded root URL of the service.
      */
-    public static final String DEFAULT_ROOT_URL = "https://baas.kinvey.com/";
+    public static final String DEFAULT_BASE_URL = "https://baas.kinvey.com/";
 
     /**
      * The default encoded service path of the service.
@@ -110,7 +110,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
                 this.currentUser = new User(this, new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
-                        this.getJsonFactory(), appKey, appSecret, null));
+                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
             return currentUser;
         }
@@ -223,7 +223,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
          */
         public Builder(HttpTransport transport, JsonFactory jsonFactory,
                        HttpRequestInitializer httpRequestInitializer) {
-            super(transport, jsonFactory, DEFAULT_ROOT_URL,
+            super(transport, jsonFactory, DEFAULT_BASE_URL,
                     DEFAULT_SERVICE_PATH, httpRequestInitializer);
         }
 
@@ -236,7 +236,23 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         public Builder(HttpTransport transport, JsonFactory jsonFactory,
                        HttpRequestInitializer httpRequestInitializer,
                        KinveyClientRequestInitializer clientRequestInitializer) {
-            super(transport, jsonFactory, DEFAULT_ROOT_URL,
+            super(transport, jsonFactory, DEFAULT_BASE_URL,
+                    DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer);
+        }
+
+        /**
+         *
+         * @param transport                HttpTransport
+         * @param jsonFactory              JsonFactory
+         * @param baseUrl
+         * @param httpRequestInitializer   HttpRequestInitializer
+         * @param clientRequestInitializer KinveyClientRequestInitializer
+         */
+        public Builder(HttpTransport transport, JsonFactory jsonFactory,
+                       String baseUrl,
+                       HttpRequestInitializer httpRequestInitializer,
+                       KinveyClientRequestInitializer clientRequestInitializer) {
+            super(transport, jsonFactory, baseUrl,
                     DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer);
         }
 
@@ -248,8 +264,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
          * .lang.String)
          */
         @Override
-        public Builder setBaseUrl(String rootUrl) {
-            return (Builder) super.setBaseUrl(rootUrl);
+        public Builder setBaseUrl(String baseUrl) {
+            return (Builder) super.setBaseUrl(baseUrl);
         }
 
 
@@ -340,7 +356,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
          */
         public enum Option {
             /** Optional. Usually the base url minus the port e.g. {@code http://api.kinvey.com} */
-            RESTSERVICE_URL("api.base.url"),
+            BASE_URL("api.base.url"),
             /** Optional. Usually 80 and used to build the api base url */
             PORT("api.port"),
             /** Required. Unique id assigned to this app for api access */

@@ -23,12 +23,10 @@ import com.google.api.client.http.UriTemplate;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.KinveyJsonResponseException;
@@ -38,6 +36,7 @@ import com.kinvey.java.core.KinveyJsonResponseException;
  * @since 2.0
  */
 public class KinveyAuthRequest extends GenericJson {
+
 
     //TODO:
 
@@ -65,11 +64,6 @@ public class KinveyAuthRequest extends GenericJson {
 
     private boolean create;
     private LoginType type;
-    /**
-     * base url used for making authentication requests *
-     */
-    //TODO (mbickle): remove this redundancy and add to the be in to Builder
-    private static final String BASE_URL = "https://baas.kinvey.com";
 
     /**
      * http transport to utilize for the request *
@@ -80,6 +74,11 @@ public class KinveyAuthRequest extends GenericJson {
      * json factory from with the object parser is built *
      */
     private final JsonFactory jsonFactory;
+
+
+    /** kcs base url **/
+    private final  String baseUrl;
+
 
     /**
      * appkey and secret RequestInitializer for the initial POST to the user endpoint *
@@ -112,15 +111,17 @@ public class KinveyAuthRequest extends GenericJson {
      *
      * @param transport            http transport layer
      * @param jsonFactory          json object parser factory
+     * @param baseUrl
      * @param appKeyAuthentication app key and secret used to initialize the auth request
      * @param username             user provided username or {@code null} if none is known
      * @param password             password for the user or {@code null} if none is known
      */
     protected KinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
-                                BasicAuthentication appKeyAuthentication, String username, String password,
+                                String baseUrl, BasicAuthentication appKeyAuthentication, String username, String password,
                                 GenericJson user, boolean create) {
         this.transport = transport;
         this.jsonFactory = jsonFactory;
+        this.baseUrl = baseUrl;
         this.appKeyAuthentication = appKeyAuthentication;
         this.appKey = appKeyAuthentication.getUsername();
         this.requestPayload = (username == null || password == null) ? null : new AuthRequestPayload(username, password);
@@ -132,11 +133,12 @@ public class KinveyAuthRequest extends GenericJson {
     }
 
     protected KinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
-                                BasicAuthentication appKeyAuthentication, ThirdPartyIdentity thirdPartyIdentity,
+                                String baseUrl, BasicAuthentication appKeyAuthentication, ThirdPartyIdentity thirdPartyIdentity,
                                 GenericJson user, boolean create) {
-            this.transport = transport;
+        this.transport = transport;
         this.jsonFactory = jsonFactory;
         this.appKeyAuthentication = appKeyAuthentication;
+        this.baseUrl = baseUrl;
         this.appKey = appKeyAuthentication.getUsername();
         this.requestPayload = thirdPartyIdentity;
         if (user != null) {
@@ -151,7 +153,8 @@ public class KinveyAuthRequest extends GenericJson {
      */
     private GenericUrl buildHttpRequestUrl() {
         // we hit different end points depending on whether 3rd party auth is utilize
-        return new GenericUrl(UriTemplate.expand(BASE_URL
+        //TODO: change this.create boolean to a parameterized string, representing "login" portion of the url
+        return new GenericUrl(UriTemplate.expand(baseUrl
                 , "/user/{appKey}/" + (this.create ? "" : "login")
                 , this
                 , true));
@@ -167,6 +170,7 @@ public class KinveyAuthRequest extends GenericJson {
         HttpRequest request = transport.createRequestFactory(appKeyAuthentication)
                 .buildPostRequest(buildHttpRequestUrl(), content)
                 .setEnableGZipContent(false)
+                .setSuppressUserAgentSuffix(true)
                 .setThrowExceptionOnExecuteError(false)
                 .setParser(jsonFactory.createJsonObjectParser())
                 .setHeaders(kinveyHeaders)
@@ -199,7 +203,7 @@ public class KinveyAuthRequest extends GenericJson {
      * </p>
      * <p/>
      * <pre>
-     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,appKey,appSecret)
+     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,baseUrl, appKey,appSecret)
      *          .setUserIdAndPassword(userid, password)
      *          .build()
      *          .execute();
@@ -210,7 +214,7 @@ public class KinveyAuthRequest extends GenericJson {
      * systems like Facebook, LinkedInCredential, etc.
      * </p>
      * <pre>
-     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,appKey,appSecret)
+     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,baseUrl, appKey,appSecret)
      *              .setThirdPartyAuthToken(thirdpartytoken)
      *              .build()
      *              .execute();
@@ -222,7 +226,7 @@ public class KinveyAuthRequest extends GenericJson {
      * </p>
      * <p/>
      * <pre>
-     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,appKey,appSecret)
+     *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,baseUrl, appKey,appSecret)
      *              .build()
      *              .execute();
      * </pre>
@@ -244,45 +248,45 @@ public class KinveyAuthRequest extends GenericJson {
         private String password;
         private boolean isThirdPartyAuthUsed = false;
         private ThirdPartyIdentity thirdPartyIdentity;
+        private final String baseUrl;
 
-        public Builder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret,
+        public Builder(HttpTransport transport, JsonFactory jsonFactory, String baseUrl, String appKey, String appSecret,
                        GenericJson user) {
             this.transport = Preconditions.checkNotNull(transport);
             this.jsonFactory = Preconditions.checkNotNull(jsonFactory);
+            this.baseUrl = baseUrl;
             this.appKeyAuthentication = new BasicAuthentication(Preconditions.checkNotNull(appKey), Preconditions.checkNotNull(appSecret));
-
-        }
-
-        public Builder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret,
-                       String username, String password, GenericJson user) {
-            this(transport, jsonFactory, appKey, appSecret, user);
-            Preconditions.checkArgument(!"".equals(username), "username cannot be empty, use null no username is known");
-            Preconditions.checkArgument(!"".equals(password), "password cannot be empty, use null no password is known");
-            this.username = username;
-            this.password = password;
             this.user = user;
         }
 
-        public Builder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret,
+        public Builder(HttpTransport transport, JsonFactory jsonFactory, String baseUrl, String appKey, String appSecret,
+                       String username, String password, GenericJson user) {
+            this(transport, jsonFactory, baseUrl, appKey, appSecret, user);
+            Preconditions.checkArgument(!"".equals(username), "username cannot be empty, use null if no username is known");
+            Preconditions.checkArgument(!"".equals(password), "password cannot be empty, use null if no password is known");
+            this.username = username;
+            this.password = password;
+        }
+
+        public Builder(HttpTransport transport, JsonFactory jsonFactory, String baseUrl, String appKey, String appSecret,
                        ThirdPartyIdentity identity, GenericJson user) {
-            this(transport, jsonFactory, appKey, appSecret, user);
+            this(transport, jsonFactory, baseUrl, appKey, appSecret, user);
             Preconditions.checkNotNull(identity, "identity must not be null");
             this.isThirdPartyAuthUsed = (identity != null);
             this.thirdPartyIdentity = identity;
-            this.user = user;
         }
 
         public KinveyAuthRequest build() {
             if (!isThirdPartyAuthUsed) {
                 return new KinveyAuthRequest(getTransport()
                         , getJsonFactory()
-                        , getAppKeyAuthentication()
+                        , getBaseUrl(), getAppKeyAuthentication()
                         , getUsername()
                         , getPassword(),user, this.create);
             }
             return new KinveyAuthRequest(getTransport()
                     , getJsonFactory()
-                    , getAppKeyAuthentication()
+                    , getBaseUrl(), getAppKeyAuthentication()
                     , getThirdPartyIdentity(),user, this.create);
         }
 
@@ -374,5 +378,8 @@ public class KinveyAuthRequest extends GenericJson {
             return create;
         }
 
+        public String getBaseUrl() {
+            return baseUrl;
+        }
     }
 }

@@ -37,14 +37,14 @@ public class MockKinveyAuthRequest extends KinveyAuthRequest {
     public MockKinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
                                  BasicAuthentication appKeyAuthentication, String username, String password,
                                  Map<String, Object> metaData, boolean create) {
-        super(new MockHttpTransport(), new MockJsonFactory(), appKeyAuthentication, username, password,
+        super(new MockHttpTransport(), new MockJsonFactory(), null, appKeyAuthentication, username, password,
                 null, create);
     }
 
     public MockKinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
                                  BasicAuthentication appKeyAuthentication, ThirdPartyIdentity thirdPartyIdentity,
                                  Map<String, Object> metaData) {
-        super(new MockHttpTransport(), new MockJsonFactory(), appKeyAuthentication, thirdPartyIdentity, null, true);
+        super(new MockHttpTransport(), new MockJsonFactory(), null, appKeyAuthentication, thirdPartyIdentity, null, true);
     }
 
     @Override
@@ -59,17 +59,17 @@ public class MockKinveyAuthRequest extends KinveyAuthRequest {
 
     public static class MockBuilder extends Builder {
         public MockBuilder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret, GenericJson user) {
-            super(transport, jsonFactory, appKey, appSecret, null);
+            super(transport, jsonFactory, null, appKey, appSecret, null);
         }
 
         public MockBuilder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret,
                        String username, String password, GenericJson user) {
-            super(transport, jsonFactory, appKey, appSecret, username, password, null);
+            super(transport, jsonFactory, null, appKey, appSecret, username, password, null);
         }
 
         public MockBuilder(HttpTransport transport, JsonFactory jsonFactory, String appKey, String appSecret,
                        ThirdPartyIdentity identity, GenericJson user) {
-            super(transport, jsonFactory, appKey, appSecret, identity);
+            super(transport, jsonFactory, null, appKey, appSecret, identity);
         }
 
         @Override

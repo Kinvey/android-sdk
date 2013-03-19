@@ -374,7 +374,7 @@ public class Client extends AbstractClient {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
                 setCurrentUser(new AsyncUser(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
-                        appKey, appSecret, null)));
+                        getBaseUrl(), appKey, appSecret, null)));
             }
             return (AsyncUser) getCurrentUser();
         }
@@ -516,6 +516,13 @@ public class Client extends AbstractClient {
                 throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
             }
 
+            if (super.getString(Option.BASE_URL) != null) {
+                this.setBaseUrl(super.getString(Option.BASE_URL));
+            }
+
+            if (super.getString(Option.PORT) != null){
+                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
@@ -541,7 +548,7 @@ public class Client extends AbstractClient {
         @Override
         public Client build() {
             final Client client = new Client(getTransport(),
-                    getHttpRequestInitializer(), getRootUrl(),
+                    getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore());
             client.setContext(context);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);

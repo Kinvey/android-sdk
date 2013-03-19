@@ -106,8 +106,8 @@ public abstract class AbstractKinveyJsonClient extends AbstractKinveyClient {
      * @see com.kinvey.java.core.AbstractKinveyClient.Builder#setRootUrl(java.lang.String)
      */
     @Override
-    public Builder setBaseUrl(String rootUrl) {
-      return (Builder) super.setBaseUrl(rootUrl);
+    public Builder setBaseUrl(String baseUrl) {
+      return (Builder) super.setBaseUrl(baseUrl);
     }
 
     /* (non-Javadoc)

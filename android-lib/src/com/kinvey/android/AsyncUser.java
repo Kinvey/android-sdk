@@ -290,6 +290,11 @@ public class AsyncUser extends User {
         new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute();
     }
 
+
+    public void loginAuthLink(String accessToken, String refreshToken, KinveyUserCallback callback) {
+        new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute();
+    }
+
     /**
      * Asynchronous Retrieve Metadata
      *
@@ -646,7 +651,7 @@ public class AsyncUser extends User {
             // TODO:  Set PushID attribute
             this.put("_apids", apidList);
             try {
-                this.update().execute();
+                this.updateBlocking().execute();
             } catch (IOException ex) {}
             // TODO:  Implement callbacks for User Update on separate thread - still async for now
 
@@ -658,6 +663,7 @@ public class AsyncUser extends User {
         String username;
         String password;
         String accessToken;
+        String refreshToken;
         String accessSecret;
         String consumerKey;
         String consumerSecret;
@@ -679,6 +685,13 @@ public class AsyncUser extends User {
         private Login(String accessToken, LoginType type, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
+            this.type = type;
+        }
+
+        private Login(String accessToken, String refreshToken, LoginType type, KinveyClientCallback callback) {
+            super(callback);
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
             this.type = type;
         }
 
@@ -713,6 +726,8 @@ public class AsyncUser extends User {
                     return AsyncUser.this.loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case LINKED_IN:
                     return AsyncUser.this.loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                case AUTH_LINK:
+                    return AsyncUser.this.loginAuthLinkBlocking(accessToken, refreshToken).execute();
                 case CREDENTIALSTORE:
                     return AsyncUser.this.login(credential).execute();
             }

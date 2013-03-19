@@ -20,6 +20,7 @@
         <module>GeoTag-Android</module>
         <module>statushare-android</module>
         <module>signin-android</module>
+        <module>oracledlc-android</module>
     </modules>
 
     <profiles>

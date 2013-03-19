@@ -37,7 +37,8 @@ public class ThirdPartyIdentity extends GenericJson{
         FACEBOOK,
         TWITTER,
         GOOGLE,
-        LINKED_IN
+        LINKED_IN,
+        AUTH_LINK
     }
 
     @Key("_socialIdentity")
@@ -66,8 +67,11 @@ public class ThirdPartyIdentity extends GenericJson{
                 case LINKED_IN:
                     this.put("linkedIn", credential);
                     break;
+                case AUTH_LINK:
+                    this.put("authlink", credential);
+                    break;
                 default:
-                    throw new IllegalArgumentException("Not social type was specified");
+                    throw new IllegalArgumentException("No known third party identity type was specified");
             }
         }
     }
@@ -87,8 +91,17 @@ public class ThirdPartyIdentity extends GenericJson{
      * Base class for OAuth2 providers
      */
     private abstract static class OAuth2 extends AccessToken {
+
+        @Key("refresh_token")
+        private String refreshToken;
+
         protected OAuth2(String accessToken) {
             super(accessToken);
+        }
+
+        protected OAuth2(String accessToken, String refreshToken) {
+            super(accessToken);
+            this.refreshToken = refreshToken;
         }
     }
 
@@ -124,6 +137,13 @@ public class ThirdPartyIdentity extends GenericJson{
 
         public FacebookCredential (String accessToken) {
             super(accessToken);
+        }
+    }
+
+    private static class AuthLinkCredential extends OAuth2 {
+
+        public AuthLinkCredential (String accessToken, String refreshToken) {
+            super(accessToken, refreshToken);
         }
     }
 
@@ -211,6 +231,14 @@ public class ThirdPartyIdentity extends GenericJson{
      *     .setThirdPartyAuthToken(linkedIn)
      *     .build()
      *     .execute();
+     *
+     * <p> Auth Link: </p>
+     * <pre>
+     * ThirdPartyIdentity authlinkIdentity = ThirdPartyIdentity.createThirdPartyIdentity(ThirdPartyIdentity.Type.AUTHLINK, accessToken, refreshToken);
+     * KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,appKey,appSecret)
+     *     .setThirdPartyAuthToken(authlinkIdentity)
+     *     .build()
+     *     .execute();
      * </pre>
      *
      * @param type authentication provider that will be used to link the user
@@ -242,6 +270,12 @@ public class ThirdPartyIdentity extends GenericJson{
                 Preconditions.checkArgument(params.length == 4, "Expected %s arguments for linkedIn but found %s", 4, params.length);
                 Provider<LinkedInCredential> linkedInCredentialProvider = new Provider<LinkedInCredential>(type, new LinkedInCredential(params[0], params[1], params[2], params[3]));
                 return new ThirdPartyIdentity(linkedInCredentialProvider);
+
+            case AUTH_LINK:
+                Preconditions.checkArgument(params.length == 2, "Expected %s arguments for linkedIn but found %s", 2, params.length);
+                Provider<AuthLinkCredential> authLinkCredentialProvider = new Provider<AuthLinkCredential>(type, new AuthLinkCredential(params[0], params[1]));
+                return new ThirdPartyIdentity(authLinkCredentialProvider);
+
 
             default:
                 throw new IllegalArgumentException("Could not recognize type passed in");

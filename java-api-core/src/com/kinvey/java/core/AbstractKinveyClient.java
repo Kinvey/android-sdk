@@ -100,7 +100,7 @@ public abstract class AbstractKinveyClient {
   
   /**
    * 
-   * @return the rootUrl appended to the servicePath
+   * @return the baseUrl appended to the servicePath
    */
   public final String getBaseUrl() {
     return rootUrl + servicePath;
@@ -136,7 +136,7 @@ public abstract class AbstractKinveyClient {
 
   /** If the specified root URL does not end with a "/" then a "/" is added to the end. */
   static String normalizeRootUrl(String rootUrl) {
-//    Preconditions.checkNotNull(rootUrl, "root URL cannot be null.");
+//    Preconditions.checkNotNull(baseUrl, "root URL cannot be null.");
     if (!rootUrl.endsWith("/")) {
       rootUrl += "/";
     }
@@ -173,7 +173,7 @@ public abstract class AbstractKinveyClient {
   
     private final HttpTransport transport;
     private final JsonObjectParser objectParser;
-    private String rootUrl;
+    private String baseUrl;
     private String servicePath;
     private HttpRequestInitializer httpRequestInitializer;
     private KinveyClientRequestInitializer kinveyRequestInitializer;
@@ -221,18 +221,18 @@ public abstract class AbstractKinveyClient {
   
   
     /**
-     * @return the rootUrl
+     * @return the baseUrl
      */
-    public final String getRootUrl() {
-      return rootUrl;
+    public final String getBaseUrl() {
+      return baseUrl;
     }
   
   
     /**
-     * @param rootUrl the rootUrl to set
+     * @param baseUrl the baseUrl to set
      */
-    public Builder setBaseUrl(String rootUrl) {
-      this.rootUrl = normalizeRootUrl(rootUrl);
+    public Builder setBaseUrl(String baseUrl) {
+      this.baseUrl = normalizeRootUrl(baseUrl);
       return this;
     }
   

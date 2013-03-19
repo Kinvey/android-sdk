@@ -47,7 +47,7 @@ public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
 
         @Override
         public MockKinveyJsonClient build() {
-            return new MockKinveyJsonClient(getTransport(), getHttpRequestInitializer(), getRootUrl(), getServicePath(), getObjectParser(), getKinveyClientRequestInitializer());
+            return new MockKinveyJsonClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(), getObjectParser(), getKinveyClientRequestInitializer());
         }
     }
 }

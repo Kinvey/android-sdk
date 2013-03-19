@@ -25,7 +25,7 @@ public class AbstractKinveyJsonClientTest extends TestCase {
 
         // with no trailing "/" on baseUrl
         buildUnderTest.setBaseUrl("https://baas.kinvey.com");
-        assertEquals(baseUrl, buildUnderTest.getRootUrl());
+        assertEquals(baseUrl, buildUnderTest.getBaseUrl());
         // with no trailing "/" on serviceUrl
         buildUnderTest.setServiceUrl("test");
         assertEquals("test/", buildUnderTest.getServicePath());

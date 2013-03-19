@@ -89,7 +89,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
             @Override
             public MockTestClient build() {
-                return new MockTestClient(getTransport(), getHttpRequestInitializer(), getRootUrl(), getServicePath(),
+                return new MockTestClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(),
                         getObjectParser(), new MockKinveyClientRequestInitializer());
             }
         }

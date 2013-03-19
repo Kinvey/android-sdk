@@ -45,6 +45,7 @@ public class User extends GenericJson   {
         TWITTER,
         FACEBOOK,
         LINKED_IN,
+        AUTH_LINK,
         CREDENTIALSTORE,
         THIRDPARTY
     }
@@ -215,26 +216,7 @@ public class User extends GenericJson   {
      * @throws IOException
      */
      LoginRequest login(ThirdPartyIdentity.Type thirdPartyType, String ... args) throws IOException {
-        switch(thirdPartyType) {
-            case FACEBOOK:
-                Preconditions.checkNotNull((args));
-                Preconditions.checkArgument(args.length == 1);
-                break;
-            case GOOGLE:
-                Preconditions.checkNotNull((args));
-                Preconditions.checkArgument(args.length == 1);
-                break;
-            case TWITTER:
-                Preconditions.checkNotNull((args));
-                Preconditions.checkArgument(args.length == 4);
-                break;
-            case LINKED_IN:
-                Preconditions.checkNotNull((args));
-                Preconditions.checkArgument(args.length == 4);
-                break;
-            default:
-                Preconditions.checkArgument(false, "Invalid Argument:  Third Party type not supported");
-        }
+        Preconditions.checkNotNull((args));
         ThirdPartyIdentity identity = ThirdPartyIdentity.createThirdPartyIdentity(thirdPartyType, args);
         return new LoginRequest(identity).buildAuthRequest();
     }
@@ -346,7 +328,7 @@ public class User extends GenericJson   {
     public LoginRequest loginTwitterBlocking(String accessToken, String accessSecret, String consumerKey, String consumerSecret)
             throws IOException {
         return login(ThirdPartyIdentity.Type.TWITTER,
-                new String[]{accessToken, accessSecret, consumerKey, consumerSecret});
+                accessToken, accessSecret, consumerKey, consumerSecret);
     }
 
     /**
@@ -365,7 +347,7 @@ public class User extends GenericJson   {
     public LoginRequest loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret)
             throws IOException {
         return login(ThirdPartyIdentity.Type.TWITTER,
-                new String[]{accessToken, accessSecret, consumerKey, consumerSecret});
+                accessToken, accessSecret, consumerKey, consumerSecret);
     }
 
     /**
@@ -381,8 +363,11 @@ public class User extends GenericJson   {
      */
     public LoginRequest loginLinkedInBlocking(String accessToken, String accessSecret, String consumerKey, String consumerSecret)
             throws IOException {
-        return login(ThirdPartyIdentity.Type.LINKED_IN,
-                new String[]{accessToken, accessSecret, consumerKey, consumerSecret});
+        return login(ThirdPartyIdentity.Type.LINKED_IN, accessToken, accessSecret, consumerKey, consumerSecret);
+    }
+
+    public LoginRequest loginAuthLinkBlocking (String accessToken, String refreshToken) throws IOException {
+        return login(ThirdPartyIdentity.Type.AUTH_LINK, accessToken, refreshToken);
     }
 
     /**
