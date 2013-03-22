@@ -6,22 +6,26 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
+import com.facebook.Session;
+import com.facebook.*;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
-import com.kinvey.samples.userlogin.R;
 import com.textuality.authorized.AuthorizedActivity;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * This class handles Facebook authentication using OAuth 2.  To use this class, an application ID
@@ -36,6 +40,7 @@ public class FacebookLoginActivity extends AccountAuthenticatorActivity {
 	 * Facebook App ID - Specific to the applicaiton making the request.
 	 */
 	private static final String FB_APP_ID = "your_facebook_app_key";
+    private static final String RESULT_OPENED = "OPENED";
 	
 	private Boolean mConfirmCredentials = false;
 	private Boolean mRequestNewAccount = true;
@@ -43,9 +48,6 @@ public class FacebookLoginActivity extends AccountAuthenticatorActivity {
 	
 	private ProgressDialog mProgressDialog = null;
 	private static final String PARAM_LOGIN_TYPE_FACEBOOK = "facebook";
-	
-	private static Facebook facebook = new Facebook(FB_APP_ID);
-	
 	/** 
 	 * Kinvey Client
 	 */
@@ -67,52 +69,45 @@ public class FacebookLoginActivity extends AccountAuthenticatorActivity {
 				FacebookLoginActivity.this, "Connecting to Facebook",
 				"Logging in with Facebook - just a moment");
 		
-		doFacebookSso(progressDialog);
+		doFacebookSso(progressDialog, savedInstanceState);
 		
 	}
 	
 	/**
 	 * Facebook SSO Oauth
 	 */
-    private void doFacebookSso(final ProgressDialog progressDialog){
-    	
-    	facebook.authorize(FacebookLoginActivity.this, 
-				new String[] { "publish_stream," , "publish_checkins" },
-				new DialogListener() {
-					@Override
-					public void onComplete(Bundle values) {
-						// Close the progress dialog and toast success to the user
-						if (progressDialog != null && progressDialog.isShowing()) {
-							progressDialog.dismiss();
-						}
-						Toast.makeText(FacebookLoginActivity.this, "Logged in with Facebook.", 
-								Toast.LENGTH_LONG).show();
-						
-						loginFacebookKinveyUser(progressDialog, facebook.getAccessToken());
-						
-					}
+    private void doFacebookSso(final ProgressDialog progressDialog, final Bundle savedInstanceState){
+        try {
+            Session.openActiveSession(this, true, new Session.StatusCallback() {
+                @Override
+                public void call(Session session, SessionState state, Exception exception) {
+                    if (exception == null) {
+                        if (state.equals(RESULT_CANCELED)) {
+                            Toast.makeText(FacebookLoginActivity.this, "FB login cancelled",
+                                    Toast.LENGTH_LONG).show();
+                        } else if (state.isOpened()) {
+                            if (progressDialog != null && progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                            }
+                            Toast.makeText(FacebookLoginActivity.this, "Logged in with Facebook.",
+                                    Toast.LENGTH_LONG).show();
 
-					@Override
-					public void onFacebookError(FacebookError error) {
-						error(progressDialog, error.getMessage());
-					}
-
-					@Override
-					public void onError(DialogError e) {
-						error(progressDialog, e.getMessage());
-					}
-
-					@Override
-					public void onCancel() {
-						Toast.makeText(FacebookLoginActivity.this, "FB login cancelled",
-								Toast.LENGTH_LONG).show();
-					}
-				});
+                            loginFacebookKinveyUser(progressDialog, session.getAccessToken());
+                        }
+                    } else {
+                        error(progressDialog, exception.getMessage());
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            Log.i("Kinvey - SignIn",ex.getMessage());
+        }
     }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	facebook.authorizeCallback(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
     }
     
     /*

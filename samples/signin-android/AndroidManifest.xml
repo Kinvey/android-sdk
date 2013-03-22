@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.kinvey.samples.userlogin"
+    package="com.kinvey.sample.signin"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -21,7 +21,8 @@
             android:name="com.kinvey.sample.signin.LoginActivity"
             android:label="@string/login" >
         </activity>
-		
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
         
         <service android:name="com.kinvey.sample.signin.KinveyAuthenticationService" >
             <intent-filter>
@@ -63,6 +64,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.facebook.LoginActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:label="@string/app_name" />
+
     </application>
 
 </manifest>
