@@ -1,7 +1,6 @@
 package com.kinvey.sample.signin;
 
 import com.google.api.client.http.HttpTransport;
-import com.kinvey.samples.userlogin.R;
 
 import android.os.Bundle;
 import android.accounts.Account;

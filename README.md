@@ -18,15 +18,15 @@ mvn install
 ### Regenerate Javadocs
 
 ```
-rm <devcenter.home>/content/reference/api/android
+rm -r <devcenter.home>/content/reference/android/api/*
 cd <project.home> 
-mvn -Ddev javadoc:javadoc install
+mvn -Pdev javadoc:javadoc install
 ```
 
 ### Release
 
 ```
-mvn -Drelease clean install
+mvn -Prelease clean install
 ```
 
 

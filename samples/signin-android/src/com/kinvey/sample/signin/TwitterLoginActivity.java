@@ -3,7 +3,6 @@ package com.kinvey.sample.signin;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
-import com.kinvey.samples.userlogin.R;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
