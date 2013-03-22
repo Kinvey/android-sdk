@@ -15,6 +15,7 @@ package com.kinvey.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.google.common.base.Preconditions;
 
@@ -65,7 +66,8 @@ class AndroidClientUsers implements ClientUsers {
 
         switch(type) {
             case USERLIST:
-                persistUsers();
+                PersistUsers persist = new PersistUsers();
+                persist.execute();
                 break;
             case ACTIVEUSER:
 
@@ -133,21 +135,6 @@ class AndroidClientUsers implements ClientUsers {
         return userType == null ? "" : userType;
     }
 
-    private void persistUsers() {
-        try {
-            FileOutputStream fStream = appContext.openFileOutput("kinveyUsers.bin", Context.MODE_PRIVATE);
-            ObjectOutputStream oStream = new ObjectOutputStream(fStream);
-
-            oStream.writeObject(userList);
-            oStream.flush();
-            oStream.close();
-
-            Log.v("Serialization success", "Success");
-        } catch (Exception e) {
-            Log.v("IO Exception", e.getMessage());
-        }
-    }
-
     private void retrieveUsers() {
         FileInputStream fIn = null;
         ObjectInputStream in = null;
@@ -164,15 +151,37 @@ class AndroidClientUsers implements ClientUsers {
             Log.e(Client.TAG, "Failed to initialize kinveyUsers.bin", e);
         } finally {
             try {
-              if (fIn != null) {
-                fIn.close();
-              }
-              if (in != null) {
-                  in.close();
-              }
+                if (fIn != null) {
+                    fIn.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException io) {
                 Log.e("AndroidClientUsers", "Failed to clean up resources while reading kinveyUser.bin", io);
             }
+        }
+    }
+
+    private class PersistUsers extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                FileOutputStream fStream = appContext.openFileOutput("kinveyUsers.bin", Context.MODE_PRIVATE);
+                ObjectOutputStream oStream = new ObjectOutputStream(fStream);
+
+                oStream.writeObject(userList);
+                oStream.flush();
+                fStream.getFD().sync();
+                oStream.close();
+
+                Log.i(Client.TAG,"Serialization success");
+            } catch (IOException e) {
+                Log.e(Client.TAG, e.getMessage());
+            }
+
+            return null;
         }
     }
 }

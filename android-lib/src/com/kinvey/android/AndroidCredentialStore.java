@@ -15,6 +15,7 @@ package com.kinvey.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.google.common.base.Preconditions;
 
@@ -46,7 +47,7 @@ class AndroidCredentialStore implements CredentialStore {
             retrieveCredentialStore();
         } catch (ClassNotFoundException ex) {
             credentials = new HashMap<String, Credential>();
-            persistCredentialStore();
+            new PersistCredentialStore().execute();
             throw new AndroidCredentialStoreException("Credential store corrupted and was rebuilt");
         }
     }
@@ -64,29 +65,14 @@ class AndroidCredentialStore implements CredentialStore {
         Preconditions.checkNotNull(userId, "userId must not be null");
 
         credentials.put(userId, credential);
-        persistCredentialStore();
+        new PersistCredentialStore().execute();
     }
 
     /** {@inheritDoc} */
     @Override
     public void delete(String userId) {
         credentials.remove(userId);
-        persistCredentialStore();
-    }
-
-    private void persistCredentialStore() {
-        try {
-            FileOutputStream fStream = appContext.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE);
-            ObjectOutputStream oStream = new ObjectOutputStream(fStream);
-
-            oStream.writeObject(credentials);
-            oStream.flush();
-            oStream.close();
-
-            Log.v("Serialization success", "Success");
-        } catch (Exception e) {
-            Log.e("IO Exception", e.getMessage());
-        }
+        new PersistCredentialStore().execute();
     }
 
     private void retrieveCredentialStore() throws ClassNotFoundException {
@@ -115,7 +101,28 @@ class AndroidCredentialStore implements CredentialStore {
                 }
             }
         } else {
-            persistCredentialStore();
+            new PersistCredentialStore().execute();
+        }
+    }
+
+    private class PersistCredentialStore extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                FileOutputStream fStream = appContext.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE);
+                ObjectOutputStream oStream = new ObjectOutputStream(fStream);
+
+                oStream.writeObject(credentials);
+                oStream.flush();
+                fStream.getFD().sync();
+                oStream.close();
+
+                Log.v(Client.TAG,"Serialization success");
+            } catch (Exception e) {
+                Log.e(TAG, "Error on persisting credential store", e);
+            }
+            return null;
         }
     }
 }
