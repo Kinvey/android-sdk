@@ -528,6 +528,43 @@ public class AppData<T> {
         return aggregate;
     }
 
+
+    /**
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     *
+     * @return a new request builder for a blocking GET (by query) operation
+     */
+    public AppDataOperation.BlockingGetBuilder  blockingGetBuilder(){
+        return new AppDataOperation.BlockingGetBuilder(this.collectionName, this.myClass, this);
+    }
+
+    /**
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     *
+     * @return a new request builder for a blocking GET (single) Entity operation
+     */
+    public AppDataOperation.BlockingGetEntityBuilder  blockingGetEntityBuilder(){
+        return new AppDataOperation.BlockingGetEntityBuilder(this.collectionName, this.myClass, this);
+    }
+
+    /**
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     *
+     * @return a new request builder for a blocking SAVE (put or post) operation
+     */
+    public AppDataOperation.BlockingSaveBuilder  blockingSaveBuilder(){
+        return new AppDataOperation.BlockingSaveBuilder(this.collectionName, this.myClass, this);
+    }
+
+    /**
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     *
+     * @return a new request builder for a blocking DELETE operation
+     */
+    public AppDataOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
+        return new AppDataOperation.BlockingDeleteBuilder(this.collectionName, this.myClass, this);
+    }
+
     /**
      * Generic Get class, extends AbstractKinveyJsonClientRequest<T[]>.  Constructs the HTTP request object for Get
      * requests.
@@ -636,7 +673,7 @@ public class AppData<T> {
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
 
-            this.resolve = Joiner.on(",").join(resolves);            
+            this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
         }
@@ -743,7 +780,7 @@ public class AppData<T> {
 
 
 
-    
+
 }
 
 

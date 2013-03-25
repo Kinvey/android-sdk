@@ -33,27 +33,35 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
- * Builder for advanced App Data requests
- *
+ * Builder for advanced Synchronous (Blocking!) App Data requests.
+ * <p>
+ * This class uses the Builder pattern to allow extensible use of all the features of our Core App Data API.
+ * </p>
+ * <p>
+ * By chaining together calls to the various set methods, you can combine any of our features into one request.
+ * </p>
  * @author edwardf
  * @since 2.0.2
  */
-public class AppDataOperation<T> {
+public class AppDataOperation {
+    //TODO edwardf confirm usage of "you" is alright in above Class level javadocs.
 
 
-    private abstract class AppDataRequestBuilder {
+    /**
+     * Abstract App Data Request Builder parent maintains collection, class, and appdata instance.
+     */
+    protected static abstract class AppDataRequestBuilder {
 
 
         //Required
         protected String collection;
         protected Class myClass;
-        protected AppData<T> appData;
+        protected AppData appData;
 
 
         public AppDataRequestBuilder(String collectionName, Class myClass, AppData appData) {
             this.collection = collectionName;
             this.myClass = myClass;
-
             this.appData = appData;
         }
 
@@ -69,7 +77,10 @@ public class AppDataOperation<T> {
         }
     }
 
-    private abstract class KRAppDataRequestBuilder extends AppDataRequestBuilder {
+    /**
+     * Abstract KR (Kinvey Reference) App Data Request Builder parent introduces resolves, resolvedepth and retain references.
+     */
+    private static abstract class KRAppDataRequestBuilder extends AppDataRequestBuilder {
 
         //Kinvey Reference Support
         protected String[] resolves = null;
@@ -100,10 +111,14 @@ public class AppDataOperation<T> {
 
     }
 
-    public class GetBuilder extends KRAppDataRequestBuilder {
+
+    /**
+     * Builder for creating new GET requests with the core App Data API.
+     */
+    public static class BlockingGetBuilder extends KRAppDataRequestBuilder {
         protected Query query = null;
 
-        public GetBuilder(String collectionName, Class myClass, AppData appData) {
+        public BlockingGetBuilder(String collectionName, Class myClass, AppData appData) {
             super(collectionName, myClass, appData);
         }
 
@@ -132,10 +147,15 @@ public class AppDataOperation<T> {
 
     }
 
-    public class GetEntityBuilder extends KRAppDataRequestBuilder {
+
+
+    /**
+     * Builder for creating new GET ENTITY requests with the core App Data API.
+     */
+    public static class BlockingGetEntityBuilder extends KRAppDataRequestBuilder {
         protected String entityID = null;
 
-        public GetEntityBuilder(String collectionName, Class myClass, AppData appData) {
+        public BlockingGetEntityBuilder(String collectionName, Class myClass, AppData appData) {
             super(collectionName, myClass, appData);
         }
 
@@ -162,14 +182,18 @@ public class AppDataOperation<T> {
 
     }
 
-    public class SaveBuilder extends AppDataRequestBuilder {
-        protected T myEntity = null;
 
-        public SaveBuilder(String collectionName, Class myClass, AppData appData) {
+    /**
+     * Builder for creating new SAVE requests with the core App Data API.
+     */
+    public static class BlockingSaveBuilder extends AppDataRequestBuilder {
+        protected Object myEntity = null;
+
+        public BlockingSaveBuilder(String collectionName, Class myClass, AppData appData) {
             super(collectionName, myClass, appData);
         }
 
-        public AppDataRequestBuilder setEntity(T myEntity) {
+        public AppDataRequestBuilder setEntity(Object myEntity) {
             this.myEntity = myEntity;
             return this;
         }
@@ -195,11 +219,15 @@ public class AppDataOperation<T> {
 
     }
 
-    public class DeleteBuilder extends AppDataRequestBuilder {
+
+    /**
+     * Builder for creating new DELETE requests with the core App Data API.
+     */
+    public static class BlockingDeleteBuilder extends AppDataRequestBuilder {
         protected String entityID = null;
         protected Query query = null;
 
-        public DeleteBuilder(String collectionName, Class myClass, AppData appData) {
+        public BlockingDeleteBuilder(String collectionName, Class myClass, AppData appData) {
             super(collectionName, myClass, appData);
         }
 
