@@ -16,6 +16,7 @@ package com.kinvey.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import com.google.common.base.Preconditions;
 
@@ -47,7 +48,7 @@ class AndroidCredentialStore implements CredentialStore {
             retrieveCredentialStore();
         } catch (ClassNotFoundException ex) {
             credentials = new HashMap<String, Credential>();
-            new PersistCredentialStore().execute();
+            persistCredentialStore();
             throw new AndroidCredentialStoreException("Credential store corrupted and was rebuilt");
         }
     }
@@ -65,14 +66,22 @@ class AndroidCredentialStore implements CredentialStore {
         Preconditions.checkNotNull(userId, "userId must not be null");
 
         credentials.put(userId, credential);
-        new PersistCredentialStore().execute();
+        persistCredentialStore();
     }
 
     /** {@inheritDoc} */
     @Override
     public void delete(String userId) {
         credentials.remove(userId);
-        new PersistCredentialStore().execute();
+        persistCredentialStore();
+    }
+
+    private void persistCredentialStore() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            new PersistCredentialStore().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            new PersistCredentialStore().execute();
+        }
     }
 
     private void retrieveCredentialStore() throws ClassNotFoundException {
@@ -101,7 +110,7 @@ class AndroidCredentialStore implements CredentialStore {
                 }
             }
         } else {
-            new PersistCredentialStore().execute();
+            persistCredentialStore();
         }
     }
 

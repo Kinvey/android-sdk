@@ -16,6 +16,7 @@ package com.kinvey.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import com.google.common.base.Preconditions;
 
@@ -66,8 +67,7 @@ class AndroidClientUsers implements ClientUsers {
 
         switch(type) {
             case USERLIST:
-                PersistUsers persist = new PersistUsers();
-                persist.execute();
+                persistUsers();
                 break;
             case ACTIVEUSER:
 
@@ -76,10 +76,21 @@ class AndroidClientUsers implements ClientUsers {
             case BOTH:
 
                 editor.putString("activeUser", activeUser);
+                persistUsers();
                 break;
+            default:
+                throw new IllegalArgumentException("Illegal PersistData argument");
         }
         editor.commit();
 
+    }
+
+    private synchronized void persistUsers() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            new PersistUsers().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            new PersistUsers().execute();
+        }
     }
 
     static AndroidClientUsers getClientUsers(Context context) {
