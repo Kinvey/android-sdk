@@ -42,86 +42,8 @@ import com.kinvey.java.query.MongoQueryFilter;
  * @author edwardf
  * @since 2.0.2
  */
-public class LinkedResourceOperation<T> extends AppDataOperation<T>{
-//
-//
-//
-//    public LinkedResourceOperation(String collectionName, Class myClass, LinkedData appData) {
-//        super(collectionName, myClass, appData);
-//    }
-//
-//
-//    @Override
-//    public AbstractKinveyClientRequest build(){
-//        AbstractKinveyClientRequest ret = null;
-//        switch(this.action){
-//            case GET:
-//                if (this.entityID != null){
-//                    if (resolves == null){
-//                        ret =  this.appData.new GetEntity(this.entityID, this.myClass);
-//                    } else {
-//                        ret =  this.appData.new GetEntity(this.entityID, this.myClass, resolves, resolveDepth, retainReference);
-//                    }
-//                }else if (this.query != null){
-//                    if (resolves == null){
-//                        ret =   this.appData.new Get(this.query, this.myClass);
-//                    } else {
-//                        ret =   this.appData.new Get(this.query, this.myClass, resolves, resolveDepth, retainReference);
-//                    }
-//                }else{
-//                    if (resolves == null){
-//                        ret =   this.appData.new Get(new Query(), this.myClass);
-//                    } else {
-//                        ret =   this.appData.new Get(new Query(), this.myClass, resolves, resolveDepth, retainReference);
-//                    }
-//
-//                }
-//                break;
-//            case SAVE:
-//                Preconditions.checkNotNull(this.myEntity, "Cannot use SAVE without first calling setEntity(myEntity)");
-//
-//
-//                String sourceID;
-//
-//                GenericJson jsonEntity = (GenericJson) this.myEntity;
-//                sourceID = (String) jsonEntity.get(AppData.ID_FIELD_NAME);
-//
-//                if (sourceID != null) {
-//                    ret = this.appData.new Save(this.myEntity, myClass, sourceID, AppData.SaveMode.PUT);
-//                } else {
-//                    ret = this.appData.new Save(this.myEntity, myClass, AppData.SaveMode.POST);
-//                }
-//
-//                break;
-//            case DELETE:
-//
-//                if (this.entityID != null){
-//                    ret =  this.appData.new Delete(this.entityID);
-//
-//                } else if(this.query != null){
-//                    ret = this.appData.new Delete(this.query);
-//                }else{
-//                    Preconditions.checkNotNull(null, "Cannot use DELETE without either calling setEntityID() or setQuery()");
-//
-//                }
-//
-//
-//                break;
-//
-//        }
-//
-//
-//        try{
-//            this.appData.getClient().initializeRequest(ret);
-//        }catch (Exception e){
-//            //TODO edwardf don't want to necessarily catch this here.
-//        }
-//        return ret;
-//
-//
-//    }
-//
-//
+public class LinkedResourceOperation extends AppDataOperation{
+
 
 
 }

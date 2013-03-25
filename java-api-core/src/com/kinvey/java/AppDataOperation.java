@@ -38,13 +38,12 @@ import com.kinvey.java.query.MongoQueryFilter;
  * This class uses the Builder pattern to allow extensible use of all the features of our Core App Data API.
  * </p>
  * <p>
- * By chaining together calls to the various set methods, you can combine any of our features into one request.
+ * These builders allow various fields to be declared independently, resulting in much simpler usage of our API for power users.
  * </p>
  * @author edwardf
  * @since 2.0.2
  */
 public class AppDataOperation {
-    //TODO edwardf confirm usage of "you" is alright in above Class level javadocs.
 
 
     /**
