@@ -14,10 +14,7 @@ package com.kinvey.android;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -86,6 +83,8 @@ public class AsyncAppData<T> extends AppData<T> {
     private static final String KEY_GET_BY_ID = "KEY_GET_BY_ID";
     private static final String KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY";
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
+    private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
+    private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
     private static final String KEY_COUNT = "KEY_COUNT";
@@ -122,6 +121,9 @@ public class AsyncAppData<T> extends AppData<T> {
             tempMap.put(KEY_MAX, AppData.class.getMethod("maxBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
             tempMap.put(KEY_MIN, AppData.class.getMethod("minBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
             tempMap.put(KEY_AVERAGE, AppData.class.getMethod("averageBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
+            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, List.class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, List.class, int.class, boolean.class}));
+
 
         }catch (NoSuchMethodException e){
             System.out.println("CHECK METHOD MAP, no such method is declared in AppData!");

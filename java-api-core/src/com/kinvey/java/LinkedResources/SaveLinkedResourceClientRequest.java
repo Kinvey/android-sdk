@@ -66,38 +66,41 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
 
             for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
-                System.out.println("Kinvey - LR, " + "saving a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
+                if (((LinkedGenericJson) getJsonContent()).getFile(key) != null) {
 
-//                byte[] file = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileData();
-                InputStream in =  ((LinkedGenericJson) getJsonContent()).getFile(key).getInput();
+                    System.out.println("Kinvey - LR, " + "found a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
+                    if (((LinkedGenericJson) getJsonContent()).getFile(key).isResolve()) {
 
-                InputStreamContent mediaContent = null;
-                String mimetype = "application/octet-stream";
-                if (in != null) {
-                    mediaContent = new InputStreamContent(mimetype, in);
-//                    mediaContent.setLength(in.);
+                        InputStream in = ((LinkedGenericJson) getJsonContent()).getFile(key).getInput();
+
+                        InputStreamContent mediaContent = null;
+                        String mimetype = "application/octet-stream";
+                        if (in != null) {
+                            mediaContent = new InputStreamContent(mimetype, in);
+                        }
+                        mediaContent.setCloseInputStream(false);
+                        mediaContent.setRetrySupported(false);
+
+                        getAbstractKinveyClient().file().setUploadProgressListener(upload);
+
+                        getAbstractKinveyClient().file().uploadBlocking(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
+
+
+                        String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();
+                        //TODO edwardf test various use/edge cases for this MIME type calculation
+                        //default to a text file if no file extension on file name.
+                        String mime = "txt";
+                        if (filename.contains(".")) {
+                            mime = filename.substring(filename.lastIndexOf('.') + 1);
+                        }
+
+                        HashMap<String, String> resourceMap = new HashMap<String, String>();
+                        resourceMap.put("_mime-type", mime);
+                        resourceMap.put("_loc", filename);
+                        resourceMap.put("_type", "resource");
+                        ((GenericJson) getJsonContent()).put(key, resourceMap);
+                    }
                 }
-                mediaContent.setCloseInputStream(false);
-                mediaContent.setRetrySupported(false);
-
-                getAbstractKinveyClient().file().setUploadProgressListener(upload);
-
-                getAbstractKinveyClient().file().uploadBlocking(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
-
-
-                String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();
-                //TODO edwardf test various use/edge cases for this MIME type calculation
-                //default to a text file if no file extension on file name.
-                String mime = "txt";
-                if (filename.contains(".")){
-                    mime = filename.substring(filename.lastIndexOf('.') + 1);
-                }
-
-                HashMap<String,String> resourceMap = new HashMap<String, String>();
-                resourceMap.put("_mime-type", mime);
-                resourceMap.put("_loc", filename);
-                resourceMap.put("_type","resource");
-                ((GenericJson) getJsonContent()).put(key, resourceMap);
             }
 
             System.out.println("Kinvey - LR, " + "saving the entity!");

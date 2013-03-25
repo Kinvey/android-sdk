@@ -71,7 +71,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public GetEntity getEntityBlocking(String entityID, DownloaderProgressListener download) throws IOException {
-        GetEntity getEntity = new GetEntity(entityID, getCurrentClass());
+        GetEntity getEntity = new GetEntity(entityID, getCurrentClass(), null);
         getEntity.setDownloadProgressListener(download);
         getClient().initializeRequest(getEntity);
         return getEntity;
@@ -95,7 +95,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public GetEntity getEntityBlocking(String entityID, DownloaderProgressListener download, String[] attachments) throws IOException {
-        GetEntity getEntity = new GetEntity(entityID, getCurrentClass());
+        GetEntity getEntity = new GetEntity(entityID, getCurrentClass(), attachments);
         getEntity.setDownloadProgressListener(download);
         getClient().initializeRequest(getEntity);
         return getEntity;
@@ -119,7 +119,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      */
     public Get getBlocking(Query query, DownloaderProgressListener download) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass());
+        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass(), null);
         get.setDownloadProgressListener(download);
         getClient().initializeRequest(get);
         return get;
@@ -144,7 +144,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      */
     public Get getBlocking(Query query, DownloaderProgressListener download, String[] attachments) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass());
+        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass(), attachments);
         get.setDownloadProgressListener(download);
         getClient().initializeRequest(get);
         return get;
@@ -261,6 +261,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
+        private String[] attachments;
 
         @Key
         private String collectionName;
@@ -281,9 +282,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         private String retainReferences;
 
 
-        Get(Query query, Class myClass) {
-            super(getClient(), "GET", REST_PATH, null, myClass);
+        Get(Query query, Class myClass, String[] attachments) {
+            super(getClient(), REST_PATH, null, myClass);
 //            super.setCache(cache, policy);
+            this.attachments = attachments;
             this.collectionName= getCollectionName();
             this.queryFilter = query.getQueryFilterJson(getClient().getJsonFactory());
             int queryLimit = query.getLimit();
@@ -295,9 +297,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         }
 
 
-        Get(Query query, Class myClass, List<String> resolves, int resolve_depth, boolean retain){
-            super(getClient(), "GET", REST_PATH, null, myClass);
+        Get(Query query, Class myClass, String[] attachments, String[] resolves, int resolve_depth, boolean retain){
+            super(getClient(), REST_PATH, null, myClass);
 //            super.setCache(cache, policy);
+            this.attachments = attachments;
             this.collectionName= getCollectionName();
             this.queryFilter = query.getQueryFilterJson(getClient().getJsonFactory());
             int queryLimit = query.getLimit();
@@ -330,6 +333,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{resolve,resolve_depth,retainReference}";
 
+        private String[] attachments;
 
         @Key
         private String entityID;
@@ -346,16 +350,18 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
 
 
-        GetEntity(String entityID, Class<T> myClass) {
-            super(getClient(), "GET", REST_PATH, null, myClass);
+        GetEntity(String entityID, Class<T> myClass, String[] attachments) {
+            super(getClient(), REST_PATH, null, myClass);
 //            super.setCache(cache, policy);
+            this.attachments = attachments;
             this.collectionName = getCollectionName();
             this.entityID = entityID;
         }
 
-        GetEntity(String entityID, Class<T> myClass, List<String> resolves, int resolve_depth, boolean retain){
-            super(getClient(), "GET", REST_PATH, null, myClass);
+        GetEntity(String entityID, Class<T> myClass, String[] attachments, String[] resolves, int resolve_depth, boolean retain){
+            super(getClient(), REST_PATH, null, myClass);
 //            super.setCache(cache, policy);
+            this.attachments = attachments;
             this.collectionName = getCollectionName();
             this.entityID = entityID;
 
@@ -376,11 +382,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
     }
 
-    /** used internally **/
-    private enum SaveMode {
-        POST,
-        PUT
-    }
+
 
     /**
      * Generic Save<T> class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for

@@ -33,6 +33,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  * <p>This class is not thread-safe.</p>
  *
  * @author edwardf
+ * @author mjsalinger
  * @since 2.0
  */
 public class User extends GenericJson   {

@@ -40,7 +40,6 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
     /**
      * @param abstractKinveyJsonClient kinvey credential JSON client
-     * @param requestMethod            HTTP Method
      * @param uriTemplate              URI template for the path relative to the base URL. If it starts with a "/"
      *                                 the base path from the base URL will be stripped out. The URI template can also be a
      *                                 full URL. URI template expansion is done using
@@ -48,8 +47,8 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected GetLinkedResourceClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
-        super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
+    protected GetLinkedResourceClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+        super(abstractKinveyJsonClient, "GET", uriTemplate, jsonContent, responseClass);
     }
 
 
@@ -84,14 +83,10 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
     private void downloadResources(LinkedGenericJson entity) throws IOException{
         System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + entity.getAllFiles().keySet().size());
-//        String location;
-        OutputStream out;
-        java.io.File f;
+
         for (String key : (entity).getAllFiles().keySet()) {
 
             System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((Map) entity.get(key)).get("_loc").toString());
-
-//            location =(String) ((Map)entity.get(key)).get("_loc");
 
             if (entity.getFile(key) == null){
                 entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));

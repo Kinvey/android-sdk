@@ -101,6 +101,8 @@ public class AppData<T> {
     }
 
 
+
+
     /**
      * Define a cache as well as the policy to use when interacting with the cache
      *
@@ -137,6 +139,25 @@ public class AppData<T> {
         return getEntity;
     }
 
+
+    /**
+     * Method to get an entity or entities.  Pass null to entityID to return all entities
+     * in a collection.
+     *
+     * @param entityID entityID to get
+     * @param resolves list of KinveyReference fields to resolve
+     * @param resolve_depth the depth of KinveyReferences fields to resolve
+     * @param retain should resolved KinveyReferences be retained
+     * @return Get object
+     * @throws java.io.IOException
+     */
+    public GetEntity getEntityBlocking(String entityID, String[] resolves, int resolve_depth, boolean retain) throws IOException {
+        GetEntity getEntity = new GetEntity(entityID, myClass, resolves, resolve_depth, retain);
+        client.initializeRequest(getEntity);
+        return getEntity;
+    }
+
+
     /**
      * Method to get an entity or entities.  Pass null to entityID to return all entities
      * in a collection.
@@ -166,6 +187,23 @@ public class AppData<T> {
         Get get = new Get(query, Array.newInstance(myClass,0).getClass());
         client.initializeRequest(get);
         return get;
+    }
+
+    /**
+     * Method to get an entity or entities.  Pass null to entityID to return all entities
+     * in a collection.
+     *
+     * @param query Query to get
+     * @param resolves list of KinveyReference fields to resolve
+     * @param resolve_depth the depth of KinveyReferences fields to resolve
+     * @param retain should resolved KinveyReferences be retained
+     * @return Get object
+     * @throws java.io.IOException
+     */
+    public Get getBlocking(Query query, String[] resolves, int resolve_depth, boolean retain) throws IOException {
+        Get getEntity = new Get(query, myClass, resolves, resolve_depth, retain);
+        client.initializeRequest(getEntity);
+        return getEntity;
     }
 
     /**
@@ -534,7 +572,7 @@ public class AppData<T> {
         }
 
 
-        Get(Query query, Class myClass, List<String> resolves, int resolve_depth, boolean retain){
+        Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
             super(client, "GET", REST_PATH, null, myClass);
             super.setCache(cache, policy);
             this.collectionName= AppData.this.collectionName;
@@ -592,8 +630,8 @@ public class AppData<T> {
             this.entityID = entityID;
         }
 
-        GetEntity(String entityID, Class<T> myClass, List<String> resolves, int resolve_depth, boolean retain){
-            super(client, "GET", REST_PATH, null, myClass);
+        GetEntity(String entityID, Class<T> myClass, String[] resolves, int resolve_depth, boolean retain){
+            super (client, "GET", REST_PATH, null, myClass);
             super.setCache(cache, policy);
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
@@ -616,7 +654,7 @@ public class AppData<T> {
     }
 
     /** used internally **/
-    private enum SaveMode {
+    protected enum SaveMode {
         POST,
         PUT
     }
@@ -702,6 +740,9 @@ public class AppData<T> {
             this.collectionName = AppData.this.collectionName;
         }
     }
+
+
+
     
 }
 

@@ -26,6 +26,7 @@ public class LinkedFile {
     private String fileName;
     private ByteArrayInputStream input = null;
     private ByteArrayOutputStream output = null;
+    private boolean resolve = true;
 
     public LinkedFile(String fileName) {
         this.fileName = fileName;
@@ -65,5 +66,13 @@ public class LinkedFile {
 
     public void setOutput(ByteArrayOutputStream output) {
         this.output = output;
+    }
+
+    public boolean isResolve() {
+        return resolve;
+    }
+
+    public void setResolve(boolean resolve) {
+        this.resolve = resolve;
     }
 }
