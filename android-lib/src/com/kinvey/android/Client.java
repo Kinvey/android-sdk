@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.OfflineAppData;
@@ -459,6 +460,7 @@ public class Client extends AbstractClient {
     public static class Builder extends AbstractClient.Builder {
 
         private Context context = null;
+        private KinveyUserCallback retrieveUserCallback = null;
 
         /**
          * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
@@ -566,7 +568,53 @@ public class Client extends AbstractClient {
                 client.setCurrentUser(null);
             }
             return client;
+        }
 
+        /**
+         * Asynchronous Client build method
+         *
+         * <p>
+         *
+         * </p>
+         *
+         * @param buildCallback Instance of {@link: KinveyClientBuilderCallback}
+         */
+        public void build(KinveyClientBuilderCallback buildCallback) {
+            new Build(buildCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        }
+
+        /**
+         * Sets a callback to be called after a client is intialized and User attributes is being retrieved.
+         *
+         * <p>
+         * When a client is intialized after an initial login, the user's credentials are cached locally and used for the
+         * initialization of the client.  As part of the initialization process, a background thread is spawned to retrieve
+         * up-to-date user attributes.  This optional callback is called when the retrieval process is complete and passes
+         * an instance of the logged in user.
+         * </p>
+         * <p>Sample Usage:
+         * <pre>
+            Client myClient = Client.Builder(this)
+                    .setRetrieveUserCallback(new KinveyUserCallback() {
+                public void onFailure(Throwable t) {
+                    CharSequence text = "Error retrieving user attributes.";
+                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                }
+
+                public void onSuccess(User u) {
+                    CharSequence text = "Retrieved up-to-date data for " + u.getUserName() + ".";
+                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                }
+            }).build();
+         * </pre
+         * ></p>
+         *
+         * @param callback
+         * @return
+         */
+        public Client.Builder setRetrieveUserCallback(KinveyUserCallback callback) {
+            this.retrieveUserCallback = callback;
+            return this;
         }
 
         private Credential retrieveUserFromCredentialStore(Client client)
@@ -591,7 +639,7 @@ public class Client extends AbstractClient {
                 Log.e(TAG, "Could not retrieve user Credentials");
             }
 
-            client.user().retrieveMetadata(new KinveyUserCallback() {
+            client.user().retrieveMetadata(retrieveUserCallback != null ? retrieveUserCallback : new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     client.setCurrentUser(result);
@@ -611,6 +659,18 @@ public class Client extends AbstractClient {
          */
         protected static String getAndroidPropertyFile() {
             return "assets/kinvey.properties";
+        }
+
+        private class Build extends AsyncClientRequest<Client> {
+
+            private Build(KinveyClientBuilderCallback builderCallback) {
+                super(builderCallback);
+            }
+
+            @Override
+            protected Client executeAsync() {
+                return Client.Builder.this.build();
+            }
         }
     }
 }
