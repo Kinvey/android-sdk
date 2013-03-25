@@ -228,7 +228,7 @@ public class AsyncUserGroup extends UserGroup {
      * @param <T> a T object.
      */
     public <T> void create(UserGroupRequest group, KinveyClientCallback<T> callback){
-        new Create(group, callback).execute();
+        new Create(group, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -250,7 +250,7 @@ public class AsyncUserGroup extends UserGroup {
      * @param <T> a T object.
      */
     public <T> void retrieve(String groupID, KinveyClientCallback<T> callback){
-        new Retrieve(groupID, callback).execute();
+        new Retrieve(groupID, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -273,7 +273,7 @@ public class AsyncUserGroup extends UserGroup {
      * @param <T> a T object.
      */
     public <T> void update(UserGroupRequest group, KinveyClientCallback<T> callback){
-        new Update(group, callback).execute();
+        new Update(group, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -295,7 +295,7 @@ public class AsyncUserGroup extends UserGroup {
      * @param <T> a T object.
      */
     public <T> void delete(String groupID, KinveyClientCallback<T> callback) {
-        new Delete(groupID, callback).execute();
+        new Delete(groupID, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     private class Create extends AsyncClientRequest<UserGroupResponse> {

@@ -57,7 +57,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download){
-        new GetEntity(entityID, callback, download, null).execute();
+        new GetEntity(entityID, callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -79,7 +79,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null).execute();
+        new Get(new Query(), callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -100,7 +100,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null).execute();
+        new Get(new Query(), callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -118,7 +118,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload) {
-        new Save(entity, callback, upload, null).execute();
+        new Save(entity, callback, upload, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 

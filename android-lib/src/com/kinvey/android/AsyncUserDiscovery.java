@@ -169,7 +169,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     public void lookup(UserLookup userlookup, KinveyUserListCallback callback) {
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        new Lookup(userlookup, callback).execute();
+        new Lookup(userlookup, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 

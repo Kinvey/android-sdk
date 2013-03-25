@@ -116,7 +116,7 @@ public class UrbanAirshipPush extends AbstractPush {
      * @return
      */
     public <T> void initialize(PushOptions options, Application currentApp, KinveyClientCallback<T> callback) {
-        new Initialize(options, currentApp, callback).execute();
+        new Initialize(options, currentApp, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class UrbanAirshipPush extends AbstractPush {
      * @param <T>
      */
     public <T> void disablePush(KinveyClientCallback<T> callback) {
-        new DisablePush(callback);
+        new DisablePush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     @Override

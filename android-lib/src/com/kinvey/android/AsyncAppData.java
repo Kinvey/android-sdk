@@ -152,7 +152,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback<T>
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback)  {
-        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -180,7 +180,7 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void get(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -203,7 +203,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyListCallback<T>
      */
     public void get(KinveyListCallback<T> callback) {
-        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute();
+        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -229,7 +229,7 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
-        new SaveRequest(entity, callback).execute();
+        new SaveRequest(entity, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -255,7 +255,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute();
+        new AppDataRequest(methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -281,7 +281,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute();
+        new AppDataRequest(methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -310,7 +310,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void count(ArrayList<String> fields, Query query, KinveyClientCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_COUNT), callback, query).execute();
+        new AppDataRequest(methodMap.get(KEY_COUNT), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -339,7 +339,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback callback) {
-        new  AppDataRequest(methodMap.get(KEY_SUM), callback, fields, sumField, query).execute();
+        new  AppDataRequest(methodMap.get(KEY_SUM), callback, fields, sumField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -368,7 +368,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void max(ArrayList<String> fields, String maxField, Query query, KinveyClientCallback callback)  {
-        new AppDataRequest(methodMap.get(KEY_MAX), callback, fields, maxField, query).execute();
+        new AppDataRequest(methodMap.get(KEY_MAX), callback, fields, maxField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -396,7 +396,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void min(ArrayList<String> fields, String minField, Query query, KinveyClientCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_MIN), callback, fields, minField, query).execute();
+        new AppDataRequest(methodMap.get(KEY_MIN), callback, fields, minField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -424,7 +424,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute();
+        new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**

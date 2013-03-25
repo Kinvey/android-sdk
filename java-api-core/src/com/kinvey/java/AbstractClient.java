@@ -383,13 +383,5 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 return value;
             }
         }
-
-
-
-
-
-
-
-
     }
 }

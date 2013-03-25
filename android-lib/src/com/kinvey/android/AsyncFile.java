@@ -110,7 +110,7 @@ public class AsyncFile extends File {
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void getDownloadUrl(String fileName, KinveyClientCallback<UriLocResponse> callback) {
-        new GetDownloadUrl(fileName, callback).execute();
+        new GetDownloadUrl(fileName, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -123,7 +123,7 @@ public class AsyncFile extends File {
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void getUploadUrl(String fileName, KinveyClientCallback<UriLocResponse> callback) {
-        new GetUploadUrl(fileName, callback).execute();
+        new GetUploadUrl(fileName, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -169,7 +169,7 @@ public class AsyncFile extends File {
      */
     public void upload(java.io.File file, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
-        new FileUpload(file, listener).execute();
+        new FileUpload(file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -181,7 +181,7 @@ public class AsyncFile extends File {
      */
     public void upload(String name, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
-        new FileUpload(name, inputStream, listener).execute();
+        new FileUpload(name, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -222,7 +222,7 @@ public class AsyncFile extends File {
      */
     public void download(String filename, OutputStream out, DownloaderProgressListener listener) {
         this.setDownloaderProgressListener(listener);
-        new FileDownload(filename, out, listener).execute();
+        new FileDownload(filename, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -232,7 +232,7 @@ public class AsyncFile extends File {
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
     public void delete(String filename, KinveyClientCallback<Void> callback) {
-        new FileDelete(filename, callback).execute();
+        new FileDelete(filename, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 

@@ -122,7 +122,7 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(KinveyUserCallback callback) {
-        new Login(callback).execute();
+        new Login(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -157,7 +157,7 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(String userid, String password, KinveyUserCallback callback) {
-        new Login(userid, password, callback).execute();
+        new Login(userid, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -187,7 +187,7 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginFacebook(String accessToken, KinveyUserCallback callback) {
-        new Login(accessToken, LoginType.FACEBOOK, callback).execute();
+        new Login(accessToken, LoginType.FACEBOOK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -219,7 +219,7 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserCallback} that contains a valid logged in user
      */
     public void loginGoogle(String accessToken, KinveyUserCallback callback)  {
-        new Login(accessToken, LoginType.GOOGLE, callback).execute();
+        new Login(accessToken, LoginType.GOOGLE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -253,7 +253,7 @@ public class AsyncUser extends User {
      */
     public void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                              KinveyUserCallback callback)  {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.TWITTER, callback).execute();
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.TWITTER, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -287,12 +287,12 @@ public class AsyncUser extends User {
      */
     public void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                               KinveyUserCallback callback) {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute();
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
     public void loginAuthLink(String accessToken, String refreshToken, KinveyUserCallback callback) {
-        new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute();
+        new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -306,7 +306,7 @@ public class AsyncUser extends User {
      * @param callback KinveyUserCallback
      */
     void retrieveMetadata(KinveyUserCallback callback) {
-        new RetrieveMetaData(callback).execute();
+        new RetrieveMetaData(callback).execute(AsyncClientRequest.ExecutorType.ANDROIDTHREADPOOL);
     }
 
     /**
@@ -344,7 +344,7 @@ public class AsyncUser extends User {
      */
     public void create(String username, String password, KinveyUserCallback callback) {
         Log.v(Client.TAG, "creating");
-        new Create(username, password, callback).execute();
+        new Create(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -381,7 +381,7 @@ public class AsyncUser extends User {
      */
     public void delete(Boolean hardDelete, KinveyUserDeleteCallback callback) {
         // TODO:  Check callback
-        new Delete(hardDelete, callback).execute();
+        new Delete(hardDelete, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -406,7 +406,7 @@ public class AsyncUser extends User {
      * @param <T>
      */
     public<T> void retrieve(KinveyClientCallback<T> callback) {
-        new Retrieve(callback).execute();
+        new Retrieve(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -432,7 +432,7 @@ public class AsyncUser extends User {
      */
     public<T> void retrieve(Query q, KinveyClientCallback<T> callback) {
         // TODO:  Correct callback?
-        new Retrieve(q, callback).execute();
+        new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -457,7 +457,7 @@ public class AsyncUser extends User {
      * @param <T>
      */
     public<T> void update(KinveyUserCallback callback) {
-        new Update(callback).execute();
+        new Update(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -479,7 +479,7 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserManagementCallback}
      */
     public void resetPassword(KinveyUserManagementCallback callback) {
-        new ResetPassword(callback).execute();
+        new ResetPassword(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -501,7 +501,7 @@ public class AsyncUser extends User {
      * @param callback {@link com.kinvey.android.callback.KinveyUserManagementCallback}
      */
     public void sendEmailVerification(KinveyUserManagementCallback callback) {
-        new EmailVerification(callback).execute();
+        new EmailVerification(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -579,7 +579,7 @@ public class AsyncUser extends User {
      * @param callback KinveyClientCallback
      */
     public void registerPush(KinveyClientCallback<Void> callback) {
-        new RegisterPush(callback).execute();
+        new RegisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -599,7 +599,7 @@ public class AsyncUser extends User {
      * @param callback KinveyClientCallback
      */
     public void unregisterPush(KinveyClientCallback<Void> callback) {
-        new UnregisterPush(callback).execute();
+        new UnregisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**

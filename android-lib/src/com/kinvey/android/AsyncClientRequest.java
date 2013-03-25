@@ -12,8 +12,11 @@
 package com.kinvey.android;
 
 import android.os.AsyncTask;
+import android.os.Build;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.concurrent.Executor;
 
 import com.kinvey.java.core.KinveyClientCallback;
 
@@ -26,9 +29,17 @@ import com.kinvey.java.core.KinveyClientCallback;
  */
 public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
 
+    public enum ExecutorType {
+        KINVEYSERIAL,
+        ANDROIDSERIAL,
+        ANDROIDTHREADPOOL
+    }
+
     private Throwable error;
 
     private KinveyClientCallback callback;
+
+    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
 
     /**
      * <p>Constructor for AsyncClientRequest.</p>
@@ -75,5 +86,56 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
      * @throws java.io.IOException if any.
      */
     protected abstract T executeAsync() throws IOException;
+
+
+    public AsyncTask<Object, Void, T> execute(ExecutorType type, Object... params) {
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            switch(type) {
+                case KINVEYSERIAL:
+                    return super.executeOnExecutor(KINVEY_SERIAL_EXECUTOR, params);
+                case ANDROIDSERIAL:
+                    return super.executeOnExecutor(SERIAL_EXECUTOR, params);
+                case ANDROIDTHREADPOOL:
+                    return super.executeOnExecutor(THREAD_POOL_EXECUTOR, params);
+                default:
+                    throw new RuntimeException("Invalid Executor defined");
+            }
+        } else {
+            return super.execute(params);
+        }
+    }
+
+    /**
+     * This class is a copy of the native SerialExecutor from AOSP.  It is duplicated here to allow
+     * AsyncClientRequest to run in their own Thread Pool seperate from the main application's AsyncTasks, but keep
+     * the concurrency benefits of only having a single AsyncTask thread.  AndroidClientRequest will run in
+     * its own thread pool of one.
+     */
+    private static class KinveySerialExecutor implements Executor {
+        final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
+        Runnable mActive;
+
+        public synchronized void execute(final Runnable r) {
+            mTasks.offer(new Runnable() {
+                public void run() {
+                    try {
+                        r.run();
+                    } finally {
+                        scheduleNext();
+                    }
+                }
+            });
+            if (mActive == null) {
+                scheduleNext();
+            }
+        }
+
+        protected synchronized void scheduleNext() {
+            if ((mActive = mTasks.poll()) != null) {
+                THREAD_POOL_EXECUTOR.execute(mActive);
+            }
+        }
+    }
 
 }
