@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.example.testdrive.android.model.Entity;
+import com.google.api.client.http.HttpTransport;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
@@ -20,6 +24,7 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 public class TestDrive extends Activity {
 
 	public static final String TAG = "TestDrive";
+    private static final Level LOGGING_LEVEL = Level.FINEST;
 
     private ProgressBar bar;
 
@@ -29,6 +34,13 @@ public class TestDrive extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_test_drive);
+
+        // run the following comamnd to turn on verbose logging:
+        //
+        // adb shell setprop log.tag.HttpTransport DEBUG
+        //
+        Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
+
         bar = (ProgressBar) findViewById(R.id.refresh_progress);
         bar.setIndeterminate(true);
 
