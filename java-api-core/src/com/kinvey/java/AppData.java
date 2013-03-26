@@ -604,7 +604,8 @@ public class AppData<T> {
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
-            this.sortFilter = query.getSortString();
+            String sortString = query.getSortString();
+            this.sortFilter = sortString != "" ? sortString : null;
 
         }
 
@@ -618,7 +619,8 @@ public class AppData<T> {
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
-            this.sortFilter = query.getSortString();
+            String sortString = query.getSortString();
+            this.sortFilter = sortString != "" ? sortString : null;
 
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
