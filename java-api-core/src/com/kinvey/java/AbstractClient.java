@@ -14,6 +14,7 @@
 
 package com.kinvey.java;
 
+import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -72,14 +73,16 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      * @param servicePath              path of Service
      * @param objectParser             JsonObjectParser
      * @param kinveyRequestInitializer KinveyRequestInitializer
+     * @param requestPolicy            BackoffPolicy
      */
     protected AbstractClient(HttpTransport transport,
                              HttpRequestInitializer httpRequestInitializer, String rootUrl,
                              String servicePath, JsonObjectParser objectParser,
-                             KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store) {
+                             KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
+                             BackOffPolicy requestPolicy) {
 
         super(transport, httpRequestInitializer, rootUrl, servicePath,
-                objectParser, kinveyRequestInitializer);
+                objectParser, kinveyRequestInitializer, requestPolicy);
         this.store = store;
     }
 

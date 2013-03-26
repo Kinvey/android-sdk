@@ -31,7 +31,7 @@ import com.kinvey.java.core.KinveyRequestInitializer;
 public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
 
     public MockKinveyJsonClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyRequestInitializer kinveyRequestInitializer) {
-        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer);
+        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, null);
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
                        String rootUrl, String servicePath, JsonObjectParser objectParser,
                        KinveyClientRequestInitializer kinveyRequestInitializer) {
-            super(transport, null, "https://baas.kinvey.com/", "" , objectParser, kinveyRequestInitializer,null);
+            super(transport, null, "https://baas.kinvey.com/", "" , objectParser, kinveyRequestInitializer,null,null);
         }
 
         @Override

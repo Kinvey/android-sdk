@@ -13,6 +13,7 @@
 package com.kinvey.java.core;
 
 import com.google.api.client.http.AbstractInputStreamContent;
+import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.EmptyContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
@@ -92,6 +93,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     private MediaHttpDownloader downloader;
 
+    /**
+     * {@link BackOffPolicy} to use for retries
+     */
+    private BackOffPolicy requestBackoffPolicy;
+
     @Key
     private String appKey;
 
@@ -112,6 +118,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         this.uriTemplate = uriTemplate;
         this.responseClass = responseClass;
         this.httpContent = httpContent;
+        this.requestBackoffPolicy = abstractKinveyClient.getBackoffPolicy();
     }
 
     /**
@@ -180,6 +187,14 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     public final Class<T> getResponseClass() {
         return responseClass;
+    }
+
+    /**
+     *
+     * @return the Backoff Policy
+     */
+    public BackOffPolicy getRequestBackoffPolicy() {
+        return requestBackoffPolicy;
     }
 
     /**
@@ -253,6 +268,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 .buildRequest(requestMethod, buildHttpRequestUrl(), httpContent);
         httpRequest.setParser(getAbstractKinveyClient().getObjectParser());
         httpRequest.setSuppressUserAgentSuffix(true);
+        httpRequest.setRetryOnExecuteIOException(true);
+        httpRequest.setBackOffPolicy(this.requestBackoffPolicy);
         // custom methods may use POST with no content but require a Content-Length header
         if (httpContent == null && (requestMethod.equals(HttpMethods.POST)
                 || requestMethod.equals(HttpMethods.PUT))) {

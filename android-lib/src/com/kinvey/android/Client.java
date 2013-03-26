@@ -18,6 +18,8 @@ package com.kinvey.android;
 import android.content.Context;
 import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.BackOffPolicy;
+import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
@@ -99,11 +101,14 @@ public class Client extends AbstractClient {
      * @param objectParser object parse used in all requests
      * @param kinveyRequestInitializer a {@link com.kinvey.java.core.KinveyClientRequestInitializer} object.
      * @param store a {@link com.kinvey.java.auth.CredentialStore} object.
+     * @param requestPolicy a {@link BackOffPolicy} for retrying HTTP Requests
      */
     protected Client(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl,
                      String servicePath, JsonObjectParser objectParser,
-                     KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store) {
-        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store);
+                     KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
+                     BackOffPolicy requestPolicy) {
+        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
+                requestPolicy);
     }
 
     /**
@@ -478,6 +483,7 @@ public class Client extends AbstractClient {
             super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
             this.context = context.getApplicationContext();
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
             try {
                 this.setCredentialStore(new AndroidCredentialStore(this.context));
             } catch (Exception ex) {
@@ -533,6 +539,7 @@ public class Client extends AbstractClient {
             this.setKinveyClientRequestInitializer(initializer);
 
             this.context = context.getApplicationContext();
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
             try {
                 this.setCredentialStore(new AndroidCredentialStore(this.context));
             } catch (AndroidCredentialStoreException ex) {
@@ -551,7 +558,8 @@ public class Client extends AbstractClient {
         public Client build() {
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
-                    getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore());
+                    getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
+                    getRequestBackoffPolicy());
             client.setContext(context);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
             try {

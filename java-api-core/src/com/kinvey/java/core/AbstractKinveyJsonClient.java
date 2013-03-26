@@ -12,6 +12,7 @@
 
 package com.kinvey.java.core;
 
+import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -28,11 +29,12 @@ public abstract class AbstractKinveyJsonClient extends AbstractKinveyClient {
    * @param rootUrl the root url for this service
    * @param servicePath the service path
    * @param objectParser the object parser or {@code null} if none
+   * @param requestPolicy the {@link BackOffPolicy} to use for HTTP requests
    */
   protected AbstractKinveyJsonClient(HttpTransport transport,
       HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath,
-      JsonObjectParser objectParser) {
-    super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser);
+      JsonObjectParser objectParser, BackOffPolicy requestPolicy) {
+    super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, requestPolicy);
   }
   
   /**
@@ -42,11 +44,13 @@ public abstract class AbstractKinveyJsonClient extends AbstractKinveyClient {
    * @param servicePath the service path
    * @param objectParser the object parser or {@code null} if none
    * @param kinveyRequestInitializer initializer to handle kinvey specific headers and authorization tokens
+   * @param requestPolicy the {@link BackOffPolicy} to use for HTTP requests
    */
   protected AbstractKinveyJsonClient(HttpTransport transport,
       HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath,
-      JsonObjectParser objectParser, KinveyRequestInitializer kinveyRequestInitializer) {
-    super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer);
+      JsonObjectParser objectParser, KinveyRequestInitializer kinveyRequestInitializer,
+      BackOffPolicy requestPolicy) {
+    super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy);
   }
 
 
