@@ -33,13 +33,32 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
- * Builder for advanced Synchronous (Blocking!) App Data requests.
+ * Builder for synchronous blocking app data requests.
  * <p>
- * This class uses the Builder pattern to allow extensible use of all the features of our Core App Data API.
+ * This class uses the builder pattern to allow extensible use of all the features of our core app data API.  There are
+ * various `set*()` methods, which can be chained together to create a builder.  Once the builder has been configured,
+ * a call to `myBuilder.build()` will return a blocking syncronous request.  By calling `myBuilder.build().execute()` the
+ * the request will be constructed and executed.
  * </p>
  * <p>
- * These builders allow various fields to be declared independently, resulting in much simpler usage of our API for power users.
+ * `myBuilder.build()` returns a blocking syncronous request for app data from a collection.  This class provides multiple
+ * implementations for various CRUD interactions.
  * </p>
+ * <p>
+ * The code below will build and execute a blocking get entity request.
+ *
+ * </p>
+ * <p>
+ *
+ *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, AppData.this)
+ *                             .setEntityID(myEntity.getId());
+ *                             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
+ *                             .setResolveDepth(2)
+ *                             .build()
+ *                             .execute();
+ * </p>
+ *
+ *
  * @author edwardf
  * @since 2.0.2
  */
@@ -52,12 +71,16 @@ public class AppDataOperation {
     protected static abstract class AppDataRequestBuilder {
 
 
-        //Required
+        //Required for all AppData operations.
         protected String collection;
         protected Class myClass;
         protected AppData appData;
 
-
+        /**
+         * @param collectionName the Name of the collection this builder's request will be accessing
+         * @param myClass a {@code GenericJson} representing the object model
+         * @param appData a reference to an appdata instance associated with an active client.
+         */
         public AppDataRequestBuilder(String collectionName, Class myClass, AppData appData) {
             this.collection = collectionName;
             this.myClass = myClass;
@@ -79,13 +102,13 @@ public class AppDataOperation {
     /**
      * Abstract KR (Kinvey Reference) App Data Request Builder parent introduces resolves, resolvedepth and retain references.
      */
-    private static abstract class KRAppDataRequestBuilder extends AppDataRequestBuilder {
+    protected static abstract class KRAppDataRequestBuilder extends AppDataRequestBuilder {
 
         //Kinvey Reference Support
         protected String[] resolves = null;
         //set defaults for kinvey reference
-        //note the above `resolves` determines if Kinvey References are used.
-        protected int resolveDepth = 2;
+        //note the above `resolves != null` determines if Kinvey References are used.
+        protected int resolveDepth = 1;
         protected boolean retainReference = true;
 
         public KRAppDataRequestBuilder(String collectionName, Class myClass, AppData appData) {
@@ -173,6 +196,9 @@ public class AppDataOperation {
                 } else {
                     ret = this.appData.new GetEntity(this.entityID, this.myClass, resolves, resolveDepth, retainReference);
                 }
+            } else{
+                Preconditions.checkNotNull(null, "Cannot use GET ENTITY without calling setEntityID()");
+                return null;
             }
 
 
