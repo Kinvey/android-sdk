@@ -41,10 +41,11 @@ import com.kinvey.sample.oracledlc.account.LoginActivity;
  */
 public class OracleDLC extends SherlockFragmentActivity implements AdapterView.OnItemClickListener {
 
+
     private static final Level LOGGING_LEVEL = Level.FINEST;
     public static final String TAG = "OracleDLC";
 
-    public static final String collectionName = "OracleDLC";
+    public static final String collectionName = "person";
 
     private ListView mList;
     private FeatureAdapter mAdapter;

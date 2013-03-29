@@ -192,16 +192,14 @@ public class KinveyAuthRequest extends GenericJson {
     /**
      * Used to construct a {@link KinveyAuthRequest}. The result will be an auth request that adjusts for the
      * authentication scenario.
-     * <p/>
      * <p>
      * There are three scenarios that this builder will support for Kinvey authentication.
      * </p>
-     * <p/>
      * <p>
      * The first is where the user is known
      * and the both the username and password have been provided.
      * </p>
-     * <p/>
+     *
      * <pre>
      *      KinveyAuthResponse response = new KinveyAuthRequest.Builder(transport,jsonfactory,baseUrl, appKey,appSecret)
      *          .setUserIdAndPassword(userid, password)

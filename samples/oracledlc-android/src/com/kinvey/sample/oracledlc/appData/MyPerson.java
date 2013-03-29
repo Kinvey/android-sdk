@@ -9,36 +9,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.oracledlc;
+package com.kinvey.sample.oracledlc.appData;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
-/**
- * @author edwardf
- * @since 2.0
- */
-public class MyEntity extends GenericJson{
+public class MyPerson extends GenericJson{
 
 
     @Key("_id")
-    private String id;
+    private Integer id;
 
-//    @Key("_geoloc")
-//    private Location location;
-
-    @Key("name")
+    @Key("firstName")
     private String name;
 
-    public MyEntity(){}
+    @Key("email")
+    private String email = "null@nullzy.com";
+
+    @Key("lastName")
+    private String lastname = "nully";
+
+    public MyPerson(){}
 
 
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

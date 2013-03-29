@@ -13,31 +13,10 @@ package com.kinvey.sample.oracledlc.account;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.json.JsonHttpContent;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.GenericData;
-import com.google.api.client.util.Key;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLConnection;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -48,6 +27,12 @@ import com.kinvey.sample.oracledlc.*;
  *
  */
 public class LoginActivity extends Activity implements View.OnClickListener {
+
+    public static final String AUTHORIZE_BASE_URL = "https://rdsdw.kinvey.com/ldap-auth-link";
+//    public static final String AUTHORIZE_BASE_URL = "http://192.168.1.23:5000";
+//    public static final String AUTHORIZE_BASE_URL = "http://192.168.2.7:5000";
+    public static final String AUTH_API_KEY = "8b4b1d7-8b3a-11e2-be63-3c075415b1e5~";
+    private static final String BUNDLE_KEY_REFRESH_TOKEN = "refreshToken";
 
     private EditText eUserName;
     private EditText ePassword;
@@ -74,32 +59,12 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
     }
 
-
-
     @Override
     public void onClick(View v) {
-
         if (!isUserLoggedIn()) {
-
-            AuthenticateTask authenticate = new AuthenticateTask();
+            AuthenticateTask authenticate = new LoginAuthenticateTask(this);
             authenticate.execute(eUserName.getText().toString(), ePassword.getText().toString());
-
-
-//            getClient().user().login(eUserName.getText().toString(), ePassword.getText().toString(), new KinveyUserCallback() {
-//                @Override
-//                public void onSuccess(User result) {
-//                    Intent feature = new Intent(LoginActivity.this, OracleDLC.class);
-//                    startActivity(feature);
-//                }
-//
-//                @Override
-//                public void onFailure(Throwable error) {
-//                    AndroidUtil.toast(LoginActivity.this, "couldn't login -> " + error.getMessage());
-//                }
-//            });
-
         }
-
     }
 
     private void showNotLoggedInToast(Throwable error) {
@@ -109,76 +74,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             AndroidUtil.toast(LoginActivity.this, "couldn't login");
     }
 
-    private void loginSucceeded() {
-        Intent feature = new Intent(LoginActivity.this, OracleDLC.class);
-        startActivity(feature);
-    }
+    public class LoginAuthenticateTask extends AuthenticateTask {
 
-    private boolean isUserLoggedIn() {
-        return getClient().user().isUserLoggedIn();
-    }
-
-    private Client getClient() {
-        return ((OracleDLCApplication) getApplicationContext()).getClient();
-    }
-
-    protected static class AuthnPayload extends GenericJson {
-
-        @Key("userId")
-        private String userId;
-
-        @Key("password")
-        private String password;
-
-        public AuthnPayload(String userId, String password) {
-            this.userId = userId;
-            this.password = password;
-        }
-
-    }
-
-    public static class AuthnResponse extends GenericJson {
-        @Key ("access_token")
-        private String accessToken;
-
-        @Key ("refresh_token")
-        private  String refreshToken;
-
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-    }
-
-
-    private static HttpTransport transport = AndroidHttp.newCompatibleTransport();
-    private class AuthenticateTask extends AsyncTask<String, Void, AuthnResponse> {
-
-        @Override
-        protected AuthnResponse doInBackground(String... params) {
-
-            String userId = params[0];
-            String pass = params[1];
-            JsonHttpContent authnPayload = newJsonHttpContent(userId, pass);
-            HttpRequest authnRequest;
-            try {
-                authnRequest = transport.createRequestFactory().buildPostRequest(new GenericUrl("https://rdsdw.kinvey.com/ldap-auth-link/authorize"), authnPayload);
-                authnRequest.getHeaders().setContentType("application/json");
-                authnRequest.getHeaders().set("x-auth-key", "8b4b1d7-8b3a-11e2-be63-3c075415b1e5~");
-                authnRequest.setParser(new JsonObjectParser(new GsonFactory()));
-                authnRequest.setEnableGZipContent(false);
-                HttpResponse response = authnRequest.execute();
-
-                if (response.isSuccessStatusCode())
-                    return response.parseAs(AuthnResponse.class);
-
-            } catch (IOException e) {
-                Log.e(OracleDLC.TAG, "failed to authenticate with auth link", e);
-            }
-            return null;
+        public LoginAuthenticateTask(Activity activity) {
+            super(activity);
         }
 
         @Override
@@ -190,7 +89,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 getClient().user().loginAuthLink(authnResponse.getAccessToken(), authnResponse.getRefreshToken(), new KinveyUserCallback() {
                     @Override
                     public void onSuccess(User result) {
-                        LoginActivity.this.loginSucceeded();
+                        Intent feature = new Intent(LoginActivity.this, OracleDLC.class);
+                        startActivity(feature);
                     }
 
                     @Override
@@ -200,15 +100,22 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 });
 
             }
-
-
         }
-
-
     }
 
-    private static JsonHttpContent newJsonHttpContent(String userId, String password) {
-        return new JsonHttpContent(new GsonFactory(),
-                new LoginActivity.AuthnPayload(userId, password));
+    private void loginSucceeded(String refreshToken) {
+        Intent feature = new Intent(LoginActivity.this, OracleDLC.class);
+        feature.getExtras().putString(BUNDLE_KEY_REFRESH_TOKEN, refreshToken);
+        startActivity(feature);
     }
+
+    private boolean isUserLoggedIn() {
+        return getClient().user().isUserLoggedIn();
+    }
+
+    private Client getClient() {
+        return ((OracleDLCApplication) getApplicationContext()).getClient();
+    }
+
+
 }

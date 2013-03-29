@@ -25,8 +25,7 @@ import com.kinvey.sample.oracledlc.R;
 import java.util.Random;
 
 /**
- * @author edwardf
- * @since 2.0
+ *
  */
 public class PutFragment extends UseCaseFragment implements View.OnClickListener {
 
@@ -73,20 +72,18 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
     public void putIt(final int howMany) {
         addCount = 0;
 
-        if ( 5 < (howMany + Integer.valueOf(totalCount.getText().toString()))){
-            AndroidUtil.toast(PutFragment.this, "can't have more than 5!  Try deleting them!");
-            return;
-        }
+//        if ( 5 < (howMany + Integer.valueOf(totalCount.getText().toString()))){
+//            AndroidUtil.toast(PutFragment.this, "can't have more than 5!  Try deleting them!");
+//            return;
+//        }
 
         for (int i = 0; i < howMany; i++) {
-
-
-            MyEntity ent = new MyEntity();
+            MyPerson ent = new MyPerson();
             ent.setName("name" + new Random().nextInt(10000));
 
-            getApplicationContext().getClient().appData(OracleDLC.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
+            getApplicationContext().getClient().appData(OracleDLC.collectionName, MyPerson.class).save(ent, new KinveyClientCallback<MyPerson>() {
                 @Override
-                public void onSuccess(MyEntity result) {
+                public void onSuccess(MyPerson result) {
                     addCount++;
                     if (addCount == howMany) {
                         AndroidUtil.toast(PutFragment.this, "Successfully saved " + addCount);
@@ -142,10 +139,10 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
 
     private void getCount() {
 
-        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyEntity.class).get(new KinveyListCallback<MyEntity>() {
+        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyPerson.class).get(new KinveyListCallback<MyPerson>() {
 
             @Override
-            public void onSuccess(MyEntity[] result) {
+            public void onSuccess(MyPerson[] result) {
                 totalCount.setText(String.valueOf(result.length));
             }
 

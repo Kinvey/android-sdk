@@ -11,10 +11,12 @@
  */
 package com.kinvey.sample.oracledlc.appData;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.sample.oracledlc.*;
 import com.kinvey.sample.oracledlc.R;
@@ -71,16 +73,23 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
             return;
         }
 
+        Query q = new Query();
+        q.equals("_id", viewingID.getSelectedItem());
+        q.setLimit(5);
+        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyPerson.class).get(q, new KinveyListCallback<MyPerson>() {
 
-        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyEntity.class).getEntity(viewingID.getSelectedItem().toString(), new KinveyClientCallback<MyEntity>() {
+
             @Override
-            public void onSuccess(MyEntity result) {
-                currentName.setText(result.getName());
-                currentID.setText(result.getId());
+            public void onSuccess(MyPerson[] result) {
+                if (result.length > 0){
+                    currentName.setText(result[0].getName());
+                    currentID.setText(result[0].getId().toString());
+                }
             }
 
             @Override
             public void onFailure(Throwable error) {
+
                 AndroidUtil.toast(GetFragment.this, "something went wrong ->" + error.getMessage());
 
 
@@ -96,25 +105,24 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
         }
     }
 
-    private void updateSpinner(MyEntity[] result) {
-
-
-        String[] ids = new String[result.length];
+    private void updateSpinner(MyPerson[] result) {
+        Integer[] ids = new Integer[result.length];
 
         for (int i = 0; i < result.length; i++) {
             ids[i] = result[i].getId();
         }
 
-        viewingID.setAdapter(new ArrayAdapter<String>(getSherlockActivity(), android.R.layout.simple_spinner_dropdown_item, ids));
+        viewingID.setAdapter(new ArrayAdapter<Integer>(getSherlockActivity(), android.R.layout.simple_spinner_dropdown_item, ids));
 
 
     }
 
     private void getCount() {
 
-        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyEntity.class).get(new KinveyListCallback<MyEntity>() {
+        getApplicationContext().getClient().appData(OracleDLC.collectionName, MyPerson.class).get(new KinveyListCallback<MyPerson>() {
             @Override
-            public void onSuccess(MyEntity[] result) {
+            public void onSuccess(MyPerson[] result) {
+                Log.d(OracleDLC.TAG, ">>>>>> result count: "+result.length);
                 currentCount.setText(String.valueOf(result.length));
                 updateSpinner(result);
             }
