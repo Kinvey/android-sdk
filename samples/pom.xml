@@ -21,6 +21,7 @@
         <module>statushare-android</module>
         <module>signin-android</module>
         <module>oracledlc-android</module>
+        <module>ticketview-android</module>
     </modules>
 
     <profiles>
