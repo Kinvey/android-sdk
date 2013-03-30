@@ -1,22 +1,18 @@
 package com.kinvey.sample.ticketview;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.api.client.http.HttpTransport;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,17 +20,22 @@ import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.sample.ticketview.model.Ticket;
+import com.kinvey.sample.ticketview.model.TicketCommentEntity;
+import com.kinvey.sample.ticketview.model.TicketEntity;
 
 public class TicketViewActivity extends SherlockFragmentActivity implements TicketCommentDialogFragment.OnNewCommentListener {
     private static final Level LOGGING_LEVEL = Level.FINEST;
     public static final String TAG = "TicketViewApplication";
-    private ArrayList<Ticket> myList;
+    private ArrayList<TicketEntity> myList;
     private Client myClient;
+
+    public interface RefreshCallback {
+        public void refreshCallback();
+
+    }
 
     /** Called when the activity is first created. */
     @Override
@@ -49,7 +50,6 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         //
         Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
 
-        bindViews();
 
         myClient = ((TicketViewApplication) getApplication()).getClient();
         if (!myClient.user().isUserLoggedIn()) {
@@ -70,23 +70,19 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         }
     }
 
-    private void bindViews() {
-        //populateList();
-    }
-
-    public ArrayList<Ticket> getTicketList() {
+    public ArrayList<TicketEntity> getTicketList() {
         return myList;
     }
 
     public void populateList() {
 
         if (myList == null) {
-            AsyncAppData<Ticket> myAppData = myClient.appData("ticket",Ticket.class);
+            AsyncAppData<TicketEntity> myAppData = myClient.appData("ticket",TicketEntity.class);
             Query myQuery = myAppData.query();
             myQuery.equals("status", "open");
-            myAppData.get(myQuery, new KinveyListCallback<Ticket>() {
+            myAppData.get(myQuery, new KinveyListCallback<TicketEntity>() {
                 @Override
-                public void onSuccess(Ticket[] result) {
+                public void onSuccess(TicketEntity[] result) {
                     myList = new ArrayList(Arrays.asList(result));
                     ticketListFragment();
                 }
@@ -100,11 +96,22 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
 
     }
 
-    public void saveTicket(Ticket ticket) {
-        myClient.appData("ticket", Ticket.class).save(ticket, new KinveyClientCallback<Ticket>() {
+    public String getTag() {
+        return TAG;
+    }
+
+    public void getComments(String ticketId, KinveyListCallback<TicketCommentEntity> callback) {
+        AsyncAppData<TicketCommentEntity> myAppData = myClient.appData("ticketComment", TicketCommentEntity.class);
+        Query myQuery = myAppData.query();
+        myQuery.equals("ticketId", ticketId);
+        myAppData.get(myQuery, callback);
+    }
+
+    public void saveTicket(TicketEntity ticket) {
+        myClient.appData("ticket", TicketEntity.class).save(ticket, new KinveyClientCallback<TicketEntity>() {
             @Override
-            public void onSuccess(Ticket result) {
-                Toast.makeText(TicketViewActivity.this, "Ticket " + result.getSubject() + " saved", Toast.LENGTH_LONG).show();
+            public void onSuccess(TicketEntity result) {
+                Log.i(TAG, "Ticket " + result.getSubject() + " saved");
             }
 
             @Override
@@ -113,17 +120,33 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
             }
         });
     }
+
+    public void saveComment(TicketCommentEntity comment) {
+        myClient.appData("ticketComment", TicketCommentEntity.class).save(comment, new KinveyClientCallback<TicketCommentEntity>() {
+            @Override
+            public void onSuccess(TicketCommentEntity result) {
+                Log.i(TAG, "Comment " + result.getCommentId() + " saved");
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.e(TAG, "Failed to save comment", error);
+            }
+        });
+    }
     
     public void ticketListFragment() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(android.R.id.content, new TicketListFragment());
+        ft.addToBackStack(null);
         ft.commit();   
     }
 
     public void ticketDetailsFragment(int position) {
-        Ticket detailsTicket = myList.get(position);
+        TicketEntity detailsTicket = myList.get(position);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(android.R.id.content, new TicketDetailsFragment(detailsTicket));
+        ft.replace(android.R.id.content, new TicketDetailsFragment(detailsTicket, position));
+        ft.addToBackStack(null);
         ft.commit();
     }
 
@@ -136,8 +159,15 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
 
     @Override
     public void onNewComment(int position, String comment) {
-        Ticket newCommentTicket = myList.get(position);
-        newCommentTicket.addComment(comment);
-        saveTicket(newCommentTicket);
+        TicketEntity newCommentTicket = myList.get(position);
+        TicketCommentEntity newComment = new TicketCommentEntity();
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ss.SZ");
+        Date date = new Date();
+        newComment.setComment(comment);
+        newComment.setTicketId(Integer.parseInt(newCommentTicket.getTicketId()));
+        newComment.setCommentDate(dateFormat.format(date));
+        newComment.setCommentBy("mikes");
+        saveComment(newComment);
     }
 }

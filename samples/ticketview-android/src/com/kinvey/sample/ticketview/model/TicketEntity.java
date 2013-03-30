@@ -13,16 +13,19 @@
  */
 package com.kinvey.sample.ticketview.model;
 
+import android.text.format.DateFormat;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.Key;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author mjsalinger
  * @since 2.0
  */
-public class Ticket extends GenericJson {
+public class TicketEntity extends GenericJson {
     @Key("_id")
     private String ticketId;
     @Key
@@ -35,8 +38,6 @@ public class Ticket extends GenericJson {
     private String subject;
     @Key
     private String status;
-    @Key
-    private ArrayList<String> comments = new ArrayList<String>();
 
     public String getTicketId() {
         return ticketId;
@@ -63,11 +64,11 @@ public class Ticket extends GenericJson {
     }
 
     public String getRequestDate() {
-        return requestDate;
+        return requestDate.toString();
     }
 
     public void setRequestDate(String requestDate) {
-        this.requestDate = requestDate;
+        this.requestDate=requestDate;
     }
 
     public String getSubject() {
@@ -84,17 +85,5 @@ public class Ticket extends GenericJson {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public ArrayList<String> getComments() {
-        return comments;
-    }
-
-    public void addComment(String comment) {
-        comments.add(comment);
-    }
-
-    public void setComments(ArrayList<String> comments) {
-        this.comments = comments;
     }
 }

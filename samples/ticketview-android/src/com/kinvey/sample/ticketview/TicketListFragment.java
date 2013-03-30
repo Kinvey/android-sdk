@@ -28,10 +28,9 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.kinvey.sample.ticketview.model.Ticket;
+import com.kinvey.sample.ticketview.model.TicketEntity;
 
 /**
  * @author mjsalinger
@@ -76,6 +75,7 @@ public class TicketListFragment extends SherlockListFragment {
                                     myAdapter.remove(myAdapter.getItem(position));
                                 }
                                 myAdapter.notifyDataSetChanged();
+                                Toast.makeText(getActivity(), "Ticket Closed", Toast.LENGTH_SHORT).show();
                             }
                         });
         listView.setOnTouchListener(touchListener);
@@ -89,11 +89,11 @@ public class TicketListFragment extends SherlockListFragment {
         ((TicketViewActivity) getActivity()).ticketDetailsFragment(position);
     }
 
-    private class TicketAdapter extends ArrayAdapter<Ticket> {
+    private class TicketAdapter extends ArrayAdapter<TicketEntity> {
 
         private LayoutInflater mInflater;
 
-        public TicketAdapter(Context context, List<Ticket> tickets,
+        public TicketAdapter(Context context, List<TicketEntity> tickets,
                              LayoutInflater inf) {
             // NOTE: I pass an arbitrary textViewResourceID to the super
             // constructor-- Below I override
@@ -101,14 +101,15 @@ public class TicketListFragment extends SherlockListFragment {
             // field anyways, it is just needed in the constructor.
             super(context, R.layout.ticket_list, tickets);
             this.mInflater = inf;
+            getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         }
 
         @Override
-        public void remove(Ticket object) {
+        public void remove(TicketEntity object) {
             object.setStatus("closed");
             ((TicketViewActivity) getActivity()).saveTicket(object);
-            super.remove(object);    //To change body of overridden methods use File | Settings | File Templates.
+            super.remove(object);
         }
 
         @Override
@@ -120,7 +121,7 @@ public class TicketListFragment extends SherlockListFragment {
             TextView requestedBy = null;
             ImageButton commentButton;
 
-            Ticket rowData = getItem(position);
+            TicketEntity rowData = getItem(position);
 
             if (null == convertView) {
                 convertView = mInflater.inflate(R.layout.ticket_list, null);

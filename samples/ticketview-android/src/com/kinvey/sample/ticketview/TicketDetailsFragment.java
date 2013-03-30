@@ -14,35 +14,46 @@
 package com.kinvey.sample.ticketview;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
-import com.kinvey.sample.ticketview.model.Ticket;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.sample.ticketview.model.TicketCommentEntity;
+import com.kinvey.sample.ticketview.model.TicketEntity;
 
 /**
  * @author mjsalinger
  * @since 2.0
  */
-public class TicketDetailsFragment extends SherlockFragment {
+public class TicketDetailsFragment extends SherlockFragment implements TicketViewActivity.RefreshCallback {
 
     private ListView commentListView;
     private ArrayAdapter<String> myAdapter;
-    private Ticket myTicket;
+    private TicketEntity myTicket;
     private TextView subject;
     private TextView description;
     private TextView requestedBy;
     private TextView requestedDate;
     private TextView status;
+    private ArrayList<String> comments = new ArrayList<String>();
+    private int position;
 
 
-    public TicketDetailsFragment(Ticket ticket) {
+    public TicketDetailsFragment(TicketEntity ticket, int position) {
         this.myTicket = ticket;
+        this.position = position;
     }
 
     @Override
@@ -53,18 +64,39 @@ public class TicketDetailsFragment extends SherlockFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return  inflater.inflate(R.layout.ticket_details, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        myAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, myTicket.getComments());
 
-        bindViews();
+        getComments();
+    }
+
+    private void getComments() {
+        ((TicketViewActivity)getActivity()).getComments(myTicket.getTicketId(), new KinveyListCallback<TicketCommentEntity>() {
+            @Override
+            public void onSuccess(TicketCommentEntity[] result) {
+                ArrayList<String> commentList = new ArrayList<String>();
+                for (TicketCommentEntity entity : result) {
+                    commentList.add(entity.getCommentDate() + ": " + entity.getComment());
+                }
+                comments = commentList;
+                bindViews();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.e(((TicketViewActivity) getActivity()).getTag(), "Error retrieving comments");
+            }
+        });
     }
 
     private void bindViews() {
+        myAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, comments);
         commentListView = (ListView) getActivity().findViewById(R.id.commentListView);
         commentListView.setAdapter(myAdapter);
         subject = (TextView) getActivity().findViewById(R.id.ticketSubject);
@@ -75,6 +107,12 @@ public class TicketDetailsFragment extends SherlockFragment {
         setValues();
     }
 
+    @Override
+    public void refreshCallback() {
+        setValues();
+        myAdapter.notifyDataSetChanged();
+    }
+
     private void setValues() {
         subject.setText(myTicket.getSubject());
         description.setText(myTicket.getDescription());
@@ -82,5 +120,36 @@ public class TicketDetailsFragment extends SherlockFragment {
         requestedDate.setText(myTicket.getRequestDate());
         status.setText(myTicket.getStatus());
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.add_comment:
+                ((TicketViewActivity) getActivity()).showCommentDialog(position);
+                return true;
+            case R.id.close_ticket:
+                closeTicket();
+                return true;
+            case R.id.action_settings:
+                return true;
+            case R.id.action_about:
+                return true;
+            case android.R.id.home:
+                ((TicketViewActivity) getActivity()).ticketListFragment();
+                return true;
+            default: return false;
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.ticket_details, menu);
+    }
+
+    private void closeTicket() {
+        myTicket.setStatus("closed");
+        ((TicketViewActivity) getActivity()).saveTicket(myTicket);
+        setValues();
     }
 }

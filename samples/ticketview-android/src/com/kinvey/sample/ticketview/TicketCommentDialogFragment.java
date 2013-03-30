@@ -22,8 +22,6 @@ import android.view.View;
 import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
-import com.kinvey.sample.ticketview.model.Ticket;
-
 /**
  * @author mjsalinger
  * @since 2.0
