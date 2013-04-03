@@ -121,8 +121,8 @@ public class AsyncAppData<T> extends AppData<T> {
             tempMap.put(KEY_MAX, AppData.class.getMethod("maxBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
             tempMap.put(KEY_MIN, AppData.class.getMethod("minBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
             tempMap.put(KEY_AVERAGE, AppData.class.getMethod("averageBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
-            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, List.class, int.class, boolean.class}));
-            tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, List.class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
 
 
         }catch (NoSuchMethodException e){

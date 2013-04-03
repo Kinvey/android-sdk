@@ -59,6 +59,29 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
         getIt.setOnClickListener(this);
         viewingID.setAdapter(new ArrayAdapter<String>(getSherlockActivity(), android.R.layout.simple_spinner_dropdown_item, new String[]{"--"}));
+        viewingID.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).getEntity(viewingID.getSelectedItem().toString(), new KinveyClientCallback<MyEntity>() {
+                    @Override
+                    public void onSuccess(MyEntity result) {
+                        currentName.setText(result.getName());
+                        currentID.setText(result.getId());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        AndroidUtil.toast(GetFragment.this, "something went wrong ->" + error.getMessage());
+
+
+                    }
+                });            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
     }
 
 

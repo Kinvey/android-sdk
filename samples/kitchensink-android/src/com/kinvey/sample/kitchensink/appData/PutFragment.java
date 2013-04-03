@@ -37,6 +37,8 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
 
     private int addCount;
 
+    private String[] ids;
+
 
     @Override
     public int getViewID() {
@@ -83,6 +85,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
 
             MyEntity ent = new MyEntity();
             ent.setName("name" + new Random().nextInt(10000));
+            ent.getAccess().setGloballyWriteable(true);
 
             getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
                 @Override
@@ -108,14 +111,16 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
 
     private void deleteAll(){
 
-        Query qAll = new Query() ;
+        if (ids == null || ids.length < 1){
+            return;
+        }
 
 
-
-       getApplicationContext().getClient().appData(KitchenSink.collectionName, KinveyDeleteResponse.class).delete(qAll, new KinveyDeleteCallback() {
+       getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).delete(ids[0], new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {
                 AndroidUtil.toast(getSherlockActivity(), "deleted " + result.getCount() + "entities!");
+                getCount();
             }
 
             @Override
@@ -147,6 +152,17 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
             @Override
             public void onSuccess(MyEntity[] result) {
                 totalCount.setText(String.valueOf(result.length));
+
+                ids = new String[result.length];
+
+                for (int i = 0 ; i < ids.length; i++){
+
+                    ids[i] = result[i].getId();
+
+
+
+                }
+
             }
 
             @Override
