@@ -28,9 +28,8 @@ import com.kinvey.sample.oracledlc.*;
  */
 public class LoginActivity extends Activity implements View.OnClickListener {
 
-    public static final String AUTHORIZE_BASE_URL = "https://rdsdw.kinvey.com/ldap-auth-link";
-//    public static final String AUTHORIZE_BASE_URL = "http://192.168.1.23:5000";
-//    public static final String AUTHORIZE_BASE_URL = "http://192.168.2.7:5000";
+//    public static final String AUTHORIZE_BASE_URL = "https://rdsdw.kinvey.com/ldap-auth-link";
+    public static final String AUTHORIZE_BASE_URL = "http://192.168.1.23:5000";
     public static final String AUTH_API_KEY = "8b4b1d7-8b3a-11e2-be63-3c075415b1e5~";
     private static final String BUNDLE_KEY_REFRESH_TOKEN = "refreshToken";
 
