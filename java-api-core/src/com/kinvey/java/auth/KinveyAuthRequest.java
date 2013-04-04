@@ -13,7 +13,9 @@
  */
 package com.kinvey.java.auth;
 
+import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.BasicAuthentication;
+import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
@@ -79,6 +81,8 @@ public class KinveyAuthRequest extends GenericJson {
     /** kcs base url **/
     private final  String baseUrl;
 
+    /** backoff policy to use **/
+    private BackOffPolicy policy;
 
     /**
      * appkey and secret RequestInitializer for the initial POST to the user endpoint *
@@ -130,6 +134,7 @@ public class KinveyAuthRequest extends GenericJson {
         }
         this.create = create;
         this.type = requestPayload == null ? LoginType.IMPLICIT : LoginType.KINVEY;
+        this.policy = new ExponentialBackOffPolicy(); // TODO:  No current access to the client, so should add to the Constructor at some point.  For now, set to Expontential Backoff Policy.
     }
 
     protected KinveyAuthRequest(HttpTransport transport, JsonFactory jsonFactory,
@@ -146,6 +151,8 @@ public class KinveyAuthRequest extends GenericJson {
         }
         this.create = create;
         this.type=LoginType.THIRDPARTY;
+        this.policy = new ExponentialBackOffPolicy(); // TODO:  No current access to the client, so should add to the Constructor at some point.  For now, set to Expontential Backoff Policy.
+
     }
 
     /**
@@ -174,6 +181,8 @@ public class KinveyAuthRequest extends GenericJson {
                 .setThrowExceptionOnExecuteError(false)
                 .setParser(jsonFactory.createJsonObjectParser())
                 .setHeaders(kinveyHeaders)
+                .setBackOffPolicy(policy)
+                .setRetryOnExecuteIOException(true)
                 .setEnableGZipContent(false);
         response = request.execute();
         if (response.isSuccessStatusCode()) {
@@ -188,6 +197,8 @@ public class KinveyAuthRequest extends GenericJson {
     public KinveyAuthResponse execute() throws IOException {
         return executeUnparsed().parseAs(KinveyAuthResponse.class);
     }
+
+
 
     /**
      * Used to construct a {@link KinveyAuthRequest}. The result will be an auth request that adjusts for the
