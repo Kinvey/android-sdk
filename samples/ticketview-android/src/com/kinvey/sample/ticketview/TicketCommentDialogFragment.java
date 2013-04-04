@@ -29,14 +29,16 @@ import com.actionbarsherlock.app.SherlockDialogFragment;
 public class TicketCommentDialogFragment extends SherlockDialogFragment {
 
     public interface OnNewCommentListener {
-        void onNewComment(int position, String comment);
+        void onNewComment(int position, String comment, TicketViewActivity.RefreshCallback callback);
     }
 
     private EditText comment;
     private int position;
+    private TicketViewActivity.RefreshCallback callback;
 
-    public TicketCommentDialogFragment(int position) {
+    public TicketCommentDialogFragment(int position, TicketViewActivity.RefreshCallback refreshCallback) {
         this.position = position;
+        this.callback = refreshCallback;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class TicketCommentDialogFragment extends SherlockDialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 OnNewCommentListener activity = (OnNewCommentListener) getActivity();
-                activity.onNewComment(position, comment.getText().toString());
+                activity.onNewComment(position, comment.getText().toString(), callback);
                 getDialog().dismiss();
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

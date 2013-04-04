@@ -27,6 +27,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 import java.util.List;
 
@@ -36,17 +39,31 @@ import com.kinvey.sample.ticketview.model.TicketEntity;
  * @author mjsalinger
  * @since 2.0
  */
-public class TicketListFragment extends SherlockListFragment {
+public class TicketListFragment extends SherlockListFragment implements TicketViewActivity.RefreshCallback {
     private ListView listView;
     private TicketAdapter myAdapter;
+    private MenuItem refresh;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         myAdapter = new TicketAdapter(getActivity(), ((TicketViewActivity) getActivity()).getTicketList(),
                 (LayoutInflater) getActivity().getSystemService(
                         SherlockFragmentActivity.LAYOUT_INFLATER_SERVICE));
         setListAdapter(myAdapter);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        refreshList();
+        super.onResume();
     }
 
     @Override
@@ -87,6 +104,33 @@ public class TicketListFragment extends SherlockListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         ((TicketViewActivity) getActivity()).ticketDetailsFragment(position);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.refresh:
+                refresh.setActionView(R.layout.refresh_progress);
+                refreshList();
+                return true;
+            default: return false;
+        }
+    }
+
+    private void refreshList() {
+        ((TicketViewActivity)getActivity()).populateList(this);
+    }
+
+    @Override
+    public void refreshCallback() {
+        myAdapter.notifyDataSetInvalidated();
+        refresh.setActionView(null);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.ticket_list, menu);
+        refresh = menu.findItem(R.id.refresh);
     }
 
     private class TicketAdapter extends ArrayAdapter<TicketEntity> {
@@ -143,7 +187,7 @@ public class TicketListFragment extends SherlockListFragment {
                 public void onClick(View view) {
                     final int position = getListView().getPositionForView((LinearLayout)view.getParent());
                     if (position >= 0) {
-                        ((TicketViewActivity) getActivity()).showCommentDialog(position);
+                        ((TicketViewActivity) getActivity()).showCommentDialog(position, null);
                     }
                 }
             });

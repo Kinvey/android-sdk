@@ -21,13 +21,20 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.text.format.DateUtils;
+import android.text.format.DateFormat;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.sample.ticketview.model.TicketCommentEntity;
@@ -80,9 +87,19 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
         ((TicketViewActivity)getActivity()).getComments(myTicket.getTicketId(), new KinveyListCallback<TicketCommentEntity>() {
             @Override
             public void onSuccess(TicketCommentEntity[] result) {
+                ArrayList<TicketCommentEntity> tempList = new ArrayList<TicketCommentEntity>(Arrays.asList(result));
+                Collections.sort(tempList, new CommentComparator());
+                Collections.reverse(tempList);
                 ArrayList<String> commentList = new ArrayList<String>();
-                for (TicketCommentEntity entity : result) {
-                    commentList.add(entity.getCommentDate() + ": " + entity.getComment());
+                for (TicketCommentEntity entity : tempList) {
+                    try {
+                        commentList.add(new SimpleDateFormat().format(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+                                .parse(entity.getCommentDate())) + " -- " + entity.getComment());
+                    } catch (ParseException ex) {
+                        Log.e(((TicketViewActivity)getActivity()).getTag(),"Parse Exception on comment Date", ex);
+                        commentList.add(" -- " + entity.getComment());
+                    }
+
                 }
                 comments = commentList;
                 bindViews();
@@ -110,6 +127,7 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
     @Override
     public void refreshCallback() {
         setValues();
+        getComments();
         myAdapter.notifyDataSetChanged();
     }
 
@@ -117,7 +135,15 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
         subject.setText(myTicket.getSubject());
         description.setText(myTicket.getDescription());
         requestedBy.setText(myTicket.getRequestedBy());
-        requestedDate.setText(myTicket.getRequestDate());
+
+        try {
+            requestedDate.setText(new SimpleDateFormat().format(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(myTicket.getRequestDate())));
+
+
+        } catch (ParseException ex) {
+            Log.e(((TicketViewActivity)getActivity()).getTag(),"Parse Exception on request Date", ex);
+            requestedDate.setText("");
+        }
         status.setText(myTicket.getStatus());
 
     }
@@ -126,14 +152,10 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.add_comment:
-                ((TicketViewActivity) getActivity()).showCommentDialog(position);
+                ((TicketViewActivity) getActivity()).showCommentDialog(position, this);
                 return true;
             case R.id.close_ticket:
                 closeTicket();
-                return true;
-            case R.id.action_settings:
-                return true;
-            case R.id.action_about:
                 return true;
             case android.R.id.home:
                 ((TicketViewActivity) getActivity()).ticketListFragment();
@@ -151,5 +173,12 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
         myTicket.setStatus("closed");
         ((TicketViewActivity) getActivity()).saveTicket(myTicket);
         setValues();
+    }
+
+    private class CommentComparator implements Comparator<TicketCommentEntity> {
+        @Override
+        public int compare(TicketCommentEntity o1, TicketCommentEntity o2) {
+            return o1.getCommentDate().compareTo(o2.getCommentDate());
+        }
     }
 }

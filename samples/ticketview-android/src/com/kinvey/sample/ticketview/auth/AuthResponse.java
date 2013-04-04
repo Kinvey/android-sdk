@@ -11,13 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.ticketview;
+package com.kinvey.sample.ticketview.auth;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
 
 /**
- * @author mjsalinger
+ * @author m0rganic
  * @since 2.0
  */
-public class LoginFragment extends SherlockFragment {
+public class AuthResponse extends GenericJson {
+    @Key("access_token")
+    private String accessToken;
+
+    @Key("refresh_token")
+    private String refreshToken;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
 }

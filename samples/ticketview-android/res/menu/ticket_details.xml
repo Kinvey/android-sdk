@@ -14,15 +14,4 @@
             android:showAsAction="always"
             android:icon="@drawable/close_dark"
             android:title="Close Ticket" />
-    <item
-            android:id="@+id/action_settings"
-            android:showAsAction="never"
-            android:title="Settings" />
-    <item
-            android:id="@+id/action_about"
-            android:showAsAction="never"
-            android:title="About"/>
-
-
-
 </menu>

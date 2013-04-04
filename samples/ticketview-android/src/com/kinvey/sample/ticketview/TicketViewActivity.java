@@ -1,17 +1,22 @@
 package com.kinvey.sample.ticketview;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.util.DateTime;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,10 +24,10 @@ import java.util.logging.Logger;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Query;
-import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.query.AbstractQuery;
+import com.kinvey.sample.ticketview.auth.LoginActivity;
 import com.kinvey.sample.ticketview.model.TicketCommentEntity;
 import com.kinvey.sample.ticketview.model.TicketEntity;
 
@@ -53,18 +58,8 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
 
         myClient = ((TicketViewApplication) getApplication()).getClient();
         if (!myClient.user().isUserLoggedIn()) {
-            myClient.user().login(new KinveyUserCallback() {
-                @Override
-                public void onSuccess(User result) {
-                    populateList();
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    Log.e(TAG, "Fatal Error", error);
-                    //To change body of implemented methods use File | Settings | File Templates.
-                }
-            });
+            startLoginActivity();
+            this.finish();
         } else {
             populateList();
         }
@@ -90,9 +85,31 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
                 @Override
                 public void onFailure(Throwable error)  {
                     Log.e(TAG, "Fatal Exception", error);
+                    Toast.makeText(TicketViewActivity.this,"Couldn't get ticket list", Toast.LENGTH_LONG).show();
                 }
             });
         }
+    }
+
+    public void populateList(final RefreshCallback callback) {
+
+        AsyncAppData<TicketEntity> myAppData = myClient.appData("ticket",TicketEntity.class);
+        Query myQuery = myAppData.query();
+        myQuery.equals("status", "open");
+        myAppData.get(myQuery, new KinveyListCallback<TicketEntity>() {
+            @Override
+            public void onSuccess(TicketEntity[] result) {
+                myList.clear();
+                myList.addAll(new ArrayList(Arrays.asList(result)));
+                callback.refreshCallback();
+            }
+
+            @Override
+            public void onFailure(Throwable error)  {
+                Log.e(TAG, "Fatal Exception", error);
+                Toast.makeText(TicketViewActivity.this,"Couldn't get ticket list", Toast.LENGTH_LONG).show();
+            }
+        });
 
     }
 
@@ -104,6 +121,7 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         AsyncAppData<TicketCommentEntity> myAppData = myClient.appData("ticketComment", TicketCommentEntity.class);
         Query myQuery = myAppData.query();
         myQuery.equals("ticketId", ticketId);
+        myQuery.addSort("commentDate", AbstractQuery.SortOrder.DESC);
         myAppData.get(myQuery, callback);
     }
 
@@ -111,26 +129,41 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         myClient.appData("ticket", TicketEntity.class).save(ticket, new KinveyClientCallback<TicketEntity>() {
             @Override
             public void onSuccess(TicketEntity result) {
-                Log.i(TAG, "Ticket " + result.getSubject() + " saved");
+                String ticketSaveResult = new StringBuilder()
+                        .append("Ticket ")
+                        .append(result.getSubject())
+                        .append(" saved").toString();
+                Log.i(TAG, ticketSaveResult + " saved");
+                Toast.makeText(TicketViewActivity.this, ticketSaveResult, Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Log.e(TAG, "Failed to save ticket", error);
+                String failure = "Failed to save ticket";
+                Log.e(TAG, failure, error);
+                Toast.makeText(TicketViewActivity.this, failure, Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public void saveComment(TicketCommentEntity comment) {
+    public void saveComment(TicketCommentEntity comment, final RefreshCallback callback) {
         myClient.appData("ticketComment", TicketCommentEntity.class).save(comment, new KinveyClientCallback<TicketCommentEntity>() {
             @Override
             public void onSuccess(TicketCommentEntity result) {
-                Log.i(TAG, "Comment " + result.getCommentId() + " saved");
+                String commentText = new StringBuilder()
+                        .append("Comment ").append(result.getCommentId()).append(" saved.").toString();
+                Log.i(TAG, commentText);
+                Toast.makeText(TicketViewActivity.this, commentText, Toast.LENGTH_LONG).show();
+                if (callback != null) {
+                    callback.refreshCallback();
+                }
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Log.e(TAG, "Failed to save comment", error);
+                String commentText = "Failed to save coment";
+                Log.e(TAG, commentText, error);
+                Toast.makeText(TicketViewActivity.this, commentText, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -150,24 +183,55 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         ft.commit();
     }
 
-    void showCommentDialog(int position) {
+    void showCommentDialog(int position, RefreshCallback callback) {
         FragmentManager fm = getSupportFragmentManager();
-        TicketCommentDialogFragment commentDialog = new TicketCommentDialogFragment(position);
+        TicketCommentDialogFragment commentDialog = new TicketCommentDialogFragment(position, callback);
         commentDialog.setCancelable(true);
         commentDialog.show(fm, "ticket_add_comment_dialog");
     }
 
     @Override
-    public void onNewComment(int position, String comment) {
+    public void onNewComment(int position, String comment, RefreshCallback callback) {
         TicketEntity newCommentTicket = myList.get(position);
         TicketCommentEntity newComment = new TicketCommentEntity();
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ss.SZ");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         Date date = new Date();
+        String commentDate = dateFormat.format(date);
         newComment.setComment(comment);
         newComment.setTicketId(Integer.parseInt(newCommentTicket.getTicketId()));
-        newComment.setCommentDate(dateFormat.format(date));
+        newComment.setCommentDate(commentDate);
         newComment.setCommentBy("mikes");
-        saveComment(newComment);
+        saveComment(newComment, callback);
+    }
+
+    public String getClientUsername() {
+        return myClient.user().getUsername();
+    }
+
+    private void logout() {
+        myClient.user().logout().execute();
+        startLoginActivity();
+        this.finish();
+    }
+
+    private void startLoginActivity() {
+        Intent login = new Intent(this, LoginActivity.class);
+        startActivity(login);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.ticket, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.logout:
+                logout();
+            default: return false;
+        }
     }
 }
