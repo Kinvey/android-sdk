@@ -38,6 +38,7 @@ public class ThirdPartyIdentity extends GenericJson{
         TWITTER,
         GOOGLE,
         LINKED_IN,
+        SALESFORCE,
         AUTH_LINK
     }
 
@@ -69,6 +70,9 @@ public class ThirdPartyIdentity extends GenericJson{
                     break;
                 case AUTH_LINK:
                     this.put("authlink", credential);
+                    break;
+                case SALESFORCE:
+                    this.put("salesforce", credential);
                     break;
                 default:
                     throw new IllegalArgumentException("No known third party identity type was specified");
@@ -159,6 +163,44 @@ public class ThirdPartyIdentity extends GenericJson{
     }
 
     /**
+     * SalesFoce credential
+     */
+    private static class SalesForceCredential extends OAuth2 {
+
+        @Key
+        private String client_id;
+        @Key
+        private String id;
+
+
+
+
+
+        public SalesForceCredential(String accessToken, String reauthToken, String client_id, String id) {
+            super(accessToken, reauthToken);
+            this.client_id = client_id;
+            this.id = id;
+        }
+
+
+        public String getClient_id() {
+            return client_id;
+        }
+
+        public void setClient_id(String client_id) {
+            this.client_id = client_id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+    }
+
+    /**
      * LinkedIn credential
      */
     private static class LinkedInCredential extends OAuth1 {
@@ -177,6 +219,9 @@ public class ThirdPartyIdentity extends GenericJson{
         }
 
     }
+
+
+
 
     /**
      * A factory method to use when constructor authentication provider and credential link objects that will be used
@@ -275,6 +320,11 @@ public class ThirdPartyIdentity extends GenericJson{
                 Preconditions.checkArgument(params.length == 2, "Expected %s arguments for linkedIn but found %s", 2, params.length);
                 Provider<AuthLinkCredential> authLinkCredentialProvider = new Provider<AuthLinkCredential>(type, new AuthLinkCredential(params[0], params[1]));
                 return new ThirdPartyIdentity(authLinkCredentialProvider);
+            case SALESFORCE:
+                Preconditions.checkArgument(params.length == 4, "Expected %s arguments for SalesForce but found %s", 4, params.length);
+                Provider<SalesForceCredential> salesForceCredentialProvider = new Provider<SalesForceCredential>(type, new SalesForceCredential(params[0], params[1], params[2], params[3]));
+                return new ThirdPartyIdentity(salesForceCredentialProvider);
+
 
 
             default:

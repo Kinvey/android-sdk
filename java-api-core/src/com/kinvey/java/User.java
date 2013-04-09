@@ -48,6 +48,7 @@ public class User extends GenericJson   {
         LINKED_IN,
         AUTH_LINK,
         CREDENTIALSTORE,
+        SALESFORCE,
         THIRDPARTY
     }
 
@@ -299,6 +300,18 @@ public class User extends GenericJson   {
      */
     public LoginRequest loginGoogleBlocking(String accessToken) throws IOException {
         return login(ThirdPartyIdentity.Type.GOOGLE, accessToken);
+    }
+
+    /**
+     * Login to Kinvey services using SalesForce access token obtained through OAuth2.  If the user does not exist in the
+     * Kinvey service, the user will be created.
+     *
+     * @param accessToken SalesForce-generated access token
+     * @return LoginRequest Object
+     * @throws IOException
+     */
+    public LoginRequest loginSalesForceBlocking(String accessToken, String Clientid, String refreshToken, String id) throws IOException {
+        return login(ThirdPartyIdentity.Type.SALESFORCE, accessToken, Clientid, refreshToken, id);
     }
 
     /**
