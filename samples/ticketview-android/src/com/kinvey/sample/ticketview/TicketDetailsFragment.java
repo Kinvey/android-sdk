@@ -94,7 +94,7 @@ public class TicketDetailsFragment extends SherlockFragment implements TicketVie
                 for (TicketCommentEntity entity : tempList) {
                     try {
                         commentList.add(new SimpleDateFormat().format(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-                                .parse(entity.getCommentDate())) + " -- " + entity.getComment());
+                                .parse(entity.getCommentDate())) + " -" + (entity.getCommentBy() != null ? entity.getCommentBy() : "") + "- " + entity.getComment());
                     } catch (ParseException ex) {
                         Log.e(((TicketViewActivity)getActivity()).getTag(),"Parse Exception on comment Date", ex);
                         commentList.add(" -- " + entity.getComment());

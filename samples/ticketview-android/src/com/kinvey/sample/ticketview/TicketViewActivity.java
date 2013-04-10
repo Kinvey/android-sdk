@@ -150,8 +150,7 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         myClient.appData("ticketComment", TicketCommentEntity.class).save(comment, new KinveyClientCallback<TicketCommentEntity>() {
             @Override
             public void onSuccess(TicketCommentEntity result) {
-                String commentText = new StringBuilder()
-                        .append("Comment ").append(result.getCommentId()).append(" saved.").toString();
+                String commentText = "Comment Saved";
                 Log.i(TAG, commentText);
                 Toast.makeText(TicketViewActivity.this, commentText, Toast.LENGTH_LONG).show();
                 if (callback != null) {
@@ -200,7 +199,7 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         newComment.setComment(comment);
         newComment.setTicketId(Integer.parseInt(newCommentTicket.getTicketId()));
         newComment.setCommentDate(commentDate);
-        newComment.setCommentBy("mikes");
+        newComment.setCommentBy(myClient.user().get("name").toString());
         saveComment(newComment, callback);
     }
 

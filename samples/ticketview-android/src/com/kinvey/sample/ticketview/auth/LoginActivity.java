@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -82,6 +83,29 @@ public class LoginActivity extends SherlockFragmentActivity {
         getClient().user().logout();
     }
 
+    void updateUserName(User user) {
+        if (!user.get("name").equals(this.username)) {
+            getClient().user().set("name",this.username);
+            getClient().user().update(new KinveyUserCallback() {
+                @Override
+                public void onSuccess(User result) {
+
+                    Log.i("myTag", "User updated");
+                    Intent feature = new Intent(LoginActivity.this, TicketViewActivity.class);
+                    startActivity(feature);
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    Log.e("myTag", "user not updated");
+                }
+            });
+        } else {
+            Intent feature = new Intent(LoginActivity.this, TicketViewActivity.class);
+            startActivity(feature);
+        }
+    }
+
     public class LoginAuthenticateTask extends AuthTask {
 
         public LoginAuthenticateTask(Activity activity) {
@@ -94,12 +118,11 @@ public class LoginActivity extends SherlockFragmentActivity {
                 LoginActivity.this.showNotLoggedInToast(null);
             }
             else {
-                getClient().user().setUsername(username);
+
                 getClient().user().loginAuthLink(authnResponse.getAccessToken(), authnResponse.getRefreshToken(), new KinveyUserCallback() {
                     @Override
                     public void onSuccess(User result) {
-                        Intent feature = new Intent(LoginActivity.this, TicketViewActivity.class);
-                        startActivity(feature);
+                        LoginActivity.this.updateUserName(result);
                     }
 
                     @Override
