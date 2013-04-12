@@ -19,6 +19,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonGenerator;
 import com.google.common.base.Preconditions;
 
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
@@ -31,10 +32,13 @@ import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
  * @author mjsalinger
  * @since 2.0
  */
-public abstract class AbstractQuery {
+public abstract class AbstractQuery implements Serializable{
+
+    private static final long serialVersionUID = 5635939847038496849L;
+
 
     /**
-     * Possible sort orders (Ascending and Descending
+     * Possible sort orders (Ascending and Descending)
      */
     public enum SortOrder {
         ASC,

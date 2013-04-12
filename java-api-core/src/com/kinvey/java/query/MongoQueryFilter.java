@@ -15,6 +15,7 @@ package com.kinvey.java.query;
 
 import com.google.api.client.util.Key;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.AbstractMap;
@@ -27,7 +28,9 @@ import java.util.Set;
  * @author mjsalinger
  * @since 2.0
  */
-public class MongoQueryFilter implements QueryFilter {
+public class MongoQueryFilter implements QueryFilter, Serializable {
+
+    private static final long serialVersionUID = 5635939847038496849L;
     @Key
     private LinkedHashMap<String,Object> queryFilter;
 
@@ -102,7 +105,10 @@ public class MongoQueryFilter implements QueryFilter {
         this.queryFilter = map;
     }
 
-    public static class MongoQueryFilterBuilder implements QueryFilterBuilder {
+    public static class MongoQueryFilterBuilder implements QueryFilterBuilder, Serializable {
+
+        private static final long serialVersionUID = 5635939847038496849L;
+
         private MongoQueryFilter query;
         private HashMap<Operators, String> operatorMap;
 
