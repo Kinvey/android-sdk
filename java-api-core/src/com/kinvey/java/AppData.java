@@ -605,7 +605,8 @@ public class AppData<T> {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
 
-            this.sortFilter = query.getSortString();
+            String sortString = query.getSortString();
+            this.sortFilter = sortString != "" ? sortString : null;
 
         }
 
