@@ -84,7 +84,7 @@ public class LoginActivity extends SherlockFragmentActivity {
     }
 
     void updateUserName(User user) {
-        if (!user.get("name").equals(this.username)) {
+        if (user.get("name") != null && !user.get("name").equals(this.username)) {
             getClient().user().set("name",this.username);
             getClient().user().update(new KinveyUserCallback() {
                 @Override
