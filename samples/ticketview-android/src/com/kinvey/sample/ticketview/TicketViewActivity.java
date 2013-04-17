@@ -199,7 +199,7 @@ public class TicketViewActivity extends SherlockFragmentActivity implements Tick
         newComment.setComment(comment);
         newComment.setTicketId(Integer.parseInt(newCommentTicket.getTicketId()));
         newComment.setCommentDate(commentDate);
-        newComment.setCommentBy(myClient.user().get("name").toString());
+        newComment.setCommentBy(myClient.user().get("name") != null ? myClient.user().get("name").toString() : null);
         saveComment(newComment, callback);
     }
 
