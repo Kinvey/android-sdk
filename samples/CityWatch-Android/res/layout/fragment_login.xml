@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#969696"
+    android:orientation="vertical"
+    tools:context=".CityWatchActivity" >
+
+    <EditText
+        android:id="@+id/login_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:inputType="text" >
+    </EditText>
+
+    <EditText
+        android:id="@+id/login_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="password"
+        android:inputType="textPassword" >
+    </EditText>
+
+    <Button
+        android:id="@+id/login_kinvey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Login/Register with Kinvey" />
+
+    <Button
+        android:id="@+id/login_facebook"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Login with Facebook" />
+
+    <Button
+        android:id="@+id/login_twitter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Login with Twitter" />
+
+</LinearLayout>

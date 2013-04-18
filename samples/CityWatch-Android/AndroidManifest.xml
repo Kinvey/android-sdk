@@ -1,15 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.example.CityWatch_Android"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-        <activity android:name="MyActivity"
-                  android:label="@string/app_name">
+          package="com.kinvey.samples.citywatch"
+          android:versionCode="1"
+          android:versionName="1.0" >
+
+    <uses-sdk
+            android:minSdkVersion="9"
+            android:targetSdkVersion="17" />
+
+    <permission
+            android:name="com.kinvey.samples.citywatch.permission.MAPS_RECEIVE"
+            android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.kinvey.samples.citywatch.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.camera" >
+    </uses-feature>
+    <uses-feature
+            android:glEsVersion="0x00020000"
+            android:required="true" />
+
+    <application
+            android:allowBackup="true"
+            android:icon="@drawable/icon_small"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
+        <activity
+                android:name=".CityWatch"
+                android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+                android:name=".CityWatchDetailsActivity"
+                android:label="Details" >
+        </activity>
+
+        <meta-data
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyC7PfbxKW2-Wry2rGkMehCsh9eOIO_xKGg" />
+        <meta-data
+                android:name="com.facebook.sdk.ApplicationId"
+                android:value="@string/app_id" />
+
+        <activity
+                android:name="com.kinvey.samples.userlogin.LoginActivity"
+                android:label="@string/login" >
+        </activity>
+
+        <service android:name="com.kinvey.samples.userlogin.KinveyAuthenticationService" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" >
+                </action>
+            </intent-filter>
+
+            <meta-data
+                    android:name="android.accounts.AccountAuthenticator"
+                    android:resource="@xml/authenticator" />
+        </service>
+
+        <activity
+                android:name="com.kinvey.samples.userlogin.RegisterNewAccountActivity"
+                android:label="@string/register" >
+        </activity>
+        <activity
+                android:name="com.kinvey.samples.userlogin.FacebookLoginActivity"
+                android:label="@string/login" >
+        </activity>
+        <activity
+                android:name="com.kinvey.samples.userlogin.TwitterLoginActivity"
+                android:label="login"
+                android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                        android:host="twitteractivity"
+                        android:scheme="kinveysociallogin" />
+            </intent-filter>
+        </activity>
+
     </application>
+
 </manifest>
