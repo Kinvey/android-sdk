@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:layout_weight=".35"
-                android:text="Request Date: "/>
+                android:text="Status: "/>
         <TextView
                 android:id="@+id/ticketStatus"
                 android:layout_height="wrap_content"
