@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>citywatch-android</artifactId>
+	<artifactId>CityWatch-android</artifactId>
 	<name>Sample: CityWatch</name>
 	<packaging>apk</packaging>
 
