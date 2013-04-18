@@ -22,6 +22,8 @@
         <module>signin-android</module>
         <module>oracledlc-android</module>
         <module>ticketview-android</module>
+        <module>citywatch-android</module>
+
     </modules>
 
     <profiles>
