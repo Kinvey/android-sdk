@@ -6,7 +6,9 @@ import android.location.Location;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
-public class CityWatchEntity extends GenericJson {
+import java.io.Serializable;
+
+public class CityWatchEntity extends GenericJson implements Serializable {
 
     private static final long serialVersionUID = 6102384593846439027L;
 

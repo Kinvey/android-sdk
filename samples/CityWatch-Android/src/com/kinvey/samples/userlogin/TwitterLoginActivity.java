@@ -1,4 +1,4 @@
-package com.kinvey.samples.old.citywatch.kinvey.samples.userlogin;//package com.kinvey.samples.userlogin;
+package com.kinvey.samples.userlogin;//package com.kinvey.samples.userlogin;
 //
 //import oauth.signpost.OAuth;
 //import oauth.signpost.OAuthConsumer;
