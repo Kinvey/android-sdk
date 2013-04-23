@@ -17,7 +17,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,8 +35,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 public class CityWatchListFragment extends SherlockFragment implements
 		OnItemClickListener {
 
-	private static final String TAG = CityWatchListFragment.class
-			.getSimpleName();
+	private static final String TAG = CityWatchApplication.TAG;
 
 	private ListView mList;
 	private CityWatchAdapter mAdapter;
@@ -84,15 +82,8 @@ public class CityWatchListFragment extends SherlockFragment implements
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 
-		Intent details = new Intent(getSherlockActivity(),
-				CityWatchDetailsActivity.class);
-		details.putExtra(CityWatchDetailsActivity.EXTRA_FRAG_TARGET,
-				CityWatchDetailsActivity.FRAG_VIEW);
-
-		details.putExtra(CityWatchDetailsActivity.EXTRA_ENTITY, mAdapter.getItem(position));
-
-
-		startActivity(details);
+        ((CityWatch) getSherlockActivity()).setCurEntity(mAdapter.getItem(position));
+        ((CityWatch) getSherlockActivity()).showViewDetailsFragment();
 
 	}
 

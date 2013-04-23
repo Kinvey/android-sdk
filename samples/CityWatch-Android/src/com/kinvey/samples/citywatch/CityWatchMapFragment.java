@@ -80,7 +80,7 @@ public class CityWatchMapFragment extends SherlockFragment {
 			// Kinvey
 			// testKinveyService();
 
-            kinveyClient = ((CityWatchApplication) getActivity().getApplication()).getClient();
+            kinveyClient = ((CityWatchApplication) getSherlockActivity().getApplication()).getClient();
 
 		}
 

@@ -8,12 +8,12 @@ import com.google.api.client.util.Key;
 
 import java.io.Serializable;
 
-public class CityWatchEntity extends GenericJson implements Serializable {
+public class CityWatchEntity extends GenericJson {
 
     private static final long serialVersionUID = 6102384593846439027L;
 
     @Key("_geoloc")
-    private transient Location coords;
+    private double[] coords;
     @Key("_id")
     private String objectId;
 
@@ -42,6 +42,15 @@ public class CityWatchEntity extends GenericJson implements Serializable {
     private String address;
     @Key()
     private Integer repeat;
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
     @Key()
     private String imageURL;
 
@@ -64,11 +73,17 @@ public class CityWatchEntity extends GenericJson implements Serializable {
 //    }
 
     public Location getCoords() {
-        return coords;
+        Location geoloc = new Location(CityWatchEntity.class.getCanonicalName());
+        geoloc.setLatitude(coords[1]);
+        geoloc.setLongitude(coords[0]);
+        return geoloc;
     }
 
     public void setCoords(Location coords) {
-        this.coords = coords;
+        double[] geoloc = new double[2];
+        geoloc[0] = coords.getLongitude();
+        geoloc[1] = coords.getLatitude();
+        this.coords = geoloc;
     }
 
     public String getObjectId() {

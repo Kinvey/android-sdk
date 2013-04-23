@@ -31,7 +31,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.kinvey.samples.citywatch.*;
 
 public class CityWatchViewDetailsFragment extends SherlockFragment {
 
@@ -59,7 +58,7 @@ public class CityWatchViewDetailsFragment extends SherlockFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup group, Bundle saved) {
 		View v = inflater.inflate(R.layout.fragment_view_details, group, false);
 		bindViews(v);
-		populateViews(((CityWatchDetailsActivity) getSherlockActivity()).curEntity);
+		populateViews(((CityWatch) getSherlockActivity()).getCurEntity());
 		return v;
 	}
 

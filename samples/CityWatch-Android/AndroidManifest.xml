@@ -30,7 +30,16 @@
             android:allowBackup="true"
             android:icon="@drawable/icon_small"
             android:label="@string/app_name"
+            android:name=".CityWatchApplication"
             android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
+        <activity
+            android:name="com.facebook.LoginActivity"
+            android:label="@string/app_name" >
+        </activity>
+
         <activity
                 android:name=".CityWatch"
                 android:label="@string/app_name" >
@@ -47,50 +56,17 @@
 
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyC7PfbxKW2-Wry2rGkMehCsh9eOIO_xKGg" />
+                android:value="AIzaSyDhx_X9VILeUvilje_iy8bfRRPnEEbrS4k" />
         <meta-data
                 android:name="com.facebook.sdk.ApplicationId"
-                android:value="@string/app_id" />
+                android:value="@string/facebook_app_id" />
 
         <activity
-                android:name="com.kinvey.samples.userlogin.LoginActivity"
+                android:name=".CityWatchLoginActivity"
                 android:label="@string/login" >
         </activity>
 
-        <service android:name="com.kinvey.samples.userlogin.KinveyAuthenticationService" >
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" >
-                </action>
-            </intent-filter>
-
-            <meta-data
-                    android:name="android.accounts.AccountAuthenticator"
-                    android:resource="@xml/authenticator" />
-        </service>
-
-        <activity
-                android:name="com.kinvey.samples.userlogin.RegisterNewAccountActivity"
-                android:label="@string/register" >
-        </activity>
-        <activity
-                android:name="com.kinvey.samples.userlogin.FacebookLoginActivity"
-                android:label="@string/login" >
-        </activity>
-        <activity
-                android:name="com.kinvey.samples.userlogin.TwitterLoginActivity"
-                android:label="login"
-                android:launchMode="singleInstance" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                        android:host="twitteractivity"
-                        android:scheme="kinveysociallogin" />
-            </intent-filter>
-        </activity>
+        <uses-library android:name="com.google.android.maps" />
 
     </application>
 
