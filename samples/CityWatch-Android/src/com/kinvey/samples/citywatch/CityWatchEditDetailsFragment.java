@@ -31,6 +31,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,8 +43,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -78,6 +81,8 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 
 	private AlertDialog confirmOG = null;
 
+    private static Typeface robotoThin;
+
 	public static CityWatchEditDetailsFragment newInstance() {
 		return new CityWatchEditDetailsFragment();
 	}
@@ -103,10 +108,12 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 		bindViews(v);
 		populateSpinners();
 		setListeners();
+        getSherlockActivity().getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		return v;
 	}
 
 	private void bindViews(View v) {
+        robotoThin = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
         ent = ((CityWatch)getSherlockActivity()).getCurEntity();
 		mImage = (ImageView) v.findViewById(R.id.edit_details_image);
 		mName = (EditText) v.findViewById(R.id.edit_details_name);
@@ -115,6 +122,8 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 		mLocation = (EditText) v.findViewById(R.id.edit_details_location);
 		mRisk = (Spinner) v.findViewById(R.id.edit_details_risk);
 		mSeverity = (Spinner) v.findViewById(R.id.edit_details_severity);
+        TextView header = (TextView) v.findViewById(R.id.header_edit_details);
+        header.setTypeface(robotoThin);
 	}
 
 	private void populateSpinners() {
@@ -169,8 +178,8 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
 		inflater.inflate(R.menu.fragment_edit, menu);
+
 
 	}
 
@@ -278,7 +287,7 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					confirmOG.cancel();
-					getSherlockActivity().finish();
+                    ((CityWatch) getSherlockActivity()).returnHome();
 				}
 			});
 			confirmOG.setButton(Dialog.BUTTON_POSITIVE, "Yeah!", new Dialog.OnClickListener() {
@@ -296,8 +305,6 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 
 	private void pushToOpenGraph() {
 
-		final String message = "Hello Open Graph!";
-
         // TODO:  Implement Push To OpenGraph through Kinvey
         FacebookEntity ogPush = new FacebookEntity();
         ogPush.setEntityId(ent.getObjectId());
@@ -307,7 +314,7 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
             public void onSuccess(FacebookEntity result) {
                 Log.i(TAG, "Save to OpenGraph Successful");
                 Toast.makeText(getSherlockActivity(), "Saved to OpenGraph", Toast.LENGTH_LONG).show();
-                ((CityWatch) getSherlockActivity()).setUpTabs();
+                ((CityWatch) getSherlockActivity()).returnHome();
             }
 
             @Override

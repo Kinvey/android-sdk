@@ -13,29 +13,44 @@
  */
 package com.kinvey.samples.citywatch;
 
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+
+import android.graphics.Typeface;
+import android.location.Location;
 import android.os.Bundle;
+
 import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.google.api.client.util.ArrayMap;
 
 
 public class CityWatchListFragment extends SherlockFragment implements
 		OnItemClickListener {
 
 	private static final String TAG = CityWatchApplication.TAG;
+    private static Typeface robotoThin;
 
 	private ListView mList;
 	private CityWatchAdapter mAdapter;
@@ -59,6 +74,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 			Bundle saved) {
 		View v = inflater.inflate(R.layout.fragment_list, group, false);
 		bindViews(v);
+        setHasOptionsMenu(true);
 		return v;
 	}
 
@@ -72,9 +88,10 @@ public class CityWatchListFragment extends SherlockFragment implements
 		mAdapter = new CityWatchAdapter(getSherlockActivity(), ents,
 				(LayoutInflater) getSherlockActivity().getSystemService(
 						Activity.LAYOUT_INFLATER_SERVICE));
-
-		mList.setAdapter(mAdapter);
+        mList.setAdapter(mAdapter);
 		mList.setOnItemClickListener(this);
+
+        robotoThin = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
 
 	}
 
@@ -95,7 +112,24 @@ public class CityWatchListFragment extends SherlockFragment implements
 
 	}
 
-	/**
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new:
+                ((CityWatch) getSherlockActivity()).showEditDetailsFragment();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    /**
 	 *
 	 * This Adapter is used to maintain data and push individual row views to
 	 * the ListView object, note it constructs the Views used by each row and
@@ -134,7 +168,9 @@ public class CityWatchListFragment extends SherlockFragment implements
 			if (null == convertView) {
 				convertView = mInflater.inflate(R.layout.list_row, null);
 				holder = new ViewHolder(convertView);
+
 				convertView.setTag(holder);
+
 			}
 			holder = (ViewHolder) convertView.getTag();
 
@@ -155,25 +191,31 @@ public class CityWatchListFragment extends SherlockFragment implements
 			comment = holder.getComment();
 			comment.setText(rowData.getDescription());
 
-			// rowData.get
+            Location lastKnown = ((CityWatch) getSherlockActivity()).getLastKnown();
+            Location itemLocation = new Location(getSherlockActivity().getClass().getCanonicalName());
+            itemLocation.setLatitude(rowData.getLatitude());
+            itemLocation.setLongitude(rowData.getLongitude());
+            double distanceInKm = lastKnown.distanceTo(itemLocation) / 1000;
 
-			// pic = holder.getPic();
+            DecimalFormat myFormatter = new DecimalFormat("#,###.#");
+            String output = myFormatter.format(distanceInKm) + " km";
 
-			// name.setText(rowData.get());
+            distance = holder.getDistance();
+            distance.setText(output);
 
-			// address = holder.getAddress();
-			// address.setText(rowData.getAddress());
+            time = holder.getTime();
+            String formattedTime = (((ArrayMap<String,Object>) rowData.get("_kmd")).get("ect").toString());
+            formattedTime = formattedTime.replace("Z", "+00:00");
+            try {
+                formattedTime = new SimpleDateFormat().format(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+                        .parse(formattedTime));
+            } catch (ParseException ex) {
+                formattedTime = "";
+            } catch(Exception ex) {
+                Log.e(TAG,"Exception",ex);
+            }
 
-			// category = holder.getCategory();
-			// category.setText(rowData.getCategory());
-
-			// comment = holder.getComment();
-			// comment.setText(rowData.getDescription());
-			// distance = holder.getDistance();
-			// distance.setText(rowData.getCoords().toString());
-			//
-			// time = holder.getTime();
-			// time.setText(rowData.get)
+            time.setText(formattedTime);
 
 			return convertView;
 		}
@@ -207,6 +249,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == pic) {
 					pic = (ImageView) mRow.findViewById(R.id.list_image);
 				}
+
 				return pic;
 			}
 
@@ -214,6 +257,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == address) {
 					address = (TextView) mRow.findViewById(R.id.list_address);
 				}
+                address.setTypeface(robotoThin);
 				return address;
 			}
 
@@ -221,6 +265,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == name) {
 					name = (TextView) mRow.findViewById(R.id.list_name);
 				}
+                name.setTypeface(robotoThin);
 				return name;
 			}
 
@@ -228,6 +273,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == comment) {
 					comment = (TextView) mRow.findViewById(R.id.list_comment);
 				}
+                comment.setTypeface(robotoThin);
 				return comment;
 			}
 
@@ -235,6 +281,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == distance) {
 					distance = (TextView) mRow.findViewById(R.id.list_distance);
 				}
+                distance.setTypeface(robotoThin);
 				return distance;
 			}
 
@@ -242,6 +289,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 				if (null == time) {
 					time = (TextView) mRow.findViewById(R.id.list_time);
 				}
+                time.setTypeface(robotoThin);
 				return time;
 			}
 

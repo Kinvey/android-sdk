@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#969696"
-    android:orientation="vertical"
-    tools:context=".CityWatchActivity" >
 
     <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:background="#fff3f3f3"
+        android:orientation="vertical"
+        tools:context=".CityWatchActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,6 +20,7 @@
                 android:layout_height="match_parent"
                 android:padding="10dp"
                 android:scaleType="center"
+                android:contentDescription="Report Image"
                 android:src="@drawable/ic_menu_camera" />
 
             <LinearLayout
@@ -32,11 +31,12 @@
                 android:padding="10dp" >
 
                 <TextView
+                    android:id="@+id/header_report_details"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
                     android:text="Report Details"
-                    android:textSize="24sp" />
+                    android:textSize="36dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -49,6 +49,7 @@
                     android:paddingTop="10dp" >
 
                     <TextView
+                        android:id="@+id/header_details_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
@@ -81,6 +82,7 @@
                     android:paddingTop="10dp" >
 
                     <TextView
+                        android:id="@+id/header_details_category"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
@@ -113,6 +115,7 @@
                     android:paddingTop="10dp" >
 
                     <TextView
+                        android:id="@+id/header_details_location"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
@@ -145,6 +148,7 @@
                     android:paddingTop="10dp" >
 
                     <TextView
+                        android:id="@+id/header_details_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
@@ -224,8 +228,12 @@
                         android:paddingLeft="5dp"
                         android:textSize="14sp" />
                 </LinearLayout>
+                <View
+                        android:layout_width="fill_parent"
+                        android:layout_height="1dp"
+                        android:background="#dddddd"
+                        />
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
-
-</LinearLayout>

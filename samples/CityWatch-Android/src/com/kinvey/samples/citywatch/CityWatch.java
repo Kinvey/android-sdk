@@ -35,7 +35,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.facebook.Session;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.http.HttpTransport;
 
@@ -71,6 +70,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
     private Geocoder geocoder;
     private LocationManager locationmanager;
+    private int lastTab = -1;
 
     private CityWatchEntity curEntity;
     public List<Address> nearbyAddress;
@@ -81,6 +81,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
     private Client kinveyClient;
 
     private static final Level LOGGING_LEVEL = Level.FINEST;
+    private Location lastKnown;
 
     // This Activity manages two fragments -- the list and the map.
     // This Activity's Action bar is a tab group.
@@ -95,7 +96,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
         if (!kinveyClient.user().isUserLoggedIn()) {
             login();
         } else {
-
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             // Note there is no call to SetContentView(...) here.
             // Check out onTabSelected()-- the selected tab and associated fragment
             // is
@@ -119,18 +120,18 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
             // get last known location for a quick, rough start. Try GPS, if that
             // fails, try network. If that fails wait for fresh data
-            Location lastknown = locationmanager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastknown == null) {
-                lastknown = locationmanager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            lastKnown = locationmanager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastKnown == null) {
+                lastKnown = locationmanager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
-            if (lastknown == null) {
+            if (lastKnown == null) {
                 // if the device has never known it's location, start at 0...?
-                lastknown = new Location(TAG);
-                lastknown.setLatitude(0.0);
-                lastknown.setLongitude(0.0);
+                lastKnown = new Location(TAG);
+                lastKnown.setLatitude(0.0);
+                lastKnown.setLongitude(0.0);
             }
-            Log.i(TAG, "lastknown -> " + lastknown.getLatitude() + ", " + lastknown.getLongitude());
-            setLocationInEntity(lastknown);
+            Log.i(TAG, "lastKnown -> " + lastKnown.getLatitude() + ", " + lastKnown.getLongitude());
+            setLocationInEntity(lastKnown);
         }
 
     }
@@ -146,6 +147,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
     public void setUpTabs() {
         mFragments = new SherlockFragment[2];
+        getSupportActionBar().setHomeButtonEnabled(false);
 
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         ActionBar.Tab listTab = getSupportActionBar().newTab().setText("List").setTabListener(this);
@@ -156,23 +158,35 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
     }
 
+    public void returnHome() {
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        getSupportActionBar().setHomeButtonEnabled(false);
+        if (lastTab == -1) {
+            lastTab = 0;
+        }
+            getSupportActionBar().selectTab(getSupportActionBar().getTabAt(lastTab));
+    }
+
     public void showViewDetailsFragment() {
+        lastTab = getSupportActionBar().getSelectedTab().getPosition();
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         CityWatchViewDetailsFragment frag = CityWatchViewDetailsFragment.newInstance();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.addToBackStack(null);
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
         transaction.replace(android.R.id.content, frag);
         transaction.commit();
     }
 
     public void showEditDetailsFragment() {
-
+        lastTab = getSupportActionBar().getSelectedTab().getPosition();
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         CityWatchEditDetailsFragment frag = CityWatchEditDetailsFragment.newInstance();
-
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.addToBackStack(null);
+        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
         transaction.replace(android.R.id.content, frag);
         transaction.commit();
     }
@@ -189,14 +203,11 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                returnHome();
+                return true;
             case R.id.menu_item_legal:
                 legal();
-                return true;
-            case R.id.menu_item_new:
-                newEvent();
-                return true;
-            case R.id.menu_item_login:
-                login();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -219,14 +230,6 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
         mLegalDialog.show();
     }
 
-    private void newEvent() {
-        if (kinveyClient.user().isUserLoggedIn()) {
-           showEditDetailsFragment();
-        } else {
-            Toast.makeText(this, "you have to login!", Toast.LENGTH_LONG).show();
-        }
-    }
-
     private void login() {
 
         Intent details = new Intent(this, CityWatchLoginActivity.class);
@@ -238,16 +241,25 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
     // Fragments are instantiated on demand.
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-
         if (tab.getPosition() == 0) {
             if (mFragments[0] == null) {
                 mFragments[0] = CityWatchListFragment.newInstance();
             }
 
+            ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+            lastTab = -1;
+
         } else {
             if (mFragments[1] == null) {
                 mFragments[1] = CityWatchMapFragment.newInstance();
             }
+
+            if (lastTab == 1) {
+                ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+            } else {
+                ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
+            lastTab = -1;
         }
 
         ft.replace(android.R.id.content, mFragments[tab.getPosition()]);
@@ -305,10 +317,16 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
     }
 
+    public Location getLastKnown() {
+        return lastKnown;
+    }
+
     private void setLocationInEntity(Location location) {
         // curEntity.setCoords(location);
         curEntity.setLatitude(location.getLatitude());
         curEntity.setLongitude(location.getLongitude());
+
+        lastKnown = location;
 
         Query cityWatchQuery = kinveyClient.query();
         cityWatchQuery.nearSphere("_geoloc", curEntity.getLatitude(), curEntity.getLongitude());
@@ -319,17 +337,19 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
                 List<CityWatchEntity> cityWatchList = Arrays.asList(result);
                 Log.i(TAG, "Success, there are -> " + cityWatchList.size());
                 nearbyEntities = cityWatchList;
-                if (cityWatchList.size() > 0) {
-                    new GetThumbnailTask().execute();
-                   // retreiveImages();
-                }
-
                 if (mFragments[0] != null) {
                     ((CityWatchListFragment) mFragments[0]).notifyNewData(nearbyEntities);
                 }
                 if (mFragments[1] != null) {
                     // udpate map next
                 }
+
+                if (cityWatchList.size() > 0) {
+                    new GetThumbnailTask().execute();
+                   // retreiveImages();
+                }
+
+
 
 
             }
@@ -359,33 +379,42 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
                 int scaleFactor = 0;
 
-                String url;
-                for (CityWatchEntity e : nearbyEntities) {
-                    url = kinveyClient.file().getDownloadUrlBlocking(e.getImageURL()).toString();
+                URL url;
+                for (int i=0; i < nearbyEntities.size(); i++) {
+                    scaleFactor = 0;
 
-                    do {
-                        opts.inSampleSize = (int) Math.pow(2, scaleFactor++);
-                        BitmapFactory.decodeStream((InputStream) new URL(url).getContent(), null, opts);
-                    } while (opts.outWidth > MAX_W || opts.outHeight > MAX_H);
+                    CityWatchEntity e = nearbyEntities.get(i);
+                    if (e.getImageURL() != null) {
+                        url = new URL(kinveyClient.file().getDownloadUrlBlocking(e.getImageURL()).execute().getBlobTemporaryUri());
+                        do {
+                            opts.inSampleSize = (int) Math.pow(2, scaleFactor++);
+                            BitmapFactory.decodeStream((InputStream) url.getContent(), null, opts);
+                        } while (opts.outWidth > MAX_W || opts.outHeight > MAX_H);
 
-                    opts.inJustDecodeBounds = false;
-                    e.setBitmap(BitmapFactory.decodeStream((InputStream) new URL(url).getContent(), null, opts));
-                    int bytes = e.getBitmap().getWidth() * e.getBitmap().getHeight() * 4;
-                    ByteBuffer buffer = ByteBuffer.allocate(bytes);
-                    e.getBitmap().copyPixelsToBuffer(buffer);
+                        opts.inJustDecodeBounds = false;
+                        e.setBitmap(BitmapFactory.decodeStream((InputStream) url.getContent(), null, opts));
 
-                    byte[] array = buffer.array();
-                    e.setImage(array);
+                        int bytes = e.getBitmap().getWidth() * e.getBitmap().getHeight() * 4;
+                        ByteBuffer buffer = ByteBuffer.allocate(bytes);
+                        e.getBitmap().copyPixelsToBuffer(buffer);
 
-                    Log.i(TAG, "Setting bitmap in entity, (true is set) -> " + (e.getBitmap() != null));
+                        byte[] array = buffer.array();
+                        e.setImage(array);
+
+                        Log.i(TAG, "Setting bitmap in entity, (true is set) -> " + (e.getBitmap() != null));
+                    } else {
+                        Log.i(TAG, "URL is invalid.  Skipping.");
+                    }
 
                 }
                 return true;
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Log.e(TAG,"Failed to download image; Bad URL.  ",e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(TAG,"Failed to download iamge; IO Exception.  ",e);
+            } catch (Exception e) {
+                Log.e(TAG,"Failed to download image. ",e);
             }
             return false;
         }

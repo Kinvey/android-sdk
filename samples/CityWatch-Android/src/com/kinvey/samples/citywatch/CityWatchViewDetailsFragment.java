@@ -20,6 +20,7 @@ package com.kinvey.samples.citywatch;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -43,6 +45,7 @@ public class CityWatchViewDetailsFragment extends SherlockFragment {
 	private TextView mDescription;
 	private TextView mSeverity;
 	private TextView mRisk;
+    private static Typeface robotoThin;
 
 	public static CityWatchViewDetailsFragment newInstance() {
 		return new CityWatchViewDetailsFragment();
@@ -59,6 +62,7 @@ public class CityWatchViewDetailsFragment extends SherlockFragment {
 		View v = inflater.inflate(R.layout.fragment_view_details, group, false);
 		bindViews(v);
 		populateViews(((CityWatch) getSherlockActivity()).getCurEntity());
+        getSherlockActivity().getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		return v;
 	}
 
@@ -70,6 +74,10 @@ public class CityWatchViewDetailsFragment extends SherlockFragment {
 		mDescription = (TextView) v.findViewById(R.id.view_details_description);
 		mSeverity = (TextView) v.findViewById(R.id.view_details_severity);
 		mRisk = (TextView) v.findViewById(R.id.view_details_risk);
+
+        robotoThin = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
+        TextView header = (TextView) v.findViewById(R.id.header_report_details);
+        header.setTypeface(robotoThin);
 
 	}
 

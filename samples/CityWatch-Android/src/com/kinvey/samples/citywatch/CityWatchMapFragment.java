@@ -21,6 +21,9 @@ import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.MapView;
@@ -51,6 +54,7 @@ public class CityWatchMapFragment extends SherlockFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup group,
 			Bundle saved) {
 		View v = inflater.inflate(R.layout.fragment_map, group, false);
+        setHasOptionsMenu(true);
 
 		// ensure the current device can even support running google services,
 		// which are required for using google maps.
@@ -130,6 +134,22 @@ public class CityWatchMapFragment extends SherlockFragment {
 	public static CityWatchMapFragment newInstance() {
 		return new CityWatchMapFragment();
 	}
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new:
+                ((CityWatch) getSherlockActivity()).showEditDetailsFragment();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 }
 

@@ -3,11 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CityWatchActivity" >
+    tools:context=".CityWatchActivity"
+    android:background="#fff3f3f3">
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:dividerHeight="16dp"
+        android:divider="#fff3f3f3"
+        />
 
 </RelativeLayout>
