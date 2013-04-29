@@ -80,7 +80,7 @@ public class CityWatchListFragment extends SherlockFragment implements
 
 	private void bindViews(View v) {
 
-		List<com.kinvey.samples.citywatch.CityWatchEntity> ents = ((CityWatch) getSherlockActivity()).nearbyEntities;
+		List<com.kinvey.samples.citywatch.CityWatchEntity> ents = ((CityWatch) getSherlockActivity()).getNearbyEntities();
 
 		// ONLY do this if there are any entities, else TODO add a loading
 		// indicator

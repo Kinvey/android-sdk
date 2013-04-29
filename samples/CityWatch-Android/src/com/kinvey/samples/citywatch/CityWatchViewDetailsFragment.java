@@ -82,10 +82,9 @@ public class CityWatchViewDetailsFragment extends SherlockFragment {
 	}
 
 	private void populateViews(com.kinvey.samples.citywatch.CityWatchEntity ent) {
-
-		if (ent.getImage() != null) {
-			Bitmap bitmap = BitmapFactory.decodeByteArray(ent.getImage(), 0, ent.getImage().length);
-			mImage.setImageBitmap(bitmap);
+        Bitmap image = ent.getBitmap();
+		if (image != null) {
+			mImage.setImageBitmap(image);
 		}else{
 			Log.i(TAG, "no image");
 		}

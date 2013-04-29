@@ -5,4 +5,5 @@
     <dimen name="button_margin">34dp</dimen>
     <dimen name="login_spacing">18dp</dimen>
     <dimen name="view_break">50dp</dimen>
+    <dimen name="greeting_size">18sp</dimen>
 </resources>

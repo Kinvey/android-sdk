@@ -29,8 +29,8 @@
             android:maxLines="2"
             android:minLines="2"
             android:singleLine="false"
-            android:text="Log in"
-            android:textColor="#333"
+            android:text="@string/login"
+            android:textColor="@color/greeting_color"
             android:textSize="18sp" />
     </LinearLayout>
 

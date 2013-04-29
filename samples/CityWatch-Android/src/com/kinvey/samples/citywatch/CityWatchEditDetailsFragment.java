@@ -199,21 +199,34 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 	}
 
 	private void saveToKinvey() {
-		ent.setTitle(mName.getText().toString());
-		ent.setCategory(mCategory.getSelectedItem().toString());
-		ent.setSeverity(mSeverity.getSelectedItem().toString());
-		ent.setRisk(mRisk.getSelectedItem().toString());
-		ent.setDescription(mDescription.getText().toString());
-		ent.setAddress(mLocation.getText().toString());
+        if (validateFields()) {
 
-		// TODO get Repeat working, so users can "RECONFIRM" an event
-		// ASSUMING lat/long have been set by location manager
-		ent.setRepeat(1);
-		Location l = new Location(TAG);
-		l.setLatitude(ent.getLatitude());
-		l.setLongitude(ent.getLongitude());
-		ent.setCoords(l);
-        saveImage();
+            ent.setTitle(mName.getText().toString());
+            ent.setCategory(mCategory.getSelectedItem().toString());
+            ent.setSeverity(mSeverity.getSelectedItem().toString());
+            ent.setRisk(mRisk.getSelectedItem().toString());
+            ent.setDescription(mDescription.getText().toString());
+            ent.setAddress(mLocation.getText().toString());
+
+            // TODO get Repeat working, so users can "RECONFIRM" an event
+            // ASSUMING lat/long have been set by location manager
+            ent.setRepeat(1);
+            Location l = new Location(TAG);
+            l.setLatitude(ent.getLatitude());
+            l.setLongitude(ent.getLongitude());
+            ent.setCoords(l);
+            saveImage();
+        }   else {
+            Toast.makeText(getSherlockActivity(), "Can't save form.  All data must be filled in and a photo taken.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean validateFields() {
+        return (
+                mName.getText() != null
+                        && mDescription.getText() != null
+                        && mLocation.getText() != null
+                        && photo != null);
     }
 
     private void saveEntity() {
@@ -304,8 +317,6 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
 	}
 
 	private void pushToOpenGraph() {
-
-        // TODO:  Implement Push To OpenGraph through Kinvey
         FacebookEntity ogPush = new FacebookEntity();
         ogPush.setEntityId(ent.getObjectId());
         ogPush.setObjectType("kinveycitywatch:" + ent.getCategory().toLowerCase());
@@ -323,10 +334,6 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
                 Toast.makeText(getSherlockActivity(), "Saved to OpenGraph", Toast.LENGTH_LONG).show();
             }
         });
-
-
-
-
 	}
 }
 

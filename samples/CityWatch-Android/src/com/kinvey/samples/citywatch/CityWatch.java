@@ -74,7 +74,16 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
     private CityWatchEntity curEntity;
     public List<Address> nearbyAddress;
-    public List<CityWatchEntity> nearbyEntities;
+
+    public List<CityWatchEntity> getNearbyEntities() {
+        return nearbyEntities;
+    }
+
+    public void setNearbyEntities(List<CityWatchEntity> nearbyEntities) {
+        this.nearbyEntities = nearbyEntities;
+    }
+
+    private List<CityWatchEntity> nearbyEntities;
 
     public SherlockFragment[] mFragments;
 
@@ -330,6 +339,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
         Query cityWatchQuery = kinveyClient.query();
         cityWatchQuery.nearSphere("_geoloc", curEntity.getLatitude(), curEntity.getLongitude());
+
         kinveyClient.appData("CityWatch",CityWatchEntity.class).get(cityWatchQuery, new KinveyListCallback<CityWatchEntity>() {
 
             @Override
@@ -346,12 +356,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
                 if (cityWatchList.size() > 0) {
                     new GetThumbnailTask().execute();
-                   // retreiveImages();
                 }
-
-
-
-
             }
 
             @Override
@@ -369,7 +374,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
         this.curEntity = curEntity;
     }
 
-    private class GetThumbnailTask extends AsyncTask<String, Integer, Boolean> {
+    private class GetThumbnailTask extends AsyncTask<String, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(String... params) {
@@ -386,10 +391,10 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
                     CityWatchEntity e = nearbyEntities.get(i);
                     if (e.getImageURL() != null) {
                         url = new URL(kinveyClient.file().getDownloadUrlBlocking(e.getImageURL()).execute().getBlobTemporaryUri());
-                        do {
+                        /*do {
                             opts.inSampleSize = (int) Math.pow(2, scaleFactor++);
                             BitmapFactory.decodeStream((InputStream) url.getContent(), null, opts);
-                        } while (opts.outWidth > MAX_W || opts.outHeight > MAX_H);
+                        } while (opts.outWidth > MAX_W || opts.outHeight > MAX_H);  */
 
                         opts.inJustDecodeBounds = false;
                         e.setBitmap(BitmapFactory.decodeStream((InputStream) url.getContent(), null, opts));
@@ -405,7 +410,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
                     } else {
                         Log.i(TAG, "URL is invalid.  Skipping.");
                     }
-
+                    publishProgress(null);
                 }
                 return true;
 
@@ -417,6 +422,11 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
                 Log.e(TAG,"Failed to download image. ",e);
             }
             return false;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            notifyFragments();
         }
 
         @Override
@@ -434,7 +444,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
             ((CityWatchListFragment) mFragments[0]).notifyNewData(nearbyEntities);
         }
         if (mFragments[1] != null) {
-            // udpate map next
+            ((CityWatchMapFragment) mFragments[1]).populateMap();
         }
 
     }

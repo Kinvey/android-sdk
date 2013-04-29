@@ -17,15 +17,15 @@
             <ImageView
                 android:id="@+id/view_details_image"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:scaleType="center"
-                android:contentDescription="Report Image"
+                android:contentDescription="@string/incident_image"
                 android:src="@drawable/ic_menu_camera" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:padding="10dp" >
@@ -35,7 +35,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
-                    android:text="Report Details"
+                    android:text="@string/incident_details"
                     android:textSize="36dp" />
 
                 <LinearLayout
@@ -54,7 +54,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Name"
+                        android:text="@string/name"
                         android:textSize="14sp" />
 
                     <TextView
@@ -87,7 +87,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Category"
+                        android:text="@string/category"
                         android:textSize="14sp" />
 
                     <TextView
@@ -120,7 +120,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Location"
+                        android:text="@string/location"
                         android:textSize="14sp" />
 
                     <TextView
@@ -153,7 +153,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Description"
+                        android:text="@string/description"
                         android:textSize="14sp" />
 
                     <TextView
@@ -185,7 +185,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Severity"
+                        android:text="@string/severity"
                         android:textSize="14sp" />
 
                     <TextView
@@ -217,7 +217,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
                         android:gravity="right"
-                        android:text="Risk"
+                        android:text="@string/risk"
                         android:textSize="14sp" />
 
                     <TextView
