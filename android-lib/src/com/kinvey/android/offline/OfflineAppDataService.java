@@ -19,12 +19,16 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.ArrayMap;
 import com.google.common.base.Preconditions;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
 
 /**
  * @author edwardf
@@ -64,8 +68,9 @@ public class OfflineAppDataService extends IntentService {
     private boolean needsSync;
 
 //    //Every call to Kinvey's AppData API needs an associated collection and response class.
-    private String collectionName = "OfflineTest";  //TODO cannot hardcode!
-    private Class responseClass;
+//    private String collectionName = "OfflineTest";  //TODO cannot hardcode!
+    private Set<String> collectionSet;
+    private Class responseClass = OfflineGenericJson[].class;
 
     public OfflineAppDataService() {
         super("Kinvey - Executor Service");
@@ -80,6 +85,7 @@ public class OfflineAppDataService extends IntentService {
         requireWIFI = settings.isRequireWIFI();
         staggerTime = settings.getStaggerTime();
         needsSync = settings.isNeedsSync();
+        collectionSet = settings.getCollectionSet();
         Log.d(Client.TAG, "Offline Executor created");
     }
 
@@ -142,10 +148,16 @@ public class OfflineAppDataService extends IntentService {
      * using Kinvey's AbstractClient appData API and manage the response internally.
      */
     private <T> void getFromStoreAndExecute() {
-        Log.v(Client.TAG, "About to get from store and execute.");
+        Log.v(Client.TAG, "About to get from store and execute it.");
 
-        final OfflineStore curStore = new OfflineStore(getApplicationContext(), collectionName);
-        Client client = new Client.Builder(getApplicationContext()).build();
+        for (String collectionName : collectionSet){
+            Log.v(Client.TAG, "Current Collection is: " + collectionName);
+
+            final OfflineStore curStore = OfflineStore.getStore(getApplicationContext(), collectionName, null);
+
+            this.responseClass = curStore.getMyClass();
+            Log.v(Client.TAG, "ok response class is: " + responseClass.getSimpleName());
+            Client client = new Client.Builder(getApplicationContext()).build();
 //        client.appData(collectionName, responseClass);
 
         for (int i = 0; i < batchSize; i++) {
@@ -167,12 +179,12 @@ public class OfflineAppDataService extends IntentService {
                 client.appData(collectionName, responseClass).save(curStore.GetEntityFromDataStore(cur.getEntityID()), new RequestInfoCallback<T>(cur) {
                     @Override
                     public void onSuccess(T result) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), result,  curStore);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), error, curStore);
                     }
                 });
             } else if (cur.getHttpVerb().equals("DELETE")) {
@@ -180,31 +192,95 @@ public class OfflineAppDataService extends IntentService {
 
                     @Override
                     public void onSuccess(KinveyDeleteResponse result) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), result, curStore);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), error, curStore);
                     }
                 });
 
 
             } else if (cur.getHttpVerb().equals("GET")) {
-                client.appData(collectionName, responseClass).getEntity(cur.getEntityID(), new RequestInfoCallback<T>(cur) {
+               Class responseArray;
+//                java.lang.reflect.Array.newInstance(responseClass, 0).getClass();
+                try{
+                    responseArray = Class.forName("[L" + responseClass.getName() + ";");
+                }catch(Exception e){
+                    Log.i(Client.TAG, "NOPE ON CREATING THAT ARRAY");
+                    responseArray = responseClass;
+                }
+
+
+                client.appData(collectionName, responseArray).getEntity(cur.getEntityID(), new RequestInfoCallback<T[]>(cur) {
                     @Override
-                    public void onSuccess(T result) {
+                    public void onSuccess(T[] result) {
+                        Log.i(Client.TAG, "GET request onSuccess callback");
+                       // OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
+//                        if (result instanceof Collection){
+//                            Object[] tempFullArray = ((Collection) result).toArray();
+//                            T temp = null;
+//                            Map<String, Object> tempValueMap;
+//                            for (int i = 0; i < tempFullArray.length; i++){
+//
+////                                Class<?> clazz = Class.forName(className);
+//                                try{
+//                                    Log.i(Client.TAG, "creating response class instance, " + responseClass.getSimpleName());
+//                                    Constructor<?> ctor = responseClass.getConstructor();
+//                                    Object  wat =  ctor.newInstance();
+//                                    temp = (T) responseClass.cast(wat);
+//                                }catch(Exception e){
+//                                    Log.e(Client.TAG, "couldn't create response class");
+//                                }
+//
+////                                temp = //new OfflineGenericJson();
+//                                tempValueMap = (Map<String, Object>) tempFullArray[i];
+//                                for (String key : tempValueMap.keySet()){
+//                                    ((OfflineGenericJson)temp).put(key, tempValueMap.get(key));
+//
+//                                }
+//
+//
+//                                curStore.addToStore(((OfflineGenericJson)temp).get("_id").toString(), temp);
+//
+//                            }
+//
+//                        }else
+//                        if (result instanceof Object){
+//                            Log.i(Client.TAG,  "It's an object");
+//                            if (responseArray.isArray()){
+//                                Log.i(Client.TAG,  "It's an Array");
+//
+//                                Object tempFullArray = responseArray.cast(result);
+//                                T[] recast = (T[]) tempFullArray;
 
-                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
 
-                        curStore.addToStore(((GenericJson) result).get("_id").toString(), result);
-                        //TODO edwardf ^^ this is too simple and will cause issues with conflicts.
+                                for (int i = 0; i < result.length; i++){
+                                    curStore.addToStore(((OfflineGenericJson)result[0]).get("_id").toString(), result[0]);
+
+                                }
+                            //}   else{
+                              //  Log.i(Client.TAG,  "It's an object, Not an Array");
+
+
+                            //}
+
+
+
+
+
+//                        }else{
+//                            Log.i(Client.TAG,  "Hrm, not a Collection and not an Object...?");
+//                        }
+                        OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), result, curStore);
 
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), curStore);
+                        Log.i(Client.TAG, "GET request onFailure callback");
+                        OfflineAppDataService.this.storeCompletedRequestInfo(false, this.getInfo(), error, curStore);
                     }
                 });
 
@@ -212,10 +288,11 @@ public class OfflineAppDataService extends IntentService {
                 Preconditions.checkNotNull(null, "Unsupported Http Verb in the store");
             }
         }
+        }
     }
 
-    private void storeCompletedRequestInfo(boolean success, OfflineRequestInfo info, OfflineStore store) {
-        store.notifyExecution(success, info);
+    private void storeCompletedRequestInfo(boolean success, OfflineRequestInfo info, Object returnValue, OfflineStore store) {
+        store.notifyExecution(success, info, returnValue);
     }
 
 

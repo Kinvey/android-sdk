@@ -53,6 +53,10 @@ public class Query extends AbstractQuery implements Serializable {
         this(new MongoQueryFilter.MongoQueryFilterBuilder());
     }
 
+    public boolean isQueryEmpty(){
+        return(getQueryFilterMap().isEmpty());
+    }
+
     // Comparison Operators
 
     /**

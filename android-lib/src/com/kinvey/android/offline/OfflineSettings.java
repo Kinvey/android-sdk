@@ -17,6 +17,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -30,6 +32,7 @@ public class OfflineSettings implements Serializable {
     public static final String STAGGER_TIME_PREFERENCE = "staggerTime";
     public static final String REQUIRE_WIFI_PREFERENCE = "requireWIFI";
     public static final String NEEDS_SYNC_PREFERENCE = "needsSync";
+    public static final String COLLECTION_NAME_SET = "colectionNameSet";
     
     //The number of milliseconds between each batch of client requests being executed.
     private long staggerTime = 1000L;
@@ -39,6 +42,8 @@ public class OfflineSettings implements Serializable {
     private int batchSize = 3;
     //a flag indicating if there is any pending work, currently tied to an OfflineStore.
     private boolean needsSync = false;
+    //a set of collections that have offlinestores
+    private Set<String> collectionSet = new HashSet<String>();
     private static OfflineSettings _instance;
 
     private SharedPreferences preferences;
@@ -48,9 +53,10 @@ public class OfflineSettings implements Serializable {
     private OfflineSettings(Context context){
         preferences = context.getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
         staggerTime = preferences.getLong(STAGGER_TIME_PREFERENCE, 1000L);
-        requireWIFI = preferences.getBoolean(REQUIRE_WIFI_PREFERENCE,false);
-        batchSize = preferences.getInt(BATCH_SIZE_PREFERENCE,3);
-        needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE,false);
+        requireWIFI = preferences.getBoolean(REQUIRE_WIFI_PREFERENCE, false);
+        batchSize = preferences.getInt(BATCH_SIZE_PREFERENCE, 3);
+        needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE, false);
+        collectionSet = preferences.getStringSet(COLLECTION_NAME_SET, new HashSet<String>());
         savePreferences();
     }
 
@@ -122,7 +128,21 @@ public class OfflineSettings implements Serializable {
             editor.putBoolean(REQUIRE_WIFI_PREFERENCE,requireWIFI);
             editor.putInt(BATCH_SIZE_PREFERENCE,batchSize);
             editor.putBoolean(NEEDS_SYNC_PREFERENCE,needsSync);
+            editor.putStringSet(COLLECTION_NAME_SET, collectionSet);
             editor.commit();
         }
+    }
+
+    public Set<String> getCollectionSet() {
+        synchronized (lock){
+            return collectionSet;
+        }
+    }
+
+    public OfflineSettings setCollectionSet(Set<String> collectionSet) {
+        synchronized (lock){
+            this.collectionSet = collectionSet;
+        }
+        return this;
     }
 }

@@ -42,6 +42,8 @@ import java.util.*;
  */
 public class OfflineStore<T> extends Observable {
 
+    private int versionCode = 1;  //Increment this number every time edits are made to persistence.
+
     /**
      * The datastore maps an Entity's _id to an instance of an entity.  This represents the latest local state of the Entity,
      * which can be synced.
@@ -55,8 +57,18 @@ public class OfflineStore<T> extends Observable {
      */
     private Queue<OfflineRequestInfo> requestStore;
 
+    /**
+     * The queryStore maps a Query string to a list of Entity's _id.  Queries can only be performed on Get operations, so it is the
+     * responsibility of the OfflineAppDataService to iterate through all results and update them in the dataStore.
+     */
+//    private HashMap<String, List<String>> queryStore;
+
+
+
     //Query and aggregate support require another two HashMaps, one for each, mapping a String to a List of Strings.
     //The String Key is the query(aggregrate) itself, and the list of Strings (Value) represent all _ids associated with the query/aggregate.
+
+
 
     //When persisting to disk the Collection name is appended to form a unique file name in local storage
     private static final String FILENAME = "Kinvey_offline_";
@@ -68,10 +80,40 @@ public class OfflineStore<T> extends Observable {
 
     private OfflineSettings settings;
 
+
+
+
+    public Class getMyClass() {
+        return myClass;
+    }
+
+    public void setMyClass(Class myClass) {
+        this.myClass = myClass;
+    }
+
+    private Class myClass;
+
     //a list of RequestInfo of the client requests that succeeded.
     private ArrayList<OfflineRequestInfo> successfulCalls;
     //a list of RequestInfo of the client requests that failed.
     private ArrayList<OfflineRequestInfo> failedCalls;
+
+    private static HashMap<String, OfflineStore> storeMap;
+
+    public static OfflineStore getStore(Context context, String collectionName, Class myClass){
+        if (storeMap == null){
+            storeMap = new HashMap<String, OfflineStore>();
+        }
+
+        if (!storeMap.containsKey(collectionName)){
+            storeMap.put(collectionName, new OfflineStore(context, collectionName, myClass));
+        }
+
+        return storeMap.get(collectionName);
+
+
+    }
+
 
 
     /**
@@ -80,12 +122,14 @@ public class OfflineStore<T> extends Observable {
      * @param context a {@link android.content.Context} object.
      * @param collectionName a {@link java.lang.String} object.
      */
-    protected OfflineStore(Context context, String collectionName) {
+    private OfflineStore(Context context, String collectionName, Class myClass) {
 //        this.dataStore = new HashMap<String, T>();
 //        this.requestStore = new LinkedList<RequestInfo>();
         this.collectionName = collectionName;
         this.context = context;
+        this.myClass = myClass;
         loadOfflineSettings();
+        this.settings.getCollectionSet().add(collectionName);
         loadOrCreateStore();
         Log.v(Client.TAG,  "Offline Store constructor finished.");
 
@@ -121,6 +165,13 @@ public class OfflineStore<T> extends Observable {
             this.requestStore = (Queue<OfflineRequestInfo>) ois.readObject();
             this.successfulCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
             this.failedCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
+            try{
+                this.myClass = (Class) ois.readObject();
+            }catch (Exception e){
+
+            }
+
+
             Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (IOException e) {
@@ -148,6 +199,7 @@ public class OfflineStore<T> extends Observable {
      */
     private void writeStore(Context context) {
         try {
+            Log.v(Client.TAG, "about to write datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
             FileOutputStream out = context.openFileOutput((FILENAME + collectionName), Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(out);
             settings.savePreferences();
@@ -155,12 +207,18 @@ public class OfflineStore<T> extends Observable {
             os.writeObject(this.requestStore);
             os.writeObject(this.successfulCalls);
             os.writeObject(this.failedCalls);
+            if (this.myClass != null){
+                os.writeObject(this.myClass);
+            }else{
+                Log.e(Client.TAG, "offline class is set to null");
+            }
             Log.v(Client.TAG, "wrote datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (FileNotFoundException e) {
             Log.e(Client.TAG, "Error accessing internal storage!");
         } catch (IOException e) {
             Log.e(Client.TAG, "IOException while creating objectOutputStream to save offline store!");
+            e.printStackTrace();
         }
     }
 
@@ -175,15 +233,18 @@ public class OfflineStore<T> extends Observable {
      * @param entityID - the unique ID of the entity to retrieve
      * @param callback - Used to indicate result of offline storage (not online execution).
      */
-    public void get(String entityID, KinveyClientCallback callback) {
+    public void getEntity(String entityID, KinveyClientCallback callback) {
+        loadOrCreateStore();
 
+        Log.v(Client.TAG, "getting entity from offline store, which currently has: " + this.dataStore.size());
         T curState = this.dataStore.get(entityID);
-        if (curState != null && callback != null) {
+        if (callback != null) {
             callback.onSuccess(curState);
         }
         //if entity is null, call onFailure?
 
         addToQueue("GET", entityID);
+        writeStore(this.context);
     }
 
 
@@ -194,6 +255,8 @@ public class OfflineStore<T> extends Observable {
      * @return the entity OR {@code null}
      */
     public T GetEntityFromDataStore(String id) {
+        loadOrCreateStore();
+
         return this.dataStore.get(id);
 
     }
@@ -210,6 +273,8 @@ public class OfflineStore<T> extends Observable {
      * @param callback - Used to indicate result of offline storage (not online execution).
      */
     public void save(T entity, KinveyClientCallback callback) {
+        loadOrCreateStore();
+
         String id = (String) ((GenericJson) entity).get("_id");
         if (id == null) {
             id = generateMongoDBID();
@@ -237,7 +302,10 @@ public class OfflineStore<T> extends Observable {
      * @param toAdd - the entity to put in the store.
      */
     public void addToStore(String entityID, T toAdd){
+        loadOrCreateStore();
         this.dataStore.put(entityID, toAdd);
+        Log.i(Client.TAG, "added to the store " + entityID + " and " + this.dataStore.size());
+        writeStore(this.context);
     }
 
 
@@ -251,7 +319,10 @@ public class OfflineStore<T> extends Observable {
      * @param entityID - the ID of the entity to apply this verb too
      */
     public void addToQueue(String httpVerb, String entityID){
+        loadOrCreateStore();
+
         this.requestStore.add(new OfflineRequestInfo(httpVerb, entityID));
+        writeStore(this.context);
     }
 
 
@@ -267,9 +338,11 @@ public class OfflineStore<T> extends Observable {
      * @param callback - Used to indicate result of offline storage (not online execution).
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
+        loadOrCreateStore();
         T curState = this.dataStore.get(entityID);
         addToQueue("Delete", entityID);
         addToStore(entityID, null);
+        writeStore(this.context);
     }
 
     /**
@@ -278,7 +351,10 @@ public class OfflineStore<T> extends Observable {
      * @return information about the first client request that has been queued OR {@code null} if empty.
      */
     public OfflineRequestInfo pop() {
-        return this.requestStore.poll();
+        loadOrCreateStore();
+        OfflineRequestInfo ret =  this.requestStore.poll();
+        writeStore(this.context);
+        return ret;
     }
 
     public OfflineSettings getSettings() {
@@ -330,7 +406,7 @@ public class OfflineStore<T> extends Observable {
         return this.dataStore.size();
     }
 
-    public void notifyExecution(boolean success, OfflineRequestInfo info) {
+    public void notifyExecution(boolean success, OfflineRequestInfo info, Object response) {
         if (success) {
             this.successfulCalls.add(info);
         } else {
@@ -338,8 +414,7 @@ public class OfflineStore<T> extends Observable {
         }
         writeStore(this.context);
         setChanged();
-        //TODO edwardf response is set as null!! Think through passing back an Object of type <T> (delete?)
-        notifyObservers(new OfflineResponseInfo(info, null, success));
+        notifyObservers(new OfflineResponseInfo(info, response, success));
 
     }
 
