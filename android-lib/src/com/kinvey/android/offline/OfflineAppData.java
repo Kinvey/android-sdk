@@ -215,7 +215,13 @@ public class OfflineAppData<T> implements Observer {
             return;
         }
 
-        callback.onSuccess((OfflineResponseInfo)o);
+        OfflineResponseInfo resp = (OfflineResponseInfo) o;
+
+        if (resp.isSuccess()){
+            callback.onSuccess(resp);
+        }else{
+            callback.onFailure(resp);
+        }
 
 
 

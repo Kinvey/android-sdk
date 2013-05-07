@@ -184,10 +184,10 @@ public class OfflineStore<T> extends Observable {
             Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (IOException e) {
-            Log.e(Client.TAG, e.getMessage());
+            Log.e(Client.TAG, "" + e.getMessage());
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            Log.e(Client.TAG, e.getMessage());
+            Log.e(Client.TAG, "" + e.getMessage());
             e.printStackTrace();
         } finally {
             if (ois != null)
