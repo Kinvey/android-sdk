@@ -13,6 +13,8 @@
  */
 package com.kinvey.android.offline;
 
+import com.kinvey.java.Query;
+
 import java.io.Serializable;
 
 /**
@@ -33,10 +35,17 @@ public class OfflineRequestInfo implements Serializable {
     //The id of the entity, assuming it is in the store.
     private String id;
 
+    private Query query;
 
     public OfflineRequestInfo(String httpVerb, String entityID) {
         this.verb = httpVerb;
         this.id = entityID;
+    }
+
+    public OfflineRequestInfo(String httpVerb, Query q, String queryjson){
+        this.verb = httpVerb;
+        this.query = q;
+        this.id = queryjson;
     }
 
     /**
@@ -55,4 +64,8 @@ public class OfflineRequestInfo implements Serializable {
         return this.id;
     }
 
+
+    public Query getQuery() {
+        return query;
+    }
 }

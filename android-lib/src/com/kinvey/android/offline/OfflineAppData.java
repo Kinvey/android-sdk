@@ -19,7 +19,9 @@ import android.content.Intent;
 import android.util.Log;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
@@ -46,7 +48,6 @@ import java.util.Observer;
  */
 public class OfflineAppData<T> implements Observer {
 
-//    private OfflineStore store;
 
     private String collectionName;
     private Class<T> myClass;
@@ -75,6 +76,8 @@ public class OfflineAppData<T> implements Observer {
 
 
 
+
+
     }
 
     /**
@@ -96,11 +99,24 @@ public class OfflineAppData<T> implements Observer {
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback) {
 
-//        this.store.getEntity(entityID, callback);
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).getEntity(entityID, callback);
 
         startSync();
 
+    }
+
+    /**
+     * Get entities by query from an offline collection.
+     *
+     *
+     */
+    public void get(Query q, KinveyListCallback<T> callback){
+        String jsonQuery = q.getQueryFilterJson(this.client.getJsonFactory());  //this.client.getJsonFactory()
+
+
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).get(q, jsonQuery, callback);
+
+        startSync();
     }
 
 

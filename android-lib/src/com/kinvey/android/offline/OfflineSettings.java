@@ -15,6 +15,8 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+import com.kinvey.android.Client;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -125,10 +127,11 @@ public class OfflineSettings implements Serializable {
         synchronized (lock) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putLong(STAGGER_TIME_PREFERENCE, staggerTime);
-            editor.putBoolean(REQUIRE_WIFI_PREFERENCE,requireWIFI);
-            editor.putInt(BATCH_SIZE_PREFERENCE,batchSize);
-            editor.putBoolean(NEEDS_SYNC_PREFERENCE,needsSync);
+            editor.putBoolean(REQUIRE_WIFI_PREFERENCE, requireWIFI);
+            editor.putInt(BATCH_SIZE_PREFERENCE, batchSize);
+            editor.putBoolean(NEEDS_SYNC_PREFERENCE, needsSync);
             editor.putStringSet(COLLECTION_NAME_SET, collectionSet);
+            Log.v(Client.TAG,  "saving preferences: " + collectionSet.size());
             editor.commit();
         }
     }
