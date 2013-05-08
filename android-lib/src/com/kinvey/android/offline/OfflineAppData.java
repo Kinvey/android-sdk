@@ -70,7 +70,7 @@ public class OfflineAppData<T> implements Observer {
         this.client = client;
 //        this.store = new OfflineStore(context, collectionName, myClass);
 //        this.store.addObserver(this);
-        this.context = context;
+        this.context = context.getApplicationContext();
 
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).addObserver(this);
 
@@ -101,7 +101,7 @@ public class OfflineAppData<T> implements Observer {
 
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).getEntity(entityID, callback);
 
-        startSync();
+        startSync(this.context);
 
     }
 
@@ -116,7 +116,7 @@ public class OfflineAppData<T> implements Observer {
 
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).get(q, jsonQuery, callback);
 
-        startSync();
+        startSync(this.context);
     }
 
 
@@ -131,7 +131,7 @@ public class OfflineAppData<T> implements Observer {
 //        this.store.save(entity, callback);
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).save(entity, callback);
 
-        startSync();
+        startSync(this.context);
 
 
     }
@@ -148,7 +148,7 @@ public class OfflineAppData<T> implements Observer {
 //        this.store.delete(entityID, callback);
         OfflineStore.getStore(this.context, this.collectionName, this.myClass).delete(entityID, callback);
 
-        startSync();
+       startSync(this.context);
 
     }
 
@@ -177,10 +177,10 @@ public class OfflineAppData<T> implements Observer {
     /**
      * Start the OfflineAppDataService with an intent for performing Sync
      */
-    private void startSync(){
-        Intent i = new Intent(this.context, OfflineAppDataService.class);
+    public static void startSync(Context context){
+        Intent i = new Intent(context, OfflineAppDataService.class);
         i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
-        this.context.startService(i);
+        context.startService(i);
         Log.v(Client.TAG, "sent intent for offline sync!");
 
     }

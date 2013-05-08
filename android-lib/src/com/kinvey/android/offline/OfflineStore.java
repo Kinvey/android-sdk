@@ -12,6 +12,8 @@
 package com.kinvey.android.offline;
 
 import android.content.Context;
+import android.os.Build;
+import android.provider.CalendarContract;
 import android.util.Log;
 import com.google.api.client.json.GenericJson;
 
@@ -83,6 +85,9 @@ public class OfflineStore<T> extends Observable {
 
     private OfflineSettings settings;
 
+    private static long lastSyncAt = 0L;
+    private static final long syncRate = 60000;
+
 
 
 
@@ -117,6 +122,20 @@ public class OfflineStore<T> extends Observable {
 
     }
 
+    public static OfflineStore getStore(Context context, String collectionName){
+        if (storeMap == null){
+            storeMap = new HashMap<String, OfflineStore>();
+        }
+
+        if (!storeMap.containsKey(collectionName)){
+            storeMap.put(collectionName, new OfflineStore(context, collectionName));
+        }
+
+        return storeMap.get(collectionName);
+
+
+    }
+
 
 
     /**
@@ -129,14 +148,29 @@ public class OfflineStore<T> extends Observable {
 //        this.dataStore = new HashMap<String, T>();
 //        this.requestStore = new LinkedList<RequestInfo>();
         this.collectionName = collectionName;
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.myClass = myClass;
         loadOfflineSettings();
         this.settings.getCollectionSet().add(collectionName);
         this.settings.savePreferences();
 
         loadOrCreateStore();
-        Log.v(Client.TAG,  "Offline Store constructor finished.");
+        //Log.v(Client.TAG,  "Offline Store constructor finished.");
+
+    }
+
+    private OfflineStore(Context context, String collectionName) {
+//        this.dataStore = new HashMap<String, T>();
+//        this.requestStore = new LinkedList<RequestInfo>();
+        this.collectionName = collectionName;
+        this.context = context.getApplicationContext();
+//        this.myClass = myClass;
+        loadOfflineSettings();
+        this.settings.getCollectionSet().add(collectionName);
+        this.settings.savePreferences();
+
+        loadOrCreateStore();
+     //   Log.v(Client.TAG,  "Offline Store constructor finished.");
 
     }
 
@@ -146,7 +180,7 @@ public class OfflineStore<T> extends Observable {
 
 
     private void loadOrCreateStore() {
-        Log.v(Client.TAG, "Loading or Creating Store!");
+       // Log.v(Client.TAG, "Loading or Creating Store!");
 
         FileInputStream fis = null;
         try {
@@ -160,28 +194,29 @@ public class OfflineStore<T> extends Observable {
             this.failedCalls = new ArrayList<OfflineRequestInfo>();
             this.queryStore = new HashMap<String, List<String>>();
             writeStore(this.context);
+
             return;
+        }finally {
+            try{
+             fis.close();
+            }catch (Exception e){}
         }
-        Log.v(Client.TAG, "offline store already exists, so attempting to load");
+       // Log.v(Client.TAG, "offline store already exists, so attempting to load");
 
         ObjectInputStream ois = null;
         try {
+            fis = context.openFileInput(FILENAME + collectionName);
+
             ois = new ObjectInputStream(fis);
             this.dataStore = (HashMap<String, T>) ois.readObject();
             this.requestStore = (Queue<OfflineRequestInfo>) ois.readObject();
             this.successfulCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
             this.failedCalls = (ArrayList<OfflineRequestInfo>) ois.readObject();
-            try{
-                this.myClass = (Class) ois.readObject();
-            }catch (Exception e){}
-            try{
-                this.queryStore = (HashMap<String, List<String>>) ois.readObject();
-            }catch (Exception e){
-                this.queryStore = new HashMap<String, List<String>>();
-            }
+            this.myClass = (Class) ois.readObject();
+            this.queryStore = (HashMap<String, List<String>>) ois.readObject();
 
 
-            Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
+            //Log.v(Client.TAG, "read in datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
 
         } catch (IOException e) {
             Log.e(Client.TAG, "" + e.getMessage());
@@ -190,11 +225,10 @@ public class OfflineStore<T> extends Observable {
             Log.e(Client.TAG, "" + e.getMessage());
             e.printStackTrace();
         } finally {
-            if (ois != null)
                 try {
                     ois.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    fis.close();
+                } catch (Exception e) {
                 }
         }
 
@@ -208,7 +242,7 @@ public class OfflineStore<T> extends Observable {
      */
     private void writeStore(Context context) {
         try {
-            Log.v(Client.TAG, "about to write datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
+            //Log.v(Client.TAG, "about to write datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
             FileOutputStream out = context.openFileOutput((FILENAME + collectionName), Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(out);
             settings.savePreferences();
@@ -216,17 +250,16 @@ public class OfflineStore<T> extends Observable {
             os.writeObject(this.requestStore);
             os.writeObject(this.successfulCalls);
             os.writeObject(this.failedCalls);
-            if (this.myClass != null){
-                os.writeObject(this.myClass);
-            }else{
-                Log.e(Client.TAG, "offline class is set to null");
-            }
+            os.writeObject(this.myClass);
             os.writeObject(this.queryStore);
 
-            Log.v(Client.TAG, "wrote datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
-            os.flush();
-            out.getFD().sync();
+           // Log.v(Client.TAG, "wrote datastore and request store! -> " + this.dataStore.size() + ", " + this.requestStore.size());
+
+            fsyncIfNeeded(os, out);
+//            os.flush();
+//            out.getFD().sync();
             os.close();
+            out.close();
 
         } catch (FileNotFoundException e) {
             Log.e(Client.TAG, "Error accessing internal storage!");
@@ -514,6 +547,24 @@ public class OfflineStore<T> extends Observable {
     }
 
 
+    private static void fsyncIfNeeded(ObjectOutputStream os, FileOutputStream out) {
+        return;
+//        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//            if (lastSyncAt == 0){
+//                lastSyncAt = System.currentTimeMillis();
+//            }
+//            long currentTime = System.currentTimeMillis();
+//            if (currentTime - lastSyncAt > syncRate) {
+//                try {
+//                    os.flush();
+//                    out.getFD().sync();
+//                } catch (IOException ioe) {
+//                    Log.e(Client.TAG, "Error flushing output stream!");
+//                }
+//                lastSyncAt = currentTime;
+//            }
+//        }
+    }
 
 
 }

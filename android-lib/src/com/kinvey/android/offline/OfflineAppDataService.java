@@ -154,8 +154,10 @@ public class OfflineAppDataService extends IntentService {
         for (final String collectionName : collectionSet) {
             Log.v(Client.TAG, "Current Collection is: " + collectionName);
 
-            final OfflineStore curStore = OfflineStore.getStore(getApplicationContext(), collectionName, null);
-
+            final OfflineStore curStore = OfflineStore.getStore(getApplicationContext(), collectionName);
+            if(curStore.getMyClass() == null){
+                return;
+            }
             this.responseClass = curStore.getMyClass();
             Log.v(Client.TAG, "ok response class is: " + responseClass.getSimpleName());
             Client client = new Client.Builder(getApplicationContext()).build();
