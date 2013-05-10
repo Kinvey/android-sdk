@@ -8,6 +8,9 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.widget.TextView;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.User;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +46,20 @@ public class MainActivity extends Activity {
         tvHello = (TextView) findViewById(R.id.tvHello);
 		if (loggedIn()) {
 			tvHello.setText("Hello!  You are logged in!");
+
+            Client kinveyClient = ((UserLogin) getApplication()).getKinveyService();
+            kinveyClient.user().put("newField1", "testValue1");
+            kinveyClient.user().update(new KinveyUserCallback() {
+                @Override
+                public void onSuccess(User result) {
+                    tvHello.setText("Hello!  You are logged in and updated");
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    tvHello.setText("Hello!  You are logged in and NOT updated!");
+                }
+            });
 			
 		} else {
 			Intent intent = new Intent(this, LoginActivity.class);

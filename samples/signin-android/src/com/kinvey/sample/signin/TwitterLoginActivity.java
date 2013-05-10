@@ -40,8 +40,8 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 	/**
 	 * Twitter Consumer Key and Secret - Specific to the application making the request
 	 */
-	private static final String TWITTER_CONSUMER_KEY = "your_twitter_consumer_key";
-	private static final String TWITTER_CONSUMER_SECRET = "your_twitter_consumer_secret";
+	private static final String TWITTER_CONSUMER_KEY = "rDPszs68dM4NwZJGwqIMxg";
+	private static final String TWITTER_CONSUMER_SECRET = "WzmezQNv7ArQR3Pm9bhlBwzPTak3f5HUjMLxRYU1IJM";
 	/**
 	 * The Callback URL is used by Twitter OAuth to return the authorization to this Activity.  The URL must be 
 	 * set as an intent in the Application manifest as follows:
@@ -56,8 +56,8 @@ public class TwitterLoginActivity extends AccountAuthenticatorActivity {
 	 * The scheme and host should be modified to identify the specific application.  
 	 * 
 	 */
-	private final String CALLBACKURL = "kinveysociallogin://twitteractivity"; 
-	private static final String  CALLBACK_SCHEME = "kinveysociallogin";
+	private final String CALLBACKURL = "koauthtest://koauthhost";
+	private static final String  CALLBACK_SCHEME = "koauthtest";
 	
 	/**
 	 * URLs for accessing Twitter OAuth

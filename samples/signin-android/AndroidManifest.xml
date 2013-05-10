@@ -51,7 +51,7 @@
                 <action android:name="android.intent.action.VIEW"/> 
                 <category android:name="android.intent.category.DEFAULT"/> 
                 <category android:name="android.intent.category.BROWSABLE"/> 
-                <data android:scheme="kinveysociallogin" android:host="twitteractivity"/> 
+                <data android:scheme="koauthtest" android:host="koauthhost"/>
 			</intent-filter> 
             >
         </activity>
