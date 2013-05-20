@@ -29,29 +29,25 @@ import java.io.IOException;
  *
  * </p>
  * <p>
- *
+ * <pre>
+ * {@code
  *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, AppData.this)
- *                             .setEntityID(myEntity.getId());
- *                             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
- *                             .setResolveDepth(2)
- *                             .setCallback(new KinveyClientCallback<MyEntity> {
- *                                 @Override
- *                                 public void onSuccess(MyEntity result) {
- *                                     Log.i(TAG, "got it!");
- *                                 }
+ *             .setEntityID(myEntity.getId());
+ *             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
+ *             .setResolveDepth(2)
+ *             .setCallback(new KinveyClientCallback<MyEntity> {
+ *                 public void onSuccess(MyEntity result) {
+ *                     Log.i(TAG, "got it!");
+ *                 }
  *
- *                                  @Override
- *                                  public void onFailure(Throwable error) {
- *                                  Log.i(TAG, "oh no!");
- *
- *
- *                                  }
- *                              })
- *                             .buildAndExecute()
+ *                 public void onFailure(Throwable error) {
+ *                     Log.i(TAG, "oh no!");
+ *                 }
+ *             })
+ *             .buildAndExecute();
+ * }
+ * </pre>
  * </p>
- *
- *
- *
  *
  * @author edwardf
  * @since 2.2.0

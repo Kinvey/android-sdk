@@ -36,8 +36,8 @@ import com.kinvey.java.core.KinveyClientCallback;
  * </p>
  * <p>
  * <pre>
- *    @Key
- *    private String city;
+ *     {@literal @}Key
+ *     private String city;
  * </pre>
  * </p>
  * <p>
@@ -46,8 +46,8 @@ import com.kinvey.java.core.KinveyClientCallback;
  * </p>
  * <p>
  * <pre>
- *    @Key("_id")
- *    private String customerID;
+ *     {@literal @}Key("_id")
+ *     private String customerID;
  * </pre>
  * </p>
  * <p>
@@ -59,11 +59,13 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <p>
  * Entity Set sample:
  * <pre>
- *    AppData<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
- *    myAppData.get(appData().query, new KinveyUserCallback() {
- *        public void onFailure(Throwable t) { ... }
- *        public void onSuccess(EventEntity[] entities) { ... }
- *    });
+ * {@code
+ *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
+ *     myAppData.get(appData().query, new KinveyListCallback<EventEntity> {
+ *         public void onFailure(Throwable t) { ... }
+ *         public void onSuccess(EventEntity[] entities) { ... }
+ *     });
+ * }
  * </pre>
  * </p>
  * <p/>
@@ -142,11 +144,13 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
-     *                new KinveyClientCallback<EventEntity> {
-     *            public void onFailure(Throwable t) { ... }
-     *            public void onSuccess(EventEntity entity) { ... }
-     *        });
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
+     *             new KinveyClientCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity entity) { ... }
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -167,13 +171,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *        Query myQuery = new Query();
-     *        myQuery.equals("age",21);
-     *        myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
-     *            public void onFailure(Throwable t) { ... }
-     *            public void onSuccess(EventEntity[] entities) { ... }
-     *        });
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -194,11 +200,13 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *         AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *         myAppData.get(new KinveyListCallback<EventEntity> {
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.get(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
-     *         });
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -218,11 +226,13 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *         AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *         myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
-     *             public void onFailure(Throwable t) { ... }
-     *             public void onSuccess(EventEntity[] entities) { ... }
-     *         });
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -245,11 +255,13 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *        myAppData.delete(myQuery, new KinveyDeleteCallback {
-     *            public void onFailure(Throwable t) { ... }
-     *            public void onSuccess(EventEntity[] entities) { ... }
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.delete(myQuery, new KinveyDeleteCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
      *     });
+     * }
      * </pre>
      * </p>
      *
@@ -269,13 +281,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *         Query myQuery = new Query();
-     *         myQuery.equals("age",21);
-     *        myAppData.delete(myQuery, new KinveyDeleteCallback {
-     *            public void onFailure(Throwable t) { ... }
-     *            public void onSuccess(EventEntity[] entities) { ... }
-     *        });
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     myAppData.delete(myQuery, new KinveyDeleteCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -297,13 +311,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *        ArrayList<String> fields = new ArrayList<String>();
-     *        fields.add("userName");
-     *        aggregate.count(fields, null, new KinveyClientCallback<EventEntity>() {
-     *            public void onSuccess(EventEntity event) { ... }
-     *            public void onFailure(Throwable T) {...}
-     *        });
+     * {@code
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     fields.add("userName");
+     *     aggregate.count(fields, null, new KinveyClientCallback<EventEntity>() {
+     *         public void onSuccess(EventEntity event) { ... }
+     *         public void onFailure(Throwable T) {...}
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -325,13 +341,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *        ArrayList<String> fields = new ArrayList<String>();
-     *        fields.add("userName");
-     *        aggregate.sumBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *            public void onSuccess(EventEntity event) { ... }
-     *            public void onFailure(Throwable T) {...}
-     *        });
+     * {@code
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     fields.add("userName");
+     *     aggregate.sumBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *         public void onSuccess(EventEntity event) { ... }
+     *         public void onFailure(Throwable T) {...}
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -354,13 +372,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *        ArrayList<String> fields = new ArrayList<String>();
-     *        fields.add("userName");
-     *        aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *             public void onSuccess(EventEntity event) { ... }
-     *             public void onFailure(Throwable T) {...}
-     *        });
+     * {@code
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     fields.add("userName");
+     *     aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *         public void onSuccess(EventEntity event) { ... }
+     *         public void onFailure(Throwable T) {...}
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -382,13 +402,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *        ArrayList<String> fields = new ArrayList<String>();
-     *        fields.add("userName");
-     *        aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *            public void onSuccess(EventEntity event) { ... }
-     *            public void onFailure(Throwable T) {...}
-     *        });
+     * {@code
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     fields.add("userName");
+     *     aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *         public void onSuccess(EventEntity event) { ... }
+     *         public void onFailure(Throwable T) {...}
+     *     });
+     * }
      * </pre>
      * </p>
      *
@@ -410,13 +432,15 @@ public class AsyncAppData<T> extends AppData<T> {
      * <p>
      * Sample Usage:
      * <pre>
-     *        AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *        ArrayList<String> fields = new ArrayList<String>();
-     *        fields.add("userName");
-     *        aggregate.average(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *            public void onSuccess(EventEntity event) { ... }
-     *            public void onFailure(Throwable T) {...}
-     *        });
+     * {@code
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     fields.add("userName");
+     *     aggregate.average(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
+     *         public void onSuccess(EventEntity event) { ... }
+     *         public void onFailure(Throwable T) {...}
+     *     });
+     * }
      * </pre>
      * </p>
      *

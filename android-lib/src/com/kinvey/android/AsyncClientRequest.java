@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 import com.kinvey.java.core.KinveyClientCallback;
 
 /**
- * <p>Abstract AsyncClientRequest class.</p>
+ * <p>Abstract AsyncClientRequest class - used for Kinvey Callbacks.</p>
  *
  * @author edwardf
  * @since 2.0
