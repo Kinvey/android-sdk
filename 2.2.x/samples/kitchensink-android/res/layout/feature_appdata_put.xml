@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/ghost_white"
+              android:orientation="vertical">
+    <FrameLayout android:id="@+id/my_content"
+                 android:layout_width="match_parent"
+                 android:layout_height="0dip"
+                 android:layout_weight="1">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                      android:orientation="vertical">
+
+
+            <TextView android:text="@string/appdata_put_description"
+                      style="@style/usecase_description"/>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="How Many To Add?"
+                          style="@style/usecase_row_label"/>
+                <Spinner android:id="@+id/appdata_put_count_spinner"
+                         style="@style/usecase_row_value"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="There are:"
+                          style="@style/usecase_row_label"/>
+                <TextView android:id="@+id/appdata_put_total_count"
+                         style="@style/usecase_row_value"/>
+            </LinearLayout>
+
+
+            <LinearLayout style="@style/usecase_row">
+                <LinearLayout
+                        style="@style/usecase_row_label"/>
+                <Button android:id="@+id/appdata_put_delete"
+                        android:text="Delete all?"
+                        style="@style/usecase_action_button"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </FrameLayout>
+    <LinearLayout android:id="@+id/my_toolbar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+        <Button
+                android:id="@+id/appdata_put_button"
+                style="@style/usecase_action_button"
+                android:text="Create"/>
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kinvey Oracle Demo</string>
+
+    <string name="feature_appdata">App Data</string>
+    <string name="feature_query">Query</string>
+    <string name="feature_login">Login</string>
+
+
+    <string name="appdata_get_description">Below you can enter specific Entity\'s ID.  After pushing the button, the Entity will be retrieved from Kinvey and displayed.</string>
+    <string name="appdata_put_description">Below you can enter values for creating a new Entity, and then save it to Kinvey\'s Backend with the press of a button.</string>
+
+    <string name="menu_login">Login</string>
+
+
+</resources>

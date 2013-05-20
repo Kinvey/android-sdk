@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@color/ghost_white"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <FrameLayout
+            android:id="@+id/my_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1">
+
+
+        <LinearLayout
+                style="@style/usecase_row"
+                android:orientation="vertical">
+
+            <TextView android:text="@string/push_description"
+                      style="@style/usecase_description"/>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="Push Status:"
+                          style="@style/usecase_row_label"/>
+                <TextView android:id="@+id/push_status"
+                          style="@style/usecase_row_label"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <Button
+                android:id="@+id/push_register_button"
+                style="@style/usecase_action_button"
+                android:text="Register for Push"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

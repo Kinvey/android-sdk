@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/ghost_white">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/ticketDetails"
+        android:text="Ticket Information"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:textColor="@color/kinvey_orange"
+        />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight=".35"
+            android:text="Subject: "/>
+        <TextView
+            android:id="@+id/ticketSubject"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight=".65"
+            android:text="" />
+     </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".35"
+                android:text="Requested By: "/>
+        <TextView
+                android:id="@+id/ticketRequestedBy"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".65"
+                android:text="" />
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".35"
+                android:text="Request Date: "/>
+        <TextView
+                android:id="@+id/ticketRequestedDate"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".65"
+                android:text="" />
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".35"
+                android:text="Request Date: "/>
+        <TextView
+                android:id="@+id/ticketStatus"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight=".65"
+                android:text="" />
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Description"
+                style="?android:attr/listSeparatorTextViewStyle"
+                android:textColor="@color/kinvey_orange"/>
+        <TextView
+                android:id="@+id/ticketDescription"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="" />
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+        <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_weight=".35"
+                android:text="Comments"
+                style="?android:attr/listSeparatorTextViewStyle"
+                android:textColor="@color/kinvey_orange"/>
+        <ListView
+            android:id="@+id/commentListView"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
+    </LinearLayout>
+
+
+
+</LinearLayout>

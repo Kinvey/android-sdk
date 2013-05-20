@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kitchensink</string>
+
+    <string name="feature_appdata">App Data</string>
+    <string name="feature_query">Query</string>
+    <string name="feature_user">User</string>
+    <string name="feature_usergroup">UserGroup</string>
+    <string name="feature_caching">Caching</string>
+    <string name="feature_file">File</string>
+    <string name="feature_push">Push</string>
+    <string name="feature_login">Login</string>
+
+    <string name="file_delete_description">You can delete the sample.txt file from the Kinvey service </string>
+    <string name="file_download_description">You can download the contents of sample.txt to the internal SDCARD. </string>
+    <string name="file_upload_description">You can edit the contents of sample.txt file to be uploaded to your backend.  The contents of the file will first be saved to the internal SDCARD then uploaded using the Kinvey file service.</string>
+    <string name="appdata_get_description">Below you can enter specific Entity\'s ID.  After pushing the button, the Entity will be retrieved from Kinvey and displayed.</string>
+    <string name="appdata_put_description">Below you can enter values for creating a new Entity, and then save it to Kinvey\'s Backend with the press of a button.</string>
+
+    <string name="push_description">Below hit "Register" to register.  Then wait for a Push!</string>
+
+    <string name="menu_login">Login</string>
+
+
+</resources>
