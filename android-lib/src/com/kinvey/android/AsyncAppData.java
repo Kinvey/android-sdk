@@ -342,7 +342,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.sumBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -373,7 +373,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -403,7 +403,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
