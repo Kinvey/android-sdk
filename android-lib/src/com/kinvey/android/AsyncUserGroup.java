@@ -68,11 +68,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().addUserToGroup("13", "14", null, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
-     *
+    }
+     * </pre>
+     * </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add a user to.
      * @param userID a {@link java.lang.String} user ID to add to a group.
@@ -94,10 +97,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().addUserListToGroup("13", userIDList, null, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+    }
+     * </pre>
+     * </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add list of users to.
      * @param userIDs a {@link java.util.List} of Strings containing userIDs to add to groups
@@ -119,10 +126,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().addUserToGroupList("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+    }
+     </pre>
+     </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add a user to.
      * @param userID a {@link java.lang.String} user ID to add.
@@ -144,10 +155,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     {@code
         kinveyClient.userGroup().addUserListToGroupList("13", "125", myGroupList, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+     }
+     </pre>
+     </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add users to.
      * @param userIDs a {@link java.util.List} of Strings containing User IDs.
@@ -169,10 +184,13 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().addAllUsersToGroup("13", "125", new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+    </pre>
+    </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add all users to.
      * @param childGroupID a {@link java.lang.String} child group to add all users to.
@@ -193,10 +211,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().addAllUsersToGroupList("13", myGroupIDs, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+    }
+     </pre>
+     </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add all users to.
      * @param childGroupIDs a {@link java.util.List} list of child IDs to add all users to.
@@ -217,11 +239,15 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         UserGroup request = kinveyClient.userGroup().getUserGroupRequest(myGroupID, myChildGroupID);
         kinveyClient.userGroup().create(request, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
          });
+    }
+     </pre>
+     </p>
      *
      * @param group a UserGroupRequest object containing the group to create.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
@@ -240,10 +266,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     {@code
         kinveyClient.userGroup().retrieve(myGroupID, new KinveyClientCallback<UserGroupResponse>() {
              public void onFailure(Throwable t) { ... }
              public void onSuccess(UserGroupResponse r) { ... }
      });
+     }
+     </pre>
+     </p>
      *
      * @param groupID a {@link java.lang.String} group ID to retrieve.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
@@ -262,11 +292,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         UserGroup request = kinveyClient.userGroup().getUserGroupRequest(myGroupID, myChildGroupID);
         kinveyClient.userGroup().update(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
              public void onFailure(Throwable t) { ... }
              public void onSuccess(UserGroupResponse r) { ... }
         });
+    </pre>
+    </p>
      *
      * @param group a UserGroupRequest containing the group to be updated.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
@@ -285,10 +318,14 @@ public class AsyncUserGroup extends UserGroup {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userGroup().delete(reqeuest, new KinveyClientCallback<UserGroupResponse>() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(UserGroupResponse r) { ... }
         });
+    }
+     </pre>
+     </p>
      *
      * @param groupID a {@link java.lang.String} group ID to be deleted.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.

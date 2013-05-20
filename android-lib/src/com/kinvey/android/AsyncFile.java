@@ -44,16 +44,14 @@ import com.kinvey.java.model.UriLocResponse;
  * <p>
  * Sample usage:
  * <pre>
+ * {@code
  *    mKinveyClient.file().upload(file,  new UploaderProgressListener() {
- *        @Override
  *        public void onSuccess(Void result) {
  *            Log.i(TAG, "successfully upload file");
  *        }
- *        @Override
  *        public void onFailure(Throwable error) {
  *            Log.e(TAG, "failed to upload file.", error);
  *        }
- *        @Override
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
  *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
  *            switch (uploader.getUploadState()) {
@@ -71,9 +69,9 @@ import com.kinvey.java.model.UriLocResponse;
  *                    Log.i(TAG, "Upload Completed!");
  *                    break;
  *            }
+ *        }
  *    });
- *
- *
+ * }
  * </pre>
  *
  * </p>
@@ -136,32 +134,34 @@ public class AsyncFile extends File {
      *     Sample usage:
      * </p>
      * <pre>
-     *            public static class MyUploadProgressListener implements UploaderProgressListener {
+     * {@code
+     *     public static class MyUploadProgressListener implements UploaderProgressListener {
      *
-     *                public void progressChanged(MediaHttpUploader uploader) throws IOException {
-     *                    switch (uploader.getUploadState()) {
-     *                        case INITIATION_STARTED:
-     *                            Log.i(TAG, "Initiation Started");
-     *                            break;
-     *                        case INITIATION_COMPLETE:
-     *                            Log.i(TAG, "Initiation Completed");
-     *                            break;
-     *                        case DOWNLOAD_IN_PROGRESS:
-     *                            Log.i(TAG, "Upload in progress");
-     *                            Log.i(TAG, "Upload percentage: " + uploader.getProgress());
-     *                            break;
-     *                        case DOWNLOAD_COMPLETE:
-     *                            Log.i(TAG, "Upload Completed!");
-     *                            break;
-     *                    }
-     *                }
+     *         public void progressChanged(MediaHttpUploader uploader) throws IOException {
+     *             switch (uploader.getUploadState()) {
+     *                 case INITIATION_STARTED:
+     *                     Log.i(TAG, "Initiation Started");
+     *                     break;
+     *                 case INITIATION_COMPLETE:
+     *                     Log.i(TAG, "Initiation Completed");
+     *                     break;
+     *                 case DOWNLOAD_IN_PROGRESS:
+     *                     Log.i(TAG, "Upload in progress");
+     *                     Log.i(TAG, "Upload percentage: " + uploader.getProgress());
+     *                     break;
+     *                 case DOWNLOAD_COMPLETE:
+     *                     Log.i(TAG, "Upload Completed!");
+     *                     break;
+     *             }
+     *         }
      *
-     *                public void onSuccess(Void result) {}
+     *         public void onSuccess(Void result) {}
      *
-     *                public void onFailure(Throwable error) {
-     *                    Log.e(TAG, "Upload failed", error);
-     *                }
-     *            }
+     *         public void onFailure(Throwable error) {
+     *             Log.e(TAG, "Upload failed", error);
+     *         }
+     *     }
+     * }
      * </pre>
      *
      * @param file     the file to be uploaded
@@ -192,28 +192,30 @@ public class AsyncFile extends File {
      * </p>
      *
      * <pre>
-     *             public static class MyDownloadProgressListener implements DownloaderProgressListener {
+     * {@code
+     *     public static class MyDownloadProgressListener implements DownloaderProgressListener {
      *
-     *                 public void progressChanged(MediaHttpDownloader downloader) throws IOException {
-     *                     switch (downloader.getDownloadState()) {
-     *                         case DOWNLOAD_IN_PROGRESS:
-     *                             Log.i(TAG, "Download in progress");
-     *                             Log.i(TAG, "Download percentage: " + downloader.getProgress());
-     *                             break;
-     *                         case DOWNLOAD_COMPLETE:
-     *                             Log.i(TAG, "Download Completed!");
-     *                             break;
-     *                     }
-     *                 }
+     *         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+     *             switch (downloader.getDownloadState()) {
+     *                 case DOWNLOAD_IN_PROGRESS:
+     *                     Log.i(TAG, "Download in progress");
+     *                     Log.i(TAG, "Download percentage: " + downloader.getProgress());
+     *                     break;
+     *                 case DOWNLOAD_COMPLETE:
+     *                     Log.i(TAG, "Download Completed!");
+     *                     break;
+     *             }
+     *         }
      *
      *
-     *                 public void onSuccess(Void result) {}
+     *         public void onSuccess(Void result) {}
      *
-     *                 public void onFailure(Throwable error) {
-     *                     Log.e(TAG, "Upload failed", error);
-     *                 }
+     *         public void onFailure(Throwable error) {
+     *             Log.e(TAG, "Upload failed", error);
+     *         }
      *
-     *            }
+     *     }
+     * }
      * </pre>
      *
      * @param filename the name used in metadata for downloadable file.

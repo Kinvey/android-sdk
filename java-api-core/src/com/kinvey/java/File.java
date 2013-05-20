@@ -46,6 +46,7 @@ import com.kinvey.java.model.UriLocResponse;
  * <p>
  * Sample usage:
  * <pre>
+ * {@code
  *    mKinveyClient.file().uploadBlocking(file,  new UploaderProgressListener() {
  *        @Override
  *        public void onSuccess(Void result) {
@@ -74,7 +75,7 @@ import com.kinvey.java.model.UriLocResponse;
  *                    break;
  *            }
  *    });
- *
+ * }
  *
  * </pre>
  *

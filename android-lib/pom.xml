@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.kinvey</groupId>
         <artifactId>parent</artifactId>
-        <version>2.2.0</version>
+        <version>2.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -192,7 +192,7 @@
                         -hdf project.name "${project.name}"
                         -hdf JavaApiCore "JavaApiCore"
                         -stubs ${project.build.directory}/stubs
-                        -federate JavaApiCore http://localhost:3000/android/reference/api/java/reference/
+                        -federate JavaApiCore http://devcenter.kinvey.com/android/reference/api/java/reference/
                         -federationxml JavaApiCore ${project.basedir}/../java-api-core/target/apidocs/api.xml
                         -d ${project.build.directory}/apidocs
                     </additionalparam>

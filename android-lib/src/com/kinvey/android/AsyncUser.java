@@ -45,36 +45,39 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <p>
  * Login sample:
  * <pre>
-    public void submit(View view) {
-        kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
-                new KinveyUserCallback() {
-            public void onFailure(Throwable t) {
-                CharSequence text = "Wrong username or password.";
-                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-            }
-            public void onSuccess(User u) {
-                CharSequence text = "Welcome back," + u.getUserName() + ".";
-                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-                LoginActivity.this.startActivity(new Intent(LoginActivity.this,
-                        SessionsActivity.class));
-                LoginActivity.this.finish();
-            }
-        });
-    }
+ * {@code
+       public void submit(View view) {
+       kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+               new KinveyUserCallback() {
+           public void onFailure(Throwable t) {
+               CharSequence text = "Wrong username or password.";
+               Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+           }
+           public void onSuccess(User u) {
+               CharSequence text = "Welcome back," + u.getUserName() + ".";
+               Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+               LoginActivity.this.startActivity(new Intent(LoginActivity.this,
+                       SessionsActivity.class));
+               LoginActivity.this.finish();
+           }
+       });
+   }
  * </pre>
  *
  * </p>
  * <p>
  * Saving user data sample:
  * <pre>
-    User user = kinveyClient.getActiveUser();
-    user.put("fav_food", "bacon");
-    user.update(new KinveyClientCallback<User.Update>() {
+ * {@code
+       User user = kinveyClient.getActiveUser();
+        user.put("fav_food", "bacon");
+        user.update(new KinveyClientCallback<User.Update>() {
 
-        public void onFailure(Throwable e) { ... }
+            public void onFailure(Throwable e) { ... }
 
-        public void onSuccess(User u) { ... }
-    });
+            public void onSuccess(User u) { ... }
+       });
+   }
  * </pre>
  * </p>
  *
@@ -109,13 +112,15 @@ public class AsyncUser extends User {
      * <p>
      *     Sample Usage:
      * <pre>
-        kinveyClient.user().login(new KinveyUserCallback() {
-            public void onFailure(Throwable t) { ... }
-            public void onSuccess(User u) {
-                CharSequence text = "Welcome back!";
-                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-            }
-        });
+     * {@code
+           kinveyClient.user().login(new KinveyUserCallback() {
+               public void onFailure(Throwable t) { ... }
+               public void onSuccess(User u) {
+                   CharSequence text = "Welcome back!";
+                   Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+               }
+           });
+       }
      * </pre>
      * </p>
      *
@@ -135,20 +140,22 @@ public class AsyncUser extends User {
      * <p>
        Sample Usage:
      * <pre>
-            kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
-                    new KinveyUserCallback() {
-            public void onFailure(Throwable t) {
-                    CharSequence text = "Wrong username or password.";
-                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-                }
-                public void onSuccess(User u) {
-                    CharSequence text = "Welcome back," + u.getUserName() + ".";
-                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-                    LoginActivity.this.startActivity(new Intent(LoginActivity.this,
-                            SessionsActivity.class));
-                    LoginActivity.this.finish();
-                }
-            });
+     * {@code
+           kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+                   new KinveyUserCallback() {
+               public void onFailure(Throwable t) {
+                   CharSequence text = "Wrong username or password.";
+                   Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+               }
+               public void onSuccess(User u) {
+                   CharSequence text = "Welcome back," + u.getUserName() + ".";
+                   Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                   LoginActivity.this.startActivity(new Intent(LoginActivity.this,
+                           SessionsActivity.class));
+                   LoginActivity.this.finish();
+               }
+           });
+       }
      * </pre>
      * </p>
      *
@@ -201,17 +208,19 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-            kinveyClient.user().loginGoogle(accessToken, new KinveyUserCallback() {
+       {@code
+           kinveyClient.user().loginGoogle(accessToken, new KinveyUserCallback() {
 
-                public void onFailure(Throwable e) {
-                    error(progressDialog, "Kinvey: " + e.getMessage());
-                    Log.e(TAG, "failed Kinvey facebook login", e);
-                }
+               public void onFailure(Throwable e) {
+                   error(progressDialog, "Kinvey: " + e.getMessage());
+                   Log.e(TAG, "failed Kinvey facebook login", e);
+               }
 
-                public void onSuccess(User u) {
-                    Log.d(TAG, "successfully logged in with facebook");
-                }
-            });
+               public void onSuccess(User u) {
+                   Log.d(TAG, "successfully logged in with facebook");
+               }
+           });
+       }
      * </pre>
      * </p>
      *
@@ -241,17 +250,19 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginTwitter(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
-                new KinveyUserCallback() {
+     * {@code
+           kinveyClient.user().loginTwitter(accessToken, accessSecret, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
+                   new KinveyUserCallback() {
 
-            public void onFailure(Throwable e) {
-                Log.e(TAG, "Failed Kinvey login", e)
-            };
+               public void onFailure(Throwable e) {
+                   Log.e(TAG, "Failed Kinvey login", e)
+               };
 
-            public void onSuccess(User r) {
-                Log.e(TAG, "Successfully logged in via Twitter");
-            }
-        });
+               public void onSuccess(User r) {
+                   Log.e(TAG, "Successfully logged in via Twitter");
+               }
+           });
+       }
      *
      * @param accessToken Twitter-generated access token
      * @param accessSecret Twitter-generated access secret
@@ -275,17 +286,19 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
-        kinveyClient.user().loginLinkedIn(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
-                new KinveyUserCallback() {
+     * {@code
+           kinveyClient.user().loginLinkedIn(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY, LINKEDIN_CONSUMER_SECRET,
+                   new KinveyUserCallback() {
 
-        public void onFailure(Throwable e) {
-            Log.e(TAG, "Failed Kinvey login", e)
-        };
+               public void onFailure(Throwable e) {
+                   Log.e(TAG, "Failed Kinvey login", e)
+               };
 
-        public void onSuccess(User r) {
-            Log.e(TAG, "Successfully logged in via Linked In");
-        }
-    });
+               public void onSuccess(User r) {
+                   Log.e(TAG, "Successfully logged in via Linked In");
+               }
+           });
+      }
      *
      * @param accessToken Linked In-generated access token
      * @param accessSecret Linked In-generated access secret
@@ -328,6 +341,7 @@ public class AsyncUser extends User {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.user().put("State","MA");
         kinveyClient.user().put("Age", 25);
         kinveyClient.user().create(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
@@ -343,6 +357,7 @@ public class AsyncUser extends User {
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             }
         });
+    }
      * </pre>
      * </p>
      *
@@ -375,13 +390,13 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
+     * {@code
         User user = kinveyClient.getActiveUser();
         user.delete(new KinveyUserDeleteCallback() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess(Void v) { ... }
         });
+    }
      * </pre>
      *
      * @param hardDelete Erases user from Kinvey backend if true; inactivates the user if false.
@@ -400,13 +415,13 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
+     {@code
         User user = kinveyClient.user();
         user.retrieve(new KinveyUserCallback() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess(User result) { ... }
         });
+     }
      * </pre>
      *
      * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
@@ -425,13 +440,13 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
+     * {@code
          User user = kinveyClient.user();
          user.retrieve(Query query, new KinveyUserListCallback() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess(User[] result) { ... }
         });
+    }
      * </pre>
      *
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users.
@@ -451,13 +466,13 @@ public class AsyncUser extends User {
      * Sample Usage:
      * </p>
      * <pre>
+     {@code
         User user = kinveyClient.user();
         user.update(new KinveyUserCallback() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess(User result) { ... }
         });
+     }
      * </pre>
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
@@ -476,12 +491,12 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.resetPassword(new KinveyClientCallback<User>() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess() { ... }
         });
+    }
      * </pre></p>
      * @param callback {@link KinveyUserManagementCallback}
      */
@@ -498,10 +513,9 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.sendEmailVerification(new KinveyClientCallback<User>() {
-            @Override
             public void onFailure(Throwable e) { ... }
-            @Override
             public void onSuccess(Void result) { ... }
         });
      * </pre></p>
@@ -521,8 +535,10 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.push().initialize(pushOptions,myApplication);
         kinveyClient.user().registerPush();
+    }
      * </pre></p>
      */
     public void registerPush() {
@@ -576,11 +592,13 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.push().initialize(pushOptions,myApplication);
         kinveyClient.user().registerPush(new KinveyClientCallback<Void> {
            onSuccess(Void v) { ... }
           onFailure(Throwable t) { ... }
         });
+    }
      * </pre></p>
      *
      * @param callback KinveyClientCallback
@@ -599,8 +617,10 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.push().initialize(pushOptions,myApplication);
         kinveyClient.user().unregisterPush();
+    }
      * </pre></p>
      *
      * @param callback KinveyClientCallback
@@ -619,11 +639,13 @@ public class AsyncUser extends User {
      * </p>
      * <p>Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.push().initialize(pushOptions,myApplication);
         kinveyClient.user().unregisterPush(new KinveyClientCallback<Void> {
             onSuccess(Void v) { ... }
             onFailure(Throwable t) { ... }
         });
+    }
      * </pre></p>
      */
     public void unregisterPush() {

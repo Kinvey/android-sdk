@@ -141,9 +141,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     * {@code
         AppData<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
      }
-     });
      * </pre>
      * </p>
      *
@@ -179,9 +179,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     * {@code
      LinkedData<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
-     }
-     });
+    }
      * </pre>
      * </p>
      *
@@ -216,9 +216,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     {@code
      OfflineAppData<myEntity> myAppData = kinveyClient.offlineAppData("entityCollection", myEntity.class);
      }
-     });
      * </pre>
      * </p>
      *
@@ -255,9 +255,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     * {@code
      File myFile = kinveyClient.file();
      }
-     });
      * </pre>
      * </p>
      *
@@ -285,9 +285,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     {@code
      UserDiscovery myUserDiscovery = kinveyClient.userDiscovery();
      }
-     });
      * </pre>
      * </p>
      *
@@ -316,9 +316,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     {@code
      UserGroup myUserGroup = kinveyClient.userGroup();
      }
-     });
      * </pre>
      * </p>
      *
@@ -365,9 +365,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
+     * {@code
      User currentUser = kinveyClient.currentUser();
      }
-     });
      * </pre>
      * </p>
      *
@@ -399,9 +399,9 @@ public class Client extends AbstractClient {
      * <p>
      *     Sample Usage:
      * <pre>
-     AbstractPush myPush = kinveyClient.push();
+     {@code
+        AbstractPush myPush = kinveyClient.push();
      }
-     });
      * </pre>
      * </p>
      *
@@ -425,10 +425,12 @@ public class Client extends AbstractClient {
      * <p>
      * Sample Usage:
      * <pre>
+     {@code
         kinveyClient.ping(new KinveyPingCallback() {
             onSuccess(Boolean result) { ... }
             onFailure(Throwable error) { ... }
         }
+     }
      * </pre>
      * </p>
      *
@@ -453,7 +455,9 @@ public class Client extends AbstractClient {
     /**
      * Create a client for interacting with Kinvey's services from an Android Activity.
      * <pre>
+     * {@code
      * Client myClient =  new Client.Builder(appKey, appSecret, getContext()).build();
+     * }
      * <pre/>
      * All features of the library are be accessed through an instance of a client.
      * <p/>
@@ -602,6 +606,7 @@ public class Client extends AbstractClient {
          * </p>
          * <p>Sample Usage:
          * <pre>
+         * {@code
             Client myClient = Client.Builder(this)
                     .setRetrieveUserCallback(new KinveyUserCallback() {
                 public void onFailure(Throwable t) {
@@ -614,7 +619,8 @@ public class Client extends AbstractClient {
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                 }
             }).build();
-         * </pre
+         }
+         * </pre>
          * ></p>
          *
          * @param callback

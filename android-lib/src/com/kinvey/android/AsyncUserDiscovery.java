@@ -40,11 +40,13 @@ import com.kinvey.java.model.UserLookup;
  * <p>
  * Sample Usage:
  * <pre>
+ * {@code
     public void submit(View view) {
     kinveyClient.userDiscovery().lookupByUserName(username, new KinveyUserListCallback () {
         public void onFailure(Throwable t) { ... }
         public void onSuccess(User[] u) { ... }
     });
+}
  * </pre>
  *
  * </p>
@@ -72,11 +74,13 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
+     *  {@code
         kinveyClient.userDiscovery().lookupByFullName("John","Smith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User[] u) { ... }
         });
      *  </pre>
+     * }
      *
      * @param firstname a {@link java.lang.String} object.
      * @param lastname a {@link java.lang.String} object.
@@ -102,10 +106,12 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         kinveyClient.userDiscovery().lookupByFullName("jsmith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User[] u) { ... }
         });
+    }
      * </pre>
      *
      * @param username a {@link java.lang.String} object.
@@ -127,10 +133,12 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
+      {@code
         kinveyClient.userDiscovery().lookupByFacebookID("jsmith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User[] u) { ... }
         });
+      }
      * </pre>
       *
      * @param facebookID a {@link java.lang.String} object.
@@ -155,12 +163,14 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * <p>
      * Sample Usage:
      * <pre>
+     * {@code
         UserLookup lookup = kinveyClient.userDiscovery().userLookup();
         lookup.put("age",21);
         kinveyClient.userDiscovery().lookup(lookup, new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
             public void onSuccess(User[] u) { ... }
-     });
+        });
+    }
      * </pre>
      *
      * @param userlookup a UserLookup object.
