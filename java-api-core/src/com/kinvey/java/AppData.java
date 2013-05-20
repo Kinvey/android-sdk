@@ -607,9 +607,6 @@ public class AppData<T> {
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
 
-            String sortString = query.getSortString();
-            this.sortFilter = sortString != "" ? sortString : null;
-
         }
 
 
