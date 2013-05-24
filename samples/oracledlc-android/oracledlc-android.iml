@@ -40,8 +40,10 @@
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-assets" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-resources" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/extracted-dependencies" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javadoc-bundle-options" />
       <excludeFolder url="file://$MODULE_DIR$/target/libs" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
+      <excludeFolder url="file://$MODULE_DIR$/target/site" />
       <excludeFolder url="file://$MODULE_DIR$/target/unpack" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
@@ -69,7 +71,8 @@
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.12" level="project" />
     <orderEntry type="module" module-name="java-api-core" />
     <orderEntry type="library" name="Maven: com.google.android:support-v4:r7" level="project" />
-    <orderEntry type="jdk" jdkName="Android SDK" jdkType="Android SDK" />
+    <orderEntry type="library" name="Maven: com.viewpagerindicator:library:apklib:2.4.1" level="project" />
+    <orderEntry type="jdk" jdkName="Android 4.1.2 Platform (3)" jdkType="Android SDK" />
     <orderEntry type="module" module-name="~apklib-com.actionbarsherlock_actionbarsherlock_4.2.0" />
     <orderEntry type="module" module-name="~apklib-com.viewpagerindicator_library_2.4.1" />
   </component>

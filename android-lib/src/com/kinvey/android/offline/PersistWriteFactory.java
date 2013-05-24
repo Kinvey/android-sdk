@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -11,19 +9,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.android.push;
+package com.kinvey.android.offline;
 
 /**
- * @author mjsalinger
- * @since 2.0
+ * Created with IntelliJ IDEA.
+ * User: edwardflemingiii
+ * Date: 5/1/13
+ * Time: 4:32 PM
+ * To change this template use File | Settings | File Templates.
  */
-public interface PushOptions {
-
-    public boolean isInProduction();
-    public void setInProduction(boolean inProduction);
-    public String getPushAppKey();
-    public String getPushAppSecret();
-    public String getAPIKey();
-    public void setPushAppKey(String appKey);
-    public void setPushAppSecret(String appSecret);
+public class PersistWriteFactory {
 }
