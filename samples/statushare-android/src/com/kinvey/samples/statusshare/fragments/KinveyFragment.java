@@ -13,38 +13,34 @@
 */
 package com.kinvey.samples.statusshare.fragments;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kinvey.android.Client;
-import com.kinvey.samples.statusshare.StatusShare;
 import com.kinvey.samples.statusshare.StatusShareApplication;
-import com.kinvey.samples.statusshare.model.Update;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
 
-/**  Boilerplate for Android Fragments, including wrapper to Applications Kinvey AbstractClient.
+/**
  *
+ *   This abstract class provides hooks for some fragment boilerplate.
  *
+ *   It also offers access to the current instance of the Kinvey Client as well as the Roboto font
  *
  * @author edwardf
  * @since 2.0
  */
 public abstract class KinveyFragment extends SherlockFragment{
 
+    private Typeface roboto;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        roboto = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
     }
 
 
@@ -61,25 +57,17 @@ public abstract class KinveyFragment extends SherlockFragment{
         populateViews();
     }
 
+    /**
+     *
+     * @return an instance of a Kinvey Client
+     */
     public Client getClient(){
         return ((StatusShareApplication) getSherlockActivity().getApplicationContext()).getClient();
     }
 
-    public Calendar getCalendar() {
-        TimeZone reference = TimeZone.getTimeZone("GMT");
-        TimeZone.setDefault(reference);
-        return Calendar.getInstance(reference);
-    }
-
-    public List<Update> getUpdates(){
-        return ((StatusShare)getSherlockActivity()).getmUpdates();
-    }
-    public void setUpdates(List<Update> ups){
-        ((StatusShare)getSherlockActivity()).setmUpdates(ups);
-    }
-
     /**
-     * @return the ID defined as  R.layout.* for this specific use case fragment.  If you are adding a new fragment, add a new layout.xml file and reference it here.
+     * If you are adding a new fragment, add a new layout.xml file and reference it here.
+     * @return the ID defined as R.layout.* for this specific use case fragment.
      */
     public abstract int getViewID();
 
@@ -91,9 +79,9 @@ public abstract class KinveyFragment extends SherlockFragment{
      *
      * TextView mytext = (TextView) v.findViewById(R.id.mytextview);
      *
-     * This is called once from onCreate.
+     * This is called once from onCreateView.
      *
-     * @param v  the View object inflated by the Fragment, this will be the parent of any View Widget within the fragment.
+     * @param v  the View object inflated by the Fragment, this will be the parent of any View within the fragment.
      */
     public abstract void bindViews(View v);
 
@@ -109,9 +97,9 @@ public abstract class KinveyFragment extends SherlockFragment{
     public void populateViews(){}
 
 
-
-
-
+    public Typeface getRoboto() {
+        return roboto;
+    }
 }
 
 

@@ -80,7 +80,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
     }
 
     /**
-     * <p>executeAsync</p>
+     * This method will be executed Asynchronously.
      *
      * @return a T object.
      * @throws java.io.IOException if any.

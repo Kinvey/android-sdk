@@ -6,20 +6,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.ArrayMap;
+import com.kinvey.java.model.KinveyReference;
 import com.kinvey.samples.statusshare.R;
+import com.kinvey.samples.statusshare.StatusShare;
+import com.kinvey.samples.statusshare.model.CommentEntity;
 import com.kinvey.samples.statusshare.model.UpdateEntity;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
+public class CommentAdapter extends ArrayAdapter<GenericJson> {
 
     private LayoutInflater mInflater;
     private Typeface roboto;
 
-    public UpdateAdapter(Context context, List<UpdateEntity> objects,
-                         LayoutInflater inf) {
+    public CommentAdapter(Context context, List<GenericJson> objects,
+                          LayoutInflater inf) {
         // NOTE: I pass an arbitrary textViewResourceID to the super
         // constructor-- Below I override
         // getView(...), which causes the underlying adapter to ignore this
@@ -35,41 +44,41 @@ public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
     public View getView(int position, View convertView, ViewGroup parent) {
         UpdateViewHolder holder = null;
 
-        TextView mBlurb = null;
-        TextView mAuthor = null;
-        TextView mWhen = null;
-        ImageView mAttachment = null;
+        TextView comment = null;
+        TextView author = null;
+        TextView when = null;
 
-        UpdateEntity rowData = getItem(position);
+        GenericJson rowData = getItem(position);
 
         if (null == convertView) {
-            convertView = mInflater.inflate(R.layout.row_update, null);
+            convertView = mInflater.inflate(R.layout.row_comment, null);
             holder = new UpdateViewHolder(convertView);
             convertView.setTag(holder);
         }
         holder = (UpdateViewHolder) convertView.getTag();
 
-        if (rowData.getText() != null){
-            mBlurb = holder.getBlurb();
-            mBlurb.setText(rowData.getText());
+        if (rowData.get("text") != null){
+            comment = holder.getBlurb();
+            comment.setText(rowData.get("text").toString());
         }
 
-        if (rowData.getAuthorName() != null){
-            mAuthor = holder.getAuthor();
-            mAuthor.setText(rowData.getAuthorName());
-        }
-        if (rowData.getSince() != null){
-            mWhen = holder.getWhen();
-            mWhen.setText(rowData.getSince());
+        if (rowData.get("author") != null){
+            author = holder.getAuthor();
+            author.setText(rowData.get("author").toString());
 
         }
-        mAttachment = holder.getAttachment();
-        if (rowData.getThumbnail() != null){
-            mAttachment.setImageBitmap(rowData.getThumbnail());
-        }else{
-            mAttachment.setBackgroundColor(R.color.ebony);
-            mAttachment.setImageBitmap(null);
+
+
+
+        ParsePosition pp = new ParsePosition(0);
+        Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US).parse(((ArrayMap)rowData.get("_kmd")).get("ect").toString(), pp);
+        String since = StatusShare.getSince(date, Calendar.getInstance());
+        if (since != null){
+            when = holder.getWhen();
+            when.setText(since);
+
         }
+
         return convertView;
     }
 
@@ -86,20 +95,19 @@ public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
      * performance (especially with large lists on large screen devices).
      */
     private class UpdateViewHolder {
-        private View mRow;
+        private View rowView;
 
-        private ImageView attachment = null;
         private TextView blurb = null;
         private TextView author = null;
         private TextView when = null;
 
         public UpdateViewHolder(View row) {
-            mRow = row;
+            rowView = row;
         }
 
         public TextView getWhen() {
             if (null == when) {
-                when = (TextView) mRow.findViewById(R.id.row_update_time);
+                when = (TextView) rowView.findViewById(R.id.row_comment_time);
             }
             when.setTypeface(roboto);
             return when;
@@ -107,7 +115,7 @@ public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
 
         public TextView getAuthor() {
             if (null == author) {
-                author = (TextView) mRow.findViewById(R.id.row_update_author);
+                author = (TextView) rowView.findViewById(R.id.row_comment_author);
             }
             author.setTypeface(roboto);
             return author;
@@ -115,17 +123,11 @@ public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
 
         public TextView getBlurb() {
             if (null == blurb) {
-                blurb = (TextView) mRow.findViewById(R.id.row_update_text);
+                blurb = (TextView) rowView.findViewById(R.id.row_comment_text);
             }
             blurb.setTypeface(roboto);
             return blurb;
         }
 
-        public ImageView getAttachment() {
-            if (null == attachment) {
-                attachment = (ImageView) mRow.findViewById(R.id.row_update_image);
-            }
-            return attachment;
-        }
     }
 }

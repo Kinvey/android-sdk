@@ -13,11 +13,27 @@
  */
 package com.kinvey.samples.statusshare.model;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
-import com.kinvey.java.LinkedResources.LinkedFile;
+import com.kinvey.android.Client;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
+import com.kinvey.java.User;
 import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.model.KinveyReference;
+import com.kinvey.samples.statusshare.StatusShare;
+
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 
 /**
@@ -26,8 +42,10 @@ import com.kinvey.java.model.KinveyMetaData;
  * @author edwardf
  * @since 2.0
  */
-public class UpdateEntity extends LinkedGenericJson {
+public class UpdateEntity extends LinkedGenericJson{
 
+
+    //----persisted fields
     @Key("_id")
     private String id;
     @Key("text")
@@ -36,13 +54,49 @@ public class UpdateEntity extends LinkedGenericJson {
     private KinveyMetaData meta;
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
+    @Key("author")
+    private KinveyReference author;
+    @Key("comments")
+    private ArrayList<KinveyReference> comments;
 
-    public UpdateEntity() {
+
+    public static final int MAX_W = 512;
+    public static final int MAX_H = 512;
+    public static final String attachmentName = "attachment";
+
+    //-----displayed inferred fields
+    private String authorName;
+    private String authorID;
+    private String since;
+    private Bitmap thumbnail;
+
+
+
+
+    public UpdateEntity(){
+        putFile(attachmentName);
+    }
+
+
+    public UpdateEntity(String userid) {
         id = null;
         text = null;
         meta = new KinveyMetaData();
         acl = new KinveyMetaData.AccessControlList();
-        putFile("attachment");
+        putFile(attachmentName);
+        author = new KinveyReference();
+        author.setCollection(User.USER_COLLECTION_NAME);
+        author.setId(userid);
+
+
+    }
+
+    public void setAuthor(KinveyReference author){
+        this.author = author;
+    }
+
+    public KinveyReference getAuthor(){
+        return this.author;
 
     }
 
@@ -77,5 +131,94 @@ public class UpdateEntity extends LinkedGenericJson {
 
     public void setMeta(KinveyMetaData meta) {
         this.meta = meta;
+
+
+
+    }
+
+
+    public String getAuthorID(){
+        if (this.author.getResolvedObject() != null){
+            this.authorID = (String) (this.author.getResolvedObject()).get("_id");
+        }
+        return ((this.authorID == null) ? "" : this.authorID);
+    }
+
+    public String getAuthorName() {
+        if (this.author.getResolvedObject() != null){
+            this.authorName = (String) (this.author.getResolvedObject()).get("username");
+        }
+        return ((this.authorName == null) ? "--" : this.authorName);
+    }
+
+    public String getSince() {
+
+
+        ParsePosition pp = new ParsePosition(0);
+        Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US).parse(this.meta.getEntityCreationTime(), pp);
+        since = StatusShare.getSince(date, Calendar.getInstance());
+
+        Log.i(Client.TAG,  "getting since -> " + (since != null));
+        return since;
+    }
+
+
+
+    /**
+     * Get the thumbnail from the LinkedResource
+     *
+     * Note it closes the output stream.
+     *
+     * @return null or the image attachment
+     */
+    public Bitmap getThumbnail() {
+        //If it hasn't been resolved...
+        if (thumbnail == null) {
+            //and there is an actual LinkedFile behind the Key
+            if (getFile(attachmentName) != null) {
+                //Then decode from the output stream and get the image.
+                thumbnail = BitmapFactory.decodeByteArray(getFile(attachmentName).getOutput().toByteArray(), 0, getFile(attachmentName).getOutput().toByteArray().length);
+                try {
+                    //close the output stream
+                    getFile(attachmentName).getOutput().close();
+                } catch (Exception e) {
+                }
+            }
+        }
+        return thumbnail;
+    }
+
+    public ArrayList<KinveyReference> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<KinveyReference> comments) {
+        this.comments = comments;
+    }
+
+    public void addComment(CommentEntity newComment){
+        if (this.comments == null){
+            this.comments = new ArrayList<KinveyReference>();
+        }
+        KinveyReference ret = new KinveyReference(StatusShare.COL_COMMENTS, newComment.getId());
+        this.comments.add(ret);
+
+    }
+
+    public void resetCommentReferences(){
+        if (this.comments == null){
+             return;
+        }
+
+        for (KinveyReference c : comments){
+            c.remove("_obj");
+
+        }
+
+
+
+
+
+
     }
 }

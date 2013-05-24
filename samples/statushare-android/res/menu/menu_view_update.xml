@@ -15,19 +15,11 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_status_post"
+    <item android:id="@+id/menu_add_comment"
         android:title="@string/description_status_post"
-        android:icon="@android:drawable/stat_notify_chat"
+        android:icon="@drawable/ic_menu_start_conversation"
         android:showAsAction="always" />
-
-    <item android:id="@+id/menu_about"
-        android:icon="@android:drawable/ic_menu_info_details"
-        android:title="@string/description_about"
-        android:showAsAction="never" />
-
-    <item android:id="@+id/menu_sign_out"
-        android:title="@string/description_sign_out"
-        android:showAsAction="never" />
     
+
     
 </menu>

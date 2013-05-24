@@ -14,7 +14,10 @@
 package com.kinvey.java.model;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
+
+import java.lang.reflect.Constructor;
 
 /**
  * A KinveyReference allows for entities to include relational data from other collections and entities.
@@ -47,19 +50,22 @@ import com.google.api.client.util.Key;
  */
 public class KinveyReference extends GenericJson{
 
+    /**
+     *
+     * @deprecated moved to {@link com.kinvey.java.User#USER_COLLECTION_NAME}
+     */
+    @Deprecated
     public static final String USER_COLLECTION = "user";
+    public static final String RESOLVED_KEY = "_obj";
 
     @Key("_type")
-    private static final String type = "KinveyRef";
+    private String type = "KinveyRef";
 
     @Key("_id")
     private String id;
 
     @Key("_collection")
     private String collection;
-
-    @Key("_obj")
-    private GenericJson returnObject;
 
     public KinveyReference(){}
 
@@ -86,11 +92,38 @@ public class KinveyReference extends GenericJson{
         this.id = id;
     }
 
-    public GenericJson getReturnObject() {
-        return returnObject;
+    @Deprecated
+    public GenericJson getReturnObject(){
+
+        ArrayMap direct = (ArrayMap) get("_obj");
+        if (direct == null){
+            return null;
+        }
+
+        GenericJson ret = new GenericJson();
+        ret.putAll(direct);
+        return ret;
+
     }
 
-    public void setReturnObject(GenericJson returnObject) {
-        this.returnObject = returnObject;
+    public GenericJson getResolvedObject() {
+        ArrayMap direct = (ArrayMap) get("_obj");
+        if (direct == null){
+            return null;
+        }
+
+        GenericJson ret = new GenericJson();
+        ret.putAll(direct);
+        return ret;
+    }
+
+
+
+    public String getType(){
+        return this.type;
+    }
+
+    public void setType(String type){
+        //do nothing, looks like json library needs this setter available....?
     }
 }

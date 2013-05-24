@@ -22,8 +22,7 @@ import java.util.ArrayList;
 /**
  * Maintain a JSON representation of the metadata of an entity stored in a collection with Kinvey.
  *
- * If metadata is needed, a custom response class can extend this to allow for automatic handling of both
- * the Access Control List as well as the relevant Kinvey metadata.
+ * Every Entity persisted with Kinvey maintains additional metadata,
  *
  * @author edwardf
  * @since 2.0
@@ -39,94 +38,19 @@ public class KinveyMetaData extends GenericJson{
     @Key("lmt")
     private String lastModifiedTime;
 
+    @Key("ect")
+    private String entityCreationTime;
+
     public KinveyMetaData(){}
 
     public String getLastModifiedTime() {
         return lastModifiedTime;
     }
 
+    public String getEntityCreationTime(){
+        return entityCreationTime;
+    }
 
-    //-------------- getters and setters
-
-//    public AccessControlList getAccessControlList() {
-//        return accessControlList;
-//    }
-//
-//    public void setAccessControlList(AccessControlList accessControlList) {
-//        this.accessControlList = accessControlList;
-//    }
-//
-//    public String getCreator() {
-//        return accessControlList.getCreator();
-//    }
-//
-//    public boolean isGloballyReadable() {
-//        return accessControlList.isGloballyReadable();
-//    }
-//
-//    public void setGloballyReadable(boolean readable) {
-//        accessControlList.setGloballyReadable(readable);
-//    }
-//
-//    public boolean isGloballyWriteable() {
-//        return accessControlList.isGloballyWriteable();
-//    }
-//
-//    public void setGloballyWriteable(boolean writeable) {
-//        accessControlList.setGloballyWriteable(writeable);
-//    }
-//
-//    public ArrayList<String> getRead() {
-//        return accessControlList.getRead();
-//    }
-//
-//    public void setRead(ArrayList<String> read) {
-//        accessControlList.setRead(read);
-//    }
-//
-//    public void addRead(String read) {
-//        accessControlList.getRead().add(read);
-//    }
-//
-//    public void removeRead(int index) {
-//        accessControlList.getRead().remove(index);
-//    }
-//
-//    public ArrayList<String> getWrite() {
-//        return accessControlList.getWrite();
-//    }
-//
-//    public void addWrite(String write) {
-//        accessControlList.getWrite().add(write);
-//    }
-//
-//    public void removeWrite(int index) {
-//        accessControlList.remove(index);
-//    }
-//
-//    public void setWrite(ArrayList<String> write) {
-//        accessControlList.setWrite(write);
-//    }
-//
-//    public ArrayList<com.kinvey.java.model.KinveyMetaData.AccessControlList.AclGroups> getAclGroups() {
-//        return accessControlList.getGroups();
-//    }
-//
-//    public void setAclGroups(ArrayList<com.kinvey.java.model.KinveyMetaData.AccessControlList.AclGroups> groups) {
-//        accessControlList.setGroups(groups);
-//    }
-
-    //----------private inner classes
-
-//    public static class MetaData extends GenericJson{
-//
-//        @Key("lmt")
-//        private String lastModifiedTime;
-//
-//        public MetaData(){}
-//
-
-//    }
 
     public static class AccessControlList extends GenericJson{
 

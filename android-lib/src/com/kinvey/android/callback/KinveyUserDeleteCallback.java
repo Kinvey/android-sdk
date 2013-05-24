@@ -16,6 +16,8 @@ package com.kinvey.android.callback;
 import com.kinvey.java.core.KinveyClientCallback;
 
 /**
+ * This class provides callbacks for an asynchronous Deletion of a User
+ *
  * @author mjsalinger
  * @since 2.0
  */

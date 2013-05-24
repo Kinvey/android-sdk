@@ -89,6 +89,11 @@ public class OfflineAppDataService extends IntentService {
         Log.d(Client.TAG, "Offline Executor created");
     }
 
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d(Client.TAG, "Offline Executor destroyed");
+    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

@@ -35,6 +35,7 @@ public class OfflineSettings implements Serializable {
     public static final String REQUIRE_WIFI_PREFERENCE = "requireWIFI";
     public static final String NEEDS_SYNC_PREFERENCE = "needsSync";
     public static final String COLLECTION_NAME_SET = "colectionNameSet";
+    public static final String PSUEDO_LOCK = "psuedoLock";
     
     //The number of milliseconds between each batch of client requests being executed.
     private long staggerTime = 1000L;
@@ -46,6 +47,9 @@ public class OfflineSettings implements Serializable {
     private boolean needsSync = false;
     //a set of collections that have offlinestores
     private Set<String> collectionSet = new HashSet<String>();
+    //a psuedo lock, indicating if service should be allowed to run indefinately or not
+    private boolean psuedoLock = false;
+
     private static OfflineSettings _instance;
 
     private SharedPreferences preferences;
@@ -59,6 +63,7 @@ public class OfflineSettings implements Serializable {
         batchSize = preferences.getInt(BATCH_SIZE_PREFERENCE, 3);
         needsSync = preferences.getBoolean(NEEDS_SYNC_PREFERENCE, false);
         collectionSet = preferences.getStringSet(COLLECTION_NAME_SET, new HashSet<String>());
+        psuedoLock = preferences.getBoolean(PSUEDO_LOCK, false);
         savePreferences();
     }
 
@@ -123,6 +128,20 @@ public class OfflineSettings implements Serializable {
         return this;
     }
 
+    public boolean isPsuedoLock(){
+        synchronized (lock){
+            return psuedoLock;
+        }
+    }
+
+    public OfflineSettings setPsuedoLock(boolean lockIt){
+        synchronized (lock){
+            this.psuedoLock = lockIt;
+        }
+        return this;
+
+    }
+
     public void savePreferences() {
         synchronized (lock) {
             SharedPreferences.Editor editor = preferences.edit();
@@ -131,7 +150,8 @@ public class OfflineSettings implements Serializable {
             editor.putInt(BATCH_SIZE_PREFERENCE, batchSize);
             editor.putBoolean(NEEDS_SYNC_PREFERENCE, needsSync);
             editor.putStringSet(COLLECTION_NAME_SET, collectionSet);
-            Log.v(Client.TAG,  "saving preferences: " + collectionSet.size());
+            editor.putBoolean(PSUEDO_LOCK, psuedoLock);
+            Log.v(Client.TAG,  "saving preferences for collection count: " + collectionSet.size());
             editor.commit();
         }
     }
