@@ -19,7 +19,9 @@ import android.content.Intent;
 import android.util.Log;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
@@ -46,7 +48,6 @@ import java.util.Observer;
  */
 public class OfflineAppData<T> implements Observer {
 
-    private OfflineStore store;
 
     private String collectionName;
     private Class<T> myClass;
@@ -67,9 +68,14 @@ public class OfflineAppData<T> implements Observer {
         this.collectionName = collectionName;
         this.myClass = myClass;
         this.client = client;
-        this.store = new OfflineStore(context, collectionName);
-        this.store.addObserver(this);
-        this.context = context;
+//        this.store = new OfflineStore(context, collectionName, myClass);
+//        this.store.addObserver(this);
+        this.context = context.getApplicationContext();
+
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).addObserver(this);
+
+
+
 
 
     }
@@ -92,8 +98,25 @@ public class OfflineAppData<T> implements Observer {
      * @throws java.io.IOException
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback) {
-        this.store.get(entityID, callback);
 
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).getEntity(entityID, callback);
+
+        startSync(this.context);
+
+    }
+
+    /**
+     * Get entities by query from an offline collection.
+     *
+     *
+     */
+    public void get(Query q, KinveyListCallback<T> callback){
+        String jsonQuery = q.getQueryFilterJson(this.client.getJsonFactory());  //this.client.getJsonFactory()
+
+
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).get(q, jsonQuery, callback);
+
+        startSync(this.context);
     }
 
 
@@ -105,11 +128,11 @@ public class OfflineAppData<T> implements Observer {
      * @throws IOException
      */
     public void save(T entity, KinveyClientCallback<T> callback) {
-        this.store.save(entity, callback);
-        Intent i = new Intent(this.context, OfflineAppDataService.class);
-        i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
-        this.context.startService(i);
-        Log.v(Client.TAG, "sent intent for offline sync!");
+//        this.store.save(entity, callback);
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).save(entity, callback);
+
+        startSync(this.context);
+
 
     }
 
@@ -122,7 +145,10 @@ public class OfflineAppData<T> implements Observer {
      * @throws IOException
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
-        this.store.delete(entityID, callback);
+//        this.store.delete(entityID, callback);
+        OfflineStore.getStore(this.context, this.collectionName, this.myClass).delete(entityID, callback);
+
+       startSync(this.context);
 
     }
 
@@ -131,7 +157,9 @@ public class OfflineAppData<T> implements Observer {
      * @return size of internal queue representing count of pending calls.
      */
     public int getQueueSize() {
-        return this.store.getRequestStoreCount();
+//        return this.store.getRequestStoreCount();
+        return OfflineStore.getStore(this.context, this.collectionName, this.myClass).getRequestStoreCount();
+
     }
 
     /**
@@ -139,9 +167,23 @@ public class OfflineAppData<T> implements Observer {
      * @return the size of the internal store maintaining offline entities.
      */
     public int getEntityCount() {
-        return this.store.getEntityStoreCount();
+//        return this.store.getEntityStoreCount();
+        return OfflineStore.getStore(this.context, this.collectionName, this.myClass).getEntityStoreCount();
+
     }
 
+
+
+    /**
+     * Start the OfflineAppDataService with an intent for performing Sync
+     */
+    public static void startSync(Context context){
+        Intent i = new Intent(context, OfflineAppDataService.class);
+        i.setAction("com.kinvey.android.ACTION_OFFLINE_SYNC");
+        context.startService(i);
+        Log.v(Client.TAG, "sent intent for offline sync!");
+
+    }
     /**
      * Set a callback to retrieve updates on live execution of requests in background
      *
@@ -173,6 +215,16 @@ public class OfflineAppData<T> implements Observer {
             return;
         }
 
+        OfflineResponseInfo resp = (OfflineResponseInfo) o;
+
+        if (resp.isSuccess()){
+            callback.onSuccess(resp);
+        }else{
+            callback.onFailure(resp);
+        }
+
+
+
 
     }
 
@@ -181,7 +233,8 @@ public class OfflineAppData<T> implements Observer {
      * @return list of successful offline requests
      */
     public List<OfflineRequestInfo> getSuccessfulCalls() {
-        return this.store.getSuccessfulCalls();
+//        return this.store.getSuccessfulCalls();
+        return OfflineStore.getStore(this.context, this.collectionName, this.myClass).getSuccessfulCalls();
 
 
     }
@@ -191,7 +244,8 @@ public class OfflineAppData<T> implements Observer {
      * @return list of failed offline requests
      */
     public List<OfflineRequestInfo> getFailedCalls() {
-        return this.store.getFailedCalls();
+//        return this.store.getFailedCalls();
+          return OfflineStore.getStore(this.context, this.collectionName, this.myClass).getFailedCalls();
     }
 
 }

@@ -15,8 +15,11 @@ package com.kinvey.samples.statusshare;
 
 
 import android.app.Application;
+import android.util.Log;
 import com.google.api.client.http.HttpTransport;
 import com.kinvey.android.Client;
+import com.kinvey.java.cache.CachePolicy;
+import com.kinvey.java.cache.InMemoryLRUCache;
 import com.kinvey.samples.statusshare.model.UpdateEntity;
 
 import java.util.Calendar;
@@ -34,7 +37,6 @@ public class StatusShareApplication extends Application{
 
 
     private Client client = null;
-
 
     @Override
     public void onCreate() {
@@ -55,7 +57,6 @@ public class StatusShareApplication extends Application{
     public Client getClient() {
         if (client == null){
             client = new Client.Builder(getApplicationContext()).build();
-
         }
         return client;
     }

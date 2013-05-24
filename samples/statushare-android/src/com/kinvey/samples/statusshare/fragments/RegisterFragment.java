@@ -13,6 +13,7 @@
  */
 package com.kinvey.samples.statusshare.fragments;
 
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -36,26 +37,47 @@ import com.kinvey.samples.statusshare.StatusShare;
 public class RegisterFragment extends KinveyFragment implements View.OnClickListener {
 
 
-    private EditText mEditRepeatPassword;
-    private Button mButtonSubmit;
-    private EditText mEditUserName;
-    private EditText mEditPassword;
+    private EditText confirmPassword;
+    private Button registerButton;
+    private EditText userName;
+    private EditText password;
+
+    private TextView usernameLabel;
+    private TextView passwordLabel;
+    private TextView confirmPasswordLabel;
 
     private static final int MIN_USERNAME_LENGTH = 5;
     private static final int MIN_PASSWORD_LENGTH = 5;
 
 
     @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
     public int getViewID() {
-        return R.layout.create_account;
+        return R.layout.fragment_register;
     }
 
     @Override
     public void bindViews(View v) {
-        mButtonSubmit = (Button) v.findViewById(R.id.create_account);
-        mEditUserName = (EditText) v.findViewById(R.id.et_login);
-        mEditPassword = (EditText) v.findViewById(R.id.et_password);
-        mEditRepeatPassword = (EditText) v.findViewById(R.id.confirm_password);
+        registerButton = (Button) v.findViewById(R.id.register_create_account);
+        userName = (EditText) v.findViewById(R.id.register_username);
+        password = (EditText) v.findViewById(R.id.register_password);
+        confirmPassword = (EditText) v.findViewById(R.id.register_confirm_password);
+        usernameLabel = (TextView) v.findViewById(R.id.register_username_label);
+        passwordLabel = (TextView) v.findViewById(R.id.register_password_label);
+        confirmPasswordLabel = (TextView) v.findViewById(R.id.register_confirm_label);
+
+        usernameLabel.setTypeface(getRoboto());
+        passwordLabel.setTypeface(getRoboto());
+        confirmPasswordLabel.setTypeface(getRoboto());
+        registerButton.setTypeface(getRoboto());
+        userName.setTypeface(getRoboto());
+        password.setTypeface(getRoboto());
+        confirmPassword.setTypeface(getRoboto());
 
         this.addEditListeners();
 
@@ -64,9 +86,9 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
 
     private void addEditListeners() {
 
-        mButtonSubmit.setOnClickListener(this);
+        registerButton.setOnClickListener(this);
 
-        mEditUserName.addTextChangedListener(new TextWatcher() {
+        userName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -77,11 +99,11 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mButtonSubmit.setEnabled(validateInput());
+                registerButton.setEnabled(validateInput());
             }
         });
 
-        mEditUserName.setOnEditorActionListener(
+        userName.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -89,7 +111,7 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                                 || actionId == EditorInfo.IME_ACTION_DONE
                                 || (event.getAction() == KeyEvent.ACTION_DOWN
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER))
-                                && mEditUserName.getText().length() < MIN_USERNAME_LENGTH
+                                && userName.getText().length() < MIN_USERNAME_LENGTH
                                 ) {
 
                             CharSequence text = "User name must contain at least " + MIN_USERNAME_LENGTH + " characters";
@@ -100,7 +122,7 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                     }
                 });
 
-        mEditPassword.addTextChangedListener(new TextWatcher() {
+        password.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -111,11 +133,11 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mButtonSubmit.setEnabled(validateInput());
+                registerButton.setEnabled(validateInput());
             }
         });
 
-        mEditPassword.setOnEditorActionListener(
+        password.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -123,7 +145,7 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                                 || actionId == EditorInfo.IME_ACTION_DONE
                                 || (event.getAction() == KeyEvent.ACTION_DOWN
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER))
-                                && mEditPassword.getText().length() < MIN_USERNAME_LENGTH
+                                && password.getText().length() < MIN_USERNAME_LENGTH
                                 ) {
                             CharSequence text = "Password must contain at least " + MIN_PASSWORD_LENGTH + " characters";
                             Toast.makeText(getSherlockActivity(), text, Toast.LENGTH_SHORT).show();
@@ -134,7 +156,7 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                 });
 
 
-        mEditRepeatPassword.addTextChangedListener(new TextWatcher() {
+        confirmPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -145,11 +167,11 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
 
             @Override
             public void afterTextChanged(Editable editable) {
-                mButtonSubmit.setEnabled(validateInput());
+                registerButton.setEnabled(validateInput());
             }
         });
 
-        mEditRepeatPassword.setOnEditorActionListener(
+        confirmPassword.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -157,8 +179,8 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                                 || actionId == EditorInfo.IME_ACTION_DONE
                                 || (event.getAction() == KeyEvent.ACTION_DOWN
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER))
-                                && (mEditRepeatPassword.getText().length() < MIN_USERNAME_LENGTH
-                                || !mEditPassword.getText().toString().equals(mEditRepeatPassword.getText().toString())
+                                && (confirmPassword.getText().length() < MIN_USERNAME_LENGTH
+                                || !password.getText().toString().equals(confirmPassword.getText().toString())
                         )) {
                             CharSequence text = "Repeat password must contain at least " + MIN_PASSWORD_LENGTH + " characters and equal password";
                             Toast.makeText(getSherlockActivity(), text, Toast.LENGTH_SHORT).show();
@@ -170,15 +192,15 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
     }
 
     private boolean validateInput() {
-        return (mEditUserName.toString().length() >= MIN_USERNAME_LENGTH
-                && mEditPassword.getText().length() >= MIN_PASSWORD_LENGTH
-                && mEditRepeatPassword.getText().length() >= MIN_PASSWORD_LENGTH
-                && mEditPassword.getText().toString().equals(mEditRepeatPassword.getText().toString()));
+        return (userName.toString().length() >= MIN_USERNAME_LENGTH
+                && password.getText().length() >= MIN_PASSWORD_LENGTH
+                && confirmPassword.getText().length() >= MIN_PASSWORD_LENGTH
+                && password.getText().toString().equals(confirmPassword.getText().toString()));
     }
 
     @Override
     public void onClick(View v) {
-        if (v == mButtonSubmit){
+        if (v == registerButton){
             submit();
 
         }
@@ -186,8 +208,11 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
     }
 
     public void submit() {
-        getClient().user().create(mEditUserName.getText().toString(), mEditPassword.getText().toString(), new KinveyUserCallback() {
+        getClient().user().create(userName.getText().toString(), password.getText().toString(), new KinveyUserCallback() {
             public void onFailure(Throwable t) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
                 CharSequence text = "Username already exists.";
                 Toast toast = Toast.makeText(getSherlockActivity(), text, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
@@ -195,6 +220,9 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
             }
 
             public void onSuccess(User u) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
                 CharSequence text = "Welcome " + u.get("username")+ ".";
                 Toast.makeText(getSherlockActivity(), text, Toast.LENGTH_LONG).show();
                 ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);

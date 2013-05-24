@@ -231,6 +231,14 @@ public class AsyncUser extends User {
         new Login(accessToken, LoginType.GOOGLE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+
+    public void loginSalesForce (String accessToken, String clientid, String refreshToken, String id, KinveyUserCallback callback){
+        new Login(accessToken, clientid, refreshToken, id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+    }
+
+
+
     /**
      * Asynchronous Twitter login.
      *
@@ -395,7 +403,6 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserDeleteCallback}.
      */
     public void delete(Boolean hardDelete, KinveyUserDeleteCallback callback) {
-        // TODO:  Check callback
         new Delete(hardDelete, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -692,6 +699,10 @@ public class AsyncUser extends User {
         Credential credential;
         LoginType type;
 
+        //Salesforce...
+        String id;
+        String client_id;
+
         private Login(KinveyClientCallback callback) {
             super(callback);
             this.type = LoginType.IMPLICIT;
@@ -727,6 +738,17 @@ public class AsyncUser extends User {
             this.type=type;
         }
 
+
+        //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
+        private Login(String accessToken, String clientID, String refresh, String id, KinveyUserCallback callback){
+            super(callback);
+            this.accessToken = accessToken;
+            this.refreshToken = refresh;
+            this.client_id = clientID;
+            this.id = id;
+            this.type = LoginType.SALESFORCE;
+        }
+
         private Login(Credential credential, KinveyClientCallback callback) {
             super(callback);
             this.credential = credential;
@@ -750,6 +772,9 @@ public class AsyncUser extends User {
                     return AsyncUser.this.loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case AUTH_LINK:
                     return AsyncUser.this.loginAuthLinkBlocking(accessToken, refreshToken).execute();
+                case SALESFORCE:
+                    return AsyncUser.this.loginSalesForceBlocking(accessToken, client_id, refreshToken, id).execute();
+
                 case CREDENTIALSTORE:
                     return AsyncUser.this.login(credential).execute();
             }

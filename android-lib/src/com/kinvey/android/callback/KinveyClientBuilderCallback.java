@@ -19,6 +19,11 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.android.Client;
 
 /**
+ * This class provides callbacks for an creation of the client.
+ * <p>
+ *  Creating a client requires disc operations which are performed asynchronously.
+ * </p>
+ *
  * @author mjsalinger
  * @since 2.0
  */

@@ -18,12 +18,23 @@ import com.google.api.client.json.GenericJson;
 import java.util.HashMap;
 
 /**
+ * Use this class as a base Entity instead of {@code com.google.api.client.json.GenericJson} when using the LinkedData API.
+ * <p>
+ * This class maintains a Map of linked files, using the JSONKey of the field as the key and a {@code com.kinvey.java.LinkedResources.LinkedFile} as the value.
+ * </p>
+ * <p>
+ * The LinkedData API uses this map to determine if there are any attachments to download.
+ * </p>
+ *
  * @author mjsalinger
  * @since 2.0
  */
 public abstract class LinkedGenericJson extends GenericJson {
     private HashMap<String, LinkedFile> files;
 
+    /**
+     * General constructor, initializes map of LinkedFiles
+     */
     public LinkedGenericJson() {
         super();
         files = new HashMap<String, LinkedFile>();

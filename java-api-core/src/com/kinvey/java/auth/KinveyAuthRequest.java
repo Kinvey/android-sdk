@@ -28,6 +28,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 import com.kinvey.java.core.KinveyHeaders;
@@ -66,6 +67,8 @@ public class KinveyAuthRequest extends GenericJson {
 
     private boolean create;
     private LoginType type;
+    private int eofRetryAttempts =3;
+    //TODO:  Set eofRetryAttempts value as builder method
 
     /**
      * http transport to utilize for the request *
@@ -184,7 +187,16 @@ public class KinveyAuthRequest extends GenericJson {
                 .setBackOffPolicy(policy)
                 .setRetryOnExecuteIOException(true)
                 .setEnableGZipContent(false);
-        response = request.execute();
+        try {
+            response = request.execute();
+        }  catch (EOFException ex) {
+            if (eofRetryAttempts > 0) {
+                eofRetryAttempts--;
+                return executeUnparsed();
+            } else {
+                throw ex;
+            }
+        }
         if (response.isSuccessStatusCode()) {
             return response;
         } else if (response.getStatusCode() == 404 && this.type == LoginType.THIRDPARTY && this.create == false) {

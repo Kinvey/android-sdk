@@ -28,12 +28,14 @@ public class OfflineResponseInfo implements Serializable {
 
     private OfflineRequestInfo request;
     private boolean success;
-    private String response;
+    private Object responseObject;
+    private String collection;
 
-    public OfflineResponseInfo(OfflineRequestInfo req, String resp, boolean  success) {
+    public OfflineResponseInfo(OfflineRequestInfo req, Object resp, boolean  success, String collection) {
         this.request = req;
-        this.response = resp;
+        this.responseObject = resp;
         this.success = success;
+        this.collection = collection;
     }
 
     /**
@@ -50,16 +52,16 @@ public class OfflineResponseInfo implements Serializable {
     }
 
     /**
-     * Get the JSON response as a String directly.
+     * Get the JSON response Object.
      *
-     * @return the JSON response.
+     * @return the JSON response
      */
-    public String getResponse() {
-        return response;
+    public Object getResponse() {
+        return responseObject;
     }
 
-    public void setResponse(String response) {
-        this.response = response;
+    public void setResponse(Object response) {
+        this.responseObject = response;
     }
 
     /**
@@ -72,5 +74,13 @@ public class OfflineResponseInfo implements Serializable {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public String getCollection() {
+        return collection;
+    }
+
+    public void setCollection(String collection) {
+        this.collection = collection;
     }
 }

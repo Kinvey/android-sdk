@@ -40,7 +40,6 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
     //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
     //TODO edwardf delete support?
-    //TODO edwardf enhance GET support with KinveyReferences (resove, resolve_depth, retain), only needs wrappers
 
 
     /**
@@ -124,6 +123,35 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         getClient().initializeRequest(get);
         return get;
     }
+
+    /**
+     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * <p>
+     * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
+     * to retrieve callback information about the File downloads.
+     * </p>
+     * <p>
+     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
+     * a large number of Linked Resources, try using an overloaded variation of this method.
+     * </p>
+     *
+     * @param query query for entities to retrieve
+     * @param attachments which json fields are linked resources that should be resolved
+     * @param resolves a string array of json field names to resolve as kinvey references
+     * @param resolve_depth how many levels of kinvey references to resolve
+     * @param retain should the resolved values be retained?
+     * @param download - used for progress updates as associated files are downloaded.
+     * @return Get object
+     * @throws java.io.IOException - if there is an issue executing the client requests
+     */
+    public Get getBlocking(Query query,  DownloaderProgressListener download, String[] attachments, String[] resolves, int resolve_depth, boolean retain) throws IOException {
+        Preconditions.checkNotNull(query);
+        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass(), null, resolves, resolve_depth, retain);
+        get.setDownloadProgressListener(download);
+        getClient().initializeRequest(get);
+        return get;
+    }
+
 
     /**
      * Method to get an entity or entities and download ALL associated Linked Resources.

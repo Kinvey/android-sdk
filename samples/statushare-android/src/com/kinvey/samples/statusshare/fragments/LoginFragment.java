@@ -19,6 +19,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -41,6 +42,8 @@ public class LoginFragment extends KinveyFragment implements View.OnClickListene
     private EditText username;
     private EditText password;
     private Button login;
+    private TextView usernameLabel;
+    private TextView passwordLabel;
 
     public static final int MIN_USERNAME_LENGTH = 4;
     public static final int MIN_PASSWORD_LENGTH = 4;
@@ -49,26 +52,36 @@ public class LoginFragment extends KinveyFragment implements View.OnClickListene
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
         if (getClient().user().isUserLoggedIn()){
-            Log.i(StatusShare.TAG, "logged in: ");
+            Log.i(StatusShare.TAG, "logged in: " + getClient().user().getUsername());
             Toast.makeText(getSherlockActivity(), "Logging in", Toast.LENGTH_SHORT);
             loggedIn();
 
         }
+
     }
 
 
 
     @Override
     public int getViewID() {
-        return R.layout.login;
+        return R.layout.fragment_login;
     }
 
     @Override
     public void bindViews(View v) {
         username = (EditText) v.findViewById(R.id.et_login);
         password = (EditText) v.findViewById(R.id.et_password);
+
+        usernameLabel = (TextView) v.findViewById(R.id.login_label_username);
+        passwordLabel = (TextView) v.findViewById(R.id.login_label_password);
+
         login = (Button) v.findViewById(R.id.login);
+
+        login.setTypeface(getRoboto());
+        usernameLabel.setTypeface(getRoboto());
+        passwordLabel.setTypeface(getRoboto());
         login.setOnClickListener(this);
     }
 
@@ -82,12 +95,18 @@ public class LoginFragment extends KinveyFragment implements View.OnClickListene
             getClient().user().login(username.getText().toString(), password.getText().toString(), new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
+                    if (getSherlockActivity() == null){
+                        return;
+                    }
                     CharSequence text = "Logged in " + result.get("username") + ".";
                     Toast.makeText(getSherlockActivity().getApplicationContext(), text, Toast.LENGTH_LONG).show();
                     loggedIn();
                 }
 
                 public void onFailure(Throwable t) {
+                    if (getSherlockActivity() == null){
+                        return;
+                    }
                     CharSequence text = "Wrong username or password";
                     Toast toast = Toast.makeText(getSherlockActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
@@ -181,6 +200,10 @@ public class LoginFragment extends KinveyFragment implements View.OnClickListene
 
     private void loggedIn(){
 
+        if (getSherlockActivity() != null && getSherlockActivity().getCurrentFocus() != null){
+            InputMethodManager imm = (InputMethodManager) getSherlockActivity().getSystemService(getSherlockActivity().INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getSherlockActivity().getCurrentFocus().getWindowToken(), 0);
+        }
         ((StatusShare) getSherlockActivity()).replaceFragment(new ShareListFragment(), false);
 
 
@@ -189,7 +212,7 @@ public class LoginFragment extends KinveyFragment implements View.OnClickListene
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.login, menu);
+        inflater.inflate(R.menu.menu_login, menu);
     }
     @Override
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {

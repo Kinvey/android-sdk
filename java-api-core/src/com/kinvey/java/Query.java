@@ -19,13 +19,18 @@ import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 
+import java.io.Serializable;
+
 /**
  * Query API for creating query requests to AppData store.
  *
  * @author mjsalinger
  * @since 2.0
  */
-public class Query extends AbstractQuery {
+public class Query extends AbstractQuery implements Serializable {
+
+    private static final long serialVersionUID = 5635939847038496849L;
+
     private int limit;
     private int skip;
 
@@ -46,6 +51,10 @@ public class Query extends AbstractQuery {
      */
     public Query(){
         this(new MongoQueryFilter.MongoQueryFilterBuilder());
+    }
+
+    public boolean isQueryEmpty(){
+        return(getQueryFilterMap().isEmpty());
     }
 
     // Comparison Operators

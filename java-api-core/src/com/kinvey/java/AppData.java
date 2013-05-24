@@ -41,12 +41,12 @@ import com.kinvey.java.query.MongoQueryFilter;
  */
 public class AppData<T> {
 
-
     private String collectionName;
     private Class<T> myClass;
     private AbstractClient client;
 
     public static final String ID_FIELD_NAME = "_id";
+    public static final String GEOLOC_FIELD_NAME = "_geoloc";
 
     private Cache<String , T> cache = null;
     private CachePolicy policy = CachePolicy.NOCACHE;
@@ -716,6 +716,8 @@ public class AppData<T> {
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
             }
+
+
         }
 
         Save(T entity, Class<T> myClass, SaveMode update) {

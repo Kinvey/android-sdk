@@ -20,11 +20,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.lang.reflect.Array;
 
-import com.kinvey.java.auth.Credential;
-import com.kinvey.java.auth.CredentialManager;
-import com.kinvey.java.auth.KinveyAuthRequest;
-import com.kinvey.java.auth.KinveyAuthResponse;
-import com.kinvey.java.auth.ThirdPartyIdentity;
+import com.kinvey.java.auth.*;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
@@ -38,6 +34,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
  */
 public class User extends GenericJson   {
 
+    public static final String USER_COLLECTION_NAME = "user";
 
     protected enum LoginType {
         IMPLICIT,
@@ -48,6 +45,7 @@ public class User extends GenericJson   {
         LINKED_IN,
         AUTH_LINK,
         CREDENTIALSTORE,
+        SALESFORCE,
         THIRDPARTY
     }
 
@@ -116,7 +114,7 @@ public class User extends GenericJson   {
      * @return true if user is logged in, false if not
      */
     public boolean isUserLoggedIn() {
-        return (this.id != null && this.authToken != null);
+        return (this.id != null || this.authToken != null || this.username != null);
     }
 
     /**
@@ -302,6 +300,18 @@ public class User extends GenericJson   {
     }
 
     /**
+     * Login to Kinvey services using SalesForce access token obtained through OAuth2.  If the user does not exist in the
+     * Kinvey service, the user will be created.
+     *
+     * @param accessToken SalesForce-generated access token
+     * @return LoginRequest Object
+     * @throws IOException
+     */
+    public LoginRequest loginSalesForceBlocking(String accessToken, String Clientid, String refreshToken, String id) throws IOException {
+        return login(ThirdPartyIdentity.Type.SALESFORCE, accessToken, Clientid, refreshToken, id);
+    }
+
+    /**
      * Login to Kinvey services using Google access token obtained through OAuth2.  If the user does not exist in the
      * Kinvey service, the user will be created.
      *
@@ -397,7 +407,7 @@ public class User extends GenericJson   {
      * @throws IOException
      */
     public LogoutRequest logout() {
-        return new LogoutRequest();
+        return new LogoutRequest(this.client.getStore());
     }
 
 
@@ -665,8 +675,14 @@ public class User extends GenericJson   {
      */
     public class LogoutRequest {
 
+        private CredentialStore store;
+
+        public LogoutRequest(CredentialStore store){
+            this.store = store;
+        }
+
         public void execute() {
-            CredentialManager manager = new CredentialManager();
+            CredentialManager manager = new CredentialManager(this.store);
             manager.removeCredential(getId());
             client.setCurrentUser(null);
             ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setCredential(null);

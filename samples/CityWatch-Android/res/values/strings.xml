@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CityWatch</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="facebook_app_id">your_facebook_app_id</string>
+    <string name="menu_save">save</string>
+    <string name="menu_cancel">cancel</string>
+    <string name="menu_new">new</string>
+    <string name="menu_legal">legal</string>
+    <string name="menu_login">login</string>
+    
+    <string name="kinvey_account">Kinvey</string>
+    <string name="enter_email">Enter Email Address</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_first_name">Enter First Name</string>
+    <string name="enter_last_name">Enter Last Name</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="login_twitter">Login with Twitter</string>
+    <string name="login_facebook">Login with Facebook</string>
+    <string name="login_google">Login with Google</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="welcome">Welcome!</string>
+    <string name="marker_default">Report an incident!</string>
+    <string name="create_report">Report Incident</string>
+    <string name="incident_image">Incident Image</string>
+    <string name="name_hint">Enter a name</string>
+    <string name="address_hint">Enter an address</string>
+    <string name="description_hint">Enter a description</string>
+    <string name="category">Category</string>
+    <string name="wildlife">Wildlife</string>
+    <string name="location">Location</string>
+    <string name="description">Description</string>
+    <string name="severity">Severity</string>
+    <string name="severity_high">HIGH</string>
+    <string name="risk">risk</string>
+    <string name="risk_none">none</string>
+    <string name="name">Name</string>
+    <string name="incident_details">Incident Details</string>
+    
+    <string name="login_failed_dialog_title">Login failed!</string>
+    <string name="ok_button">OK</string>
+
+</resources>

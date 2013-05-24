@@ -1,6 +1,7 @@
 package com.kinvey.samples.statusshare.component;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,23 +9,25 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.kinvey.samples.statusshare.R;
-import com.kinvey.samples.statusshare.model.Update;
+import com.kinvey.samples.statusshare.model.UpdateEntity;
 
 import java.util.List;
 
-public class UpdateAdapter extends ArrayAdapter<Update> {
+public class UpdateAdapter extends ArrayAdapter<UpdateEntity> {
 
     private LayoutInflater mInflater;
+    private Typeface roboto;
 
-
-    public UpdateAdapter(Context context, List<Update> objects,
+    public UpdateAdapter(Context context, List<UpdateEntity> objects,
                          LayoutInflater inf) {
         // NOTE: I pass an arbitrary textViewResourceID to the super
         // constructor-- Below I override
         // getView(...), which causes the underlying adapter to ignore this
         // field anyways, it is just needed in the constructor.
-        super(context, R.id.text, objects);
+        super(context, 0, objects);
         this.mInflater = inf;
+        roboto = Typeface.createFromAsset(context.getAssets(), "Roboto-Thin.ttf");
+
     }
 
 
@@ -32,25 +35,19 @@ public class UpdateAdapter extends ArrayAdapter<Update> {
     public View getView(int position, View convertView, ViewGroup parent) {
         UpdateViewHolder holder = null;
 
-        ImageView mAvatar = null;
         TextView mBlurb = null;
         TextView mAuthor = null;
         TextView mWhen = null;
         ImageView mAttachment = null;
 
-        Update rowData = getItem(position);
+        UpdateEntity rowData = getItem(position);
 
         if (null == convertView) {
-            convertView = mInflater.inflate(R.layout.row_status_share, null);
+            convertView = mInflater.inflate(R.layout.row_update, null);
             holder = new UpdateViewHolder(convertView);
             convertView.setTag(holder);
         }
         holder = (UpdateViewHolder) convertView.getTag();
-
-//        if (rowData.getAvatar() != null){
-//            mAvatar = holder.getAvatar();
-//            mAvatar.setImageBitmap(rowData.getAvatar());
-//        }
 
         if (rowData.getText() != null){
             mBlurb = holder.getBlurb();
@@ -66,15 +63,13 @@ public class UpdateAdapter extends ArrayAdapter<Update> {
             mWhen.setText(rowData.getSince());
 
         }
-        if (rowData.getAvatar() != null){
-            mAttachment = holder.getAvatar();
-            mAttachment.setImageBitmap(rowData.getAvatar());
-
+        mAttachment = holder.getAttachment();
+        if (rowData.getThumbnail() != null){
+            mAttachment.setImageBitmap(rowData.getThumbnail());
+        }else{
+            mAttachment.setBackgroundColor(R.color.ebony);
+            mAttachment.setImageBitmap(null);
         }
-
-
-
-
         return convertView;
     }
 
@@ -93,49 +88,44 @@ public class UpdateAdapter extends ArrayAdapter<Update> {
     private class UpdateViewHolder {
         private View mRow;
 
-        private ImageView mAvatar = null;
-        private TextView mBlurb = null;
-        private TextView mAuthor = null;
-        private TextView mWhen = null;
-//        private ImageView mAttachment = null;
+        private ImageView attachment = null;
+        private TextView blurb = null;
+        private TextView author = null;
+        private TextView when = null;
 
         public UpdateViewHolder(View row) {
             mRow = row;
         }
 
-//        public ImageView getAttachment() {
-//            if (null == mAttachment) {
-//                mAttachment = (ImageView) mRow.findViewById(R.id.attachment);
-//            }
-//            return mAttachment;
-//        }
-
         public TextView getWhen() {
-            if (null == mWhen) {
-                mWhen = (TextView) mRow.findViewById(R.id.when);
+            if (null == when) {
+                when = (TextView) mRow.findViewById(R.id.row_update_time);
             }
-            return mWhen;
+            when.setTypeface(roboto);
+            return when;
         }
 
         public TextView getAuthor() {
-            if (null == mAuthor) {
-                mAuthor = (TextView) mRow.findViewById(R.id.author);
+            if (null == author) {
+                author = (TextView) mRow.findViewById(R.id.row_update_author);
             }
-            return mAuthor;
+            author.setTypeface(roboto);
+            return author;
         }
 
         public TextView getBlurb() {
-            if (null == mBlurb) {
-                mBlurb = (TextView) mRow.findViewById(R.id.text);
+            if (null == blurb) {
+                blurb = (TextView) mRow.findViewById(R.id.row_update_text);
             }
-            return mBlurb;
+            blurb.setTypeface(roboto);
+            return blurb;
         }
 
-        public ImageView getAvatar() {
-            if (null == mAvatar) {
-                mAvatar = (ImageView) mRow.findViewById(R.id.avatar);
+        public ImageView getAttachment() {
+            if (null == attachment) {
+                attachment = (ImageView) mRow.findViewById(R.id.row_update_image);
             }
-            return mAvatar;
+            return attachment;
         }
     }
 }

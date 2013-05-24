@@ -23,7 +23,9 @@ public class CredentialManager {
 
     private CredentialStore credentialStore;
 
-    public CredentialManager() {}
+    private CredentialManager() {
+
+    }
 
     public CredentialManager(CredentialStore credentialStore)  {
         if (credentialStore == null) {

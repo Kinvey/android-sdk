@@ -21,7 +21,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 /**
- * Implementation of a Client Request, which can download linked resources.
+ * Implementation of a Client Request, which can download linked resources through the File API as well as the AppData API in one request.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
@@ -81,23 +81,24 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
     }
 
-    private void downloadResources(LinkedGenericJson entity) throws IOException{
+    private void downloadResources(LinkedGenericJson entity) throws IOException {
         System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + entity.getAllFiles().keySet().size());
 
         for (String key : (entity).getAllFiles().keySet()) {
+            if (entity.get(key) != null) {
 
-            System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((Map) entity.get(key)).get("_loc").toString());
+                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((Map) entity.get(key)).get("_loc").toString());
 
-            if (entity.getFile(key) == null){
-                entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+                if (entity.getFile(key) == null) {
+                    entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+                }
+
+
+                entity.getFile(key).setOutput(new ByteArrayOutputStream());
+
+                getAbstractKinveyClient().file().setDownloaderProgressListener(download);
+                getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
             }
-
-
-            entity.getFile(key).setOutput(new ByteArrayOutputStream());
-
-            getAbstractKinveyClient().file().setDownloaderProgressListener(download);
-            getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
-
         }
 
     }

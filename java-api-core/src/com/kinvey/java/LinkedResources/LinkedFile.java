@@ -17,6 +17,13 @@ package com.kinvey.java.LinkedResources;
 import java.io.*;
 
 /**
+ * This class maintains metadata and java specific file access to a File associated with an Entity through the {@code com.kinvey.java.LinkedData} API.
+ *
+ * There are references to a `ByteArrayInputStream as well as a `ByteArrayOutputStream`, which can be used to stream to/from the file.
+ *
+ * NOTE:  It is the responsibility of the client application to close these streams appropriately after usage.
+ *
+ *
  * @author mjsalinger
  * @author edwardf
  * @since 2.0
@@ -28,22 +35,20 @@ public class LinkedFile {
     private ByteArrayOutputStream output = null;
     private boolean resolve = true;
 
+    /**
+     * Constructor for a LinkedFile
+     *
+     * @param fileName - the FileName of the Linked File
+     */
     public LinkedFile(String fileName) {
         this.fileName = fileName;
     }
 
-    public LinkedFile(String fileName, ByteArrayInputStream input) {
-        this.fileName = fileName;
-        this.input = input;
-    }
-
-    public LinkedFile(String fileName, ByteArrayOutputStream output){
-        this.fileName = fileName;
-        this.output = output;
-    }
-
-
-
+    /**
+     * Get the file name of a Linked File
+     *
+     * @return  the file name
+     */
     public String getFileName() {
         return fileName;
     }

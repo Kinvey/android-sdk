@@ -25,6 +25,20 @@ import com.kinvey.java.core.UploaderProgressListener;
 import java.io.IOException;
 
 /**
+ * Wraps the {@link com.kinvey.java.LinkedData} public methods in asynchronous functionality using native Android AsyncTask.
+ *
+ * <p>
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#linkedData(String, Class)} convenience method.
+ * The first String parameter is the name of the Collection, and the Class is the expected Response Class.
+ * </p>
+ * <p>
+ * The methods provided in this class take two (optional) callbacks, a {@code KinveyClientCallback} for the AppData request as well as a {@code UploaderProgressListener} or {@code DownloaderProgressListener} for updates on the File status
+ * </p>
+ * <p>
+ * The functionality of this class is provided by both the {@code com.kinvey.java.AppData} API as well as the {@code com.kinvey.java.File} API.
+ * </p>
+ *
+ *
  * @auther edwardf
  *
  */
@@ -79,7 +93,27 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(new Query(), callback, download, null, null, 0 , false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    /**
+     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * <p>
+     * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
+     * to retrieve callback information about the File downloads.
+     * </p>
+     * <p>
+     * This method will only download Linked Resources for the fields declared in the resources array.
+     * These Strings must match the strings used as keys in the entity.
+     * </p>
+     *
+     * @param query query for entities to retrieve
+     * @param download - used for progress updates as associated files are downloaded.
+     * @return Get object
+     * @throws java.io.IOException - if there is an issue executing the client requests
+     */
+    public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] resolves, int resolve_depth, boolean retain) {
+        new Get(new Query(), callback, download, null, resolves, resolve_depth , retain).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -100,7 +134,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(new Query(), callback, download, null, null, 0, false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -129,17 +163,23 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
         Query query = null;
         String[] attachments;
         DownloaderProgressListener progress;
+        String[] resolves;
+        int resolve_depth;
+        boolean retain;
 
-        public Get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener progress, String[] attachments) {
+        public Get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener progress, String[] attachments, String[] resolves, int resolve_depth, boolean retain) {
             super(callback);
             this.query = query;
             this.progress = progress;
             this.attachments = attachments;
+            this.resolves = resolves;
+            this.resolve_depth = resolve_depth;
+            this.retain = retain;
         }
 
         @Override
         protected T[] executeAsync() throws IOException {
-            return AsyncLinkedData.this.getBlocking(this.query, this.progress, this.attachments).execute();
+            return AsyncLinkedData.this.getBlocking(this.query, this.progress, this.attachments, this.resolves, this.resolve_depth, this.retain).execute();
         }
     }
     private class GetEntity extends AsyncClientRequest<T> {
