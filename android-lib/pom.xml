@@ -106,6 +106,12 @@
             <version>${gson.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.gcm</groupId>
+            <artifactId>gcm-client</artifactId>
+            <version>3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.google.http-client</groupId>

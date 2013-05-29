@@ -35,6 +35,7 @@ import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.OfflineAppData;
 import com.kinvey.android.push.AbstractPush;
+import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.push.UrbanAirshipPush;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
@@ -121,12 +122,6 @@ public class Client extends AbstractClient {
             this.context = context.getApplicationContext();
         }
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Creates a new instance of the AppData class or returns the existing instance.
-     */
 
     /**
      * AppData factory method
@@ -347,11 +342,11 @@ public class Client extends AbstractClient {
         }
 
     }
-
-    private boolean userExists() {
-        String user = getClientUsers().getCurrentUser();
-        return (user != null && !user.isEmpty());
-    }
+//
+//    private boolean userExists() {
+//        String user = getClientUsers().getCurrentUser();
+//        return (user != null && !user.isEmpty());
+//    }
 
     /**
      * User factory method
@@ -409,6 +404,8 @@ public class Client extends AbstractClient {
      */
     public AbstractPush push() {
         synchronized (lock) {
+            //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
+            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely.
             if (pushProvider == null) {
                 pushProvider = new UrbanAirshipPush(this);
             }
@@ -453,6 +450,14 @@ public class Client extends AbstractClient {
     }
 
     /**
+     * Get a reference to the Application Context used to create this instance of the Client
+     * @return {@code null} or the live Application Context
+     */
+    public Context getContext(){
+        return this.context;
+    }
+
+    /**
      * Create a client for interacting with Kinvey's services from an Android Activity.
      * <pre>
      * {@code
@@ -470,6 +475,11 @@ public class Client extends AbstractClient {
 
         private Context context = null;
         private KinveyUserCallback retrieveUserCallback = null;
+        //GCM Push Fields
+        private String GCM_SenderID = "";
+        private boolean GCM_Enabled = false;
+        private boolean GCM_DevMode = true;
+
 
         /**
          * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
@@ -520,7 +530,7 @@ public class Client extends AbstractClient {
                 final InputStream in = context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
                 super.getProps().load(in);
             } catch (IOException e) {
-                Log.w(TAG, "Couldn't load property, trying another approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                Log.w(TAG, "Couldn't load properties, trying another approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
             } catch (NullPointerException ex){
                 Log.e(TAG, "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
@@ -534,6 +544,18 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.PORT) != null){
                 this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.GCM_PUSH_ENABLED) != null){
+                this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
+            }
+
+            if (super.getString(Option.GCM_DEV_MODE) != null){
+                this.GCM_DevMode = Boolean.parseBoolean(super.getString(Option.GCM_DEV_MODE));
+            }
+
+            if (super.getString(Option.GCM_SENDER_ID) != null){
+                this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
             }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
@@ -579,6 +601,12 @@ public class Client extends AbstractClient {
                 Log.e(TAG, "Credential store failed to load", ex);
                 client.setCurrentUser(null);
             }
+
+            //GCM explicitely enabled
+            if (this.GCM_Enabled ==  true){
+                client.pushProvider = new GCMPush(client, this.GCM_DevMode, this.GCM_SenderID);
+            }
+
             return client;
         }
 

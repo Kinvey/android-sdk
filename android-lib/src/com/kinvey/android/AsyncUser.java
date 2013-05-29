@@ -545,6 +545,7 @@ public class AsyncUser extends User {
         // In the case where the app has no named users, while initializing push they'll
         // need a current user to set the apid field
         if (!isUserLoggedIn()) {
+            Log.e(Client.TAG, "Push registration failed, the Client needs an active current user. (Please login first!)");
             return; //defers push
         }
 

@@ -156,6 +156,16 @@ public class UrbanAirshipPush extends AbstractPush {
         return new UrbanAirshipPushOptions(pushAppKey, pushAppSecret, inProduction, null, UrbanAirshipPushOptions.TransportType.HELIUM);
     }
 
+    @Override
+    public boolean isInDevMode() {
+        return false;
+    }
+
+    @Override
+    public String[] getSenderIDs() {
+        return new String[0];
+    }
+
     private class DisablePush extends AsyncClientRequest<Void> {
 
 

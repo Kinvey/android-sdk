@@ -374,7 +374,13 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /** PUSH mode key **/
             PUSH_MODE("push.mode"),
             /** PUSH enabled key **/
-            PUSH_ENABLED("push.enabled");
+            PUSH_ENABLED("push.enabled"),
+            /**GCM Push enabled **/
+            GCM_PUSH_ENABLED("gcm.enabled"),
+            /**GCM Sender ID **/
+            GCM_SENDER_ID("gcm.senderID"),
+            /**GCM SERVER URL **/
+            GCM_DEV_MODE("gcm.devmode");
 
             private final String value;
 

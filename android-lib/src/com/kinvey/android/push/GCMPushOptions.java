@@ -13,6 +13,9 @@
  */
 package com.kinvey.android.push;
 
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
+
 /**
  * @author edwardf
  * @since 2.2
@@ -62,5 +65,58 @@ public class GCMPushOptions implements PushOptions {
 
     public void setAPIKey(String gcmSender) {
         this.gcmSender = gcmSender;
+    }
+
+
+    public static class PushConfig extends GenericJson{
+
+        @Key("GCM")
+        private PushConfigField gcm;
+        @Key("GCM_dev")
+        private PushConfigField gcmDev;
+
+        public PushConfig(){}
+
+
+        public PushConfigField getGcm() {
+            return gcm;
+        }
+
+        public void setGcm(PushConfigField gcm) {
+            this.gcm = gcm;
+        }
+
+        public PushConfigField getGcmDev() {
+            return gcmDev;
+        }
+
+        public void setGcmDev(PushConfigField gcmDev) {
+            this.gcmDev = gcmDev;
+        }
+    }
+
+    public static class PushConfigField extends GenericJson{
+        @Key
+        private String[] ids;
+        @Key("notification_key")
+        private String notificationKey;
+
+        public PushConfigField(){}
+
+        public String[] getIds() {
+            return ids;
+        }
+
+        public void setIds(String[] ids) {
+            this.ids = ids;
+        }
+
+        public String getNotificationKey() {
+            return notificationKey;
+        }
+
+        public void setNotificationKey(String notificationKey) {
+            this.notificationKey = notificationKey;
+        }
     }
 }
