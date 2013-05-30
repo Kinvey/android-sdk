@@ -189,6 +189,22 @@ public class AppData<T> {
         return get;
     }
 
+
+    /**
+     * Method to get a query of entities.  Pass an array of entity _ids to return the entites.
+     *
+     * @param ids array of _ids to query for
+     * @return Get object
+     * @throws java.io.IOException
+     */
+    public Get getBlocking(String[] ids) throws IOException {
+        Preconditions.checkNotNull(ids, "ids cannot be null.");
+        Query q = new Query();
+        q.in("_id", ids);
+        return this.getBlocking(q);
+    }
+
+
     /**
      * Method to get an entity or entities.  Pass null to entityID to return all entities
      * in a collection.

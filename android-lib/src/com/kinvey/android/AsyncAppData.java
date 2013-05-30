@@ -162,6 +162,37 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     /**
+     * Asynchronous request to fetch an array of Entities using an array of _ids.
+     * <p>
+     * Constructs an asynchronous request to fetch an Array of Entities, filtering by the provided list of _ids.  Uses
+     * KinveyListCallback<T> to return an Array of type T.  This method uses a Query {@link com.kinvey.java.Query}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.get(new String[]{"189472023", "10193583"}, new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param ids A list of _ids to query by.
+     * @param callback KinveyListCallback<T>
+     */
+    public void get(String[] ids, KinveyListCallback<T> callback){
+        Preconditions.checkNotNull(ids, "ids must not be null.");
+        Query q = new Query();
+        q.in("_id", ids);
+        this.get(q, callback);
+    }
+
+
+
+    /**
      * Asynchronous request to fetch an array of Entities using a Query object.
      * <p>
      * Constructs an asynchronous request to fetch an Array of Entities, filtering by a Query object.  Uses
