@@ -35,7 +35,6 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
    *        {@link UriTemplate#expand(String, String, Object, boolean)}
    * @param jsonContent POJO that can be serialized into JSON content or {@code null} for none
    * @param responseClass response class to parse into
-   * @param requestPolicy the {@link BackOffPolicy} to use for HTTP requests
    */
   protected AbstractKinveyJsonClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient,
       String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {

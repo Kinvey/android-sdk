@@ -29,6 +29,18 @@ import com.kinvey.java.User;
 
 /**
  * IntentService responsible for handling GCM messages.
+ * <p>
+ * Upon successful registration/unregistration with GCM, this class will perform the appropriate action with Kinvey as well.
+ * </p>
+ * <p>
+ * This class will also re-broadcast all received intents to a custom broadcast receiver, using the intent: com.kinvey.android.push.KINVEY_GCM_MESSAGE
+ * </p>
+ * <p>
+ *
+ *
+ *
+ * </p>
+ *
  */
 public class GCMIntentService extends GCMBaseIntentService {
 
@@ -167,30 +179,5 @@ public class GCMIntentService extends GCMBaseIntentService {
         context.sendBroadcast(intent);
     }
 
-    /**
-     * Issues a notification to inform the user that server has sent a message.
-     */
-//    private static void generateNotification(Context context, String message) {
-//        int icon = R.drawable.ic_btn_speak_now;
-//        long when = System.currentTimeMillis();
-//        NotificationManager notificationManager = (NotificationManager)
-//                context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        Notification notification = new Notification(icon, message, when);
-//        Intent notificationIntent = new Intent(context, DemoActivity.class);
-//        // set intent so it does not start a new activity
-//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-//                Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//        PendingIntent intent =
-//                PendingIntent.getActivity(context, 0, notificationIntent, 0);
-//        notification.setLatestEventInfo(context, "Title", message, intent);
-//        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-//        notificationManager.notify(0, notification);
-//    }
-
-//    static void notifyClient(Context context, String message) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_MESSAGE, message);
-//        context.sendBroadcast(intent);
-//    }
 
 }

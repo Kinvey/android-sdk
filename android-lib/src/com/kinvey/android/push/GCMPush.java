@@ -28,6 +28,11 @@ import com.kinvey.java.User;
 
 
 /**
+ *
+ * <p>
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#push()} convenience method.
+ * </p>
+ *
  * @author edwardf
  * @since 2.2
  */
@@ -52,9 +57,6 @@ public class GCMPush extends AbstractPush {
         GCMRegistrar.checkDevice(currentApp);
         GCMRegistrar.checkManifest(currentApp);
 
-//        currentApp.registerReceiver(mHandleMessageReceiver,
-//                new IntentFilter(KINVEY_GCM_MESSAGE));
-
         final String regId = GCMRegistrar.getRegistrationId(currentApp);
 
         //if we are not registered on GCM, then register
@@ -71,56 +73,7 @@ public class GCMPush extends AbstractPush {
 
 
 
-//    private final BroadcastReceiver mHandleMessageReceiver =
-//            new BroadcastReceiver() {
-//                @Override
-//                public void onReceive(Context context, Intent intent) {
-//                    String messageType = "";
-//                    messageType = intent.getExtras().getString(EXTRA_TYPE);
-//                    if (messageType.equals((MESSAGE_REGISTERED))) {
-//                        //registered with GCM, now it's time to register with Kinvey
-//                        String gcmID = GCMRegistrar.getRegistrationId(context);
-//                        registerWithKinvey(gcmID, true);
-//                    } else if (messageType.equals(MESSAGE_UNREGISTERED)) {
-//                        //unregistered with GCM, not it's time to unregister with Kinvey
-//                        String gcmID = GCMRegistrar.getRegistrationId(context);
-//                        registerWithKinvey(gcmID, false);
-//                    }
-//
-//                    //All we care about here is register/unregister so we can perform the same action against Kinvey
-//                    //So, now we just rewrap the intent and pass it on to the next (optional) receiver
-//                    //TODO rebroadcast intent
-//
-//
-//                }
-//            };
 
-//    static void notifyReceiverOfRegistrationState(Context context, String message) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, message);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfPushMessage(Context context, String message) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_FROM_GCM);
-//        intent.putExtra(MESSAGE_FROM_GCM, message);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfDeletion(Context context, int count) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_DELETE);
-//        intent.putExtra(MESSAGE_DELETE_COUNT, count);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfError(Context context, String errorMessage) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_ERROR);
-//        intent.putExtra(MESSAGE_FROM_GCM, errorMessage);
-//        context.sendBroadcast(intent);
-//    }
 
 
     /**
@@ -137,9 +90,18 @@ public class GCMPush extends AbstractPush {
         }
     }
 
+    /**
+     * Check to see if the current user is registered for GCM.  This checks both with GCM directly as well as with a Kinvey backend.
+     *
+     * @return true if current user is registered, false if they are not.
+     */
     @Override
     public boolean isPushEnabled() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        if (getClient().getContext() == null){
+            return false;
+        }
+        String gcmID = GCMRegistrar.getRegistrationId(getClient().getContext());
+        return (!gcmID.equals("") && getClient().user().containsKey("_push"));
     }
 
     @Override
@@ -161,60 +123,7 @@ public class GCMPush extends AbstractPush {
     public String[] getSenderIDs() {
         return senderIDs;
     }
-//
-//    public static class PushConfig extends GenericJson {
-//
-//        @Key("GCM")
-//        private PushConfigField gcm;
-//        @Key("GCM_dev")
-//        private PushConfigField gcmDev;
-//
-//        public PushConfig() {
-//        }
-//
-//
-//        public PushConfigField getGcm() {
-//            return gcm;
-//        }
-//
-//        public void setGcm(PushConfigField gcm) {
-//            this.gcm = gcm;
-//        }
-//
-//        public PushConfigField getGcmDev() {
-//            return gcmDev;
-//        }
-//
-//        public void setGcmDev(PushConfigField gcmDev) {
-//            this.gcmDev = gcmDev;
-//        }
-//    }
-//
-//    public static class PushConfigField extends GenericJson {
-//        @Key
-//        private String[] ids;
-//        @Key("notification_key")
-//        private String notificationKey;
-//
-//        public PushConfigField() {
-//        }
-//
-//        public String[] getIds() {
-//            return ids;
-//        }
-//
-//        public void setIds(String[] ids) {
-//            this.ids = ids;
-//        }
-//
-//        public String getNotificationKey() {
-//            return notificationKey;
-//        }
-//
-//        public void setNotificationKey(String notificationKey) {
-//            this.notificationKey = notificationKey;
-//        }
-//    }
+
 
 
 }
