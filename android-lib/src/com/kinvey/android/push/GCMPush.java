@@ -14,17 +14,9 @@
 package com.kinvey.android.push;
 
 import android.app.Application;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
 import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.java.User;
 
 
 /**
@@ -52,6 +44,7 @@ public class GCMPush extends AbstractPush {
 
     @Override
     public GCMPush initialize(PushOptions options, Application currentApp) {
+
         this.options = (GCMPushOptions) options;
         //First check runtime and grab current registration ID
         GCMRegistrar.checkDevice(currentApp);
@@ -61,11 +54,17 @@ public class GCMPush extends AbstractPush {
 
         //if we are not registered on GCM, then register
         if (regId.equals("")) {
+            Log.v(Client.TAG, "GCM - Registration Id is empty, about to use GCMRegistrar");
             //Registration comes back via an intent
             GCMRegistrar.register(currentApp, senderIDs);
+            Log.v(Client.TAG, "GCM - just registered with the GCMRegistrar");
         } else if (!GCMRegistrar.isRegisteredOnServer(currentApp)) {
             //registered on GCM but not on Kinvey?
-            GCMIntentService.registerWithKinvey(getClient(), regId, true);
+            Log.v(Client.TAG , "GCM - not regsitered on server, about to try!");
+
+            KinveyGCMService.registerWithKinvey(getClient(), regId, true);
+            Log.v(Client.TAG , "GCM - just registered with Kinvey");
+
         }
         return this;
     }

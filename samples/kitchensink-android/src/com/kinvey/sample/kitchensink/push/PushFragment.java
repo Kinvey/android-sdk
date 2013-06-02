@@ -57,13 +57,13 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
     public void registerPush() {
         PushOptions options = getApplicationContext().getClient().push().getPushOptions("5ZD39dqgRGaOFygj1pqGnQ","JLSUy-bpQBWhzESnxtMJYA",
                 false);
-        getApplicationContext().getClient().push().initialize(options, getActivity().getApplication());
+        getApplicationContext().getClient().push().initialize(options, getApplicationContext());
 
-        try {
-            getApplicationContext().getClient().user().registerPush();
-        } catch (PushRegistrationException ex) {
-            Toast.makeText(this.getActivity(), ex.getMessage(),Toast.LENGTH_LONG).show();
-        }
+//        try {
+//            getApplicationContext().getClient().user().registerPush();
+//        } catch (PushRegistrationException ex) {
+//            Toast.makeText(this.getActivity(), ex.getMessage(),Toast.LENGTH_LONG).show();
+//        }
     }
 
     public String getPushStatus() {

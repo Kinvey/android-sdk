@@ -35,14 +35,12 @@ import com.kinvey.java.User;
  * <p>
  * This class will also re-broadcast all received intents to a custom broadcast receiver, using the intent: com.kinvey.android.push.KINVEY_GCM_MESSAGE
  * </p>
- * <p>
  *
  *
- *
- * </p>
- *
+ * @author edwardf
+ * @since 2.0
  */
-public class GCMIntentService extends GCMBaseIntentService {
+public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     public static final String KINVEY_GCM_MESSAGE = "com.kinvey.android.push.KINVEY_GCM_MESSAGE";
     public static final String EXTRA_MESSAGE = "Extra_Message";
@@ -58,8 +56,8 @@ public class GCMIntentService extends GCMBaseIntentService {
     @SuppressWarnings("hiding")
     private static final String TAG = "Kinvey - GCM";
 
-    public GCMIntentService() {
-        super(GCMPush.senderIDs);
+    public KinveyGCMService() {
+        super("GCM PUSH");
     }
 
     @Override
@@ -68,7 +66,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, true);
 
-        notifyReceiverOfRegistrationState(context, MESSAGE_REGISTERED);
+        onRegistered(registrationId);
     }
 
     @Override
@@ -76,28 +74,29 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Device unregistered");
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, false);
-        notifyReceiverOfRegistrationState(context, MESSAGE_UNREGISTERED);
+        onUnregistered(registrationId);
     }
 
     @Override
     protected void onMessage(Context context, Intent intent) {
-        Log.i(TAG, "Received message");
         String message = intent.getStringExtra(MESSAGE_FROM_GCM);
-        notifyReceiverOfPushMessage(context, message);
+        Log.i(TAG, "Received message -> " + message);
+
+        onMessage(message);
 
     }
 
     @Override
     protected void onDeletedMessages(Context context, int total) {
         Log.i(TAG, "Received deleted messages notification");
-        notifyReceiverOfDeletion(context, total);
+        onDelete(total);
 
     }
 
     @Override
     public void onError(Context context, String errorId) {
         Log.i(TAG, "Received error: " + errorId);
-        notifyReceiverOfError(context, errorId);
+        onError(errorId);
     }
 
     @Override
@@ -110,6 +109,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
     public static void registerWithKinvey(Client client, String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
+        Log.v(Client.TAG , "about to register with Kinvey");
+
         if (!client.user().isUserLoggedIn()) {
             Log.e(Client.TAG, "Need to login a current user before registering for push!");
             return;
@@ -134,12 +135,12 @@ public class GCMIntentService extends GCMBaseIntentService {
         client.user().update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
-                //To change body of implemented methods use File | Settings | File Templates.
+                Log.v(Client.TAG , "GCM - user updated successfully -> " + result.containsKey("_user"));
             }
 
             @Override
             public void onFailure(Throwable error) {
-                //To change body of implemented methods use File | Settings | File Templates.
+                Log.v(Client.TAG , "GCM - user update error: " + error);
             }
         });
 
@@ -152,32 +153,46 @@ public class GCMIntentService extends GCMBaseIntentService {
         GCMRegistrar.onDestroy(getApplicationContext());
     }
 
-    static void notifyReceiverOfRegistrationState(Context context, String message) {
-        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-        intent.putExtra(EXTRA_TYPE, message);
-        context.sendBroadcast(intent);
-    }
 
-    static void notifyReceiverOfPushMessage(Context context, String message) {
-        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-        intent.putExtra(EXTRA_TYPE, MESSAGE_FROM_GCM);
-        intent.putExtra(MESSAGE_FROM_GCM, message);
-        context.sendBroadcast(intent);
-    }
 
-    static void notifyReceiverOfDeletion(Context context, int count) {
-        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-        intent.putExtra(EXTRA_TYPE, MESSAGE_DELETE);
-        intent.putExtra(MESSAGE_DELETE_COUNT, count);
-        context.sendBroadcast(intent);
-    }
+    public abstract void onMessage(String message);
 
-    static void notifyReceiverOfError(Context context, String errorMessage) {
-        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-        intent.putExtra(EXTRA_TYPE, MESSAGE_ERROR);
-        intent.putExtra(MESSAGE_FROM_GCM, errorMessage);
-        context.sendBroadcast(intent);
-    }
+
+    public abstract void onError(String error);
+
+
+    public abstract void onDelete(int deleteCount);
+
+    public abstract void onRegistered(String gcmID);
+
+    public abstract void onUnregistered(String oldID) ;
+
+//    static void notifyReceiverOfRegistrationState(Context context, String message) {
+//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
+//        intent.putExtra(EXTRA_TYPE, message);
+//        context.sendBroadcast(intent);
+//    }
+//
+//    static void notifyReceiverOfPushMessage(Context context, String message) {
+//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
+//        intent.putExtra(EXTRA_TYPE, MESSAGE_FROM_GCM);
+//        intent.putExtra(MESSAGE_FROM_GCM, message);
+//        context.sendBroadcast(intent);
+//    }
+//
+//    static void notifyReceiverOfDeletion(Context context, int count) {
+//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
+//        intent.putExtra(EXTRA_TYPE, MESSAGE_DELETE);
+//        intent.putExtra(MESSAGE_DELETE_COUNT, count);
+//        context.sendBroadcast(intent);
+//    }
+//
+//    static void notifyReceiverOfError(Context context, String errorMessage) {
+//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
+//        intent.putExtra(EXTRA_TYPE, MESSAGE_ERROR);
+//        intent.putExtra(MESSAGE_FROM_GCM, errorMessage);
+//        context.sendBroadcast(intent);
+//    }
 
 
 }

@@ -1,14 +1,12 @@
-package com.kinvey.android.push;
+package com.kinvey.sample.kitchensink.push;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.content.Intent;
+
 import android.util.Log;
 import com.kinvey.android.Client;
+import com.kinvey.android.push.KinveyGCMService;
 
 
-public class GCMLoggingReceiver extends AbstractGCMReceiver {
+public class GCMLoggingReceiver extends KinveyGCMService {
     @Override
     public void onMessage(String message) {
         Log.i(Client.TAG, "GCM - onMessage: " + message);
@@ -25,12 +23,12 @@ public class GCMLoggingReceiver extends AbstractGCMReceiver {
     }
 
     @Override
-    public void onRegister(String gcmID) {
+    public void onRegistered(String gcmID) {
         Log.i(Client.TAG, "GCM - onRegister, new gcmID is: " + gcmID);
     }
 
     @Override
-    public void onUnregister() {
+    public void onUnregistered(String oldID) {
         Log.i(Client.TAG, "GCM - onUnregister");
     }
 
