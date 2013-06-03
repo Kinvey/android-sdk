@@ -33,36 +33,26 @@ import com.kinvey.java.User;
  * Upon successful registration/unregistration with GCM, this class will perform the appropriate action with Kinvey as well.
  * </p>
  * <p>
- * This class will also re-broadcast all received intents to a custom broadcast receiver, using the intent: com.kinvey.android.push.KINVEY_GCM_MESSAGE
- * </p>
- *
+ * To use GCM for push notifications, extend this class and implement the provided abstract methods.
+ * <p>
  *
  * @author edwardf
  * @since 2.0
  */
 public abstract class KinveyGCMService extends GCMBaseIntentService {
 
-    public static final String KINVEY_GCM_MESSAGE = "com.kinvey.android.push.KINVEY_GCM_MESSAGE";
-    public static final String EXTRA_MESSAGE = "Extra_Message";
-    public static final String EXTRA_TYPE = "Extra_type";
+    public static final String MESSAGE_FROM_GCM = "msg";
 
-    public static final String MESSAGE_REGISTERED = "registered";
-    public static final String MESSAGE_UNREGISTERED = "unregistered";
-    public static final String MESSAGE_DELETE = "deleted";
-    public static final String MESSAGE_ERROR = "error";
-    public static final String MESSAGE_FROM_GCM = "message";
-    public static final String MESSAGE_DELETE_COUNT = "delete_count";
-
-    @SuppressWarnings("hiding")
-    private static final String TAG = "Kinvey - GCM";
-
+    /**
+     * Public Constructor used by operating system.
+     */
     public KinveyGCMService() {
         super("GCM PUSH");
     }
 
     @Override
     protected void onRegistered(Context context, String registrationId) {
-        Log.i(TAG, "Device registered: regId = " + registrationId);
+        Log.v(TAG, "Device registered: regId = " + registrationId);
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, true);
 
@@ -71,7 +61,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     @Override
     protected void onUnregistered(Context context, String registrationId) {
-        Log.i(TAG, "Device unregistered");
+        Log.v(TAG, "Device unregistered");
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, false);
         onUnregistered(registrationId);
@@ -80,7 +70,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     @Override
     protected void onMessage(Context context, Intent intent) {
         String message = intent.getStringExtra(MESSAGE_FROM_GCM);
-        Log.i(TAG, "Received message -> " + message);
+        Log.v(TAG, "Received message -> " + message);
 
         onMessage(message);
 
@@ -88,20 +78,20 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     @Override
     protected void onDeletedMessages(Context context, int total) {
-        Log.i(TAG, "Received deleted messages notification");
+        Log.v(TAG, "Received deleted messages notification");
         onDelete(total);
 
     }
 
     @Override
     public void onError(Context context, String errorId) {
-        Log.i(TAG, "Received error: " + errorId);
+        Log.v(TAG, "Received error: " + errorId);
         onError(errorId);
     }
 
     @Override
     protected boolean onRecoverableError(Context context, String errorId) {
-        Log.i(TAG, "Received recoverable error: " + errorId);
+        Log.v(TAG, "Received recoverable error: " + errorId);
         return super.onRecoverableError(context, errorId);
     }
 
@@ -117,11 +107,12 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         }
         if (register) {
             //send registration to Kinvey
-            GCMPushOptions.PushConfig config = new GCMPushOptions.PushConfig();
-            GCMPushOptions.PushConfigField active = new GCMPushOptions.PushConfigField();
-            active.setIds(client.push().getSenderIDs());
-            active.setNotificationKey(gcmRegID);
-            if (client.push().isInDevMode()) {
+            GCMPush.PushConfig config = new GCMPush.PushConfig();
+            GCMPush.PushConfigField active = new GCMPush.PushConfigField();
+            //TODO -- don't just set IDs, get it, add new one, and then save it (multiple devices -> multiple GCM ids)
+            active.setIds(new String[]{gcmRegID});
+            //active.setNotificationKey(gcmRegID);
+            if (!client.push().isInProduction()) {
                 config.setGcmDev(active);
             } else {
                 config.setGcm(active);
@@ -135,7 +126,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         client.user().update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
-                Log.v(Client.TAG , "GCM - user updated successfully -> " + result.containsKey("_user"));
+                Log.v(Client.TAG , "GCM - user updated successfully -> " + result.containsKey("_push"));
             }
 
             @Override
@@ -154,45 +145,43 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     }
 
 
-
+    /**
+     * This method is called when a message is received through GCM via Kinvey.
+     *
+     * @param message the text of the message
+     */
     public abstract void onMessage(String message);
 
 
+    /**
+     * This method is called when an error occurs with GCM.
+     *
+     * @param error the text of the error message
+     */
     public abstract void onError(String error);
 
-
+    /**
+     * This method is called when GCM messages are deleted.
+     *
+     * @param deleteCount the number of deleted messages
+     */
     public abstract void onDelete(int deleteCount);
 
+    /**
+     * This method is called after successful registration.  This includes both registering with GCM as well as Kinvey.
+     *
+     * @param gcmID the new user's unique GCM registration ID
+     */
     public abstract void onRegistered(String gcmID);
 
+    /**
+     * This method is called after successful unregistration.  This includes removing push from both GCM as well as Kinvey.
+     *
+     * @param oldID the old GCM registration ID of the now unregistered user.
+     */
     public abstract void onUnregistered(String oldID) ;
 
-//    static void notifyReceiverOfRegistrationState(Context context, String message) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, message);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfPushMessage(Context context, String message) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_FROM_GCM);
-//        intent.putExtra(MESSAGE_FROM_GCM, message);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfDeletion(Context context, int count) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_DELETE);
-//        intent.putExtra(MESSAGE_DELETE_COUNT, count);
-//        context.sendBroadcast(intent);
-//    }
-//
-//    static void notifyReceiverOfError(Context context, String errorMessage) {
-//        Intent intent = new Intent(KINVEY_GCM_MESSAGE);
-//        intent.putExtra(EXTRA_TYPE, MESSAGE_ERROR);
-//        intent.putExtra(MESSAGE_FROM_GCM, errorMessage);
-//        context.sendBroadcast(intent);
-//    }
+
 
 
 }

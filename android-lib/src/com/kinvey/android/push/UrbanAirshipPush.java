@@ -64,6 +64,36 @@ public class UrbanAirshipPush extends AbstractPush {
      *
      * <p>This method is used to initialize push for the first time, and to enable
      * push on each application start.  This method *must* be called in the Application instance's onCreate method.
+     * </p>
+     *
+     * @param currentApp Instance of the current {@link Application}
+     * @return
+     * @deprecated see Renamed to {@link #initialize(PushOptions, android.app.Application)}}
+     */
+    @Override
+    public UrbanAirshipPush initialize(Application currentApp) {
+        final AirshipConfigOptions uaOpts = new AirshipConfigOptions();
+
+        uaOpts.developmentAppKey = pushOptions.getPushAppKey();
+        uaOpts.developmentAppSecret = pushOptions.getPushAppSecret();
+        uaOpts.productionAppKey = pushOptions.getPushAppKey();
+        uaOpts.productionAppSecret = pushOptions.getPushAppSecret();
+
+        uaOpts.inProduction = pushOptions.isInProduction();
+        uaOpts.gcmSender = pushOptions.getAPIKey();
+        uaOpts.transport = pushOptions.getTransportType();
+
+        UAirship.takeOff(currentApp, uaOpts);
+        PushManager.shared().setIntentReceiver(getPushIntentReceiver() == null ? PushReceiver.class : getPushIntentReceiver());
+        PushManager.enablePush();
+        return this;
+    }
+
+    /**
+     * Method to initialize push for a specific application.
+     *
+     * <p>This method is used to initialize push for the first time, and to enable
+     * push on each application start.  This method *must* be called in the Application instance's onCreate method.
      * The method accepts an object of PushOptions which contain the PushAppKey and PushAppSecret obtained from the Kinvey
      * Developer Console.
      * </p>
@@ -157,8 +187,8 @@ public class UrbanAirshipPush extends AbstractPush {
     }
 
     @Override
-    public boolean isInDevMode() {
-        return false;
+    public boolean isInProduction() {
+        return true;
     }
 
     @Override

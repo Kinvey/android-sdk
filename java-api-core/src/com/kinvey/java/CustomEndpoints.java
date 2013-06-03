@@ -19,7 +19,6 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * Class for managing access to custom RPC endpoints.
@@ -27,7 +26,7 @@ import java.util.HashMap;
  * @author edwardf
  * @since 2.0.2
  */
-public class CustomEndpoints<I, R> {
+public class CustomEndpoints {
 
 
     private AbstractClient client;
@@ -36,9 +35,9 @@ public class CustomEndpoints<I, R> {
         this.client = client;
     }
 
-    public RpcCommand runCommandBlocking(String commandName, HashMap<String, String> args) throws IOException{
+    public customCommand runCommandBlocking(String commandName, GenericJson input) throws IOException{
         Preconditions.checkNotNull(commandName, "commandName must not be null");
-        RpcCommand command = new RpcCommand(commandName, args,  GenericJson.class);
+        customCommand command = new customCommand(commandName, input,  GenericJson.class);
         client.initializeRequest(command);
         return command;
 
@@ -50,14 +49,14 @@ public class CustomEndpoints<I, R> {
 
 
 
-    public class RpcCommand extends AbstractKinveyJsonClientRequest<R> {
+    public class customCommand extends AbstractKinveyJsonClientRequest {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key
         private String endpoint;
 
 
-        RpcCommand(String commandName, Object args, Class responseClass) {
+        customCommand(String commandName, GenericJson args, Class responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
         }

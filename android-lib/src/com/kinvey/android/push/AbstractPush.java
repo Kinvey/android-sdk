@@ -67,11 +67,12 @@ public abstract class AbstractPush {
     }
 
     public abstract AbstractPush initialize(PushOptions options, Application currentApp);
+    public abstract AbstractPush initialize(Application currentApp);
     public abstract String getPushId();
     public abstract boolean isPushEnabled();
     public abstract void disablePush() throws PushRegistrationException;
-    public abstract PushOptions getPushOptions(String pushAppKey, String pushAppSecret, boolean inProduction);
-    public abstract boolean isInDevMode();
+    public PushOptions getPushOptions(String pushAppKey, String pushAppSecret, boolean inProduction){return null;}
+    public abstract boolean isInProduction();
     public abstract String[] getSenderIDs();
 
 

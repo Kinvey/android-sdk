@@ -405,7 +405,7 @@ public class Client extends AbstractClient {
     public AbstractPush push() {
         synchronized (lock) {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
-            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely.
+            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
                 pushProvider = new UrbanAirshipPush(this);
             }
@@ -478,7 +478,7 @@ public class Client extends AbstractClient {
         //GCM Push Fields
         private String GCM_SenderID = "";
         private boolean GCM_Enabled = false;
-        private boolean GCM_DevMode = true;
+        private boolean GCM_InProduction = true;
 
 
         /**
@@ -550,8 +550,8 @@ public class Client extends AbstractClient {
                 this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
             }
 
-            if (super.getString(Option.GCM_DEV_MODE) != null){
-                this.GCM_DevMode = Boolean.parseBoolean(super.getString(Option.GCM_DEV_MODE));
+            if (super.getString(Option.GCM_PROD_MODE) != null){
+                this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
             }
 
             if (super.getString(Option.GCM_SENDER_ID) != null){
@@ -604,7 +604,7 @@ public class Client extends AbstractClient {
 
             //GCM explicitely enabled
             if (this.GCM_Enabled ==  true){
-                client.pushProvider = new GCMPush(client, this.GCM_DevMode, this.GCM_SenderID);
+                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
             }
 
             return client;

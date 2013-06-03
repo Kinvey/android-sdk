@@ -13,6 +13,7 @@
  */
 package com.kinvey.android;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
@@ -34,27 +35,27 @@ public class AsyncCustomEndpoints extends CustomEndpoints {
         super(client);
     }
 
-    public void runCommand(String commandName, Object args, KinveyListCallback callback){
-        new RpcCommand(commandName, args, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void runCommand(String commandName, GenericJson input, KinveyListCallback callback){
+        new AsyncCommand(commandName, input, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
 
 
-    private class RpcCommand extends AsyncClientRequest<Void> {
+    private class AsyncCommand extends AsyncClientRequest<Void> {
 
         private String commandName;
-        private Object args;
+        private GenericJson input;
 
-        public RpcCommand(String commandName, Object args, KinveyClientCallback callback) {
+        public AsyncCommand(String commandName, GenericJson input, KinveyClientCallback callback) {
             super(callback);
             this.commandName = commandName;
-            this.args = args;
+            this.input = input;
         }
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncCustomEndpoints.this.runCommandBlocking(commandName, null).execute();
+            AsyncCustomEndpoints.this.runCommandBlocking(commandName, input).execute();
             return null;
         }
 

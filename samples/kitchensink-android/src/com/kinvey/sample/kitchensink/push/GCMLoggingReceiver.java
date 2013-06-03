@@ -35,4 +35,6 @@ public class GCMLoggingReceiver extends KinveyGCMService {
 
 
 
+
+
 }

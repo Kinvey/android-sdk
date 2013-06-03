@@ -526,6 +526,7 @@ public class AsyncUser extends User {
     }
 
     /**
+     *
      * Register current user for push notifications
      * <p>
      * The registerPush method registers the current user for Push notifications.  Push must have already been activated
@@ -540,6 +541,8 @@ public class AsyncUser extends User {
         kinveyClient.user().registerPush();
     }
      * </pre></p>
+     *
+     * @deprecated used for UrbanAirship, GCM only requires a call to myClient.push().initialize(...);
      */
     public void registerPush() {
         // In the case where the app has no named users, while initializing push they'll
@@ -603,6 +606,7 @@ public class AsyncUser extends User {
      * </pre></p>
      *
      * @param callback KinveyClientCallback
+     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
      */
     public void registerPush(KinveyClientCallback<Void> callback) {
         new RegisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -625,6 +629,8 @@ public class AsyncUser extends User {
      * </pre></p>
      *
      * @param callback KinveyClientCallback
+     *
+     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
      */
     public void unregisterPush(KinveyClientCallback<Void> callback) {
         new UnregisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -648,6 +654,8 @@ public class AsyncUser extends User {
         });
     }
      * </pre></p>
+     *
+     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
      */
     public void unregisterPush() {
         // In the case where the app has no named users, while initializing push they'll
