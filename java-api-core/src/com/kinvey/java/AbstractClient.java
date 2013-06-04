@@ -380,7 +380,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**GCM Sender ID **/
             GCM_SENDER_ID("gcm.senderID"),
             /**GCM SERVER URL **/
-            GCM_PROD_MODE("gcm.devmode");
+            GCM_PROD_MODE("gcm.production");
 
             private final String value;
 
