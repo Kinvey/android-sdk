@@ -178,18 +178,36 @@ class AndroidClientUsers implements ClientUsers {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            FileOutputStream fStream = null;
+            ObjectOutputStream oStream = null;
+
             try {
-                FileOutputStream fStream = appContext.openFileOutput("kinveyUsers.bin", Context.MODE_PRIVATE);
-                ObjectOutputStream oStream = new ObjectOutputStream(fStream);
+                fStream = appContext.openFileOutput("kinveyUsers.bin", Context.MODE_PRIVATE);
+                oStream = new ObjectOutputStream(fStream);
 
                 oStream.writeObject(userList);
-                oStream.flush();
-                fStream.getFD().sync();
-                oStream.close();
+
 
                 Log.i(Client.TAG,"Serialization success");
             } catch (IOException e) {
                 Log.e(Client.TAG, e.getMessage());
+            } finally{
+                try {
+                    oStream.flush();
+                    fStream.getFD().sync();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        oStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+
+                }
+
+
+
             }
 
             return null;
