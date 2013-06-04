@@ -16,11 +16,6 @@ package com.kinvey.sample.kitchensink.push;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.kinvey.android.push.PushOptions;
-import com.kinvey.android.push.PushRegistrationException;
-import com.kinvey.android.push.UrbanAirshipPushOptions;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -55,22 +50,15 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
     }
 
     public void registerPush() {
-        PushOptions options = getApplicationContext().getClient().push().getPushOptions("5ZD39dqgRGaOFygj1pqGnQ","JLSUy-bpQBWhzESnxtMJYA",
-                false);
-        getApplicationContext().getClient().push().initialize(options, getApplicationContext());
 
-//        try {
-//            getApplicationContext().getClient().user().registerPush();
-//        } catch (PushRegistrationException ex) {
-//            Toast.makeText(this.getActivity(), ex.getMessage(),Toast.LENGTH_LONG).show();
-//        }
+        getApplicationContext().getClient().push().initialize(getApplicationContext());
+
+
     }
 
     public String getPushStatus() {
 
-        PushOptions options = getApplicationContext().getClient().push().getPushOptions("5ZD39dqgRGaOFygj1pqGnQ","JLSUy-bpQBWhzESnxtMJYA",
-                false);
-        getApplicationContext().getClient().push().initialize(options, getActivity().getApplication());
+        getApplicationContext().getClient().push().initialize(getActivity().getApplication());
         return Boolean.toString(getApplicationContext().getClient().push().isPushEnabled());
 
     }
