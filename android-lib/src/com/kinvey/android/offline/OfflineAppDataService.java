@@ -173,13 +173,6 @@ public class OfflineAppDataService extends IntentService {
                 final OfflineRequestInfo cur = curStore.pop();
 
                 if (cur != null) {
-//                    //if a call to pop() on the store returns null, then there is nothing left in the queue
-//                    //so syncing is done.
-//                    this.needsSync = false;
-//                    Log.v(Client.TAG, "Nothing to execute!");
-//                    this.stopSelf();
-//                    return;
-//                }
 
                 Log.v(Client.TAG, "request to execute of type: " + cur.getHttpVerb());
 
@@ -269,59 +262,12 @@ public class OfflineAppDataService extends IntentService {
                         @Override
                         public void onSuccess(T[] result) {
                             Log.i(Client.TAG, "GET request onSuccess callback");
-                            // OfflineAppDataService.this.storeCompletedRequestInfo(true, this.getInfo(), curStore);
-//                        if (result instanceof Collection){
-//                            Object[] tempFullArray = ((Collection) result).toArray();
-//                            T temp = null;
-//                            Map<String, Object> tempValueMap;
-//                            for (int i = 0; i < tempFullArray.length; i++){
-//
-////                                Class<?> clazz = Class.forName(className);
-//                                try{
-//                                    Log.i(Client.TAG, "creating response class instance, " + responseClass.getSimpleName());
-//                                    Constructor<?> ctor = responseClass.getConstructor();
-//                                    Object  wat =  ctor.newInstance();
-//                                    temp = (T) responseClass.cast(wat);
-//                                }catch(Exception e){
-//                                    Log.e(Client.TAG, "couldn't create response class");
-//                                }
-//
-////                                temp = //new OfflineGenericJson();
-//                                tempValueMap = (Map<String, Object>) tempFullArray[i];
-//                                for (String key : tempValueMap.keySet()){
-//                                    ((OfflineGenericJson)temp).put(key, tempValueMap.get(key));
-//
-//                                }
-//
-//
-//                                curStore.addToStore(((OfflineGenericJson)temp).get("_id").toString(), temp);
-//
-//                            }
-//
-//                        }else
-//                        if (result instanceof Object){
-//                            Log.i(Client.TAG,  "It's an object");
-//                            if (responseArray.isArray()){
-//                                Log.i(Client.TAG,  "It's an Array");
-//
-//                                Object tempFullArray = responseArray.cast(result);
-//                                T[] recast = (T[]) tempFullArray;
-
 
                             for (int i = 0; i < result.length; i++) {
                                 curStore.addToStore(((OfflineGenericJson) result[i]).get("_id").toString(), result[i]);
 
                             }
-                            //}   else{
-                            //  Log.i(Client.TAG,  "It's an object, Not an Array");
 
-
-                            //}
-
-
-//                        }else{
-//                            Log.i(Client.TAG,  "Hrm, not a Collection and not an Object...?");
-//                        }
                             OfflineAppDataService.this.storeCompletedRequestInfo(collectionName, true, this.getInfo(), result, curStore);
 
                         }
@@ -339,13 +285,6 @@ public class OfflineAppDataService extends IntentService {
             }   else{ done++;}
             }
         }
-//        if (done == collectionSet.size()){
-//
-//                            this.needsSync = false;
-//                    Log.v(Client.TAG, "Nothing to execute!");
-//                    this.stopSelf();
-//                    return;)
-//        }
 
     }
 

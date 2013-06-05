@@ -28,24 +28,23 @@ import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
- * Builder for synchronous blocking app data requests.
+ * This class allows extensible use of various features provided by the AppData() API and variations
  * <p>
- * This class uses the builder pattern to allow extensible use of all the features of our core app data API.  There are
- * various `set*()` methods, which can be chained together to create a builder.  Once the builder has been configured,
- * a call to `myBuilder.build()` will return a blocking syncronous request.  By calling `myBuilder.build().execute()` the
+ *   There are various `set*()` methods, which can be chained together to create a builder.  Once the builder has been configured,
+ * a call to `myBuilder.build()` will return a blocking synchronous request.  By calling `myBuilder.build().execute()` the
  * the request will be constructed and executed.
  * </p>
  * <p>
- * `myBuilder.build()` returns a blocking syncronous request for app data from a collection.  This class provides multiple
- * implementations for various CRUD interactions.
+ * This class supports CRUD operations on any AppData collection.
  * </p>
  * <p>
- * The code below will build and execute a blocking get entity request.
+ * The code below will build and execute a blocking get entity request resolving two kinvey references up to a depth of 2..
  *
  * </p>
  * <p>
@@ -60,7 +59,7 @@ import com.kinvey.java.query.MongoQueryFilter;
  *
  *
  * @author edwardf
- * @since 2.0.2
+ * @since 2.3.0
  */
 public class AppDataOperation {
 
@@ -77,14 +76,14 @@ public class AppDataOperation {
         protected AppData appData;
 
         /**
+         * @param client an active Kinvey client
          * @param collectionName the Name of the collection this builder's request will be accessing
          * @param myClass a {@code GenericJson} representing the object model
-         * @param appData a reference to an appdata instance associated with an active client.
          */
-        public AppDataRequestBuilder(String collectionName, Class myClass, AppData appData) {
+        public AppDataRequestBuilder(AbstractClient client, String collectionName, Class myClass) {
             this.collection = collectionName;
             this.myClass = myClass;
-            this.appData = appData;
+            this.appData = client.appData(collectionName, myClass);
         }
 
 
@@ -99,11 +98,16 @@ public class AppDataOperation {
         }
     }
 
-    /**
-     * Abstract KR (Kinvey Reference) App Data Request Builder parent introduces resolves, resolvedepth and retain references.
-     */
-    protected static abstract class KRAppDataRequestBuilder extends AppDataRequestBuilder {
 
+
+    /**
+     * Builder for creating new GET requests with the core App Data API.
+     * <p>
+     * This builder supports Kinvey References.
+     * </p>
+     */
+    public static class BlockingGetBuilder extends AppDataRequestBuilder {
+        protected Query query = null;
         //Kinvey Reference Support
         protected String[] resolves = null;
         //set defaults for kinvey reference
@@ -111,8 +115,35 @@ public class AppDataOperation {
         protected int resolveDepth = 1;
         protected boolean retainReference = true;
 
-        public KRAppDataRequestBuilder(String collectionName, Class myClass, AppData appData) {
-            super(collectionName, myClass, appData);
+
+        public BlockingGetBuilder(AbstractClient client, String collectionName, Class myClass) {
+            super(client, collectionName, myClass);
+        }
+
+
+        public AppDataRequestBuilder setQuery(Query query) {
+            this.query = query;
+            return this;
+        }
+
+        public AppDataRequestBuilder setID(String id){
+            this.query = new Query().equals(AppData.ID_FIELD_NAME, id);
+            return this;
+        }
+
+        public AbstractKinveyClientRequest build() {
+            AbstractKinveyClientRequest ret = null;
+            if (this.query == null) {
+                this.query = new Query();
+            }
+
+            if (resolves == null) {
+                ret = this.appData.new Get(this.query, this.myClass);
+            } else {
+                ret = this.appData.new Get(this.query, this.myClass, resolves, resolveDepth, retainReference);
+            }
+
+            return super.build(ret);
         }
 
         public AppDataRequestBuilder setResolves(String[] resolves) {
@@ -129,83 +160,8 @@ public class AppDataOperation {
             this.retainReference = retain;
             return this;
         }
-
-
     }
 
-
-    /**
-     * Builder for creating new GET requests with the core App Data API.
-     */
-    public static class BlockingGetBuilder extends KRAppDataRequestBuilder {
-        protected Query query = null;
-
-        public BlockingGetBuilder(String collectionName, Class myClass, AppData appData) {
-            super(collectionName, myClass, appData);
-        }
-
-
-        public AppDataRequestBuilder setQuery(Query query) {
-            this.query = query;
-            return this;
-        }
-
-        public AbstractKinveyClientRequest build() {
-            AbstractKinveyClientRequest ret = null;
-            if (this.query == null) {
-                this.query = new Query();
-            }
-
-            if (resolves == null) {
-                ret = this.appData.new Get(this.query, this.myClass);
-            } else {
-                ret = this.appData.new Get(this.query, this.myClass, resolves, resolveDepth, retainReference);
-            }
-
-
-            return super.build(ret);
-        }
-
-
-    }
-
-
-
-    /**
-     * Builder for creating new GET ENTITY requests with the core App Data API.
-     */
-    public static class BlockingGetEntityBuilder extends KRAppDataRequestBuilder {
-        protected String entityID = null;
-
-        public BlockingGetEntityBuilder(String collectionName, Class myClass, AppData appData) {
-            super(collectionName, myClass, appData);
-        }
-
-        public AppDataRequestBuilder setEntityID(String entityID) {
-            this.entityID = entityID;
-            return this;
-        }
-
-        public AbstractKinveyClientRequest build() {
-            AbstractKinveyClientRequest ret = null;
-
-
-            if (this.entityID != null) {
-                if (resolves == null) {
-                    ret = this.appData.new GetEntity(this.entityID, this.myClass);
-                } else {
-                    ret = this.appData.new GetEntity(this.entityID, this.myClass, resolves, resolveDepth, retainReference);
-                }
-            } else{
-                Preconditions.checkNotNull(null, "Cannot use GET ENTITY without calling setEntityID()");
-                return null;
-            }
-
-
-            return super.build(ret);
-        }
-
-    }
 
 
     /**
@@ -214,8 +170,8 @@ public class AppDataOperation {
     public static class BlockingSaveBuilder extends AppDataRequestBuilder {
         protected Object myEntity = null;
 
-        public BlockingSaveBuilder(String collectionName, Class myClass, AppData appData) {
-            super(collectionName, myClass, appData);
+        public BlockingSaveBuilder(AbstractClient client, String collectionName, Class myClass) {
+            super(client, collectionName, myClass);
         }
 
         public AppDataRequestBuilder setEntity(Object myEntity) {
@@ -249,16 +205,15 @@ public class AppDataOperation {
      * Builder for creating new DELETE requests with the core App Data API.
      */
     public static class BlockingDeleteBuilder extends AppDataRequestBuilder {
-        protected String entityID = null;
         protected Query query = null;
 
-        public BlockingDeleteBuilder(String collectionName, Class myClass, AppData appData) {
-            super(collectionName, myClass, appData);
+        public BlockingDeleteBuilder(AbstractClient client, String collectionName, Class myClass) {
+            super(client, collectionName, myClass);
         }
 
 
         public AppDataRequestBuilder setEntityID(String entityID) {
-            this.entityID = entityID;
+            this.query = new Query().equals(AppData.ID_FIELD_NAME, entityID);
             return this;
         }
 
@@ -269,21 +224,15 @@ public class AppDataOperation {
         }
 
         public AbstractKinveyClientRequest build() {
-
             AbstractKinveyClientRequest ret = null;
 
-            if (this.entityID != null) {
-                ret = this.appData.new Delete(this.entityID);
-
-            } else if (this.query != null) {
+            if (this.query != null) {
                 ret = this.appData.new Delete(this.query);
             } else {
-                Preconditions.checkNotNull(null, "Cannot use DELETE without either calling setEntityID() or setQuery()");
+                Preconditions.checkNotNull(null, "Cannot use DELETE without either calling setEntityID(...) or setQuery(...)");
                 return null;
             }
-
             return super.build(ret);
-
         }
     }
 

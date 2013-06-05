@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  *
  * @author edwardf
- * @since 2.0
+ * @since 2.4
  *
  */
 public class OfflineClientRequest<T> extends AbstractKinveyJsonClientRequest<T> {
