@@ -548,19 +548,10 @@ public class AppData<T> {
     /**
      * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
      *
-     * @return a new request builder for a blocking GET (by query) operation
+     * @return a new request builder for a blocking GET operation
      */
     public AppDataOperation.BlockingGetBuilder  blockingGetBuilder(){
-        return new AppDataOperation.BlockingGetBuilder(this.collectionName, this.myClass, this);
-    }
-
-    /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
-     *
-     * @return a new request builder for a blocking GET (single) Entity operation
-     */
-    public AppDataOperation.BlockingGetEntityBuilder  blockingGetEntityBuilder(){
-        return new AppDataOperation.BlockingGetEntityBuilder(this.collectionName, this.myClass, this);
+        return new AppDataOperation.BlockingGetBuilder(getClient(), this.collectionName, this.myClass);
     }
 
     /**
@@ -569,7 +560,7 @@ public class AppData<T> {
      * @return a new request builder for a blocking SAVE (put or post) operation
      */
     public AppDataOperation.BlockingSaveBuilder  blockingSaveBuilder(){
-        return new AppDataOperation.BlockingSaveBuilder(this.collectionName, this.myClass, this);
+        return new AppDataOperation.BlockingSaveBuilder(getClient(), this.collectionName, this.myClass);
     }
 
     /**
@@ -578,7 +569,7 @@ public class AppData<T> {
      * @return a new request builder for a blocking DELETE operation
      */
     public AppDataOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
-        return new AppDataOperation.BlockingDeleteBuilder(this.collectionName, this.myClass, this);
+        return new AppDataOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
     }
 
     /**
