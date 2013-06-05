@@ -55,8 +55,6 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         Log.v(TAG, "Device registered: regId = " + registrationId);
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, true);
-
-        onRegistered(registrationId);
     }
 
     @Override
@@ -64,14 +62,12 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         Log.v(TAG, "Device unregistered");
         Client myClient = new Client.Builder(context).build();
         registerWithKinvey(myClient, registrationId, false);
-        onUnregistered(registrationId);
     }
 
     @Override
     protected void onMessage(Context context, Intent intent) {
         String message = intent.getStringExtra(MESSAGE_FROM_GCM);
         Log.v(TAG, "Received message -> " + message);
-
         onMessage(message);
 
     }
@@ -97,7 +93,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
 
 
-    public static void registerWithKinvey(Client client, String gcmRegID, boolean register) {
+    public void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG , "about to register with Kinvey");
 
@@ -127,6 +123,15 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             @Override
             public void onSuccess(User result) {
                 Log.v(Client.TAG , "GCM - user updated successfully -> " + result.containsKey("_push"));
+                if (result.containsKey("_push")){
+                    KinveyGCMService.this.onRegistered(gcmRegID);
+
+                }else{
+                    KinveyGCMService.this.onUnregistered(gcmRegID);
+
+                }
+
+
             }
 
             @Override

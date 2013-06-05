@@ -96,14 +96,15 @@ public class GCMPush extends AbstractPush {
             //Registration comes back via an intent
             GCMRegistrar.register(currentApp, senderIDs);
             Log.v(Client.TAG, "GCM - just registered with the GCMRegistrar");
-        } else if (!GCMRegistrar.isRegisteredOnServer(currentApp)) {
-            //registered on GCM but not on Kinvey?
-            Log.v(Client.TAG , "GCM - not registered on server, about to try!");
-
-            KinveyGCMService.registerWithKinvey(getClient(), regId, true);
-            Log.v(Client.TAG , "GCM - just registered with Kinvey");
-
         }
+//        else if (!GCMRegistrar.isRegisteredOnServer(currentApp)) {
+//            //registered on GCM but not on Kinvey?
+//            Log.v(Client.TAG , "GCM - not registered on server, about to try!");
+//
+//            KinveyGCMService.registerWithKinvey(getClient(), regId, true);
+//            Log.v(Client.TAG , "GCM - just registered with Kinvey");
+//
+//        }
         return this;
     }
 
@@ -155,18 +156,6 @@ public class GCMPush extends AbstractPush {
     @Override
     public void disablePush() throws PushRegistrationException {
         GCMRegistrar.unregister(getClient().getContext());
-        getClient().user().remove("_push");
-        getClient().user().update(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-               //no - op, doesn't matter here-- see KinveyGCMService
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                //no - op, doesn't matter here-- see KinveyGCMService
-            }
-        });
     }
 
 

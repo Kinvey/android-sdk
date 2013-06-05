@@ -3,6 +3,7 @@ package com.kinvey.android;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.AppDataOperation;
 import com.kinvey.java.Query;
@@ -59,9 +60,9 @@ public class AsyncAppDataOperation extends AppDataOperation {
 
         private KinveyClientCallback callback;
 
-        public AsyncAppDataRequestBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+        public AsyncAppDataRequestBuilder(Client client, String collectionName, Class myClass) {
 
-            super(collectionName, myClass, appData);
+            super(client, collectionName, myClass);
         }
 
         public AsyncAppDataRequestBuilder setCallback(KinveyClientCallback callback) {
