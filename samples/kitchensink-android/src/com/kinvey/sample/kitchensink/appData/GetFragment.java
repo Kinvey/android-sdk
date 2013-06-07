@@ -18,6 +18,8 @@ import android.util.StringBuilderPrinter;
 import android.view.View;
 import android.widget.*;
 
+import com.google.api.client.json.GenericJson;
+import com.kinvey.android.AsyncCustomEndpoints;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -62,7 +64,12 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
         viewingID.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).getEntity(viewingID.getSelectedItem().toString(), new KinveyClientCallback<MyEntity>() {
+
+                if (viewingID.getSelectedItem().toString().equals("--")){
+                    return;
+                }
+
+                getClient().appData(KitchenSink.collectionName, MyEntity.class).getEntity(viewingID.getSelectedItem().toString(), new KinveyClientCallback<MyEntity>() {
                     @Override
                     public void onSuccess(MyEntity result) {
                         currentName.setText(result.getName());
@@ -71,7 +78,7 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
                     @Override
                     public void onFailure(Throwable error) {
-                        AndroidUtil.toast(GetFragment.this, "something went wrong ->" + error.getMessage());
+                        AndroidUtil.toast(GetFragment.this, "something went wrong on getEntity ->" + error.getMessage());
 
 
                     }
@@ -92,7 +99,6 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
 
     public void getIt() {
-
         getCount();
 
         if (viewingID.getSelectedItem() == null){
@@ -109,7 +115,7 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
             @Override
             public void onFailure(Throwable error) {
-                AndroidUtil.toast(GetFragment.this, "something went wrong ->" + error.getMessage());
+                AndroidUtil.toast(GetFragment.this, "something went wrong on getEntity ->" + error.getMessage());
 
 
             }
@@ -140,7 +146,7 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
     private void getCount() {
 
-        getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).get(new KinveyListCallback<MyEntity>() {
+        getClient().appData(KitchenSink.collectionName, MyEntity.class).get(new KinveyListCallback<MyEntity>() {
             @Override
             public void onSuccess(MyEntity[] result) {
                 currentCount.setText(String.valueOf(result.length));
@@ -149,7 +155,7 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
             @Override
             public void onFailure(Throwable error) {
-                AndroidUtil.toast(getSherlockActivity(), "something went wrong ->" + error.getMessage());
+                AndroidUtil.toast(getSherlockActivity(), "something went wrong on get->" + error.getMessage());
             }
         });
 

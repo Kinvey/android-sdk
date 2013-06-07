@@ -19,12 +19,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.json.MockJsonFactory;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
-import com.kinvey.java.File;
-import com.kinvey.java.Query;
-import com.kinvey.java.UserDiscovery;
-import com.kinvey.java.UserGroup;
+import com.kinvey.java.*;
 import com.kinvey.java.auth.ClientUsers;
 import junit.framework.TestCase;
 
@@ -62,6 +57,11 @@ public abstract class KinveyMockUnitTest extends TestCase {
         @Override
         public File file() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public CustomEndpoints customEndpoints(){
+            return null;
         }
 
         @Override

@@ -69,6 +69,12 @@
         </activity>
 
         <activity
+                android:name=".custom.CustomEndpointActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:label="@string/feature_file">
+        </activity>
+
+        <activity
                 android:name=".account.LoginActivity"
                 android:windowSoftInputMode="adjustResize"
                 android:noHistory="true"

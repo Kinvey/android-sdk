@@ -76,7 +76,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
         addCount = 0;
 
         if ( 5 < (howMany + Integer.valueOf(totalCount.getText().toString()))){
-            AndroidUtil.toast(PutFragment.this, "can't have more than 5!  Try deleting them!");
+            AndroidUtil.toast(PutFragment.this, "Try something besides just creating new entities!  Delete some first.");
             return;
         }
 
@@ -87,10 +87,13 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
             ent.setName("name" + new Random().nextInt(10000));
             ent.getAccess().setGloballyWriteable(true);
 
-            getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
+            getClient().appData(KitchenSink.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
                 @Override
                 public void onSuccess(MyEntity result) {
                     addCount++;
+
+
+                    totalCount.setText(String.valueOf ((Integer.valueOf(totalCount.getText().toString()) + 1)));
                     if (addCount == howMany) {
                         AndroidUtil.toast(PutFragment.this, "Successfully saved " + addCount);
                         countToAdd.setSelection(0);
@@ -100,7 +103,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
 
                 @Override
                 public void onFailure(Throwable error) {
-                    AndroidUtil.toast(PutFragment.this, "something went wrong ->" + error.getMessage());
+                    AndroidUtil.toast(PutFragment.this, "something went wrong on put ->" + error.getMessage());
                 }
 
             });

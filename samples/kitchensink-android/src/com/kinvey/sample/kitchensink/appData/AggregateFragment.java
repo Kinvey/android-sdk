@@ -11,35 +11,27 @@
  */
 package com.kinvey.sample.kitchensink.appData;
 
-import com.kinvey.sample.kitchensink.FeatureActivity;
+import android.view.View;
+import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author edwardf
  * @since 2.0
  */
-public class AppDataActivity extends FeatureActivity {
-
+public class AggregateFragment extends UseCaseFragment{
+    @Override
+    public int getViewID() {
+        return R.layout.feature_appdata_aggregate;
+    }
 
     @Override
-    public List<UseCaseFragment> getFragments() {
+    public void bindViews(View v) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 
-        ArrayList<UseCaseFragment> ret = new ArrayList<UseCaseFragment>();
-        PutFragment put = new PutFragment();
-        ret.add(put);
-
-        GetFragment get = new GetFragment();
-        ret.add(get);
-
-        QueryFragment query = new QueryFragment();
-        ret.add(query);
-
-        AggregateFragment agg = new AggregateFragment();
-        ret.add(agg);
-
-        return ret;
+    @Override
+    public String getTitle() {
+        return "Aggregates";
     }
 }

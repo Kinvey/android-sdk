@@ -121,6 +121,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     protected abstract ClientUsers getClientUsers();
 
+    public abstract CustomEndpoints customEndpoints();
+
     /**
      * Pings the Kinvey backend service with a logged in user.
      *

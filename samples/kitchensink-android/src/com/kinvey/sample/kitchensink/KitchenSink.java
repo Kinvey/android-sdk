@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.kinvey.android.AsyncCustomEndpoints;
 import com.kinvey.android.Client;
 import com.kinvey.sample.kitchensink.account.LoginActivity;
 
@@ -68,17 +69,6 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
         //
         Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
 
-        //create kinvey client and init appdata here.
-//        AbstractClient.initialize(appKey, appSecret, getApplicationContext());//.appData(collectionName, MyEntity.class);
-//        try {
-//            AbstractClient.getInstance().user().login();
-//        } catch(IOException ex) {
-//            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
-//            Logger.getLogger(HttpTransport.class.getName()).log(Level.SEVERE, ex.getMessage());
-//        }
-
-
-
     }
 
     private void bindViews(){
@@ -90,7 +80,6 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
                         Activity.LAYOUT_INFLATER_SERVICE));
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(this);
-
     }
 
     @Override
@@ -113,6 +102,7 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
         switch (item.getItemId()) {
 
             case R.id.menu_item_login:
+                ((KitchenSinkApplication)getApplicationContext()).getClient().user().logout().execute();
                 login();
                 return true;
             default:
@@ -122,7 +112,7 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
 
     private void login(){
        Intent login = new Intent(this, LoginActivity.class);
-        startActivity(login);
+       startActivity(login);
 
     }
 

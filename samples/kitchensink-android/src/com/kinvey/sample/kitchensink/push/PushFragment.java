@@ -13,6 +13,8 @@
  */
 package com.kinvey.sample.kitchensink.push;
 
+import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -52,6 +54,20 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
     public void registerPush() {
 
         getApplicationContext().getClient().push().initialize(getApplicationContext());
+
+
+        //Not going to hook up intents for this sample, so just wait for five seconds before redrawing
+        new CountDownTimer(5000,1000){
+
+            @Override
+            public void onTick(long miliseconds){}
+
+            @Override
+            public void onFinish(){
+                //after 5 seconds update the status
+                pushStatus.setText(getPushStatus());
+            }
+        }.start();
 
 
     }

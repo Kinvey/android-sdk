@@ -9,7 +9,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.kitchensink.appData;
+package com.kinvey.sample.kitchensink.custom;
 
 import com.kinvey.sample.kitchensink.FeatureActivity;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
@@ -21,25 +21,14 @@ import java.util.List;
  * @author edwardf
  * @since 2.0
  */
-public class AppDataActivity extends FeatureActivity {
-
-
+public class CustomEndpointActivity extends FeatureActivity {
     @Override
     public List<UseCaseFragment> getFragments() {
 
         ArrayList<UseCaseFragment> ret = new ArrayList<UseCaseFragment>();
-        PutFragment put = new PutFragment();
-        ret.add(put);
+        EndpointFragment end = new EndpointFragment();
+        ret.add(end);
 
-        GetFragment get = new GetFragment();
-        ret.add(get);
 
-        QueryFragment query = new QueryFragment();
-        ret.add(query);
-
-        AggregateFragment agg = new AggregateFragment();
-        ret.add(agg);
-
-        return ret;
-    }
+        return ret;    }
 }

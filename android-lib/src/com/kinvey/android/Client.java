@@ -90,6 +90,7 @@ public class Client extends AbstractClient {
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
     private AsyncUser currentUser;
+    private AsyncCustomEndpoints customEndpoints;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -265,6 +266,36 @@ public class Client extends AbstractClient {
                 file = new AsyncFile(this);
             }
             return file;
+        }
+    }
+
+    /**
+     * Custom Endpoints factory method
+     *<p>
+     * Returns the instance of {@link com.kinvey.java.CustomEndpoints} used for executing RPC requests.  Only one instance
+     * of Custom Endpoints is created for each instance of the Kinvey Client.
+     *</p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+      CustomEndpoints myCustomEndpoints = kinveyClient.customEndpoints();
+     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
+     */
+    @Override
+    public AsyncCustomEndpoints customEndpoints(){
+        synchronized (lock){
+            if (customEndpoints == null){
+                customEndpoints = new AsyncCustomEndpoints(this);
+            }
+            return customEndpoints;
         }
     }
 

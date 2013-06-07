@@ -12,6 +12,7 @@
 package com.kinvey.sample.kitchensink;
 
 import com.kinvey.sample.kitchensink.appData.AppDataActivity;
+import com.kinvey.sample.kitchensink.custom.CustomEndpointActivity;
 import com.kinvey.sample.kitchensink.file.FileActivity;
 import com.kinvey.sample.kitchensink.push.PushActivity;
 
@@ -36,6 +37,11 @@ public class Loader {
 
         Feature push = new Feature("Push", "Enable Push notifications using Urban Airship", PushActivity.class);
         featureList.add(push);
+
+        Feature customEndpoint = new Feature("Custom Endpoints", "Define behavoir on you backend and run it from the client.", CustomEndpointActivity.class);
+        featureList.add(customEndpoint);
+
+
 
         return featureList;
     }

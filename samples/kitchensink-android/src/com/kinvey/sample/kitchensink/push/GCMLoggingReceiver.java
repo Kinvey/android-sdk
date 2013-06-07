@@ -25,6 +25,7 @@ public class GCMLoggingReceiver extends KinveyGCMService {
     @Override
     public void onRegistered(String gcmID) {
         Log.i(Client.TAG, "GCM - onRegister, new gcmID is: " + gcmID);
+
     }
 
     @Override

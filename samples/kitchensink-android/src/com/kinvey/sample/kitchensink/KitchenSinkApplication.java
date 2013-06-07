@@ -16,8 +16,6 @@ package com.kinvey.sample.kitchensink;
 import android.app.Application;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.push.PushOptions;
-import com.kinvey.android.push.UrbanAirshipPushOptions;
 
 /**
  * @author mjsalinger
@@ -37,13 +35,6 @@ public class KitchenSinkApplication extends Application {
         myClient = new Client.Builder(this.getApplicationContext()).build();
     }
 
-    public void registerPush() {
-        PushOptions options = myClient.push().getPushOptions(pushAppKey, pushAppSecret,
-                false);
-      //  myClient.push().setIntentReceiver(com.kinvey.sample.kitchensink.push.CustomPushReceiver.class);
-        myClient.push().initialize(options, this);
-
-    }
 
     public void setsClient(Client myClient) {
         this.myClient = myClient;
