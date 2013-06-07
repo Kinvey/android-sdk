@@ -24,23 +24,22 @@ import java.io.IOException;
 /**
  * Wraps the {@link com.kinvey.java.CustomEndpoints} public methods in asynchronous functionality using native Android AsyncTask.
  * <p>
- *  NOTE:  It is the responsibility of the user to either use a {@code com.kinvey.android.callback.KinveyListCallback} or
- *  a {@code com.kinvey.android.callback.KinveyClientCallback} depending on what their Custom Endpoint returns.
+ *  NOTE:  It is the responsibility of the user to either use a {@link com.kinvey.android.callback.KinveyListCallback} or
+ *  a {@link com.kinvey.java.core.KinveyClientCallback} depending on what their Custom Endpoint returns.
  * </p>
  * <p>
  * Sample usage:
  * <pre>
  * {@code
- *    mKinveyClient.customEndpoints().callEndpoint("myCustomCommand", null, new KinveyListCallback<GenericJson>() {
-        @Override
-        public void onSuccess(GenericJson[] result) {
-            results.setText(result[0].toString());
-        }
-        @Override
-        public void onFailure(Throwable error) {
-            results.setText("Uh oh -> " + error);
-        }
-    });
+ *      mKinveyClient.customEndpoints().callEndpoint("myCustomCommand", null, new KinveyListCallback<GenericJson>() {
+ *        public void onSuccess(GenericJson[] result) {
+ *              results.setText(result[0].toString());
+ *          }
+ *        public void onFailure(Throwable error) {
+ *              results.setText("Uh oh -> " + error);
+ *          }
+ *      });
+ * }
  * </pre>
  *  The above sample assumes the Custom Endpoint takes no input and returns an array of JSON objects.
  * </p>
