@@ -43,6 +43,9 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     public static final String MESSAGE_FROM_GCM = "msg";
 
+    private Client client;
+
+
     /**
      * Public Constructor used by operating system.
      */
@@ -51,10 +54,20 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     }
 
     @Override
-    protected void onRegistered(Context context, String registrationId) {
+    protected void onRegistered(Context context, final String registrationId) {
         Log.v(TAG, "Device registered: regId = " + registrationId);
-        Client myClient = new Client.Builder(context).build();
-        registerWithKinvey(myClient, registrationId, true);
+       client = new Client.Builder(context).setRetrieveUserCallback(new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                registerWithKinvey(registrationId, true);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        }).build();
+
     }
 
     @Override
@@ -93,14 +106,23 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
 
 
+    private void registerWithKinvey(String gcmID, boolean register){
+        registerWithKinvey(client, gcmID, register);
+    }
+
     public void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG , "about to register with Kinvey");
+        if (client == null){
+            Log.e(Client.TAG, "GCMService got garbage collected, cannot complete registration!");
+            return;
+        }
 
         if (!client.user().isUserLoggedIn()) {
             Log.e(Client.TAG, "Need to login a current user before registering for push!");
             return;
         }
+
         if (register) {
             //send registration to Kinvey
             GCMPush.PushConfig config = new GCMPush.PushConfig();
@@ -118,7 +140,6 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             //remove push from user object
             client.user().remove("_push");
         }
-
         client.user().update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {

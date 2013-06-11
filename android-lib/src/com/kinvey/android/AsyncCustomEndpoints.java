@@ -41,7 +41,7 @@ import java.io.IOException;
  *      });
  * }
  * </pre>
- *  The above sample assumes the Custom Endpoint takes no input and returns an array of JSON objects.
+ *  The above sample assumes the Custom Endpoint takes no input {@code null} and returns an array of JSON objects.
  * </p>
  *
  * @author edwardf

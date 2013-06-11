@@ -29,9 +29,6 @@ import java.util.ArrayList;
  *
  */
 public class KinveyMetaData extends GenericJson{
-//
-//    @Key("_acl")
-//    private AccessControlList accessControlList;
 
     public static final String JSON_FIELD_NAME = "_kmd";
 

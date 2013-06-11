@@ -327,7 +327,8 @@ public class AsyncUser extends User {
      * @param callback KinveyUserCallback
      */
     void retrieveMetadata(KinveyUserCallback callback) {
-        new RetrieveMetaData(callback).execute(AsyncClientRequest.ExecutorType.ANDROIDTHREADPOOL);
+        new RetrieveMetaData(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
     }
 
     /**

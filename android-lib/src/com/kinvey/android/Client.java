@@ -712,15 +712,20 @@ public class Client extends AbstractClient {
                 Log.e(TAG, "Could not retrieve user Credentials");
             }
 
-            client.user().retrieveMetadata(retrieveUserCallback != null ? retrieveUserCallback : new KinveyUserCallback() {
+            client.user().retrieveMetadata(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     client.setCurrentUser(result);
+                    if (retrieveUserCallback != null){
+                        retrieveUserCallback.onSuccess(result);
+                    }
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    //
+                    if (retrieveUserCallback != null){
+                        retrieveUserCallback.onFailure(error);
+                    }
                 }
             });
         }

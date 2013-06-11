@@ -17,7 +17,7 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 
 /**
- * Use this for async callbacks
+ * This callback is typed for a {@link com.kinvey.java.User} object, use it for operations on Users.
  *
  * @author edwardf
  * @since 2.0

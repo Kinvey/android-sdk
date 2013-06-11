@@ -13,7 +13,19 @@
  */
 package com.kinvey.android.push;
 
+import static com.google.android.gcm.GCMConstants.ERROR_SERVICE_NOT_AVAILABLE;
+import static com.google.android.gcm.GCMConstants.EXTRA_ERROR;
+import static com.google.android.gcm.GCMConstants.EXTRA_REGISTRATION_ID;
+import static com.google.android.gcm.GCMConstants.EXTRA_SPECIAL_MESSAGE;
+import static com.google.android.gcm.GCMConstants.EXTRA_TOTAL_DELETED;
+import static com.google.android.gcm.GCMConstants.EXTRA_UNREGISTERED;
+import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_LIBRARY_RETRY;
+import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE;
+import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK;
+import static com.google.android.gcm.GCMConstants.VALUE_DELETED_MESSAGES;
+
 import android.app.Application;
+import android.content.Intent;
 import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.api.client.json.GenericJson;
@@ -47,6 +59,7 @@ public class GCMPush extends AbstractPush {
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
 
+
     public GCMPush(Client client, boolean inProduction, String... senderIDs) {
         super(client);
         this.senderIDs = senderIDs;
@@ -67,7 +80,7 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(Application currentApp) {
-        return  this.initialize(null, currentApp);
+        return this.initialize(null, currentApp);
     }
 
 
@@ -96,22 +109,23 @@ public class GCMPush extends AbstractPush {
             //Registration comes back via an intent
             GCMRegistrar.register(currentApp, senderIDs);
             Log.v(Client.TAG, "GCM - just registered with the GCMRegistrar");
+        }else{
+            Log.v(Client.TAG, "Client is already initialized with GCMid: " + regId);
+            if (isPushEnabled()){
+                Log.v(Client.TAG, "Client is fully initialized and push is enabled");
+            }else{
+                Log.v(Client.TAG, "About to register with Kinvey");
+//                KinveyGCMService.registerWithKinvey(getClient(), regId, true);
+
+                Intent registrationIntent = new Intent(INTENT_FROM_GCM_REGISTRATION_CALLBACK);
+                registrationIntent.putExtra(EXTRA_REGISTRATION_ID, regId);
+                registrationIntent.putExtra(EXTRA_ERROR, "");
+
+                currentApp.startService(registrationIntent);
+            }
         }
-//        else if (!GCMRegistrar.isRegisteredOnServer(currentApp)) {
-//            //registered on GCM but not on Kinvey?
-//            Log.v(Client.TAG , "GCM - not registered on server, about to try!");
-//
-//            KinveyGCMService.registerWithKinvey(getClient(), regId, true);
-//            Log.v(Client.TAG , "GCM - just registered with Kinvey");
-//
-//        }
         return this;
     }
-
-
-
-
-
 
 
     /**

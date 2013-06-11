@@ -336,10 +336,11 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
-
-            this.resolve = Joiner.on(",").join(resolves);
-            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
-            this.retainReferences = Boolean.toString(retain);
+            if (this.resolve != null){
+                this.resolve = Joiner.on(",").join(resolves);
+                this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+                this.retainReferences = Boolean.toString(retain);
+            }
 
 
         }
@@ -392,10 +393,11 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
             this.attachments = attachments;
             this.collectionName = getCollectionName();
             this.entityID = entityID;
-
-            this.resolve = Joiner.on(",").join(resolves);
-            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
-            this.retainReferences = Boolean.toString(retain);
+            if (this.resolve != null){
+                this.resolve = Joiner.on(",").join(resolves);
+                this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+                this.retainReferences = Boolean.toString(retain);
+            }
         }
 
 
