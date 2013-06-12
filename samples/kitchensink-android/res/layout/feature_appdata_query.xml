@@ -15,45 +15,24 @@
             <TextView android:text="@string/appdata_query_description"
                       style="@style/usecase_description"/>
 
+
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Reset Query: "
+                <TextView android:text="Query for current user"
                           style="@style/usecase_row_label"/>
 
 
-                <Button android:id="@+id/appdata_query_reset"
-                        android:text="Reset"
+                <Button android:id="@+id/appdata_query_current"
+                        android:text="current user"
                         style="@style/usecase_action_button"/>
             </LinearLayout>
 
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Add equals: "
+                <TextView android:text="Query for not current user"
                           style="@style/usecase_row_label"/>
 
 
-                <Button android:id="@+id/appdata_query_equals"
-                        android:text="equals"
-                        style="@style/usecase_action_button"/>
-            </LinearLayout>
-
-
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Add less than: "
-                          style="@style/usecase_row_label"/>
-
-
-                <Button android:id="@+id/appdata_query_less_than"
-                        android:text="less than"
-                        style="@style/usecase_action_button"/>
-            </LinearLayout>
-
-
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Add greater than"
-                          style="@style/usecase_row_label"/>
-
-
-                <Button android:id="@+id/appdata_query_greater_than"
-                        android:text="greater than"
+                <Button android:id="@+id/appdata_query_not_current"
+                        android:text="not current user"
                         style="@style/usecase_action_button"/>
             </LinearLayout>
 

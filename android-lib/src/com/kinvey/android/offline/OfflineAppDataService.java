@@ -32,9 +32,6 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
- * @author edwardf
- * @since 2.0
- *
  *
  * This IntentService can be used to execute App Data client requests.  The current implementation is coupled with an
  * OfflineStore, -- this class is listening for an intent OFFLINE_SYNC that is kicked off by the store when a new client
@@ -49,6 +46,11 @@ import java.util.*;
  * The size of this batch represents the number of service calls to kick off at the same time, and is configurable.
  *
  * This Service also supports staggering calls, so that there is a delay between kicking off batches.
+ *
+ *
+ * @author edwardf
+ * @since 2.0
+ *
  */
 public class OfflineAppDataService extends IntentService {
 

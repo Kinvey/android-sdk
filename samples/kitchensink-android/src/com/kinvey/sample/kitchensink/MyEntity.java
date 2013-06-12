@@ -26,20 +26,15 @@ public class MyEntity extends GenericJson{
     @Key("_id")
     private String id;
 
-//    @Key("_geoloc")
-//    private Location location;
-
     @Key("name")
     private String name;
-
-    public MyEntity(){
-        this.acl = new KinveyMetaData.AccessControlList();
-    }
 
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
 
-
+    public MyEntity(){
+        this.acl = new KinveyMetaData.AccessControlList();
+    }
 
     public String getId() {
         return id;

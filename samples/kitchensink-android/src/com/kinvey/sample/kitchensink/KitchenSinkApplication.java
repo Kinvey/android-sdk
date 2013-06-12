@@ -33,6 +33,7 @@ public class KitchenSinkApplication extends Application {
     public void onCreate() {
         super.onCreate();
         myClient = new Client.Builder(this.getApplicationContext()).build();
+
     }
 
 

@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import com.kinvey.java.Query;
+import com.kinvey.sample.kitchensink.KitchenSink;
+import com.kinvey.sample.kitchensink.MyEntity;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -24,18 +26,19 @@ import com.kinvey.sample.kitchensink.UseCaseFragment;
  */
 public class QueryFragment extends UseCaseFragment implements View.OnClickListener{
 
-    private Query q;
+    private Button current;
+    private Button notCurrent;
 
-    private Button resetQuery;
-    private Button lessThan;
-    private Button greaterThan;
-    private Button equals;
+
+
+
+
+
 
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        q = new Query();
     }
 
     @Override
@@ -45,17 +48,13 @@ public class QueryFragment extends UseCaseFragment implements View.OnClickListen
 
     @Override
     public void bindViews(View v) {
-        resetQuery = (Button) v.findViewById(R.id.appdata_query_reset);
-        lessThan = (Button) v.findViewById(R.id.appdata_query_less_than);
-        greaterThan = (Button) v.findViewById(R.id.appdata_query_greater_than);
-        equals = (Button) v.findViewById(R.id.appdata_query_equals);
+        current = (Button) v.findViewById(R.id.appdata_query_current);
+        notCurrent = (Button) v.findViewById(R.id.appdata_query_not_current);
 
-        resetQuery.setOnClickListener(this);
-        lessThan.setOnClickListener(this);
-        greaterThan.setOnClickListener(this);
-        equals.setOnClickListener(this);
+        current.setOnClickListener(this);
+        notCurrent.setOnClickListener(this);
 
-
+       // q.equals("_acl.creator", source.getAuthorID());
     }
 
     @Override
@@ -65,14 +64,22 @@ public class QueryFragment extends UseCaseFragment implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        if (v == resetQuery){
-            q = new Query();
-        }else if (v == lessThan){
-            q.greaterThan("", "");
-        }else if (v == greaterThan){
-            q.lessThan("","");
-        }else if (v == equals){
-            q.equals("","");
+        if (v == current){
+            queryForCurrent();
+        }else if (v == notCurrent){
+            queryForNotCurrent();
         }
+    }
+
+    private void queryForCurrent(){}
+
+    private void queryForNotCurrent(){}
+
+    private void executeQueryAndUpdateView(Query q){
+
+        getClient().appData(KitchenSink.collectionName, MyEntity.class).get(new Query(), null );
+
+
+
     }
 }
