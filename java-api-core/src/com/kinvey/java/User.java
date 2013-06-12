@@ -241,7 +241,9 @@ public class User extends GenericJson   {
         User ret = this.retrieveBlocking().execute();
         String authToken = this.authToken;
         this.putAll(ret.getUnknownKeys());
-        this.authToken = authToken;
+        this.username = ret.username;
+//        this.authToken = authToken;
+
         return this;
     }
 
