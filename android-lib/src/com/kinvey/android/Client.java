@@ -690,6 +690,21 @@ public class Client extends AbstractClient {
             return this;
         }
 
+        public Client.Builder enableGCM(boolean gcmEnabled){
+            this.GCM_Enabled = gcmEnabled;
+            return this;
+        }
+
+        public Client.Builder setSenderIDs(String senderID){
+            this.GCM_SenderID = senderID;
+            return this;
+        }
+
+        public Client.Builder setGcmInProduction(boolean inProduction){
+            this.GCM_InProduction = inProduction;
+            return this;
+        }
+
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws AndroidCredentialStoreException, IOException {
             Credential credential = null;

@@ -168,6 +168,8 @@ public class KinveyAuthRequest extends GenericJson {
                 , "/user/{appKey}/" + (this.create ? "" : "login")
                 , this
                 , true));
+
+        //TODO edwardf I think the third arguement *this* is causing the issue with strange queries getting attached
     }
 
 

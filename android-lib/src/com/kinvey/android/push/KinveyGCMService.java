@@ -56,7 +56,22 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, final String registrationId) {
         Log.v(TAG, "Device registered: regId = " + registrationId);
-       client = new Client.Builder(context).setRetrieveUserCallback(new KinveyUserCallback() {
+
+
+        Client.Builder builder;
+        if (getAppKey() == null){
+            builder = new Client.Builder(context);
+        }else{
+            builder = new Client.Builder(getAppKey(), getAppSecret(), context);
+        }
+
+        if (gcmEnabled()){
+            builder.setSenderIDs(getSenderIDs());
+            builder.setGcmInProduction(inProduction());
+            builder.enableGCM(gcmEnabled());
+        }
+
+        builder.setRetrieveUserCallback(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 registerWithKinvey(registrationId, true);
@@ -64,17 +79,54 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
             @Override
             public void onFailure(Throwable error) {
-                //To change body of implemented methods use File | Settings | File Templates.
+                Log.e(TAG, "GCM registration failed to retrieve user!");
             }
-        }).build();
+        });
+
+        client = builder.build();
+
+
 
     }
 
+    public String getSenderIDs(){
+        return null;
+    }
+
+    public String getAppKey(){
+        return null;
+    }
+
+    public String getAppSecret(){
+        return null;
+    }
+
+    public boolean gcmEnabled(){
+        return false;
+    }
+
+    public boolean inProduction(){
+        return true;
+    }
+
+
+
+
     @Override
-    protected void onUnregistered(Context context, String registrationId) {
+    protected void onUnregistered(Context context, final String registrationId) {
         Log.v(TAG, "Device unregistered");
-        Client myClient = new Client.Builder(context).build();
-        registerWithKinvey(myClient, registrationId, false);
+        client = new Client.Builder(context).setRetrieveUserCallback(new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                registerWithKinvey(registrationId, false);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        }).build();
+        registerWithKinvey(client, registrationId, false);
     }
 
     @Override
@@ -139,11 +191,12 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         } else {
             //remove push from user object
             client.user().remove("_push");
+            client.user().put("_push", null);
         }
         client.user().update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
-                Log.v(Client.TAG , "GCM - user updated successfully -> " + result.containsKey("_push"));
+                Log.v(Client.TAG , "GCM - user updated successfully, push exists? -> " + result.containsKey("_push"));
                 if (result.containsKey("_push")){
                     KinveyGCMService.this.onRegistered(gcmRegID);
 
