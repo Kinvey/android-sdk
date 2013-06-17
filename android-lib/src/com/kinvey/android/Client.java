@@ -438,7 +438,7 @@ public class Client extends AbstractClient {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = new UrbanAirshipPush(this);
+                pushProvider = new GCMPush(this, true, "");
             }
             return pushProvider;
         }

@@ -70,6 +70,9 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             builder.setGcmInProduction(inProduction());
             builder.enableGCM(gcmEnabled());
         }
+        if (getBaseURL() != null){
+            builder.setBaseUrl(getBaseURL());
+        }
 
         builder.setRetrieveUserCallback(new KinveyUserCallback() {
             @Override
@@ -109,13 +112,34 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         return true;
     }
 
+    public String getBaseURL(){
+        return null;
+    }
+
 
 
 
     @Override
     protected void onUnregistered(Context context, final String registrationId) {
         Log.v(TAG, "Device unregistered");
-        client = new Client.Builder(context).setRetrieveUserCallback(new KinveyUserCallback() {
+
+        Client.Builder builder;
+        if (getAppKey() == null){
+            builder = new Client.Builder(context);
+        }else{
+            builder = new Client.Builder(getAppKey(), getAppSecret(), context);
+        }
+
+        if (gcmEnabled()){
+            builder.setSenderIDs(getSenderIDs());
+            builder.setGcmInProduction(inProduction());
+            builder.enableGCM(gcmEnabled());
+        }
+        if (getBaseURL() != null){
+            builder.setBaseUrl(getBaseURL());
+        }
+
+        builder.setRetrieveUserCallback(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 registerWithKinvey(registrationId, false);
@@ -123,10 +147,12 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
             @Override
             public void onFailure(Throwable error) {
-                //To change body of implemented methods use File | Settings | File Templates.
+                Log.e(TAG, "GCM registration failed to retrieve user!");
             }
-        }).build();
-        registerWithKinvey(client, registrationId, false);
+        });
+
+        client = builder.build();
+
     }
 
     @Override
@@ -213,8 +239,6 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
                 Log.v(Client.TAG , "GCM - user update error: " + error);
             }
         });
-
-
     }
 
     @Override
