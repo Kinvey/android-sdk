@@ -65,9 +65,7 @@
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-jackson:1.13.1-beta" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.12" level="project" />
     <orderEntry type="module" module-name="java-api-core" />
-    <orderEntry type="library" name="Maven: com.actionbarsherlock:actionbarsherlock:apklib:4.2.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.android:support-v4:r7" level="project" />
-    <orderEntry type="library" name="Maven: com.viewpagerindicator:library:apklib:2.4.1" level="project" />
     <orderEntry type="jdk" jdkName="Android 4.1.2 Platform" jdkType="Android SDK" />
     <orderEntry type="module" module-name="~apklib-com.actionbarsherlock_actionbarsherlock_4.2.0" />
     <orderEntry type="module" module-name="~apklib-com.viewpagerindicator_library_2.4.1" />
