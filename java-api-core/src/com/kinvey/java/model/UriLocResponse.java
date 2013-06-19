@@ -20,6 +20,7 @@ import com.google.api.client.util.Key;
 /**
  * Generic blob service response object for upload and download url requests.
  *
+ * @deprecated  with new file API
  */
 public class UriLocResponse extends GenericJson {
 

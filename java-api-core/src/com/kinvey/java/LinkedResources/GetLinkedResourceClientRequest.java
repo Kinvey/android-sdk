@@ -13,6 +13,7 @@
  */
 package com.kinvey.java.LinkedResources;
 
+import com.kinvey.java.File;
 import com.kinvey.java.core.*;
 
 import java.io.ByteArrayOutputStream;
@@ -97,7 +98,11 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 entity.getFile(key).setOutput(new ByteArrayOutputStream());
 
                 getAbstractKinveyClient().file().setDownloaderProgressListener(download);
-                getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
+
+                File.FileMetaData meta = new File.FileMetaData(((Map) entity.get(key)).get("_loc").toString());
+
+                getAbstractKinveyClient().file().downloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
+
             }
         }
 

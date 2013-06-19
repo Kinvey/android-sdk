@@ -35,6 +35,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.kinvey.java.File;
 import com.kinvey.java.model.UriLocResponse;
 
 /**
@@ -295,7 +296,7 @@ public class MediaHttpUploader {
         GenericUrl uploadUrl;
         try {
             JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
-            uploadUrl = new GenericUrl(parse(jsonObjectParser, initialResponse).getTempUploadLoc());
+            uploadUrl = new GenericUrl(parse(jsonObjectParser, initialResponse).getUploadUrl());
         } finally {
             initialResponse.disconnect();
         }
@@ -375,7 +376,7 @@ public class MediaHttpUploader {
 
     /**
      * @author m0rganic
-     *
+     * @deprecated
      */
     public static class UploadUrlResponse extends UriLocResponse {
         /**
@@ -387,8 +388,8 @@ public class MediaHttpUploader {
     }
 
     /** package-level for testing **/
-    UploadUrlResponse parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
-        return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), UploadUrlResponse.class);
+    File.FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
+        return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), File.FileMetaData.class);
     }
 
     /**

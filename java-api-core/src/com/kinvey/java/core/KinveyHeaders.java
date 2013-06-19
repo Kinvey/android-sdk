@@ -25,7 +25,7 @@ public class KinveyHeaders extends HttpHeaders {
     private String VERSION = "2.4.2";
 
     @Key("X-Kinvey-API-Version")
-    private String kinveyApiVersion = "2";
+    private String kinveyApiVersion = "3";
 
     private String userAgent = "android-kinvey-http/"+ VERSION;
 

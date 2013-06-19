@@ -32,6 +32,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.kinvey.java.File;
 import com.kinvey.java.model.UriLocResponse;
 
 /**
@@ -146,7 +147,7 @@ public class MediaHttpDownloader {
 
     /**
      * @author m0rganic
-     *
+     * @deprecated
      */
     public static class DownloadUrlResponse extends UriLocResponse {
 
@@ -160,8 +161,8 @@ public class MediaHttpDownloader {
     }
 
     /** package-level for testing **/
-    DownloadUrlResponse parse (JsonObjectParser parser, HttpResponse response) throws IOException {
-        return parser.parseAndClose(response.getContent(), response.getContentCharset(), DownloadUrlResponse.class);
+    File.FileMetaData parse (JsonObjectParser parser, HttpResponse response) throws IOException {
+        return parser.parseAndClose(response.getContent(), response.getContentCharset(), File.FileMetaData.class);
     }
 
     /**
@@ -187,9 +188,9 @@ public class MediaHttpDownloader {
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
 
         // Make initial request to get the unique upload URL.
-        DownloadUrlResponse initialResponse = executeDownloadInitiation(initiationClientRequest);
+        File.FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
         GenericUrl downloadUrl;
-        downloadUrl = new GenericUrl(initialResponse.getDownloadLoc());
+        downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
         while (true) {
@@ -236,7 +237,7 @@ public class MediaHttpDownloader {
      * @return
      * @throws IOException
      */
-    private DownloadUrlResponse executeDownloadInitiation(AbstractKinveyClientRequest initiationRequest) throws IOException {
+    private File.FileMetaData executeDownloadInitiation(AbstractKinveyClientRequest initiationRequest) throws IOException {
         updateStateAndNotifyListener(DownloadState.INITIATION_STARTED);
         HttpResponse response = initiationRequest.executeUnparsed();
         JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationRequest.getAbstractKinveyClient().getObjectParser();

@@ -20,7 +20,9 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
@@ -54,9 +56,14 @@ public class DeleteFragment extends UseCaseFragment implements View.OnClickListe
     }
 
     private void delete() {
-        getApplicationContext().getClient().file().delete(FileActivity.FILENAME, new KinveyClientCallback<Void>() {
+
+        Query q = new Query();
+//        q.equals("_filename", FileActivity.FILENAME);
+        com.kinvey.java.File.FileMetaData meta = new com.kinvey.java.File.FileMetaData(FileActivity.FILENAME);
+        meta.setId(FileActivity.FILENAME);
+        getApplicationContext().getClient().file().delete(meta, new KinveyClientCallback<KinveyDeleteResponse>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(KinveyDeleteResponse result) {
                 File file = getTarget();
 
                 if (file.exists()) {

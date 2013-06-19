@@ -177,7 +177,11 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                 save(text, target);
 
                 //Call the kinvey specific task to perform upload
-                getApplicationContext().getClient().file().upload(getTarget(), new UploaderProgressListener() {
+                com.kinvey.java.File.FileMetaData meta = new com.kinvey.java.File.FileMetaData(getTarget().getName())     ;
+                meta.setId(getTarget().getName());
+
+
+                getApplicationContext().getClient().file().upload(meta, getTarget(), new UploaderProgressListener() {
                     @Override
                     public void onSuccess(Void result) {
                         Log.i(KitchenSink.TAG, "successfully upload: " + getTarget().length() + " byte file.");

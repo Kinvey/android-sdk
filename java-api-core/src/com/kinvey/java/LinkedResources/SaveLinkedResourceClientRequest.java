@@ -15,6 +15,7 @@ package com.kinvey.java.LinkedResources;
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.File;
 import com.kinvey.java.core.*;
 
 import java.io.ByteArrayInputStream;
@@ -83,7 +84,11 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
                         getAbstractKinveyClient().file().setUploadProgressListener(upload);
 
-                        getAbstractKinveyClient().file().uploadBlocking(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName(), mediaContent).execute();
+                        File.FileMetaData meta = new File.FileMetaData(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
+
+                        getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
+
+
 
 
                         String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();

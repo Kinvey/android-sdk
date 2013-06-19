@@ -36,7 +36,6 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.OfflineAppData;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.push.UrbanAirshipPush;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;

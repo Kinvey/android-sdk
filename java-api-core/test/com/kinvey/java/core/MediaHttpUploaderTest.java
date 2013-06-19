@@ -17,6 +17,7 @@ import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
+import com.kinvey.java.File;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +47,8 @@ public class MediaHttpUploaderTest extends TestCase {
         when(mockContent.getInputStream())
                 .thenReturn(mock(InputStream.class));
         MediaHttpUploader objectUnderTest = spy(new MediaHttpUploader(mockContent, new MockHttpTransport(), null));
-        MediaHttpUploader.UploadUrlResponse mockUriResponse = mock(MediaHttpUploader.UploadUrlResponse.class);
-        when(mockUriResponse.getTempUploadLoc()).thenReturn(HttpTesting.SIMPLE_URL);
+        File.FileMetaData mockUriResponse = mock(File.FileMetaData.class);
+        when(mockUriResponse.getUploadUrl()).thenReturn(HttpTesting.SIMPLE_URL);
         doReturn(mockUriResponse)
                 .when(objectUnderTest)
                 .parse(any(JsonObjectParser.class), any(HttpResponse.class));

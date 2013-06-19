@@ -390,7 +390,7 @@ public class CityWatch extends SherlockFragmentActivity implements ActionBar.Tab
 
                     CityWatchEntity e = nearbyEntities.get(i);
                     if (e.getImageURL() != null) {
-                        url = new URL(kinveyClient.file().getDownloadUrlBlocking(e.getImageURL()).execute().getBlobTemporaryUri());
+                        url = new URL(kinveyClient.file().downloadMetaDataBlocking(e.getImageURL()).execute().getDownloadURL());
                         /*do {
                             opts.inSampleSize = (int) Math.pow(2, scaleFactor++);
                             BitmapFactory.decodeStream((InputStream) url.getContent(), null, opts);
