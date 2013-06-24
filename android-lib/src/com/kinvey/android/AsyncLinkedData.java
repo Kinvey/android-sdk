@@ -93,7 +93,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null, null, 0 , false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(query, callback, download, null, null, 0 , false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -113,7 +113,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] resolves, int resolve_depth, boolean retain) {
-        new Get(new Query(), callback, download, null, resolves, resolve_depth , retain).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(query, callback, download, null, resolves, resolve_depth , retain).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 

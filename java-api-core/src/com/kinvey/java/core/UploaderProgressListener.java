@@ -18,6 +18,9 @@
  */
 package com.kinvey.java.core;
 
+
+import com.kinvey.java.model.FileMetaData;
+
 import java.io.IOException;
 
 
@@ -52,23 +55,35 @@ import java.io.IOException;
  * </pre>
  *
  */
-public interface UploaderProgressListener extends KinveyClientCallback<Void>{
+public interface UploaderProgressListener extends KinveyClientCallback<Void> {
 
-  /**
-   * Called to notify that progress has been changed.
-   *
-   * <p>
-   * This method is called once before and after the initiation request. For media uploads it is
-   * called multiple times depending on how many chunks are uploaded. Once the upload completes it
-   * is called one final time.
-   * </p>
-   *
-   * <p>
-   * The upload state can be queried by calling {@link MediaHttpUploader#getUploadState} and the
-   * progress by calling {@link MediaHttpUploader#getProgress}.
-   * </p>
-   *
-   * @param uploader Media HTTP uploader
-   */
-  public void progressChanged(MediaHttpUploader uploader) throws IOException;
+    /**
+     * Called to notify that progress has been changed.
+     * <p/>
+     * <p>
+     * This method is called once before and after the initiation request. For media uploads it is
+     * called multiple times depending on how many chunks are uploaded. Once the upload completes it
+     * is called one final time.
+     * </p>
+     * <p/>
+     * <p>
+     * The upload state can be queried by calling {@link MediaHttpUploader#getUploadState} and the
+     * progress by calling {@link MediaHttpUploader#getProgress}.
+     * </p>
+     *
+     * @param uploader Media HTTP uploader
+     */
+    public void progressChanged(MediaHttpUploader uploader) throws IOException;
+
+    /**
+     * Called to notify that metadata has been successfully uploaded to the /blob/
+     * <p/>
+     * <p>
+     * This method is called once, before the file upload actually begins but after the metadata has been set in the
+     * blob collection.  This metadata is used by the File API to determine the upload URL, and contains the id of the file.
+     * </p>
+     *
+     * @param metaData - The File MetaData associated wtih the upload about to occur.
+     */
+    public void metaDataUploaded(FileMetaData metaData);
 }

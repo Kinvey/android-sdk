@@ -167,9 +167,9 @@ public class KinveyAuthRequest extends GenericJson {
         return new GenericUrl(UriTemplate.expand(baseUrl
                 , "/user/{appKey}/" + (this.create ? "" : "login")
                 , this
-                , true));
+                , false));
 
-        //TODO edwardf I think the third arguement *this* is causing the issue with strange queries getting attached
+        //TODO edwardf I think the fourth arguement *true* (now false!!!!!) is causing the issue with strange queries getting attached
     }
 
 

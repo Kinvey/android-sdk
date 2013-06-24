@@ -30,9 +30,11 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.model.UriLocResponse;
+import com.kinvey.java.query.AbstractQuery;
 
 /**
  Wraps the {@link com.kinvey.java.File} public methods in asynchronous functionality using native Android AsyncTask.
@@ -127,7 +129,6 @@ public abstract class File {
         }else{
             mode = AppData.SaveMode.POST;
         }
-        initSize(fileMetaData, content);
 
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
 
@@ -146,7 +147,7 @@ public abstract class File {
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
-    public UploadMetadataAndFile uploadBlockingByFilename(String fileName, AbstractInputStreamContent content) throws IOException {
+    public UploadMetadataAndFile uploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
         FileMetaData meta = new FileMetaData();
         if (fileName != null){
             meta.setFileName(fileName);
@@ -177,12 +178,26 @@ public abstract class File {
 //
 //    }
 //
-//    public DownloadMetadataAndFileQuery downloadBlockingByFilename(String filename) throws IOException{
-//        Query q = new Query();
-//        q.equals("_filename", filename);
-//        return downloadBlocking(q);
-//
-//    }
+
+    /**
+     * This method performs a query to find a file by it's filename.
+     *
+     * As Kinvey File now supports non-unique file names, this method will only return a single file with this name.
+     *
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery downloadBlocking(String filename) throws IOException{
+        Query q = new Query();
+        q.equals("_filename", filename);
+        q.setLimit(1);
+        q.addSort("_kmd.lmt", Query.SortOrder.DESC);
+        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(q, downloaderProgressListener);
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return download;
+
+    }
 
 
     /**
@@ -639,28 +654,28 @@ public abstract class File {
 
     }
 
-//    /**
-//     * This class gets a {@link FileMetaData} object from Kinvey, and then downloads the associated File
-//     */
-//    public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
-//
-//        private final static String REST_URL = "blob/{appKey}/{id}" + "{?query}";
-//
-//        @Key
-//        private String id;
-//        @Key("query")
-//        private String queryFilter;
-//
-//
-//        private DownloadMetadataAndFileQuery(Query query, DownloaderProgressListener progressListener){
-//            super(client, "GET", REST_URL, null, FileMetaData[].class);
-//            initializeMediaHttpDownloader(progressListener);
-//            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
-//        }
-//
-//
-//
-//    }
+    /**
+     * This class gets a {@link FileMetaData} object from Kinvey, and then downloads the associated File
+     */
+    public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
+
+        private final static String REST_URL = "blob/{appKey}/{id}" + "{?query}";
+
+        @Key
+        private String id;
+        @Key("query")
+        private String queryFilter;
+
+
+        private DownloadMetadataAndFileQuery(Query query, DownloaderProgressListener progressListener){
+            super(client, "GET", REST_URL, null, FileMetaData[].class);
+            initializeMediaHttpDownloader(progressListener);
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+        }
+
+
+
+    }
 
     public class DeleteFile extends AbstractKinveyJsonClientRequest<KinveyDeleteResponse>{
 
@@ -673,9 +688,10 @@ public abstract class File {
 
         public DeleteFile(FileMetaData metaData){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
-            this.id = Preconditions.checkNotNull(metaData.getId());
+            this.id = Preconditions.checkNotNull(metaData.getId(), "cannot delete a file without an _id!");
         }
 
+        //TODO edwardf re-add delete by query support once it is supported in kcs
 //        public DeleteFile(Query q){
 //            super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
 //            this.queryFilter = q.getQueryFilterJson(client.getJsonFactory());
@@ -691,96 +707,6 @@ public abstract class File {
 
     }
 
-
-
-    public static class FileMetaData extends GenericJson {
-
-        @Key("_id")
-        private String id;
-
-        @Key("_filename")
-        private String fileName;
-
-        @Key("size")
-        private long size;
-
-        @Key("mimetype")
-        private String mimetype;
-
-        @Key("_acl")
-        private KinveyMetaData.AccessControlList acl;
-
-        @Key("_uploadURL")
-        private String uploadUrl;
-
-        @Key("_downloadURL")
-        private String downloadURL;
-
-        public FileMetaData() {
-        }
-
-        public FileMetaData(String fileName){
-            setFileName(fileName);
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        public void setFileName(String fileName) {
-            this.fileName = fileName;
-        }
-
-        public long getSize() {
-            return size;
-        }
-
-        public void setSize(long size) {
-            this.size = size;
-        }
-
-        public String getMimetype() {
-            return mimetype;
-        }
-
-        public void setMimetype(String mimetype) {
-            this.mimetype = mimetype;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public KinveyMetaData.AccessControlList getAcl() {
-            return acl;
-        }
-
-        public void setAcl(KinveyMetaData.AccessControlList acl) {
-            this.acl = acl;
-        }
-
-        public String getUploadUrl() {
-            return uploadUrl;
-        }
-
-        public void setUploadUrl(String uploadUrl) {
-            this.uploadUrl = uploadUrl;
-        }
-
-        public String getDownloadURL() {
-            return downloadURL;
-        }
-
-        public void setDownloadURL(String downloadURL) {
-            this.downloadURL = downloadURL;
-        }
-    }
-
-
-    protected abstract void initSize(FileMetaData meta, AbstractInputStreamContent content);
+    protected abstract void initMimeTypeAndSize(FileMetaData meta, java.io.File file);
 
 }

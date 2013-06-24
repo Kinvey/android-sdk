@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.kinvey.java.File;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.UriLocResponse;
 
 /**
@@ -161,8 +162,12 @@ public class MediaHttpDownloader {
     }
 
     /** package-level for testing **/
-    File.FileMetaData parse (JsonObjectParser parser, HttpResponse response) throws IOException {
-        return parser.parseAndClose(response.getContent(), response.getContentCharset(), File.FileMetaData.class);
+    FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
+        try{
+            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData.class);
+        }catch(Exception e){
+            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData[].class)[0];
+        }
     }
 
     /**
@@ -188,7 +193,7 @@ public class MediaHttpDownloader {
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
 
         // Make initial request to get the unique upload URL.
-        File.FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
+        FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
         GenericUrl downloadUrl;
         downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
@@ -237,7 +242,7 @@ public class MediaHttpDownloader {
      * @return
      * @throws IOException
      */
-    private File.FileMetaData executeDownloadInitiation(AbstractKinveyClientRequest initiationRequest) throws IOException {
+    private FileMetaData executeDownloadInitiation(AbstractKinveyClientRequest initiationRequest) throws IOException {
         updateStateAndNotifyListener(DownloadState.INITIATION_STARTED);
         HttpResponse response = initiationRequest.executeUnparsed();
         JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationRequest.getAbstractKinveyClient().getObjectParser();

@@ -14,6 +14,7 @@
 package com.kinvey.android;
 
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.common.base.Preconditions;
@@ -29,6 +30,7 @@ import com.kinvey.java.File;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
@@ -145,13 +147,14 @@ public class AsyncFile extends File {
      */
     public void upload(java.io.File file, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
-
-
-        new FileUpload(new File.FileMetaData(file.getName()), file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        FileMetaData meta = new FileMetaData(file.getName());
+        initMimeTypeAndSize(meta, file);
+        new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void upload(FileMetaData meta, java.io.File file, UploaderProgressListener listener){
         this.setUploadProgressListener(listener);
+        initMimeTypeAndSize(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -164,7 +167,9 @@ public class AsyncFile extends File {
      */
     public void upload(String name, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
-        new FileUpload(new File.FileMetaData(name), inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        FileMetaData meta = new FileMetaData(name);
+        initMimeTypeAndSize(meta, inputStream);
+        new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -205,7 +210,7 @@ public class AsyncFile extends File {
      * @param listener an implementation of a client listener to get results on the UI thread from the async call.
      * @param out a {@link java.io.OutputStream} object.
      */
-    public void download(File.FileMetaData metaData, OutputStream out, DownloaderProgressListener listener) {
+    public void download(FileMetaData metaData, OutputStream out, DownloaderProgressListener listener) {
         this.setDownloaderProgressListener(listener);
         new FileDownload(metaData, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -221,7 +226,7 @@ public class AsyncFile extends File {
      * @param metadata the metadata of the file
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
-    public void delete(File.FileMetaData metadata, KinveyClientCallback<KinveyDeleteResponse> callback) {
+    public void delete(FileMetaData metadata, KinveyClientCallback<KinveyDeleteResponse> callback) {
         new FileDelete(metadata.getId(), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -253,15 +258,15 @@ public class AsyncFile extends File {
     }
 
 
-    private class FileUpload extends AsyncClientRequest<File.FileMetaData> {
+    private class FileUpload extends AsyncClientRequest<FileMetaData> {
 
         private java.io.File file;
-        private byte [] byteContent;
+//        private byte [] byteContent;
         private InputStream inputStream;
 
-        private File.FileMetaData meta;
+        private FileMetaData meta;
 
-        public FileUpload(File.FileMetaData meta, java.io.File file, KinveyClientCallback callback) {
+        public FileUpload(FileMetaData meta, java.io.File file, KinveyClientCallback callback) {
             super(callback);
             Preconditions.checkNotNull(file, "file must not be null");
             this.file = file;
@@ -271,8 +276,8 @@ public class AsyncFile extends File {
 
 
 
-        //TODO somebody might want this someday, but for now it's not really necessary-- also cannot find mimetype of a byte array
-//        public FileUpload(File.FileMetaData meta, byte [] byteContent, KinveyClientCallback callback) {
+        //TODO somebody might want this someday
+//        public FileUpload(FileMetaData meta, byte [] byteContent, KinveyClientCallback callback) {
 //            super(callback);
 //            Preconditions.checkNotNull(byteContent, "byteContent must not be null");
 //            Preconditions.checkNotNull(meta, "metadata must not be null");
@@ -281,7 +286,7 @@ public class AsyncFile extends File {
 //
 //        }
 
-        public FileUpload(File.FileMetaData meta, InputStream inputStream, KinveyClientCallback callback) {
+        public FileUpload(FileMetaData meta, InputStream inputStream, KinveyClientCallback callback) {
             super(callback);
             Preconditions.checkNotNull(inputStream, "byteContent must not be null");
             Preconditions.checkNotNull(meta, "metadata must not be null");
@@ -291,7 +296,7 @@ public class AsyncFile extends File {
         }
 
         @Override
-        protected File.FileMetaData executeAsync() throws IOException {
+        protected FileMetaData executeAsync() throws IOException {
 
             InputStreamContent mediaContent = null;
             String mimetype = "application/octet-stream";
@@ -311,10 +316,10 @@ public class AsyncFile extends File {
 
     private class FileDownload extends AsyncClientRequest<Void> {
 
-        private File.FileMetaData meta;
+        private FileMetaData meta;
         private OutputStream out;
 
-        public FileDownload(File.FileMetaData metaData, OutputStream out, KinveyClientCallback callback) {
+        public FileDownload(FileMetaData metaData, OutputStream out, KinveyClientCallback callback) {
             super(callback);
             this.meta = metaData;
             this.out = out;
@@ -328,24 +333,24 @@ public class AsyncFile extends File {
 
     }
 //
-//    private class FileQueryDownload extends AsyncClientRequest<Void>{
-//                                                                                 TODO
-//        private String fileName;
-//        private OutputStream out;
-//
-//        public FileQueryDownload(String fileName, OutputStream out, KinveyClientCallback callback) {
-//            super(callback);
-//            this.fileName = fileName;
-//            this.out = out;
-//        }
-//
-//        @Override
-//        protected Void executeAsync() throws IOException {
-//            AsyncFile.this.downloadBlocking(fileName).executeAndDownloadTo(out);
-//            return null;
-//        }
-//
-//    }
+    private class FileQueryDownload extends AsyncClientRequest<Void>{
+
+        private String fileName;
+        private OutputStream out;
+
+        public FileQueryDownload(String fileName, OutputStream out, KinveyClientCallback callback) {
+            super(callback);
+            this.fileName = fileName;
+            this.out = out;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            AsyncFile.this.downloadBlocking(fileName).executeAndDownloadTo(out);
+            return null;
+        }
+
+    }
 
 
     private class FileDelete extends AsyncClientRequest<KinveyDeleteResponse> {
@@ -376,22 +381,22 @@ public class AsyncFile extends File {
 
 
 
-    private class UploadMetaData extends AsyncClientRequest<File.FileMetaData>{
-        private File.FileMetaData meta;
+    private class UploadMetaData extends AsyncClientRequest<FileMetaData>{
+        private FileMetaData meta;
 
-        public UploadMetaData(File.FileMetaData metaData, KinveyClientCallback callback) {
+        public UploadMetaData(FileMetaData metaData, KinveyClientCallback callback) {
             super(callback);
             this.meta = metaData;
         }
 
         @Override
-        protected File.FileMetaData executeAsync() throws IOException {
+        protected FileMetaData executeAsync() throws IOException {
             return AsyncFile.this.uploadMetaDataBlocking(meta).execute();
         }
 
     }
 
-    private class DownloadMetaData extends AsyncClientRequest<File.FileMetaData>{
+    private class DownloadMetaData extends AsyncClientRequest<FileMetaData>{
         private String id;
 
         public DownloadMetaData(String id, KinveyClientCallback callback) {
@@ -400,41 +405,63 @@ public class AsyncFile extends File {
         }
 
         @Override
-        protected File.FileMetaData executeAsync() throws IOException {
+        protected FileMetaData executeAsync() throws IOException {
             return AsyncFile.this.downloadMetaDataBlocking(id).execute();
         }
 
     }
 
 
-    protected void initSize(FileMetaData meta, AbstractInputStreamContent content) {
-
-        if (content == null){
-            Log.v(Client.TAG, "cannot calculate mimetype and size without any content!");
+    protected void initMimeTypeAndSize(FileMetaData meta, java.io.File file){
+        if (file == null || file.getName() == null || meta == null) {
+            Log.v(Client.TAG, "cannot calculate mimetype without a file or filename!");
+            meta.setMimetype("application/octet-stream");
             return;
         }
 
-        Log.v(Client.TAG, "content stream type is: " + content.getType());
+        //check metadata file name first
+        //check file's file name
+        //check stream
+        String mimetype = "application/octet-stream";
+        String fileExt = "";
 
-//        String mime;
-        long size;
-
-//        try{
-//            mime = URLConnection.guessContentTypeFromStream(content.getInputStream());
-//            meta.setMimetype(mime);
-//        }catch(Exception e){
-//            Log.v(Client.TAG, "couldn't read mimetype from input content stream.");
-//        }
-
-        try{
-            size = content.getLength();
-            if (size >= 0){
-                meta.setSize(size);
-            }else {
-                Log.v(Client.TAG, "couldn't read size from input content stream.");
-            }
-        }catch(Exception e){
-            Log.v(Client.TAG, "couldn't read size from input content stream.");
+        if (meta.getFileName().length() > 0 && meta.getFileName().contains(".")){
+            fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), file.getName().length());
         }
+
+        if (file.getName() != null && file.getName().contains(".")){
+            if (fileExt.length() == 0){
+                fileExt = file.getName().substring(file.getName().lastIndexOf('.'), file.getName().length());
+            }
+        }
+
+        System.out.print("Async File file extension: " + fileExt);
+
+        //did we get it from file extension? if not, attempt to get it from file contents
+        if (fileExt.length() > 0){
+            mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt);
+        }else{
+            mimetype = "application/octet-stream";
+        }
+
+        meta.setMimetype(mimetype);
+        meta.setSize(file.length());
+    }
+
+
+    protected void initMimeTypeAndSize(FileMetaData meta, InputStream file){
+        String mimetype = null;
+        try{
+                mimetype = URLConnection.guessContentTypeFromStream(file);
+            }catch(Exception e){
+                System.out.println("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
+            }
+
+        if (mimetype == null){
+            mimetype = "application/octet-stream";
+        }
+
+        meta.setMimetype(mimetype);
+        meta.setSize(file.toString().getBytes().length);
     }
 }

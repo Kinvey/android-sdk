@@ -30,7 +30,7 @@ import java.io.*;
  */
 public class LinkedFile {
 
-    private String fileName;
+    private String id;
     private ByteArrayInputStream input = null;
     private ByteArrayOutputStream output = null;
     private boolean resolve = true;
@@ -38,10 +38,10 @@ public class LinkedFile {
     /**
      * Constructor for a LinkedFile
      *
-     * @param fileName - the FileName of the Linked File
+     * @param id - the id of the linked file
      */
-    public LinkedFile(String fileName) {
-        this.fileName = fileName;
+    public LinkedFile(String id) {
+        this.id = id;
     }
 
     /**
@@ -49,12 +49,12 @@ public class LinkedFile {
      *
      * @return  the file name
      */
-    public String getFileName() {
-        return fileName;
+    public String getId() {
+        return id;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public ByteArrayInputStream getInput() {

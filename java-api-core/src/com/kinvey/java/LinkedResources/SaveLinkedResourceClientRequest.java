@@ -17,6 +17,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.File;
 import com.kinvey.java.core.*;
+import com.kinvey.java.model.FileMetaData;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -40,6 +41,8 @@ import java.util.HashMap;
 public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientRequest<T> {
 
     private UploaderProgressListener upload;
+
+
 
 
     /**
@@ -69,7 +72,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
             for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
                 if (((LinkedGenericJson) getJsonContent()).getFile(key) != null) {
 
-                    System.out.println("Kinvey - LR, " + "found a LinkedGenericJson: " + key + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
+                    System.out.println("Kinvey - LR, " + "found a LinkedGenericJson: " + key);// + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getId());
                     if (((LinkedGenericJson) getJsonContent()).getFile(key).isResolve()) {
 
                         InputStream in = ((LinkedGenericJson) getJsonContent()).getFile(key).getInput();
@@ -82,28 +85,51 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         mediaContent.setCloseInputStream(false);
                         mediaContent.setRetrySupported(false);
 
-                        getAbstractKinveyClient().file().setUploadProgressListener(upload);
+                        getAbstractKinveyClient().file().setUploadProgressListener(new UploaderProgressListener() {
+                            @Override
+                            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                                if (upload != null) {
+                                    upload.progressChanged(uploader);
+                                }
+                            }
 
-                        File.FileMetaData meta = new File.FileMetaData(((LinkedGenericJson) getJsonContent()).getFile(key).getFileName());
+                            @Override
+                            public void metaDataUploaded(FileMetaData metaData) {
+                                if (upload != null) {
+                                    upload.metaDataUploaded(metaData);
+                                }
+                                HashMap<String, String> resourceMap = new HashMap<String, String>();
+                                resourceMap.put("_id", metaData.getId());
+                                resourceMap.put("_type", "KinveyFile");
 
-                        getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
+                                ((GenericJson) getJsonContent()).put(key, resourceMap);
+
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                if (upload != null) {
+                                    upload.onSuccess(result);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+                                if (upload != null) {
+                                    upload.onFailure(error);
+                                }
+                            }
+                        });
+
+                        FileMetaData meta = new FileMetaData(((LinkedGenericJson) getJsonContent()).getFile(key).getId());
+                        FileMetaData file = getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
 
 
 
 
-                        String filename = ((LinkedGenericJson) getJsonContent()).getFile(key).getFileName();
-                        //TODO edwardf test various use/edge cases for this MIME type calculation
-                        //default to a text file if no file extension on file name.
-                        String mime = "txt";
-                        if (filename.contains(".")) {
-                            mime = filename.substring(filename.lastIndexOf('.') + 1);
-                        }
 
-                        HashMap<String, String> resourceMap = new HashMap<String, String>();
-                        resourceMap.put("_mime-type", mime);
-                        resourceMap.put("_loc", filename);
-                        resourceMap.put("_type", "resource");
-                        ((GenericJson) getJsonContent()).put(key, resourceMap);
+
+
                     }
                 }
             }

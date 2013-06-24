@@ -22,6 +22,7 @@ import java.io.File;
 
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.R;
@@ -59,7 +60,7 @@ public class DeleteFragment extends UseCaseFragment implements View.OnClickListe
 
         Query q = new Query();
 //        q.equals("_filename", FileActivity.FILENAME);
-        com.kinvey.java.File.FileMetaData meta = new com.kinvey.java.File.FileMetaData(FileActivity.FILENAME);
+        FileMetaData meta = new FileMetaData(FileActivity.FILENAME);
         meta.setId(FileActivity.FILENAME);
         getApplicationContext().getClient().file().delete(meta, new KinveyClientCallback<KinveyDeleteResponse>() {
             @Override

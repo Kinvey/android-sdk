@@ -18,6 +18,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.kinvey.java.File;
+import com.kinvey.java.model.FileMetaData;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ public class MediaHttpUploaderTest extends TestCase {
         when(mockContent.getInputStream())
                 .thenReturn(mock(InputStream.class));
         MediaHttpUploader objectUnderTest = spy(new MediaHttpUploader(mockContent, new MockHttpTransport(), null));
-        File.FileMetaData mockUriResponse = mock(File.FileMetaData.class);
+        FileMetaData mockUriResponse = mock(FileMetaData.class);
         when(mockUriResponse.getUploadUrl()).thenReturn(HttpTesting.SIMPLE_URL);
         doReturn(mockUriResponse)
                 .when(objectUnderTest)
@@ -59,6 +60,11 @@ public class MediaHttpUploaderTest extends TestCase {
             @Override
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
                 argValueRecorder.push(uploader.getUploadState());
+            }
+
+            @Override
+            public void metaDataUploaded(FileMetaData metaData) {
+                //To change body of implemented methods use File | Settings | File Templates.
             }
 
             @Override

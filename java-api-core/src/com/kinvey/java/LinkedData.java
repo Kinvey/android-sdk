@@ -42,6 +42,17 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     //TODO edwardf delete support?
 
 
+    private MimeTypeFinder mimeTypeFinder = new MimeTypeFinder(){
+        @Override
+        public String getMimeType() {return "application/octet-stream";}
+    };
+
+    protected void setMimeTypeFinder(MimeTypeFinder finder){
+        this.mimeTypeFinder = finder;
+    }
+
+
+
     /**
      * Constructor to instantiate the LinkedData class.
      *
@@ -338,9 +349,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
             this.sortFilter = query.getSortString();
             if (this.resolve != null){
                 this.resolve = Joiner.on(",").join(resolves);
-                this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
-                this.retainReferences = Boolean.toString(retain);
             }
+            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+            this.retainReferences = Boolean.toString(retain);
+
 
 
         }
@@ -441,5 +453,9 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
 
 
+
+    public interface MimeTypeFinder{
+        public String getMimeType();
+    }
 
 }

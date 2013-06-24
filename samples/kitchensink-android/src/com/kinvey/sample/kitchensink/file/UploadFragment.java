@@ -34,6 +34,7 @@ import java.io.OutputStreamWriter;
 
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
@@ -177,7 +178,7 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                 save(text, target);
 
                 //Call the kinvey specific task to perform upload
-                com.kinvey.java.File.FileMetaData meta = new com.kinvey.java.File.FileMetaData(getTarget().getName())     ;
+                FileMetaData meta = new FileMetaData(getTarget().getName())     ;
                 meta.setId(getTarget().getName());
 
 
@@ -207,6 +208,11 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                                        : tProgress.getText() + "\n" + state);
                             }
                         });
+                    }
+
+                    @Override
+                    public void metaDataUploaded(FileMetaData metaData) {
+                        //To change body of implemented methods use File | Settings | File Templates.
                     }
                 });
             }

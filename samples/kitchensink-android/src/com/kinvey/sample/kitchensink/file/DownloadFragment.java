@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
@@ -65,9 +66,8 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
         FileOutputStream fos= new FileOutputStream(target);
 
         // call kinvey specific task to perform download
-        com.kinvey.java.File.FileMetaData meta = new com.kinvey.java.File.FileMetaData(FileActivity.FILENAME);
+        FileMetaData meta = new FileMetaData(FileActivity.FILENAME);
         meta.setId(FileActivity.FILENAME);
-        Log.v("WTF", meta.toString());
         getApplicationContext().getClient().file().download(meta, fos, new DownloaderProgressListener() {
             @Override
             public void progressChanged(MediaHttpDownloader downloader) throws IOException {

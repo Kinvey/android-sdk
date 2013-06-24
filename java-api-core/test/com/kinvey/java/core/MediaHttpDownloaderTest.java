@@ -17,6 +17,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.kinvey.java.File;
+import com.kinvey.java.model.FileMetaData;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +45,7 @@ public class MediaHttpDownloaderTest extends TestCase {
 
         //setup and stub out the mocks
         MediaHttpDownloader objectUnderTest = spy(new MediaHttpDownloader(new MockHttpTransport(), null));
-        File.FileMetaData mockUriResponse = mock(File.FileMetaData.class);
+        FileMetaData mockUriResponse = mock(FileMetaData.class);
         when(mockUriResponse.getDownloadURL()).thenReturn(HttpTesting.SIMPLE_URL);
         doReturn(mockUriResponse)
                 .when(objectUnderTest)

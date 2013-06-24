@@ -34,8 +34,11 @@ import com.google.common.io.LimitInputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.kinvey.java.File;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.UriLocResponse;
 
 /**
@@ -294,9 +297,19 @@ public class MediaHttpUploader {
             return initialResponse;
         }
         GenericUrl uploadUrl;
+        Map<String, String> headers = null;
         try {
             JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
-            uploadUrl = new GenericUrl(parse(jsonObjectParser, initialResponse).getUploadUrl());
+            FileMetaData meta = parse(jsonObjectParser, initialResponse);
+
+            if (meta.containsKey("_requiredHeaders")){
+                //then there are special headers to use in the request to google
+                headers = (Map<String, String>) meta.get("_requiredHeaders");
+            }
+
+
+            notifyListenerWithMetaData(meta);
+            uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
             initialResponse.disconnect();
         }
@@ -326,6 +339,11 @@ public class MediaHttpUploader {
             currentRequest.setThrowExceptionOnExecuteError(false);
             currentRequest.setRetryOnExecuteIOException(true);
             currentRequest.setEnableGZipContent(!disableGZipContent);
+            if (headers != null){
+                for (String header : headers.keySet()){
+                    currentRequest.getHeaders().put(header, headers.get(header));
+                }
+            }
             response = currentRequest.execute();
             boolean returningResponse = false;
             try {
@@ -388,8 +406,12 @@ public class MediaHttpUploader {
     }
 
     /** package-level for testing **/
-    File.FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
-        return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), File.FileMetaData.class);
+    FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
+        try{
+            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData.class);
+        }catch(Exception e){
+            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData[].class)[0];
+        }
     }
 
     /**
@@ -782,6 +804,15 @@ public class MediaHttpUploader {
         this.uploadState = uploadState;
         if (progressListener != null) {
             progressListener.progressChanged(this);
+        }
+    }
+
+    /**
+     * Notifies the listener (if there is one) of the updated metadata
+     */
+    private void notifyListenerWithMetaData(FileMetaData meta){
+        if (this.progressListener != null){
+            this.progressListener.metaDataUploaded(meta);
         }
     }
 

@@ -356,7 +356,13 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             response.ignore();
             return null;
         }
-        return response.parseAs(responseClass);
+        try{
+            return response.parseAs(responseClass);
+        }catch(IllegalArgumentException e){
+            System.out.println("unable to parse response -> " + e.getLocalizedMessage());
+            //this prevents a crash when we receive a 200 with null content
+            return null;
+        }
     }
 
     /**

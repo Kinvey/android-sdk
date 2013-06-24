@@ -15,6 +15,7 @@ package com.kinvey.java.LinkedResources;
 
 import com.kinvey.java.File;
 import com.kinvey.java.core.*;
+import com.kinvey.java.model.FileMetaData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,25 +59,25 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
         T entity = super.execute();
 
-        if (entity instanceof LinkedGenericJson[]){
+        if (entity instanceof LinkedGenericJson[]) {
             System.out.println("Kinvey - LR, " + "linked resource array found");
             LinkedGenericJson[] casted = (LinkedGenericJson[]) entity;
-            for (LinkedGenericJson ent : casted){
+            for (LinkedGenericJson ent : casted) {
                 downloadResources(ent);
             }
             return entity;
 
 
-            }else if (entity instanceof LinkedGenericJson){
-                System.out.println("Kinvey - LR, " + "linked resource instance found");
-                downloadResources((LinkedGenericJson) entity);
-                return entity;
+        } else if (entity instanceof LinkedGenericJson) {
+            System.out.println("Kinvey - LR, " + "linked resource instance found");
+            downloadResources((LinkedGenericJson) entity);
+            return entity;
 
-            }else{
-                System.out.println("Kinvey - LR, " + "not a linked resource, behaving as usual!");
-                return entity;
+        } else {
+            System.out.println("Kinvey - LR, " + "not a linked resource, behaving as usual!");
+            return entity;
 
-            }
+        }
 
 
 
@@ -88,10 +89,10 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
         for (String key : (entity).getAllFiles().keySet()) {
             if (entity.get(key) != null) {
 
-                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key + " -> " + ((Map) entity.get(key)).get("_loc").toString());
+                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key  );//-> " + ((Map) entity.get(key)).get("_loc").toString());
 
                 if (entity.getFile(key) == null) {
-                    entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+                    entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_id").toString()));
                 }
 
 
@@ -99,7 +100,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
                 getAbstractKinveyClient().file().setDownloaderProgressListener(download);
 
-                File.FileMetaData meta = new File.FileMetaData(((Map) entity.get(key)).get("_loc").toString());
+                FileMetaData meta = new FileMetaData(((Map) entity.get(key)).get("_id").toString());
 
                 getAbstractKinveyClient().file().downloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
 

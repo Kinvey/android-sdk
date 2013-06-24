@@ -53,9 +53,11 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import com.kinvey.android.Client;
+import com.kinvey.java.File;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.samples.citywatch.CityWatchData.Category;
 import com.kinvey.samples.citywatch.CityWatchData.Risk;
 import com.kinvey.samples.citywatch.CityWatchData.Severity;
@@ -259,6 +261,11 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
             @Override
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
 
+            }
+
+            @Override
+            public void metaDataUploaded(FileMetaData metaData) {
+                //To change body of implemented methods use File | Settings | File Templates.
             }
 
             @Override

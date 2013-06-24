@@ -15,6 +15,7 @@ package com.kinvey.java;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpRequest;
+import com.kinvey.java.model.FileMetaData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +70,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileUploadInitializer() {
         fileApiUnderTest = new MockFile(super.mockClient);
         try {
-            fileApiUnderTest.uploadBlocking(new File.FileMetaData("testfilename.txt"), mockContent);
+            fileApiUnderTest.uploadBlocking(new FileMetaData("testfilename.txt"), mockContent);
 
         } catch (IOException e) {
             fail("file api should not be throw exception on upload");
@@ -142,9 +143,12 @@ public class FileTest extends KinveyMockUnitTest {
         }
 
         @Override
-        protected void initSize(FileMetaData meta, AbstractInputStreamContent content) {
+        protected void initMimeTypeAndSize(FileMetaData meta, java.io.File file) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
+
+
+
     }
 
 }
