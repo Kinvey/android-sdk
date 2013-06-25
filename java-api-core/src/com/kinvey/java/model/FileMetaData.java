@@ -20,7 +20,7 @@ public class FileMetaData extends GenericJson{
     @Key("size")
     private long size;
 
-    @Key("mimetype")
+    @Key("mimeType")
     private String mimetype;
 
     @Key("_acl")
@@ -34,6 +34,9 @@ public class FileMetaData extends GenericJson{
 
     @Key("_public")
     private boolean _public = false;
+
+
+
 
     public FileMetaData() {
     }

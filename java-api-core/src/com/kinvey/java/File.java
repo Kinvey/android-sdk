@@ -113,6 +113,14 @@ public abstract class File {
         this.client = Preconditions.checkNotNull(client);
     }
 
+
+    /**
+     *
+     * @return an instance of a client associated with this instance of File
+     */
+    protected AbstractClient getClient(){
+        return this.client;
+    }
     /**
      * Uploads a given file and its contents to the Kinvey file service.
      *
@@ -593,7 +601,6 @@ public abstract class File {
             if (verb.equals(AppData.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
-
             this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
         }
     }
@@ -707,6 +714,8 @@ public abstract class File {
 
     }
 
-    protected abstract void initMimeTypeAndSize(FileMetaData meta, java.io.File file);
+
+
+
 
 }

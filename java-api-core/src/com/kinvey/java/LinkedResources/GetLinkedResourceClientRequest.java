@@ -92,7 +92,11 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key  );//-> " + ((Map) entity.get(key)).get("_loc").toString());
 
                 if (entity.getFile(key) == null) {
-                    entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_id").toString()));
+                    if (((Map)entity.get(key)).containsKey("_id")){
+                        entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_id").toString()));
+                    }else if (((Map)entity.get(key)).containsKey("_loc")){     //TODO backwards compt for v2 of File API, this condition can be removed when it's done
+                        entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+                    }
                 }
 
 

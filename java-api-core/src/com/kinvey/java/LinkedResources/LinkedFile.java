@@ -31,23 +31,38 @@ import java.io.*;
 public class LinkedFile {
 
     private String id;
+    private String fileName;
     private ByteArrayInputStream input = null;
     private ByteArrayOutputStream output = null;
     private boolean resolve = true;
 
     /**
-     * Constructor for a LinkedFile
+     * Constructor for a LinkedFile, sets BOTH filename and id to be input
      *
-     * @param id - the id of the linked file
+     * @param id - the filename which is also used as the id
      */
     public LinkedFile(String id) {
         this.id = id;
+        this.fileName = id;
     }
 
     /**
-     * Get the file name of a Linked File
+     * Constructor for LinkedFile, allowing unique id and filename
      *
-     * @return  the file name
+     *
+     * @param id the id to use for the linked file
+     * @param filename the filename of the linkedfile
+     */
+    public LinkedFile(String id, String filename){
+        this.id = id;
+        this.fileName = filename;
+
+    }
+
+    /**
+     * Get the id of a Linked File
+     *
+     * @return  the id
      */
     public String getId() {
         return id;
@@ -79,5 +94,13 @@ public class LinkedFile {
 
     public void setResolve(boolean resolve) {
         this.resolve = resolve;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

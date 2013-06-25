@@ -17,6 +17,7 @@ package com.kinvey.android;
 
 import android.content.Context;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
@@ -25,8 +26,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -45,6 +48,7 @@ import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.model.FileMetaData;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -765,5 +769,123 @@ public class Client extends AbstractClient {
             }
         }
     }
+
+
+    @Override
+    public MimeTypeFinder getMimeTypeFinder() {
+        return new MimeTypeFinder() {
+            @Override
+            public void getMimeType(FileMetaData meta, InputStream stream) {
+                Log.i(TAG, "******************");
+                Log.i(TAG, "getting mime type! from stream");
+                Log.i(TAG, "******************");
+                String mimetype = null;
+                try{
+                    mimetype = URLConnection.guessContentTypeFromStream(stream);
+                    System.out.println("Kinvey - Client - File | mimetype from stream found as: " + mimetype);
+                } catch (Exception e) {
+                    System.out.println("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
+                }
+
+                if (mimetype == null){
+                    getMimeType(meta);
+                }else{
+                    meta.setMimetype(mimetype);
+                }
+
+
+
+                stream.mark(0x100000 * 10);  //10MB mark limit
+                int numBytes = 0;
+                try{
+                    while (stream.read() != -1){
+                        numBytes++;
+                    }
+
+                }catch (Exception e){
+                    Log.i(TAG, "error reading input stream to get size, setting it to 0") ;
+                    numBytes = 0;
+                }
+                try{
+                    stream.reset();
+                }catch(Exception e){
+                    Log.i(TAG, "error resetting stream!") ;
+
+                }
+
+                Log.i(TAG, "size is: " + numBytes) ;
+
+
+
+                meta.setSize(numBytes);
+            }
+
+            @Override
+            public void getMimeType(FileMetaData meta, File file) {
+                Log.i(TAG, "******************");
+                Log.i(TAG, "getting mime type! from file");
+                Log.i(TAG, "******************");
+                if (file == null || file.getName() == null || meta == null) {
+                    Log.v(Client.TAG, "cannot calculate mimetype without a file or filename!");
+                    meta.setMimetype("application/octet-stream");
+                    super.getMimeType(meta, file);
+                    return;
+                }
+
+                //check metadata file name first
+                //check file's file name
+                //check stream                          );
+
+                String mimetype;
+                String fileExt = "";
+
+                if (meta.getFileName().length() > 0 && meta.getFileName().contains(".")){
+                    fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), file.getName().length());
+                }
+
+                if (file.getName() != null && file.getName().contains(".")){
+                    if (fileExt.length() == 0){
+                        fileExt = file.getName().substring(file.getName().lastIndexOf('.'), file.getName().length());
+                    }
+                }
+
+                System.out.print("Async File file extension: " + fileExt);
+
+                //did we get it from file extension? if not, attempt to get it from file contents
+                if (fileExt.length() > 0){
+                    mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt);
+                }else{
+                    mimetype = "application/octet-stream";
+                }
+
+                meta.setMimetype(mimetype);
+                meta.setSize(file.length());            }
+
+            @Override
+            public void getMimeType(FileMetaData metaData) {
+                Log.i(TAG, "******************");
+                Log.i(TAG, "getting mime type! from metadata");
+                Log.i(TAG, "******************");
+
+                String mimetype = null;
+
+                if(metaData.getFileName()!= null){
+                    int dotIndex = metaData.getFileName().lastIndexOf(".");
+                    if (dotIndex > 0){
+                        mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(metaData.getFileName().substring(dotIndex, metaData.getFileName().length()));
+                    }
+                }
+
+                if (mimetype == null){
+                    mimetype = "application/octet-stream";
+                }
+                metaData.setMimetype(mimetype);
+
+            }
+        };
+    }
+
+
+
 }
 

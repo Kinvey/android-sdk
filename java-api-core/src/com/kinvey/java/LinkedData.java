@@ -42,14 +42,6 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     //TODO edwardf delete support?
 
 
-    private MimeTypeFinder mimeTypeFinder = new MimeTypeFinder(){
-        @Override
-        public String getMimeType() {return "application/octet-stream";}
-    };
-
-    protected void setMimeTypeFinder(MimeTypeFinder finder){
-        this.mimeTypeFinder = finder;
-    }
 
 
 
@@ -454,8 +446,5 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
 
 
-    public interface MimeTypeFinder{
-        public String getMimeType();
-    }
 
 }

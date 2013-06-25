@@ -21,6 +21,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -34,6 +35,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -394,5 +396,19 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 return value;
             }
         }
+    }
+
+
+    public MimeTypeFinder getMimeTypeFinder(){
+        return new MimeTypeFinder(){};
+    }
+
+    public static abstract class MimeTypeFinder{
+        public void getMimeType(FileMetaData meta, InputStream stream){meta.setMimetype("application/octet-stream");}
+
+        public void getMimeType(FileMetaData meta, java.io.File file){meta.setMimetype("application/octet-stream");}
+
+        public void getMimeType(FileMetaData metaData){metaData.setMimetype("application/octet-stream");}
+
     }
 }

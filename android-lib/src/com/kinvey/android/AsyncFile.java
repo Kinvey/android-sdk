@@ -148,13 +148,13 @@ public class AsyncFile extends File {
     public void upload(java.io.File file, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
         FileMetaData meta = new FileMetaData(file.getName());
-        initMimeTypeAndSize(meta, file);
+        getClient().getMimeTypeFinder().getMimeType(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void upload(FileMetaData meta, java.io.File file, UploaderProgressListener listener){
         this.setUploadProgressListener(listener);
-        initMimeTypeAndSize(meta, file);
+        getClient().getMimeTypeFinder().getMimeType(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -168,7 +168,7 @@ public class AsyncFile extends File {
     public void upload(String name, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
         FileMetaData meta = new FileMetaData(name);
-        initMimeTypeAndSize(meta, inputStream);
+        getClient().getMimeTypeFinder().getMimeType(meta, inputStream);
         new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -412,56 +412,5 @@ public class AsyncFile extends File {
     }
 
 
-    protected void initMimeTypeAndSize(FileMetaData meta, java.io.File file){
-        if (file == null || file.getName() == null || meta == null) {
-            Log.v(Client.TAG, "cannot calculate mimetype without a file or filename!");
-            meta.setMimetype("application/octet-stream");
-            return;
-        }
 
-        //check metadata file name first
-        //check file's file name
-        //check stream
-        String mimetype = "application/octet-stream";
-        String fileExt = "";
-
-        if (meta.getFileName().length() > 0 && meta.getFileName().contains(".")){
-            fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), file.getName().length());
-        }
-
-        if (file.getName() != null && file.getName().contains(".")){
-            if (fileExt.length() == 0){
-                fileExt = file.getName().substring(file.getName().lastIndexOf('.'), file.getName().length());
-            }
-        }
-
-        System.out.print("Async File file extension: " + fileExt);
-
-        //did we get it from file extension? if not, attempt to get it from file contents
-        if (fileExt.length() > 0){
-            mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt);
-        }else{
-            mimetype = "application/octet-stream";
-        }
-
-        meta.setMimetype(mimetype);
-        meta.setSize(file.length());
-    }
-
-
-    protected void initMimeTypeAndSize(FileMetaData meta, InputStream file){
-        String mimetype = null;
-        try{
-                mimetype = URLConnection.guessContentTypeFromStream(file);
-            }catch(Exception e){
-                System.out.println("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
-            }
-
-        if (mimetype == null){
-            mimetype = "application/octet-stream";
-        }
-
-        meta.setMimetype(mimetype);
-        meta.setSize(file.toString().getBytes().length);
-    }
 }

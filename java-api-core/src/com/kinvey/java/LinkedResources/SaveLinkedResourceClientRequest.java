@@ -15,6 +15,7 @@ package com.kinvey.java.LinkedResources;
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.File;
 import com.kinvey.java.core.*;
 import com.kinvey.java.model.FileMetaData;
@@ -100,6 +101,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                                 }
                                 HashMap<String, String> resourceMap = new HashMap<String, String>();
                                 resourceMap.put("_id", metaData.getId());
+                                resourceMap.put("_loc", metaData.getId());
                                 resourceMap.put("_type", "KinveyFile");
 
                                 ((GenericJson) getJsonContent()).put(key, resourceMap);
@@ -121,7 +123,14 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             }
                         });
 
-                        FileMetaData meta = new FileMetaData(((LinkedGenericJson) getJsonContent()).getFile(key).getId());
+
+                        LinkedFile lf = ((LinkedGenericJson) getJsonContent()).getFile(key);
+                        FileMetaData meta = new FileMetaData(lf.getId());
+                        meta.setFileName(lf.getFileName());
+
+                        if (getAbstractKinveyClient() instanceof AbstractClient){
+                            ((AbstractClient) getAbstractKinveyClient()).getMimeTypeFinder().getMimeType(meta, in);
+                        }
                         FileMetaData file = getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
 
 

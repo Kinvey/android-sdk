@@ -43,6 +43,9 @@ import java.util.*;
 public class ShareListFragment extends KinveyFragment {
 
 
+    public static final String TAG = "share list fragment";
+
+
     private ListView mListView;
     private ProgressBar loading;
     private UpdateAdapter mAdapter;
@@ -87,20 +90,10 @@ public class ShareListFragment extends KinveyFragment {
 
     }
 
-
-
-
-
-
-
-
-
-
-
     private void loadUpdates() {
         showListView(false);
 
-        Query q = getClient().appData(StatusShare.COL_UPDATES, UpdateEntity.class).query();
+        Query q = new Query();
         q.setLimit(10);
         q.addSort("_kmd.lmt", AbstractQuery.SortOrder.DESC);
 
@@ -127,7 +120,6 @@ public class ShareListFragment extends KinveyFragment {
                     empty.setVisibility(View.VISIBLE);
                     loading.setVisibility(View.GONE);
                 } else{
-                    empty.setVisibility(View.GONE);
                     setAdapter();
                 }
 
@@ -144,24 +136,21 @@ public class ShareListFragment extends KinveyFragment {
     }
 
     private void setAdapter() {
-        if ( ((StatusShare)getSherlockActivity()).getShareList() == null) {
+        if (((StatusShare) getSherlockActivity()).getShareList() == null) {
             Log.i(StatusShare.TAG, "not ready to set Adapter");
             return;
         }
 
 
         showListView(true);
-            mAdapter = new UpdateAdapter(getSherlockActivity(),  ((StatusShare)getSherlockActivity()).getShareList(), getSherlockActivity().getLayoutInflater());
-            mListView.setAdapter(mAdapter);
+        mAdapter = new UpdateAdapter(getSherlockActivity(), ((StatusShare) getSherlockActivity()).getShareList(), getSherlockActivity().getLayoutInflater());
+        mListView.setAdapter(mAdapter);
 
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    ((StatusShare) getSherlockActivity()).replaceFragment(UpdateDetailsFragment.newInstance(((StatusShare)getSherlockActivity()).getShareList().get(position)), true);
-//                    ((StatusShare) getSherlockActivity()).addFragment(UserFragment.newInstance(shareList.get(position)), true);
-
-                }
-            });
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ((StatusShare) getSherlockActivity()).replaceFragment(UpdateDetailsFragment.newInstance(((StatusShare) getSherlockActivity()).getShareList().get(position)), true);
+            }
+        });
     }
 
 

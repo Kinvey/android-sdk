@@ -142,10 +142,6 @@ public class FileTest extends KinveyMockUnitTest {
             super(client);
         }
 
-        @Override
-        protected void initMimeTypeAndSize(FileMetaData meta, java.io.File file) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
 
 
 
