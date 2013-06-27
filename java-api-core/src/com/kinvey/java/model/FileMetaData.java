@@ -101,11 +101,11 @@ public class FileMetaData extends GenericJson{
         this.downloadURL = downloadURL;
     }
 
-    public boolean is_public() {
-        return _public;
+    public boolean isPublic() {
+        return this._public;
     }
 
-    public void set_public(boolean _public) {
-        this._public = _public;
+    public void setPublic(boolean isPublic) {
+        this._public = isPublic;
     }
 }

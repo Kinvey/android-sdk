@@ -264,11 +264,6 @@ public class CityWatchEditDetailsFragment extends SherlockFragment {
             }
 
             @Override
-            public void metaDataUploaded(FileMetaData metaData) {
-                //To change body of implemented methods use File | Settings | File Templates.
-            }
-
-            @Override
             public void onSuccess(Void result) {
                 Log.i(TAG, "image saved successfully");
                 saveEntity();

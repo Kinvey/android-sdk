@@ -47,6 +47,13 @@ public class LinkedFile {
     }
 
     /**
+     * Constructor for a LinkedFile, sets NEITHER a filename or an id
+     */
+    public LinkedFile(){
+
+    }
+
+    /**
      * Constructor for LinkedFile, allowing unique id and filename
      *
      *

@@ -75,15 +75,5 @@ public interface UploaderProgressListener extends KinveyClientCallback<Void> {
      */
     public void progressChanged(MediaHttpUploader uploader) throws IOException;
 
-    /**
-     * Called to notify that metadata has been successfully uploaded to the /blob/
-     * <p/>
-     * <p>
-     * This method is called once, before the file upload actually begins but after the metadata has been set in the
-     * blob collection.  This metadata is used by the File API to determine the upload URL, and contains the id of the file.
-     * </p>
-     *
-     * @param metaData - The File MetaData associated wtih the upload about to occur.
-     */
-    public void metaDataUploaded(FileMetaData metaData);
+
 }

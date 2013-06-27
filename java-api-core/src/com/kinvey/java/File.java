@@ -86,8 +86,8 @@ import com.kinvey.java.query.AbstractQuery;
  * </pre>
  *
  * </p>
- * @author m0rganic
- * @since 2.0
+ * @author edwardf
+ * @since 2.4
  */
 public abstract class File {
 
@@ -199,9 +199,10 @@ public abstract class File {
     public DownloadMetadataAndFileQuery downloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
-        q.setLimit(1);
+//        q.setLimit(1);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(q, downloaderProgressListener);
+        client.initializeRequest(download);
         download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
@@ -630,7 +631,7 @@ public abstract class File {
      *  Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
     public class DownloadMetadata extends AbstractKinveyJsonClientRequest<FileMetaData>{
-        private final static String REST_URL = "blob/{appKey}/{id}";
+        private static final String REST_URL = "blob/{appKey}/{id}";
 
         @Key
         private String id;
@@ -666,10 +667,8 @@ public abstract class File {
      */
     public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
 
-        private final static String REST_URL = "blob/{appKey}/{id}" + "{?query}";
+        private final static String REST_URL = "blob/{appKey}/";
 
-        @Key
-        private String id;
         @Key("query")
         private String queryFilter;
 

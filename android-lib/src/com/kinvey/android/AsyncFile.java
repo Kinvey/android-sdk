@@ -148,10 +148,19 @@ public class AsyncFile extends File {
     public void upload(java.io.File file, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
         FileMetaData meta = new FileMetaData(file.getName());
+        meta.setFileName(file.getName());
         getClient().getMimeTypeFinder().getMimeType(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+    /**
+     * Upload a java.io.File with it's associated metadata
+     *
+     *
+     * @param meta the metadata of the file to upload
+     * @param file the file itself
+     * @param listener listener for callbacks about upload progress
+     */
     public void upload(FileMetaData meta, java.io.File file, UploaderProgressListener listener){
         this.setUploadProgressListener(listener);
         getClient().getMimeTypeFinder().getMimeType(meta, file);
@@ -171,6 +180,21 @@ public class AsyncFile extends File {
         getClient().getMimeTypeFinder().getMimeType(meta, inputStream);
         new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+
+    /**
+     * Uploads the contents of the stream to the Kinvey file service endpoint.
+     *
+     * @param meta the metadata of the file to upload
+     * @param inputStream  stream to be uploaded
+     * @param listener an implementation of a client listener to get results on the UI thread from the async call.
+     */
+    public void upload(FileMetaData meta, InputStream inputStream, UploaderProgressListener listener) {
+        this.setUploadProgressListener(listener);
+        getClient().getMimeTypeFinder().getMimeType(meta, inputStream);
+        new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+
 
 
     /**

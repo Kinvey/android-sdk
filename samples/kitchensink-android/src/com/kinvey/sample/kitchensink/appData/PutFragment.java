@@ -15,13 +15,17 @@ import android.view.View;
 import android.widget.*;
 
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.File;
 import com.kinvey.java.Query;
+import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.sample.kitchensink.*;
 import com.kinvey.sample.kitchensink.R;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -61,6 +65,10 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
         totalCount = (TextView) v.findViewById(R.id.appdata_put_total_count);
         totalCount.setText("0");
         getCount();
+
+
+
+
 
 
 

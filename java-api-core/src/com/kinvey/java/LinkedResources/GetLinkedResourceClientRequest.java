@@ -95,7 +95,10 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                     if (((Map)entity.get(key)).containsKey("_id")){
                         entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_id").toString()));
                     }else if (((Map)entity.get(key)).containsKey("_loc")){     //TODO backwards compt for v2 of File API, this condition can be removed when it's done
-                        entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
+                        LinkedFile lf = new LinkedFile();
+                        lf.setFileName(((Map) entity.get(key)).get("_loc").toString());
+                        entity.putFile(key, lf);
+//                        entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_loc").toString()));
                     }
                 }
 
@@ -104,9 +107,22 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
                 getAbstractKinveyClient().file().setDownloaderProgressListener(download);
 
-                FileMetaData meta = new FileMetaData(((Map) entity.get(key)).get("_id").toString());
+                FileMetaData meta = new FileMetaData();
+                if (((Map) entity.get(key)).containsKey("_id")){
+                    meta.setId(((Map) entity.get(key)).get("_id").toString());
+                    getAbstractKinveyClient().file().downloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
 
-                getAbstractKinveyClient().file().downloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
+                }else if(((Map) entity.get(key)).containsKey("_loc")){
+                    meta.setFileName(((Map) entity.get(key)).get("_loc").toString());
+                    getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
+
+
+                }
+
+
+
+//                FileMetaData meta = new FileMetaData(((Map) entity.get(key)).get("_id").toString());
+
 
             }
         }

@@ -776,9 +776,7 @@ public class Client extends AbstractClient {
         return new MimeTypeFinder() {
             @Override
             public void getMimeType(FileMetaData meta, InputStream stream) {
-                Log.i(TAG, "******************");
-                Log.i(TAG, "getting mime type! from stream");
-                Log.i(TAG, "******************");
+
                 String mimetype = null;
                 try{
                     mimetype = URLConnection.guessContentTypeFromStream(stream);
@@ -822,9 +820,6 @@ public class Client extends AbstractClient {
 
             @Override
             public void getMimeType(FileMetaData meta, File file) {
-                Log.i(TAG, "******************");
-                Log.i(TAG, "getting mime type! from file");
-                Log.i(TAG, "******************");
                 if (file == null || file.getName() == null || meta == null) {
                     Log.v(Client.TAG, "cannot calculate mimetype without a file or filename!");
                     meta.setMimetype("application/octet-stream");
@@ -839,7 +834,7 @@ public class Client extends AbstractClient {
                 String mimetype;
                 String fileExt = "";
 
-                if (meta.getFileName().length() > 0 && meta.getFileName().contains(".")){
+                if (meta.getFileName() != null && meta.getFileName().length() > 0 && meta.getFileName().contains(".")){
                     fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), file.getName().length());
                 }
 

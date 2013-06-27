@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.kinvey.java.File;
+import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.UriLocResponse;
 
@@ -812,7 +813,10 @@ public class MediaHttpUploader {
      */
     private void notifyListenerWithMetaData(FileMetaData meta){
         if (this.progressListener != null){
-            this.progressListener.metaDataUploaded(meta);
+            if(this.progressListener instanceof SaveLinkedResourceClientRequest.MetaUploadListener){
+                ((SaveLinkedResourceClientRequest.MetaUploadListener)this.progressListener).metaDataUploaded(meta);
+            }
+
         }
     }
 

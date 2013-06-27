@@ -27,10 +27,12 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.JsonParser;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 
 import com.kinvey.java.File;
 import com.kinvey.java.model.FileMetaData;
@@ -161,13 +163,21 @@ public class MediaHttpDownloader {
 
     }
 
-    /** package-level for testing **/
+    /**
+     * package-level for testing *
+     */
     FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {
-        try{
-            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData.class);
-        }catch(Exception e){
-            return initationResponseParser.parseAndClose(response.getContent(), response.getContentCharset(), FileMetaData[].class)[0];
+
+        JsonParser parser = initationResponseParser.getJsonFactory().createJsonParser(response.getContent(), response.getContentCharset());
+        FileMetaData meta = null;
+        try {
+            meta = (FileMetaData) parser.parse(FileMetaData.class, false, null);
+        } catch (Exception e) {
+            meta = ((FileMetaData[]) parser.parse(FileMetaData[].class, false, null))[0];
+        }finally {
+            response.getContent().close();
         }
+        return meta;
     }
 
     /**

@@ -86,7 +86,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         mediaContent.setCloseInputStream(false);
                         mediaContent.setRetrySupported(false);
 
-                        getAbstractKinveyClient().file().setUploadProgressListener(new UploaderProgressListener() {
+                        getAbstractKinveyClient().file().setUploadProgressListener(new MetaUploadListener() {
                             @Override
                             public void progressChanged(MediaHttpUploader uploader) throws IOException {
                                 if (upload != null) {
@@ -96,13 +96,11 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
                             @Override
                             public void metaDataUploaded(FileMetaData metaData) {
-                                if (upload != null) {
-                                    upload.metaDataUploaded(metaData);
-                                }
+
                                 HashMap<String, String> resourceMap = new HashMap<String, String>();
                                 resourceMap.put("_id", metaData.getId());
-                                resourceMap.put("_loc", metaData.getId());
                                 resourceMap.put("_type", "KinveyFile");
+
 
                                 ((GenericJson) getJsonContent()).put(key, resourceMap);
 
@@ -158,5 +156,19 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
     public void setUpload(UploaderProgressListener upload) {
         this.upload = upload;
+    }
+
+    public static interface MetaUploadListener extends UploaderProgressListener{
+        /**
+         * Called to notify that metadata has been successfully uploaded to the /blob/
+         * <p/>
+         * <p>
+         * This method is called once, before the file upload actually begins but after the metadata has been set in the
+         * blob collection.  This metadata is used by the File API to determine the upload URL, and contains the id of the file.
+         * </p>
+         *
+         * @param metaData - The File MetaData associated with the upload about to occur.
+         */
+        public void metaDataUploaded(FileMetaData metaData);
     }
 }

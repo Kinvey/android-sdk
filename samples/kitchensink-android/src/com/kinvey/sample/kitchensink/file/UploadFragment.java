@@ -210,10 +210,6 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                         });
                     }
 
-                    @Override
-                    public void metaDataUploaded(FileMetaData metaData) {
-                        //To change body of implemented methods use File | Settings | File Templates.
-                    }
                 });
             }
             catch (Exception e) {
