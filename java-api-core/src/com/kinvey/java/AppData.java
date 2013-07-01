@@ -48,9 +48,22 @@ public class AppData<T> {
     public static final String ID_FIELD_NAME = "_id";
     public static final String GEOLOC_FIELD_NAME = "_geoloc";
 
-    private Cache<String , T> cache = null;
+    private Cache<String , T> cache = new Cache<String, T>() {
+        @Override
+        public void put(String key, T value) {
+            //Do nothing by default!
+        }
+
+        @Override
+        public T get(String key) {
+            return null;
+        }
+    };
     private CachePolicy policy = CachePolicy.NOCACHE;
     private Object cacheLock = new Object();
+
+
+
 
     /**
      * Constructor to instantiate the AppData class.

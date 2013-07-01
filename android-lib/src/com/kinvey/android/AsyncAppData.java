@@ -100,6 +100,9 @@ public class AsyncAppData<T> extends AppData<T> {
 
 
 
+
+
+
     /** Constructor to instantiate the AppData class.
      *
      * @param collectionName Name of the appData collection
@@ -483,6 +486,7 @@ public class AsyncAppData<T> extends AppData<T> {
     public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+
 
     /**
      *

@@ -27,6 +27,7 @@ import java.net.URLConnection;
 
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.File;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
@@ -239,10 +240,19 @@ public class AsyncFile extends File {
         new FileDownload(metaData, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-//    public void download(String filename, OutputStream out, DownloaderProgressListener listener){ TODO query support?
-//        this.setDownloaderProgressListener(listener);
-//        new FileQueryDownload(filename, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-//    }
+
+    /**
+     * Download a file by Query, only the first result will be downloaded.
+     *
+     *
+     * @param q - the query, with a limit of 1
+     * @param out - where to download the file
+     * @param listener - for progress notifications
+     */
+    public void download(Query q, OutputStream out, DownloaderProgressListener listener){
+        this.setDownloaderProgressListener(listener);
+        new FileQueryDownload(q, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
 
     /**
      * Deletes the given file from the Kinvey file service.
@@ -254,14 +264,11 @@ public class AsyncFile extends File {
         new FileDelete(metadata.getId(), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-//    public void delete(Query query, KinveyClientCallback<Void> callback){
-//        new FileDelete(query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-//    }
 
 
 
     /**
-     * Deletes the given file from the Kinvey file service.
+     * Downloads just the metadata of a file
      *
      * @param id the metadata of the file
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
@@ -272,7 +279,7 @@ public class AsyncFile extends File {
 
 
     /**
-     * Deletes the given file from the Kinvey file service.
+     * Upload metadata for an existing file
      *
      * @param id the metadata of the file
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
@@ -359,18 +366,18 @@ public class AsyncFile extends File {
 //
     private class FileQueryDownload extends AsyncClientRequest<Void>{
 
-        private String fileName;
         private OutputStream out;
+        private Query query;
 
-        public FileQueryDownload(String fileName, OutputStream out, KinveyClientCallback callback) {
+        public FileQueryDownload(Query query, OutputStream out, KinveyClientCallback callback) {
             super(callback);
-            this.fileName = fileName;
+            this.query = query;
             this.out = out;
         }
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.downloadBlocking(fileName).executeAndDownloadTo(out);
+            AsyncFile.this.downloadBlocking(query).executeAndDownloadTo(out);
             return null;
         }
 
