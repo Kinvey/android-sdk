@@ -501,8 +501,8 @@ public class AsyncUser extends User {
      * </pre></p>
      * @param callback {@link KinveyUserManagementCallback}
      */
-    public void resetPassword(KinveyUserManagementCallback callback) {
-        new ResetPassword(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void resetPassword(String username, KinveyUserManagementCallback callback) {
+        new ResetPassword(username, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -899,18 +899,22 @@ public class AsyncUser extends User {
 
     private class ResetPassword extends AsyncClientRequest<Void> {
 
-        private ResetPassword(KinveyClientCallback callback) {
+        String username;
+
+        private ResetPassword(String username, KinveyClientCallback callback) {
             super(callback);
+            this.username = username;
         }
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncUser.this.resetPasswordBlocking();
+            AsyncUser.this.resetPasswordBlocking(this.username).execute();
             return null;
         }
     }
 
     private class EmailVerification extends AsyncClientRequest<Void> {
+
 
         private EmailVerification(KinveyClientCallback callback) {
             super(callback);
@@ -918,7 +922,7 @@ public class AsyncUser extends User {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncUser.this.sendEmailVerificationBlocking();
+            AsyncUser.this.sendEmailVerificationBlocking().execute();
             return null;
         }
     }

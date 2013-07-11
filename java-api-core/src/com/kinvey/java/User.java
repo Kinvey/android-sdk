@@ -554,14 +554,15 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Initiates a password reset request for the current user
+     * Initiates a password reset request for a provided username
      *
+     * @param username the username to request a password reset for
      * @return ResetPassword request
      * @throws IOException
      */
-    public ResetPassword resetPasswordBlocking() throws IOException {
-        Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        ResetPassword reset = new ResetPassword(this.getId());
+    public ResetPassword resetPasswordBlocking(String username) throws IOException {
+        Preconditions.checkNotNull(username, "username must not be null!");
+        ResetPassword reset = new ResetPassword(username);
         client.initializeRequest(reset);
         return reset;
     }
@@ -571,12 +572,12 @@ public class User extends GenericJson   {
      *
      * @return ResetPassword request
      * @throws IOException
-     * @deprecated Renamed to {@link #resetPasswordBlocking()}
+     * @deprecated Renamed to {@link #resetPasswordBlocking(String username)}
      */
     @Deprecated
     public ResetPassword resetPassword() throws IOException {
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        ResetPassword reset = new ResetPassword(this.getId());
+        ResetPassword reset = new ResetPassword(this.getUsername());
         client.initializeRequest(reset);
         return reset;
     }
@@ -781,9 +782,11 @@ public class User extends GenericJson   {
         @Key
         private String userID;
 
-        ResetPassword(String userID) {
-            super(client, "POST", REST_PATH, userID,  Void.class);
-            this.userID = userID;
+        ResetPassword(String username) {
+            super(client, "POST", REST_PATH, null,  Void.class);
+            this.userID = username;
+            this.setRequireAppCredentials(true);
+
         }
     }
 
@@ -798,8 +801,9 @@ public class User extends GenericJson   {
         private String userID;
 
         EmailVerification(String userID) {
-            super(client, "POST", REST_PATH, userID, Void.class);
+            super(client, "POST", REST_PATH, null, Void.class);
             this.userID = userID;
+            this.setRequireAppCredentials(true);
         }
     }
 }

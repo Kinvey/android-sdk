@@ -267,7 +267,7 @@ public abstract class File {
         q.equals("_filename", filename);
 //        q.setLimit(1);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(filename, q, downloaderProgressListener);
+        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
         client.initializeRequest(download);
         download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;

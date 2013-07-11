@@ -158,15 +158,16 @@ public class UserTest extends KinveyMockUnitTest {
     public void testResetPassword() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-        User.ResetPassword pwd = currentUser.resetPasswordBlocking();
-        assertEquals(currentUser.getId(),pwd.get("userID").toString());
+        currentUser.setUsername("test");
+        User.ResetPassword pwd = currentUser.resetPasswordBlocking(currentUser.getUsername());
+        assertEquals(currentUser.getUsername(),pwd.get("userID").toString());
         assertEquals("POST", pwd.getRequestMethod());
     }
 
     public void testResetPasswordNullUser() throws IOException {
         initializeUser();
         try {
-            User.ResetPassword pwd = currentUser.resetPasswordBlocking();
+            User.ResetPassword pwd = currentUser.resetPasswordBlocking(null);
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }

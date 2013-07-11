@@ -98,6 +98,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     private BackOffPolicy requestBackoffPolicy;
 
+    /**
+     * Does this request require the appkey/appsecret for authentication or does it require a user context
+     */
+    private boolean requireAppCredentials = false;
+
     @Key
     private String appKey;
 
@@ -276,6 +281,14 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             httpRequest.setContent(new EmptyContent());
         }
         httpRequest.getHeaders().putAll(requestHeaders);
+
+        System.out.println("*******HEADERS********");
+        HttpHeaders headers = httpRequest.getHeaders();
+        for (String s : headers.keySet()){
+            System.out.println("header -> " + s + " with " + headers.get(s));
+
+        }
+
         return httpRequest;
     }
 
@@ -419,5 +432,13 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     public AbstractKinveyClientRequest setAppKey(String appKey) {
         this.appKey = appKey;
         return this;
+    }
+
+    public boolean isRequireAppCredentials() {
+        return requireAppCredentials;
+    }
+
+    public void setRequireAppCredentials(boolean requireAppCredentials) {
+        this.requireAppCredentials = requireAppCredentials;
     }
 }

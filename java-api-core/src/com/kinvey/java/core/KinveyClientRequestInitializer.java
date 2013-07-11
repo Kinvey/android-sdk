@@ -12,7 +12,11 @@
 package com.kinvey.java.core;
 
 
+import com.google.api.client.http.BasicAuthentication;
+import com.google.api.client.http.HttpHeaders;
 import com.kinvey.java.auth.Credential;
+
+import java.util.logging.Logger;
 
 /**
  * @author m0rganic
@@ -85,11 +89,16 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
      * @param request the request to initialize
      */
     public void initialize(AbstractKinveyClientRequest<?> request) {
-        if (credential != null) {
+        if (credential != null && !request.isRequireAppCredentials()) {
             credential.initialize(request);
+        }
+
+        if (request.isRequireAppCredentials()){
+            request.getRequestHeaders().setBasicAuthentication(getAppKey(), getAppSecret());
         }
 
         request.setAppKey(appKey);
         request.getRequestHeaders().putAll(kinveyHeaders);
     }
+
 }
