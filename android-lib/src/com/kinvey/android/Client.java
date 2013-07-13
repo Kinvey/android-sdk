@@ -36,7 +36,6 @@ import java.util.logging.Logger;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.offline.OfflineAppData;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
@@ -86,7 +85,6 @@ public class Client extends AbstractClient {
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
     private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
-    private ConcurrentHashMap<String, OfflineAppData> offlineInstanceCache;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncFile file;
@@ -202,45 +200,6 @@ public class Client extends AbstractClient {
         }
     }
 
-    /**
-     * OfflineAppData factory method
-     * <p>
-     * Returns an instance of {@link OfflineAppData} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of {@link OfflineAppData} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link OfflineAppData}.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     {@code
-     OfflineAppData<myEntity> myAppData = kinveyClient.offlineAppData("entityCollection", myEntity.class);
-     }
-     * </pre>
-     * </p>
-     *
-     *
-     *
-     * @param collectionName The name of the collection
-     * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
-     *                for saving and fetching of data
-     * @return Instance of {@link OfflineAppData} for the defined collection
-     */
-    public <T> OfflineAppData<T> offlineAppData(String collectionName, Class<T> myClass) {
-        synchronized (lock) {
-
-            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
-            if (offlineInstanceCache == null) {
-                offlineInstanceCache = new ConcurrentHashMap<String, OfflineAppData>();
-            }
-            if (!offlineInstanceCache.containsKey(collectionName)) {
-                offlineInstanceCache.put(collectionName, new OfflineAppData(collectionName, myClass, this, context));
-            }
-            return offlineInstanceCache.get(collectionName);
-        }
-    }
 
     /**
      * File factory method
@@ -564,11 +523,11 @@ public class Client extends AbstractClient {
                 final InputStream in = context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
                 super.getProps().load(in);
             } catch (IOException e) {
-                Log.w(TAG, "Couldn't load properties, trying another approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                Log.w(TAG, "Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
             } catch (NullPointerException ex){
                 Log.e(TAG, "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                Log.e(TAG, "If you are using push notification or offline storage you must configure your client to load from properties, see our online guides for instructions.");
+                Log.e(TAG, "If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
                 throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
             }
 

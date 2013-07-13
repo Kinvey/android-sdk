@@ -29,9 +29,9 @@ import java.util.Map;
  * @since 2.0
  *
  */
-public class InMemoryLRUCache<String, V> implements Cache<String, V> {
+public class InMemoryLRUCache<T, V> implements Cache<T, V> {
 
-    protected LinkedHashMap<String, V> mCache;
+    protected LinkedHashMap<T, V> mCache;
 
     //these are defaults declared by Oracle: http://docs.oracle.com/javase/1.4.2/docs/api/java/util/LinkedHashMap.html
     int cacheSize = 16;
@@ -65,7 +65,7 @@ public class InMemoryLRUCache<String, V> implements Cache<String, V> {
     }
 
     private void initCache(){
-        mCache = new LinkedHashMap<String, V>(cacheSize+1, loadFactor) {
+        mCache = new LinkedHashMap<T, V>(cacheSize+1, loadFactor) {
             public boolean removeEldestEntry(Map.Entry eldest) {
                 return size() > cacheSize;
             }
@@ -83,7 +83,7 @@ public class InMemoryLRUCache<String, V> implements Cache<String, V> {
      * @param value - the Value to store
      */
     @Override
-    public void put(String key, V value) {
+    public void put(T key, V value) {
         synchronized (mCache){
             mCache.put(key, value);
         }
@@ -98,7 +98,7 @@ public class InMemoryLRUCache<String, V> implements Cache<String, V> {
      * @return
      */
     @Override
-    public V get(String key) {
+    public V get(T key) {
         synchronized (mCache){
             return mCache.get(key);
         }

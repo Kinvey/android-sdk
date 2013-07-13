@@ -18,8 +18,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.ArrayMap;
 import com.google.common.base.Preconditions;
 
 import com.kinvey.android.Client;
@@ -27,14 +25,14 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.offline.OfflineGenericJson;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
  *
  * This IntentService can be used to execute App Data client requests.  The current implementation is coupled with an
- * OfflineStore, -- this class is listening for an intent OFFLINE_SYNC that is kicked off by the store when a new client
+ * OfflineStorage, -- this class is listening for an intent OFFLINE_SYNC that is kicked off by the store when a new client
  * request is queued up.
  *
  * After receiving that intent from the Store, if the device is connected, it will begin sync.
@@ -67,7 +65,7 @@ public class OfflineAppDataService extends IntentService {
     private boolean requireWIFI;
     //The size of a batch, indicating how many async requests are executed at the same time.
     private int batchSize;
-    //a flag indicating if there is any pending work, currently tied to an OfflineStore.
+    //a flag indicating if there is any pending work, currently tied to an OfflineStorage.
     private boolean needsSync;
 
 //    //Every call to Kinvey's AppData API needs an associated collection and response class.
@@ -147,7 +145,7 @@ public class OfflineAppDataService extends IntentService {
 
 
     /**
-     * This method pulls a RequestInfo from an instance of an OfflineStore.
+     * This method pulls a RequestInfo from an instance of an OfflineStorage.
      *
      * If there are no queued requests in the Store, this service will set the needsSync flag to false and end itself.
      *
@@ -161,7 +159,7 @@ public class OfflineAppDataService extends IntentService {
         for (final String collectionName : collectionSet) {
             Log.v(Client.TAG, "Current Collection is: " + collectionName);
 
-            final OfflineStore curStore = OfflineStore.getStore(getApplicationContext(), collectionName);
+            final OfflineStorage curStore = OfflineStorage.getStore(getApplicationContext(), collectionName);
             if(curStore.getMyClass() == null){
                 return;
             }
@@ -290,7 +288,7 @@ public class OfflineAppDataService extends IntentService {
 
     }
 
-    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Object returnValue, OfflineStore store) {
+    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Object returnValue, OfflineStorage store) {
         store.notifyExecution(collectionName, success, info, returnValue);
     }
 

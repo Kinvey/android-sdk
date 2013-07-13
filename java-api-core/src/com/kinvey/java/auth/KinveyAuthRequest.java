@@ -41,8 +41,6 @@ import com.kinvey.java.core.KinveyJsonResponseException;
 public class KinveyAuthRequest extends GenericJson {
 
 
-    //TODO:
-
     public enum LoginType {
         IMPLICIT,
         KINVEY,
@@ -168,8 +166,6 @@ public class KinveyAuthRequest extends GenericJson {
                 , "/user/{appKey}/" + (this.create ? "" : "login")
                 , this
                 , false));
-
-        //TODO edwardf I think the fourth arguement *true* (now false!!!!!) is causing the issue with strange queries getting attached
     }
 
 

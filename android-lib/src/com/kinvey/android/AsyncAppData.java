@@ -19,11 +19,13 @@ import java.util.*;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.offline.OfflineStore;
 
 /**
  * Wraps the {@link com.kinvey.java.AppData} public methods in asynchronous functionality using native Android AsyncTask.
@@ -485,6 +487,11 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void setOffline(OfflinePolicy policy, OfflineStore store){
+        super.setOffline(policy, store);
+
     }
 
 

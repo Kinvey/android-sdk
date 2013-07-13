@@ -43,7 +43,7 @@ public class OfflineSettings implements Serializable {
     private boolean requireWIFI = false;
     //The size of a batch, indicating how many async requests are executed at the same time.
     private int batchSize = 3;
-    //a flag indicating if there is any pending work, currently tied to an OfflineStore.
+    //a flag indicating if there is any pending work, currently tied to an OfflineStorage.
     private boolean needsSync = false;
     //a set of collections that have offlinestores
     private Set<String> collectionSet = new HashSet<String>();

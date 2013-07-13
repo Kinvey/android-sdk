@@ -17,6 +17,8 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyRequestInitializer;
 
+import java.io.IOException;
+
 /**
  * @author m0rganic
  * @since 2.0

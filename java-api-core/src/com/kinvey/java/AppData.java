@@ -26,9 +26,13 @@ import java.util.List;
 import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
+import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
+import com.kinvey.java.offline.OfflinePolicy;
+import com.kinvey.java.offline.OfflineStore;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -48,6 +52,8 @@ public class AppData<T> {
     public static final String ID_FIELD_NAME = "_id";
     public static final String GEOLOC_FIELD_NAME = "_geoloc";
 
+    private CachePolicy policy = CachePolicy.NOCACHE;
+    private Object cacheLock = new Object();
     private Cache<String , T> cache = new Cache<String, T>() {
         @Override
         public void put(String key, T value) {
@@ -59,8 +65,26 @@ public class AppData<T> {
             return null;
         }
     };
-    private CachePolicy policy = CachePolicy.NOCACHE;
-    private Object cacheLock = new Object();
+
+    private OfflinePolicy offlinePolicy = OfflinePolicy.ALWAYSONLINE;
+    private OfflineStore<T> offlineStore = new OfflineStore<T>(){
+
+
+        @Override
+        public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+    };
 
 
 
@@ -93,7 +117,7 @@ public class AppData<T> {
      * Gets the current collectionName
      * @return Name of appData collection
      */
-    protected String getCollectionName() {
+    public String getCollectionName() {
         return collectionName;
     }
 
@@ -101,7 +125,7 @@ public class AppData<T> {
      * Gets current class that this AppData instance references.
      * @return Current appData class for marshalling data
      */
-    protected Class<T> getCurrentClass() {
+    public Class<T> getCurrentClass() {
         return myClass;
     }
 
@@ -114,8 +138,6 @@ public class AppData<T> {
     }
 
 
-
-
     /**
      * Define a cache as well as the policy to use when interacting with the cache
      *
@@ -126,6 +148,19 @@ public class AppData<T> {
         synchronized (cacheLock) {
             this.cache = cache;
             this.policy = policy;
+        }
+    }
+
+
+    /**
+     * Define the policy for Offline sync to use when performing operations in the background
+     *
+     * @param policy the policy defining behavior of offline sync
+     */
+    public void setOffline(OfflinePolicy policy, OfflineStore store){
+        synchronized (cacheLock){
+            this.offlinePolicy = policy;
+            this.offlineStore = store;
         }
     }
 
@@ -586,7 +621,7 @@ public class AppData<T> {
     }
 
     /**
-     * Generic Get class, extends AbstractKinveyJsonClientRequest<T[]>.  Constructs the HTTP request object for Get
+     * Generic Get class.  Constructs the HTTP request object for Get
      * requests.
      *
      */
@@ -616,8 +651,9 @@ public class AppData<T> {
 
 
         Get(Query query, Class myClass) {
-            super(client, "GET", REST_PATH, null, myClass);
+            super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -631,8 +667,9 @@ public class AppData<T> {
 
 
         Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
-            super(client, "GET", REST_PATH, null, myClass);
+            super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -657,7 +694,7 @@ public class AppData<T> {
 
 
     /**
-     * Generic Get class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for Get
+     * Generic Get class.  Constructs the HTTP request object for Get
      * requests.
      *
      */
@@ -683,15 +720,17 @@ public class AppData<T> {
 
 
         GetEntity(String entityID, Class<T> myClass) {
-            super(client, "GET", REST_PATH, null, myClass);
+            super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
         }
 
         GetEntity(String entityID, Class<T> myClass, String[] resolves, int resolve_depth, boolean retain){
-            super (client, "GET", REST_PATH, null, myClass);
+            super (client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
 
@@ -719,11 +758,11 @@ public class AppData<T> {
     }
 
     /**
-     * Generic Save<T> class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for
+     * Generic Save<T> class.  Constructs the HTTP request object for
      * Create / Update requests.
      *
      */
-    public class Save extends AbstractKinveyJsonClientRequest<T> {
+    public class Save extends AbstractKinveyOfflineClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}";
         @Key
         private String collectionName;
@@ -731,7 +770,8 @@ public class AppData<T> {
         private String entityID;
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
-            super(client, update.toString(), REST_PATH, entity, myClass);
+            super(client, update.toString(), REST_PATH, entity, myClass, AppData.this.collectionName);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
@@ -746,11 +786,11 @@ public class AppData<T> {
     }
 
     /**
-     * Generic Delete class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object
+     * Generic Delete class.  Constructs the HTTP request object
      * for Delete requests.
      *
      */
-    public class Delete extends AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
+    public class Delete extends AbstractKinveyOfflineClientRequest<KinveyDeleteResponse> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
@@ -768,13 +808,15 @@ public class AppData<T> {
         private String skip;
 
         Delete(String entityID) {
-            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
+            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class,  AppData.this.collectionName);
+            super.setStore(offlineStore,  offlinePolicy);
             this.entityID = entityID;
             this.collectionName = AppData.this.collectionName;
         }
 
         Delete(Query query) {
-            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
+            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class, AppData.this.collectionName);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -787,17 +829,18 @@ public class AppData<T> {
     }
 
     /**
-     * Generic Aggregate<T> class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for
+     * Generic Aggregate<T> class, constructs the HTTP request object for
      * Aggregate requests.
      *
      */
-    public class Aggregate extends AbstractKinveyJsonClientRequest<T> {
+    public class Aggregate extends AbstractKinveyOfflineClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_group";
         @Key
         private String collectionName;
 
         Aggregate(AggregateEntity entity, Class<T> myClass) {
-            super(client, "POST", REST_PATH, entity,myClass);
+            super(client, "POST", REST_PATH, entity,myClass, AppData.this.collectionName);
+            super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
         }
     }

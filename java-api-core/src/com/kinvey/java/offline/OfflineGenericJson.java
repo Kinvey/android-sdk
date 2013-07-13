@@ -9,7 +9,7 @@
 * or implied. See the License for the specific language governing permissions and limitations under
 * the License.
 */
-package com.kinvey.android.offline;
+package com.kinvey.java.offline;
 
 
 import com.google.api.client.json.GenericJson;
@@ -19,4 +19,5 @@ import java.io.Serializable;
 public class OfflineGenericJson extends GenericJson implements Serializable{
 
     public static final long serialVersionUID = 1L;
+
 }

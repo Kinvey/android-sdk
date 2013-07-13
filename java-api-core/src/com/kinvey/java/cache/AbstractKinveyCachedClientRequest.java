@@ -15,6 +15,7 @@ import com.google.api.client.http.UriTemplate;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ import java.io.IOException;
  * @since 2.0
  *
  */
-public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinveyJsonClientRequest<T>{
+public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinveyOfflineClientRequest<T> {
 
 
     private CachePolicy policy = CachePolicy.NOCACHE;
@@ -61,11 +62,12 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
      *        {@link com.google.api.client.http.UriTemplate#expand(String, String, Object, boolean)}
      * @param jsonContent POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass response class to parse into
+     * @param collectionName the collection this request is associated with
      */
     protected AbstractKinveyCachedClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient,
-                                              String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+                                              String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass, String collectionName) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent,
-                responseClass);
+                responseClass, collectionName);
     }
 
 
