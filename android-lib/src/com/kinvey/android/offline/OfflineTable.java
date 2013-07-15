@@ -54,15 +54,28 @@ public class OfflineTable<T extends OfflineGenericJson> {
     public static final String UNIQUE_INDEX = "SOME_INDEX";
     //for the queued action
     public static final String COLUMN_ACTION = "_action";
+    //for query strings
+    public static final String COLUMN_QUERY_STRING = "_queryString";
+    //for results of request,(0 false, 1 true)
+    public static final String COLUMN_RESULT = "_result";
+
+    //Each collection has multiple tables, these are the prefixes of the table names
+    public static final String PREFIX_OFFLINE = "offline_";
+    public static final String PREFIX_QUEUE = "queue_";
+    public static final String PREFIX_QUERY = "query_";
+    public static final String PREFIX_RESULTS = "results_";
 
     public String TABLE_NAME;
-
+    public String QUERY_NAME;
     public String QUEUE_NAME;
+    public String RESULTS_NAME;
 
 
     public OfflineTable(String collection){
-        this.TABLE_NAME = "offline_" + collection;
-        this.QUEUE_NAME = "queue_" + collection;
+        this.TABLE_NAME = PREFIX_OFFLINE + collection;
+        this.QUEUE_NAME = PREFIX_QUEUE + collection;
+        this.QUERY_NAME = PREFIX_QUERY + collection;
+        this.RESULTS_NAME = PREFIX_RESULTS + collection;
     }
 
     public void onCreate(SQLiteDatabase database) {
@@ -78,7 +91,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_JSON + " TEXT not null, "
                 + COLUMN_USER + " TEXT not null, "
-                + COLUMN_DELETED + " INTEGER not null"     //TODO might not need this! (delete request is queued, entity doesn't care
+                + COLUMN_DELETED + " INTEGER not null"     //TODO might not need this! (delete request is queued, entity doesn't care)
                 + ");";
 
 
@@ -89,6 +102,28 @@ public class OfflineTable<T extends OfflineGenericJson> {
                 + "("
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_ACTION + " TEXT not null"
+                + ");";
+
+        runCommand(database, createCommand);
+
+        //create the local query queue
+        createCommand = "CREATE TABLE IF NOT EXISTS "
+                + QUERY_NAME
+                + "("
+                + COLUMN_QUERY_STRING + " TEXT not null, "
+                + COLUMN_ID + " TEXT not null"
+                + ");";
+
+        runCommand(database, createCommand);
+
+        //create the local results queue
+        createCommand = "CREATE TABLE IF NOT EXISTS "
+                + RESULTS_NAME
+                + "("
+                + COLUMN_ID + " TEXT not null, "
+                + COLUMN_ACTION + " TEXT not null, "
+                + COLUMN_JSON + " TEXT not null, "
+                + COLUMN_RESULT + " INTEGER not null"
                 + ");";
 
         runCommand(database, createCommand);
@@ -123,6 +158,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
         }
 
 
+
     }
 
     public T insertEntity(OfflineHelper helper, AbstractClient client, OfflineGenericJson offlineEntity){
@@ -131,11 +167,9 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
         ContentValues values = new ContentValues();
 
-        if (offlineEntity.containsKey("_id")) {
-            values.put(COLUMN_ID, offlineEntity.get("_id").toString());
-        }else{
-            //TODO edwardf figure out how to handle new entities without a preset _id --> they need something for the associated queued request however it needs to be removed before the actual request
-        }
+
+        values.put(COLUMN_ID, offlineEntity.get("_id").toString());
+
 
         String jsonResult = "";
         StringWriter writer = new StringWriter();
@@ -155,6 +189,9 @@ public class OfflineTable<T extends OfflineGenericJson> {
         int change = db.updateWithOnConflict(TABLE_NAME, values, null, null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(TABLE_NAME, null, values);
+            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_ID));
+        }else{
+            Log.v(TAG, "updating entity -> " + values.get(COLUMN_ID));
         }
 
 
@@ -227,6 +264,20 @@ public class OfflineTable<T extends OfflineGenericJson> {
         c.close();
         db.close();
         return ret;
+    }
+
+    public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_ID, info.getEntityID());
+        values.put(COLUMN_ACTION, info.getHttpVerb());
+        values.put(COLUMN_JSON, returnValue);
+        values.put(COLUMN_RESULT, (success ? 1 : 0));
+
+        db.insert(RESULTS_NAME, null, values);
+
+        db.close();
     }
 
 }

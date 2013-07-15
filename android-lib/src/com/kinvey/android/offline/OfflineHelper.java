@@ -73,7 +73,6 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-       createCollectionTable();
        OfflineTable table = new OfflineTable(collectionName);
        table.onCreate(database);
 
@@ -86,6 +85,8 @@ public class OfflineHelper extends SQLiteOpenHelper {
     }
 
     public OfflineTable getTable(String collectionName){
+        createCollectionTable();
+        addCollection(collectionName);
         return new OfflineTable(collectionName);
     }
 
@@ -99,7 +100,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
         if (change == 0){
             db.insert(COLLECTION_TABLE, null, values);
         }
-        db.close();
+
     }
 
     public List<String> getCollectionTables(){
@@ -118,7 +119,10 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     }
 
-    public OfflineGenericJson getEntity(AbstractClient client, AppData appData, String id) {
+
+
+
+        public OfflineGenericJson getEntity(AbstractClient client, AppData appData, String id) {
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         SQLiteDatabase db = getWritableDatabase();
 
@@ -130,9 +134,10 @@ public class OfflineHelper extends SQLiteOpenHelper {
     }
 
 
-
-
-    public void createCollectionTable(){
+    /**
+     * this method does not close the DB, it is assumed an entry will be added immediately after (and that operation will close it)
+     */
+    private void createCollectionTable(){
         SQLiteDatabase db = getWritableDatabase();
 
         String createCommand = "CREATE TABLE IF NOT EXISTS "
@@ -143,6 +148,5 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
         OfflineTable.runCommand(db, createCommand);
 
-        db.close();
     }
 }

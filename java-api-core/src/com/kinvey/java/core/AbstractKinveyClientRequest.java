@@ -281,14 +281,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             httpRequest.setContent(new EmptyContent());
         }
         httpRequest.getHeaders().putAll(requestHeaders);
-
-        System.out.println("*******HEADERS********");
-        HttpHeaders headers = httpRequest.getHeaders();
-        for (String s : headers.keySet()){
-            System.out.println("header -> " + s + " with " + headers.get(s));
-
-        }
-
         return httpRequest;
     }
 
@@ -336,6 +328,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             lastResponseMessage = response.getStatusMessage();
             lastResponseHeaders = response.getHeaders();
             // process any errors
+            System.out.println("*** -> " + response.getStatusCode());
             if (throwExceptionOnError && !response.isSuccessStatusCode()) {
                 throw newExceptionOnError(response);
             }

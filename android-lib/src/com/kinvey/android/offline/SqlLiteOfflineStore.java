@@ -63,9 +63,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, false);
         //find the index after {collectionName}/
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
-        Log.i(TAG, "************* Offline!");
-        Log.i(TAG, "targetURI -> " + targetURI);
-        Log.i(TAG, "id substring -> " + targetURI.substring(idIndex, targetURI.length()));
+
 
         T ret;
         //determine if it is a query or get by id
@@ -79,6 +77,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
             ret = (T) dbHelper.getTable(appData.getCollectionName()).getEntity(dbHelper, client, targetID, appData.getCurrentClass());
 
         }
+        db.close();
         dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "GET", targetURI.substring(idIndex, targetURI.length()));
 
         kickOffSync();
@@ -107,7 +106,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         String targetID = targetURI.substring(idIndex, targetURI.length());
         KinveyDeleteResponse ret = dbHelper.getTable(appData.getCollectionName()).delete(dbHelper,client, targetID);
-
+        db.close();
         dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "DELETE", targetURI.substring(idIndex, targetURI.length()));
 
         kickOffSync();
@@ -132,6 +131,8 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         OfflineGenericJson jsonContent = (OfflineGenericJson) request.getJsonContent();
         T ret = (T) dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
+
+        db.close();
 
         dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "PUT", ((OfflineGenericJson)request.getJsonContent()).get("_id").toString());
 

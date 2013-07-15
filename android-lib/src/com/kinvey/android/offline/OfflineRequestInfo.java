@@ -18,7 +18,7 @@ import com.kinvey.java.Query;
 import java.io.Serializable;
 
 /**
- * This public static class maintains information about the client request.
+ * This public class maintains information about the client request.
  * <p/>
  * This stores the relationship between an Http Verb and and an associated entity's ID.
  * <p/>
