@@ -122,7 +122,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
 
 
-        public OfflineGenericJson getEntity(AbstractClient client, AppData appData, String id) {
+    public OfflineGenericJson getEntity(AbstractClient client, AppData appData, String id) {
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         SQLiteDatabase db = getWritableDatabase();
 

@@ -16,13 +16,16 @@ package com.kinvey.android.offline;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 import android.util.Log;
 import com.google.api.client.json.JsonGenerator;
+import com.kinvey.android.AndroidCredentialStoreException;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineGenericJson;
 
 import java.io.IOException;
@@ -50,14 +53,18 @@ public class OfflineTable<T extends OfflineGenericJson> {
     public static final String COLUMN_USER = "_user";
     //for lazy-delete support, add a deleted flag (0 false, 1 true)
     public static final String COLUMN_DELETED = "_deleted";
-    //for the unique index
-    public static final String UNIQUE_INDEX = "SOME_INDEX";
+    //for the unique index on the collection store
+    public static final String UNIQUE_INDEX_IDS = "SOME_INDEX";
+    //for the unique index on the request queue
+    public static final String UNIQUE_INDEX_QUEUE = "ANOTHER_INDEX";
     //for the queued action
     public static final String COLUMN_ACTION = "_action";
     //for query strings
     public static final String COLUMN_QUERY_STRING = "_queryString";
     //for results of request,(0 false, 1 true)
     public static final String COLUMN_RESULT = "_result";
+    //unique key for queued requests, using Mongo db's algorithm
+    public static final String COLUMN_UNIQUE_KEY = "_key";
 
     //Each collection has multiple tables, these are the prefixes of the table names
     public static final String PREFIX_OFFLINE = "offline_";
@@ -100,6 +107,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
         createCommand = "CREATE TABLE IF NOT EXISTS "
                 + QUEUE_NAME
                 + "("
+                + COLUMN_UNIQUE_KEY + " TEXT not null, "
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_ACTION + " TEXT not null"
                 + ");";
@@ -129,7 +137,10 @@ public class OfflineTable<T extends OfflineGenericJson> {
         runCommand(database, createCommand);
 
         //set a unique index on the local offline entity store
-        String primaryKey = "CREATE UNIQUE INDEX " + UNIQUE_INDEX + " ON " + TABLE_NAME + " (" + COLUMN_ID + " ASC);";
+        String primaryKey = "CREATE UNIQUE INDEX " + UNIQUE_INDEX_IDS + " ON " + TABLE_NAME + " (" + COLUMN_ID + " ASC);";
+        runCommand(database, primaryKey);
+        //set a unique key on the queued request store
+        primaryKey = "CREATE UNIQUE INDEX " + UNIQUE_INDEX_QUEUE + " ON " + QUEUE_NAME + " (" + COLUMN_UNIQUE_KEY + " ASC);";
         runCommand(database, primaryKey);
 
 
@@ -186,7 +197,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
         values.put(COLUMN_DELETED, 0);
         values.put(COLUMN_USER, client.user().getId());
 
-        int change = db.updateWithOnConflict(TABLE_NAME, values, null, null, db.CONFLICT_REPLACE);
+        int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(TABLE_NAME, null, values);
             Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_ID));
@@ -211,7 +222,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
             cursor.moveToFirst();
             try{
                ret =  client.getJsonFactory().fromString(cursor.getString(0), responseClass);
-            }catch(IOException e){
+            }catch(Exception e){
                 Log.e(TAG, "cannot parse json into object! -> " + e);
             }
             cursor.close();
@@ -220,8 +231,45 @@ public class OfflineTable<T extends OfflineGenericJson> {
         return ret;
     }
 
-    public T[] getQuery(OfflineHelper helper, String q){
-        return null; //TODO
+
+
+    public T[] getQuery(OfflineHelper helper, AbstractClient client, String q, Class clazz){
+
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        Cursor c =  db.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null);
+
+        if (c.moveToFirst() && c.getColumnCount() > 0) {
+            String[] resultIDs = c.getString(0).split(",");
+
+            OfflineGenericJson[] ret = new OfflineGenericJson[resultIDs.length];
+
+            for (int i = 0; i < resultIDs.length; i++) {
+                ret[i] = getEntity(helper, client, resultIDs[i], clazz);
+            }
+
+            return (T[]) ret;
+        }
+        return null;
+
+    }
+
+    public void storeQueryResults(OfflineHelper helper, String queryString, List<String> resultIds){
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_QUERY_STRING, queryString);
+
+        String commaDelimitedIds = TextUtils.join(",", resultIds);
+
+        values.put(COLUMN_ID, commaDelimitedIds);
+
+        db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
+
+        db.close();
+
+
     }
 
     public KinveyDeleteResponse delete(OfflineHelper helper, AbstractClient client, String id){
@@ -243,6 +291,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.generateMongoDBID());
         values.put(COLUMN_ID, id);
         values.put(COLUMN_ACTION, verb);
 
@@ -251,17 +300,39 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
-    public List<OfflineRequestInfo> popQueue(OfflineHelper helper){
+    public List<OfflineRequestInfo> popQueued(OfflineHelper helper){
         ArrayList<OfflineRequestInfo> ret = new ArrayList<OfflineRequestInfo>();
-
-
         SQLiteDatabase db = helper.getReadableDatabase();
 
         Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION}, null, null, null, null, null);
         while (c.moveToNext()){
             ret.add(new OfflineRequestInfo(c.getString(1), c.getString(0)));
         }
+
+
         c.close();
+        db.close();
+        return ret;
+    }
+
+    public OfflineRequestInfo popSingleQueue(OfflineHelper helper){
+        OfflineRequestInfo ret = null;
+
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        String curKey = null;
+
+        Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null);
+        if (c.moveToFirst()){
+            ret = new OfflineRequestInfo(c.getString(1), c.getString(0));
+            curKey = c.getString(2);
+        }
+        c.close();
+
+        //remove the popped request
+        if (curKey != null){
+            db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
+        }
         db.close();
         return ret;
     }
@@ -278,6 +349,23 @@ public class OfflineTable<T extends OfflineGenericJson> {
         db.insert(RESULTS_NAME, null, values);
 
         db.close();
+    }
+
+    public List<OfflineResponseInfo> getHistoricalRequests(OfflineHelper helper){
+
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor c = db.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null);
+
+        ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
+
+        while (c.moveToNext()){
+            ret.add(new OfflineResponseInfo(new OfflineRequestInfo(c.getString(1), c.getString(0)), c.getString(2), (c.getInt(3) == 1 ? true : false )));
+        }
+
+        c.close();
+        db.close();
+        return ret;
+
     }
 
 }

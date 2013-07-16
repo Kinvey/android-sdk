@@ -57,7 +57,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         OfflineHelper dbHelper = new OfflineHelper(context, appData.getCollectionName());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //expand the URI from the template
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, false);
@@ -67,18 +67,22 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         T ret;
         //determine if it is a query or get by id
-        if (targetURI.contains("query")){
+        if (targetURI.contains("query") || idIndex == targetURI.length()){
             //it's a query
             String query = targetURI.substring(idIndex, targetURI.length());
-            ret = (T) dbHelper.getTable(appData.getCollectionName()).getQuery(dbHelper,  query);
+            ret = (T) dbHelper.getTable(appData.getCollectionName()).getQuery(dbHelper, client, query, appData.getCurrentClass());
+            dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "QUERY", targetURI.substring(idIndex, targetURI.length()));
+
+
         }else{
             //it's get by id
             String targetID = targetURI.substring(idIndex, targetURI.length());
             ret = (T) dbHelper.getTable(appData.getCollectionName()).getEntity(dbHelper, client, targetID, appData.getCurrentClass());
+            dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "GET", targetURI.substring(idIndex, targetURI.length()));
+
 
         }
-        db.close();
-        dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "GET", targetURI.substring(idIndex, targetURI.length()));
+//        db.close();
 
         kickOffSync();
         return ret;

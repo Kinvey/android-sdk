@@ -28,6 +28,7 @@ import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -177,26 +178,21 @@ public class KinveySyncService extends IntentService {
     }
 
     public void getFromStoreAndExecute() {
-
-
-        //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
-
         List<String> collectionNames = dbHelper.getCollectionTables();
 
+        boolean done = false;
 
         for (String s : collectionNames) {
-            List<OfflineRequestInfo> requests = dbHelper.getTable(s).popQueue(dbHelper);
-
-            for (OfflineRequestInfo req : requests) {
-                executeRequest(dbHelper, req, s);
-
-
+            while (!done){
+                OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
+                if (req == null){
+                    done = true;
+                }else{
+                    executeRequest(dbHelper, req, s);
+                }
             }
-
         }
-
-
     }
 
     private void executeRequest(final OfflineHelper dbHelper, final OfflineRequestInfo cur, final String collectionName) {
@@ -219,6 +215,8 @@ public class KinveySyncService extends IntentService {
                 @Override
                 public void onSuccess(OfflineGenericJson result) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+                    //update datastore with response
+                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result);
                 }
 
                 @Override
@@ -239,13 +237,39 @@ public class KinveySyncService extends IntentService {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
                 }
             });
-        }
+        }else if (cur.getHttpVerb().equals("QUERY")){
+            client.appData(collectionName, OfflineGenericJson[].class).getEntity(cur.getEntityID(), new KinveyClientCallback<OfflineGenericJson[]>() {
+                @Override
+                public void onSuccess(OfflineGenericJson[] result) {
+                    List<String> resultIds = new ArrayList<String>();
 
+                    for (OfflineGenericJson res : result){
+                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
+                        //update datastore with response
+                        dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);
+                        resultIds.add(res.get("_id").toString());
+                    }
+
+                    dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(),resultIds);
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
+                }
+            });
+        }
     }
 
     private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
         OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
         dbHelper.getTable(collectionName).storeCompletedRequestInfo(dbHelper, collectionName, success, info, returnValue);
+
+        //if request failed, re-queue it
+        if (!success){
+            dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
+        }
+
     }
 
     private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, GenericJson returnValue) {

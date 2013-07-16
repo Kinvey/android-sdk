@@ -437,7 +437,7 @@ public class OfflineStorage<T> extends Observable {
     public void addToQueue(String httpVerb, Query query, String queryjson){
         loadOrCreateStore();
 
-        this.requestStore.add(new OfflineRequestInfo(httpVerb, query, queryjson));
+//        this.requestStore.add(new OfflineRequestInfo(httpVerb, query, queryjson));
         writeStore(this.context);
     }
 
@@ -530,7 +530,7 @@ public class OfflineStorage<T> extends Observable {
         }
         writeStore(this.context);
         setChanged();
-        notifyObservers(new OfflineResponseInfo(info, response, success, collection));
+        notifyObservers(new OfflineResponseInfo(info, response, success));
 
     }
 

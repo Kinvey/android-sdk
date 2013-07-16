@@ -212,36 +212,36 @@ public class OfflineAppDataService extends IntentService {
 //                        responseArray = responseClass;
 //                    }
 
-
-                    client.appData(collectionName, responseClass).get(cur.getQuery(), new RequestInfoListCallback<T>(cur) {
-                        @Override
-                        public void onSuccess(T[] result) {
-                            Log.i(Client.TAG, "GET query onSuccess callback");
-
-                            ArrayList<String> ids = new ArrayList<String>();
-
-                            for (int i = 0; i < result.length; i++) {
-                                String id = ((OfflineGenericJson) result[i]).get("_id").toString();
-                                curStore.addToStore(id, result[i]);
-                                ids.add(id);
-
-                            }
-
-//                            curStore.add
-
-//                            cur.getQuery();
-                            curStore.addQuery(cur.getQuery(), cur.getEntityID(), ids) ;
-
-                            OfflineAppDataService.this.storeCompletedRequestInfo(collectionName, true, this.getInfo(), result, curStore);
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            Log.i(Client.TAG, "GET request onFailure callback");
-                            OfflineAppDataService.this.storeCompletedRequestInfo(collectionName, false, this.getInfo(), error, curStore);
-                        }
-                    });
+//
+//                    client.appData(collectionName, responseClass).get(cur.getQuery(), new RequestInfoListCallback<T>(cur) {
+//                        @Override
+//                        public void onSuccess(T[] result) {
+//                            Log.i(Client.TAG, "GET query onSuccess callback");
+//
+//                            ArrayList<String> ids = new ArrayList<String>();
+//
+//                            for (int i = 0; i < result.length; i++) {
+//                                String id = ((OfflineGenericJson) result[i]).get("_id").toString();
+//                                curStore.addToStore(id, result[i]);
+//                                ids.add(id);
+//
+//                            }
+//
+////                            curStore.add
+//
+////                            cur.getQuery();
+//                            curStore.addQuery(cur.getQuery(), cur.getEntityID(), ids) ;
+//
+//                            OfflineAppDataService.this.storeCompletedRequestInfo(collectionName, true, this.getInfo(), result, curStore);
+//
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Throwable error) {
+//                            Log.i(Client.TAG, "GET request onFailure callback");
+//                            OfflineAppDataService.this.storeCompletedRequestInfo(collectionName, false, this.getInfo(), error, curStore);
+//                        }
+//                    });
 
 
 

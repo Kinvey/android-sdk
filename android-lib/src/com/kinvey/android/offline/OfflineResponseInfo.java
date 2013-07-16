@@ -29,13 +29,11 @@ public class OfflineResponseInfo implements Serializable {
     private OfflineRequestInfo request;
     private boolean success;
     private Object responseObject;
-    private String collection;
 
-    public OfflineResponseInfo(OfflineRequestInfo req, Object resp, boolean  success, String collection) {
+    public OfflineResponseInfo(OfflineRequestInfo req, Object resp, boolean  success) {
         this.request = req;
         this.responseObject = resp;
         this.success = success;
-        this.collection = collection;
     }
 
     /**
@@ -76,11 +74,5 @@ public class OfflineResponseInfo implements Serializable {
         this.success = success;
     }
 
-    public String getCollection() {
-        return collection;
-    }
 
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
 }

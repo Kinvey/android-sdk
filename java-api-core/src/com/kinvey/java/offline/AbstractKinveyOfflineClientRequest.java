@@ -152,7 +152,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
 
 
-    private static String generateMongoDBID() {
+    public static String generateMongoDBID() {
         //from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
 
         int _time = (int) (System.currentTimeMillis() / 1000);
