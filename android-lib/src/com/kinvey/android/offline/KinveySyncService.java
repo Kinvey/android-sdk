@@ -181,9 +181,10 @@ public class KinveySyncService extends IntentService {
         OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
         List<String> collectionNames = dbHelper.getCollectionTables();
 
-        boolean done = false;
 
         for (String s : collectionNames) {
+            boolean done = false;
+
             while (!done){
                 OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
                 if (req == null){

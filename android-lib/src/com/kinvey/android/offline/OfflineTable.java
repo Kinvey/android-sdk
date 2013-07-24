@@ -110,11 +110,13 @@ public class OfflineTable<T extends OfflineGenericJson> {
                 + COLUMN_UNIQUE_KEY + " TEXT not null, "
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_ACTION + " TEXT not null"
+                + COLUMN_DELETED + " INTEGER not null"     //TODO might not need this
+
                 + ");";
 
         runCommand(database, createCommand);
 
-        //create the local query queue
+        //create the local query store
         createCommand = "CREATE TABLE IF NOT EXISTS "
                 + QUERY_NAME
                 + "("
@@ -124,7 +126,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
         runCommand(database, createCommand);
 
-        //create the local results queue
+        //create the local results store
         createCommand = "CREATE TABLE IF NOT EXISTS "
                 + RESULTS_NAME
                 + "("
@@ -206,6 +208,8 @@ public class OfflineTable<T extends OfflineGenericJson> {
         }
 
 
+
+
         db.close();
         return (T) offlineEntity;
     }
@@ -265,7 +269,15 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
         values.put(COLUMN_ID, commaDelimitedIds);
 
-        db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
+        Log.v(TAG, "inserting query ");
+
+        int change = db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
+        if (change == 0){
+            db.insert(QUERY_NAME, null, values);
+            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_ID));
+        }else{
+            Log.v(TAG, "updating entity -> " + values.get(COLUMN_ID));
+        }
 
         db.close();
 
@@ -328,7 +340,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
             curKey = c.getString(2);
         }
         c.close();
-
+        Log.e(TAG, "*** current key is -> " + curKey);
         //remove the popped request
         if (curKey != null){
             db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);

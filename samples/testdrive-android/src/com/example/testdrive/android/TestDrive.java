@@ -1,6 +1,7 @@
 package com.example.testdrive.android;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,17 +10,24 @@ import android.widget.Toast;
 import com.example.testdrive.android.model.Entity;
 import com.google.api.client.http.HttpTransport;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.api.client.json.GenericJson;
+import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.Query;
 import com.kinvey.android.Client;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.model.KinveyReference;
+import com.kinvey.java.offline.OfflinePolicy;
 
 public class TestDrive extends Activity {
 
@@ -29,6 +37,8 @@ public class TestDrive extends Activity {
     private ProgressBar bar;
 
 	private Client kinveyClient;
+
+    private SqlLiteOfflineStore store;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +51,17 @@ public class TestDrive extends Activity {
         //
         Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
 
+        this.store = new SqlLiteOfflineStore(getApplicationContext());
+
         bar = (ProgressBar) findViewById(R.id.refresh_progress);
         bar.setIndeterminate(true);
 
         kinveyClient = new Client.Builder(this).build();
+        kinveyClient.enableDebugLogging();
+
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
-            kinveyClient.user().login(new KinveyUserCallback() {
+            kinveyClient.user().login("ok", "ok", new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     bar.setVisibility(View.GONE);
@@ -69,12 +83,18 @@ public class TestDrive extends Activity {
 
 	public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        kinveyClient.appData("entityCollection", Entity.class).getEntity("myEntity", new KinveyClientCallback<Entity>() {
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
                 bar.setVisibility(View.GONE);
-                Toast.makeText(TestDrive.this,"Entity Retrieved\nTitle: " + result.getTitle()
-                + "\nDescription: " + result.get("Description"), Toast.LENGTH_LONG).show();
+                if (result == null){
+                    Toast.makeText(TestDrive.this, "got callback but it's null!", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(TestDrive.this, "Entity Retrieved\nTitle: " + result.getTitle()
+                        + "\nDescription: " + result.get("Description"), Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
@@ -90,14 +110,25 @@ public class TestDrive extends Activity {
         bar.setVisibility(View.VISIBLE);
         Query myQuery = kinveyClient.query();
         myQuery.equals("_id","myEntity");
-        kinveyClient.appData("entityCollection", Entity.class).get(myQuery, new KinveyListCallback<Entity>() {
+
+
+//        kinveyClient.linkedData("myCollect", myEntity.class).get(new Query(), null, null, new String[] {"fieldNameOfReference"}, 1, true );
+
+
+        KinveyReference ret = new KinveyReference()    ;
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+//        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.get(myQuery, new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
                 bar.setVisibility(View.GONE);
+                if(result != null){
                 for (Entity entity : result) {
                     Toast.makeText(TestDrive.this,"Entity Retrieved\nTitle: " + entity.getTitle()
                             + "\nDescription: " + entity.get("Description"), Toast.LENGTH_LONG).show();
                 }
+                }
+
             }
 
             @Override
@@ -111,13 +142,17 @@ public class TestDrive extends Activity {
 
     public void onLoadAllClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        kinveyClient.appData("entityCollection", Entity.class).get(new Query(), new KinveyListCallback<Entity>() {
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.get(new Query(), new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
                 bar.setVisibility(View.GONE);
+                if (result != null){
                 for (Entity entity : result) {
                     Toast.makeText(TestDrive.this,"Entity Retrieved\nTitle: " + entity.getTitle()
                             + "\nDescription: " + entity.get("Description"), Toast.LENGTH_LONG).show();
+                }
                 }
             }
 
@@ -133,13 +168,15 @@ public class TestDrive extends Activity {
 	public void onSaveClick(View view) {
         bar.setVisibility(View.VISIBLE);
         Entity entity = new Entity("myEntity");
-        entity.put("Description","This is a description of a dynamically-added Entity property.");
-        kinveyClient.appData("entityCollection", Entity.class).save(entity, new KinveyClientCallback<Entity>() {
+        entity.put("Description", "This is a description of an offline entity!");
+        entity.setOk(Entity.test.ONE);
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
                 bar.setVisibility(View.GONE);
-                Toast.makeText(TestDrive.this,"Entity Saved\nTitle: " + result.getTitle()
-                        + "\nDescription: " + result.get("Description"), Toast.LENGTH_LONG).show();
+                Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -153,7 +190,11 @@ public class TestDrive extends Activity {
 
     public void onDeleteClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        kinveyClient.appData("entityCollection", Entity.class).delete("myEntity", new KinveyDeleteCallback() {
+
+
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.delete("myEntity", new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {
                 bar.setVisibility(View.GONE);
@@ -168,4 +209,7 @@ public class TestDrive extends Activity {
             }
         });
     }
+
+
+
 }

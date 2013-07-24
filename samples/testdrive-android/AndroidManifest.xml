@@ -9,7 +9,9 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="17" />
     
-	<uses-permission android:name="android.permission.INTERNET" /> 
+	<uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <application
         android:allowBackup="true"
@@ -26,6 +28,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <service
+                android:name="com.kinvey.android.offline.KinveySyncService"
+                android:exported="true" android:process=":backgroundsync" >
+            <intent-filter>
+                <action android:name="com.kinvey.android.ACTION_OFFLINE_SYNC" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
