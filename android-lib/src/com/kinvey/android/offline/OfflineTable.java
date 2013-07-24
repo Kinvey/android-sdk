@@ -30,6 +30,7 @@ import com.kinvey.java.offline.OfflineGenericJson;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +111,7 @@ public class OfflineTable<T extends OfflineGenericJson> {
                 + COLUMN_UNIQUE_KEY + " TEXT not null, "
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_ACTION + " TEXT not null"
-                + COLUMN_DELETED + " INTEGER not null"     //TODO might not need this
+
 
                 + ");";
 
@@ -246,8 +247,9 @@ public class OfflineTable<T extends OfflineGenericJson> {
         if (c.moveToFirst() && c.getColumnCount() > 0) {
             String[] resultIDs = c.getString(0).split(",");
 
-            OfflineGenericJson[] ret = new OfflineGenericJson[resultIDs.length];
+//            T[] ret = new clazz[resultIDs.length];
 
+            T[] ret = (T[]) Array.newInstance(clazz, resultIDs.length);
             for (int i = 0; i < resultIDs.length; i++) {
                 ret[i] = getEntity(helper, client, resultIDs[i], clazz);
             }
