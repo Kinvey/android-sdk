@@ -177,30 +177,26 @@
    END OF TERMS AND CONDITIONS
 
 Summary:
-   >>> google-http-client-1.13.1-beta [apache-2.0] - used by google's android http client
-   >>> google-http-client-android-1.13.1-beta [apache-2.0] - used for HTTP requests
-   >>> google-http-client-gson-1.13.1-beta [apache-2.0] - used for JSON marshalling
-   >>> gson-2.1 [apache-2.0] - used by google's gson-client
-   >>> guava-jdk5-13.0 [apache-2.0] - used for concurrency and I/O operations
-   >>> google-android [apache-2.0] - used for core operating system features
+   >>> Kinvey-Android-Library [apache-2.0] - used to consume Kinvey web services
+   >>> google-play-services [apache-2.0] - used for geolocation services
+   >>> action-bar-sherlock [apache-2.0] - used for backwards compatibility
+   >>> facebook-android-API-3.0 [apache-2.0] - used for Facebook integration
 
 SECTION 1: Apache License, V2.0
 
-   >>> google-http-client-1.13.1-beta
-   >>> google-http-client-android-1.13.1-beta
-   >>> google-http-client-gson-1.13.1-beta
-   >>> gson-2.1
-   >>> guava-jdk5-13.0
-   >>> google-android
+   >>> Kinvey-Android-Library
+   >>> google-play-services
+   >>> action-bar-sherlock
+   >>> facebook-android-API-3.0 
 
 
 --------------- SECTION 1: Apache License, V2.0 ----------
 
 Apache License, V2.0 is applicable to the following component(s).
 
->>>  google-http-client-1.13.1-beta
+>>>  Kinvey-Android-Library
 
- Copyright 2013 Google Inc.
+ Copyright 2013 Kinvey
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -215,7 +211,7 @@ Apache License, V2.0 is applicable to the following component(s).
  limitations under the License.
 
 
->>> google-http-client-android-1.13.1-beta
+>>> google-play-services
 
  Copyright 2013 Google Inc.
 
@@ -232,15 +228,15 @@ Apache License, V2.0 is applicable to the following component(s).
  limitations under the License.
  
 
->>> google-http-client-gson-1.13.1-beta
+>>> action-bar-sherlock
 
- Copyright (c) 2013 Google Inc.
+ Copyright 2012 Jake Wharton
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
@@ -249,9 +245,9 @@ Apache License, V2.0 is applicable to the following component(s).
  limitations under the License.
 
 
->>> gson-2.1
+>>> facebook-android-API-3.0 
 
- Copyright 2013 Google Inc.
+ Copyright 2013 Facebook
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -265,38 +261,3 @@ Apache License, V2.0 is applicable to the following component(s).
  See the License for the specific language governing permissions and
  limitations under the License.
  
-
->>> guava-jdk5-13.0
-
- Copyright 2013 Google Inc.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
-
->>> google-android
-
- Copyright 2013 Google Inc.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
-
