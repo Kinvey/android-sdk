@@ -104,11 +104,6 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 throw new UnsupportedOperationException("Unrecognized Verb in offline request -> " + verb);
             }
 
-
-
-
-
-
             return ret;
 
 

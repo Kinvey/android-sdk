@@ -231,6 +231,7 @@ public class KinveySyncService extends IntentService {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
 
                 @Override

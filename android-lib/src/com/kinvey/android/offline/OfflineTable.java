@@ -301,6 +301,14 @@ public class OfflineTable<T extends OfflineGenericJson> {
         return ret;
     }
 
+    public void deleteEntity(OfflineHelper helper, String id){
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        db.delete(TABLE_NAME, COLUMN_ID + "=?", new String[]{id});
+        db.close();
+
+    }
+
     public void enqueueRequest(OfflineHelper helper, String verb, String id){
         SQLiteDatabase db = helper.getWritableDatabase();
 

@@ -24,7 +24,7 @@ public enum OfflinePolicy {
     ALWAYSONLINE{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(false);
+            return offlineRequest.offlineFromService(true);
         }
     },
 
@@ -32,21 +32,21 @@ public enum OfflinePolicy {
     SYNC_ANYTIME{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromStore();
+            return offlineRequest.offlineFromService(true);
         }
     },
 
     SYNC_FOREGROUND{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(false);
+            return offlineRequest.offlineFromService(true);
         }
     },
 
     SYNC_BACKGROUND{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(false);
+            return offlineRequest.offlineFromService(true);
         }
     };
 
