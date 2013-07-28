@@ -10,8 +10,6 @@
 package com.kinvey.java.offline;
 
 
-import com.sun.tools.javac.util.Log;
-
 import java.io.IOException;
 
 /**
