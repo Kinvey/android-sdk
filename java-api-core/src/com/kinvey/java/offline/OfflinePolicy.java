@@ -10,6 +10,8 @@
 package com.kinvey.java.offline;
 
 
+import com.sun.tools.javac.util.Log;
+
 import java.io.IOException;
 
 /**
@@ -17,34 +19,42 @@ import java.io.IOException;
  */
 public enum OfflinePolicy {
 
-    ALWAYSONLINE{
+    ALWAYS_ONLINE{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
             return offlineRequest.offlineFromService(true);
         }
     },
-
-
-    SYNC_ANYTIME{
+    ONLINE_FIRST{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(true);
+            T ret = offlineRequest.offlineFromService(true);
+            if (ret == null){
+                ret = offlineRequest.offlineFromStore();
+            }
+
+            return ret;
         }
     },
-
-    SYNC_FOREGROUND{
+    LOCAL_FIRST{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(true);
-        }
-    },
+            T ret =  offlineRequest.offlineFromStore();
+            System.out.println("*** local first-> " + ret);
+            if (ret == null){
+                ret = offlineRequest.offlineFromService(true);
+                System.out.println("*** local first online-> " + ret);
 
-    SYNC_BACKGROUND{
-        @Override
-        public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            return offlineRequest.offlineFromService(true);
+            }
+            return ret;
         }
     };
+
+
+
+
+
+
 
 
 

@@ -36,7 +36,7 @@ import java.nio.ByteBuffer;
  */
 public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonClientRequest<T> {
 
-    private OfflinePolicy policy = OfflinePolicy.ALWAYSONLINE;
+    private OfflinePolicy policy = OfflinePolicy.ALWAYS_ONLINE;
 
     private OfflineStore<T> store = null;
 
@@ -114,18 +114,32 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
      * This method retrieves an entity from the service.  The request is executed as normal, and, if persisted, the
      * response can be added to the cache.
      *
-     * @param persist - true if the response should be added to the cache, false if the cache shouldn't be updated.
+     * @param assumeOnline - should the method check if you are online first or just go
      * @return an entity from the online collection..
      * @throws IOException
      */
-    public T offlineFromService(boolean persist) throws IOException{
-        ///if this throws an IO exception, then there is probably no return object and thus nothing to persist...
-        T ret = super.execute();
-        if (persist && ret != null){
-            synchronized (lock){
-                return this.offlineFromStore();
-            }
+    public T offlineFromService(boolean assumeOnline) throws IOException{
+
+        if (assumeOnline){
+            return super.execute();
         }
+
+
+
+
+        T ret = null;
+        if(((AbstractClient) getAbstractKinveyClient()).appData(collectionName, getResponseClass()).isOnline()){
+            try{
+                ret = super.execute();
+                if (ret != null){
+                    synchronized (lock){
+                        return this.offlineFromStore();
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();;
+            }
+         }
         return ret;
     }
 
@@ -171,5 +185,8 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
         }
         return buf.toString();
     }
+
+
+
 
 }

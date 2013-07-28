@@ -93,7 +93,7 @@ public class TestDrive extends Activity {
 	public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -126,7 +126,7 @@ public class TestDrive extends Activity {
 
         KinveyReference ret = new KinveyReference()    ;
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(myQuery, new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
@@ -152,7 +152,7 @@ public class TestDrive extends Activity {
     public void onLoadAllClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(new Query(), new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
@@ -180,7 +180,7 @@ public class TestDrive extends Activity {
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -202,7 +202,7 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.SYNC_ANYTIME, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.delete("myEntity", new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {

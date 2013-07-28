@@ -14,6 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
@@ -539,6 +543,22 @@ public class AsyncAppData<T> extends AppData<T> {
         protected T executeAsync() throws IOException {
             return (AsyncAppData.super.saveBlocking(entity)).execute();
         }
+    }
+
+
+    @Override
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager)((Client)getClient()).getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            Log.v(Client.TAG, "Device is online");
+            return true;
+        }
+        Log.v(Client.TAG, "Device is offline");
+
+        return false;
+
     }
 
 

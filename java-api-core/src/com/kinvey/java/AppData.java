@@ -62,7 +62,7 @@ public class AppData<T> {
         }
     };
 
-    private OfflinePolicy offlinePolicy = OfflinePolicy.ALWAYSONLINE;
+    private OfflinePolicy offlinePolicy = OfflinePolicy.ALWAYS_ONLINE;
     private OfflineStore<T> offlineStore = new OfflineStore<T>(){
 
 
@@ -839,6 +839,10 @@ public class AppData<T> {
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
         }
+    }
+
+    public boolean isOnline() {
+        return true;
     }
 
 
