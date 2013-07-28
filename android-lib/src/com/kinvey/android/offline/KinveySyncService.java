@@ -290,4 +290,11 @@ public class KinveySyncService extends IntentService {
 
     }
 
+    public class KBinder extends Binder{
+        public KinveySyncService getService(){
+            return KinveySyncService.this;
+        }
+
+    }
+
 }
