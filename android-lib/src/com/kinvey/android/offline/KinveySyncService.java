@@ -49,7 +49,7 @@ public class KinveySyncService extends IntentService {
     public static final String ACTION_OFFLINE_SYNC = "com.kinvey.android.ACTION_OFFLINE_SYNC";
 
     //allows clients to bind
-    private final IBinder mBinder = new LocalBinder();
+    private final IBinder mBinder = new KBinder();
     private final String TAG = "Kinvey - SyncService";
 
     private Client client;
@@ -64,17 +64,6 @@ public class KinveySyncService extends IntentService {
 
     }
 
-
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-    public class LocalBinder extends Binder {
-        public KinveySyncService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return KinveySyncService.this;
-        }
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -291,6 +280,11 @@ public class KinveySyncService extends IntentService {
 
     }
 
+
+    /**
+     * Binder coupled with this Service
+     *
+     */
     public class KBinder extends Binder{
         public KinveySyncService getService(){
             return KinveySyncService.this;
