@@ -11,23 +11,20 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.MediaStore;
 import android.util.Log;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
-import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
-import com.kinvey.java.Query;
-import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
-import com.kinvey.java.offline.OfflineGenericJson;
 import com.kinvey.java.offline.OfflineStore;
 
 /**
+ * This class is an implementation of an {@link OfflineStore}, which uses SqlLite3 to maintain data.
+ *
+ *
  * @author edwardf
  */
 public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
@@ -41,7 +38,14 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
     }
 
 
-
+    /**
+     * Execute a get request against this offline store
+     *
+     * @param client - an instance of a client
+     * @param appData - an instance of AppData
+     * @param request - an Offline Client Request to be executed (must be a GET)
+     * @return the entity or null
+     */
     @Override
     public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
 
@@ -85,6 +89,15 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
     }
 
+    /**
+     *
+     * Execute a delete against this offline store
+     *
+     * @param client - an instance of a client
+     * @param appData - an instance of AppData
+     * @param request - an Offline Client Request to be executed (must be a DELETE)
+     * @return a delete response containing the count of entities deleted
+     */
     @Override
     public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
 
@@ -114,6 +127,16 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
     }
 
+
+    /**
+     *
+     * Execute a save against this offline store
+     *
+     * @param client - an instance of a client
+     * @param appData - an instance of AppData
+     * @param request - an Offline Client Request to be executed (must be a PUT or POST)
+     * @return the entity saved
+     */
     @Override
     public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
 
@@ -129,12 +152,12 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         //grab json content and put it in the store
 
-        OfflineGenericJson jsonContent = (OfflineGenericJson) request.getJsonContent();
+        GenericJson jsonContent = (GenericJson) request.getJsonContent();
         T ret = (T) dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
 
         db.close();
 
-        dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "PUT", ((OfflineGenericJson)request.getJsonContent()).get("_id").toString());
+        dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString());
 
         kickOffSync();
 

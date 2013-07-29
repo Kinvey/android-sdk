@@ -10,12 +10,12 @@
 package com.kinvey.java.offline;
 
 import com.google.api.client.http.UriTemplate;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.Cache;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.offline.OfflinePolicy;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -94,7 +94,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("POST")){
                 //generate and add id
-                ((OfflineGenericJson) this.getJsonContent()).put("_id", generateMongoDBID());
+                ((GenericJson) this.getJsonContent()).put("_id", generateMongoDBID());
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);

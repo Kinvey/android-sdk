@@ -14,17 +14,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
-import com.kinvey.android.AndroidCredentialStoreException;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.Query;
-import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
-import com.kinvey.java.offline.OfflineGenericJson;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -38,7 +34,7 @@ import java.util.List;
  * @author edwardf
  * @since 2.0
  */
-public class OfflineTable<T extends OfflineGenericJson> {
+public class OfflineTable<T extends GenericJson> {
 
     private final String TAG = Client.TAG + " " + this.getClass().getSimpleName();
 
@@ -156,6 +152,13 @@ public class OfflineTable<T extends OfflineGenericJson> {
         onCreate(database);
     }
 
+
+    /**
+     * Run a SQLLite command against a database
+     *
+     * @param database
+     * @param command
+     */
     public static void runCommand(SQLiteDatabase database, String command){
         database.beginTransaction();
         try {
@@ -171,7 +174,17 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
-    public T insertEntity(OfflineHelper helper, AbstractClient client, OfflineGenericJson offlineEntity){
+
+    /**
+     * Insert an entity into this offline table
+     *
+     *
+     * @param helper
+     * @param client
+     * @param offlineEntity
+     * @return
+     */
+    public T insertEntity(OfflineHelper helper, AbstractClient client, GenericJson offlineEntity){
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -211,6 +224,17 @@ public class OfflineTable<T extends OfflineGenericJson> {
         return (T) offlineEntity;
     }
 
+
+    /**
+     * Retrive an entity from this offline table
+     *
+     *
+     * @param helper
+     * @param client
+     * @param id
+     * @param responseClass
+     * @return
+     */
     public T getEntity(OfflineHelper helper, AbstractClient client, String id, Class<T> responseClass){
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, new String[] {COLUMN_JSON}, COLUMN_ID + "=?",
@@ -233,7 +257,15 @@ public class OfflineTable<T extends OfflineGenericJson> {
     }
 
 
-
+    /**
+     * Retrieve the results of a query from this offline table
+     *
+     * @param helper
+     * @param client
+     * @param q
+     * @param clazz
+     * @return
+     */
     public T[] getQuery(OfflineHelper helper, AbstractClient client, String q, Class clazz){
 
         SQLiteDatabase db = helper.getReadableDatabase();
@@ -256,6 +288,14 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
+
+    /**
+     * Store the results of a query
+     *
+     * @param helper
+     * @param queryString
+     * @param resultIds
+     */
     public void storeQueryResults(OfflineHelper helper, String queryString, List<String> resultIds){
 
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -282,6 +322,14 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
+    /**
+     * Flag an entity for deletion
+     *
+     * @param helper
+     * @param client
+     * @param id
+     * @return
+     */
     public KinveyDeleteResponse delete(OfflineHelper helper, AbstractClient client, String id){
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -305,6 +353,13 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
+    /**
+     * enqueue a request for later execution
+     *
+     * @param helper
+     * @param verb
+     * @param id
+     */
     public void enqueueRequest(OfflineHelper helper, String verb, String id){
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -318,21 +373,13 @@ public class OfflineTable<T extends OfflineGenericJson> {
 
     }
 
-    public List<OfflineRequestInfo> popQueued(OfflineHelper helper){
-        ArrayList<OfflineRequestInfo> ret = new ArrayList<OfflineRequestInfo>();
-        SQLiteDatabase db = helper.getReadableDatabase();
 
-        Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION}, null, null, null, null, null);
-        while (c.moveToNext()){
-            ret.add(new OfflineRequestInfo(c.getString(1), c.getString(0)));
-        }
-
-
-        c.close();
-        db.close();
-        return ret;
-    }
-
+    /**
+     * Pop a queued request and remove it from the queue
+     *
+     * @param helper
+     * @return
+     */
     public OfflineRequestInfo popSingleQueue(OfflineHelper helper){
         OfflineRequestInfo ret = null;
 
@@ -355,6 +402,16 @@ public class OfflineTable<T extends OfflineGenericJson> {
         return ret;
     }
 
+
+    /**
+     * store the results of a request executed in the background
+     *
+     * @param helper
+     * @param collectionName
+     * @param success
+     * @param info
+     * @param returnValue
+     */
     public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -369,6 +426,13 @@ public class OfflineTable<T extends OfflineGenericJson> {
         db.close();
     }
 
+
+    /**
+     * return a list of all historical offline requests
+     *
+     * @param helper
+     * @return
+     */
     public List<OfflineResponseInfo> getHistoricalRequests(OfflineHelper helper){
 
         SQLiteDatabase db = helper.getReadableDatabase();

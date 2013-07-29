@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ *
+ * This Android Service listens for intents and uses the {@link com.kinvey.android.AsyncAppData} API to execute requests
+ *
  * @author edwardf
  * @since 2.0
  */
@@ -150,8 +153,6 @@ public class KinveySyncService extends IntentService {
 
     }
 
-//    public void sync();
-
     private void initClientAndKickOffSync() {
 
         if (client == null) {
@@ -198,9 +199,9 @@ public class KinveySyncService extends IntentService {
 
 
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
-            client.appData(collectionName, OfflineGenericJson.class).save(dbHelper.getEntity(client, client.appData(collectionName, OfflineGenericJson.class), cur.getEntityID()), new KinveyClientCallback<OfflineGenericJson>() {
+            client.appData(collectionName, GenericJson.class).save(dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID()), new KinveyClientCallback<GenericJson>() {
                 @Override
-                public void onSuccess(OfflineGenericJson result) {
+                public void onSuccess(GenericJson result) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                 }
 
@@ -210,9 +211,9 @@ public class KinveySyncService extends IntentService {
                 }
             });
         } else if (cur.getHttpVerb().equals("GET")){
-            client.appData(collectionName, OfflineGenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<OfflineGenericJson>() {
+            client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson>() {
                 @Override
-                public void onSuccess(OfflineGenericJson result) {
+                public void onSuccess(GenericJson result) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     //update datastore with response
                     dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result);
@@ -225,7 +226,7 @@ public class KinveySyncService extends IntentService {
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
 
-            client.appData(collectionName, OfflineGenericJson.class).delete(cur.getEntityID(), new KinveyDeleteCallback() {
+            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID(), new KinveyDeleteCallback() {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -238,12 +239,12 @@ public class KinveySyncService extends IntentService {
                 }
             });
         }else if (cur.getHttpVerb().equals("QUERY")){
-            client.appData(collectionName, OfflineGenericJson[].class).getEntity(cur.getEntityID(), new KinveyClientCallback<OfflineGenericJson[]>() {
+            client.appData(collectionName, GenericJson[].class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson[]>() {
                 @Override
-                public void onSuccess(OfflineGenericJson[] result) {
+                public void onSuccess(GenericJson[] result) {
                     List<String> resultIds = new ArrayList<String>();
 
-                    for (OfflineGenericJson res : result){
+                    for (GenericJson res : result){
                         KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
                         //update datastore with response
                         dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);

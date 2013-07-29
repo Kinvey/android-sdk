@@ -12,9 +12,8 @@ package com.example.testdrive.android.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
-import com.kinvey.java.offline.OfflineGenericJson;
 
-public class Entity extends OfflineGenericJson {
+public class Entity extends GenericJson {
 
 	@Key("_id")
 	private String title;

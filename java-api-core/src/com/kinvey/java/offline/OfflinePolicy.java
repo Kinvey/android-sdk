@@ -13,9 +13,13 @@ package com.kinvey.java.offline;
 import java.io.IOException;
 
 /**
+ * This enum set determines behaivor of an Offline Request
+ *
+ *
  * @author edwardf
  */
 public enum OfflinePolicy {
+
 
     ALWAYS_ONLINE{
         @Override
@@ -26,9 +30,11 @@ public enum OfflinePolicy {
     ONLINE_FIRST{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            T ret = offlineRequest.offlineFromService(true);
+            T ret = offlineRequest.offlineFromService(false);
             if (ret == null){
                 ret = offlineRequest.offlineFromStore();
+            }else{
+                offlineRequest.offlineFromStore(); //exucute anyways to update local store but ignore result
             }
 
             return ret;
@@ -40,9 +46,8 @@ public enum OfflinePolicy {
             T ret =  offlineRequest.offlineFromStore();
             System.out.println("*** local first-> " + ret);
             if (ret == null){
-                ret = offlineRequest.offlineFromService(true);
+                ret = offlineRequest.offlineFromService(false);
                 System.out.println("*** local first online-> " + ret);
-
             }
             return ret;
         }

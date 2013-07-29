@@ -14,6 +14,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
@@ -36,11 +37,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-
-//    private Object lock = new Object();
-//    private ConcurrentHashMap<String, OfflineTable> tableCache;
-
-    String collectionName;
+    private String collectionName;
 
     private static final String DB_NAME = "kinveyOffline.db";
 
@@ -67,6 +64,11 @@ public class OfflineHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Called by operating system when a new database is created
+     *
+     * @param database
+     */
     @Override
     public void onCreate(SQLiteDatabase database) {
        OfflineTable table = new OfflineTable(collectionName);
@@ -74,19 +76,37 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Called by operating system when a database needs to be upgraded
+     *
+     * @param database
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         OfflineTable table = new OfflineTable(collectionName);
         table.onUpgrade(database, oldVersion, newVersion);
     }
 
+    /**
+     * Creates a new collection table, adds it to the metadata table, and returns it
+     *
+     * @param collectionName - the collection to create a new table for
+     * @return
+     */
     public OfflineTable getTable(String collectionName){
         createCollectionTable();
         addCollection(collectionName);
         return new OfflineTable(collectionName);
     }
 
-    public void addCollection(String collectionName){
+    /**
+     * Add a collection to the metadata table if it doesn't already exist
+     *
+     * @param collectionName
+     */
+    private void addCollection(String collectionName){
 
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -99,6 +119,11 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * query the metdata table for a list of all collection tables, returning them as a list
+     *
+     * @return a list of collection table names
+     */
     public List<String> getCollectionTables(){
         ArrayList<String> ret = new ArrayList<String>();
 
@@ -116,13 +141,20 @@ public class OfflineHelper extends SQLiteOpenHelper {
     }
 
 
+    /**
+     * Get an entity directly from an offline table
+     *
+     * @param client - an instance of the client
+     * @param appData - an instance of appdata
+     * @param id - the id of the entity to return
+     * @return
+     */
 
-
-    public OfflineGenericJson getEntity(AbstractClient client, AppData appData, String id) {
+    public GenericJson getEntity(AbstractClient client, AppData appData, String id) {
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         SQLiteDatabase db = getWritableDatabase();
 
-        OfflineGenericJson ret;
+        GenericJson ret;
 
         ret = getTable(appData.getCollectionName()).getEntity(this, client, id, appData.getCurrentClass());
 
