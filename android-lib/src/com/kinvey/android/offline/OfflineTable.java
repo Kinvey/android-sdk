@@ -411,8 +411,11 @@ public class OfflineTable<T extends GenericJson> {
      * @param success
      * @param info
      * @param returnValue
+     * @deprecated removed, as trable would grow infinitely
      */
     public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
+        //no-op haven't found a user for this yet
+        if (false){
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -424,6 +427,8 @@ public class OfflineTable<T extends GenericJson> {
         db.insert(RESULTS_NAME, null, values);
 
         db.close();
+        }
+        return;
     }
 
 
@@ -432,9 +437,10 @@ public class OfflineTable<T extends GenericJson> {
      *
      * @param helper
      * @return
+     * @deprecated removed, as table would grow infinitely
      */
     public List<OfflineResponseInfo> getHistoricalRequests(OfflineHelper helper){
-
+        if(false){
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor c = db.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null);
 
@@ -447,6 +453,8 @@ public class OfflineTable<T extends GenericJson> {
         c.close();
         db.close();
         return ret;
+        }
+        return new ArrayList<OfflineResponseInfo>();
 
     }
 
