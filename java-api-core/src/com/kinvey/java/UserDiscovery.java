@@ -69,31 +69,7 @@ public class UserDiscovery {
         return lookupBlocking(lookup);
     }
 
-    /**
-     * @deprecated Renamed to {@link #lookupByFullNameBlocking(String, String)}
-     */
-    @Deprecated
-    public Lookup lookupByFullName(String firstname, String lastname) throws IOException{
-
-        Preconditions.checkNotNull(firstname, "firstname must not be null.");
-        Preconditions.checkNotNull(lastname, "lastname must not be null.");
-        UserLookup lookup = new UserLookup();
-        lookup.setFirstName(firstname);
-        lookup.setLastName(lastname);
-        return lookupBlocking(lookup);
-    }
-
     public Lookup lookupByUserNameBlocking(String username) throws IOException{
-        Preconditions.checkNotNull(username, "username must not be null.");
-        UserLookup lookup = new UserLookup();
-        lookup.setUsername(username);
-        return lookupBlocking(lookup);
-    }
-    /**
-     * @deprecated Renamed to {@link #lookupByUserNameBlocking(String)}
-     */
-    @Deprecated
-    public Lookup lookupByUserName(String username) throws IOException{
         Preconditions.checkNotNull(username, "username must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setUsername(username);
@@ -106,32 +82,8 @@ public class UserDiscovery {
         lookup.setFacebookID(facebookID);
         return lookupBlocking(lookup);
     }
-    /**
-     * @deprecated Renamed to {@link #lookupByFacebookIDBlocking(String)}
-     */
-    @Deprecated
-    public Lookup lookupByFacebookID(String facebookID) throws IOException{
-        Preconditions.checkNotNull(facebookID, "facebookID must not be null.");
-        UserLookup lookup = new UserLookup();
-        lookup.setFacebookID(facebookID);
-        return lookupBlocking(lookup);
-    }
-
 
     public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
-
-        Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup, Array.newInstance(User.class,0).getClass());
-        client.initializeRequest(lookup);
-        return lookup;
-
-    }
-
-    /**
-     * @deprecated Renamed to {@link #lookupBlocking(com.kinvey.java.model.UserLookup)}
-     */
-    @Deprecated
-    public Lookup lookup(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
         Lookup lookup = new Lookup(userlookup, Array.newInstance(User.class,0).getClass());

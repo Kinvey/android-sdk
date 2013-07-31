@@ -45,20 +45,7 @@ public class Util {
      */
     public Ping pingBlocking() throws IOException {
         Ping ping = new Ping();
-        client.initializeRequest(ping);
-        return ping;
-    }
-
-    /**
-     * Method to ping service.
-     *
-     * @return Ping object
-     * @throws java.io.IOException
-     * @deprecated Renamed to {@link #pingBlocking()}
-     */
-    @Deprecated
-    public Ping ping() throws IOException {
-        Ping ping = new Ping();
+        ping.setRequireAppCredentials(true);
         client.initializeRequest(ping);
         return ping;
     }

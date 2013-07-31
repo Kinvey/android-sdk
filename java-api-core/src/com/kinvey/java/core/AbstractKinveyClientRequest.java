@@ -325,7 +325,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             lastResponseMessage = response.getStatusMessage();
             lastResponseHeaders = response.getHeaders();
             // process any errors
-            System.out.println("*** -> " + response.getStatusCode());
             if (throwExceptionOnError && !response.isSuccessStatusCode()) {
                 throw newExceptionOnError(response);
             }

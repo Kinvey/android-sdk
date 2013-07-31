@@ -374,22 +374,6 @@ public class AppData<T> {
     }
 
     /**
-     * Retrieve a group by MIN on a collection or filtered collection
-     *
-     * @param fields fields to group by
-     * @param minField field to obtain MIN value from
-     * @param query optional query to filter by (null for all records in a collection)
-     * @return
-     * @throws IOException
-     * @deprecated Renamed to {@link #minBlocking(java.util.ArrayList, String, Query)}
-     */
-    public Aggregate min(ArrayList<String> fields, String minField, Query query) throws IOException {
-        Preconditions.checkNotNull(fields);
-        Preconditions.checkNotNull(minField);
-        return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, query);
-    }
-
-    /**
      * Retrieve a group by AVERAGE on a collection or filtered collection
      *
      * @param fields fields to group by
