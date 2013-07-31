@@ -55,7 +55,7 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
     }
 
     public static Credential from(User user){
-        return new Credential(user.getId(), user.get("authKey").toString());
+        return new Credential(user.getId(), user.get("authToken").toString());
     }
 
     public String getUserId() {

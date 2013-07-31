@@ -158,19 +158,6 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Login with the implicit user.  If implicit user does not exist, the user is created.  After calling this method,
-     * the application should retrieve and store the userID using getId()
-     *
-     * @return LoginRequest object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginBlocking()}
-     */
-    @Deprecated
-    public LoginRequest login() throws IOException {
-        return new LoginRequest().buildAuthRequest();
-    }
-
-    /**
      * Login with Kinvey user and password.   If user does not exist, returns a error response.
      *
      * @param username userID of Kinvey User
@@ -179,22 +166,6 @@ public class User extends GenericJson   {
      * @throws IOException
      */
     public LoginRequest loginBlocking(String username, String password) throws IOException {
-        Preconditions.checkNotNull(username, "Username cannot be null.");
-        Preconditions.checkNotNull(password, "Password cannot be null.");
-        return new LoginRequest(username, password, false).buildAuthRequest();
-    }
-
-    /**
-     * Login with Kinvey user and password.   If user does not exist, returns a error response.
-     *
-     * @param username userID of Kinvey User
-     * @param password password of Kinvey user
-     * @return LoginRequest object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginBlocking()}
-     */
-    @Deprecated
-    public LoginRequest login(String username, String password) throws IOException {
         Preconditions.checkNotNull(username, "Username cannot be null.");
         Preconditions.checkNotNull(password, "Password cannot be null.");
         return new LoginRequest(username, password, false).buildAuthRequest();
@@ -244,22 +215,6 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Convenience Method to retrieve Metadata.
-     *
-     * @return Current user object with refreshed metadata
-     * @throws IOException
-     * @deprecated Renamed to {@link #retrieveMetadataBlocking()}
-     */
-    @Deprecated
-    protected User retrieveMetadata() throws IOException {
-        User ret = this.retrieveBlocking().execute();
-        String authToken = this.authToken;
-        this.putAll(ret.getUnknownKeys());
-        this.authToken = authToken;
-        return this;
-    }
-
-    /**
      * Login to Kinvey services using Facebook access token obtained through OAuth2.  If the user does not exist in the
      * Kinvey service, the user will be created.
      *
@@ -268,20 +223,6 @@ public class User extends GenericJson   {
      * @throws IOException
      */
     public LoginRequest loginFacebookBlocking(String accessToken) throws IOException {
-        return login(ThirdPartyIdentity.Type.FACEBOOK, accessToken);
-    }
-
-    /**
-     * Login to Kinvey services using Facebook access token obtained through OAuth2.  If the user does not exist in the
-     * Kinvey service, the user will be created.
-     *
-     * @param accessToken Facebook-generated access token.
-     * @return LoginRequest Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginFacebookBlocking(String)}
-     */
-    @Deprecated
-    public LoginRequest loginFacebook(String accessToken) throws IOException {
         return login(ThirdPartyIdentity.Type.FACEBOOK, accessToken);
     }
 
@@ -310,20 +251,6 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Login to Kinvey services using Google access token obtained through OAuth2.  If the user does not exist in the
-     * Kinvey service, the user will be created.
-     *
-     * @param accessToken Google-generated access token
-     * @return LoginRequest Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginGoogleBlocking(String)}
-     */
-    @Deprecated
-    public LoginRequest loginGoogle(String accessToken) throws IOException {
-        return login(ThirdPartyIdentity.Type.GOOGLE, accessToken);
-    }
-
-    /**
      * Login to Kinvey services using Twitter-generated access token, access secret, consumer key, and consumer secret
      * obtained through OAuth1a.  If the user does not exist in the Kinvey service, the user will be created.
      *
@@ -340,23 +267,12 @@ public class User extends GenericJson   {
                 accessToken, accessSecret, consumerKey, consumerSecret);
     }
 
-    /**
-     * Login to Kinvey services using Twitter-generated access token, access secret, consumer key, and consumer secret
-     * obtained through OAuth1a.  If the user does not exist in the Kinvey service, the user will be created.
-     *
-     * @param accessToken Twitter-generated access token
-     * @param accessSecret Twitter-generated access secret
-     * @param consumerKey Twitter-generated consumer key
-     * @param consumerSecret Twitter-generated consumer secret
-     * @return LoginRequest Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginTwitterBlocking(String, String, String, String)}
-     */
-    @Deprecated
-    public LoginRequest loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret)
-            throws IOException {
-        return login(ThirdPartyIdentity.Type.TWITTER,
-                accessToken, accessSecret, consumerKey, consumerSecret);
+    public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
+        this.setAuthToken(authToken);
+        this.setId(userId);
+        Credential c = Credential.from(this);
+        return login(c);
+
     }
 
     /**
@@ -377,25 +293,6 @@ public class User extends GenericJson   {
 
     public LoginRequest loginAuthLinkBlocking (String accessToken, String refreshToken) throws IOException {
         return login(ThirdPartyIdentity.Type.AUTH_LINK, accessToken, refreshToken);
-    }
-
-    /**
-     * Login to Kinvey services using LinkedIn-generated access token, access secret, consumer key, and consumer secret
-     * obtained through OAuth1a.  If the user does not exist in the Kinvey service, the user will be created.
-     *
-     * @param accessToken Linked In generated access token
-     * @param accessSecret Linked In generated access secret
-     * @param consumerKey Linked In generated consumer key
-     * @param consumerSecret Linked In generated consumer secret
-     * @return LoginRequest Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #loginLinkedInBlocking(String, String, String, String)}
-     */
-    @Deprecated
-    public LoginRequest loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret)
-            throws IOException {
-        return login(ThirdPartyIdentity.Type.LINKED_IN,
-                new String[]{accessToken, accessSecret, consumerKey, consumerSecret});
     }
 
     /**
@@ -422,20 +319,6 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Creates an explicit Kinvey User.
-     *
-     * @param userid userID of Kinvey user
-     * @param password password of Kinvey user
-     * @return LoginRequest Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #createBlocking(String, String)}
-     */
-    @Deprecated
-    public LoginRequest create(String userid, String password) throws IOException {
-        return new LoginRequest(userid, password, true).buildAuthRequest();
-    }
-
-    /**
      * Delete's the given user from the server.
      *
      * @param hardDelete if true, physically deletes the user. If false, marks user as inactive.
@@ -443,22 +326,6 @@ public class User extends GenericJson   {
      * @throws IOException
      */
     public Delete deleteBlocking(boolean hardDelete) throws IOException {
-        Preconditions.checkNotNull(this.getId());
-        Delete delete = new Delete(this.getId(), hardDelete);
-        client.initializeRequest(delete);
-        return delete;
-    }
-
-    /**
-     * Delete's the given user from the server.
-     *
-     * @param hardDelete if true, physically deletes the user. If false, marks user as inactive.
-     * @return Delete Request
-     * @throws IOException
-     * @deprecated Renamed to {@link #deleteBlocking(boolean)}
-     */
-    @Deprecated
-    public Delete delete(boolean hardDelete) throws IOException {
         Preconditions.checkNotNull(this.getId());
         Delete delete = new Delete(this.getId(), hardDelete);
         client.initializeRequest(delete);
@@ -479,21 +346,6 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Retrieves current user profile metadata.
-     *
-     * @return Retrieve Request
-     * @throws IOException
-     * @deprecated Renamed to {@link #retrieveBlocking()}
-     */
-    @Deprecated
-    public Retrieve<User> retrieve() throws IOException{
-        Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        Retrieve<User> retrieve = new Retrieve(this.getId(), thisClass);
-        client.initializeRequest(retrieve);
-        return retrieve;
-    }
-
-    /**
      * Retrieves an array of User[] based on a Query.
      *
      * @return Retrieve Request
@@ -507,42 +359,12 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Retrieves an array of User[] based on a Query.
-     *
-     * @return Retrieve Request
-     * @throws IOException
-     * @deprecated Renamed to {@link #retrieveBlocking(Query)}
-     */
-    @Deprecated
-    public Retrieve<User[]> retrieve(Query query) throws IOException{
-        Preconditions.checkNotNull(query, "query must not be null");
-        Retrieve<User[]> retrieve = new Retrieve(query, Array.newInstance(thisClass,0).getClass());
-        client.initializeRequest(retrieve);
-        return retrieve;
-    }
-
-    /**
      * Updates the current user's profile
      *
      * @return Update request
      * @throws IOException
      */
     public Update updateBlocking() throws IOException{
-        Preconditions.checkNotNull(this.getId(), "user must not be null");
-        Update update = new Update(this);
-        client.initializeRequest(update);
-        return update;
-    }
-
-    /**
-     * Updates the current user's profile
-     *
-     * @return Update request
-     * @throws IOException
-     * @deprecated Renamed to {@link #updateBlocking()}
-     */
-    @Deprecated
-    public Update update() throws IOException{
         Preconditions.checkNotNull(this.getId(), "user must not be null");
         Update update = new Update(this);
         client.initializeRequest(update);
@@ -564,42 +386,12 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Initiates a password reset request for the current user
-     *
-     * @return ResetPassword request
-     * @throws IOException
-     * @deprecated Renamed to {@link #resetPasswordBlocking(String username)}
-     */
-    @Deprecated
-    public ResetPassword resetPassword() throws IOException {
-        Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        ResetPassword reset = new ResetPassword(this.getUsername());
-        client.initializeRequest(reset);
-        return reset;
-    }
-
-    /**
      * Initiates an EmailVerification request for the current user
      *
      * @return EMail Verification Request
      * @throws IOException
      */
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
-        Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        EmailVerification verify = new EmailVerification(this.getId());
-        client.initializeRequest(verify);
-        return verify;
-    }
-
-    /**
-     * Initiates an EmailVerification request for the current user
-     *
-     * @return EMail Verification Request
-     * @throws IOException
-     * @deprecated Renamed to {@link #sendEmailVerificationBlocking()}
-     */
-    @Deprecated
-    public EmailVerification sendEmailVerification() throws IOException {
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
         EmailVerification verify = new EmailVerification(this.getId());
         client.initializeRequest(verify);

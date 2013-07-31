@@ -202,21 +202,7 @@ public class AppData<T> {
     }
 
 
-    /**
-     * Method to get an entity or entities.  Pass null to entityID to return all entities
-     * in a collection.
-     *
-     * @param entityID entityID to get
-     * @return Get object
-     * @throws java.io.IOException
-     * @deprecated Renamed to {@link #getEntityBlocking(String)}
-     */
-    @Deprecated
-    public GetEntity getEntity(String entityID) throws IOException {
-        GetEntity getEntity = new GetEntity(entityID, myClass);
-        client.initializeRequest(getEntity);
-        return getEntity;
-    }
+
 
     /**
      * Method to get a query of entities.  Pass an empty query to return all entities
@@ -267,23 +253,6 @@ public class AppData<T> {
     }
 
     /**
-     * Method to get a query of entities.  Pass an empty query to return all entities
-     * in a collection.
-     *
-     * @param query Query to get
-     * @return Get object
-     * @deprecated Renamed to {@link #getBlocking(Query)}
-     * @throws java.io.IOException
-     */
-    @Deprecated
-    public Get get(Query query) throws IOException {
-        Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(myClass,0).getClass());
-        client.initializeRequest(get);
-        return get;
-    }
-
-    /**
      * Method to get all entities in a collection.
      *
      * @return Get Object
@@ -295,18 +264,6 @@ public class AppData<T> {
     }
 
     /**
-     * Method to get all entities in a collection.
-     *
-     * @return Get Object
-     * @throws IOException
-     * @deprecated Renamed to {@link #getBlocking()}
-     */
-    @Deprecated
-    public Get get() throws IOException {
-        return getBlocking(new Query());
-    }
-
-    /**
      * Save (create or update) an entity to a collection.
      *
      * @param entity Entity to Save
@@ -314,32 +271,6 @@ public class AppData<T> {
      * @throws IOException
      */
     public Save saveBlocking(T entity) throws IOException {
-
-        Save save;
-        String sourceID;
-
-        GenericJson jsonEntity = (GenericJson) entity;
-        sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
-
-        if (sourceID != null) {
-            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
-        } else {
-            save = new Save(entity, myClass, SaveMode.POST);
-        }
-        client.initializeRequest(save);
-        return save;
-    }
-
-    /**
-     * Save (create or update) an entity to a collection.
-     *
-     * @param entity Entity to Save
-     * @return Save object
-     * @throws IOException
-     * @deprecated Renamed to {@link #saveBlocking(Object)}
-     */
-    @Deprecated
-    public Save save(T entity) throws IOException {
 
         Save save;
         String sourceID;
@@ -371,22 +302,6 @@ public class AppData<T> {
     }
 
     /**
-     * Delete an entity from a collection by ID.
-     *
-     * @param entityID entityID to delete
-     * @return Delete object
-     * @throws IOException
-     * @deprecated Renamed to {@link #deleteBlocking(String)}
-     */
-    @Deprecated
-    public Delete delete(String entityID) throws IOException {
-        Preconditions.checkNotNull(entityID);
-        Delete delete = new Delete(entityID);
-        client.initializeRequest(delete);
-        return delete;
-    }
-
-    /**
      * Delete an entity from a collection by Query.
      *
      * @param query query for entities to delete
@@ -394,22 +309,6 @@ public class AppData<T> {
      * @throws IOException
      */
     public Delete deleteBlocking(Query query) throws IOException {
-        Preconditions.checkNotNull(query);
-        Delete delete = new Delete(query);
-        client.initializeRequest(delete);
-        return delete;
-    }
-
-    /**
-     * Delete an entity from a collection by Query.
-     *
-     * @param query query for entities to delete
-     * @return Delete object
-     * @throws IOException
-     * @deprecated Renamed to {@link #deleteBlocking(String)}
-     */
-    @Deprecated
-    public Delete delete(Query query) throws IOException {
         Preconditions.checkNotNull(query);
         Delete delete = new Delete(query);
         client.initializeRequest(delete);
@@ -430,21 +329,6 @@ public class AppData<T> {
     }
 
     /**
-     * Retrieve a group by COUNT on a collection or filtered collection
-     *
-     * @param fields fields to group by
-     * @param query  optional query to filter by (null for all records in a collection)
-     * @return Aggregate object
-     * @throws IOException
-     * @deprecated Renamed to {@link #countBlocking(java.util.ArrayList, Query)}
-     */
-    @Deprecated
-    public Aggregate count(ArrayList<String> fields, Query query) throws IOException {
-        Preconditions.checkNotNull(fields);
-        return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, query);
-    }
-
-    /**
      * Retrieve a group by SUM on a collection or filtered collection
      *
      * @param fields fields to group by
@@ -460,23 +344,6 @@ public class AppData<T> {
     }
 
     /**
-     * Retrieve a group by SUM on a collection or filtered collection
-     *
-     * @param fields fields to group by
-     * @param sumField field to sum
-     * @param query optional query to filter by (null for all records in a collection)
-     * @return
-     * @throws IOException
-     * @deprecated Renamed to {@link #sumBlocking(java.util.ArrayList, String, Query)}
-     */
-    @Deprecated
-    public Aggregate sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
-        Preconditions.checkNotNull(fields);
-        Preconditions.checkNotNull(sumField);
-        return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, query);
-    }
-
-    /**
      * Retrieve a group by MAX on a collection or filtered collection
      *
      * @param fields fields to group by
@@ -486,23 +353,6 @@ public class AppData<T> {
      * @throws IOException
      */
     public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Query query) throws IOException {
-        Preconditions.checkNotNull(fields);
-        Preconditions.checkNotNull(maxField);
-        return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField, query);
-    }
-
-    /**
-     * Retrieve a group by MAX on a collection or filtered collection
-     *
-     * @param fields fields to group by
-     * @param maxField field to obtain max value from
-     * @param query optional query to filter by (null for all records in a collection)
-     * @return
-     * @throws IOException
-     * @deprecated Renamed to {@link #maxBlocking(java.util.ArrayList, String, Query)}
-     */
-    @Deprecated
-    public Aggregate max(ArrayList<String> fields, String maxField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(maxField);
         return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField, query);
@@ -549,23 +399,6 @@ public class AppData<T> {
      * @throws IOException
      */
     public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Query query) throws IOException {
-        Preconditions.checkNotNull(fields);
-        Preconditions.checkNotNull(averageField);
-        return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, query);
-    }
-
-    /**
-     * Retrieve a group by AVERAGE on a collection or filtered collection
-     *
-     * @param fields fields to group by
-     * @param averageField field to average
-     * @param query optional query to filter by (null for all records in a collection)
-     * @return
-     * @throws IOException
-     * @deprecated Renamed to {@link #averageBlocking(java.util.ArrayList, String, Query)}
-     */
-    @Deprecated
-    public Aggregate average(ArrayList<String> fields, String averageField, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(averageField);
         return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, query);

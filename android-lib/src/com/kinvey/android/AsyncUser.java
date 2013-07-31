@@ -233,6 +233,10 @@ public class AsyncUser extends User {
 
     }
 
+    public void loginKinveyAuthToken(String userId, String authToken, KinveyUserCallback callback){
+        new LoginKinveyAuth(userId, authToken, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
 
 
     /**
@@ -920,6 +924,25 @@ public class AsyncUser extends User {
         protected Void executeAsync() throws IOException {
             AsyncUser.this.sendEmailVerificationBlocking().execute();
             return null;
+        }
+    }
+
+    private class LoginKinveyAuth extends AsyncClientRequest<User> {
+
+        private String authToken;
+        private String userID;
+
+        private LoginKinveyAuth(String userId, String authToken, KinveyUserCallback callback){
+            super(callback);
+            this.userID = userId;
+            this.authToken = authToken;
+        }
+
+
+        @Override
+        protected User executeAsync() throws IOException {
+            return AsyncUser.this.loginKinveyAuthTokenBlocking(userID,  authToken).execute();
+
         }
     }
 }
