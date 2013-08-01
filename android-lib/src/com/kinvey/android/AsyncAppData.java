@@ -491,6 +491,13 @@ public class AsyncAppData<T> extends AppData<T> {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+
+    /**
+     * Set an {@link OfflinePolicy} on AppData, allowing requests to be executed locally
+     *
+     * @param policy the policy defining behavior of offline sync
+     * @param store the type of store to be used, commonly {@link com.kinvey.android.offline.SqlLiteOfflineStore}
+     */
     public void setOffline(OfflinePolicy policy, OfflineStore store){
         super.setOffline(policy, store);
 
@@ -546,6 +553,11 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
 
+    /**
+     * Method to check if the current runtime environment has an active connection to the internet, this implementation is tightly coupled with the Android Operating System
+     *
+     * @return true if the device is connected or connecting
+     */
     @Override
     public boolean isOnline() {
         ConnectivityManager cm =

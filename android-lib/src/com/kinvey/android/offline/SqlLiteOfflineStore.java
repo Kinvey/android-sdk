@@ -22,7 +22,7 @@ import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
 
 /**
- * This class is an implementation of an {@link OfflineStore}, which uses SqlLite3 to maintain data.
+ * This class is an implementation of an {@link OfflineStore}, which manages a set of {@link OfflineTable}s for each collection used by an application.
  *
  *
  * @author edwardf

@@ -12,6 +12,7 @@ package com.kinvey.java.core;
 
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.HttpHeaders;
+import com.google.common.base.Preconditions;
 import com.kinvey.java.auth.Credential;
 
 import java.util.logging.Logger;
@@ -87,6 +88,14 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
      * @param request the request to initialize
      */
     public void initialize(AbstractKinveyClientRequest<?> request) {
+        if (!request.isRequireAppCredentials()){
+            Preconditions.checkNotNull(credential, "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
+            Preconditions.checkNotNull(credential.getUserId(), "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
+            Preconditions.checkNotNull(credential.getAuthToken(), "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
+
+        }
+
+
         if (credential != null && !request.isRequireAppCredentials()) {
             credential.initialize(request);
         }
