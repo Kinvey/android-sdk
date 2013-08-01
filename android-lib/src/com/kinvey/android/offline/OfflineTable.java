@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a collection as a sqllite table, used for offline storage.
- *
- * Every row is an entity, with a sqllite column for the _id and one for the json body.
+ * This class manages the necessary tables for offline to function associated with one specific {@link com.kinvey.android.AsyncAppData} collection.
+ * <p/>
+ * Schema-less entities are stored in an `offline_MyCollection` table, which has two columns-- one for the _id of the entity and one for the json representation of the entity.
+ * `queue_MyCollection` maintains an ordered list of queued requests, so that they be retrieved and executed when a connection is restored.  The queue associates an HTTP Verb with an _id of the entity to perform it on.
+ * Another table is used to support queries, mapping the query string to a list of returned _ids.
  *
  * @author edwardf
  * @since 2.0

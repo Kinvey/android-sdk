@@ -12,7 +12,6 @@ package com.kinvey.sample.oracledlc;
 import android.app.Application;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.push.PushOptions;
 
 /**
  * @author mjsalinger
@@ -22,9 +21,9 @@ public class OracleDLCApplication extends Application {
 
     private Client myClient;
 
-    // NOTE: When configuring push notifications you have to change the android package name of this app
-    private String pushAppKey = "";
-    private String pushAppSecret = "";
+//    // NOTE: When configuring push notifications you have to change the android package name of this app
+//    private String pushAppKey = "";
+//    private String pushAppSecret = "";
 
     @Override
     public void onCreate() {
@@ -33,10 +32,10 @@ public class OracleDLCApplication extends Application {
     }
 
     public void registerPush() {
-        PushOptions options = myClient.push().getPushOptions(pushAppKey, pushAppSecret,
-                false);
-      //  myClient.push().setIntentReceiver(com.kinvey.sample.oracledlc.push.CustomPushReceiver.class);
-        myClient.push().initialize(options, this);
+//        PushOptions options = myClient.push().getPushOptions(pushAppKey, pushAppSecret,
+//                false);
+//      //  myClient.push().setIntentReceiver(com.kinvey.sample.oracledlc.push.CustomPushReceiver.class);
+//        myClient.push().initialize(options, this);
 
     }
 

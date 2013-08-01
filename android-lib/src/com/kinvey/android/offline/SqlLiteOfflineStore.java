@@ -22,7 +22,11 @@ import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
 
 /**
- * This class is an implementation of an {@link OfflineStore}, which manages a set of {@link OfflineTable}s for each collection used by an application.
+ * This class is an implementation of an {@link OfflineStore}, which provides methods to execute requests locally.
+ * <p/>
+ * This class delegates requests to an appropriate {@link OfflineTable}, which is associated with the current collection.
+ * <p/>
+ * It also enqueues requests in that same {@link OfflineTable}, and can start an Android Service to begin background sync.
  *
  *
  * @author edwardf

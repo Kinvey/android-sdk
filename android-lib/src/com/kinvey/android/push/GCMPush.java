@@ -76,23 +76,6 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(Application currentApp) {
-        return this.initialize(null, currentApp);
-    }
-
-
-    /**
-     * Initialize GCM by registering the current user with both GCM as well as your backend at Kinvey.
-     *
-     * Note these operations are performed asynchronously, however there is no callback.  Instead, updates
-     * are delegated to your custom `KinveyGCMService` which will handle any responses.
-     *
-     * @param options - deprecated, pass {@code null}.
-     * @param currentApp - The current valid application context.
-     * @return an instance of GCM push, initialized for the current user.
-     */
-    @Override
-    public GCMPush initialize(PushOptions options, Application currentApp) {
-
         //First check runtime and grab current registration ID
         GCMRegistrar.checkDevice(currentApp);
         GCMRegistrar.checkManifest(currentApp);
@@ -122,6 +105,9 @@ public class GCMPush extends AbstractPush {
         }
         return this;
     }
+
+
+
 
 
     /**
@@ -161,10 +147,9 @@ public class GCMPush extends AbstractPush {
      *
      * Unregistration is asynchronous, so use the `KinveyGCMService` to receive notification when unregistration has completed.
      *
-     * @throws PushRegistrationException
      */
     @Override
-    public void disablePush() throws PushRegistrationException {
+    public void disablePush() {
         GCMRegistrar.unregister(getClient().getContext());
     }
 

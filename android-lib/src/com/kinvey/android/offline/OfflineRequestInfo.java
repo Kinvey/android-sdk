@@ -14,12 +14,15 @@ import com.kinvey.java.Query;
 import java.io.Serializable;
 
 /**
- * This public class maintains information about the client request.
+ * This class is an abstraction of a REST request.
  * <p/>
- * This stores the relationship between an Http Verb and and an associated entity's ID.
+ * An instance of this class stores the relationship between an Http Verb and and an associated entity's ID.
  * <p/>
  * myRequest.getHttpVerb() represents the HTTP verb as a String ("GET", "PUT", "DELETE", "POST");
+ * <p/>
  * myRequest.getEntityID() represents the id of the entity, which might be stored in the local store.
+ *
+ * @author edwardf
  */
 public class OfflineRequestInfo implements Serializable {
 
@@ -28,7 +31,7 @@ public class OfflineRequestInfo implements Serializable {
     //The Http verb of the client request ("GET", "PUT", "DELETE", "POST", "QUERY");
     private String verb;
 
-    //The id of the entity, assuming it is in the store.
+    //The id of the entity, or the query string
     private String id;
 
 

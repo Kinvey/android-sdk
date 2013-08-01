@@ -18,6 +18,8 @@ import com.kinvey.android.Client;
 
 
 /**
+ * This class defines the behaviour of a Push implementation, and should be extended within the library to support with new providers.
+ *
  * @author mjsalinger
  * @since 2.0
  */
@@ -62,12 +64,10 @@ public abstract class AbstractPush {
         PushManager.shared().setNotificationBuilder(builder);
     }
 
-    public abstract AbstractPush initialize(PushOptions options, Application currentApp);
     public abstract AbstractPush initialize(Application currentApp);
     public abstract String getPushId();
     public abstract boolean isPushEnabled();
-    public abstract void disablePush() throws PushRegistrationException;
-    public PushOptions getPushOptions(String pushAppKey, String pushAppSecret, boolean inProduction){return null;}
+    public abstract void disablePush();
     public abstract boolean isInProduction();
     public abstract String[] getSenderIDs();
 

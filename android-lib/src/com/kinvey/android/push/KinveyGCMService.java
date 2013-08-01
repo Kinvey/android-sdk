@@ -27,7 +27,7 @@ import com.kinvey.java.User;
  * Upon successful registration/unregistration with GCM, this class will perform the appropriate action with Kinvey as well.
  * </p>
  * <p>
- * To use GCM for push notifications, extend this class and implement the provided abstract methods.
+ * To use GCM for push notifications, extend this class and implement the provided abstract methods.  When GCM related events occur, they relevant method will be called by the library.
  * <p>
  *
  * @author edwardf
@@ -41,11 +41,12 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
 
     /**
-     * Public Constructor used by operating system.
+     * Public Constructor used by the operating system when an intent is fired.
      */
     public KinveyGCMService() {
         super("GCM PUSH");
     }
+
 
     @Override
     protected void onRegistered(Context context, final String registrationId) {
@@ -182,7 +183,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         registerWithKinvey(client, gcmID, register);
     }
 
-    public void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
+    private void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG , "about to register with Kinvey");
         if (client == null){
@@ -244,6 +245,8 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     /**
      * This method is called when a message is received through GCM via Kinvey.
+     * <p/>
+     * the String message is exactly as it is sent from the Console, so it can be displayed immediately with a NotificationBuilder, or can be parsed to perform actions.
      *
      * @param message the text of the message
      */
@@ -265,7 +268,10 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     public abstract void onDelete(int deleteCount);
 
     /**
-     * This method is called after successful registration.  This includes both registering with GCM as well as Kinvey.
+     * This method is executed after `myKinveyClient.push().initialize(getApplication());` has been called and registration has completed.
+     * This can use this pop a notification using a `NotificationBuilder`, or just log output.
+     * <p/>
+     * This method will register the current user with Kinvey, after successfully registering with GCM.
      *
      * @param gcmID the new user's unique GCM registration ID
      */
