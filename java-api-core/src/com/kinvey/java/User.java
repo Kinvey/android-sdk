@@ -273,6 +273,16 @@ public class User extends GenericJson   {
                 accessToken, accessSecret, consumerKey, consumerSecret);
     }
 
+
+    /**
+     * Login to Kinvey services using a Kinvey user's _id and their valid Kinvey Auth Token.  This method is provided
+     * to allow for cross-platform login, by reusing a session provided with another client library (or the REST api).
+     *
+     * @param userId the _id field of the user to login
+     * @param authToken a valid Kinvey Auth token
+     * @return a LoginRequest ready to be executed
+     * @throws IOException
+     */
     public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
         this.setAuthToken(authToken);
         this.setId(userId);

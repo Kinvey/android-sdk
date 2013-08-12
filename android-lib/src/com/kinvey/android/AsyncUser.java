@@ -233,12 +233,32 @@ public class AsyncUser extends User {
         new Login(accessToken, LoginType.GOOGLE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-
+    /**
+     * Login to Kinvey Services using a Salesforce identity
+     *
+     * @param accessToken - provided by salesforce, after successful login
+     * @param clientid - client id used by salesforce
+     * @param refreshToken - provided by salesforce, after successful login
+     * @param id - the salesforce id of the user
+     * @param callback - {@link KinveyUserCallback} that contains a valid logged in user
+     */
     public void loginSalesForce (String accessToken, String clientid, String refreshToken, String id, KinveyUserCallback callback){
         new Login(accessToken, clientid, refreshToken, id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
+
+
+    /**
+     * Login to Kinvey services using a Kinvey user's _id and their valid Kinvey Auth Token.  This method is provided
+     * to allow for cross-platform login, by reusing a session provided with another client library (or the REST api).
+     *
+     * @param userId the _id field of the user to login
+     * @param authToken a valid Kinvey Auth token
+     * @param callback {@link KinveyUserCallback} that contains a valid logged in user
+     * @return a LoginRequest ready to be executed
+     * @throws IOException
+     */
     public void loginKinveyAuthToken(String userId, String authToken, KinveyUserCallback callback){
         new LoginKinveyAuth(userId, authToken, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
