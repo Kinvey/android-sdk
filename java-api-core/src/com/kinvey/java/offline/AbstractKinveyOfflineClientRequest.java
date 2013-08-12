@@ -117,11 +117,11 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
 
     /**
-     * This method retrieves an entity from the service.  The request is executed as normal, and, if persisted, the
-     * response can be added to the cache.
+     * This method retrieves an entity from the service.  If assumeOnline is true, then the method will throw any connection errors.
+     * If assumeOnline is false, then the method will catch the error and attempt to return the entity from the store.
      *
-     * @param assumeOnline - should the method check if you are online first or just go
-     * @return an entity from the online collection..
+     * @param assumeOnline - should execution assume the user is online (and return errors if they aren't)?
+     * @return an entity from the online collection
      * @throws IOException
      */
     public T offlineFromService(boolean assumeOnline) throws IOException{
@@ -164,7 +164,13 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
     }
 
 
-
+    /**
+     * Generate a unique mongodb style id.
+     * <p/>
+     * Offline requires all entities to have an `_id` field, so if one doesn't exist this method can be used to generate one
+     *
+     * @return a unique String id
+     */
     public static String generateMongoDBID() {
         //from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
 

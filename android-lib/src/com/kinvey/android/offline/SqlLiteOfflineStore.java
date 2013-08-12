@@ -66,7 +66,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context, appData.getCollectionName());
+        OfflineHelper dbHelper = new OfflineHelper(context);
 //        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //expand the URI from the template
@@ -118,7 +118,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context, appData.getCollectionName());
+        OfflineHelper dbHelper = new OfflineHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //set deleted flag in table
@@ -157,7 +157,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context, appData.getCollectionName());
+        OfflineHelper dbHelper = new OfflineHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //grab json content and put it in the store

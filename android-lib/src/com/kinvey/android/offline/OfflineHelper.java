@@ -20,8 +20,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
+import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.offline.*;
@@ -43,23 +45,23 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-    private String collectionName;
+//    private String collectionName;
 
     private static final String DB_NAME = "kinveyOffline.db";
 
     private static final String COLLECTION_TABLE = "collections";
     private static final String COLUMN_NAME = "name";
 
-    /**
-     * Used for creating new database tables, collection name is used for generating table name
-     *
-     * @param context
-     * @param collectionName
-     */
-    public OfflineHelper(Context context, String collectionName) {
-        super(context, DB_NAME, null, DATABASE_VERSION);
-        this.collectionName = collectionName;
-    }
+//    /**
+//     * Used for creating new database tables, collection name is used for generating table name
+//     *
+//     * @param context
+//     * @param collectionName
+//     */
+//    public OfflineHelper(Context context, String collectionName) {
+//        super(context, DB_NAME, null, DATABASE_VERSION);
+//        this.collectionName = collectionName;
+//    }
 
     /**
      * used for accessing ALREADY existing tables
@@ -71,14 +73,16 @@ public class OfflineHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Called by operating system when a new database is created
+     * Called by operating system when a new database is created.
+     *
      *
      * @param database
      */
     @Override
     public void onCreate(SQLiteDatabase database) {
-       OfflineTable table = new OfflineTable(collectionName);
-       table.onCreate(database);
+        Log.v(Client.TAG, "offline helper onCreate");
+//       OfflineTable table = new OfflineTable(collectionName);
+//       table.onCreate(database);
 
     }
 
@@ -91,8 +95,12 @@ public class OfflineHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        OfflineTable table = new OfflineTable(collectionName);
-        table.onUpgrade(database, oldVersion, newVersion);
+        List<String> collectionTables = getCollectionTables();
+        OfflineTable tb;
+        for (String s : collectionTables){
+            tb = new OfflineTable(s);
+             tb.onUpgrade(database, oldVersion, newVersion);
+        }
     }
 
     /**
@@ -102,6 +110,13 @@ public class OfflineHelper extends SQLiteOpenHelper {
      * @return
      */
     public OfflineTable getTable(String collectionName){
+        OfflineTable table = new OfflineTable(collectionName);
+
+        SQLiteDatabase db = getWritableDatabase();
+        table.onCreate(db);
+        db.close();
+
+
         createCollectionTable();
         addCollection(collectionName);
         return new OfflineTable(collectionName);
@@ -110,7 +125,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
     /**
      * Add a collection to the metadata table if it doesn't already exist
      *
-     * @param collectionName
+     * @param collectionName - the name of the AppData collection
      */
     private void addCollection(String collectionName){
 
