@@ -97,6 +97,8 @@ public class AsyncAppData<T> extends AppData<T> {
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
+    private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
+    private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";
     private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
     private static final String KEY_COUNT = "KEY_COUNT";
@@ -138,6 +140,8 @@ public class AsyncAppData<T> extends AppData<T> {
             tempMap.put(KEY_AVERAGE, AppData.class.getMethod("averageBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
             tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class} ));
+            tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));
 
 
         }catch (NoSuchMethodException e){
@@ -168,7 +172,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param entityID entityID to fetch
-     * @param callback KinveyClientCallback<T>
+     * @param callback either successfully returns list of resolved entities or an error
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback)  {
         new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -194,7 +198,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param ids A list of _ids to query by.
-     * @param callback KinveyListCallback<T>
+     * @param callback either successfully returns list of resolved entities or an error
      */
     public void get(String[] ids, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(ids, "ids must not be null.");
@@ -228,7 +232,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </p>
      *
      * @param query {@link com.kinvey.java.Query} to filter the results.
-     * @param callback KinveyListCallback<T>
+     * @param callback either successfully returns list of resolved entities or an error
      */
     public void get(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
@@ -254,12 +258,63 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param callback KinveyListCallback<T>
+     * @param callback either successfully returns list of resolved entities or an error
      */
     public void get(KinveyListCallback<T> callback) {
         new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
+
+
+    /**
+     * Asynchronous request to fetch an entity and resolve KinveyReferences
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.get(myEntityID, new String[]{"ReferencedField"}, new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param id
+     * @param resolves
+     * @param callback
+     */
+    public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
+        new AppDataRequest(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    /**
+     * Asynchronous request to execute a query and resolve KinveyReferences
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     Query q = new Query();
+     *     q.equals("displayName", "myDisplayName");
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     myAppData.get(q, new String[]{"ReferencedField"}, new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param q
+     * @param resolves
+     * @param callback
+     */
+    public void get(Query q, String[] resolves, KinveyListCallback<T> callback){
+        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER),callback, q, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
 
     /**
      * Asynchronous request to save or update an entity to a collection.
@@ -500,6 +555,16 @@ public class AsyncAppData<T> extends AppData<T> {
 
     /**
      * Set an {@link OfflinePolicy} on AppData, allowing requests to be executed locally
+     *
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     AsyncAppData<EventEntity> offline = kinveyClient.appData("events", EventEntity.class);
+     *     offline.setOffline(OfflinePolicy.ALWAYS_ONLINE, new SqlLiteOfflineStore(getContext()));
+     * </pre>
+     * </p>
+     *
      *
      * @param policy the policy defining behavior of offline sync
      * @param store the type of store to be used, commonly {@link com.kinvey.android.offline.SqlLiteOfflineStore}

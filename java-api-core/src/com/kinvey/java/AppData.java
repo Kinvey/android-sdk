@@ -248,8 +248,7 @@ public class AppData<T> {
 
 
     /**
-     * Method to get an entity or entities.  Pass null to entityID to return all entities
-     * in a collection.
+     * Method to execute a query and resolve KinveyReferences in the entities
      *
      * @param query Query to get
      * @param resolves list of KinveyReference fields to resolve
@@ -262,6 +261,35 @@ public class AppData<T> {
         Get getEntity = new Get(query, myClass, resolves, resolve_depth, retain);
         client.initializeRequest(getEntity);
         return getEntity;
+    }
+
+
+    /**
+     * Convenience wrapper method to execute a query and resolve KinveyReferences in the entities
+     *
+     *
+     * @param query - Query to get
+     * @param resolves list of KinveyReference fields to resolve
+     * @return Get Request object ready for execution
+     * @throws IOException
+     */
+    public Get getBlocking(Query query, String[] resolves) throws IOException{
+        return getBlocking(query, resolves, 1, true);
+
+    }
+
+
+    /**
+     * Convenience wrapper method to get an entity and resolve KinveyReferences
+     *
+     * @param id the id of the entity to query for
+     * @param resolves list of KinveyReference fields to resolve
+     * @return Get Request object ready for execution
+     * @throws IOException
+     */
+    public GetEntity getEntityBlocking(String id, String[] resolves) throws IOException{
+        return getEntityBlocking(id, resolves, 1, true);
+
     }
 
     /**
