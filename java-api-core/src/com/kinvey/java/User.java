@@ -70,18 +70,34 @@ public class User extends GenericJson   {
         this.authToken = authToken;
     }
 
+    /**
+     * Get the Authtoken associated with this User for making requests with Kinvey
+     * @return the authtoken for the current user's session
+     */
     public String getAuthToken() {
         return authToken;
     }
 
+    /**
+     * Set the unique id of this User
+     * @param id a unique user id
+     */
     public void setId(String id){
         this.id = id;
     }
 
+    /**
+     * Get the username of this User
+     * @return this User's username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Set the username of this user
+     * @param username the new username to set
+     */
     public void setUsername(String username) {
         this.username = username;
     }

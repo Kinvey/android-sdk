@@ -411,8 +411,7 @@ public class Client extends AbstractClient {
     /**
      * Asynchronous Ping service method
      * <p>
-     * Performs an authenticated ping against the configured Kinvey backend.  This method must be executed in the context
-     * of a logged-in active user.
+     * Performs an authenticated ping against the configured Kinvey backend.
      * </p>
      * <p>
      * Sample Usage:

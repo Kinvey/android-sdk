@@ -36,7 +36,7 @@ public class CustomEndpoints {
     private AbstractClient client;
 
     /**
-     * Create a new instance of this Custom Endpoints class
+     * Create a new instance, should only be called by an {@link AbstractClient}.
      * @param client - an active logged in Client
      */
     public CustomEndpoints(AbstractClient client){

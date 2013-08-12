@@ -51,7 +51,13 @@ public class AppData<T> {
     private Class<T> myClass;
     private AbstractClient client;
 
+    /**
+     * static final String representing universal "_id" value, used to uniquely identify entites
+     */
     public static final String ID_FIELD_NAME = "_id";
+    /**
+     * static final String representing universal "_geoloc" value, used for geoqueries
+     */
     public static final String GEOLOC_FIELD_NAME = "_geoloc";
 
     private CachePolicy policy = CachePolicy.NOCACHE;
