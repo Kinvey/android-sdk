@@ -123,12 +123,6 @@ public class TestDrive extends Activity {
         bar.setVisibility(View.VISIBLE);
         Query myQuery = kinveyClient.query();
         myQuery.equals("_id","myEntity");
-
-
-//        kinveyClient.linkedData("myCollect", myEntity.class).get(new Query(), null, null, new String[] {"fieldNameOfReference"}, 1, true );
-
-
-        KinveyReference ret = new KinveyReference()    ;
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
         ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(myQuery, new KinveyListCallback<Entity>() {
@@ -183,6 +177,8 @@ public class TestDrive extends Activity {
         Entity entity = new Entity("myEntity");
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
+
+
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
         ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
@@ -199,6 +195,27 @@ public class TestDrive extends Activity {
                 Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+
+        AsyncAppData<Entity> ad2 = kinveyClient.appData("ent2", Entity.class);
+        ad2.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad2.save(entity, new KinveyClientCallback<Entity>() {
+            @Override
+            public void onSuccess(Entity result) {
+                bar.setVisibility(View.GONE);
+                Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                bar.setVisibility(View.GONE);
+                Log.e(TAG, "AppData.save Failure", error);
+                Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+
+
     }
 
     public void onDeleteClick(View view) {
