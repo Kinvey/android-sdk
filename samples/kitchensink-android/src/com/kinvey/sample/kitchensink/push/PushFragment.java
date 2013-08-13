@@ -65,6 +65,7 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
             @Override
             public void onFinish(){
                 //after 5 seconds update the status
+                if (getApplicationContext() != null)
                 pushStatus.setText(getPushStatus());
             }
         }.start();

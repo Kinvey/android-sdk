@@ -16,26 +16,29 @@
 package com.kinvey.android.push;
 
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
+import sun.net.idn.StringPrep;
+
+import java.util.AbstractMap;
 
 /**
  * IntentService responsible for handling GCM messages.
  * <p>
  * Upon successful registration/unregistration with GCM, this class will perform the appropriate action with Kinvey as well.
  * </p>
- * <p>
+ * <p/>
  * To use GCM for push notifications, extend this class and implement the provided abstract methods.  When GCM related events occur, they relevant method will be called by the library.
- * <p>
+ * <p/>
  *
  * @author edwardf
  * @since 2.0
@@ -60,18 +63,18 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
 
         Client.Builder builder;
-        if (getAppKey() == null){
+        if (getAppKey() == null) {
             builder = new Client.Builder(context);
-        }else{
+        } else {
             builder = new Client.Builder(getAppKey(), getAppSecret(), context);
         }
 
-        if (gcmEnabled()){
+        if (gcmEnabled()) {
             builder.setSenderIDs(getSenderIDs());
             builder.setGcmInProduction(inProduction());
             builder.enableGCM(gcmEnabled());
         }
-        if (getBaseURL() != null){
+        if (getBaseURL() != null) {
             builder.setBaseUrl(getBaseURL());
         }
 
@@ -90,34 +93,31 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         client = builder.build();
 
 
-
     }
 
-    public String getSenderIDs(){
+    public String getSenderIDs() {
         return null;
     }
 
-    public String getAppKey(){
+    public String getAppKey() {
         return null;
     }
 
-    public String getAppSecret(){
+    public String getAppSecret() {
         return null;
     }
 
-    public boolean gcmEnabled(){
+    public boolean gcmEnabled() {
         return false;
     }
 
-    public boolean inProduction(){
+    public boolean inProduction() {
         return true;
     }
 
-    public String getBaseURL(){
+    public String getBaseURL() {
         return null;
     }
-
-
 
 
     @Override
@@ -125,18 +125,18 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         Log.v(TAG, "Device unregistered");
 
         Client.Builder builder;
-        if (getAppKey() == null){
+        if (getAppKey() == null) {
             builder = new Client.Builder(context);
-        }else{
+        } else {
             builder = new Client.Builder(getAppKey(), getAppSecret(), context);
         }
 
-        if (gcmEnabled()){
+        if (gcmEnabled()) {
             builder.setSenderIDs(getSenderIDs());
             builder.setGcmInProduction(inProduction());
             builder.enableGCM(gcmEnabled());
         }
-        if (getBaseURL() != null){
+        if (getBaseURL() != null) {
             builder.setBaseUrl(getBaseURL());
         }
 
@@ -184,15 +184,14 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     }
 
 
-
-    private void registerWithKinvey(String gcmID, boolean register){
+    private void registerWithKinvey(String gcmID, boolean register) {
         registerWithKinvey(client, gcmID, register);
     }
 
-    public void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
+    public void registerWithKinvey(final Client client, final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
-        Log.v(Client.TAG , "about to register with Kinvey");
-        if (client == null){
+        Log.v(Client.TAG, "about to register with Kinvey");
+        if (client == null) {
             Log.e(Client.TAG, "GCMService got garbage collected, cannot complete registration!");
             return;
         }
@@ -207,12 +206,24 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                    KinveyGCMService.this.onRegistered(gcmRegID);
+
+                    client.user().update(new KinveyUserCallback() {
+                        @Override
+                        public void onSuccess(User result) {
+                            KinveyGCMService.this.onRegistered(gcmRegID);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            Log.v(Client.TAG, "GCM - user update error: " + error);
+                        }
+                    });
+
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.v(Client.TAG , "GCM - user update error: " + error);
+                    Log.v(Client.TAG, "GCM - user update error: " + error);
                 }
             }, gcmRegID);
 
@@ -220,12 +231,22 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             client.push().disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                    KinveyGCMService.this.onUnregistered(gcmRegID);
+                    client.user().update(new KinveyUserCallback() {
+                        @Override
+                        public void onSuccess(User result) {
+                            KinveyGCMService.this.onUnregistered(gcmRegID);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            Log.v(Client.TAG, "GCM - user update error: " + error);
+                        }
+                    });
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.v(Client.TAG , "GCM - user update error: " + error);
+                    Log.v(Client.TAG, "GCM - user update error: " + error);
                 }
             }, gcmRegID);
 
@@ -233,7 +254,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         GCMRegistrar.onDestroy(getApplicationContext());
     }
@@ -273,9 +294,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
      *
      * @param oldID the old GCM registration ID of the now unregistered user.
      */
-    public abstract void onUnregistered(String oldID) ;
-
-
+    public abstract void onUnregistered(String oldID);
 
 
 }

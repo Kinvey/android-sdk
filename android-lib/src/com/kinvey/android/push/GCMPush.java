@@ -39,6 +39,9 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -145,15 +148,43 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public boolean isPushEnabled() {
-        if (getClient().getContext() == null){
+        if (getClient() == null || getClient().getContext() == null){
+            Log.e("OK", "nope on state");
             return false;
         }
         String gcmID = GCMRegistrar.getRegistrationId(getClient().getContext());
-        return (!gcmID.equals("") && getClient().user().containsKey("_push"));
+//        return (!gcmID.equals("") && getClient().user().containsKey("_push"));
+//
+//
+//       /**
+        if (getClient().user().containsKey("_push")){
+            Log.e("OK", "has push");
+            AbstractMap pushField = (AbstractMap) getClient().user().get("_push");
+            if (pushField.containsKey("GCM")){
+                Log.e("OK", "has gcm");
+                AbstractMap gcmField = (AbstractMap) pushField.get("GCM");
+                if (gcmField.containsKey("ids")){
+                    Log.e("OK", "has ids");
+                    List<String> ids = (ArrayList<String>) gcmField.get("ids");
+                    for (String s : ids){
+                        Log.e("OK", "id -> "  + s);
+                        Log.e("OK", "gcm -> "  + gcmID);
+
+                        if (s.equals(gcmID)){
+                            Log.e("OK", "match");
+
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+      //  */
     }
 
     /**
-     * Unregisters the current user with GCM and removes all _push fields from the current user object.
+     * Unregisters the current user with GCM
      *
      * Unregistration is asynchronous, so use the `KinveyGCMService` to receive notification when unregistration has completed.
      *
