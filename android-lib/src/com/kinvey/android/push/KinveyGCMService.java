@@ -27,7 +27,6 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
-import sun.net.idn.StringPrep;
 
 import java.util.AbstractMap;
 
