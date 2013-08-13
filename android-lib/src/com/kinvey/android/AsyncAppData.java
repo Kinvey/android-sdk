@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.android;
 
@@ -267,7 +267,8 @@ public class AsyncAppData<T> extends AppData<T> {
 
 
     /**
-     * Asynchronous request to fetch an entity and resolve KinveyReferences
+     * Asynchronous request to fetch a single entity by _id and resolve KinveyReferences.  The resolves array defines which json keys
+     * are KinveyReferences that should be resolved.
      * <p>
      * Sample Usage:
      * <pre>
@@ -282,16 +283,17 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param id
-     * @param resolves
-     * @param callback
+     * @param id - the _id of the entity to retrieve
+     * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
+     * @param callback - results of execution, either success or failure
      */
     public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
         new AppDataRequest(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
-     * Asynchronous request to execute a query and resolve KinveyReferences
+     * Asynchronous request to execute a query and resolve KinveyReferences.  The Query will be used to determine which entities to retrieve,
+     * and the resolves array defines which json keys are KinveyReferences that should be resolved.
      * <p>
      * Sample Usage:
      * <pre>
@@ -299,7 +301,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *     Query q = new Query();
      *     q.equals("displayName", "myDisplayName");
      *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     myAppData.get(q, new String[]{"ReferencedField"}, new KinveyListCallback<EventEntity> {
+     *     myAppData.get(q, new String[]{"myReferencedField"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
      *     });
@@ -307,9 +309,9 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param q
-     * @param resolves
-     * @param callback
+     * @param q - the {@link com.kinvey.java.Query} to execute determining which entities to retrieve.
+     * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
+     * @param callback - results of execution, either success or failure
      */
     public void get(Query q, String[] resolves, KinveyListCallback<T> callback){
         new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER),callback, q, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);

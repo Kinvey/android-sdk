@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.android.callback;
 
@@ -23,7 +23,7 @@ import com.kinvey.java.model.UriLocResponse;
  *
  * @author edwardf
  * @since 2.0
- *
+ * @deprecated
  */
 public interface KinveyUriCallback extends KinveyClientCallback<UriLocResponse> {
 

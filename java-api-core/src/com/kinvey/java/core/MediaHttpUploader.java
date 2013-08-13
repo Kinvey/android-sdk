@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 
 package com.kinvey.java.core;
@@ -393,19 +393,6 @@ public class MediaHttpUploader {
         return mediaContentLength;
     }
 
-
-    /**
-     * @author m0rganic
-     * @deprecated
-     */
-    public static class UploadUrlResponse extends UriLocResponse {
-        /**
-         * @return the uploadLoc
-         */
-        public String getTempUploadLoc() {
-            return super.getBlobTemporaryUri();
-        }
-    }
 
     /** package-level for testing **/
     FileMetaData parse(JsonObjectParser initationResponseParser, HttpResponse response) throws IOException {

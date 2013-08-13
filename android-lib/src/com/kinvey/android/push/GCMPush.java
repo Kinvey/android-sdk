@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.android.push;
 
@@ -32,9 +32,13 @@ import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
+
+import java.io.IOException;
 
 
 /**
@@ -47,7 +51,7 @@ import com.kinvey.java.User;
  *
  * sample usage:
  * <pre>
-     kinveyClient.push().initialize(getApplicationContext());
+ kinveyClient.push().initialize(getApplicationContext());
  * </pre>
  *
  *<p>This code snippet will enable push notifications through GCM for the current logged in user.</p>
@@ -241,5 +245,65 @@ public class GCMPush extends AbstractPush {
         }
     }
 
+
+    @Override
+    public void enablePushViaRest(KinveyClientCallback callback, String deviceID){
+        new AsyncEnablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+
+
+    }
+
+    @Override
+    public void disablePushViaRest(KinveyClientCallback callback, String deviceID){
+        new AsyncDisablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+
+    }
+
+
+    private class AsyncEnablePush extends AsyncClientRequest{
+
+        String deviceID;
+
+        public AsyncEnablePush(KinveyClientCallback callback, String deviceID) {
+            super(callback);
+            this.deviceID = deviceID;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+
+            PushRegistration ent = new PushRegistration(deviceID);
+            RegisterPush p = new RegisterPush(ent);
+            getClient().initializeRequest(p);
+            p.execute();
+
+
+            return null;
+        }
+    }
+
+
+    private class AsyncDisablePush extends AsyncClientRequest {
+
+        String deviceID;
+
+        public AsyncDisablePush(KinveyClientCallback callback, String deviceID) {
+            super(callback);
+            this.deviceID = deviceID;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+
+            PushRegistration ent = new PushRegistration(deviceID);
+            UnregisterPush p = new UnregisterPush(ent);
+            getClient().initializeRequest(p);
+            p.execute();
+
+            return null;
+        }
+    }
 
 }

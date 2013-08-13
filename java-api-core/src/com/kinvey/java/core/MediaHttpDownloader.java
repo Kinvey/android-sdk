@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.java.core;
 
@@ -146,20 +146,7 @@ public class MediaHttpDownloader {
     }
 
 
-    /**
-     * @author m0rganic
-     * @deprecated
-     */
-    public static class DownloadUrlResponse extends UriLocResponse {
 
-        /**
-         * @return the string representing the remote location of the file to download
-         */
-        public String getDownloadLoc() {
-            return super.getBlobTemporaryUri();
-        }
-
-    }
 
     /**
      * package-level for testing *

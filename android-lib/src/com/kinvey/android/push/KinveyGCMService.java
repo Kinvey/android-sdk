@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.android.push;
 
@@ -26,6 +26,7 @@ import com.google.android.gcm.GCMRegistrar;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -47,12 +48,11 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
 
     /**
-     * Public Constructor used by the operating system when an intent is fired.
+     * Public Constructor used by operating system.
      */
     public KinveyGCMService() {
         super("GCM PUSH");
     }
-
 
     @Override
     protected void onRegistered(Context context, final String registrationId) {
@@ -189,7 +189,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         registerWithKinvey(client, gcmID, register);
     }
 
-    private void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
+    public void registerWithKinvey(Client client, final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG , "about to register with Kinvey");
         if (client == null){
@@ -203,43 +203,33 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         }
 
         if (register) {
-            //send registration to Kinvey
-            GCMPush.PushConfig config = new GCMPush.PushConfig();
-            GCMPush.PushConfigField active = new GCMPush.PushConfigField();
-            //TODO -- don't just set IDs, get it, add new one, and then save it (multiple devices -> multiple GCM ids)
-            active.setIds(new String[]{gcmRegID});
-            //active.setNotificationKey(gcmRegID);
-            if (!client.push().isInProduction()) {
-                config.setGcmDev(active);
-            } else {
-                config.setGcm(active);
-            }
-            client.user().put("_push", config);
-        } else {
-            //remove push from user object
-            client.user().remove("_push");
-            client.user().put("_push", null);
-        }
-        client.user().update(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-                Log.v(Client.TAG , "GCM - user updated successfully, push exists? -> " + result.containsKey("_push"));
-                if (result.containsKey("_push")){
+
+            client.push().enablePushViaRest(new KinveyClientCallback() {
+                @Override
+                public void onSuccess(Object result) {
                     KinveyGCMService.this.onRegistered(gcmRegID);
-
-                }else{
-                    KinveyGCMService.this.onUnregistered(gcmRegID);
-
                 }
 
+                @Override
+                public void onFailure(Throwable error) {
+                    Log.v(Client.TAG , "GCM - user update error: " + error);
+                }
+            }, gcmRegID);
 
-            }
+        } else {
+            client.push().disablePushViaRest(new KinveyClientCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    KinveyGCMService.this.onUnregistered(gcmRegID);
+                }
 
-            @Override
-            public void onFailure(Throwable error) {
-                Log.v(Client.TAG , "GCM - user update error: " + error);
-            }
-        });
+                @Override
+                public void onFailure(Throwable error) {
+                    Log.v(Client.TAG , "GCM - user update error: " + error);
+                }
+            }, gcmRegID);
+
+        }
     }
 
     @Override
@@ -251,8 +241,6 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
 
     /**
      * This method is called when a message is received through GCM via Kinvey.
-     * <p/>
-     * the String message is exactly as it is sent from the Console, so it can be displayed immediately with a NotificationBuilder, or can be parsed to perform actions.
      *
      * @param message the text of the message
      */
@@ -274,10 +262,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
     public abstract void onDelete(int deleteCount);
 
     /**
-     * This method is executed after `myKinveyClient.push().initialize(getApplication());` has been called and registration has completed.
-     * This can use this pop a notification using a `NotificationBuilder`, or just log output.
-     * <p/>
-     * This method will register the current user with Kinvey, after successfully registering with GCM.
+     * This method is called after successful registration.  This includes both registering with GCM as well as Kinvey.
      *
      * @param gcmID the new user's unique GCM registration ID
      */
