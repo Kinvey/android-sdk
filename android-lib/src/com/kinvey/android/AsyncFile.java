@@ -256,6 +256,20 @@ public class AsyncFile extends File {
         new FileQueryDownload(q, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+
+    /**
+     * Download a file asyncronously with a custom time to live.
+     *
+     * @param id - the id of the file to download
+     * @param ttl - the custom ttl to use for the download URL
+     * @param out - where to download the file
+     * @param listener - for progress notifications
+     */
+    public void downloadWithTTL(String id, int ttl, OutputStream out, DownloaderProgressListener listener){
+        this.setDownloaderProgressListener(listener);
+        new FileQueryWithIDDownload(id, ttl, out, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
     /**
      * Deletes the given file from the Kinvey file service.
      *
@@ -382,6 +396,28 @@ public class AsyncFile extends File {
             AsyncFile.this.downloadBlocking(query).executeAndDownloadTo(out);
             return null;
         }
+
+    }
+
+    private class FileQueryWithIDDownload extends AsyncClientRequest<Void>{
+
+        private OutputStream out;
+        private String id;
+        private int ttl;
+
+        public FileQueryWithIDDownload(String id, int ttl, OutputStream out, KinveyClientCallback callback){
+            super(callback);
+            this.id = id;
+            this.out = out;
+            this.ttl = ttl;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            AsyncFile.this.downloadWithTTLBlocking(this.id, this.ttl).executeAndDownloadTo(out);
+            return null;
+        }
+
 
     }
 

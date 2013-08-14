@@ -208,34 +208,8 @@ public abstract class File {
      *
      *    Query q = new Query();
      *    q.equals("ttl_in_seconds", 3600);  //set a new ttl for the download URL
-     *    mKinveyClient.file().downloadBlocking("myFileName.txt", q,  new UploaderProgressListener() {
-     *        @Override
-     *        public void onSuccess(Void result) {
-     *            Log.i(TAG, "successfully upload file");
-     *        }
-     *        @Override
-     *        public void onFailure(Throwable error) {
-     *            Log.e(TAG, "failed to upload file.", error);
-     *        }
-     *        @Override
-     *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
-     *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
-     *            switch (uploader.getUploadState()) {
-     *                case INITIATION_STARTED:
-     *                    Log.i(TAG, "Initiation Started");
-     *                    break;
-     *                case INITIATION_COMPLETE:
-     *                    Log.i(TAG, "Initiation Completed");
-     *                    break;
-     *                case DOWNLOAD_IN_PROGRESS:
-     *                    Log.i(TAG, "Upload in progress");
-     *                    Log.i(TAG, "Upload percentage: " + uploader.getProgress());
-     *                    break;
-     *                case DOWNLOAD_COMPLETE:
-     *                    Log.i(TAG, "Upload Completed!");
-     *                    break;
-     *            }
-     *    });
+     *    OutputStream out = new ByteArrayOutputStream(...);
+     *    mKinveyClient.file().downloadBlocking("myFileName.txt", q).executeAndDownloadTo(out);
      * }
      *
      *
@@ -252,6 +226,31 @@ public abstract class File {
         download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
+    }
+
+    /**
+     * Download a file with a custom Time-To-Live
+     *
+     * <p>
+     * Sample usage:
+     * <pre>
+     * {@code
+     *
+     *    OutputStream out = new ByteArrayOutputStream(...);
+     *    mKinveyClient.file().downloadBlocking("myFileName.txt", 3600).executeAndDownloadTo(out);
+     * }
+     *
+     *
+     *
+     * @param id - the unique _id of the file to download
+     * @param ttl - a custom TTL, in milliseconds
+     * @return a {@link DownloadMetadataAndFileQuery} request ready to be executed.
+     * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery downloadWithTTLBlocking(String id, int ttl) throws IOException{
+        Query q = new Query();
+        q.equals("ttl_in_seconds", ttl);
+        return downloadBlocking(id, q);
     }
 
 
