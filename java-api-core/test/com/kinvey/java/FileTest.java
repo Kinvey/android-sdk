@@ -49,24 +49,26 @@ public class FileTest extends KinveyMockUnitTest {
     }
 
 
-//    @Test
-//    public void uploadUrlEndpointMatches() throws IOException {
-//        File fileApi = new MockFile(super.mockClient);
-//        File.Upload upload = fileApi.uploadBlocking("testfilename.txt", mockContent);
-//        HttpRequest request = upload.buildHttpRequest();
-//        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//upload-loc/testfilename.txt";
-//        assertEquals(expectedPath, request.getUrl().toString());
-//    }
-//
-//
-//    @Test
-//    public void downloadUrlEndpointMatches() throws IOException {
-//        File fileApi = new MockFile(super.mockClient);
-//        File.Download download = fileApi.downloadBlocking("testfilename.txt");
-//        HttpRequest request = download.buildHttpRequest();
-//        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//download-loc/testfilename.txt";
-//        assertEquals(expectedPath, request.getUrl().toString());
-//    }
+    @Test
+    public void uploadUrlEndpointMatches() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+        FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.UploadMetadataAndFile upload = fileApi.uploadBlocking(meta, mockContent);
+        HttpRequest request = upload.buildHttpRequest();
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
+        assertEquals(expectedPath, request.getUrl().toString());
+    }
+
+
+    @Test
+    public void downloadUrlEndpointMatches() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+        FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.DownloadMetadataAndFile download = fileApi.downloadBlocking(meta);
+        HttpRequest request = download.buildHttpRequest();
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
+        assertEquals(expectedPath, request.getUrl().toString());
+    }
 
     @Test
     public void testFileUploadInitializer() {
@@ -79,53 +81,48 @@ public class FileTest extends KinveyMockUnitTest {
         }
     }
 
-//    @Test
-//    public void uploadShouldThrowNpeOnNullFilename() {
-//        fileApiUnderTest = new File(super.mockClient);
-//        try {
-//            fileApiUnderTest.uploadBlocking(new File.FileMetaData(null), mock(AbstractInputStreamContent.class));
-//            fail("file api should throw exception on null filename");
-//        } catch (IOException e) {
-//            fail("file api should throw a NullPointerException on null filename");
-//        } catch (NullPointerException e) {
-//            // expected
-//        }
-//    }
+    @Test
+    public void testFileDownloadWithTTL() throws  IOException{
+        fileApiUnderTest = new MockFile(super.mockClient);
+        File.DownloadMetadataAndFileQuery download =  fileApiUnderTest.downloadWithTTLBlocking("testfilename.txt", 120);
+        HttpRequest req = download.buildHttpRequest();
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?query";
+        assertEquals(expectedPath, req.getUrl().toString());
+    }
 
+    @Test
+    public void testFileDownloadInitializer() {
+        fileApiUnderTest = new MockFile(super.mockClient);
+        try {
+            fileApiUnderTest.downloadBlocking(new FileMetaData("testfilename.txt"));
+        } catch (IOException e) {
+            fail("file api should not throw an exception on download");
+        }
 
-//    @Test
-//    public void testFileDownloadInitializer() {
-//        fileApiUnderTest = new MockFile(super.mockClient);
-//        try {
-//            fileApiUnderTest.downloadBlocking(new File.FileMetaData("testfilename.txt"));
-//        } catch (IOException e) {
-//            fail("file api should not throw an exception on download");
-//        }
-//
-//    }
+    }
 
-//    @Test
-//    public void downloadShouldThrowNpeOnNullFilename() {
-//        fileApiUnderTest = new File(super.mockClient);
-//        try {
-//            fileApiUnderTest.downloadBlocking(new File.FileMetaData(null));
-//            fail("file api should throw exception on null filename");
-//        } catch (IOException e) {
-//            fail("file api should throw a NullPointerException on null filename");
-//        } catch (NullPointerException e) {
-//            // expected
-//        }
-//    }
+    @Test
+    public void downloadShouldThrowNpeOnNullFilename() {
+        fileApiUnderTest = new MockFile(super.mockClient) ;
+        try {
+            fileApiUnderTest.downloadBlocking(new FileMetaData(null));
+            fail("file api should throw exception on null filename");
+        } catch (IOException e) {
+            fail("file api should throw a NullPointerException on null filename");
+        } catch (NullPointerException e) {
+            // expected
+        }
+    }
 
-//    @Test
-//    public void testFileDelete() {
-//        fileApiUnderTest = new MockFile(super.mockClient);
-//        try {
-//            fileApiUnderTest.deleteBlocking(new File.FileMetaData("testfilename.txt"));
-//        } catch (IOException e) {
-//            fail("file api should not throw an exception on delete");
-//        }
-//    }
+    @Test
+    public void testFileDelete() {
+        fileApiUnderTest = new MockFile(super.mockClient);
+        try {
+            fileApiUnderTest.deleteBlocking(new FileMetaData("testfilename.txt"));
+        } catch (IOException e) {
+            fail("file api should not throw an exception on delete");
+        }
+    }
 
     private static class MockFile extends File{
 
