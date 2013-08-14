@@ -436,7 +436,7 @@ public abstract class File {
      */
     public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
 
-        private final static String REST_URL = "blob/{appKey}/{id} + {?query}";
+        private final static String REST_URL = "blob/{appKey}/{id}" + "?query={query}";
 
         @Key("query")
         private String queryFilter;
