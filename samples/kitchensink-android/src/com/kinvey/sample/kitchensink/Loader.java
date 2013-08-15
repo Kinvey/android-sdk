@@ -37,7 +37,7 @@ public class Loader {
         Feature files = new Feature("File", "Store large file, images or video", FileActivity.class);
         featureList.add(files);
 
-        Feature push = new Feature("Push", "Enable Push notifications using Urban Airship", PushActivity.class);
+        Feature push = new Feature("Push", "Enable Push notifications using GCM", PushActivity.class);
         featureList.add(push);
 
         Feature customEndpoint = new Feature("Custom Endpoints", "Define behavoir on you backend and run it from the client.", CustomEndpointActivity.class);

@@ -15,10 +15,10 @@
  */
 
 /**
- * Kinvey brings Push Notifications to you through a partnership with  [Urban Airship](http://urbanairship.com/).
+ * Kinvey brings Push Notifications to you through Google Cloud Messaging (GCM).
  *
  * <p>
- * This package encompasses the urban airship integration with Kinvey's service.
+ * This package encompasses the GCM integration with Kinvey's service.
  * </p>
  *
  * <p>

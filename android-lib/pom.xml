@@ -23,12 +23,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.urbanairship</groupId>
-            <artifactId>urbanairship-lib</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
             <version>${google-http-client.version}</version>
@@ -168,6 +162,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
