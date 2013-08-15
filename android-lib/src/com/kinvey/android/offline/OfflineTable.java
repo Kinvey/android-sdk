@@ -140,10 +140,10 @@ public class OfflineTable<T extends GenericJson> {
         runCommand(database, createCommand);
 
         //set a unique index on the local offline entity store
-        String primaryKey = "CREATE UNIQUE INDEX " + UNIQUE_INDEX_IDS + " ON " + TABLE_NAME + " (" + COLUMN_ID + " ASC);";
+        String primaryKey = "CREATE UNIQUE INDEX IF NOT EXISTS " + UNIQUE_INDEX_IDS + " ON " + TABLE_NAME + " (" + COLUMN_ID + " ASC);";
         runCommand(database, primaryKey);
         //set a unique key on the queued request store
-        primaryKey = "CREATE UNIQUE INDEX " + UNIQUE_INDEX_QUEUE + " ON " + QUEUE_NAME + " (" + COLUMN_UNIQUE_KEY + " ASC);";
+        primaryKey = "CREATE UNIQUE INDEX IF NOT EXISTS " + UNIQUE_INDEX_QUEUE + " ON " + QUEUE_NAME + " (" + COLUMN_UNIQUE_KEY + " ASC);";
         runCommand(database, primaryKey);
 
 
@@ -157,6 +157,10 @@ public class OfflineTable<T extends GenericJson> {
 
         Log.w(TAG, String.format("Upgrading database from version %d to %d which will call drop table", oldVersion, newVersion));
         runCommand(database, "DROP TABLE IF EXISTS " + TABLE_NAME);
+        runCommand(database, "DROP TABLE IF EXISTS " + QUERY_NAME);
+        runCommand(database, "DROP TABLE IF EXISTS " + QUERY_NAME);
+        runCommand(database, "DROP TABLE IF EXISTS " + RESULTS_NAME);
+
         onCreate(database);
     }
 
