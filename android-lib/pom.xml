@@ -83,6 +83,12 @@
 
         <dependency>
             <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-android</artifactId>
+            <version>${google-http-client.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
             <version>${google-http-client.version}</version>
             <exclusions>
