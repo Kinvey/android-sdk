@@ -26,6 +26,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.JsonParser;
+import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
@@ -131,6 +132,11 @@ public class MediaHttpDownloader {
     private long lastBytePos = -1;
 
     /**
+     * has the request been cancelled?
+     */
+    private boolean cancelled = false;
+
+    /**
      * Construct the {@link MediaHttpDownloader}.
      *
      * @param transport The transport to use for requests
@@ -193,7 +199,7 @@ public class MediaHttpDownloader {
         downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
-        while (true) {
+        while (true && !cancelled) {
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
             currentRequest.setSuppressUserAgentSuffix(true);
             long currentRequestLastBytePos = bytesDownloaded + chunkSize - 1;
@@ -212,7 +218,7 @@ public class MediaHttpDownloader {
 
             HttpResponse response = currentRequest.execute();
             if (response.getContent() != null)
-                AbstractInputStreamContent.copy(response.getContent(), out);
+                IOUtils.copy(response.getContent(), out);
 
             String contentRange = response.getHeaders().getContentRange();
             long nextByteIndex = getNextByteIndex(contentRange);
@@ -454,4 +460,13 @@ public class MediaHttpDownloader {
     public double getProgress() {
         return mediaContentLength == 0 ? 0 : (double) bytesDownloaded / mediaContentLength;
     }
+
+    public void cancel(){
+        this.cancelled = true;
+    }
+
+    public boolean isCancelled(){
+        return this.cancelled;
+    }
+
 }

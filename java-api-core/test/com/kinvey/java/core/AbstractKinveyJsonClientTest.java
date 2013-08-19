@@ -18,7 +18,7 @@ package com.kinvey.java.core;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.http.json.MockJsonFactory;
+import com.google.api.client.testing.json.MockJsonFactory;
 import junit.framework.TestCase;
 import org.junit.Test;
 

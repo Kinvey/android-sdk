@@ -130,6 +130,11 @@ public class MediaHttpUploader {
     private HttpContent metadata;
 
     /**
+     * has the request been cancelled?
+     */
+    private boolean cancelled = false;
+
+    /**
      * The length of the HTTP media content.
      *
      * <p>
@@ -212,15 +217,6 @@ public class MediaHttpUploader {
      * request is completed in {@link #upload}.
      */
     private byte currentRequestContentBuffer[];
-
-    /**
-     * Whether to disable GZip compression of HTTP content.
-     *
-     * <p>
-     * The default value is {@code false}.
-     * </p>
-     */
-    private boolean disableGZipContent;
 
     /**
      * Construct the {@link MediaHttpUploader}.
@@ -327,7 +323,7 @@ public class MediaHttpUploader {
 
         HttpResponse response;
         // Upload the media content in chunks.
-        while (true) {
+        while (true && !cancelled) {
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
 //            addMethodOverride(currentRequest); // needed for PUT
@@ -340,7 +336,7 @@ public class MediaHttpUploader {
 //            }
             currentRequest.setThrowExceptionOnExecuteError(false);
             currentRequest.setRetryOnExecuteIOException(true);
-            currentRequest.setEnableGZipContent(!disableGZipContent);
+            //if there are custom headers, add them
             if (headers != null){
                 for (String header : headers.keySet()){
                     currentRequest.getHeaders().put(header, headers.get(header));
@@ -376,6 +372,7 @@ public class MediaHttpUploader {
                 }
             }
         }
+        return null; // TODO ensure this works for both cancelled and not-cancelled requests
     }
 
     /**
@@ -695,29 +692,6 @@ public class MediaHttpUploader {
     }
 
     /**
-     * Returns whether to disable GZip compression of HTTP content.
-     *
-     * @since 1.13
-     */
-    public boolean getDisableGZipContent() {
-        return disableGZipContent;
-    }
-
-    /**
-     * Sets whether to disable GZip compression of HTTP content.
-     *
-     * <p>
-     * By default it is {@code false}.
-     * </p>
-     *
-     * @since 1.13
-     */
-    public MediaHttpUploader setDisableGZipContent(boolean disableGZipContent) {
-        this.disableGZipContent = disableGZipContent;
-        return this;
-    }
-
-    /**
      * Returns the HTTP method used for the initiation request.
      *
      * <p>
@@ -835,5 +809,13 @@ public class MediaHttpUploader {
                 "the specified AbstractInputStreamContent has no content length. Use " +
                 " getNumBytesUploaded() to denote progress instead.");
         return getMediaContentLength() == 0 ? 0 : (double) bytesUploaded / getMediaContentLength();
+    }
+
+    public void cancel(){
+        this.cancelled = true;
+    }
+
+    public boolean isCancelled(){
+        return this.cancelled;
     }
 }

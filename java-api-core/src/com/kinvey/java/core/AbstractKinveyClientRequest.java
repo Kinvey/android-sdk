@@ -223,7 +223,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
         uploader = createMediaHttpUploader(content, requestFactory);
         uploader.setDirectUploadEnabled(true);
-        uploader.setDisableGZipContent(true);
         uploader.setProgressListener(progressListener);
     }
 

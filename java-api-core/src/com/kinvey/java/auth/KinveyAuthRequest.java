@@ -179,14 +179,12 @@ public class KinveyAuthRequest extends GenericJson {
         HttpContent content = (this.requestPayload != null) ? new JsonHttpContent(jsonFactory, this.requestPayload) : null;
         HttpRequest request = transport.createRequestFactory(appKeyAuthentication)
                 .buildPostRequest(buildHttpRequestUrl(), content)
-                .setEnableGZipContent(false)
                 .setSuppressUserAgentSuffix(true)
                 .setThrowExceptionOnExecuteError(false)
                 .setParser(jsonFactory.createJsonObjectParser())
                 .setHeaders(kinveyHeaders)
                 .setBackOffPolicy(policy)
-                .setRetryOnExecuteIOException(true)
-                .setEnableGZipContent(false);
+                .setRetryOnExecuteIOException(true);
         try {
             response = request.execute();
         }  catch (EOFException ex) {

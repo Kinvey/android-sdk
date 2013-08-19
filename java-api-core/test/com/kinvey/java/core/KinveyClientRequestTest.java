@@ -56,7 +56,6 @@ public class KinveyClientRequestTest extends TestCase {
 
             MediaHttpUploader mockMediaUploader = mockClientRequest.getMockMediaUploader();
             verify(mockMediaUploader, times(1)).upload(any(AbstractKinveyClientRequest.class));
-            verify(mockMediaUploader, times(1)).setDisableGZipContent(true);
             verify(mockMediaUploader, times(1)).setDirectUploadEnabled(true);
         } catch (IOException e) {
             fail("KinveyClientRequest should not throw an exception on execute");

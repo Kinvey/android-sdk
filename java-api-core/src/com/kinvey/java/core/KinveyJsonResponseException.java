@@ -35,6 +35,8 @@ public class KinveyJsonResponseException extends HttpResponseException {
   
   private final KinveyJsonError details;
 
+  private final String message;
+
     /**
      *
      * @param response raw http reponse
@@ -42,8 +44,9 @@ public class KinveyJsonResponseException extends HttpResponseException {
      * @param message general message
      */
   private KinveyJsonResponseException(HttpResponse response, KinveyJsonError details, String message) {
-    super(response, message);
+    super(response);
     this.details = details;
+    this.message = message;
   }
 
     /**
@@ -88,7 +91,14 @@ public class KinveyJsonResponseException extends HttpResponseException {
    * @return the details
    */
   public KinveyJsonError getDetails() {
-    return details;
+    return this.details;
   }
+
+    /**
+     * @return the message
+     */
+    public String getMessage(){
+        return this.message;
+    }
 
 }

@@ -20,7 +20,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.HttpTesting;
 import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.http.json.MockJsonFactory;
+import com.google.api.client.testing.json.MockJsonFactory;
 
 import com.kinvey.java.File;
 import com.kinvey.java.core.AbstractKinveyJsonClient;

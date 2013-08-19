@@ -101,7 +101,6 @@ abstract class AuthenticateTask extends AsyncTask<String, Void, AuthnResponse> {
         authnRequest.getHeaders().setContentType("application/json");
         authnRequest.getHeaders().set("x-auth-key", LoginActivity.AUTH_API_KEY);
         authnRequest.setParser(new JsonObjectParser(new GsonFactory()));
-        authnRequest.setEnableGZipContent(false);
         return authnRequest;
     }
 

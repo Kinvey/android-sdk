@@ -68,7 +68,7 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
         // call kinvey specific task to perform download
         FileMetaData meta = new FileMetaData(FileActivity.FILENAME);
         meta.setId(FileActivity.FILENAME);
-        getApplicationContext().getClient().file().download(meta, fos, new DownloaderProgressListener() {
+        getApplicationContext().getClient().file().downloadWithTTL(meta.getId(), 1200000, fos, new DownloaderProgressListener() {
             @Override
             public void progressChanged(MediaHttpDownloader downloader) throws IOException {
                 Log.i(KitchenSink.TAG, "progress updated: "+downloader.getDownloadState());
