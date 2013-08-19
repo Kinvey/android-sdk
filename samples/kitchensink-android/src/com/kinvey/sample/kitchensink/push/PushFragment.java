@@ -40,8 +40,7 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
         bRegister = (Button) v.findViewById(R.id.push_register_button);
         bRegister.setOnClickListener(this);
         pushStatus = (TextView) v.findViewById(R.id.push_status);
-        pushStatus.setText(getPushStatus());
-
+        pushStatus.setText(Boolean.toString(getApplicationContext().getClient().push().isPushEnabled()));
     }
 
     @Override
@@ -66,19 +65,14 @@ public class PushFragment extends UseCaseFragment implements View.OnClickListene
             public void onFinish(){
                 //after 5 seconds update the status
                 if (getApplicationContext() != null)
-                pushStatus.setText(getPushStatus());
+                pushStatus.setText(Boolean.toString(getApplicationContext().getClient().push().isPushEnabled()));
             }
         }.start();
 
 
     }
 
-    public String getPushStatus() {
 
-        getApplicationContext().getClient().push().initialize(getActivity().getApplication());
-        return Boolean.toString(getApplicationContext().getClient().push().isPushEnabled());
-
-    }
 
     @Override
     public String getTitle() {

@@ -142,6 +142,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
         builder.setRetrieveUserCallback(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
+                Log.v(TAG, "retrieved user, about to register with Kinvey.");
                 registerWithKinvey(registrationId, false);
             }
 
@@ -206,9 +207,10 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
                 @Override
                 public void onSuccess(Object result) {
 
-                    client.user().update(new KinveyUserCallback() {
+                    client.user().retrieve(new KinveyUserCallback() {
                         @Override
                         public void onSuccess(User result) {
+                            Log.v(TAG, "Successfully retrieved user, calling onRegister");
                             KinveyGCMService.this.onRegistered(gcmRegID);
                         }
 

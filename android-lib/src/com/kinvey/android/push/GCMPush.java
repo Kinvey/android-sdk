@@ -113,7 +113,7 @@ public class GCMPush extends AbstractPush {
                 registrationIntent.putExtra(EXTRA_REGISTRATION_ID, regId);
                 registrationIntent.putExtra(EXTRA_ERROR, "");
 
-                currentApp.startService(registrationIntent);
+                currentApp.sendBroadcast(registrationIntent);
             }
         }
         return this;
