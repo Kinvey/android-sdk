@@ -137,6 +137,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
         if (change == 0){
             db.insert(COLLECTION_TABLE, null, values);
         }
+        db.close();
 
     }
 
@@ -173,7 +174,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     public GenericJson getEntity(AbstractClient client, AppData appData, String id) {
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        SQLiteDatabase db = getWritableDatabase();
+       // SQLiteDatabase db = getWritableDatabase();
 
         GenericJson ret;
 
@@ -196,6 +197,8 @@ public class OfflineHelper extends SQLiteOpenHelper {
                 + ");";
 
         OfflineTable.runCommand(db, createCommand);
+
+        db.close();
 
     }
 }

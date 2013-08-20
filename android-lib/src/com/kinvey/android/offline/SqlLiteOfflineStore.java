@@ -17,7 +17,6 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
@@ -67,7 +66,6 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         OfflineHelper dbHelper = new OfflineHelper(context);
-//        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //expand the URI from the template
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, false);
@@ -81,6 +79,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
             //it's a query
             String query = targetURI.substring(idIndex, targetURI.length());
             ret = (T) dbHelper.getTable(appData.getCollectionName()).getQuery(dbHelper, client, query, appData.getCurrentClass());
+
             dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "QUERY", targetURI.substring(idIndex, targetURI.length()));
 
 
@@ -88,11 +87,11 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
             //it's get by id
             String targetID = targetURI.substring(idIndex, targetURI.length());
             ret = (T) dbHelper.getTable(appData.getCollectionName()).getEntity(dbHelper, client, targetID, appData.getCurrentClass());
+
             dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "GET", targetURI.substring(idIndex, targetURI.length()));
 
 
         }
-//        db.close();
 
         kickOffSync();
         return ret;
@@ -119,7 +118,6 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         OfflineHelper dbHelper = new OfflineHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //set deleted flag in table
         //expand the URI from the template
@@ -129,7 +127,6 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         String targetID = targetURI.substring(idIndex, targetURI.length());
         KinveyDeleteResponse ret = dbHelper.getTable(appData.getCollectionName()).delete(dbHelper,client, targetID);
-        db.close();
         dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "DELETE", targetURI.substring(idIndex, targetURI.length()));
 
         kickOffSync();
@@ -158,14 +155,10 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
         OfflineHelper dbHelper = new OfflineHelper(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //grab json content and put it in the store
-
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
         T ret = (T) dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
-
-        db.close();
 
         dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString());
 

@@ -293,9 +293,11 @@ public class OfflineTable<T extends GenericJson> {
             for (int i = 0; i < resultIDs.length; i++) {
                 ret[i] = getEntity(helper, client, resultIDs[i], clazz);
             }
+            db.close();
 
             return (T[]) ret;
         }
+        db.close();
         return null;
 
     }
@@ -426,19 +428,19 @@ public class OfflineTable<T extends GenericJson> {
      * @deprecated removed, as trable would grow infinitely
      */
     public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
-        //no-op haven't found a user for this yet
-        if (false){
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        //no-op haven't found a use for this yet
+        if (false) {
+            SQLiteDatabase db = helper.getWritableDatabase();
+            ContentValues values = new ContentValues();
 
-        values.put(COLUMN_ID, info.getEntityID());
-        values.put(COLUMN_ACTION, info.getHttpVerb());
-        values.put(COLUMN_JSON, returnValue);
-        values.put(COLUMN_RESULT, (success ? 1 : 0));
+            values.put(COLUMN_ID, info.getEntityID());
+            values.put(COLUMN_ACTION, info.getHttpVerb());
+            values.put(COLUMN_JSON, returnValue);
+            values.put(COLUMN_RESULT, (success ? 1 : 0));
 
-        db.insert(RESULTS_NAME, null, values);
+            db.insert(RESULTS_NAME, null, values);
 
-        db.close();
+            db.close();
         }
         return;
     }
@@ -452,19 +454,19 @@ public class OfflineTable<T extends GenericJson> {
      * @deprecated removed, as table would grow infinitely
      */
     public List<OfflineResponseInfo> getHistoricalRequests(OfflineHelper helper){
-        if(false){
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor c = db.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null);
+        if (false) {
+            SQLiteDatabase db = helper.getReadableDatabase();
+            Cursor c = db.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null);
 
-        ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
+            ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
 
-        while (c.moveToNext()){
-            ret.add(new OfflineResponseInfo(new OfflineRequestInfo(c.getString(1), c.getString(0)), c.getString(2), (c.getInt(3) == 1 ? true : false )));
-        }
+            while (c.moveToNext()) {
+                ret.add(new OfflineResponseInfo(new OfflineRequestInfo(c.getString(1), c.getString(0)), c.getString(2), (c.getInt(3) == 1 ? true : false)));
+            }
 
-        c.close();
-        db.close();
-        return ret;
+            c.close();
+            db.close();
+            return ret;
         }
         return new ArrayList<OfflineResponseInfo>();
 
