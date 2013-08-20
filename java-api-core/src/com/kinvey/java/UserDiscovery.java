@@ -92,7 +92,7 @@ public class UserDiscovery {
     public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup, Array.newInstance(User.class,0).getClass());
+        Lookup lookup = new Lookup(userlookup, User[].class);
         client.initializeRequest(lookup);
         return lookup;
 
