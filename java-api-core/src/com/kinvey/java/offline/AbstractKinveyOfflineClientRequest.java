@@ -25,6 +25,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 /**
  * Implementation of a Client Request, which can either pull a response from a Cache instance or from online.
@@ -100,7 +101,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("POST")){
                 //generate and add id
-                ((GenericJson) this.getJsonContent()).put("_id", generateMongoDBID());
+                ((GenericJson) this.getJsonContent()).put("_id", getUUID());
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
@@ -130,22 +131,19 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             return super.execute();
         }
 
-
-
-
         T ret = null;
         if(((AbstractClient) getAbstractKinveyClient()).appData(collectionName, getResponseClass()).isOnline()){
+            System.out.println("Offline Request - Online execution!");
             try{
                 ret = super.execute();
                 if (ret != null){
-                    synchronized (lock){
-                        return this.offlineFromStore();
-                    }
+                    this.offlineFromStore();           //enqueue it anyways so that store gets updated
                 }
             }catch (Exception e){
                 e.printStackTrace();;
             }
          }
+
         return ret;
     }
 
@@ -196,6 +194,11 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             buf.append(s);
         }
         return buf.toString();
+    }
+
+    public static String getUUID(){
+        return UUID.randomUUID().toString();
+
     }
 
 

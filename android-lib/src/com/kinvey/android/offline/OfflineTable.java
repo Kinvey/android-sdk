@@ -378,7 +378,7 @@ public class OfflineTable<T extends GenericJson> {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.generateMongoDBID());
+        values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
         values.put(COLUMN_ID, id);
         values.put(COLUMN_ACTION, verb);
 
