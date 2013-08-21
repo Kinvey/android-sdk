@@ -124,12 +124,11 @@
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
 				<version>${android-maven.version}</version>
-				<configuration>
-					<sdk>
-						<path>${env.ANDROID_HOME}</path>
-						<platform>${android.platform}</platform>
-					</sdk>
-				</configuration>
+                <configuration>
+                    <properties>
+                        <android.sdk.path>${ENV.ANDROID_HOME}</android.sdk.path>
+                    </properties>
+                </configuration>
 				<extensions>true</extensions>
 			</plugin>
 
