@@ -337,11 +337,7 @@ public class Client extends AbstractClient {
         }
 
     }
-//
-//    private boolean userExists() {
-//        String user = getClientUsers().getCurrentUser();
-//        return (user != null && !user.isEmpty());
-//    }
+
 
     /**
      * User factory method
@@ -673,7 +669,7 @@ public class Client extends AbstractClient {
             Credential credential = null;
             if (!client.user().isUserLoggedIn()) {
                 String userID = client.getClientUsers().getCurrentUser();
-                if (userID != null && !userID.isEmpty()) {
+                if (userID != null && !userID.equals("")) {
                     AndroidCredentialStore store = new AndroidCredentialStore(context);
                     CredentialManager manager = new CredentialManager(store);
                     credential = manager.loadCredential(userID);

@@ -29,6 +29,53 @@ mvn -Pdev javadoc:javadoc install
 mvn -Prelease clean install
 ```
 
+###Explicit release steps (including the above)
+```
+find and replace on version number (all poms.xml and RequestHeader version)
+check in
+double check/update devcenter.home location (in parent pom) relative to trunk/
+
+git pull devcenter
+remove current android javadocs (rm -r <devcenter.home>/content/reference/android/api/*)
+
+rm -r <devcenter.home>/content/reference/android/api/*
+cd <trunk> 
+mvn -Pdev javadoc:javadoc install
+
+node . to run at localhost:3000
+
+//strange errors from above?
+nvm is at ~/.nvm
+rm -r node_modules
+(npm install)
+(npm update)
+
+mvn -Prelease clean install
+
+cd devcenter/content/downloads/android-changelog.md
+update changelog
+
+login to AWS S3 and upload zip from trunk/release
+modify links in content/downloads.json
+
+test locally
+commit
+push to origin master
+push to staging
+check it
+push to prod
+check it
+
+svn up at root
+
+svn merge -rLastRevisionMergedFromTrunkToBranch:HEAD url/of/trunk path/to/branch/wc
+(merge any changes on trunk into correct branch or create new one for major release)
+svn cp from branch/2.2.x to tag2.2.2 (tag is snapshot of release)
+
+check it all in
+```
+
+
 
 ## License
 
