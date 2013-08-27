@@ -429,7 +429,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param callback KinveyClientCallback
      */
     public void count(ArrayList<String> fields, Query query, KinveyClientCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_COUNT), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest(methodMap.get(KEY_COUNT), callback, fields, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 

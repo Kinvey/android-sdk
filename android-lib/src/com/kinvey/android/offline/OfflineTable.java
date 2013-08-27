@@ -377,12 +377,18 @@ public class OfflineTable<T extends GenericJson> {
     public void enqueueRequest(OfflineHelper helper, String verb, String id){
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
-        values.put(COLUMN_ID, id);
-        values.put(COLUMN_ACTION, verb);
+        Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null);
 
-        db.insert(QUEUE_NAME, null, values);
+        if (c.getCount() == 0){
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
+            values.put(COLUMN_ID, id);
+            values.put(COLUMN_ACTION, verb);
+            db.insert(QUEUE_NAME, null, values);
+        }
+
+        c.close();
+
         db.close();
 
     }

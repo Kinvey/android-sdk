@@ -161,6 +161,10 @@ public class Client extends AbstractClient {
             if (!appDataInstanceCache.containsKey(collectionName)) {
                 appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));
             }
+            if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
+                appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));   
+            }
+
             return appDataInstanceCache.get(collectionName);
         }
     }
