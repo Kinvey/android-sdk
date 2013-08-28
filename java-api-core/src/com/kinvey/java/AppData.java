@@ -429,7 +429,7 @@ public class AppData<T> {
     }
 
     /**
-     * Private helper method to create AggregateEntity and return an intialize Aggregate Request Object
+     * public helper method to create AggregateEntity and return an intialize Aggregate Request Object
      * @param fields fields to group by
      * @param type Type of aggregation
      * @param aggregateField Field to aggregate on
@@ -437,7 +437,7 @@ public class AppData<T> {
      * @return
      * @throws IOException
      */
-    private Aggregate aggregate(ArrayList<String> fields, AggregateEntity.AggregateType type, String aggregateField,
+    public Aggregate aggregate(ArrayList<String> fields, AggregateEntity.AggregateType type, String aggregateField,
                                    Query query) throws IOException {
         AggregateEntity entity = new AggregateEntity(fields, type, aggregateField, query, client);
         Aggregate aggregate = new Aggregate(entity, myClass);

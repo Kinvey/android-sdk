@@ -69,7 +69,7 @@ public class GCMPush extends AbstractPush {
     private static boolean inProduction = false;
 
 
-    public GCMPush(Client client, boolean inProduction, String... senderIDs) {
+    public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
         this.senderIDs = senderIDs;
         this.inProduction = inProduction;
@@ -97,7 +97,10 @@ public class GCMPush extends AbstractPush {
 
         //if we are not registered on GCM, then register
         if (regId.equals("")) {
-            Log.v(Client.TAG, "GCM - Registration Id is empty, about to use GCMRegistrar");
+            Log.v(Client.TAG, "GCM - Registration Id is empty, about to use GCMRegistrar for SenderIDs:");
+            for (String s: senderIDs){
+                Log.v(Client.TAG, "GCM Id -> " + s);
+            }
             //Registration comes back via an intent
             GCMRegistrar.register(currentApp, senderIDs);
             Log.v(Client.TAG, "GCM - just registered with the GCMRegistrar");
@@ -114,6 +117,7 @@ public class GCMPush extends AbstractPush {
                 registrationIntent.putExtra(EXTRA_ERROR, "");
 
                 currentApp.sendBroadcast(registrationIntent);
+//                currentApp.sen
             }
         }
         return this;

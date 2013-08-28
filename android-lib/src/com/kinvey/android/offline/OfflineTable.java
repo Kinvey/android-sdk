@@ -283,11 +283,8 @@ public class OfflineTable<T extends GenericJson> {
         SQLiteDatabase db = helper.getReadableDatabase();
 
         Cursor c =  db.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null);
-
         if (c.moveToFirst() && c.getColumnCount() > 0) {
             String[] resultIDs = c.getString(0).split(",");
-
-//            T[] ret = new clazz[resultIDs.length];
 
             T[] ret = (T[]) Array.newInstance(clazz, resultIDs.length);
             for (int i = 0; i < resultIDs.length; i++) {
@@ -295,7 +292,7 @@ public class OfflineTable<T extends GenericJson> {
             }
             db.close();
 
-            return (T[]) ret;
+            return ret;
         }
         db.close();
         return null;
@@ -321,7 +318,7 @@ public class OfflineTable<T extends GenericJson> {
 
         values.put(COLUMN_ID, commaDelimitedIds);
 
-        Log.v(TAG, "inserting query ");
+        Log.v(TAG, "inserting query: " + queryString);
 
         int change = db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
         if (change == 0){

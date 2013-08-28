@@ -31,6 +31,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -234,7 +235,12 @@ public class KinveySyncService extends IntentService {
                 }
             });
         }else if (cur.getHttpVerb().equals("QUERY")){
-            client.appData(collectionName, GenericJson[].class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson[]>() {
+
+            Query q = new Query();
+            q.setQueryString(cur.getEntityID());
+
+            client.appData(collectionName, GenericJson.class).get(q, new KinveyListCallback<GenericJson>()
+            {
                 @Override
                 public void onSuccess(GenericJson[] result) {
                     List<String> resultIds = new ArrayList<String>();

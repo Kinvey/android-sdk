@@ -99,14 +99,15 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 ret = this.store.executeGet((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("PUT")){
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
-            }else if (verb.equals("POST")){
+            }else if (verb.equals("POST") && !UriTemplate.expand(getAbstractKinveyClient().getBaseUrl(), this.getUriTemplate(), this, false).contains("_group")){
                 //generate and add id
                 ((GenericJson) this.getJsonContent()).put("_id", getUUID());
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else{
-                throw new UnsupportedOperationException("Unrecognized Verb in offline request -> " + verb);
+                //throw new UnsupportedOperationException("Unrecognized Verb in offline request -> " + verb);
+                System.out.println("Kinvey Offline, unrecognized verb in store! -> " + verb );
             }
 
             return ret;

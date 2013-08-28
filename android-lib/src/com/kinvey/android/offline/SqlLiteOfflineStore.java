@@ -26,6 +26,8 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
 
+import java.net.URLDecoder;
+
 /**
  * This class is an implementation of an {@link OfflineStore}, which provides methods to execute requests locally.
  * <p/>
@@ -68,7 +70,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         OfflineHelper dbHelper = new OfflineHelper(context);
 
         //expand the URI from the template
-        String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, false);
+        String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
         //find the index after {collectionName}/
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
 
@@ -78,9 +80,19 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         if (targetURI.contains("query") || idIndex == targetURI.length()){
             //it's a query
             String query = targetURI.substring(idIndex, targetURI.length());
+   
+            query = query.replace("?query=","");
+            try{
+                query = URLDecoder.decode(query, "UTF-8");
+            }catch (Exception e){}
+//
+//            Log.e("Offline", "targeturi string is: " + targetURI);
+//            Log.e("Offline", "idIndex  is: " + idIndex );
+//            Log.e("Offline", "query string is: " + query);
+
             ret = (T) dbHelper.getTable(appData.getCollectionName()).getQuery(dbHelper, client, query, appData.getCurrentClass());
 
-            dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "QUERY", targetURI.substring(idIndex, targetURI.length()));
+            dbHelper.getTable(appData.getCollectionName()).enqueueRequest(dbHelper, "QUERY", query);
 
 
         }else{

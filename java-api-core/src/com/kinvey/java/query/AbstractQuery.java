@@ -49,6 +49,7 @@ public abstract class AbstractQuery implements Serializable{
 
     protected QueryFilterBuilder builder;
     protected LinkedHashMap<String,SortOrder> sort;
+    private String queryString = null;
 
     /**
      * Constructor, sets the appropriate Filter builder and creates a Sort object
@@ -58,6 +59,11 @@ public abstract class AbstractQuery implements Serializable{
     public AbstractQuery(QueryFilterBuilder builder) {
         this.builder = builder;
         this.sort = new LinkedHashMap<String, SortOrder>();
+    }
+
+    public AbstractQuery setQueryString(String queryString){
+        this.queryString = queryString;
+        return this;
     }
 
     /**
@@ -74,6 +80,10 @@ public abstract class AbstractQuery implements Serializable{
      */
     public String getQueryFilterJson(JsonFactory factory) {
         Preconditions.checkNotNull(factory);
+        if (queryString != null){
+            return this.queryString;
+        }
+
         StringWriter writer = new StringWriter();
         String jsonResult = "";
         try {
