@@ -369,6 +369,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             System.out.println("unable to parse response -> " + e.getLocalizedMessage());
             //this prevents a crash when we receive a 200 with null content
             return null;
+        }catch (NullPointerException ex){
+            return null;
         }
     }
 
