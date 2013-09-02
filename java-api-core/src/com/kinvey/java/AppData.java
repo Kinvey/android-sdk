@@ -80,17 +80,21 @@ public class AppData<T> {
 
         @Override
         public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
         }
 
         @Override
         public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
         }
 
         @Override
         public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
+        }
+
+        @Override
+        public void insertEntity(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
         }
     };
 
