@@ -179,6 +179,15 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         return ret;
     }
 
+    @Override
+    public void insertEntity(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+
+        OfflineHelper dbHelper = new OfflineHelper(context);
+        GenericJson jsonContent = (GenericJson) request.getJsonContent();
+
+        dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 
 
     private void kickOffSync(){

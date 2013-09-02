@@ -138,7 +138,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             try{
                 ret = super.execute();
                 if (ret != null){
-                    this.offlineFromStore();           //enqueue it anyways so that store gets updated
+                    this.store.insertEntity((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
                 }
             }catch (Exception e){
                 e.printStackTrace();;

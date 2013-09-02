@@ -31,6 +31,8 @@ public interface OfflineStore<T>  {
 
     public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request);
 
+    public void insertEntity(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request);
+
 
 
 }

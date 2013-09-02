@@ -202,7 +202,6 @@ public class OfflineTable<T extends GenericJson> {
 
         ContentValues values = new ContentValues();
 
-
         values.put(COLUMN_ID, offlineEntity.get("_id").toString());
 
 
@@ -221,12 +220,14 @@ public class OfflineTable<T extends GenericJson> {
         values.put(COLUMN_DELETED, 0);
         values.put(COLUMN_USER, client.user().getId());
 
+        Log.e(TAG, "insert entity -> " + jsonResult);
+
         int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(TABLE_NAME, null, values);
-            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_ID));
+            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_JSON));
         }else{
-            Log.v(TAG, "updating entity -> " + values.get(COLUMN_ID));
+            Log.v(TAG, "updating entity -> " + values.get(COLUMN_JSON));
         }
 
 
@@ -258,7 +259,10 @@ public class OfflineTable<T extends GenericJson> {
         if (cursor != null){
             cursor.moveToFirst();
             try{
-               ret =  client.getJsonFactory().fromString(cursor.getString(0), responseClass);
+               String s  =cursor.getString(0);
+                Log.e(TAG, "get entity -> " + s);
+
+                ret =  client.getJsonFactory().fromString(s, responseClass);
             }catch(Exception e){
                 Log.e(TAG, "cannot parse json into object! -> " + e);
             }
@@ -284,11 +288,21 @@ public class OfflineTable<T extends GenericJson> {
 
         Cursor c =  db.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null);
         if (c.moveToFirst() && c.getColumnCount() > 0) {
-            String[] resultIDs = c.getString(0).split(",");
+            String s = c.getString(0);
+            Log.e(TAG, "get query entity -> " + s);
+            T[] ret = null;
 
-            T[] ret = (T[]) Array.newInstance(clazz, resultIDs.length);
-            for (int i = 0; i < resultIDs.length; i++) {
-                ret[i] = getEntity(helper, client, resultIDs[i], clazz);
+            String[] resultIDs = s.split(",");
+            if (clazz != null) {
+                Class singleClass = clazz.getClass().getComponentType();
+                if (singleClass != null) {
+                     ret = (T[]) Array.newInstance(singleClass, resultIDs.length);
+
+
+                    for (int i = 0; i < resultIDs.length; i++) {
+                        ret[i] = getEntity(helper, client, resultIDs[i], singleClass);
+                    }
+                }
             }
             db.close();
 
@@ -323,9 +337,9 @@ public class OfflineTable<T extends GenericJson> {
         int change = db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(QUERY_NAME, null, values);
-            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_ID));
+            Log.v(TAG, "inserting new query -> " + values.get(COLUMN_ID));
         }else{
-            Log.v(TAG, "updating entity -> " + values.get(COLUMN_ID));
+            Log.v(TAG, "updating query -> " + values.get(COLUMN_ID));
         }
 
         db.close();
