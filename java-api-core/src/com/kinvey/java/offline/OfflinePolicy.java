@@ -39,10 +39,7 @@ public enum OfflinePolicy {
             T ret = offlineRequest.offlineFromService(false);
             if (ret == null){
                 ret = offlineRequest.offlineFromStore();
-            }else{
-                offlineRequest.offlineFromStore(); //exucute anyways to update local store but ignore result
             }
-
             return ret;
         }
     },

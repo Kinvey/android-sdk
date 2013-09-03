@@ -106,7 +106,6 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else{
-                //throw new UnsupportedOperationException("Unrecognized Verb in offline request -> " + verb);
                 System.out.println("Kinvey Offline, unrecognized verb in store! -> " + verb );
             }
 
