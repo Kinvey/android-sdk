@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.kinvey</groupId>
 		<artifactId>parent-sample</artifactId>
-		<version>2.6.2</version>
+		<version>2.6.3</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -125,9 +125,10 @@
 				<artifactId>android-maven-plugin</artifactId>
 				<version>${android-maven.version}</version>
                 <configuration>
-                    <properties>
-                        <android.sdk.path>${ENV.ANDROID_HOME}</android.sdk.path>
-                    </properties>
+                    <sdk>
+                        <path>${env.ANDROID_HOME}</path>
+                        <platform>${android.platform}</platform>
+                    </sdk>
                 </configuration>
 				<extensions>true</extensions>
 			</plugin>
