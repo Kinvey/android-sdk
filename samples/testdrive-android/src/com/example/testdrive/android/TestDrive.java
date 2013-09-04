@@ -178,7 +178,6 @@ public class TestDrive extends Activity {
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
 
-
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
         ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
@@ -195,26 +194,6 @@ public class TestDrive extends Activity {
                 Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        AsyncAppData<Entity> ad2 = kinveyClient.appData("ent2", Entity.class);
-        ad2.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
-        ad2.save(entity, new KinveyClientCallback<Entity>() {
-            @Override
-            public void onSuccess(Entity result) {
-                bar.setVisibility(View.GONE);
-                Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                bar.setVisibility(View.GONE);
-                Log.e(TAG, "AppData.save Failure", error);
-                Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-
-
-
 
     }
 
@@ -239,6 +218,7 @@ public class TestDrive extends Activity {
             }
         });
     }
+
 
 
 
