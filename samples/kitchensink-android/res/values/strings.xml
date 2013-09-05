@@ -24,7 +24,7 @@
     <string name="appdata_aggregate_description">Aggregates allows you to collect all entities with the same value for a field or fields, and then apply a reduce function (such as count or average) on all those items.</string>
 
     <string name="push_description">hit "Register" to register the currently active user for push notifications. This functionality is associated with the application\'s package name-- So if you want to configure your own push make sure you change this sample\'s package name!</string>
-
+    <string name="user_lookup_description">Perform user lookup operations to discover other users</string>
     <string name="menu_login">Login</string>
 
 

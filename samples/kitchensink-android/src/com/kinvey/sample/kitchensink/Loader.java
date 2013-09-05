@@ -17,6 +17,7 @@ import com.kinvey.sample.kitchensink.appData.AppDataActivity;
 import com.kinvey.sample.kitchensink.custom.CustomEndpointActivity;
 import com.kinvey.sample.kitchensink.file.FileActivity;
 import com.kinvey.sample.kitchensink.push.PushActivity;
+import com.kinvey.sample.kitchensink.user.UserActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,9 @@ public class Loader {
 
         Feature customEndpoint = new Feature("Custom Endpoints", "Define behavoir on you backend and run it from the client.", CustomEndpointActivity.class);
         featureList.add(customEndpoint);
+
+        Feature user = new Feature("User", "Store data associated with a user and perform user lookup operations", UserActivity.class);
+        featureList.add(user);
 
 
 

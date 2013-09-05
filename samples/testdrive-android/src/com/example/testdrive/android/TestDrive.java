@@ -168,9 +168,11 @@ public class TestDrive extends Activity {
 
 	public void onSaveClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        Entity entity = new Entity("noQueryEntity");
+        Entity entity = new Entity("myEntity");
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
+
+
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
 //        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);

@@ -83,6 +83,12 @@
                 android:label="@string/feature_login">
         </activity>
 
+        <activity
+                android:name=".user.UserActivity"
+                android:windowSoftInputMode="adjustResize"
+                android:noHistory="true"
+                android:label="@string/feature_user">
+        </activity>
         <receiver
                 android:name="com.kinvey.sample.kitchensink.push.GCMReciever"
                 android:permission="com.google.android.c2dm.permission.SEND" >
