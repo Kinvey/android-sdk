@@ -475,6 +475,7 @@ public class Client extends AbstractClient {
         private String GCM_SenderID = "";
         private boolean GCM_Enabled = false;
         private boolean GCM_InProduction = true;
+        private boolean sharedPrefCredentials = false;
 
 
         /**
@@ -494,11 +495,18 @@ public class Client extends AbstractClient {
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            try {
-                this.setCredentialStore(new AndroidCredentialStore(this.context));
-            } catch (Exception ex) {
-                //TODO Add handling
+
+            if (this.sharedPrefCredentials){
+                 this.setCredentialStore(new SharedPrefCredentialStore(this.context));
+            }else{
+                try {
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                } catch (Exception ex) {
+                    //TODO Add handling
+                }
             }
+
+
         }
 
 
@@ -555,6 +563,10 @@ public class Client extends AbstractClient {
                 this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
             }
 
+            if (super.getString(Option.SHARED_PREF) != null){
+                this.sharedPrefCredentials = Boolean.parseBoolean(super.getString(Option.SHARED_PREF));
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -563,13 +575,18 @@ public class Client extends AbstractClient {
 
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            try {
-                this.setCredentialStore(new AndroidCredentialStore(this.context));
-            } catch (AndroidCredentialStoreException ex) {
-                Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
-            } catch (IOException ex) {
-                Log.e(TAG, "Credential store failed to load", ex);
+            if (this.sharedPrefCredentials){
+                this.setCredentialStore(new SharedPrefCredentialStore(this.context));
+            }else{
+                try {
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                } catch (AndroidCredentialStoreException ex) {
+                    Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
+                } catch (IOException ex) {
+                    Log.e(TAG, "Credential store failed to load", ex);
+                }
             }
+
         }
 
 
@@ -620,6 +637,8 @@ public class Client extends AbstractClient {
             new Build(buildCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
         }
 
+
+
         /**
          * Sets a callback to be called after a client is intialized and User attributes is being retrieved.
          *
@@ -656,11 +675,23 @@ public class Client extends AbstractClient {
             return this;
         }
 
+        /**
+         * Builder method to enable GCM for the client
+         *
+         * @param gcmEnabled - should push use GCM, defaults to true
+         * @return the current instance of the builder
+         */
         public Client.Builder enableGCM(boolean gcmEnabled){
             this.GCM_Enabled = gcmEnabled;
             return this;
         }
 
+        /**
+         * Builder method to set sender ID for GCM push
+         *
+         * @param senderID - the senderID to register
+         * @return the current instance of the builder
+         */
         public Client.Builder setSenderIDs(String senderID){
             this.GCM_SenderID = senderID;
             return this;
@@ -670,6 +701,11 @@ public class Client extends AbstractClient {
             this.GCM_InProduction = inProduction;
             return this;
         }
+//        Might want to expose this someday, but don't yet
+//        public Client.Builder useSharedPrefCredentials(){
+//            this.sharedPrefCredentials = true;
+//            return this;
+//        }
 
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws AndroidCredentialStoreException, IOException {
@@ -677,7 +713,13 @@ public class Client extends AbstractClient {
             if (!client.user().isUserLoggedIn()) {
                 String userID = client.getClientUsers().getCurrentUser();
                 if (userID != null && !userID.equals("")) {
-                    AndroidCredentialStore store = new AndroidCredentialStore(context);
+                    CredentialStore store;
+
+                    if (sharedPrefCredentials){
+                        store = new SharedPrefCredentialStore(context);
+                    }else{
+                        store = new AndroidCredentialStore(context);
+                    }
                     CredentialManager manager = new CredentialManager(store);
                     credential = manager.loadCredential(userID);
                 }

@@ -13,6 +13,9 @@
  */
 package com.example.testdrive.android.test;
 
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import com.example.testdrive.android.R;
@@ -22,10 +25,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowEnvironment;
+import org.robolectric.shadows.ShadowHandler;
+import org.robolectric.shadows.ShadowToast;
+import org.robolectric.util.ActivityController;
 
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -47,21 +56,79 @@ public class TestDriveTest {
 
     @Before
     public void setUp() throws Exception {
-//        activity = Robolectric.buildActivity(TestDrive.class).create().get();
-//        load = (Button) activity.findViewById(R.id.load);
-//        loadAll = (Button) activity.findViewById(R.id.loadAll);
-//        query = (Button) activity.findViewById(R.id.query);
-//        save = (Button) activity.findViewById(R.id.save);
-//        delete = (Button) activity.findViewById(R.id.delete);
-//        progress = (ProgressBar) activity.findViewById(R.id.refresh_progress);
+        //config robolectric for real HTTP and persistance
+        Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+
+
+//        ActivityController<TestDrive> controller = Robolectric.buildActivity(TestDrive.class);
+//        controller.
+
+        activity = Robolectric.buildActivity(TestDrive.class).create().get();
+        ShadowHandler.idleMainLooper();
+        //both creating a new user and logging in an existing user show a toast containing the string `implicit`
+        String s= ShadowToast.getTextOfLatestToast();
+        assertTrue(s.contains("implicit"));
+
+        load = (Button) activity.findViewById(R.id.load);
+        loadAll = (Button) activity.findViewById(R.id.loadAll);
+        query = (Button) activity.findViewById(R.id.query);
+        save = (Button) activity.findViewById(R.id.save);
+        delete = (Button) activity.findViewById(R.id.delete);
+        progress = (ProgressBar) activity.findViewById(R.id.refresh_progress);
+
 
     }
 
 
     @Test
     public void testAppName() throws Exception {
-        String appName = new TestDrive().getResources().getString(R.string.app_name);
+        String appName = activity.getResources().getString(R.string.app_name);
         assertThat(appName, equalTo("TestDrive"));
+
+    }
+
+    @Test
+    public void testSave() throws Exception{
+        save.performClick();
+        ShadowHandler.idleMainLooper();
+        assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Entity Saved") );
+    }
+
+    @Test
+    public void testLoad() throws Exception{
+        load.performClick();
+        ShadowHandler.idleMainLooper();
+        assertTrue(ShadowToast.getTextOfLatestToast().contains("Entity Retrieved"));
+
+    }
+
+    @Test
+    public void testQuery() throws Exception{
+        query.performClick();
+        ShadowHandler.idleMainLooper();
+        assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Retrieved 2 entities!"));
+
+    }
+
+    @Test
+    public void testLoadAll() throws Exception{
+        loadAll.performClick();
+        ShadowHandler.idleMainLooper();
+        assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Retrieved 3 entities!"));
+
+
+    }
+
+    @Test
+    public void testDelete() throws Exception{
+
+        testSave();
+
+        delete.performClick();
+        ShadowHandler.idleMainLooper();
+        assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Number of Entities Deleted: 1"));
+
     }
 
 

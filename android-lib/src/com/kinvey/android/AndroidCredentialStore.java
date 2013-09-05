@@ -16,7 +16,6 @@
 package com.kinvey.android;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -39,7 +38,6 @@ import com.kinvey.java.auth.CredentialStore;
 class AndroidCredentialStore implements CredentialStore {
     private static final String TAG = AndroidCredentialStore.class.getSimpleName();
 
-    SharedPreferences preferences;
     HashMap<String, Credential> credentials;
     Context appContext;
 

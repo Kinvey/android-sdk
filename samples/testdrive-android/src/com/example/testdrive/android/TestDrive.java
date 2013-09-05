@@ -74,7 +74,7 @@ public class TestDrive extends Activity {
 
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
-            kinveyClient.user().login("ok", "ok", new KinveyUserCallback() {
+            kinveyClient.user().login("myUsername", "myPassword", new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     bar.setVisibility(View.GONE);
@@ -97,7 +97,7 @@ public class TestDrive extends Activity {
 	public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -122,18 +122,15 @@ public class TestDrive extends Activity {
     public void onQueryClick(View view) {
         bar.setVisibility(View.VISIBLE);
         Query myQuery = kinveyClient.query();
-        myQuery.equals("_id","myEntity");
+        myQuery.startsWith("_id", "my");
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(myQuery, new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
                 bar.setVisibility(View.GONE);
                 if(result != null){
-                for (Entity entity : result) {
-                    Toast.makeText(TestDrive.this,"Entity Retrieved\nTitle: " + entity.getTitle()
-                            + "\nDescription: " + entity.get("Description"), Toast.LENGTH_LONG).show();
-                }
+                    Toast.makeText(TestDrive.this,"Retrieved " + result.length + " entities!", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -150,16 +147,13 @@ public class TestDrive extends Activity {
     public void onLoadAllClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(new Query(), new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
                 bar.setVisibility(View.GONE);
                 if (result != null){
-                for (Entity entity : result) {
-                    Toast.makeText(TestDrive.this,"Entity Retrieved\nTitle: " + entity.getTitle()
-                            + "\nDescription: " + entity.get("Description"), Toast.LENGTH_LONG).show();
-                }
+                    Toast.makeText(TestDrive.this,"Retrieved " + result.length + " entities!", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -174,12 +168,12 @@ public class TestDrive extends Activity {
 
 	public void onSaveClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        Entity entity = new Entity("myEntity");
+        Entity entity = new Entity("noQueryEntity");
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -202,7 +196,7 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.delete("myEntity", new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {

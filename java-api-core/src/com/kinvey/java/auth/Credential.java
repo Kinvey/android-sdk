@@ -37,7 +37,7 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
 
     /** package **/ Credential() {}
 
-    /** package **/ Credential(String userId, String authToken) {
+    public Credential(String userId, String authToken) {
         this.userId = userId;
         this.authToken = authToken;
     }
