@@ -60,10 +60,6 @@ public class TestDriveTest {
         Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
 
-
-//        ActivityController<TestDrive> controller = Robolectric.buildActivity(TestDrive.class);
-//        controller.
-
         activity = Robolectric.buildActivity(TestDrive.class).create().get();
         ShadowHandler.idleMainLooper();
         //both creating a new user and logging in an existing user show a toast containing the string `implicit`
@@ -97,6 +93,7 @@ public class TestDriveTest {
 
     @Test
     public void testLoad() throws Exception{
+        testSave();
         load.performClick();
         ShadowHandler.idleMainLooper();
         assertTrue(ShadowToast.getTextOfLatestToast().contains("Entity Retrieved"));
@@ -105,6 +102,7 @@ public class TestDriveTest {
 
     @Test
     public void testQuery() throws Exception{
+        testSave();
         query.performClick();
         ShadowHandler.idleMainLooper();
         assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Retrieved 2 entities!"));
@@ -113,6 +111,7 @@ public class TestDriveTest {
 
     @Test
     public void testLoadAll() throws Exception{
+        testSave();
         loadAll.performClick();
         ShadowHandler.idleMainLooper();
         assertThat(ShadowToast.getTextOfLatestToast(), equalTo("Retrieved 3 entities!"));
