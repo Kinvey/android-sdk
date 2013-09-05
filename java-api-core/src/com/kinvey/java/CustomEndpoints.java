@@ -51,12 +51,12 @@ public class CustomEndpoints {
      * @return a CustomCommand request ready to be executed.
      * @throws IOException
      */
-    public customCommand callEndpointBlocking(String endpoint, GenericJson input) throws IOException{
+    public CustomCommand callEndpointBlocking(String endpoint, GenericJson input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
         if (input == null){
             input = new GenericJson();
         }
-        customCommand command = new customCommand(endpoint, input,  GenericJson.class);
+        CustomCommand command = new CustomCommand(endpoint, input,  GenericJson.class);
         client.initializeRequest(command);
         return command;
     }
@@ -69,12 +69,12 @@ public class CustomEndpoints {
      * @return a CustomCommand ready to be executed
      * @throws IOException
      */
-    public customCommandArray callEndpointArrayBlocking(String endpoint, GenericJson input) throws IOException{
+    public CustomCommandArray callEndpointArrayBlocking(String endpoint, GenericJson input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
         if (input == null){
             input = new GenericJson();
         }
-        customCommandArray command = new customCommandArray(endpoint, input,  GenericJson[].class);
+        CustomCommandArray command = new CustomCommandArray(endpoint, input,  GenericJson[].class);
         client.initializeRequest(command);
         return command;
     }
@@ -84,14 +84,14 @@ public class CustomEndpoints {
      * A JSON client request which executes against a custom endpoint returning a single JSON object.
      *
      */
-    protected class customCommand extends AbstractKinveyJsonClientRequest<GenericJson> {
+    protected class CustomCommand extends AbstractKinveyJsonClientRequest<GenericJson> {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key
         private String endpoint;
 
 
-        customCommand(String commandName, GenericJson args, Class responseClass) {
+        CustomCommand(String commandName, GenericJson args, Class responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
         }
@@ -102,14 +102,14 @@ public class CustomEndpoints {
      * A JSON client request which executes against a custom endpoint returning an array.
      *
      */
-    protected class customCommandArray extends AbstractKinveyJsonClientRequest<GenericJson[]> {
+    protected class CustomCommandArray extends AbstractKinveyJsonClientRequest<GenericJson[]> {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key
         private String endpoint;
 
 
-        customCommandArray(String commandName, GenericJson args, Class responseClass) {
+        CustomCommandArray(String commandName, GenericJson args, Class responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
         }

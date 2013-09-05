@@ -231,7 +231,7 @@ public class AppDataOperation {
             if (this.query != null) {
                 ret = this.appData.new Delete(this.query);
             } else {
-                Preconditions.checkNotNull(null, "Cannot use DELETE without either calling setEntityID(...) or setQuery(...)");
+                Preconditions.checkArgument((this.query != null), "Cannot use DELETE without either calling setEntityID(...) or setQuery(...)");
                 return null;
             }
             return super.build(ret);

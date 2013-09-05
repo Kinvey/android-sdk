@@ -84,9 +84,10 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         String mimetype = "application/octet-stream";
                         if (in != null) {
                             mediaContent = new InputStreamContent(mimetype, in);
+                            mediaContent.setCloseInputStream(false);
+                            mediaContent.setRetrySupported(false);
                         }
-                        mediaContent.setCloseInputStream(false);
-                        mediaContent.setRetrySupported(false);
+
 
                         getAbstractKinveyClient().file().setUploadProgressListener(new MetaUploadListener() {
                             @Override
