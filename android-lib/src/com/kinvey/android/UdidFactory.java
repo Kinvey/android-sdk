@@ -69,7 +69,7 @@ class UdidFactory {
                         // fallback on deviceId, unless it's not available, then
                         // fallback on a random number which we store to a prefs file
                         try {
-                            if (!"9774d56d682e549c".equals(androidId)) {
+                            if (androidId != null && !"9774d56d682e549c".equals(androidId)) {
                                 uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8"));
                             } else {
                                 final String deviceId = ((TelephonyManager) context

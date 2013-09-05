@@ -145,11 +145,19 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>org.robolectric</groupId>
+            <artifactId>robolectric</artifactId>
+            <version>2.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <finalName>kinvey-android-lib-${project.version}</finalName> 
         <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>test</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>

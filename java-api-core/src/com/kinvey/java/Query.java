@@ -56,7 +56,7 @@ public class Query extends AbstractQuery implements Serializable {
     }
 
     public boolean isQueryEmpty(){
-        return(getQueryFilterMap().equals(""));
+        return(getQueryFilterMap().size() == 0);
     }
 
     // Comparison Operators

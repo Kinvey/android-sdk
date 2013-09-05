@@ -47,10 +47,8 @@ public enum OfflinePolicy {
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
             T ret =  offlineRequest.offlineFromStore();
-            System.out.println("*** local first-> " + ret);
             if (ret == null){
                 ret = offlineRequest.offlineFromService(false);
-                System.out.println("*** local first online-> " + ret);
             }
             return ret;
         }

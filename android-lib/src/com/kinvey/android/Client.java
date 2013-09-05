@@ -523,7 +523,8 @@ public class Client extends AbstractClient {
             super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null);
 
             try {
-                final InputStream in = context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
+                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
+
                 super.getProps().load(in);
             } catch (IOException e) {
                 Log.w(TAG, "Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
