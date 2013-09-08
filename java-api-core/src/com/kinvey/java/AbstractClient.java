@@ -375,7 +375,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**GCM SERVER URL **/
             GCM_PROD_MODE("gcm.production"),
             /**Shared Pref Credential Store*/
-            SHARED_PREF("cred.shared");
+            SHARED_PREF("cred.shared"),
+            /** debug mode, used for HTTP logging **/
+            DEBUG_MODE("debug");
 
             private final String value;
 

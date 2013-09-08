@@ -476,6 +476,7 @@ public class Client extends AbstractClient {
         private boolean GCM_Enabled = false;
         private boolean GCM_InProduction = true;
         private boolean sharedPrefCredentials = false;
+        private boolean debugMode = false;
 
 
         /**
@@ -567,6 +568,10 @@ public class Client extends AbstractClient {
                 this.sharedPrefCredentials = Boolean.parseBoolean(super.getString(Option.SHARED_PREF));
             }
 
+            if (super.getString(Option.DEBUG_MODE) != null){
+                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -619,6 +624,10 @@ public class Client extends AbstractClient {
             //GCM explicitely enabled
             if (this.GCM_Enabled ==  true){
                 client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+            }
+
+            if (this.debugMode){
+                client.enableDebugLogging();
             }
 
             return client;
