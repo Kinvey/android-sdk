@@ -297,11 +297,11 @@ public class AsyncFile extends File {
     /**
      * Upload metadata for an existing file
      *
-     * @param id the metadata of the file
+     * @param meta the {@link FileMetaData} to update
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
-    public void uploadMetaData(String id, KinveyClientCallback<Void> callback) {
-        new DownloadMetaData(id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void uploadMetaData(FileMetaData meta, KinveyClientCallback<Void> callback) {
+        new UploadMetaData(meta, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 

@@ -71,7 +71,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * Saving user data sample:
  * <pre>
  * {@code
-       User user = kinveyClient.getActiveUser();
+       User user = kinveyClient.user();
         user.put("fav_food", "bacon");
         user.update(new KinveyClientCallback<User.Update>() {
 
@@ -418,7 +418,7 @@ public class AsyncUser extends User {
      * </p>
      * <pre>
      * {@code
-        User user = kinveyClient.getActiveUser();
+        User user = kinveyClient.user();
         user.delete(new KinveyUserDeleteCallback() {
             public void onFailure(Throwable e) { ... }
             public void onSuccess(Void v) { ... }

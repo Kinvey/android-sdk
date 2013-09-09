@@ -16,27 +16,27 @@ package com.kinvey.java;
 /**
  * @author edwardf
  */
-public class KinveyException {
+public class KinveyException extends RuntimeException{
 
-    private String cause;
+    private String reason;
     private String fix;
     private String explanation;
 
 
 
-    public KinveyException(String cause, String fix, String explanation){
-        this.cause = cause;
+    public KinveyException(String reason, String fix, String explanation){
+        this.reason = reason;
         this.fix = fix;
         this.explanation = explanation;
     }
 
 
-    public String getCause() {
-        return cause;
+    public String getReason() {
+        return reason;
     }
 
-    public void setCause(String cause) {
-        this.cause = cause;
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public String getFix() {
@@ -54,4 +54,6 @@ public class KinveyException {
     public void setExplanation(String explanation) {
         this.explanation = explanation;
     }
+
+
 }

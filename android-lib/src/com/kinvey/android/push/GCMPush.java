@@ -35,6 +35,7 @@ import com.google.api.client.util.Key;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 
@@ -89,6 +90,12 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(Application currentApp) {
+
+        if (!getClient().user().isUserLoggedIn()){
+            throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
+        }
+
+
         //First check runtime and grab current registration ID
         GCMRegistrar.checkDevice(currentApp);
         GCMRegistrar.checkManifest(currentApp);
@@ -110,14 +117,39 @@ public class GCMPush extends AbstractPush {
                 Log.v(Client.TAG, "Client is fully initialized and push is enabled");
             }else{
                 Log.v(Client.TAG, "About to register with Kinvey");
+
+                getClient().push().enablePushViaRest(new KinveyClientCallback() {
+                    @Override
+                    public void onSuccess(Object result) {
+
+                        getClient().user().retrieve(new KinveyUserCallback() {
+                            @Override
+                            public void onSuccess(User result) {
+                                Log.v(TAG, "User is registered for push!");
+//                                KinveyGCMService.this.onRegistered(gcmRegID);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+                                Log.v(Client.TAG, "GCM - user update error: " + error);
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        Log.v(Client.TAG, "GCM - user update error: " + error);
+                    }
+                }, regId);
 //                KinveyGCMService.registerWithKinvey(getClient(), regId, true);
 
-                Intent registrationIntent = new Intent(INTENT_FROM_GCM_REGISTRATION_CALLBACK);
-                registrationIntent.putExtra(EXTRA_REGISTRATION_ID, regId);
-                registrationIntent.putExtra(EXTRA_ERROR, "");
-
-                currentApp.sendBroadcast(registrationIntent);
-//                currentApp.sen
+//                Intent registrationIntent = new Intent(INTENT_FROM_GCM_REGISTRATION_CALLBACK);
+//                registrationIntent.putExtra(EXTRA_REGISTRATION_ID, regId);
+//                registrationIntent.putExtra(EXTRA_ERROR, "");
+//
+//                currentApp.sendBroadcast(registrationIntent);
+////                currentApp.sen
             }
         }
         return this;
