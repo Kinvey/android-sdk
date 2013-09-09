@@ -17,6 +17,7 @@ package com.kinvey.java.LinkedResources;
 
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * This class maintains metadata and java specific file access to a File associated with an Entity through the {@code com.kinvey.java.LinkedData} API.
@@ -37,6 +38,7 @@ public class LinkedFile {
     private ByteArrayInputStream input = null;
     private ByteArrayOutputStream output = null;
     private boolean resolve = true;
+    private HashMap<String, Object> extras;
 
     /**
      * Constructor for a LinkedFile, sets BOTH filename and id to be input
@@ -112,4 +114,43 @@ public class LinkedFile {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+
+    /**
+     * Add an extra property to this KinveyFile.  When the File is uploaded through LinkedData, any extra properties here
+     * will be added to the {@link com.kinvey.java.model.FileMetaData} object created during the file upload.
+     *
+     * @param key the key to use for the extra associated with the {@link com.kinvey.java.model.FileMetaData}
+     * @param value the value of the extra
+     */
+    public void addExtra(String key, Object value){
+        if (extras == null){
+            extras = new HashMap<String, Object>();
+        }
+        extras.put(key, value);
+
+    }
+
+    /**
+     * Retrieve an extra property by key associated with this KinveyFile.
+     *
+     * @param key the key used to define the property
+     * @return the value of the property, or null if it hasn't been set.
+     */
+    public Object getExtra(String key){
+        if (extras != null && extras.containsKey(key)){
+            return extras.get(key);
+        }
+        return null;
+
+    }
+
+    public boolean hasExtras(){
+        return (extras != null && extras.size() > 0);
+    }
+
+    public HashMap<String, Object> getExtras(){
+        return this.extras;
+    }
+
 }

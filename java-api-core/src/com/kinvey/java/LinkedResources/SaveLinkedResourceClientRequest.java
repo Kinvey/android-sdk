@@ -129,6 +129,12 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         FileMetaData meta = new FileMetaData(lf.getId());
                         meta.setFileName(lf.getFileName());
 
+                        if (lf.hasExtras()){
+                            for (String k : lf.getExtras().keySet()){
+                                meta.put(k, lf.getExtra(k));
+                            }
+                        }
+
                         if (getAbstractKinveyClient() instanceof AbstractClient){
                             ((AbstractClient) getAbstractKinveyClient()).getMimeTypeFinder().getMimeType(meta, in);
                         }
