@@ -201,6 +201,7 @@ SECTION 1: Apache License, V2.0
    >>> google-play-services
    >>> action-bar-sherlock
    >>> viewpager-indicator
+   >>> Google Android Library
 
 SECTION 2: Kinvey Proprietary License
    >>> Kinvey-Android-Library

@@ -196,6 +196,7 @@ Summary:
 SECTION 1: Apache License, V2.0
 
    >>> action-bar-sherlock
+   >>> Google Android Library
 
 SECTION 2: Kinvey Proprietary License
 

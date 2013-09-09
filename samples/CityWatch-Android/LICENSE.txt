@@ -199,7 +199,8 @@ SECTION 1: Apache License, V2.0
 
    >>> google-play-services
    >>> action-bar-sherlock
-   >>> facebook-android-API-3.0 
+   >>> facebook-android-API-3.0
+   >>> Google Android Library
 
 SECTION 2: Kinvey Proprietary License
    >>> Kinvey-Android-Library
