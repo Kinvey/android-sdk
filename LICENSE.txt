@@ -11,14 +11,13 @@
  KINVEY, INC and is subject to applicable licensing agreements.
  Unauthorized reproduction, transmission or distribution of this file and its
  contents is a violation of applicable laws.
-  
- 
 
 
 Summary:
    >>> google-http-client-1.16.0-rc [apache-2.0] - used by google's android http client
    >>> google-http-client-android-1.16.0-rc [apache-2.0] - used for HTTP requests
    >>> google-http-client-gson-1.16.0-rc [apache-2.0] - used for JSON marshalling
+   >>> google-api-java-client-1.9.0-beta [apache-2.0] - used for upload/download media files 
    >>> gson-2.1 [apache-2.0] - used by google's gson-client
    >>> guava-14.0.1 [apache-2.0] - used for concurrency and I/O operations
    >>> Google Android Library [apache-2.0] - used for core operating system features
@@ -45,6 +44,7 @@ SECTION 1: Apache License, V2.0
    >>> google-http-client-1.16.0-rc
    >>> google-http-client-android-1.16.0-rc
    >>> google-http-client-gson-1.16.0-rc
+   >>> google-api-java-client-1.9.0-beta
    >>> gson-2.1
    >>> guava-14.0.1
    >>> Google Android Library
@@ -121,6 +121,23 @@ Apache License, V2.0 is applicable to the following component(s).
 >>> google-http-client-gson-1.13.1-beta
 
  Copyright (c) 2013 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+
+>>> google-api-java-client-1.9.0-beta
+
+ Copyright (c) 2011 Google Inc.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
