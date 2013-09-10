@@ -262,7 +262,7 @@ public class AppData<T> {
      * @throws java.io.IOException
      */
     public Get getBlocking(Query query, String[] resolves, int resolve_depth, boolean retain) throws IOException {
-        Get getEntity = new Get(query, myClass, resolves, resolve_depth, retain);
+        Get getEntity = new Get(query, Array.newInstance(myClass,0).getClass(), resolves, resolve_depth, retain);
         client.initializeRequest(getEntity);
         return getEntity;
     }
