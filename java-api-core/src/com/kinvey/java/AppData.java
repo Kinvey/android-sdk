@@ -94,7 +94,7 @@ public class AppData<T> {
         }
 
         @Override
-        public void insertEntity(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+        public void insertEntity(AbstractClient client, AppData<T> appData, T request) {
         }
     };
 
