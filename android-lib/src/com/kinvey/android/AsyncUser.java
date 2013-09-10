@@ -455,12 +455,61 @@ public class AsyncUser extends User {
         new Retrieve(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+
+    /**
+     * Asynchronous call to retrive (refresh) the current user, and resolve KinveyReferences
+     * <p>
+     * Constructs an asynchronous request to refresh current user's data via the Kinvey back-end.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * </p>
+     * <pre>
+     {@code
+        User user = kinveyClient.user();
+        user.retrieve(new String[]{"myKinveyReferencedField"}, new KinveyUserCallback() {
+           public void onFailure(Throwable e) { ... }
+           public void onSuccess(User result) { ... }
+        });
+     }
+     * </pre>
+     *
+     * @param resolves an array of json keys maintaining KinveyReferences to be resolved
+     * @param callback {@link KinveyUserCallback} containing refreshed user instance
+     */
     public void retrieve(String[] resolves, KinveyUserCallback callback){
         new Retrieve(resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    public void retrieve(Query q, String[] resolves, KinveyUserListCallback callback){
-        new Retrieve(q, resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+
+
+    /**
+     * Asynchronous call to retrive (refresh) the users by query, and resolve KinveyReferences
+     * <p>
+     * Constructs an asynchronous request to retrieve User objects via a Query.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * </p>
+     * <pre>
+     * {@code
+          User user = kinveyClient.user();
+          user.retrieve(Query query, new String[]{"myKinveyReferenceField"}, new KinveyUserListCallback() {
+             public void onFailure(Throwable e) { ... }
+             public void onSuccess(User[] result) { ... }
+          });
+       }
+     * </pre>
+     *
+     *
+     *
+     * @param query the query to execute defining users to return
+     * @param resolves an array of json keys maintaining KinveyReferences to be resolved
+     * @param callback {@link KinveyUserListCallback} containing an array of queried users
+     */
+    public void retrieve(Query query, String[] resolves, KinveyUserListCallback callback){
+        new Retrieve(query, resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
