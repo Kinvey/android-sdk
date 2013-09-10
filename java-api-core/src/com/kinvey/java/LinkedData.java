@@ -130,14 +130,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     }
 
     /**
-     * Method to get an entity or entities and download ALL associated Linked Resources.
+     * Method to get an entity or entities and download ALL associated Linked Resources, with complete control over KinveyReferencess
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
      * to retrieve callback information about the File downloads.
-     * </p>
-     * <p>
-     * This method will download all associated Linked Resources and could take a long time.  For more control when handling
-     * a large number of Linked Resources, try using an overloaded variation of this method.
      * </p>
      *
      * @param query query for entities to retrieve
@@ -151,12 +147,29 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      */
     public Get getBlocking(Query query,  DownloaderProgressListener download, String[] attachments, String[] resolves, int resolve_depth, boolean retain) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass(), null, resolves, resolve_depth, retain);
+        Get get = new Get(query, Array.newInstance(getCurrentClass(), 0).getClass(), attachments, resolves, resolve_depth, retain);
         get.setDownloadProgressListener(download);
         getClient().initializeRequest(get);
         return get;
     }
 
+    /**
+     * Method to get entities by query and download ALL associated Linked Resources, with wrapped control over KinveyReferencess
+     * <p>
+     * Use the {@code DownloaderProgressListener}
+     * to retrieve callback information about the File downloads.
+     * </p>
+     *
+     * @param query query for entities to retrieve
+     * @param download - used for progress updates as associated files are downloaded.
+     * @param attachments which json fields are linked resources that should be resolved
+     * @param resolves a string array of json field names to resolve as kinvey references
+     * @return Get object
+     * @throws java.io.IOException - if there is an issue executing the client requests
+     */
+    public Get getBlocking(Query query, DownloaderProgressListener download, String[] attachments, String[] resolves) throws IOException{
+        return getBlocking(query, download, attachments, resolves, 1, true);
+    }
 
     /**
      * Method to get an entity or entities and download ALL associated Linked Resources.
@@ -219,7 +232,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public Get getBlocking(DownloaderProgressListener download, String[] attachments) throws IOException {
-        return getBlocking(new Query(), download);
+        Get get = new Get(new Query(), Array.newInstance(getCurrentClass(), 0).getClass(), attachments);
+        get.setDownloadProgressListener(download);
+        getClient().initializeRequest(get);
+        return get;
     }
 
     /**
@@ -256,7 +272,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     /**
      * Save (create or update) an entity to a collection and upload ALL associated Linked Resources.
      * <p>
-     * This method will only upload Linked Resources for the fields declared in the resources array.
+     * This method will only upload Linked Resources for the fields declared in the attachments array.
      * These Strings must match the strings used as keys in the entity.
      * </p>
      *
@@ -341,11 +357,11 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
-            if (this.resolve != null){
+            if (resolves != null){
                 this.resolve = Joiner.on(",").join(resolves);
+                this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+                this.retainReferences = Boolean.toString(retain);
             }
-            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
-            this.retainReferences = Boolean.toString(retain);
 
 
 
@@ -399,7 +415,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
             this.attachments = attachments;
             this.collectionName = getCollectionName();
             this.entityID = entityID;
-            if (this.resolve != null){
+            if (resolves != null){
                 this.resolve = Joiner.on(",").join(resolves);
                 this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
                 this.retainReferences = Boolean.toString(retain);
