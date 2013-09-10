@@ -22,6 +22,7 @@ import com.kinvey.android.AsyncUser;
 import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
+import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.sample.kitchensink.R;
@@ -97,6 +98,45 @@ public class LookupFragment extends UseCaseFragment implements  View.OnClickList
                 Toast.makeText(getSherlockActivity(), "lookup failed -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+
+    private void performRetrievalWithReferences(){
+
+
+        AsyncUser user = getClient().user();
+
+        user.retrieve(new String[]{"ref"}, new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                Log.i("got user", result.toString());
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.i("failed", error.getMessage());
+                error.printStackTrace();;
+            }
+        });
+
+
+        Query q = new Query();
+        q.equals("username", "keepon");
+        user.retrieve(q, new String[]{"ref"}, new KinveyUserListCallback() {
+            @Override
+            public void onSuccess(User[] result) {
+                Log.i("got users", result.toString());
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.i("failed", error.getMessage());
+                error.printStackTrace();;
+            }
+        });
+
+
 
     }
 

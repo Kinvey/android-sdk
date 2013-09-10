@@ -17,6 +17,7 @@ package com.kinvey.java;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
@@ -365,7 +366,7 @@ public class User extends GenericJson   {
     }
 
     /**
-     * Retrieves current user profile metadata.
+     * Retrieves current user's metadata.
      *
      * @return Retrieve Request
      * @throws IOException
@@ -380,12 +381,41 @@ public class User extends GenericJson   {
     /**
      * Retrieves an array of User[] based on a Query.
      *
-     * @return Retrieve Request
+     * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
     public Retrieve<User[]> retrieveBlocking(Query query) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
         Retrieve<User[]> retrieve = new Retrieve(query, Array.newInstance(thisClass,0).getClass());
+        client.initializeRequest(retrieve);
+        return retrieve;
+    }
+
+    /**
+     * Retrieve current user's metadata with support for resolving KinveyReferences
+     *
+     * @param resolves - List of {@link com.kinvey.java.model.KinveyReference} fields to resolve
+     * @return a Retrieve Request ready to be executed
+     * @throws IOException
+     */
+    public Retrieve<User> retrieveBlocking(String[] resolves) throws IOException{
+        Preconditions.checkNotNull(this.getId(), "userID must not be null");
+        Retrieve<User> retrieve = new Retrieve(this.getId(), resolves, 1, true, thisClass);
+        client.initializeRequest(retrieve);
+        return retrieve;
+    }
+
+    /**
+     * Retrieves an array of User[] based on a Query with support for resolving KinveyReferences
+     *
+     * @param query the query to execute
+     * @param resolves - List of {@link com.kinvey.java.model.KinveyReference} fields to resolve
+     * @return a Retrieve Request ready to be executed
+     * @throws IOException
+     */
+    public Retrieve<User[]> retrieveBlocking(Query query, String[] resolves) throws IOException{
+        Preconditions.checkNotNull(query, "query must not be null");
+        Retrieve<User[]> retrieve = new Retrieve(query, resolves, 1, true,  Array.newInstance(thisClass,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -546,7 +576,7 @@ public class User extends GenericJson   {
      * Retrieve User requests.
      */
     public class Retrieve<T> extends AbstractKinveyJsonClientRequest<T> {
-        private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip}";
+        private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
         private String userID;
@@ -558,6 +588,13 @@ public class User extends GenericJson   {
         private String limit;
         @Key
         private String skip;
+
+        @Key("resolve")
+        private String resolve;
+        @Key("resolve_depth")
+        private String resolve_depth;
+        @Key("retainReferences")
+        private String retainReferences;
 
         Retrieve(String userID, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
@@ -572,6 +609,30 @@ public class User extends GenericJson   {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
+        }
+
+        Retrieve(String userID, String[] resolve, int resolve_depth, boolean retain, Class myClass){
+            super(client, "GET", REST_PATH, null, myClass);
+            this.userID = userID;
+
+            this.resolve = Joiner.on(",").join(resolve);
+            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+            this.retainReferences = Boolean.toString(retain);
+        }
+
+        Retrieve(Query query, String[] resolve, int resolve_depth, boolean retain, Class myClass){
+            super(client, "GET", REST_PATH, null, myClass);
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            this.sortFilter = query.getSortString();
+
+            this.resolve = Joiner.on(",").join(resolve);
+            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+            this.retainReferences = Boolean.toString(retain);
+
         }
     }
 

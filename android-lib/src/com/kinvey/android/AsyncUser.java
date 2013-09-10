@@ -20,10 +20,8 @@ import java.util.ArrayList;
 
 import android.util.Log;
 
-import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.callback.*;
 
-import com.kinvey.android.callback.KinveyUserDeleteCallback;
-import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -393,7 +391,6 @@ public class AsyncUser extends User {
      * @param callback {@link KinveyUserCallback} containing a new User instance.
      */
     public void create(String username, String password, KinveyUserCallback callback) {
-        Log.v(Client.TAG, "creating");
         new Create(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -458,6 +455,14 @@ public class AsyncUser extends User {
         new Retrieve(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+    public void retrieve(String[] resolves, KinveyUserCallback callback){
+        new Retrieve(resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void retrieve(Query q, String[] resolves, KinveyUserListCallback callback){
+        new Retrieve(q, resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
     /**
      * Asynchronous Call to Retrieve users via a Query
      * <p>
@@ -479,8 +484,7 @@ public class AsyncUser extends User {
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users.
      * @param <T>
      */
-    public<T> void retrieve(Query q, KinveyClientCallback<T> callback) {
-        // TODO:  Correct callback?
+    public<T> void retrieve(Query q, KinveyListCallback<T> callback) {
         new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -613,115 +617,6 @@ public class AsyncUser extends User {
         }
     }
 
-    /**
-     * Asynchronous call to register current user for push notifications
-     * <p>
-     * Constructs an Asynchronous request to register the current user for Push notifications.  Push must have already been activated
-     * for the current application and a logged-in user context must exist.  This must be called when enabling
-     * push for a user on a device.  Once called, it does not have to be called again unless push has been explicitly
-     * disabled for a user, the app has been uninstalled / reinstalled, or app data has been cleared.
-     * </p>
-     * <p>Sample Usage:
-     * <pre>
-     * {@code
-        kinveyClient.push().initialize(pushOptions,myApplication);
-        kinveyClient.user().registerPush(new KinveyClientCallback<Void> {
-           onSuccess(Void v) { ... }
-          onFailure(Throwable t) { ... }
-        });
-    }
-     * </pre></p>
-     *
-     * @param callback KinveyClientCallback
-     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
-     */
-    public void registerPush(KinveyClientCallback<Void> callback) {
-        new RegisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
-
-    /**
-     * Unregisters current user from receiving push notifications
-     * <p>
-     * The unregisterPush method removes the registration for the current user from Push notifications.
-     * Push must have already been activated for the current application and a logged-in user context must exist.
-     * Once called, a user on a specific device will no longer receive push notifications for the app until explicitly
-     * reenabled.
-     * </p>
-     * <p>Sample Usage:
-     * <pre>
-     * {@code
-        kinveyClient.push().initialize(pushOptions,myApplication);
-        kinveyClient.user().unregisterPush();
-    }
-     * </pre></p>
-     *
-     * @param callback KinveyClientCallback
-     *
-     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
-     */
-    public void unregisterPush(KinveyClientCallback<Void> callback) {
-        new UnregisterPush(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
-
-    /**
-     * Asynchronous call to unregiseter current user for push notifications
-     * <p>
-     * Constructs an Asynchronous request to remove the registration for the current user from Push notifications.
-     * Push must have already been activated for the current application and a logged-in user context must exist.
-     * Once called, a user on a specific device will no longer receive push notifications for the app until explicitly
-     * reenabled.
-     * </p>
-     * <p>Sample Usage:
-     * <pre>
-     * {@code
-        kinveyClient.push().initialize(pushOptions,myApplication);
-        kinveyClient.user().unregisterPush(new KinveyClientCallback<Void> {
-            onSuccess(Void v) { ... }
-            onFailure(Throwable t) { ... }
-        });
-    }
-     * </pre></p>
-     *
-     * @deprecated only needed for UrbanAirship, with GCM all Push configuration managed through myClient.push().
-     */
-    public void unregisterPush() {
-        // In the case where the app has no named users, while initializing push they'll
-        // need a current user to set the apid field
-        if (!isUserLoggedIn()) {
-            return; //defers push
-        }
-
-        String pushId = getClient().push().getPushId();
-        if (pushId != null) {
-            // need to retrieve any existing properties to append apid
-            final Object obj = this.get("_apids");
-            final ArrayList<String> apidList = new ArrayList<String>();
-            if (obj != null) {
-                if (obj instanceof ArrayList<?>) {
-                    final ArrayList<?> objArr = (ArrayList<?>) obj;
-                    boolean exists = false;
-                    for (final Object itemObj : objArr) {
-                        if (itemObj instanceof String) {
-                            final String apid = (String) itemObj;
-                            if (pushId.equals(apid)) {
-                                exists=true;
-                            }
-                        }
-                    }
-                    if (exists) {
-                        apidList.remove(pushId);
-                    }
-                }
-            }
-            // TODO:  Set PushID attribute
-            this.put("_apids", apidList);
-            try {
-                this.updateBlocking().execute();
-            } catch (IOException ex) {}
-            // TODO:  Implement callbacks for User Update on separate thread - still async for now
-
-        }
-    }
 
     private class Login extends AsyncClientRequest<User> {
 
@@ -852,6 +747,7 @@ public class AsyncUser extends User {
     private class Retrieve<T> extends AsyncClientRequest<T> {
 
         private Query query = null;
+        private String[] resolves = null;
 
         private Retrieve(KinveyClientCallback callback) {
             super(callback);
@@ -862,42 +758,62 @@ public class AsyncUser extends User {
             this.query = query;
         }
 
+        private Retrieve(String[] resolves, KinveyClientCallback callback){
+            super(callback);
+            this.resolves = resolves;
+        }
+
+        private Retrieve(Query query, String[] resolves, KinveyClientCallback callback){
+            super(callback);
+            this.query = query;
+            this.resolves = resolves;
+        }
+
         @Override
         public T executeAsync() throws IOException {
             if (query == null){
-                return (T) AsyncUser.this.retrieveBlocking().execute();
+                if (resolves == null){
+                    return (T) AsyncUser.this.retrieveBlocking().execute();
+                }else{
+                    return (T) AsyncUser.this.retrieveBlocking(resolves).execute();
+                }
             }else{
-                return (T) AsyncUser.this.retrieveBlocking(query).execute();
+                if (resolves == null){
+                    return (T) AsyncUser.this.retrieveBlocking(query).execute();
+                }else{
+                    return (T) AsyncUser.this.retrieveBlocking(query, resolves).execute();
+                }
+
             }
 
         }
     }
+//
+//    private class RegisterPush extends AsyncClientRequest<Void> {
+//
+//        private RegisterPush(KinveyClientCallback<Void> callback) {
+//            super(callback);
+//        }
+//
+//        @Override
+//        protected Void executeAsync() throws IOException {
+//            AsyncUser.this.registerPush();
+//            return null;
+//        }
+//    }
 
-    private class RegisterPush extends AsyncClientRequest<Void> {
-
-        private RegisterPush(KinveyClientCallback<Void> callback) {
-            super(callback);
-        }
-
-        @Override
-        protected Void executeAsync() throws IOException {
-            AsyncUser.this.registerPush();
-            return null;
-        }
-    }
-
-    private class UnregisterPush extends AsyncClientRequest<Void> {
-
-        private UnregisterPush(KinveyClientCallback<Void> callback) {
-            super(callback);
-        }
-
-        @Override
-        protected Void executeAsync() throws IOException {
-            AsyncUser.this.unregisterPush();
-            return null;
-        }
-    }
+//    private class UnregisterPush extends AsyncClientRequest<Void> {
+//
+//        private UnregisterPush(KinveyClientCallback<Void> callback) {
+//            super(callback);
+//        }
+//
+//        @Override
+//        protected Void executeAsync() throws IOException {
+//            AsyncUser.this.unregisterPush();
+//            return null;
+//        }
+//    }
 
     private class RetrieveMetaData extends AsyncClientRequest<User> {
 
