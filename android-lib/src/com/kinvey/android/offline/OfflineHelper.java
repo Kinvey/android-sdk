@@ -149,13 +149,15 @@ public class OfflineHelper extends SQLiteOpenHelper {
     public List<String> getCollectionTables(){
         ArrayList<String> ret = new ArrayList<String>();
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(COLLECTION_TABLE, new String[]{COLUMN_NAME}, null, null, null, null, null);
-        while (c.moveToNext()){
-            ret.add(c.getString(0));
+        if (checkTableExists(COLLECTION_TABLE)){
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(COLLECTION_TABLE, new String[]{COLUMN_NAME}, null, null, null, null, null);
+            while (c.moveToNext()){
+                ret.add(c.getString(0));
+            }
+            c.close();
+            db.close();
         }
-        c.close();
-        db.close();
         return ret;
 
 
@@ -200,5 +202,21 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
         db.close();
 
+    }
+
+    private boolean checkTableExists(String tableName){
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+tableName+"'", null);
+        if(cursor!=null) {
+            if(cursor.getCount()>0) {
+                cursor.close();
+                db.close();
+                return true;
+            }
+            cursor.close();
+            db.close();
+        }
+        return false;
     }
 }

@@ -498,6 +498,11 @@ public class User extends GenericJson   {
         }
 
         public User execute() throws IOException {
+            if (isUserLoggedIn()){
+                throw new KinveyException("Attempting to login when a user is already logged in",
+                        "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
+                        "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
+            }
             String userType = "";
             if (this.type == LoginType.CREDENTIALSTORE) {
                 return initUser(credential);

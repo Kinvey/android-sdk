@@ -90,11 +90,9 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(Application currentApp) {
-
         if (!getClient().user().isUserLoggedIn()){
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
-
 
         //First check runtime and grab current registration ID
         GCMRegistrar.checkDevice(currentApp);
@@ -142,14 +140,6 @@ public class GCMPush extends AbstractPush {
                         Log.v(Client.TAG, "GCM - user update error: " + error);
                     }
                 }, regId);
-//                KinveyGCMService.registerWithKinvey(getClient(), regId, true);
-
-//                Intent registrationIntent = new Intent(INTENT_FROM_GCM_REGISTRATION_CALLBACK);
-//                registrationIntent.putExtra(EXTRA_REGISTRATION_ID, regId);
-//                registrationIntent.putExtra(EXTRA_ERROR, "");
-//
-//                currentApp.sendBroadcast(registrationIntent);
-////                currentApp.sen
             }
         }
         return this;
