@@ -20,8 +20,10 @@ import java.util.ArrayList;
 
 import android.util.Log;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.*;
 
+import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -536,6 +538,20 @@ public class AsyncUser extends User {
     public<T> void retrieve(Query q, KinveyListCallback<T> callback) {
         new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+
+
+    /**
+     * Logs out the current user and clears the local sqllite3 storage
+     *
+     * @return a Logout Request, ready to have *.execute() called
+     */
+    @Override
+    public LogoutRequest logout() {
+        new SqlLiteOfflineStore<GenericJson>(getClient().getContext()).clearStorage();
+        return super.logout();
+
+    }
+
 
     /**
      * Asynchronous Call to Save the current user
