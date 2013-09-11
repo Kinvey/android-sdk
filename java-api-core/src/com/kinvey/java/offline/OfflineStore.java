@@ -33,6 +33,8 @@ public interface OfflineStore<T>  {
 
     public void insertEntity(AbstractClient client, AppData<T> appData, T entity);
 
+    public void clearStorage();
+
 
 
 }

@@ -17,6 +17,8 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
@@ -27,6 +29,8 @@ import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is an implementation of an {@link OfflineStore}, which provides methods to execute requests locally.
@@ -187,6 +191,28 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
         dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void clearStorage() {
+
+        OfflineHelper dbHelper = new OfflineHelper(context);
+
+        List<String> collections = dbHelper.getCollectionTables();
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        for (String collection : collections){
+
+            db.delete(OfflineTable.PREFIX_QUEUE + collection, null, null);
+            db.delete(OfflineTable.PREFIX_OFFLINE + collection, null, null);
+            db.delete(OfflineTable.PREFIX_QUERY + collection, null, null);
+            db.delete(OfflineTable.PREFIX_RESULTS + collection, null, null);
+        }
+
+        db.close();
+
+
     }
 
 

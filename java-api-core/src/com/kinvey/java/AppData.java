@@ -96,6 +96,9 @@ public class AppData<T> {
         @Override
         public void insertEntity(AbstractClient client, AppData<T> appData, T request) {
         }
+
+        @Override
+        public void clearStorage(){}
     };
 
 
