@@ -29,7 +29,7 @@
 
 
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Query for current user"
+                <TextView android:text="Query for entities created by current user"
                           style="@style/usecase_row_label"/>
 
 
@@ -39,7 +39,7 @@
             </LinearLayout>
 
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Query for not current user"
+                <TextView android:text="Query for entities not created by current user"
                           style="@style/usecase_row_label"/>
 
 
@@ -52,21 +52,7 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="2dp"
                           android:background="@color/kinvey_orange"/>
 
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="id:"
-                          style="@style/usecase_row_label"/>
-                <TextView android:id="@+id/appdata_get_id_value"
-                          android:text="..."
-                          style="@style/usecase_row_value"/>
-            </LinearLayout>
 
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="name:"
-                          style="@style/usecase_row_label"/>
-                <TextView android:id="@+id/appdata_get_name_value"
-                          android:text="..."
-                          style="@style/usecase_row_value"/>
-            </LinearLayout>
 
 
         </LinearLayout>

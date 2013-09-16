@@ -134,6 +134,9 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
     private void updateSpinner(MyEntity[] result) {
 
+        if (getSherlockActivity() == null){
+            return;
+        }
 
         String[] ids = new String[result.length];
 

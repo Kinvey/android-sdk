@@ -16,6 +16,8 @@ package com.kinvey.sample.kitchensink.appData;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.Query;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.MyEntity;
@@ -73,13 +75,33 @@ public class QueryFragment extends UseCaseFragment implements View.OnClickListen
         }
     }
 
-    private void queryForCurrent(){}
+    private void queryForCurrent(){
+        Query q = new Query();
+        q.equals("_acl.creator", getClient().user().getId());
+        executeQueryAndUpdateView(q);
 
-    private void queryForNotCurrent(){}
+    }
+
+    private void queryForNotCurrent(){
+        Query q = new Query();
+        q.notEqual("_acl.creator", getClient().user().getId());
+        executeQueryAndUpdateView(q);
+
+    }
 
     private void executeQueryAndUpdateView(Query q){
 
-        getClient().appData(KitchenSink.collectionName, MyEntity.class).get(new Query(), null );
+        getClient().appData(KitchenSink.collectionName, MyEntity.class).get(q, new KinveyListCallback<MyEntity>() {
+            @Override
+            public void onSuccess(MyEntity[] result) {
+                Toast.makeText(getSherlockActivity(), "got " + result.length + " results!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
 

@@ -85,7 +85,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
     public void putIt(final int howMany) {
         addCount = 0;
 
-        if ( 5 < (howMany + Integer.valueOf(totalCount.getText().toString()))){
+        if ( 100 < (howMany + Integer.valueOf(totalCount.getText().toString()))){
             AndroidUtil.toast(PutFragment.this, "Try something besides just creating new entities!  Delete some first.");
             return;
         }
@@ -96,6 +96,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
             MyEntity ent = new MyEntity();
             ent.setName("name" + new Random().nextInt(10000));
             ent.getAccess().setGloballyWriteable(true);
+            ent.getAccess().setGloballyReadable(true);
 
             getClient().appData(KitchenSink.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
                 @Override
