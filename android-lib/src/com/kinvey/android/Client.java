@@ -755,6 +755,7 @@ public class Client extends AbstractClient {
 
                 @Override
                 public void onFailure(Throwable error) {
+                    client.user().logout().execute();
                     if (retrieveUserCallback != null){
                         retrieveUserCallback.onFailure(error);
                     }

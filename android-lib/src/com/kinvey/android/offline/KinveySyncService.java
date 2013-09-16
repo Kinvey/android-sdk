@@ -26,6 +26,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
@@ -84,7 +85,7 @@ public class KinveySyncService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, startId, startId);
-        Log.i("LocalService", "Received start id " + startId + ": " + intent);
+        Log.i(TAG, "Received start id " + startId + ": " + intent);
         onHandleIntent(intent);
 
         return START_STICKY;
@@ -155,6 +156,7 @@ public class KinveySyncService extends IntentService {
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
+                    Log.i(TAG, "Logged in as -> " + client.user().getUsername() + "(" + client.user().getId() +")");
                     getFromStoreAndExecute();
                 }
 
@@ -198,26 +200,28 @@ public class KinveySyncService extends IntentService {
             client.appData(collectionName, GenericJson.class).save(dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID()), new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
+                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         } else if (cur.getHttpVerb().equals("GET")){
             client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     //update datastore with response
                     dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result);
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
+                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
@@ -225,13 +229,14 @@ public class KinveySyncService extends IntentService {
             client.appData(collectionName, GenericJson.class).delete(cur.getEntityID(), new KinveyDeleteCallback() {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
+                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         }else if (cur.getHttpVerb().equals("QUERY")){
@@ -246,51 +251,56 @@ public class KinveySyncService extends IntentService {
                     List<String> resultIds = new ArrayList<String>();
 
                     for (GenericJson res : result){
-                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
+//                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
                         //update datastore with response
                         dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);
                         resultIds.add(res.get("_id").toString());
                     }
 
-                    dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(),resultIds);
+                    dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(), resultIds);
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error.getMessage());
+                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    //dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         }
     }
 
-    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
-        OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
-        dbHelper.getTable(collectionName).storeCompletedRequestInfo(dbHelper, collectionName, success, info, returnValue);
+    @Deprecated
+    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Throwable error) {
+         //  Might want this someday but not yet
 
-        //if request failed, re-queue it
-        if (!success){
+        OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
+//        dbHelper.getTable(collectionName).storeCompletedRequestInfo(dbHelper, collectionName, success, info, returnValue);
+
+        //if request failed on client side, re-queue it
+        if (!success && !(error instanceof HttpResponseException)){
             dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
         }
 
     }
 
-    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, GenericJson returnValue) {
+//    @Deprecated
+//    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, GenericJson returnValue) {
+//        Might want this someday but not yet
+//        String jsonResult = "";
+//        StringWriter writer = new StringWriter();
+//        try {
+//            JsonGenerator generator = client.getJsonFactory().createJsonGenerator(writer);
+//            generator.serialize(returnValue);
+//            generator.flush();
+//            jsonResult = writer.toString();
+//        } catch (Exception ex) {
+//            Log.e(TAG, "unable to serialize JSON! -> " + ex);
+//        }
+//
+//        storeCompletedRequestInfo(collectionName, success, info, jsonResult);
 
-        String jsonResult = "";
-        StringWriter writer = new StringWriter();
-        try {
-            JsonGenerator generator = client.getJsonFactory().createJsonGenerator(writer);
-            generator.serialize(returnValue);
-            generator.flush();
-            jsonResult = writer.toString();
-        } catch (Exception ex) {
-            Log.e(TAG, "unable to serialize JSON! -> " + ex);
-        }
 
-        storeCompletedRequestInfo(collectionName, success, info, jsonResult);
-
-
-    }
+//    }
 
 
     /**

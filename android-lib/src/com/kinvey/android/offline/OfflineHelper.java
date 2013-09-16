@@ -45,23 +45,10 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-//    private String collectionName;
-
     private static final String DB_NAME = "kinveyOffline.db";
 
     private static final String COLLECTION_TABLE = "collections";
     private static final String COLUMN_NAME = "name";
-
-//    /**
-//     * Used for creating new database tables, collection name is used for generating table name
-//     *
-//     * @param context
-//     * @param collectionName
-//     */
-//    public OfflineHelper(Context context, String collectionName) {
-//        super(context, DB_NAME, null, DATABASE_VERSION);
-//        this.collectionName = collectionName;
-//    }
 
     /**
      * used for accessing ALREADY existing tables
