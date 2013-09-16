@@ -27,39 +27,19 @@
             <TextView android:text="@string/appdata_aggregate_description"
                       style="@style/usecase_description"/>
 
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="There are: "
-                          style="@style/usecase_row_label"/>
 
-
-                <TextView android:id="@+id/appdata_get_current_count"
-                          style="@style/usecase_row_value"/>
-            </LinearLayout>
-
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="Viewing id: "
-                          style="@style/usecase_row_label"/>
-                <Spinner android:id="@+id/appdata_get_id_spinner"
-                         style="@style/usecase_row_value"/>
-            </LinearLayout>
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="2dp"
                           android:background="@color/kinvey_orange"/>
 
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="id:"
+                <TextView android:text="perform an aggregation"
                           style="@style/usecase_row_label"/>
-                <TextView android:id="@+id/appdata_get_id_value"
-                          android:text="..."
-                          style="@style/usecase_row_value"/>
-            </LinearLayout>
 
-            <LinearLayout style="@style/usecase_row">
-                <TextView android:text="name:"
-                          style="@style/usecase_row_label"/>
-                <TextView android:id="@+id/appdata_get_name_value"
-                          android:text="..."
-                          style="@style/usecase_row_value"/>
+
+                <Button android:id="@+id/appdata_agg_perform"
+                        android:text="try it"
+                        style="@style/usecase_action_button"/>
             </LinearLayout>
 
 
