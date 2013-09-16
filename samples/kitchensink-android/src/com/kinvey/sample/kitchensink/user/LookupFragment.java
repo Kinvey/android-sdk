@@ -62,7 +62,7 @@ public class LookupFragment extends UseCaseFragment implements  View.OnClickList
     private void performUserUpdate(){
 
         AsyncUser user = getApplicationContext().getClient().user();
-        user.put("last_name", "Madison");
+        user.put("last_name", "Smith");
         user.update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
@@ -86,11 +86,11 @@ public class LookupFragment extends UseCaseFragment implements  View.OnClickList
 
         AsyncUserDiscovery users = getApplicationContext().getClient().userDiscovery();
         UserLookup criteria = users.userLookup();
-        criteria.setLastName("Madison");
+        criteria.setLastName("Smith");
         users.lookup(criteria, new KinveyUserListCallback() {
             @Override
             public void onSuccess(User[] result) {
-                Toast.makeText(getSherlockActivity(), "lookup returned: " + result.length + " user!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getSherlockActivity(), "lookup returned: " + result.length + " user(s)!", Toast.LENGTH_SHORT).show();
             }
 
             @Override

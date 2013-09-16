@@ -55,7 +55,6 @@ public class User extends GenericJson   {
     @Key("_id")
     private String id;
 
-    @Key("authToken")
     private String authToken;
 
     @Key("username")
