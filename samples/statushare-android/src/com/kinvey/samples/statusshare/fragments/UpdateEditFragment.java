@@ -150,9 +150,9 @@ public class UpdateEditFragment extends KinveyFragment implements View.OnClickLi
 
         if (bytes != null && filename != null) {
             Log.i(Client.TAG, "there is an attachment!");
-            updateEntity.putFile("attachment", new LinkedFile(filename));
-
-
+            LinkedFile lf = new LinkedFile(filename);
+            lf.addExtra("_public", true);
+            updateEntity.putFile("attachment", lf);
         }
         final ByteArrayInputStream bais = ((bytes == null) ? null : new ByteArrayInputStream(bytes));
         if (bais != null){
