@@ -26,6 +26,10 @@
     <string name="push_description">hit "Register" to register the currently active user for push notifications. This functionality is associated with the application\'s package name-- So if you want to configure your own push make sure you change this sample\'s package name!</string>
     <string name="user_lookup_description">Perform user lookup operations to discover other users</string>
     <string name="menu_login">Login</string>
+    <string name="custom_endpoints_description"> create a new custom endpoint named `doit` through the console, with the following code: /nfunction onRequest(request, response, modules){
+        /nresponse.body = [{"resp": "seems to be working!"}];
+        /nresponse.complete(201);
+        /n} and then you can try it here</string>
 
 
 </resources>

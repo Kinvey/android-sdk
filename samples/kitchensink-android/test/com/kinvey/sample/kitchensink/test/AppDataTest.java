@@ -13,8 +13,23 @@
  */
 package com.kinvey.sample.kitchensink.test;
 
+import android.os.Environment;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import com.kinvey.sample.kitchensink.KitchenSink;
+import com.kinvey.sample.kitchensink.R;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowEnvironment;
+import org.robolectric.shadows.ShadowHandler;
+import org.robolectric.shadows.ShadowToast;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author edwardf
@@ -22,6 +37,26 @@ import org.robolectric.RobolectricTestRunner;
 @RunWith(RobolectricTestRunner.class)
 public class AppDataTest {
 
+    private KitchenSink activity;
 
 
+    @Before
+    public void setUp() throws Exception {
+        //config robolectric for real HTTP and persistance
+        Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+
+       // activity = Robolectric.buildActivity(KitchenSink.class).create().get();
+
+
+
+    }
+
+
+    @Test
+    public void testAppName() throws Exception {
+        //String appName = activity.getResources().getString(R.string.app_name);
+        //assertThat(appName, equalTo("Kitchensink"));
+
+    }
 }
