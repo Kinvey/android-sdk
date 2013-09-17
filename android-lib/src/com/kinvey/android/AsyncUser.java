@@ -90,6 +90,8 @@ import com.kinvey.java.core.KinveyClientCallback;
  */
 public class AsyncUser extends User {
 
+    private boolean clearStorage = true;
+
 
     /**
      * Base constructor requires the client instance and a {@link KinveyAuthRequest.Builder} to be passed in.
@@ -547,9 +549,21 @@ public class AsyncUser extends User {
      */
     @Override
     public LogoutRequest logout() {
-        new SqlLiteOfflineStore<GenericJson>(getClient().getContext()).clearStorage();
+        if (clearStorage){
+            new SqlLiteOfflineStore<GenericJson>(getClient().getContext()).clearStorage();
+        }
         return super.logout();
 
+    }
+
+
+    /**
+     * Set a flag to allow local offline storage to persist after calls to logout.
+     * <p/>
+     * Only use this method if each device will have a guaranteed consistent user and there are no concerns about security
+     */
+    public void dontClearStorage(){
+        clearStorage = false;
     }
 
 

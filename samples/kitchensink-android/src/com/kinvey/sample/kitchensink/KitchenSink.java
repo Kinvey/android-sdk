@@ -17,6 +17,7 @@ package com.kinvey.sample.kitchensink;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -127,6 +128,8 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
     private class FeatureAdapter extends ArrayAdapter<Loader.Feature> {
 
         private LayoutInflater mInflater;
+        private Typeface roboto;
+
 
         public FeatureAdapter(Context context, List<Loader.Feature> objects,
                                 LayoutInflater inf) {
@@ -136,6 +139,7 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
             // field anyways, it is just needed in the constructor.
             super(context, R.id.row_feature_name, objects);
             this.mInflater = inf;
+            roboto = Typeface.createFromAsset(context.getAssets(), "Roboto-Thin.ttf");
 
         }
 
@@ -189,6 +193,7 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
                 if (null == tvName) {
                     tvName = (TextView) mRow.findViewById(R.id.row_feature_name);
                 }
+                tvName.setTypeface(roboto);
                 return tvName;
             }
 
@@ -196,6 +201,7 @@ public class KitchenSink extends SherlockFragmentActivity implements AdapterView
                 if (null == tvBlurb) {
                     tvBlurb = (TextView) mRow.findViewById(R.id.row_feature_blurb);
                 }
+                tvBlurb.setTypeface(roboto);
                 return tvBlurb;
             }
 
