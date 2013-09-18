@@ -392,16 +392,5 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
 
-    public MimeTypeFinder getMimeTypeFinder(){
-        return new MimeTypeFinder(){};
-    }
 
-    public static abstract class MimeTypeFinder{
-        public void getMimeType(FileMetaData meta, InputStream stream){meta.setMimetype("application/octet-stream");}
-
-        public void getMimeType(FileMetaData meta, java.io.File file){meta.setMimetype("application/octet-stream");}
-
-        public void getMimeType(FileMetaData metaData){metaData.setMimetype("application/octet-stream");}
-
-    }
 }

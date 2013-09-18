@@ -53,6 +53,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      */
     protected AsyncLinkedData(String collectionName, Class<T> myClass, AbstractClient client) {
         super(collectionName, myClass, client);
+        super.setMimeTypeManager(new AndroidMimeTypeFinder());
     }
 
 

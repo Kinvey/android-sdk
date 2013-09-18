@@ -102,6 +102,9 @@ public abstract class File {
     /** the download request listener, can be {@code null} if the call code has not set it **/
     private DownloaderProgressListener downloaderProgressListener;
 
+    /** Used to calculate the MimeType of files **/
+    protected MimeTypeFinder mimeTypeFinder;
+
     /**
      * Base constructor requires the client instance to be passed in.
      * <p>
@@ -116,6 +119,14 @@ public abstract class File {
     }
 
 
+    /**
+     * Set a {@code MimeTypeFinder}
+     *
+     * @param finder an implementaiton of a {@code MimeTypeFinder} to use
+     */
+    protected void setMimeTypeManager(MimeTypeFinder finder){
+        this.mimeTypeFinder = finder;
+    }
     /**
      *
      * @return an instance of a client associated with this instance of File

@@ -562,7 +562,7 @@ public class AsyncUser extends User {
      * <p/>
      * Only use this method if each device will have a guaranteed consistent user and there are no concerns about security
      */
-    public void dontClearStorage(){
+    public void keepOfflineStorageOnLogout(){
         clearStorage = false;
     }
 

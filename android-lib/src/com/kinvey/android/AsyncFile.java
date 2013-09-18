@@ -103,6 +103,7 @@ public class AsyncFile extends File {
      */
     AsyncFile(AbstractClient client) {
         super(client);
+        setMimeTypeManager(new AndroidMimeTypeFinder());
     }
 
     /**
@@ -152,7 +153,7 @@ public class AsyncFile extends File {
         this.setUploadProgressListener(listener);
         FileMetaData meta = new FileMetaData(file.getName());
         meta.setFileName(file.getName());
-        getClient().getMimeTypeFinder().getMimeType(meta, file);
+        this.mimeTypeFinder.getMimeType(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -166,7 +167,7 @@ public class AsyncFile extends File {
      */
     public void upload(FileMetaData meta, java.io.File file, UploaderProgressListener listener){
         this.setUploadProgressListener(listener);
-        getClient().getMimeTypeFinder().getMimeType(meta, file);
+        this.mimeTypeFinder.getMimeType(meta, file);
         new FileUpload(meta, file, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -180,7 +181,7 @@ public class AsyncFile extends File {
     public void upload(String name, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
         FileMetaData meta = new FileMetaData(name);
-        getClient().getMimeTypeFinder().getMimeType(meta, inputStream);
+        this.mimeTypeFinder.getMimeType(meta, inputStream);
         new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -193,7 +194,7 @@ public class AsyncFile extends File {
      */
     public void upload(FileMetaData meta, InputStream inputStream, UploaderProgressListener listener) {
         this.setUploadProgressListener(listener);
-        getClient().getMimeTypeFinder().getMimeType(meta, inputStream);
+        this.mimeTypeFinder.getMimeType(meta, inputStream);
         new FileUpload(meta, inputStream, listener).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 

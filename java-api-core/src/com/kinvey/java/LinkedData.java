@@ -27,7 +27,6 @@ import com.kinvey.java.core.UploaderProgressListener;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.List;
 
 /**
  * Subset of the AppData API, offering support for downloading and uploading associated files with an entity.
@@ -44,8 +43,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
     //TODO edwardf delete support?
 
 
-
-
+    MimeTypeFinder mimetypeFinder;
 
     /**
      * Constructor to instantiate the LinkedData class.
@@ -300,6 +298,10 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
         return save;
     }
 
+    protected void setMimeTypeManager(MimeTypeFinder finder){
+        this.mimetypeFinder = finder;
+    }
+
     /**
      * Generic Get class, extends AbstractKinveyJsonClientRequest<T[]>.  Constructs the HTTP request object for Get
      * requests.
@@ -450,6 +452,7 @@ public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
             super(getClient(), update.toString(), REST_PATH, entity, myClass);
+            setMimeTypeFinder(mimetypeFinder);
             this.collectionName = getCollectionName();
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;

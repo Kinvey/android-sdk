@@ -17,13 +17,10 @@ package com.kinvey.java.LinkedResources;
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.File;
+import com.kinvey.java.MimeTypeFinder;
 import com.kinvey.java.core.*;
 import com.kinvey.java.model.FileMetaData;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -45,6 +42,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
     private UploaderProgressListener upload;
 
+    private MimeTypeFinder mimeTypeFinder;
 
 
 
@@ -60,6 +58,10 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
      */
     protected SaveLinkedResourceClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
+    }
+
+    public void setMimeTypeFinder(MimeTypeFinder finder){
+        this.mimeTypeFinder = finder;
     }
 
     @Override
@@ -134,17 +136,9 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                                 meta.put(k, lf.getExtra(k));
                             }
                         }
+                        mimeTypeFinder.getMimeType(meta, in);
 
-                        if (getAbstractKinveyClient() instanceof AbstractClient){
-                            ((AbstractClient) getAbstractKinveyClient()).getMimeTypeFinder().getMimeType(meta, in);
-                        }
                         FileMetaData file = getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
-
-
-
-
-
-
 
                     }
                 }
