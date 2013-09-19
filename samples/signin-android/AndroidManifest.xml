@@ -44,6 +44,10 @@
             android:label="@string/login" >
         </activity>
         <activity
+            android:name="com.kinvey.sample.signin.LinkedinLoginActivity"
+            android:label="@string/login" >
+        </activity>
+        <activity
             android:name="com.kinvey.sample.signin.TwitterLoginActivity"
             android:label="login" 
             android:launchMode="singleInstance" >
