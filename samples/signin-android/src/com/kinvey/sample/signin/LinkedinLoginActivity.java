@@ -46,8 +46,8 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
     /**
      * Linkedin Consumer Key and Secret - Specific to the application making the request
      */
-    private static final String LINKEDIN_CONSUMER_KEY = "your_linkedin_consumer_key";
-    private static final String LINKEDIN_CONSUMER_SECRET = "your_linkedin_consumer_secret";
+    private static final String LINKEDIN_CONSUMER_KEY = "q2wxhqhicjz7";
+    private static final String LINKEDIN_CONSUMER_SECRET = "CA4N29GLYblAgoZe";
     /**
      * The Callback URL is used by Linkedin OAuth to return the authorization to this Activity.  The URL must be
      * set as an intent in the Application manifest as follows:
@@ -62,15 +62,15 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
      * The scheme and host should be modified to identify the specific application.
      *
      */
-    private final String CALLBACKURL = "kinveysociallogin://linkedactivity";
-    private static final String  CALLBACK_SCHEME = "kinveysociallogin";
+    private final String CALLBACKURL = "http://kinvey-tutorials";
+    private static final String  CALLBACK_SCHEME = "http://";
 
     /**
-     * URLs for accessing Twitter OAuth
+     * URLs for accessing Linkedin OAuth
      */
-    public static final String REQUEST_URL = "http://api.linked.com/oauth/request_token";
-    public static final String ACCESS_URL = "http://api.linked.com/oauth/access_token";
-    public static final String AUTHORIZE_URL = "http://api.linked.com/oauth/authorize";
+    public static final String REQUEST_URL = "https://api.linkedin.com/uas/oauth/requestToken";
+    public static final String ACCESS_URL = "https://api.linkedin.com/uas/oauth/authenticate";
+    public static final String AUTHORIZE_URL = "https://api.linkedin.com/uas/oauth/authenticate";
 
     /**
      * Configuration parameters for Android's AbstractAuthenticator
@@ -220,6 +220,8 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
 
         super.onNewIntent(intent);
         final Uri uri = intent.getData();
+        Log.i(TAG, "Callback received : " + uri);
+
         if (uri != null && uri.getScheme().equals(CALLBACK_SCHEME)) {
             Log.i(TAG, "Callback received : " + uri);
             Log.i(TAG, "Retrieving Access Token");
@@ -246,7 +248,7 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
         protected Void doInBackground(Void... params) {
 
             try {
-                Log.i(TAG, "Retrieving request token from Google servers");
+                Log.i(TAG, "Retrieving request token");
                 final String url = provider.retrieveRequestToken(consumer, CALLBACKURL);
                 Log.i(TAG, "Popping a browser with the authorize URL : " + url);
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_FROM_BACKGROUND);
@@ -281,6 +283,7 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
             try {
                 provider.retrieveAccessToken(consumer, oauth_verifier);
 
+
                 loginTwitterKinveyUser(consumer.getToken(),consumer.getTokenSecret());
 
                 Log.i(TAG, "OAuth - Access Token Retrieved");
@@ -295,7 +298,6 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
          * Method to log the linked Kinvey user, passing a KinveyCallback.
          */
         private void loginTwitterKinveyUser(String accessToken, String accessSecret) {
-
             kinveyClient.user().loginTwitter(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY,
                     LINKEDIN_CONSUMER_SECRET, new KinveyUserCallback() {
 
@@ -306,7 +308,7 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
                     toast.show();
                 }
 
-                ;
+
 
                 @Override
                 public void onSuccess(User u) {

@@ -46,6 +46,12 @@
         <activity
             android:name="com.kinvey.sample.signin.LinkedinLoginActivity"
             android:label="@string/login" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http" android:host="kinvey-tutorials"/>
+            </intent-filter>
         </activity>
         <activity
             android:name="com.kinvey.sample.signin.TwitterLoginActivity"

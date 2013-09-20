@@ -141,7 +141,17 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		LoginActivity.this.startActivity(new Intent(LoginActivity.this, FacebookLoginActivity.class));
         LoginActivity.this.finish();
 	}
-	
+
+    public void launchGoogleLogin(View v){
+        LoginActivity.this.startActivity(new Intent(LoginActivity.this, GoogleLoginActivity.class));
+        LoginActivity.this.finish();
+    }
+
+    public void launchLinkedInLogin(View v){
+        LoginActivity.this.startActivity(new Intent(LoginActivity.this, LinkedinLoginActivity.class));
+        LoginActivity.this.finish();
+    }
+
 	public void registerAccount(View v) {
 		Intent intent = new Intent(this, RegisterNewAccountActivity.class);
         startActivity(intent);

@@ -10,12 +10,16 @@
   or implied. See the License for the specific language governing permissions and limitations under
   the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+<RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".LoginActivity"
-                android:background="@color/ghost_white" >
+                android:background="@color/ghost_white"
+                tools:context=".LoginActivity" >
 
     <TextView
             android:id="@+id/tvErrorMessage"
@@ -24,10 +28,10 @@
             android:layout_below="@+id/etPassword"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/login_spacing"
+            android:clickable="true"
             android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/kinvey_orange"
-            android:clickable="true" />
+            android:textColor="@color/kinvey_orange" />
 
     <Button
             android:id="@+id/btnLogin"
@@ -35,12 +39,12 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/etPassword"
             android:layout_below="@+id/tvErrorMessage"
+            android:layout_marginLeft="@dimen/button_margin"
             android:background="@color/kinvey_orange"
+            android:minWidth="@dimen/button_min_width"
             android:onClick="login"
             android:text="@string/login"
-            android:textColor="@color/ghost_white"
-            android:minWidth="@dimen/button_min_width"
-            android:layout_marginLeft="@dimen/button_margin"/>
+            android:textColor="@color/ghost_white" />
 
     <Button
             android:id="@+id/btnRegisterAccount"
@@ -48,12 +52,12 @@
             android:layout_height="wrap_content"
             android:layout_alignRight="@+id/etEmailLogin"
             android:layout_below="@+id/tvErrorMessage"
-            android:minWidth="@dimen/button_min_width"
+            android:layout_marginRight="@dimen/button_margin"
             android:background="@color/kinvey_orange"
-            android:text="@string/register"
-            android:textColor="@color/ghost_white"
+            android:minWidth="@dimen/button_min_width"
             android:onClick="registerAccount"
-            android:layout_marginRight="@dimen/button_margin"/>
+            android:text="@string/register"
+            android:textColor="@color/ghost_white" />
 
     <EditText
             android:id="@+id/etPassword"
@@ -62,9 +66,9 @@
             android:layout_alignLeft="@+id/etEmailLogin"
             android:layout_below="@+id/etEmailLogin"
             android:hint="@string/enter_password"
-            android:textColorHint="@color/hint_color"
+            android:inputType="textPassword"
             android:textColor="@color/ebony"
-            android:inputType="textPassword" />
+            android:textColorHint="@color/hint_color" />
 
     <EditText
             android:id="@+id/etEmailLogin"
@@ -72,12 +76,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:textColorHint="@color/hint_color"
-            android:textColor="@color/ebony"
+            android:layout_marginTop="@dimen/login_spacing"
             android:hint="@string/enter_email"
             android:inputType="textEmailAddress"
-            android:layout_marginTop="@dimen/login_spacing"
-            />
+            android:textColor="@color/ebony"
+            android:textColorHint="@color/hint_color" />
 
     <ImageButton
             android:id="@+id/btnLoginTwitter"
@@ -87,8 +90,8 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/button_margin"
             android:contentDescription="@string/login_twitter"
-            android:src="@drawable/sign_in_twitter"
-            android:onClick="launchTwitterLogin"/>
+            android:onClick="launchTwitterLogin"
+            android:src="@drawable/sign_in_twitter" />
 
     <ImageButton
             android:id="@+id/btnLoginFacebook"
@@ -98,7 +101,35 @@
             android:layout_below="@+id/btnLoginTwitter"
             android:layout_marginTop="@dimen/button_margin"
             android:contentDescription="@string/login_facebook"
-            android:src="@drawable/sign_in_facebook"
-            android:onClick="launchFacebookLogin" />
+            android:onClick="launchFacebookLogin"
+            android:src="@drawable/sign_in_facebook" />
+
+    <Button
+            android:id="@+id/btnLoginGoogle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/btnLoginTwitter"
+            android:layout_alignRight="@id/btnLoginTwitter"
+            android:layout_below="@+id/btnLoginFacebook"
+            android:layout_marginTop="@dimen/button_margin"
+            android:contentDescription="@string/login_google"
+            android:textColor="#000000"
+            android:text="@string/login_google"
+            android:onClick="launchGoogleLogin" />
+
+    <Button
+            android:id="@+id/btnLoginLinkedIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/btnLoginTwitter"
+            android:layout_alignRight="@id/btnLoginTwitter"
+            android:layout_below="@+id/btnLoginGoogle"
+            android:layout_marginTop="@dimen/button_margin"
+            android:contentDescription="@string/login_linkedin"
+            android:textColor="#000000"
+            android:text="@string/login_linkedin"
+            android:onClick="launchLinkedInLogin" />
 
 </RelativeLayout>
+
+</ScrollView>
