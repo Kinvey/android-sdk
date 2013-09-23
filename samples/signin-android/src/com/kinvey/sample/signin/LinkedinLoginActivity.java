@@ -26,7 +26,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import oauth.signpost.OAuth;
@@ -63,14 +65,14 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
      *
      */
     private final String CALLBACKURL = "http://kinvey-tutorials";
-    private static final String  CALLBACK_SCHEME = "http://";
+    private static final String  CALLBACK_SCHEME = "http";
 
     /**
      * URLs for accessing Linkedin OAuth
      */
     public static final String REQUEST_URL = "https://api.linkedin.com/uas/oauth/requestToken";
-    public static final String ACCESS_URL = "https://api.linkedin.com/uas/oauth/authenticate";
-    public static final String AUTHORIZE_URL = "https://api.linkedin.com/uas/oauth/authenticate";
+    public static final String ACCESS_URL = "https://api.linkedin.com/uas/oauth/accessToken";
+    public static final String AUTHORIZE_URL = "https://api.linkedin.com/uas/oauth/authorize";
 
     /**
      * Configuration parameters for Android's AbstractAuthenticator
@@ -221,6 +223,7 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
         super.onNewIntent(intent);
         final Uri uri = intent.getData();
         Log.i(TAG, "Callback received : " + uri);
+        Log.i(TAG, "callback received: " + uri.getScheme() + " and " + CALLBACK_SCHEME);
 
         if (uri != null && uri.getScheme().equals(CALLBACK_SCHEME)) {
             Log.i(TAG, "Callback received : " + uri);
@@ -298,7 +301,7 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
          * Method to log the linked Kinvey user, passing a KinveyCallback.
          */
         private void loginTwitterKinveyUser(String accessToken, String accessSecret) {
-            kinveyClient.user().loginTwitter(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY,
+            kinveyClient.user().loginLinkedIn(accessToken, accessSecret, LINKEDIN_CONSUMER_KEY,
                     LINKEDIN_CONSUMER_SECRET, new KinveyUserCallback() {
 
                 public void onFailure(Throwable e) {
@@ -309,12 +312,13 @@ public class LinkedinLoginActivity extends AccountAuthenticatorActivity{
                 }
 
 
-
                 @Override
                 public void onSuccess(User u) {
                     CharSequence text = "Logged in " + u.get("username") + ".";
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
                     onAuthenticationResult(u.getId(), u.getAuthToken());
+
+
                     LinkedinLoginActivity.this.startActivity(new Intent(LinkedinLoginActivity.this, MainActivity.class));
                     LinkedinLoginActivity.this.finish();
                 }

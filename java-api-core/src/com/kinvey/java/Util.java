@@ -51,8 +51,8 @@ public class Util {
      */
     public Ping pingBlocking() throws IOException {
         Ping ping = new Ping();
-        client.initializeRequest(ping);
         ping.setRequireAppCredentials(true);
+        client.initializeRequest(ping);
         return ping;
     }
 

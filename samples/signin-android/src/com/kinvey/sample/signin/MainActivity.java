@@ -57,11 +57,10 @@ public class MainActivity extends Activity {
         tvHello = (TextView) findViewById(R.id.tvHello);
 		if (loggedIn()) {
 			tvHello.setText("Hello!  You are logged in!");
-			
 		} else {
-			Intent intent = new Intent(this, LoginActivity.class);
-	        startActivity(intent);
-		}
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+        }
 		
 	}
 	

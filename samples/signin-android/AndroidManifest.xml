@@ -43,9 +43,13 @@
             android:name="com.kinvey.sample.signin.FacebookLoginActivity"
             android:label="@string/login" >
         </activity>
+        <activity android:name="com.kinvey.sample.signin.GoogleLoginActivity"
+                  android:label="@string/login"
+                  />
         <activity
             android:name="com.kinvey.sample.signin.LinkedinLoginActivity"
-            android:label="@string/login" >
+            android:label="@string/login"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
