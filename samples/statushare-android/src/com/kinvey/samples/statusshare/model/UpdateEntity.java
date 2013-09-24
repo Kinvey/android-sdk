@@ -145,8 +145,8 @@ public class UpdateEntity extends LinkedGenericJson{
     }
 
     public String getAuthorName() {
-        if (this.author.getResolvedObject() != null){
-            this.authorName = (String) (this.author.getResolvedObject()).get("username");
+        if (this.author.getTypedObject(User.class) != null){
+            this.authorName = this.author.getTypedObject(User.class).getUsername();
         }
         return ((this.authorName == null) ? "--" : this.authorName);
     }

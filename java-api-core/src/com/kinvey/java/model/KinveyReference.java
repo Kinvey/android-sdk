@@ -69,6 +69,7 @@ public class KinveyReference extends GenericJson{
     @Key("_collection")
     private String collection;
 
+
     public KinveyReference(){}
 
     public KinveyReference(String collectionName, String id) {
@@ -94,20 +95,6 @@ public class KinveyReference extends GenericJson{
         this.id = id;
     }
 
-    @Deprecated
-    public GenericJson getReturnObject(){
-
-        ArrayMap direct = (ArrayMap) get("_obj");
-        if (direct == null){
-            return null;
-        }
-
-        GenericJson ret = new GenericJson();
-        ret.putAll(direct);
-        return ret;
-
-    }
-
     public GenericJson getResolvedObject() {
         ArrayMap direct = (ArrayMap) get("_obj");
         if (direct == null){
@@ -116,6 +103,24 @@ public class KinveyReference extends GenericJson{
 
         GenericJson ret = new GenericJson();
         ret.putAll(direct);
+        return ret;
+    }
+
+    public <T extends GenericJson> T getTypedObject(Class<T> clazz){
+        ArrayMap direct = (ArrayMap) get("_obj");
+        if (direct == null){
+            return null;
+        }
+        T ret = null;
+        try {
+            ret = clazz.newInstance();
+            ret.putAll(direct);
+        } catch (Exception e) {
+            System.out.println("unable to instantiate class!");
+            e.printStackTrace();
+            return null;
+        }
+
         return ret;
     }
 
@@ -128,4 +133,6 @@ public class KinveyReference extends GenericJson{
     public void setType(String type){
         //do nothing, looks like json library needs this setter available....?
     }
+
+
 }
