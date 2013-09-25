@@ -13,19 +13,28 @@
  */
 package com.kinvey.sample.kitchensink.test;
 
+import android.app.Application;
 import android.os.Environment;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import com.actionbarsherlock.ActionBarSherlock;
+import com.actionbarsherlock.internal.ActionBarSherlockCompat;
+import com.actionbarsherlock.internal.ActionBarSherlockNative;
+import com.kinvey.sample.kitchensink.AndroidUtil;
 import com.kinvey.sample.kitchensink.KitchenSink;
+import com.kinvey.sample.kitchensink.KitchenSinkApplication;
 import com.kinvey.sample.kitchensink.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowHandler;
 import org.robolectric.shadows.ShadowToast;
+import org.robolectric.util.ActivityController;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -34,10 +43,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author edwardf
  */
+
 @RunWith(RobolectricTestRunner.class)
 public class AppDataTest {
 
     private KitchenSink activity;
+    private ListView featureList;
 
 
     @Before
@@ -46,17 +57,18 @@ public class AppDataTest {
         Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
 
-       // activity = Robolectric.buildActivity(KitchenSink.class).create().get();
+        //activity = Robolectric.buildActivity(KitchenSink.class).create().get();
 
-
+        //featureList = (ListView) activity.findViewById(R.id.ks_list);
 
     }
 
 
     @Test
     public void testAppName() throws Exception {
-        //String appName = activity.getResources().getString(R.string.app_name);
-        //assertThat(appName, equalTo("Kitchensink"));
+//        String appName = activity.getResources().getString(R.string.app_name);
+//        assertThat(appName, equalTo("Kitchensink"));
 
     }
+
 }

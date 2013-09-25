@@ -14,6 +14,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
+              android:background="@color/bg"
               android:layout_height="match_parent">
     <com.viewpagerindicator.TitlePageIndicator
             android:id="@+id/feature_indicator"

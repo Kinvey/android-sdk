@@ -13,17 +13,17 @@
  */
 package com.kinvey.java.core;
 
-import com.kinvey.java.model.AggregateResponse;
+import com.kinvey.java.model.Aggregation;
 
 /**
  * @author edwardf
  */
-public abstract class KinveyAggregateCallback implements KinveyClientCallback<AggregateResponse.AggregateResult[]> {
+public abstract class KinveyAggregateCallback implements KinveyClientCallback<Aggregation.Result[]> {
 
     @Override
-    public void onSuccess(AggregateResponse.AggregateResult[] result) {
+    public void onSuccess(Aggregation.Result[] result) {
 
-        AggregateResponse response = new AggregateResponse(result);
+        Aggregation response = new Aggregation(result);
         onSuccess(response);
 
     }
@@ -31,6 +31,6 @@ public abstract class KinveyAggregateCallback implements KinveyClientCallback<Ag
 
     public abstract void onFailure(Throwable error);
 
-    public abstract void onSuccess(AggregateResponse response);
+    public abstract void onSuccess(Aggregation response);
 
 }

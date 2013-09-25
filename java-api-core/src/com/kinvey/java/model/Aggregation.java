@@ -21,17 +21,17 @@ import java.util.ArrayList;
 /**
  * @author edwardf
  */
-public class AggregateResponse {
+public class Aggregation {
 
-    public AggregateResult[] results;
+    public Result[] results;
 
-    public AggregateResponse(AggregateResult[] res){
+    public Aggregation(Result[] res){
         this.results = res;
     }
 
     public ArrayList<Number> getResultsFor(String key, String value){
         ArrayList<Number> ret = new ArrayList<Number>();
-        for (AggregateResult a : results){
+        for (Result a : results){
             if (a.containsKey(key)){
                 if (a.get(key).equals(value)){
                     ret.add(a.result);
@@ -49,11 +49,11 @@ public class AggregateResponse {
 
 
 
-    public static class AggregateResult extends GenericJson{
+    public static class Result extends GenericJson{
         @Key("_result")
         public Number result;
 
-        public AggregateResult(){}
+        public Result(){}
     }
 
 

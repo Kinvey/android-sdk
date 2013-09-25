@@ -13,17 +13,14 @@
  */
 package com.kinvey.sample.kitchensink.appData;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
-import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.Query;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyAggregateCallback;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.sample.kitchensink.KitchenSink;
-import com.kinvey.sample.kitchensink.MyEntity;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -55,25 +52,40 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
 
     private void performAggregation(){
 
-        AsyncAppData<GenericJson[]> aggregate = getClient().appData(KitchenSink.collectionName, GenericJson[].class);
+        AsyncAppData<Aggregation.Result[]> aggregate = getClient().appData(KitchenSink.collectionName, Aggregation.Result[].class);
 
         ArrayList <String> fields = new ArrayList<String>();
         fields.add("_acl.creator");
         Query q = new Query();
-        aggregate.count(fields,q, new KinveyListCallback<GenericJson>() {
-            @Override
-            public void onSuccess(GenericJson[] res) {
-                Toast.makeText(getSherlockActivity(), "got: " + res[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
-
-            }
-
+        aggregate.count(fields, q, new KinveyAggregateCallback() {
             @Override
             public void onFailure(Throwable error) {
-                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();            }
+
+            @Override
+            public void onSuccess(Aggregation res) {
+
+                Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
             }
         });
+
+//
+//        aggregate.count(fields,q, new KinveyListCallback<GenericJson>() {
+//            @Override
+//            public void onSuccess(GenericJson[] res) {
+//                Toast.makeText(getSherlockActivity(), "got: " + res[0].get("_result"), Toast.LENGTH_SHORT ).show();
+//
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable error) {
+//                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//
+//            }
+//        });
     }
 
     @Override
