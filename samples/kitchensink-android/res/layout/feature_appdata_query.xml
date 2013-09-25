@@ -59,14 +59,7 @@
 
 
     </FrameLayout>
-    <LinearLayout android:id="@+id/my_toolbar"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content">
-        <Button
-                android:id="@+id/appdata_get_button"
-                style="@style/usecase_action_button"
-                android:text="Load"/>
-    </LinearLayout>
+
 
 
 </LinearLayout>

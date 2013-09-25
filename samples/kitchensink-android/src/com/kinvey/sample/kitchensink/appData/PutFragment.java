@@ -97,6 +97,7 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
             ent.setName("name" + new Random().nextInt(10000));
             ent.getAccess().setGloballyWriteable(true);
             ent.getAccess().setGloballyReadable(true);
+            ent.setAggField(new Random().nextInt(10));
 
             getClient().appData(KitchenSink.collectionName, MyEntity.class).save(ent, new KinveyClientCallback<MyEntity>() {
                 @Override

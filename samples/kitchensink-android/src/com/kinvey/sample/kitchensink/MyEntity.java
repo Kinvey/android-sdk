@@ -34,6 +34,10 @@ public class MyEntity extends GenericJson{
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
 
+    @Key("aggregateField")
+    private int aggField;
+
+
     public MyEntity(){
         this.acl = new KinveyMetaData.AccessControlList();
     }
@@ -60,5 +64,13 @@ public class MyEntity extends GenericJson{
 
     public void setAccess(KinveyMetaData.AccessControlList acl) {
         this.acl = acl;
+    }
+
+    public void setAggField(int agg){
+        this.aggField = agg;
+    }
+
+    public int getAggField(){
+        return this.aggField;
     }
 }

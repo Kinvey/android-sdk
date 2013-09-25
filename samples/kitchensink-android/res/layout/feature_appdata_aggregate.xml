@@ -20,6 +20,8 @@
                  android:layout_height="0dip"
                  android:layout_weight="1">
 
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:orientation="vertical">
 
@@ -33,28 +35,62 @@
                           android:background="@color/kinvey_orange"/>
 
             <LinearLayout style="@style/usecase_row">
-                <TextView android:text="perform an aggregation"
+                <TextView android:text="perform a Count on creator"
                           style="@style/usecase_row_label"/>
 
 
-                <Button android:id="@+id/appdata_agg_perform"
-                        android:text="try it"
+                <Button android:id="@+id/appdata_agg_count"
+                        android:text="Count"
+                        style="@style/usecase_action_button"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="perform a Sum on creator"
+                          style="@style/usecase_row_label"/>
+
+
+                <Button android:id="@+id/appdata_agg_sum"
+                        android:text="Sum"
+                        style="@style/usecase_action_button"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="perform a Min on creator"
+                          style="@style/usecase_row_label"/>
+
+
+                <Button android:id="@+id/appdata_agg_min"
+                        android:text="Min"
+                        style="@style/usecase_action_button"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="perform a Max on creator"
+                          style="@style/usecase_row_label"/>
+
+
+                <Button android:id="@+id/appdata_agg_max"
+                        android:text="Max"
+                        style="@style/usecase_action_button"/>
+            </LinearLayout>
+
+            <LinearLayout style="@style/usecase_row">
+                <TextView android:text="perform an Average on creator"
+                          style="@style/usecase_row_label"/>
+
+
+                <Button android:id="@+id/appdata_agg_average"
+                        android:text="Average"
                         style="@style/usecase_action_button"/>
             </LinearLayout>
 
 
         </LinearLayout>
 
+        </ScrollView>
 
     </FrameLayout>
-    <LinearLayout android:id="@+id/my_toolbar"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content">
-        <Button
-                android:id="@+id/appdata_get_button"
-                style="@style/usecase_action_button"
-                android:text="Load"/>
-    </LinearLayout>
+
 
 
 </LinearLayout>

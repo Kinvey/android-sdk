@@ -26,6 +26,9 @@ public class Aggregation {
     public Result[] results;
 
     public Aggregation(Result[] res){
+        if (res == null){
+            res = new Result[0];
+        }
         this.results = res;
     }
 
