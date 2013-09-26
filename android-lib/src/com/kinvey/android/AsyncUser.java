@@ -586,10 +586,40 @@ public class AsyncUser extends User {
      * </pre>
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
-     * @param <T>
      */
-    public<T> void update(KinveyUserCallback callback) {
-        new Update(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void update(KinveyUserCallback callback) {
+        new Update(AsyncUser.this, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    /**
+     * Asynchronous Call to Save a given user
+     * <p>
+     * Constructs an asynchronous request to save a provided Kinvey user.
+     * </p>
+     * Ensure you have configured backend to allow for `Full` permissions on User edits through the console.
+     * <p>
+     * Sample Usage:
+     * </p>
+     * <pre>
+     {@code
+     kinveyClient.user().retrieve(new Query(), new KinveyUserListCallback(){
+     public void onFailure(Throwable e) { ... }
+     public void onSuccess(User[] result) {
+     for (User u : result){
+     kinveyClient.User().update(u, new KinveyUserCallback() {
+     public void onFailure(Throwable e) { ... }
+     public void onSuccess(User result) { ... }
+     });
+     }
+     }
+     });
+     }
+     * </pre>
+     *
+     * @param callback {@link KinveyUserCallback} containing an updated User instance.
+     */
+    public void update(User user, KinveyUserCallback callback){
+        new Update(user, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -908,15 +938,20 @@ public class AsyncUser extends User {
 
     private class Update extends AsyncClientRequest<User> {
 
-        private Update(KinveyClientCallback callback) {
+        User user = null;
+
+        private Update(User user, KinveyClientCallback callback){
             super(callback);
+            this.user = user;
         }
 
         @Override
         protected User executeAsync() throws IOException {
-            return AsyncUser.this.updateBlocking().execute();
+            return AsyncUser.this.updateBlocking(user).execute();
         }
     }
+
+
 
     private class ResetPassword extends AsyncClientRequest<Void> {
 

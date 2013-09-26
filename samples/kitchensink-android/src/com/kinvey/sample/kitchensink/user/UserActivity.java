@@ -28,7 +28,7 @@ public class UserActivity extends FeatureActivity {
     @Override
     public List<UseCaseFragment> getFragments() {
         return Arrays.asList(new UseCaseFragment[]{
-                new LookupFragment()
+                new LookupFragment() , new UpdateFragment()
         });
     }
 }

@@ -433,6 +433,20 @@ public class User extends GenericJson   {
     }
 
     /**
+     * Updates a provided user's profile
+     *
+     * @param user the user to update
+     * @return an Update request ready to be executed
+     * @throws IOException
+     */
+    public Update updateBlocking(User user) throws IOException{
+        Preconditions.checkNotNull(user.getId(), "user must not be null");
+        Update update = new Update(user);
+        client.initializeRequest(update);
+        return update;
+    }
+
+    /**
      * Initiates a password reset request for a provided username
      *
      * @param username the username to request a password reset for

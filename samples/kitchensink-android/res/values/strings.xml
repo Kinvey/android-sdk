@@ -31,5 +31,7 @@
         \nresponse.complete(201);
         \n}\n and then you can try it here</string>
 
+    <string name="user_update_description">Update information in the user collection via the User API</string>
+
 
 </resources>

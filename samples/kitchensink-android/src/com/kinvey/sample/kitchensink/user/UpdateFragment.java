@@ -13,16 +13,13 @@
  */
 package com.kinvey.sample.kitchensink.user;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 import com.kinvey.android.AsyncUser;
 import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
-import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.sample.kitchensink.R;
@@ -31,38 +28,49 @@ import com.kinvey.sample.kitchensink.UseCaseFragment;
 /**
  * @author edwardf
  */
-public class LookupFragment extends UseCaseFragment implements  View.OnClickListener{
+public class UpdateFragment extends UseCaseFragment implements View.OnClickListener{
 
-    private Button lookup;
-    private Button updateUser;
-
-
-
-
+    private Button updateCurrent;
+    private Button updateOther;
 
     @Override
     public int getViewID() {
-        return R.layout.feature_user_lookup;
+        return R.layout.feature_user_update;
     }
 
     @Override
     public void bindViews(View v) {
-        lookup = (Button) v.findViewById(R.id.user_lookup_lookup);
-        lookup.setOnClickListener(this);
-        updateUser = (Button) v.findViewById(R.id.user_lookup_update);
-        updateUser.setOnClickListener(this);
+        updateCurrent = (Button) v.findViewById(R.id.user_update_current);
+        updateOther = (Button) v.findViewById(R.id.user_update_other);
+
+        updateCurrent.setOnClickListener(this);
+        updateOther.setOnClickListener(this);
     }
 
     @Override
     public String getTitle() {
-        return "Lookup";
+        return "Update";
+    }
+
+    private void performUserUpdate(){
+
+        AsyncUser user = getApplicationContext().getClient().user();
+        user.put("last_name", "Smith");
+        user.update(new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                Toast.makeText(getSherlockActivity(), "updated user!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Toast.makeText(getSherlockActivity(), "update failed -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
-
-
-
-    private void performUserLookup(){
+    private void lookupAndUpdate(){
 
         AsyncUserDiscovery users = getApplicationContext().getClient().userDiscovery();
         UserLookup criteria = users.userLookup();
@@ -71,6 +79,9 @@ public class LookupFragment extends UseCaseFragment implements  View.OnClickList
             @Override
             public void onSuccess(User[] result) {
                 Toast.makeText(getSherlockActivity(), "lookup returned: " + result.length + " user(s)!", Toast.LENGTH_SHORT).show();
+                if (result != null && result.length > 0){
+                    performOtherUserUpdate(result[0]);
+                }
             }
 
             @Override
@@ -78,54 +89,31 @@ public class LookupFragment extends UseCaseFragment implements  View.OnClickList
                 Toast.makeText(getSherlockActivity(), "lookup failed -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
-    private void performRetrievalWithReferences(){
+    private void performOtherUserUpdate(User u){
 
-
-        AsyncUser user = getClient().user();
-
-        user.retrieve(new String[]{"ref"}, new KinveyUserCallback() {
+        AsyncUser user = getApplicationContext().getClient().user();
+        u.put("last_name", "UpdatedName");
+        user.update(u, new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
-                Toast.makeText(getSherlockActivity(), "got user!", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getSherlockActivity(), "updated user!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Toast.makeText(getSherlockActivity(), "failed -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                error.printStackTrace();;
+                Toast.makeText(getSherlockActivity(), "update failed -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-
-//        Query q = new Query();
-//        q.equals("username", "keepon");
-//        user.retrieve(q, new String[]{"ref"}, new KinveyUserListCallback() {
-//            @Override
-//            public void onSuccess(User[] result) {
-//                Log.i("got users", result.toString());
-//            }
-//
-//            @Override
-//            public void onFailure(Throwable error) {
-//                Log.i("failed", error.getMessage());
-//                error.printStackTrace();;
-//            }
-//        });
-
-
-
     }
 
     @Override
     public void onClick(View view) {
-        if (view == lookup){
-            performUserLookup();
-        }else if (view == updateUser){
-            performRetrievalWithReferences();
+        if (view == updateOther){
+            performUserUpdate();
+        }else if (view == updateCurrent){
+            lookupAndUpdate();
         }
     }
 }
