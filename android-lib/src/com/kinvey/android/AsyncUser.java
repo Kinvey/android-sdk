@@ -603,15 +603,15 @@ public class AsyncUser extends User {
      * <pre>
      {@code
      kinveyClient.user().retrieve(new Query(), new KinveyUserListCallback(){
-     public void onFailure(Throwable e) { ... }
-     public void onSuccess(User[] result) {
-     for (User u : result){
-     kinveyClient.User().update(u, new KinveyUserCallback() {
-     public void onFailure(Throwable e) { ... }
-     public void onSuccess(User result) { ... }
-     });
-     }
-     }
+         public void onFailure(Throwable e) { ... }
+         public void onSuccess(User[] result) {
+             for (User u : result){
+                 kinveyClient.User().update(u, new KinveyUserCallback() {
+                     public void onFailure(Throwable e) { ... }
+                     public void onSuccess(User result) { ... }
+                 });
+             }
+         }
      });
      }
      * </pre>
