@@ -26,6 +26,8 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 
 /**
+ * This class maintains information about Aggregation Requests
+ *
  * @author mjsalinger
  * @since 2.0
  */

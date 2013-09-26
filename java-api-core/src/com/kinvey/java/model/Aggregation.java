@@ -19,6 +19,10 @@ import com.google.api.client.util.Key;
 import java.util.ArrayList;
 
 /**
+ * This class wraps the response of an Aggregation Request.
+ *
+ * Access the results through the array called `results`
+ *
  * @author edwardf
  */
 public class Aggregation {
@@ -32,6 +36,13 @@ public class Aggregation {
         this.results = res;
     }
 
+    /**
+     * Return a list of result values from the aggregation
+     *
+     * @param key the key to search for
+     * @param value the value of the key to search for
+     * @return a list of numbers containing the results for the provided key/value
+     */
     public ArrayList<Number> getResultsFor(String key, String value){
         ArrayList<Number> ret = new ArrayList<Number>();
         for (Result a : results){
@@ -45,13 +56,10 @@ public class Aggregation {
     }
 
 
-
-
-
-
-
-
-
+    /**
+     * This class represents an individual result of an Aggregation request.
+     *
+     */
     public static class Result extends GenericJson{
         @Key("_result")
         public Number result;
