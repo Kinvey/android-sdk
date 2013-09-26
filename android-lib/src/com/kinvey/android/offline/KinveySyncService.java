@@ -197,18 +197,22 @@ public class KinveySyncService extends IntentService {
 
 
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
-            client.appData(collectionName, GenericJson.class).save(dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID()), new KinveyClientCallback<GenericJson>() {
-                @Override
-                public void onSuccess(GenericJson result) {
-//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
-                }
+            GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
+            if (entity != null){
 
-                @Override
-                public void onFailure(Throwable error) {
-                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
-                }
-            });
+                client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
+                    @Override
+                    public void onSuccess(GenericJson result) {
+//                      KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                        dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
+                    }
+                });
+            }
         } else if (cur.getHttpVerb().equals("GET")){
             client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson>() {
                 @Override
