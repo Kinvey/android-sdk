@@ -113,6 +113,7 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
             public void onSuccess(MyEntity result) {
                 currentName.setText(result.getName());
                 currentID.setText(result.getId());
+                AndroidUtil.toast(GetFragment.this, "Got an entity -> " + result.getName());
             }
 
             @Override
