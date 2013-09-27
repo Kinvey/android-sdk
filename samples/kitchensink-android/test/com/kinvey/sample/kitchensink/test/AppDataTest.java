@@ -15,6 +15,8 @@ package com.kinvey.sample.kitchensink.test;
 
 import android.app.Application;
 import android.os.Environment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -25,6 +27,7 @@ import com.kinvey.sample.kitchensink.AndroidUtil;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.KitchenSinkApplication;
 import com.kinvey.sample.kitchensink.R;
+import com.kinvey.sample.kitchensink.appData.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +50,15 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class AppDataTest {
 
-    private KitchenSink activity;
-    private ListView featureList;
+    private AppDataActivity activity;
+
+    private PutFragment putFrag;
+    private GetFragment getFrag;
+    private QueryFragment queryFrag;
+    private AggregateFragment aggFrag;
+
+
+
 
 
     @Before
@@ -57,18 +67,44 @@ public class AppDataTest {
         Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
 
-        //activity = Robolectric.buildActivity(KitchenSink.class).create().get();
+        ActivityController<AppDataActivity> controller = Robolectric.buildActivity(AppDataActivity.class);
+        ((KitchenSinkApplication)controller.get().getApplication()).getClient().user().loginBlocking("tester", "tester").execute();
 
-        //featureList = (ListView) activity.findViewById(R.id.ks_list);
+
+
+
+        activity = controller.create().start().resume().get();
+
+
+
+        putFrag = new PutFragment();
+
+        FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(android.R.id.content, putFrag);
+        fragmentTransaction.commit();
+        activity.getSupportFragmentManager().executePendingTransactions();
+
+
+
+
+
+
+
 
     }
-
 
     @Test
-    public void testAppName() throws Exception {
-//        String appName = activity.getResources().getString(R.string.app_name);
-//        assertThat(appName, equalTo("Kitchensink"));
-
+    public void testPut(){
+        putFrag.getView().findViewById(R.id.appdata_put_button).performClick();
+        ShadowHandler.idleMainLooper();
+        String s= ShadowToast.getTextOfLatestToast();
+        assertTrue(s.contains("Successfully saved"));
     }
+
+
+
+
+
 
 }
