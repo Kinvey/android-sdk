@@ -68,6 +68,11 @@ public class AppDataTest {
         activity = controller.create().start().resume().get();
 
     }
+
+    @Test
+    public void testRunner(){
+
+    }
 //
 //    @Test
 //    public void testPut_Put(){

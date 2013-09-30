@@ -52,12 +52,12 @@ public class KitchenSinkTest {
     }
 
 //
-//    @Test
-//    public void testAppName() throws Exception {
+    @Test
+    public void testAppName() throws Exception {
 //        String appName = activity.getResources().getString(R.string.app_name);
 //        assertThat(appName, equalTo("Kitchensink"));
 //
-//    }
+    }
 //
 //    @Test
 //    public void testListContents(){
