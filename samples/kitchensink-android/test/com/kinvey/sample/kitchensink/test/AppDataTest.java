@@ -60,12 +60,12 @@ public class AppDataTest {
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
 
         //grab the application and login
-        ActivityController<AppDataActivity> controller = Robolectric.buildActivity(AppDataActivity.class);
-        if(!((KitchenSinkApplication)controller.get().getApplication()).getClient().user().isUserLoggedIn()){
-            ((KitchenSinkApplication)controller.get().getApplication()).getClient().user().loginBlocking("tester", "tester").execute();
-        }
+//        ActivityController<AppDataActivity> controller = Robolectric.buildActivity(AppDataActivity.class);
+//        if(!((KitchenSinkApplication)controller.get().getApplication()).getClient().user().isUserLoggedIn()){
+//            ((KitchenSinkApplication)controller.get().getApplication()).getClient().user().loginBlocking("tester", "tester").execute();
+//        }
         //start the activity and get a reference to it
-        activity = controller.create().start().resume().get();
+       // activity = controller.create().start().resume().get();
 
     }
 
