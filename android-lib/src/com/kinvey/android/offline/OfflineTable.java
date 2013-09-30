@@ -256,16 +256,16 @@ public class OfflineTable<T extends GenericJson> {
 
 
         T ret = null;
-        if (cursor != null){
-            cursor.moveToFirst();
+        if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()){
             try{
-               String s  =cursor.getString(0);
+                String s  = cursor.getString(0);
                 Log.e(TAG, "get entity -> " + s);
 
                 ret =  client.getJsonFactory().fromString(s, responseClass);
             }catch(Exception e){
                 Log.e(TAG, "cannot parse json into object! -> " + e);
             }
+
             cursor.close();
         }
         db.close();
@@ -419,10 +419,10 @@ public class OfflineTable<T extends GenericJson> {
         String curKey = null;
 
         Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null);
-        if (c.moveToFirst()){
-            ret = new OfflineRequestInfo(c.getString(1), c.getString(0));
-            curKey = c.getString(2);
-        }
+            if (c.moveToFirst()){
+                ret = new OfflineRequestInfo(c.getString(1), c.getString(0));
+                curKey = c.getString(2);
+            }
         c.close();
         Log.e(TAG, "*** current key is -> " + curKey);
         //remove the popped request

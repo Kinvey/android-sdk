@@ -100,38 +100,9 @@ public class KinveySyncService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.i(Client.TAG, "Offline Executor Intent received ->" + intent.getAction());
-        String action = intent.getAction();
-        if (action == null) {
-            return;
-        }
-
         if (isOnline()) {
             initClientAndKickOffSync();
         }
-
-        //all intents do the same thing (as of now) so no distinction is necessary
-        /**
-         if (action.equals(ACTION_OFFLINE_SYNC)) {
-         Log.i(TAG, "offline sync");
-         if (isOnline()) {
-         initClientAndKickOffSync();
-         }
-         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-         Log.i(TAG, "connectivity actions");
-
-         if (isOnline()) {
-         initClientAndKickOffSync();
-         }
-         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-         Log.i(TAG, "network state change");
-         if (isOnline()) {
-         initClientAndKickOffSync();
-         }
-         }
-
-         */
-
     }
 
     public boolean isOnline() {
