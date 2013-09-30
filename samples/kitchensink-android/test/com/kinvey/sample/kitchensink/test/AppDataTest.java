@@ -68,131 +68,131 @@ public class AppDataTest {
         activity = controller.create().start().resume().get();
 
     }
-
-    @Test
-    public void testPut_Put(){
-
-        PutFragment putFrag = new PutFragment();
-        showFragment(putFrag);
-
-
-        putFrag.getView().findViewById(R.id.appdata_put_button).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("Successfully saved"));
-
-
-    }
-
-    @Test
-    public void testPut_Delete(){
-
-        PutFragment putFrag = new PutFragment();
-        showFragment(putFrag);
-
-        putFrag.getView().findViewById(R.id.appdata_put_delete).performClick();
-        ShadowHandler.idleMainLooper();;
-        String s = ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("deleted"));
-
-    }
-
-    @Test
-    public void testGet_Get(){
-        GetFragment getFrag = new GetFragment();
-        showFragment(getFrag);
-
-        getFrag.getView().findViewById(R.id.appdata_get_button).performClick();
-
-
-
-    }
-
-    @Test
-    public void testQuery_Current(){
-        QueryFragment queryFrag = new QueryFragment();
-        showFragment(queryFrag);
-
-        queryFrag.getView().findViewById(R.id.appdata_query_current).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-
-
-
-    }
-
-    @Test
-    public void testQuery_NotCurrent(){
-        QueryFragment queryFrag = new QueryFragment();
-        showFragment(queryFrag);
-
-        queryFrag.getView().findViewById(R.id.appdata_query_not_current).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-    }
-
-    @Test
-    public void testAgg_count(){
-
-        AggregateFragment aggFrag = new AggregateFragment();
-        showFragment(aggFrag);
-
-        aggFrag.getView().findViewById(R.id.appdata_agg_count).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-    }
-
-    @Test
-    public void testAgg_sum(){
-        AggregateFragment aggFrag = new AggregateFragment();
-        showFragment(aggFrag);
-
-        aggFrag.getView().findViewById(R.id.appdata_agg_sum).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-
-    }
-
-    @Test
-    public void testAgg_min(){
-
-        AggregateFragment aggFrag = new AggregateFragment();
-        showFragment(aggFrag);
-
-        aggFrag.getView().findViewById(R.id.appdata_agg_min).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-
-    }
-
-    @Test
-    public void testAgg_max(){
-        AggregateFragment aggFrag = new AggregateFragment();
-        showFragment(aggFrag);
-
-        aggFrag.getView().findViewById(R.id.appdata_agg_max).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-
-    }
-
-    @Test
-    public void testAgg_avg(){
-        AggregateFragment aggFrag = new AggregateFragment();
-        showFragment(aggFrag);
-
-        aggFrag.getView().findViewById(R.id.appdata_agg_average).performClick();
-        ShadowHandler.idleMainLooper();
-        String s= ShadowToast.getTextOfLatestToast();
-        assertTrue(s.contains("got"));
-
-    }
+//
+//    @Test
+//    public void testPut_Put(){
+//
+//        PutFragment putFrag = new PutFragment();
+//        showFragment(putFrag);
+//
+//
+//        putFrag.getView().findViewById(R.id.appdata_put_button).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("Successfully saved"));
+//
+//
+//    }
+//
+//    @Test
+//    public void testPut_Delete(){
+//
+//        PutFragment putFrag = new PutFragment();
+//        showFragment(putFrag);
+//
+//        putFrag.getView().findViewById(R.id.appdata_put_delete).performClick();
+//        ShadowHandler.idleMainLooper();;
+//        String s = ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("deleted"));
+//
+//    }
+//
+//    @Test
+//    public void testGet_Get(){
+//        GetFragment getFrag = new GetFragment();
+//        showFragment(getFrag);
+//
+//        getFrag.getView().findViewById(R.id.appdata_get_button).performClick();
+//
+//
+//
+//    }
+//
+//    @Test
+//    public void testQuery_Current(){
+//        QueryFragment queryFrag = new QueryFragment();
+//        showFragment(queryFrag);
+//
+//        queryFrag.getView().findViewById(R.id.appdata_query_current).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//
+//
+//
+//    }
+//
+//    @Test
+//    public void testQuery_NotCurrent(){
+//        QueryFragment queryFrag = new QueryFragment();
+//        showFragment(queryFrag);
+//
+//        queryFrag.getView().findViewById(R.id.appdata_query_not_current).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//    }
+//
+//    @Test
+//    public void testAgg_count(){
+//
+//        AggregateFragment aggFrag = new AggregateFragment();
+//        showFragment(aggFrag);
+//
+//        aggFrag.getView().findViewById(R.id.appdata_agg_count).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//    }
+//
+//    @Test
+//    public void testAgg_sum(){
+//        AggregateFragment aggFrag = new AggregateFragment();
+//        showFragment(aggFrag);
+//
+//        aggFrag.getView().findViewById(R.id.appdata_agg_sum).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//
+//    }
+//
+//    @Test
+//    public void testAgg_min(){
+//
+//        AggregateFragment aggFrag = new AggregateFragment();
+//        showFragment(aggFrag);
+//
+//        aggFrag.getView().findViewById(R.id.appdata_agg_min).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//
+//    }
+//
+//    @Test
+//    public void testAgg_max(){
+//        AggregateFragment aggFrag = new AggregateFragment();
+//        showFragment(aggFrag);
+//
+//        aggFrag.getView().findViewById(R.id.appdata_agg_max).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//
+//    }
+//
+//    @Test
+//    public void testAgg_avg(){
+//        AggregateFragment aggFrag = new AggregateFragment();
+//        showFragment(aggFrag);
+//
+//        aggFrag.getView().findViewById(R.id.appdata_agg_average).performClick();
+//        ShadowHandler.idleMainLooper();
+//        String s= ShadowToast.getTextOfLatestToast();
+//        assertTrue(s.contains("got"));
+//
+//    }
 
 
 
