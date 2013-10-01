@@ -669,6 +669,23 @@ public class User extends GenericJson   {
             this.userID = user.getId();
 
         }
+
+        public User execute() throws IOException {
+
+            User u = super.execute();
+
+            if (u.getId().equals(User.this.getId())){
+                KinveyAuthResponse auth = new KinveyAuthResponse();
+                auth.put("_id", u.get("_id"));
+                auth.put("_kmd", u.get("_kmd"));
+                String userType = client.getClientUsers().getCurrentUserType();
+                return initUser(auth, userType);
+            }else{
+                return u;
+            }
+        }
+
+
     }
 
     /**

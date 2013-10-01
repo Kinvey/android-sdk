@@ -28,6 +28,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.Client;
 import com.kinvey.java.LinkedResources.LinkedFile;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.samples.statusshare.R;
 import com.kinvey.samples.statusshare.StatusShare;
 import com.kinvey.samples.statusshare.model.UpdateEntity;
@@ -152,6 +153,9 @@ public class UpdateEditFragment extends KinveyFragment implements View.OnClickLi
             Log.i(Client.TAG, "there is an attachment!");
             LinkedFile lf = new LinkedFile(filename);
             lf.addExtra("_public", true);
+            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
+            acl.setGloballyReadable(true);
+            lf.addExtra("_acl", acl);
             updateEntity.putFile("attachment", lf);
         }
         final ByteArrayInputStream bais = ((bytes == null) ? null : new ByteArrayInputStream(bytes));
