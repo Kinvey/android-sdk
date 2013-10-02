@@ -82,6 +82,9 @@ public class OfflineHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+        if (newVersion <= oldVersion){
+            return;
+        }
         List<String> collectionTables = getCollectionTables();
         OfflineTable tb;
         for (String s : collectionTables){

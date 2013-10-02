@@ -150,18 +150,7 @@ public class OfflineTable<T extends GenericJson> {
     }
 
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        if (this.TABLE_NAME == null || this.TABLE_NAME == ""){
-            Log.e(TAG, "cannot upgrade a table without a name!");
-            return;
-        }
 
-        Log.w(TAG, String.format("Upgrading database from version %d to %d which will call drop table", oldVersion, newVersion));
-        runCommand(database, "DROP TABLE IF EXISTS " + TABLE_NAME);
-        runCommand(database, "DROP TABLE IF EXISTS " + QUERY_NAME);
-        runCommand(database, "DROP TABLE IF EXISTS " + QUERY_NAME);
-        runCommand(database, "DROP TABLE IF EXISTS " + RESULTS_NAME);
-
-        onCreate(database);
     }
 
 
@@ -220,14 +209,14 @@ public class OfflineTable<T extends GenericJson> {
         values.put(COLUMN_DELETED, 0);
         values.put(COLUMN_USER, client.user().getId());
 
-        Log.e(TAG, "insert entity -> " + jsonResult);
+        //Log.e(TAG, "insert entity -> " + jsonResult);
 
         int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(TABLE_NAME, null, values);
-            Log.v(TAG, "inserting new entity -> " + values.get(COLUMN_JSON));
+            Log.v(TAG, "offline inserting new entity -> " + values.get(COLUMN_JSON));
         }else{
-            Log.v(TAG, "updating entity -> " + values.get(COLUMN_JSON));
+            Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
         }
 
 
@@ -250,8 +239,8 @@ public class OfflineTable<T extends GenericJson> {
      */
     public T getEntity(OfflineHelper helper, AbstractClient client, String id, Class<T> responseClass){
         SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, new String[] {COLUMN_JSON}, COLUMN_ID + "=?",
-                new String[] { id }, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, new String[] {COLUMN_JSON},COLUMN_ID + "='" + id + "'",
+               null, null, null, null, null);
 
 
 
@@ -370,14 +359,6 @@ public class OfflineTable<T extends GenericJson> {
         return ret;
     }
 
-    public void deleteEntity(OfflineHelper helper, String id){
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        db.delete(TABLE_NAME, COLUMN_ID + "=?", new String[]{id});
-        db.close();
-
-    }
-
     /**
      * enqueue a request for later execution
      *
@@ -391,6 +372,7 @@ public class OfflineTable<T extends GenericJson> {
         Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null);
 
         if (c.getCount() == 0){
+            Log.v(TAG, "offline queueing -> " + id);
             ContentValues values = new ContentValues();
             values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
             values.put(COLUMN_ID, id);
@@ -424,9 +406,9 @@ public class OfflineTable<T extends GenericJson> {
                 curKey = c.getString(2);
             }
         c.close();
-        Log.e(TAG, "*** current key is -> " + curKey);
         //remove the popped request
         if (curKey != null){
+            Log.e(TAG, "offline popped queue, current id is: " + ret.getEntityID());
             db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
         }
         db.close();

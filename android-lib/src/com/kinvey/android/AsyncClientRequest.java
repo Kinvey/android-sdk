@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
@@ -89,7 +90,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
      * @return a T object.
      * @throws java.io.IOException if any.
      */
-    protected abstract T executeAsync() throws IOException;
+    protected abstract T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
 
 
     public AsyncTask<Object, Void, T> execute(ExecutorType type, Object... params) {

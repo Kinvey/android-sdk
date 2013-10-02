@@ -149,7 +149,10 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
     @Override
     public T execute() throws IOException{
-        return policy.execute(this);
+
+        T ret =  policy.execute(this);
+        this.store.kickOffSync();
+        return ret;
     }
 
     public KinveyClientCallback<T> getCallback(){

@@ -596,15 +596,9 @@ public class AsyncAppData<T> extends AppData<T> {
         }
 
         @Override
-        public T executeAsync() throws IOException {
-            try{
-                return ((AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args)).execute();
-            }catch (InvocationTargetException e){
-                e.printStackTrace();
-            } catch(IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            return null;
+        public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+
+            return ((AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args)).execute();
 
         }
     }

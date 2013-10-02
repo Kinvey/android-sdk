@@ -35,6 +35,8 @@ public interface OfflineStore<T>  {
 
     public void clearStorage();
 
+    public void kickOffSync();
+
 
 
 }

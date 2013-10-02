@@ -203,7 +203,6 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         for (String collection : collections){
-
             db.delete(OfflineTable.PREFIX_QUEUE + collection, null, null);
             db.delete(OfflineTable.PREFIX_OFFLINE + collection, null, null);
             db.delete(OfflineTable.PREFIX_QUERY + collection, null, null);
@@ -211,12 +210,11 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
         }
 
         db.close();
-
-
     }
 
 
-    private void kickOffSync(){
+    @Override
+    public void kickOffSync(){
         Intent syncIt = new Intent(this.context, KinveySyncService.class);
         syncIt.setAction(KinveySyncService.ACTION_OFFLINE_SYNC);
         this.context.startService(syncIt);

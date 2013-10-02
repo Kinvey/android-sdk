@@ -19,6 +19,7 @@ import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -41,9 +42,7 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.*;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  *
@@ -55,6 +54,8 @@ import java.util.Random;
 public class KinveySyncService extends IntentService {
 
     public static final String ACTION_OFFLINE_SYNC = "com.kinvey.android.ACTION_OFFLINE_SYNC";
+    private static final String shared_pref = "Kinvey_Offline_Sync";
+    private static final String pref_last_failure_at = "last_failure";
 
     //allows clients to bind
     private final IBinder mBinder = new KBinder();
@@ -78,8 +79,8 @@ public class KinveySyncService extends IntentService {
         return mBinder;
     }
 
-    public void ping() {
-        Log.i(TAG, "ping success!");
+    public void pingService() {
+        Log.i(TAG, "\"Hi!\" said the Kinvey Sync Service");
     }
 
     @Override
@@ -127,13 +128,13 @@ public class KinveySyncService extends IntentService {
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
-                    Log.i(TAG, "Logged in as -> " + client.user().getUsername() + "(" + client.user().getId() +")");
+                    Log.i(TAG, "offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
                     getFromStoreAndExecute();
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.e(TAG, "Unable to login from Kinvey Sync Service! -> " + error);
+                    Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> " + error);
                 }
             }).build();
             client.enableDebugLogging();
@@ -153,7 +154,7 @@ public class KinveySyncService extends IntentService {
         for (String s : collectionNames) {
             boolean done = false;
 
-            while (!done){
+            while (!done && saveToAttempExecution()){
                 OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
                 if (req == null){
                     done = true;
@@ -180,9 +181,10 @@ public class KinveySyncService extends IntentService {
                     @Override
                     public void onFailure(Throwable error) {
                         KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                        dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                     }
                 });
+            }else{
+                KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, new NullPointerException());
             }
         } else if (cur.getHttpVerb().equals("GET")){
             client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson>() {
@@ -196,7 +198,6 @@ public class KinveySyncService extends IntentService {
                 @Override
                 public void onFailure(Throwable error) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
@@ -205,13 +206,11 @@ public class KinveySyncService extends IntentService {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
-                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
                     KinveySyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                    dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
                 }
             });
         }else if (cur.getHttpVerb().equals("QUERY")){
@@ -244,7 +243,6 @@ public class KinveySyncService extends IntentService {
         }
     }
 
-    @Deprecated
     private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Throwable error) {
          //  Might want this someday but not yet
 
@@ -253,7 +251,9 @@ public class KinveySyncService extends IntentService {
 
         //if request failed on client side, re-queue it
         if (!success && !(error instanceof HttpResponseException)){
+            Log.i(TAG, "requeing request");
             dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
+            registerFailure();
         }
 
     }
@@ -286,6 +286,55 @@ public class KinveySyncService extends IntentService {
         public KinveySyncService getService(){
             return KinveySyncService.this;
         }
+
+    }
+
+    private HashMap<String, String> getSyncSettings(){
+        HashMap<String, String> ret = new HashMap<String, String>();
+
+        SharedPreferences pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE);
+
+
+
+
+        return ret;
+    }
+
+    /**
+     * @return the time of the last failure, or a safe number if there haven't been any
+     */
+    private Long getLastFailureTime(){
+
+        SharedPreferences pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE);
+        long lastFail = pref.getLong(pref_last_failure_at, Calendar.getInstance().getTimeInMillis() - client.getSyncRate() - 100);
+
+        return lastFail;
+    }
+
+    /**
+     * Register a retryable (client-side) failure time
+     *
+     */
+    private void registerFailure(){
+        Long currentTime = Calendar.getInstance().getTimeInMillis();
+        SharedPreferences.Editor pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+        pref.putLong(pref_last_failure_at, currentTime);
+        pref.commit();
+
+    }
+
+    /**
+     * Comapre current time to last failure and sync rate to determine if sync should occur
+     *
+     * @return
+     */
+    private boolean saveToAttempExecution(){
+        Long currentTime = Calendar.getInstance().getTimeInMillis();
+        Long lastFail = getLastFailureTime();
+
+        boolean safe = ((lastFail + client.getSyncRate()) < currentTime);
+        Log.e("OK", "is it safe -> " + safe);
+        return safe;
 
     }
 

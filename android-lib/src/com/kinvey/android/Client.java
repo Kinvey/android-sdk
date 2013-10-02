@@ -21,10 +21,7 @@ import android.content.Context;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.BackOffPolicy;
-import com.google.api.client.http.ExponentialBackOffPolicy;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.*;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
@@ -94,6 +91,7 @@ public class Client extends AbstractClient {
     private ClientUsers clientUsers;
     private AsyncUser currentUser;
     private AsyncCustomEndpoints customEndpoints;
+    private long syncRate;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -446,6 +444,15 @@ public class Client extends AbstractClient {
     }
 
     /**
+     * How long, in milliseconds, should offline wait before retrying a failed request
+     *
+     * @return the number of milliseconds for offline sync to wait between failures
+     */
+    public long getSyncRate(){
+        return this.syncRate;
+    }
+
+    /**
      * Get a reference to the Application Context used to create this instance of the Client
      * @return {@code null} or the live Application Context
      */
@@ -477,6 +484,7 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean sharedPrefCredentials = false;
         private boolean debugMode = false;
+        private long syncRate = 1000 * 60 * 10; //10 minutes
 
 
         /**
@@ -572,6 +580,10 @@ public class Client extends AbstractClient {
                 this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
+            if (super.getString(Option.SYNC_RATE) != null){
+                this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -629,6 +641,8 @@ public class Client extends AbstractClient {
             if (this.debugMode){
                 client.enableDebugLogging();
             }
+
+            client.syncRate = this.syncRate;
 
             return client;
         }
@@ -755,6 +769,9 @@ public class Client extends AbstractClient {
 
                 @Override
                 public void onFailure(Throwable error) {
+                    if (!(error instanceof HttpResponseException)){
+                        client.user().keepOfflineStorageOnLogout();
+                    }
                     client.user().logout().execute();
                     if (retrieveUserCallback != null){
                         retrieveUserCallback.onFailure(error);

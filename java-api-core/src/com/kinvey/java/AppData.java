@@ -99,6 +99,9 @@ public class AppData<T> {
 
         @Override
         public void clearStorage(){}
+
+        @Override
+        public void kickOffSync() {}
     };
 
 
