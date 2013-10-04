@@ -15,6 +15,7 @@
  */
 package com.kinvey.java.offline;
 
+import com.google.api.client.http.HttpResponseException;
 
 import java.io.IOException;
 
@@ -53,7 +54,16 @@ public enum OfflinePolicy {
     ONLINE_FIRST{
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
-            T ret = offlineRequest.offlineFromService(false);
+            T ret = null;
+        try{
+            ret = offlineRequest.offlineFromService(false);
+        }catch(HttpResponseException e){
+            if (e.getLocalizedMessage().contains("DLC")){
+                throw e;
+            }
+
+        }
+
             if (ret == null){
                 ret = offlineRequest.offlineFromStore();
             }

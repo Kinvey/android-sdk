@@ -214,9 +214,9 @@ public class OfflineTable<T extends GenericJson> {
         int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(TABLE_NAME, null, values);
-            Log.v(TAG, "offline inserting new entity -> " + values.get(COLUMN_JSON));
+            //Log.v(TAG, "offline inserting new entity -> " + values.get(COLUMN_JSON));
         }else{
-            Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
+            //Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
         }
 
 
@@ -278,7 +278,7 @@ public class OfflineTable<T extends GenericJson> {
         Cursor c =  db.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null);
         if (c.moveToFirst() && c.getColumnCount() > 0) {
             String s = c.getString(0);
-            Log.e(TAG, "get query entity -> " + s);
+            //Log.e(TAG, "get query entity -> " + s);
             T[] ret = null;
 
             String[] resultIDs = s.split(",");
@@ -321,14 +321,14 @@ public class OfflineTable<T extends GenericJson> {
 
         values.put(COLUMN_ID, commaDelimitedIds);
 
-        Log.v(TAG, "inserting query: " + queryString);
+       // Log.v(TAG, "inserting query: " + queryString);
 
         int change = db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(QUERY_NAME, null, values);
-            Log.v(TAG, "inserting new query -> " + values.get(COLUMN_ID));
+           // Log.v(TAG, "inserting new query -> " + values.get(COLUMN_ID));
         }else{
-            Log.v(TAG, "updating query -> " + values.get(COLUMN_ID));
+           // Log.v(TAG, "updating query -> " + values.get(COLUMN_ID));
         }
 
         db.close();

@@ -137,7 +137,7 @@ public class KinveySyncService extends IntentService {
                     Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> " + error);
                 }
             }).build();
-            client.enableDebugLogging();
+            //client.enableDebugLogging();
 
 
         } else {
@@ -333,7 +333,7 @@ public class KinveySyncService extends IntentService {
         Long lastFail = getLastFailureTime();
 
         boolean safe = ((lastFail + client.getSyncRate()) < currentTime);
-        Log.e("OK", "is it safe -> " + safe);
+        //Log.e("OK", "is it safe -> " + safe);
         return safe;
 
     }

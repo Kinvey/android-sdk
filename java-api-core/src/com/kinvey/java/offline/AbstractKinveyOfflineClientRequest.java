@@ -134,14 +134,17 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
         T ret = null;
         if(((AbstractClient) getAbstractKinveyClient()).appData(collectionName, getResponseClass()).isOnline()){
             System.out.println("Offline Request - Online execution!");
-            try{
+           
                 ret = super.execute();
                 if (ret != null){
-                    this.store.insertEntity((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), ret);
+                    if (ret.getClass().isArray()){
+                        this.offlineFromStore();
+                    }else{
+                        this.store.insertEntity((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), ret);
+                    }
+
                 }
-            }catch (Exception e){
-                e.printStackTrace();;
-            }
+       
          }
 
         return ret;
@@ -200,7 +203,9 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
     }
 
     public static String getUUID(){
-        return UUID.randomUUID().toString();
+        String id = UUID.randomUUID().toString();
+        String ret = id.replace("-", "");
+        return ret;
 
     }
 
