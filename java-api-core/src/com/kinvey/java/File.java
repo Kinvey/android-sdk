@@ -91,7 +91,7 @@ import com.kinvey.java.query.AbstractQuery;
  * @author edwardf
  * @since 2.4
  */
-public abstract class File {
+public class File {
 
     /** the client for this api **/
     private AbstractClient client;

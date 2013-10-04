@@ -13,18 +13,36 @@
  */
 package com.kinvey.java;
 
-import com.google.api.client.http.BackOffPolicy;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
+import android.content.Context;
+import android.util.Log;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonObjectParser;
-import com.kinvey.java.auth.ClientUsers;
-import com.kinvey.java.auth.CredentialStore;
+import com.google.common.base.Preconditions;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
+import com.kinvey.java.auth.*;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author edwardf
  */
 public class Client extends AbstractClient{
+
+
+    private ConcurrentHashMap<String, AppData> appDataInstanceCache;
+    private ConcurrentHashMap<String, LinkedData> linkedDataInstanceCache;
+
+    private UserDiscovery userDiscovery;
+    private File file;
+    private UserGroup userGroup;
+    private ClientUsers clientUsers;
+    private User currentUser;
+    private CustomEndpoints customEndpoints;
 
 
     /**
@@ -41,34 +59,455 @@ public class Client extends AbstractClient{
     protected Client(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store, BackOffPolicy requestPolicy) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy);
     }
-
-    @Override
+    /**
+     * AppData factory method
+     * <p>
+     * Returns an instance of {@link com.kinvey.java.AppData} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of {@link AppData} is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.AppData}.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     * {@code
+    AppData<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
+    }
+     * </pre>
+     * </p>
+     *
+     * @param collectionName The name of the collection
+     * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
+     *                for saving and fetching of data
+     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @return Instance of {@link com.kinvey.java.AppData} for the defined collection
+     */
     public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
+            if (appDataInstanceCache == null) {
+                appDataInstanceCache = new ConcurrentHashMap<String, AppData>();
+            }
+            if (!appDataInstanceCache.containsKey(collectionName)) {
+                appDataInstanceCache.put(collectionName, new AppData(collectionName, myClass, this));
+            }
+            if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
+                appDataInstanceCache.put(collectionName, new AppData(collectionName, myClass, this));
+            }
+
+            return appDataInstanceCache.get(collectionName);
+        }
     }
 
+    /**
+     * LinkedData factory method
+     * <p>
+     * Returns an instance of {@link LinkedData} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of LinkedData is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.kinvey.java.LinkedResources.LinkedGenericJson} entity type that is used for fetching/saving of {@link LinkedData}.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     * {@code
+    LinkedData<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
+    }
+     * </pre>
+     * </p>
+     *
+     * @param collectionName The name of the collection
+     * @param myClass The class that defines the entity of type {@link com.kinvey.java.LinkedResources.LinkedGenericJson} used for saving and fetching of data
+     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @return Instance of {@link LinkedData} for the defined collection
+     */
+    public <T extends LinkedGenericJson> LinkedData<T> linkedData(String collectionName, Class<T> myClass) {
+        synchronized (lock) {
+            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
+            if (linkedDataInstanceCache == null) {
+                linkedDataInstanceCache = new ConcurrentHashMap<String, LinkedData>();
+            }
+            if (!linkedDataInstanceCache.containsKey(collectionName)) {
+                linkedDataInstanceCache.put(collectionName, new LinkedData(collectionName, myClass, this));
+            }
+            return linkedDataInstanceCache.get(collectionName);
+        }
+    }
+
+
+    /**
+     * File factory method
+     * <p>
+     * Returns an instance of {@link com.kinvey.java.File} for uploading and downloading of files.  Only one instance is created for each
+     * instance of the Kinvey client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     * {@code
+    File myFile = kinveyClient.file();
+    }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.File} for the defined collection
+     */
     @Override
     public File file() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            if (file == null) {
+                file = new File(this);
+            }
+            return file;
+        }
     }
 
+    /**
+     * Custom Endpoints factory method
+     *<p>
+     * Returns the instance of {@link com.kinvey.java.CustomEndpoints} used for executing RPC requests.  Only one instance
+     * of Custom Endpoints is created for each instance of the Kinvey Client.
+     *</p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+     CustomEndpoints myCustomEndpoints = kinveyClient.customEndpoints();
+     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
+     */
+    @Override
+    public CustomEndpoints customEndpoints(){
+        synchronized (lock){
+            if (customEndpoints == null){
+                customEndpoints = new CustomEndpoints(this);
+            }
+            return customEndpoints;
+        }
+    }
+
+    /**
+     * UserDiscovery factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.UserDiscovery} used for searching for users. Only one instance of
+     * UserDiscovery is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+     UserDiscovery myUserDiscovery = kinveyClient.userDiscovery();
+     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
+     */
     @Override
     public UserDiscovery userDiscovery() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            if (userDiscovery == null) {
+                userDiscovery = new UserDiscovery(this,
+                        (KinveyClientRequestInitializer) this.getKinveyRequestInitializer());
+            }
+            return userDiscovery;
+        }
     }
 
+    /**
+     * UserGroup factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.UserGroup} used for managing user groups. Only one instance of
+     * UserGroup is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+     UserGroup myUserGroup = kinveyClient.userGroup();
+     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserGroup} for the defined collection
+     */
     @Override
     public UserGroup userGroup() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            if (userGroup == null) {
+                userGroup = new UserGroup(this,
+                        (KinveyClientRequestInitializer) this.getKinveyRequestInitializer());
+            }
+            return userGroup;
+        }
+
     }
 
+    /** {@inheritDoc} */
     @Override
     protected ClientUsers getClientUsers() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        synchronized (lock) {
+            if (this.clientUsers == null) {
+                this.clientUsers = JavaClientUsers.getClientUsers();
+            }
+            return this.clientUsers;
+        }
+
     }
 
-    @Override
-    public CustomEndpoints customEndpoints() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+
+    /**
+     * User factory method
+     * <p>
+     * Returns the instance of {@link com.kinvey.java.User} that contains the current active user.  If no active user context
+     * has been established, the {@link com.kinvey.java.User} object returned will be instantiated and empty.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     * {@code
+    User currentUser = kinveyClient.currentUser();
     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.User} for the defined collection
+     */
+    @Override
+    public User user() {
+        synchronized (lock) {
+            if (getCurrentUser() == null) {
+                String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
+                String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+                setCurrentUser(new User(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
+                        getBaseUrl(), appKey, appSecret, null)));
+            }
+            return (User) getCurrentUser();
+        }
+    }
+
+    /**
+     * Asynchronous Ping service method
+     * <p>
+     * Performs an authenticated ping against the configured Kinvey backend.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     {@code
+     boolean ping = kinveyClient.ping().execute();
+     }
+     * </pre>
+     * </p>
+     * @return true if ping is successful, false if it fails
+     */
+    public boolean ping() {
+        try{
+            Util util = new Util(this);
+            return util.pingBlocking().executeUnparsed().getStatusCode() == 200;
+        }catch(IOException e){
+            return false;
+        }
+
+    }
+
+
+    /**
+     * Create a client for interacting with Kinvey's services from an Android Activity.
+     * <pre>
+     * {@code
+     * Client myClient =  new Client.Builder(appKey, appSecret, getContext()).build();
+     * }
+     * <pre/>
+     * All features of the library are be accessed through an instance of a client.
+     * <p/>
+     * It is recommended to maintain a single instance of a {@code Client} while developing with Kinvey, either in an
+     * Activity, a Service, or an Application.
+     * <p/>
+     * This Builder class is not thread-safe.
+     */
+    public static class Builder extends AbstractClient.Builder {
+
+        private boolean debugMode = false;
+
+
+        /**
+         * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
+         * set for the Java runtime.
+         *
+         * @param appKey Your Kinvey Application Key
+         * @param appSecret Your Kinvey Application Secret
+         */
+        public Builder(String appKey, String appSecret) {
+            super(new NetHttpTransport(), JavaJson.newCompatibleJsonFactory(), null
+                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders()));
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+            try {
+                this.setCredentialStore(new JavaCredentialStore());
+            } catch (Exception ex) {
+                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
+            }
+
+
+
+        }
+
+
+        /**
+         * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
+         * set for the Android Operating System.
+         * <p>
+         * This constructor requires a  properties file, containing configuration for your Kinvey Client.
+         * Save this file within your Android project, at:  assets/kinvey.properties
+         * </p>
+         * <p>
+         * This constructor provides support for push notifications.
+         * </p>
+         * <p>
+         * <a href="http://devcenter.kinvey.com/android/guides/getting-started#InitializeClient">Kinvey Guide for initializing Client with a properties file.</a>
+         * </p>
+         *
+         * @param context - Your Android Application Context
+         *
+         */
+        public Builder(Context context) {
+            super(AndroidHttp.newCompatibleTransport(), JavaJson.newCompatibleJsonFactory(), null);
+
+            try {
+                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
+
+                super.getProps().load(in);
+            } catch (IOException e) {
+                System.out.println("KINVEY" +  "Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                super.loadPropertiesFromDisk(getPropertyFile());
+            } catch (NullPointerException ex){
+                System.out.println("KINVEY" +  "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                System.out.println("KINVEY" +  "If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+            }
+
+            if (super.getString(Option.BASE_URL) != null) {
+                this.setBaseUrl(super.getString(Option.BASE_URL));
+            }
+
+            if (super.getString(Option.PORT) != null){
+                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.DEBUG_MODE) != null){
+                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
+            }
+
+            String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
+            String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
+
+            KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders());
+            this.setKinveyClientRequestInitializer(initializer);
+
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+//            try {
+                    this.setCredentialStore(new JavaCredentialStore());
+//            } catch (IOException ex) {
+//                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
+//            }
+
+
+        }
+
+
+        /**
+         * @return an instantiated Kinvey Android Client,
+         * which contains factory methods for accessing various functionality.
+         */
+        @Override
+        public Client build() {
+            final Client client = new Client(getTransport(),
+                    getHttpRequestInitializer(), getBaseUrl(),
+                    getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
+                    getRequestBackoffPolicy());
+            client.clientUsers = JavaClientUsers.getClientUsers();
+            try {
+                Credential credential = retrieveUserFromCredentialStore(client);
+                if (credential != null) {
+                    loginWithCredential(client, credential);
+                }
+            } catch (IOException ex) {
+                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
+                client.setCurrentUser(null);
+            }
+
+
+            if (this.debugMode){
+                client.enableDebugLogging();
+            }
+
+            return client;
+        }
+
+        private Credential retrieveUserFromCredentialStore(Client client)
+                throws IOException {
+            Credential credential = null;
+            if (!client.user().isUserLoggedIn()) {
+                String userID = client.getClientUsers().getCurrentUser();
+                if (userID != null && !userID.equals("")) {
+                    CredentialStore store;
+                    store = new JavaCredentialStore();
+
+                    CredentialManager manager = new CredentialManager(store);
+                    credential = manager.loadCredential(userID);
+                }
+            }
+            return credential;
+        }
+
+        private void loginWithCredential(final Client client, Credential credential) {
+            getKinveyClientRequestInitializer().setCredential(credential);
+            try {
+                client.user().login(credential).execute();
+            } catch (IOException ex) {
+                System.out.println("KINVEY" + "Could not retrieve user Credentials");
+            }
+
+            try{
+            client.setCurrentUser(client.user().retrieveMetadataBlocking());
+            }catch (IOException ex){
+                System.out.println("KINVEY" +  "Unable to login!" + ex);
+            }
+        }
+
+        /**
+         * The default kinvey settings filename {@code kinvey.properties}
+         *
+         * @return {@code kinvey.properties}
+         */
+        protected static String getPropertyFile() {
+            return "kinvey.properties";
+        }
+
+
+    }
+
+
 }
