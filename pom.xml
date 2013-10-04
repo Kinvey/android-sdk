@@ -23,6 +23,7 @@
     <modules>
         <module>java-api-core</module>
         <module>android-lib</module>
+        <module>java-lib</module>
         <module>samples</module>
     </modules>
 
