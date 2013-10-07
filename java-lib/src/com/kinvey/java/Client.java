@@ -35,13 +35,11 @@ public class Client extends AbstractClient{
 
 
     private ConcurrentHashMap<String, AppData> appDataInstanceCache;
-    private ConcurrentHashMap<String, LinkedData> linkedDataInstanceCache;
 
     private UserDiscovery userDiscovery;
-    private File file;
+    //private File file;
     private UserGroup userGroup;
     private ClientUsers clientUsers;
-    private User currentUser;
     private CustomEndpoints customEndpoints;
 
 
@@ -102,44 +100,6 @@ public class Client extends AbstractClient{
     }
 
     /**
-     * LinkedData factory method
-     * <p>
-     * Returns an instance of {@link LinkedData} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of LinkedData is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.kinvey.java.LinkedResources.LinkedGenericJson} entity type that is used for fetching/saving of {@link LinkedData}.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-    LinkedData<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
-    }
-     * </pre>
-     * </p>
-     *
-     * @param collectionName The name of the collection
-     * @param myClass The class that defines the entity of type {@link com.kinvey.java.LinkedResources.LinkedGenericJson} used for saving and fetching of data
-     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link LinkedData} for the defined collection
-     */
-    public <T extends LinkedGenericJson> LinkedData<T> linkedData(String collectionName, Class<T> myClass) {
-        synchronized (lock) {
-            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
-            if (linkedDataInstanceCache == null) {
-                linkedDataInstanceCache = new ConcurrentHashMap<String, LinkedData>();
-            }
-            if (!linkedDataInstanceCache.containsKey(collectionName)) {
-                linkedDataInstanceCache.put(collectionName, new LinkedData(collectionName, myClass, this));
-            }
-            return linkedDataInstanceCache.get(collectionName);
-        }
-    }
-
-
-    /**
      * File factory method
      * <p>
      * Returns an instance of {@link com.kinvey.java.File} for uploading and downloading of files.  Only one instance is created for each
@@ -161,12 +121,14 @@ public class Client extends AbstractClient{
      */
     @Override
     public File file() {
-        synchronized (lock) {
-            if (file == null) {
-                file = new File(this);
-            }
-            return file;
-        }
+        throw new UnsupportedOperationException("File has not yet been implemented for the java client!");
+
+//        synchronized (lock) {
+//            if (file == null) {
+//                file = new File(this);
+//            }
+//            return file;
+//        }
     }
 
     /**
@@ -267,7 +229,7 @@ public class Client extends AbstractClient{
     protected ClientUsers getClientUsers() {
         synchronized (lock) {
             if (this.clientUsers == null) {
-                this.clientUsers = JavaClientUsers.getClientUsers();
+                this.clientUsers = InMemoryClientUsers.getClientUsers();
             }
             return this.clientUsers;
         }
@@ -304,7 +266,7 @@ public class Client extends AbstractClient{
                 setCurrentUser(new User(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
                         getBaseUrl(), appKey, appSecret, null)));
             }
-            return (User) getCurrentUser();
+            return getCurrentUser();
         }
     }
 
@@ -365,7 +327,7 @@ public class Client extends AbstractClient{
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders()));
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
             try {
-                this.setCredentialStore(new JavaCredentialStore());
+                this.setCredentialStore(new InMemoryCredentialStore());
             } catch (Exception ex) {
                 System.out.println("KINVEY" +  "Credential store failed to load" + ex);
             }
@@ -375,66 +337,6 @@ public class Client extends AbstractClient{
         }
 
 
-        /**
-         * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
-         * set for the Android Operating System.
-         * <p>
-         * This constructor requires a  properties file, containing configuration for your Kinvey Client.
-         * Save this file within your Android project, at:  assets/kinvey.properties
-         * </p>
-         * <p>
-         * This constructor provides support for push notifications.
-         * </p>
-         * <p>
-         * <a href="http://devcenter.kinvey.com/android/guides/getting-started#InitializeClient">Kinvey Guide for initializing Client with a properties file.</a>
-         * </p>
-         *
-         * @param context - Your Android Application Context
-         *
-         */
-        public Builder(Context context) {
-            super(AndroidHttp.newCompatibleTransport(), JavaJson.newCompatibleJsonFactory(), null);
-
-            try {
-                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
-
-                super.getProps().load(in);
-            } catch (IOException e) {
-                System.out.println("KINVEY" +  "Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getPropertyFile());
-            } catch (NullPointerException ex){
-                System.out.println("KINVEY" +  "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                System.out.println("KINVEY" +  "If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
-                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-            }
-
-            if (super.getString(Option.BASE_URL) != null) {
-                this.setBaseUrl(super.getString(Option.BASE_URL));
-            }
-
-            if (super.getString(Option.PORT) != null){
-                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
-            }
-
-            if (super.getString(Option.DEBUG_MODE) != null){
-                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
-            }
-
-            String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
-            String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
-
-            KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders());
-            this.setKinveyClientRequestInitializer(initializer);
-
-            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-//            try {
-                    this.setCredentialStore(new JavaCredentialStore());
-//            } catch (IOException ex) {
-//                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
-//            }
-
-
-        }
 
 
         /**
@@ -447,7 +349,7 @@ public class Client extends AbstractClient{
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy());
-            client.clientUsers = JavaClientUsers.getClientUsers();
+            client.clientUsers = InMemoryClientUsers.getClientUsers();
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
@@ -473,7 +375,7 @@ public class Client extends AbstractClient{
                 String userID = client.getClientUsers().getCurrentUser();
                 if (userID != null && !userID.equals("")) {
                     CredentialStore store;
-                    store = new JavaCredentialStore();
+                    store = new InMemoryCredentialStore();
 
                     CredentialManager manager = new CredentialManager(store);
                     credential = manager.loadCredential(userID);
@@ -497,14 +399,7 @@ public class Client extends AbstractClient{
             }
         }
 
-        /**
-         * The default kinvey settings filename {@code kinvey.properties}
-         *
-         * @return {@code kinvey.properties}
-         */
-        protected static String getPropertyFile() {
-            return "kinvey.properties";
-        }
+
 
 
     }
