@@ -30,12 +30,18 @@ import com.kinvey.sample.kitchensink.UseCaseFragment;
  */
 public class EndpointFragment  extends UseCaseFragment implements View.OnClickListener {
     private Button hitIt;
+    private Button typedArray;
+    private Button typed;
     private TextView results;
 
     @Override
     public void onClick(View v) {
         if (v == hitIt){
             hitTheEndpoint();
+        }else if (v == typedArray){
+            hitTypedEndpoint();
+        }else if (v == typed){
+            hitSingleEndpoint();
         }
 
     }
@@ -49,7 +55,11 @@ public class EndpointFragment  extends UseCaseFragment implements View.OnClickLi
     public void bindViews(View v) {
         hitIt = (Button) v.findViewById(R.id.endpoint_basic_hitit);
         results = (TextView) v.findViewById(R.id.endpoint_basic_result);
+        typedArray = (Button) v.findViewById(R.id.endpoint_typed_hitit);
+        typed = (Button) v.findViewById(R.id.endpoint_typed_single_hitit);
 
+        typed.setOnClickListener(this);
+        typedArray.setOnClickListener(this);
         hitIt.setOnClickListener(this);
 
     }
@@ -78,5 +88,56 @@ public class EndpointFragment  extends UseCaseFragment implements View.OnClickLi
             }
         });
 
+    }
+
+    private void hitTypedEndpoint(){
+        AsyncCustomEndpoints<MyRequestClass, MyResponseClass> endpoints = getClient().customEndpoints(MyResponseClass.class);
+        endpoints.callEndpoint("doit", new MyRequestClass(), new KinveyListCallback<MyResponseClass>() {
+            @Override
+            public void onSuccess(MyResponseClass[] result) {
+                if (result == null){
+                    results.setText("nope, got null back!");
+                }else{
+                    results.setText(result[0].toString()) ;
+
+                }
+            }
+            @Override
+            public void onFailure(Throwable error) {
+                results.setText("Uh oh -> " + error);
+            }
+        });
+
+
+    }
+
+
+    private void hitSingleEndpoint(){
+        AsyncCustomEndpoints<MyRequestClass, MyResponseClass> endpoints = getClient().customEndpoints(MyResponseClass.class);
+        endpoints.callEndpoint("doitSingle", new MyRequestClass(), new KinveyClientCallback<MyResponseClass>() {
+            @Override
+            public void onSuccess(MyResponseClass result) {
+                if (result == null){
+                    results.setText("nope, got null back!");
+                }else{
+                    results.setText(result.toString()) ;
+
+                }
+            }
+            @Override
+            public void onFailure(Throwable error) {
+                results.setText("Uh oh -> " + error);
+            }
+        });
+
+
+    }
+
+    public static class MyRequestClass extends GenericJson{
+        public MyRequestClass(){}
+    }
+
+    public static class MyResponseClass extends GenericJson{
+        public MyResponseClass(){}
     }
 }

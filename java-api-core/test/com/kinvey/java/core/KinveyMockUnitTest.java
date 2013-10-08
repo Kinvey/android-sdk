@@ -17,6 +17,7 @@ package com.kinvey.java.core;
 
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
@@ -62,10 +63,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        @Override
-        public CustomEndpoints customEndpoints(){
-            return null;
-        }
+
 
         @Override
         public UserDiscovery userDiscovery() {
@@ -79,6 +77,11 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
         @Override
         public ClientUsers getClientUsers() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public <I extends GenericJson, O extends GenericJson> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 

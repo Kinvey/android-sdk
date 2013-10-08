@@ -16,6 +16,7 @@
 package com.kinvey.java;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -26,6 +27,7 @@ import java.lang.reflect.Array;
 import com.kinvey.java.auth.*;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.model.KinveyMetaData;
 
 /**
  *
@@ -132,7 +134,7 @@ public class User extends GenericJson   {
      * @return true if user is logged in, false if not
      */
     public boolean isUserLoggedIn() {
-        return (this.id != null || this.authToken != null || this.username != null);
+        return (this.id != null || this.authToken != null);
     }
 
     /**
@@ -147,7 +149,9 @@ public class User extends GenericJson   {
         this.setId(response.getUserId());
         this.put("_kmd",response.getMetadata());
         this.putAll(response.getUnknownKeys());
-        this.setUsername(response.get("username").toString());
+        if (response.containsKey("username")){
+            this.setUsername(response.get("username").toString());
+        }
         this.setAuthToken(response.getAuthToken());
         CredentialManager credentialManager = new CredentialManager(client.getStore());
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer())
@@ -677,7 +681,17 @@ public class User extends GenericJson   {
             if (u.getId().equals(User.this.getId())){
                 KinveyAuthResponse auth = new KinveyAuthResponse();
                 auth.put("_id", u.get("_id"));
-                auth.put("_kmd", u.get("_kmd"));
+                KinveyAuthResponse.KinveyUserMetadata kmd = new KinveyAuthResponse.KinveyUserMetadata();
+                kmd.put("lmt", u.get("_kmd.lmt")) ;
+                kmd.put("authtoken", u.get("_kmd.authtoken"));
+                kmd.putAll((ArrayMap) u.get("_kmd"));
+                auth.put("_kmd", kmd);
+                auth.put("username", u.get("username"));
+                for (String key : u.keySet()){
+                    if (!key.equals("_kmd")){
+                        auth.put(key, u.get(key));
+                    }
+                }
                 String userType = client.getClientUsers().getCurrentUserType();
                 return initUser(auth, userType);
             }else{

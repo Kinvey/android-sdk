@@ -18,6 +18,7 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
@@ -144,20 +145,16 @@ public class Client extends AbstractClient{
      *     Sample Usage:
      * <pre>
      {@code
-     CustomEndpoints myCustomEndpoints = kinveyClient.customEndpoints();
+     AsyncCustomEndpoints<MyRequestClass, MyResponseClass> endpoints = getClient().customEndpoints(MyResponseClass.class);
      }
      * </pre>
      * </p>
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    @Override
-    public CustomEndpoints customEndpoints(){
-        synchronized (lock){
-            if (customEndpoints == null){
-                customEndpoints = new CustomEndpoints(this);
-            }
-            return customEndpoints;
+    public <I extends GenericJson, O extends GenericJson> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        synchronized (lock) {
+            return new CustomEndpoints(myClass, this);
         }
     }
 

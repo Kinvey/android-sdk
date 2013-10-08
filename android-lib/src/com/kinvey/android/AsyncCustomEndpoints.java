@@ -49,7 +49,7 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0.2
  */
-public class AsyncCustomEndpoints extends CustomEndpoints {
+public class AsyncCustomEndpoints<I extends GenericJson, O extends GenericJson> extends CustomEndpoints<I, O> {
 
     /**
      * Constructor for this Asyncronous Custom Endpoint class
@@ -60,6 +60,10 @@ public class AsyncCustomEndpoints extends CustomEndpoints {
         super(client);
     }
 
+    public AsyncCustomEndpoints(Class<O> responseClass, AbstractClient client){
+        super(responseClass, client);
+    }
+
 
     /**
      * Execute a Custom Endpoint which will return a single JSON object
@@ -68,7 +72,7 @@ public class AsyncCustomEndpoints extends CustomEndpoints {
      * @param input - any required input, can be {@code null}
      * @param callback - get results of the command as a single JSON object
      */
-    public void callEndpoint(String commandName, GenericJson input, KinveyClientCallback callback){
+    public void callEndpoint(String commandName, I input, KinveyClientCallback callback){
         new AsyncCommand(commandName, input, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -79,44 +83,46 @@ public class AsyncCustomEndpoints extends CustomEndpoints {
      * @param input - any required input, can be {@code null}
      * @param callback - get results of the command as an array of JSON objects.
      */
-    public void callEndpoint(String commandName, GenericJson input, KinveyListCallback callback){
+    public void callEndpoint(String commandName, I input, KinveyListCallback callback){
         new AsyncCommandArray(commandName, input, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
 
 
-    private class AsyncCommand extends AsyncClientRequest<GenericJson> {
+
+
+    private class AsyncCommand extends AsyncClientRequest<O> {
 
         private String commandName;
-        private GenericJson input;
+        private I input;
 
-        public AsyncCommand(String commandName, GenericJson input, KinveyClientCallback callback) {
+        public AsyncCommand(String commandName, I input, KinveyClientCallback callback) {
             super(callback);
             this.commandName = commandName;
             this.input = input;
         }
 
         @Override
-        protected GenericJson executeAsync() throws IOException {
+        protected O executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointBlocking(commandName, input).execute();
         }
 
     }
 
-    private class AsyncCommandArray extends AsyncClientRequest<GenericJson[]> {
+    private class AsyncCommandArray extends AsyncClientRequest<O[]> {
 
         private String commandName;
-        private GenericJson input;
+        private I input;
 
-        public AsyncCommandArray(String commandName, GenericJson input, KinveyListCallback callback) {
+        public AsyncCommandArray(String commandName, I input, KinveyListCallback callback) {
             super(callback);
             this.commandName = commandName;
             this.input = input;
         }
 
         @Override
-        protected GenericJson[] executeAsync() throws IOException {
+        protected O[] executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
         }
 

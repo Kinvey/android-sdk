@@ -55,11 +55,23 @@ public class UpdateFragment extends UseCaseFragment implements View.OnClickListe
     private void performUserUpdate(){
 
         AsyncUser user = getApplicationContext().getClient().user();
-        user.put("last_name", "Smith");
+        user.put("email", "Smith@ks.com");
         user.update(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 Toast.makeText(getSherlockActivity(), "updated user!", Toast.LENGTH_SHORT).show();
+
+                AsyncUser user = getApplicationContext().getClient().user();
+                user.put("last_name", "Smith");
+                user.update(new KinveyUserCallback(){
+                    @Override
+                    public void onSuccess(User result) {
+                        Toast.makeText(getSherlockActivity(), "updated user again!!", Toast.LENGTH_SHORT).show();                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        Toast.makeText(getSherlockActivity(), "updating user failed -> " + error, Toast.LENGTH_SHORT).show();                    }
+                });
             }
 
             @Override
@@ -111,9 +123,10 @@ public class UpdateFragment extends UseCaseFragment implements View.OnClickListe
     @Override
     public void onClick(View view) {
         if (view == updateOther){
-            performUserUpdate();
-        }else if (view == updateCurrent){
             lookupAndUpdate();
+        }else if (view == updateCurrent){
+            performUserUpdate();
+
         }
     }
 }

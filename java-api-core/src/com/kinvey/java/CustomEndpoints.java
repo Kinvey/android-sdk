@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 
 /**
  * Class for managing access to custom endpoints.
@@ -31,9 +32,10 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0.2
  */
-public class CustomEndpoints {
+public class CustomEndpoints<I extends GenericJson, O extends GenericJson> {
 
     private AbstractClient client;
+    private Class<O> currentResponseClass;
 
     /**
      * Create a new instance, should only be called by an {@link AbstractClient}.
@@ -41,6 +43,12 @@ public class CustomEndpoints {
      */
     public CustomEndpoints(AbstractClient client){
         this.client = client;
+    }
+
+    public CustomEndpoints(Class<O> responseClass, AbstractClient client){
+        this.client = client;
+        this.currentResponseClass = responseClass;
+
     }
 
     /**
@@ -51,12 +59,9 @@ public class CustomEndpoints {
      * @return a CustomCommand request ready to be executed.
      * @throws IOException
      */
-    public CustomCommand callEndpointBlocking(String endpoint, GenericJson input) throws IOException{
+    public CustomCommand callEndpointBlocking(String endpoint, I input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
-        if (input == null){
-            input = new GenericJson();
-        }
-        CustomCommand command = new CustomCommand(endpoint, input,  GenericJson.class);
+        CustomCommand command = new CustomCommand(endpoint, input,  currentResponseClass);
         client.initializeRequest(command);
         return command;
     }
@@ -69,29 +74,29 @@ public class CustomEndpoints {
      * @return a CustomCommand ready to be executed
      * @throws IOException
      */
-    public CustomCommandArray callEndpointArrayBlocking(String endpoint, GenericJson input) throws IOException{
+    public CustomCommandArray callEndpointArrayBlocking(String endpoint, I input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
-        if (input == null){
-            input = new GenericJson();
-        }
-        CustomCommandArray command = new CustomCommandArray(endpoint, input,  GenericJson[].class);
+        CustomCommandArray command = new CustomCommandArray(endpoint, input,  Array.newInstance(currentResponseClass, 0).getClass());
         client.initializeRequest(command);
         return command;
     }
 
+    public Class<O> getCurrentResponseClass(){
+        return currentResponseClass;
+    }
 
     /**
      * A JSON client request which executes against a custom endpoint returning a single JSON object.
      *
      */
-    protected class CustomCommand extends AbstractKinveyJsonClientRequest<GenericJson> {
+    public class CustomCommand extends AbstractKinveyJsonClientRequest<O> {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key
         private String endpoint;
 
 
-        CustomCommand(String commandName, GenericJson args, Class responseClass) {
+        CustomCommand(String commandName, I args, Class<O> responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
         }
@@ -102,14 +107,14 @@ public class CustomEndpoints {
      * A JSON client request which executes against a custom endpoint returning an array.
      *
      */
-    protected class CustomCommandArray extends AbstractKinveyJsonClientRequest<GenericJson[]> {
+    public class CustomCommandArray extends AbstractKinveyJsonClientRequest<O[]> {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key
         private String endpoint;
 
 
-        CustomCommandArray(String commandName, GenericJson args, Class responseClass) {
+        CustomCommandArray(String commandName, I args, Class responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
         }

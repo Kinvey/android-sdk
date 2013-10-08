@@ -22,6 +22,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.*;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
@@ -84,13 +85,15 @@ public class Client extends AbstractClient {
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
     private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
+    private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
+    private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncFile file;
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
     private AsyncUser currentUser;
-    private AsyncCustomEndpoints customEndpoints;
+//    private AsyncCustomEndpoints customEndpoints;
     private long syncRate;
 
     /**
@@ -257,13 +260,35 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    @Override
+    @Deprecated
     public AsyncCustomEndpoints customEndpoints(){
         synchronized (lock){
-            if (customEndpoints == null){
-                customEndpoints = new AsyncCustomEndpoints(this);
-            }
-            return customEndpoints;
+            return  new AsyncCustomEndpoints(GenericJson.class, this);
+        }
+    }
+    /**
+     * Custom Endpoints factory method
+     *<p>
+     * Returns the instance of {@link com.kinvey.java.CustomEndpoints} used for executing RPC requests.  Only one instance
+     * of Custom Endpoints is created for each instance of the Kinvey Client.
+     *</p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+     AsyncCustomEndpoints<MyRequestClass, MyResponseClass> endpoints = getClient().customEndpoints(MyResponseClass.class);
+     }
+     * </pre>
+     * </p>
+     *
+     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
+     */
+    public <I extends GenericJson, O extends GenericJson> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        synchronized (lock) {
+            return new AsyncCustomEndpoints(myClass, this);
         }
     }
 
