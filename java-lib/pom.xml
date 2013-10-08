@@ -176,7 +176,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.7</version>
@@ -187,9 +187,7 @@
                         <version>1.0.6a</version>
                     </docletArtifact>
                     <doclet>com.google.doclava.Doclava</doclet>
-                    <!--
-                      | bootclasspath required by Sun's JVM
-                    -->
+
                     <bootclasspath>${sun.boot.class.path}</bootclasspath>
                     <additionalparam>
                         -hdf project.name "${project.name}"
@@ -200,14 +198,14 @@
                         -d ${project.build.directory}/apidocs
                     </additionalparam>
                     <useStandardDocletOptions>false</useStandardDocletOptions>
-                    <!--
-                      | Apple's JVM sometimes requires more memory
-                    -->
+
+
+
                     <additionalJOption>-J-Xmx1024m</additionalJOption>
                     <overview>src/javadoc/overview.html</overview>
                     <show>public</show>
                 </configuration>
-            </plugin>
+            </plugin>       -->
 
            <!--  <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
