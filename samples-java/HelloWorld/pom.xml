@@ -5,7 +5,7 @@
 
 	<artifactId>HelloWorld-Java</artifactId>
 	<name>Sample: HelloWorld</name>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<parent>
 		<groupId>com.kinvey</groupId>
