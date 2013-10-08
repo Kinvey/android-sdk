@@ -56,10 +56,17 @@ public class AsyncCustomEndpoints<I extends GenericJson, O extends GenericJson> 
      *
      * @param client
      */
+    @Deprecated
     public AsyncCustomEndpoints(AbstractClient client) {
         super(client);
     }
 
+    /**
+     * Constructor for this Asyncronous Custom Endpoint class
+     *
+     * @param responseClass the class of the expected resposne object
+     * @param client an active logged in client
+     */
     public AsyncCustomEndpoints(Class<O> responseClass, AbstractClient client){
         super(responseClass, client);
     }

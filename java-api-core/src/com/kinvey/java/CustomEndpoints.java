@@ -45,6 +45,12 @@ public class CustomEndpoints<I extends GenericJson, O extends GenericJson> {
         this.client = client;
     }
 
+    /**
+     * Create a new instance, should only be called by an {@link AbstractClient}
+     *
+     * @param responseClass the class of the response object
+     * @param client - an active logged in client
+     */
     public CustomEndpoints(Class<O> responseClass, AbstractClient client){
         this.client = client;
         this.currentResponseClass = responseClass;
