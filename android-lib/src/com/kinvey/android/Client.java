@@ -794,13 +794,13 @@ public class Client extends AbstractClient {
 
                 @Override
                 public void onFailure(Throwable error) {
-                    if (!(error instanceof HttpResponseException)){
-                        client.user().keepOfflineStorageOnLogout();
+                    if ((error instanceof HttpResponseException)){
+                        client.user().logout().execute();
                     }
-                    client.user().logout().execute();
                     if (retrieveUserCallback != null){
                         retrieveUserCallback.onFailure(error);
                     }
+
                 }
             });
         }
