@@ -38,10 +38,9 @@ public class Client extends AbstractClient{
     private ConcurrentHashMap<String, AppData> appDataInstanceCache;
 
     private UserDiscovery userDiscovery;
-    //private File file;
+    private File file;
     private UserGroup userGroup;
     private ClientUsers clientUsers;
-    private CustomEndpoints customEndpoints;
 
 
     /**
@@ -122,14 +121,12 @@ public class Client extends AbstractClient{
      */
     @Override
     public File file() {
-        throw new UnsupportedOperationException("File has not yet been implemented for the java client!");
-
-//        synchronized (lock) {
-//            if (file == null) {
-//                file = new File(this);
-//            }
-//            return file;
-//        }
+        synchronized (lock) {
+            if (file == null) {
+                file = new File(this);
+            }
+            return file;
+        }
     }
 
     /**
