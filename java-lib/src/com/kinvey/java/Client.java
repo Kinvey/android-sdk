@@ -13,20 +13,16 @@
  */
 package com.kinvey.java;
 
-import android.content.Context;
-import android.util.Log;
-import com.google.api.client.extensions.android.http.AndroidHttp;
+
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.*;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

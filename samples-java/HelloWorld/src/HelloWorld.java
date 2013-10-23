@@ -14,7 +14,7 @@
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.*;
+import com.kinvey.java.Client;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -35,6 +35,7 @@ public class HelloWorld {
         System.out.println("Hello World");
 
         Client myJavaClient = new Client.Builder("kid_ePZ9kJuZMi","3b16c9a8fb8e4b90bf1c71e5b0fe87eb").build();
+        myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
         System.out.println("Client ping -> " + ping);
 
@@ -75,7 +76,6 @@ public class HelloWorld {
         }
 
         try{
-//    BufferedReader br  = new BufferedReader(new FileReader("/ic_lockscreen_decline_activated.png"));
 
             InputStream is = new FileInputStream("/ic_lockscreen_decline_activated.png");
 
@@ -91,6 +91,7 @@ public class HelloWorld {
 
             mediaContent.setCloseInputStream(false);
             mediaContent.setRetrySupported(false);
+        //    myJavaClient.file().uploadBlocking(fm, mediaContent);
 
 
         }catch(Exception e){
