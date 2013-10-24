@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.java;
+package com.kinvey.nativejava;
 
 import android.os.Build;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;

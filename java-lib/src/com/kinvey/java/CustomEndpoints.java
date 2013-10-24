@@ -13,18 +13,19 @@
  */
 package com.kinvey.nativejava;
 
-import com.google.api.client.util.Key;
+import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 
 /**
  * @author edwardf
  */
-public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
+public class CustomEndpoints<I extends GenericJson, O extends GenericJson> extends com.kinvey.java.CustomEndpoints<I, O> {
 
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
+    public CustomEndpoints(Class<O> responseClass, AbstractClient client) {
+        super(responseClass, client);
+    }
 
-    public KinveyHeaders() {
-        super();
-        deviceInfo = "JAVA/" + System.getProperty("java.version");
+    public CustomEndpoints(AbstractClient client) {
+        super(client);
     }
 }

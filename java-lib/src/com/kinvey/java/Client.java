@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.java;
+package com.kinvey.nativejava;
 
 
 import com.google.api.client.http.*;
@@ -19,8 +19,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
-import com.kinvey.java.auth.*;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.auth.*;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author edwardf
  */
-public class Client extends AbstractClient{
+public class Client extends AbstractClient {
 
 
     private ConcurrentHashMap<String, AppData> appDataInstanceCache;
@@ -256,7 +257,7 @@ public class Client extends AbstractClient{
                 setCurrentUser(new User(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
                         getBaseUrl(), appKey, appSecret, null)));
             }
-            return getCurrentUser();
+            return (User) getCurrentUser();
         }
     }
 

@@ -13,18 +13,20 @@
  */
 package com.kinvey.nativejava;
 
-import com.google.api.client.util.Key;
+
+import com.kinvey.java.AbstractClient;
 
 /**
  * @author edwardf
  */
-public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
-
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
-
-    public KinveyHeaders() {
-        super();
-        deviceInfo = "JAVA/" + System.getProperty("java.version");
+public class AppData<T> extends com.kinvey.java.AppData<T> {
+    /**
+     * Constructor to instantiate the AppData class.
+     *
+     * @param collectionName Name of the appData collection
+     * @param myClass        Class Type to marshall data between.
+     */
+    protected AppData(String collectionName, Class<T> myClass, AbstractClient client) {
+        super(collectionName, myClass, client);
     }
 }

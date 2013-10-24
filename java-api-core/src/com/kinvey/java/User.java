@@ -230,7 +230,7 @@ public class User extends GenericJson   {
      * @return Current user object with refreshed metadata
      * @throws IOException
      */
-    protected User retrieveMetadataBlocking() throws IOException {
+    public User retrieveMetadataBlocking() throws IOException {
         User ret = this.retrieveBlocking().execute();
         String authToken = this.authToken;
         this.putAll(ret.getUnknownKeys());

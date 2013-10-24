@@ -12,9 +12,10 @@
  * the License.
  */
 
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.Client;
+import com.kinvey.nativejava.Client;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -77,7 +78,7 @@ public class HelloWorld {
 
         try{
 
-            InputStream is = new FileInputStream("/ic_lockscreen_decline_activated.png");
+            InputStream is = new FileInputStream("/Users/edwardflemingiii/ic_lockscreen_decline_activated.png");
 
             FileMetaData fm = new FileMetaData();
             fm.setFileName("lockscreen.png");
@@ -87,11 +88,40 @@ public class HelloWorld {
 
 
             InputStreamContent mediaContent = new InputStreamContent("image/png", is);
-            mediaContent.setLength(is.available());
+//            mediaContent.setLength(is.available());
+//
+//            mediaContent.setCloseInputStream(false);
+//            mediaContent.setRetrySupported(false);
 
-            mediaContent.setCloseInputStream(false);
-            mediaContent.setRetrySupported(false);
-        //    myJavaClient.file().uploadBlocking(fm, mediaContent);
+            UploaderProgressListener progressListener = new UploaderProgressListener() {
+                @Override
+                public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+            };
+
+//
+//            HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+//            uploader = createMediaHttpUploader(content, requestFactory);
+//            uploader.setDirectUploadEnabled(true);
+//            uploader.setProgressListener(progressListener);
+//
+//            initializeMediaHttpUploader(mediaContent, progressListener);
+//            HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+//            uploader = createMediaHttpUploader(content, requestFactory);
+//            uploader.setDirectUploadEnabled(true);
+//            uploader.setProgressListener(progressListener);
+            myJavaClient.file().uploadBlocking(fm, mediaContent);
 
 
         }catch(Exception e){

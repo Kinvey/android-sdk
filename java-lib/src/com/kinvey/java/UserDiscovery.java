@@ -13,18 +13,20 @@
  */
 package com.kinvey.nativejava;
 
-import com.google.api.client.util.Key;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 
 /**
  * @author edwardf
  */
-public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
-
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
-
-    public KinveyHeaders() {
-        super();
-        deviceInfo = "JAVA/" + System.getProperty("java.version");
+public class UserDiscovery extends com.kinvey.java.UserDiscovery {
+    /**
+     * Constructor to access Kinvey's UserDiscovery management.
+     *
+     * @param client      - an instance of Kinvey AbstractClient, configured for the application
+     * @param initializer
+     */
+    protected UserDiscovery(AbstractClient client, KinveyClientRequestInitializer initializer) {
+        super(client, initializer);
     }
 }

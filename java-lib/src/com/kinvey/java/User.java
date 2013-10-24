@@ -13,18 +13,17 @@
  */
 package com.kinvey.nativejava;
 
-import com.google.api.client.util.Key;
+import com.google.common.base.Preconditions;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.auth.KinveyAuthRequest;
 
 /**
  * @author edwardf
  */
-public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
+public class User extends com.kinvey.java.User {
 
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
 
-    public KinveyHeaders() {
-        super();
-        deviceInfo = "JAVA/" + System.getProperty("java.version");
+    protected User(AbstractClient client, KinveyAuthRequest.Builder builder) {
+        super(client, builder);
     }
 }
