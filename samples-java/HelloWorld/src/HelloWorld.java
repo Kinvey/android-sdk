@@ -21,7 +21,6 @@ import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 
 import java.io.*;
-import java.util.ArrayList;
 
 /**
  * @author edwardf
@@ -78,53 +77,33 @@ public class HelloWorld {
 
         try{
 
-            InputStream is = new FileInputStream("/Users/edwardflemingiii/ic_lockscreen_decline_activated.png");
+            InputStream is = new FileInputStream("/path/to/my/file.png");
 
             FileMetaData fm = new FileMetaData();
             fm.setFileName("lockscreen.png");
             fm.setMimetype("image/png");
 
-            fm.setPublic(true);
-
-
-            InputStreamContent mediaContent = new InputStreamContent("image/png", is);
-//            mediaContent.setLength(is.available());
-//
-//            mediaContent.setCloseInputStream(false);
-//            mediaContent.setRetrySupported(false);
-
             UploaderProgressListener progressListener = new UploaderProgressListener() {
                 @Override
                 public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                    //To change body of implemented methods use File | Settings | File Templates.
+                    System.out.println("upload progress change!");
                 }
 
                 @Override
                 public void onSuccess(Void result) {
-                    //To change body of implemented methods use File | Settings | File Templates.
+                    System.out.println("upload success!");
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    //To change body of implemented methods use File | Settings | File Templates.
+                    System.out.println("upload failed -> " + error);
                 }
             };
+            myJavaClient.file().uploadBlocking(fm, is, progressListener);
 
-//
-//            HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
-//            uploader = createMediaHttpUploader(content, requestFactory);
-//            uploader.setDirectUploadEnabled(true);
-//            uploader.setProgressListener(progressListener);
-//
-//            initializeMediaHttpUploader(mediaContent, progressListener);
-//            HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
-//            uploader = createMediaHttpUploader(content, requestFactory);
-//            uploader.setDirectUploadEnabled(true);
-//            uploader.setProgressListener(progressListener);
-            myJavaClient.file().uploadBlocking(fm, mediaContent);
-
-
+            System.out.println("uploading...");
         }catch(Exception e){
+            System.out.println("Couldn't upload! -> " + e);
             e.printStackTrace();
         }
     }
