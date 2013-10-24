@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.kinvey.java.File;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.UriLocResponse;
@@ -324,6 +325,11 @@ public class MediaHttpUploader {
 
 
             notifyListenerWithMetaData(meta);
+            if(meta.getUploadUrl() != null){
+                uploadUrl = new GenericUrl(meta.getUploadUrl());
+            }else{
+                throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for File!","The library cannot upload a file without this url");
+            }
             uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
             initialResponse.disconnect();

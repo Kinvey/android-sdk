@@ -209,7 +209,7 @@ public class OfflineTable<T extends GenericJson> {
         values.put(COLUMN_DELETED, 0);
         values.put(COLUMN_USER, client.user().getId());
 
-        //Log.e(TAG, "insert entity -> " + jsonResult);
+        Log.v(TAG, "insert entity -> " + offlineEntity.get("_id").toString());
 
         int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
@@ -248,7 +248,7 @@ public class OfflineTable<T extends GenericJson> {
         if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()){
             try{
                 String s  = cursor.getString(0);
-                Log.e(TAG, "get entity -> " + s);
+                Log.v(TAG, "get entity -> " + s);
 
                 ret =  client.getJsonFactory().fromString(s, responseClass);
             }catch(Exception e){
@@ -408,7 +408,7 @@ public class OfflineTable<T extends GenericJson> {
         c.close();
         //remove the popped request
         if (curKey != null){
-            Log.e(TAG, "offline popped queue, current id is: " + ret.getEntityID());
+            Log.v(TAG, "offline popped queue, current id is: " + ret.getEntityID());
             db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
         }
         db.close();

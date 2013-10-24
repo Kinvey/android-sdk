@@ -27,20 +27,19 @@ import java.io.*;
  */
 public class HelloWorld {
 
-
-
-
+    public static final String appKey = "kid_ePZ9kJuZMi";
+    public static final String appSecret = "3b16c9a8fb8e4b90bf1c71e5b0fe87eb";
 
     public static void main(String[] args){
         System.out.println("Hello World");
 
-        Client myJavaClient = new Client.Builder("kid_ePZ9kJuZMi","3b16c9a8fb8e4b90bf1c71e5b0fe87eb").build();
+        Client myJavaClient = new Client.Builder(appKey, appSecret).build();
         myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
         System.out.println("Client ping -> " + ping);
 
         try {
-            myJavaClient.user().loginBlocking("kid_ePZ9kJuZMi","3b16c9a8fb8e4b90bf1c71e5b0fe87eb").execute();
+            myJavaClient.user().loginBlocking(appKey, appSecret).execute();
             System.out.println("Client login -> " + myJavaClient.user().isUserLoggedIn());
         } catch (IOException e) {
             System.out.println("Couldn't login -> " + e);
@@ -77,7 +76,7 @@ public class HelloWorld {
 
         try{
 
-            InputStream is = new FileInputStream("/path/to/my/file.png");
+            InputStream is = new FileInputStream("/Users/edwardflemingiii/ic_lockscreen_decline_activated.png");
 
             FileMetaData fm = new FileMetaData();
             fm.setFileName("lockscreen.png");
@@ -101,8 +100,8 @@ public class HelloWorld {
             };
             myJavaClient.file().uploadBlocking(fm, is, progressListener);
 
-            System.out.println("uploading...");
-        }catch(Exception e){
+            System.out.println("uploading Complete!");
+        }catch(IOException e){
             System.out.println("Couldn't upload! -> " + e);
             e.printStackTrace();
         }

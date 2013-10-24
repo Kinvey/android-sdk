@@ -49,6 +49,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 
 import com.kinvey.java.File;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.UriLocResponse;
 
@@ -214,7 +215,12 @@ public class MediaHttpDownloader {
         // Make initial request to get the unique upload URL.
         FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
         GenericUrl downloadUrl;
-        downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
+        if(initialResponse.getDownloadURL() != null){
+            downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
+        }else{
+            throw new KinveyException("_downloadURL is null!","do not remove _downloadURL in collection hooks for File!","The library cannot download a file without this url");
+        }
+
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
         while (true && !cancelled) {
