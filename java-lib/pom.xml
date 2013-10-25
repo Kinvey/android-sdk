@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.kinvey</groupId>
         <artifactId>parent</artifactId>
-        <version>2.6.8</version>
+        <version>2.6.9</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -266,7 +266,7 @@
                                 <phase>install</phase>
                                 <configuration>
                                     <tasks>
-                                        <copy todir="${devcenter.home}/content/reference/nativejava/api">
+                                        <copy todir="${devcenter.home}/content/reference/java/api">
                                             <fileset dir="${project.build.directory}/apidocs/"/>
                                         </copy>
                                     </tasks>
