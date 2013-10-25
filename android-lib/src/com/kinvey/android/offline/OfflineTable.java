@@ -222,7 +222,7 @@ public class OfflineTable<T extends GenericJson> {
 
 
 
-        db.close();
+//        db.close();
         return (T) offlineEntity;
     }
 
@@ -257,7 +257,7 @@ public class OfflineTable<T extends GenericJson> {
 
             cursor.close();
         }
-        db.close();
+//        db.close();
         return ret;
     }
 
@@ -293,11 +293,11 @@ public class OfflineTable<T extends GenericJson> {
                     }
                 }
             }
-            db.close();
+//            db.close();
 
             return ret;
         }
-        db.close();
+//        db.close();
         return null;
 
     }
@@ -331,7 +331,7 @@ public class OfflineTable<T extends GenericJson> {
            // Log.v(TAG, "updating query -> " + values.get(COLUMN_ID));
         }
 
-        db.close();
+//        db.close();
 
 
     }
@@ -355,7 +355,7 @@ public class OfflineTable<T extends GenericJson> {
         KinveyDeleteResponse ret =  new KinveyDeleteResponse();
 
         ret.setCount(db.updateWithOnConflict(TABLE_NAME, values, null, null, db.CONFLICT_REPLACE));
-        db.close();
+//        db.close();
         return ret;
     }
 
@@ -382,7 +382,7 @@ public class OfflineTable<T extends GenericJson> {
 
         c.close();
 
-        db.close();
+//        db.close();
 
     }
 
@@ -411,7 +411,7 @@ public class OfflineTable<T extends GenericJson> {
             Log.v(TAG, "offline popped queue, current id is: " + ret.getEntityID());
             db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
         }
-        db.close();
+//        db.close();
         return ret;
     }
 
@@ -439,7 +439,7 @@ public class OfflineTable<T extends GenericJson> {
 
             db.insert(RESULTS_NAME, null, values);
 
-            db.close();
+//            db.close();
         }
         return;
     }
@@ -464,7 +464,7 @@ public class OfflineTable<T extends GenericJson> {
             }
 
             c.close();
-            db.close();
+//            db.close();
             return ret;
         }
         return new ArrayList<OfflineResponseInfo>();

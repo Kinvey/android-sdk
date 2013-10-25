@@ -147,7 +147,7 @@ public class KinveySyncService extends IntentService {
     }
 
     public void getFromStoreAndExecute() {
-        OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
+        OfflineHelper dbHelper = OfflineHelper.getInstance(getApplicationContext());
         List<String> collectionNames = dbHelper.getCollectionTables();
 
 
@@ -246,7 +246,7 @@ public class KinveySyncService extends IntentService {
     private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Throwable error) {
          //  Might want this someday but not yet
 
-        OfflineHelper dbHelper = new OfflineHelper(getApplicationContext());
+        OfflineHelper dbHelper = OfflineHelper.getInstance(getApplicationContext());
 //        dbHelper.getTable(collectionName).storeCompletedRequestInfo(dbHelper, collectionName, success, info, returnValue);
 
         //if request failed on client side, re-queue it

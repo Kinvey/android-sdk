@@ -71,7 +71,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context);
+        OfflineHelper dbHelper = OfflineHelper.getInstance(context);
 
         //expand the URI from the template
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
@@ -133,7 +133,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context);
+        OfflineHelper dbHelper = OfflineHelper.getInstance(context);
 
         //set deleted flag in table
         //expand the URI from the template
@@ -170,7 +170,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
 
 
         //ensure table exists, if not, create it   <- done by constructor of offlinehelper (oncreate will delegate)
-        OfflineHelper dbHelper = new OfflineHelper(context);
+        OfflineHelper dbHelper = OfflineHelper.getInstance(context);
 
         //grab json content and put it in the store
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
@@ -186,7 +186,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
     @Override
     public void insertEntity(AbstractClient client, AppData<T> appData, T entity) {
 
-        OfflineHelper dbHelper = new OfflineHelper(context);
+        OfflineHelper dbHelper = OfflineHelper.getInstance(context);
         GenericJson jsonContent = (GenericJson) entity;
 
         dbHelper.getTable(appData.getCollectionName()).insertEntity(dbHelper, client, jsonContent);
@@ -196,7 +196,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
     @Override
     public void clearStorage() {
 
-        OfflineHelper dbHelper = new OfflineHelper(context);
+        OfflineHelper dbHelper = OfflineHelper.getInstance(context);
 
         List<String> collections = dbHelper.getCollectionTables();
 
@@ -209,7 +209,7 @@ public class SqlLiteOfflineStore<T> implements OfflineStore<T> {
             db.delete(OfflineTable.PREFIX_RESULTS + collection, null, null);
         }
 
-        db.close();
+        //db.close();
     }
 
 

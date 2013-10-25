@@ -50,12 +50,22 @@ public class OfflineHelper extends SQLiteOpenHelper {
     private static final String COLLECTION_TABLE = "collections";
     private static final String COLUMN_NAME = "name";
 
+    private static OfflineHelper _instance;
+
+    public static synchronized OfflineHelper getInstance(Context context){
+        if (_instance == null){
+            _instance = new OfflineHelper(context);
+        }
+        return _instance;
+    }
+
+
     /**
      * used for accessing ALREADY existing tables
      *
      * @param context
      */
-    public OfflineHelper(Context context){
+    private OfflineHelper(Context context){
         super(context, DB_NAME, null, DATABASE_VERSION);
     }
 
@@ -104,7 +114,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         table.onCreate(db);
-        db.close();
+//        db.close();
 
 
         createCollectionTable();
@@ -127,7 +137,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
         if (change == 0){
             db.insert(COLLECTION_TABLE, null, values);
         }
-        db.close();
+//        db.close();
 
     }
 
@@ -146,7 +156,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
                 ret.add(c.getString(0));
             }
             c.close();
-            db.close();
+//            db.close();
         }
         return ret;
 
@@ -190,7 +200,7 @@ public class OfflineHelper extends SQLiteOpenHelper {
 
         OfflineTable.runCommand(db, createCommand);
 
-        db.close();
+//        db.close();
 
     }
 
@@ -201,11 +211,11 @@ public class OfflineHelper extends SQLiteOpenHelper {
         if(cursor!=null) {
             if(cursor.getCount()>0) {
                 cursor.close();
-                db.close();
+//                db.close();
                 return true;
             }
             cursor.close();
-            db.close();
+//            db.close();
         }
         return false;
     }
