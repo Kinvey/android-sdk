@@ -54,6 +54,18 @@
                               <zipfileset file="../../LICENSE"/>
                               <zipfileset dir="../../samples" includes="**/*-sources.jar" prefix="sample-sources"/>
                             </zip>
+
+                          <delete file="${project.build.directory}/kinvey-java-${project.version}.zip"/>
+                          <zip destfile="${project.build.directory}/kinvey-java-${project.version}.zip">
+                              <zipfileset dir="dependencies/" includes="*.jar" prefix="libs"/>
+                              <zipfileset file="../../java-api-core/target/kinvey-java-${project.version}.jar" prefix="libs"/>
+                              <zipfileset file="../../java-api-core/target/kinvey-java-${project.version}-javadoc.jar" prefix="docs"/>
+                              <zipfileset file="../../java-lib/target/kinvey-java-lib-${project.version}.jar" prefix="libs"/>
+                              <zipfileset file="../../java-lib/target/kinvey-java-lib-${project.version}-javadoc.jar" prefix="docs"/>
+                              <zipfileset file="README-JAVA.md" />
+                              <zipfileset file="../../LICENSE"/>
+                              <zipfileset dir="../../samples-java" includes="**/*-sources.jar" prefix="sample-sources"/>
+                          </zip>
                       </tasks>
                     </configuration>
                   </execution>
