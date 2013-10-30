@@ -23,6 +23,7 @@
         <module>oracledlc-android</module>
         <module>ticketview-android</module>
         <module>CityWatch-Android</module>
+        <module>secure-signin-android</module>
 
     </modules>
 
