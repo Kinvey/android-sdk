@@ -7,7 +7,7 @@
  * including commercial applications, and to alter it and redistribute it
  * freely, as long as the origin is not misrepresented.
  */
-package com.kinvey.android;
+package com.kinvey.android.secure;
 
 
 

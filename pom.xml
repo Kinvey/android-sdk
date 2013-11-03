@@ -37,7 +37,7 @@
         <devcenter.baseurl>http://localhost:3000</devcenter.baseurl>
 
         <android.version>4.0.1.2</android.version>
-        <android.platform>16</android.platform>
+        <android.platform>18</android.platform>
         <android-support.version>r7</android-support.version>
 
         <android-maven.version>3.6.1</android-maven.version>
