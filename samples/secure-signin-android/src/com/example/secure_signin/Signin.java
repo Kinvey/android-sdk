@@ -1,11 +1,9 @@
 package com.example.secure_signin;
 
-import android.accounts.AccountAuthenticatorActivity;
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import com.kinvey.android.Crypto;
+import com.kinvey.android.secure.Crypto;
 import android.util.Base64;
 
 
@@ -26,10 +24,12 @@ public class Signin extends Activity {
     public void secureArbitraryString(){
         try{
             String id = "how about this";
-            String encrypted = Crypto.encrypt(id);
-            String decrypted = Crypto.decrypt(encrypted);
+            String encrypted = Crypto.encrypt(id, "passcode");
+            String decrypted = Crypto.decrypt(encrypted, "passcode");
 
             String b64 = Base64.encodeToString(id.getBytes(), Base64.DEFAULT);
+
+
 
             Log.i(TAG, "**********");
             Log.i(TAG, "**********");
@@ -49,27 +49,6 @@ public class Signin extends Activity {
 
     }
 
-//    private Context ctx;
-//
-//    public void  DataSec(Context ctx)
-//    {
-//        this.ctx = ctx;
-//    }
-//
-//    public void genKey() throws Exception
-//    {
-//        SecretKey key = KeyGenerator.getInstance("AES").generateKey();
-//
-//        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-//        ks.load(null, "clavedekey".toCharArray());
-//
-//        KeyStore.PasswordProtection pass = new KeyStore.PasswordProtection("fedsgjk".toCharArray());
-//        KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(key);
-//        ks.setEntry("secretKeyAlias", skEntry, pass);
-//
-//        FileOutputStream fos = ctx.openFileOutput("bs.keystore", Context.MODE_PRIVATE);
-//        ks.store(fos, "clavedekey".toCharArray());
-//        fos.close();
-//    }
+
 
 }
