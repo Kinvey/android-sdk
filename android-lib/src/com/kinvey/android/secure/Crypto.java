@@ -19,9 +19,11 @@ import android.util.Log;
 import com.kinvey.android.secure.PRNGFixes;
 
 import javax.crypto.Cipher;
+import java.math.BigInteger;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.*;
 
 /**
  * This class offers publicly accessible methods for handling on-device encryption of arbitrary strings.
@@ -40,8 +42,10 @@ public class Crypto{
     private static final int JELLYBEAN43 = 18;
     private static final String RSA = "RSA";
     private static final int KEY_SIZE = 512;
-    private static final String KINVEY_PRIVATE = "kinvey_private";
-    private static final String KINVEY_PUBLIC = "kinvey_public";
+    private static final String KINVEY_PRIVATE_MOD = "kinvey_private_mod";
+    private static final String KINVEY_PUBLIC_MOD = "kinvey_public_mod";
+    private static final String KINVEY_PRIVATE_EXP = "kinvey_private_exp";
+    private static final String KINVEY_PUBLIC_EXP = "kinvey_public_exp";
 
     private static PublicKey pubKey;
     private static PrivateKey privateKey;
@@ -121,20 +125,27 @@ public class Crypto{
         if (pubKey != null && privateKey != null){
             return;
         }
+
         //get store wrapper dependant on runtime version
         if(Build.VERSION.SDK_INT >= JELLYBEAN43){
             keystore = KeyStoreJb43.getInstance();
         }else{
             keystore = KeyStore.getInstance();
         }
+
+
         //check if the keys exist in the store
-        if(keystore.contains(KINVEY_PUBLIC) && keystore.contains(KINVEY_PRIVATE)){
+        if(keystore.contains(KINVEY_PUBLIC_EXP) && keystore.contains(KINVEY_PRIVATE_EXP)){
             //load bytes
-            byte[] privateBytes = keystore.get(KINVEY_PRIVATE);
-            byte[] publicBytes = keystore.get(KINVEY_PUBLIC);
+            byte[] privateExp = keystore.get(KINVEY_PRIVATE_EXP);
+            byte[] privateMod = keystore.get(KINVEY_PRIVATE_MOD);
+            byte[] publicExp = keystore.get(KINVEY_PUBLIC_EXP);
+            byte[] publicMod = keystore.get(KINVEY_PUBLIC_MOD);
             //create keyspec from bytes
-            X509EncodedKeySpec privateSpec = new X509EncodedKeySpec(privateBytes);
-            X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(publicBytes);
+            RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(new BigInteger(publicMod), new BigInteger(publicExp));
+            RSAPrivateKeySpec privateSpec = new RSAPrivateKeySpec(new BigInteger(privateMod), new BigInteger(privateExp));
+
+
             KeyFactory keyFact = null;
             //create RSA keyfactory and generate keys from bytes
             try {
@@ -148,12 +159,21 @@ public class Crypto{
             }
 
 
+
+
         }else{
             //generate and save
             try{
                 KeyPair pair = generateKey();
-                keystore.put(KINVEY_PRIVATE, pair.getPrivate().getEncoded());
-                keystore.put(KINVEY_PUBLIC, pair.getPublic().getEncoded());
+                RSAPrivateKey RSAprivateKey = ((RSAPrivateKey) pair.getPrivate());
+                RSAPublicKey RSApublicKey = ((RSAPublicKey) pair.getPublic());
+
+                keystore.put(KINVEY_PRIVATE_EXP, RSAprivateKey.getPrivateExponent().toByteArray());
+                keystore.put(KINVEY_PRIVATE_MOD, RSAprivateKey.getModulus().toByteArray());
+
+                keystore.put(KINVEY_PUBLIC_EXP, RSApublicKey.getPublicExponent().toByteArray());
+                keystore.put(KINVEY_PUBLIC_MOD, RSApublicKey.getModulus().toByteArray());
+
             } catch (NoSuchAlgorithmException e){
                 e.printStackTrace();
             }
@@ -162,6 +182,13 @@ public class Crypto{
 
 
 
+    }
+
+    public static void deleteKeys(){
+        keystore.delete(KINVEY_PRIVATE_MOD);
+        keystore.delete(KINVEY_PRIVATE_EXP);
+        keystore.delete(KINVEY_PUBLIC_MOD);
+        keystore.delete(KINVEY_PUBLIC_MOD);
     }
 
 
