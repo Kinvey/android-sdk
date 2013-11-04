@@ -13,12 +13,15 @@
  */
 package com.kinvey.android.secure;
 
+import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 import com.kinvey.android.secure.PRNGFixes;
 
 import javax.crypto.Cipher;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * This class offers publicly accessible methods for handling on-device encryption of arbitrary strings.
@@ -34,17 +37,22 @@ import java.security.*;
 public class Crypto{
 
     private static final String TAG = "Kinvey - Crypto";
+    private static final int JELLYBEAN43 = 18;
     private static final String RSA = "RSA";
     private static final int KEY_SIZE = 512;
-    public static PublicKey pubKey;
-    public static PrivateKey privateKey;
+    private static final String KINVEY_PRIVATE = "kinvey_private";
+    private static final String KINVEY_PUBLIC = "kinvey_public";
+
+    private static PublicKey pubKey;
+    private static PrivateKey privateKey;
+    private static KeyStore keystore;
 
 
     /**
      * This method will generate a public and private key
      * @throws Exception
      */
-    private static KeyPair generateKey() throws Exception{
+    private static KeyPair generateKey() throws NoSuchAlgorithmException{
         PRNGFixes.apply();
         KeyPairGenerator gen = KeyPairGenerator.getInstance(RSA);
         gen.initialize(KEY_SIZE, new SecureRandom());
@@ -113,13 +121,47 @@ public class Crypto{
         if (pubKey != null && privateKey != null){
             return;
         }
-        try{
-            KeyPair pair = generateKey();
-        }catch (Exception e){
-            Log.e(TAG, "Couldn't generate keys -> " + e.getMessage());
-            e.printStackTrace();
+        //get store wrapper dependant on runtime version
+        if(Build.VERSION.SDK_INT >= JELLYBEAN43){
+            keystore = KeyStoreJb43.getInstance();
+        }else{
+            keystore = KeyStore.getInstance();
+        }
+        //check if the keys exist in the store
+        if(keystore.contains(KINVEY_PUBLIC) && keystore.contains(KINVEY_PRIVATE)){
+            //load bytes
+            byte[] privateBytes = keystore.get(KINVEY_PRIVATE);
+            byte[] publicBytes = keystore.get(KINVEY_PUBLIC);
+            //create keyspec from bytes
+            X509EncodedKeySpec privateSpec = new X509EncodedKeySpec(privateBytes);
+            X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(publicBytes);
+            KeyFactory keyFact = null;
+            //create RSA keyfactory and generate keys from bytes
+            try {
+                keyFact = KeyFactory.getInstance(RSA);
+                privateKey = keyFact.generatePrivate(privateSpec);
+                pubKey = keyFact.generatePublic(pubSpec);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch(InvalidKeySpecException e){
+                e.printStackTrace();
+            }
+
+
+        }else{
+            //generate and save
+            try{
+                KeyPair pair = generateKey();
+                keystore.put(KINVEY_PRIVATE, pair.getPrivate().getEncoded());
+                keystore.put(KINVEY_PUBLIC, pair.getPublic().getEncoded());
+            } catch (NoSuchAlgorithmException e){
+                e.printStackTrace();
+            }
 
         }
+
+
+
     }
 
 
