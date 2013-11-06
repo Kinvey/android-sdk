@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import com.kinvey.android.secure.Crypto;
-import android.util.Base64;
-import com.kinvey.android.secure.Cryptoz;
 
 
 public class Signin extends Activity {
