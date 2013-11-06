@@ -381,7 +381,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /** time limit for retrying failed offline requests **/
             SYNC_RATE("sync.rate"),
             /** debug mode, used for HTTP logging **/
-            DEBUG_MODE("debug");
+            DEBUG_MODE("debug"),
+            /** securely store credentials **/
+            SECURE_CRED("cred.secure");
 
             private final String value;
 

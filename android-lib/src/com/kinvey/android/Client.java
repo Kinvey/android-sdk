@@ -508,6 +508,7 @@ public class Client extends AbstractClient {
         private boolean GCM_Enabled = false;
         private boolean GCM_InProduction = true;
         private boolean sharedPrefCredentials = false;
+        private boolean encryptCredentials = false;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
 
@@ -607,6 +608,10 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.SYNC_RATE) != null){
                 this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
+            }
+
+            if (super.getString(Option.SECURE_CRED) != null){
+                this.encryptCredentials = Boolean.parseBoolean(super.getString(Option.SECURE_CRED));
             }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");

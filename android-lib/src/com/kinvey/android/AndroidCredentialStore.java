@@ -28,6 +28,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
+import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
 
@@ -38,12 +39,27 @@ import com.kinvey.java.auth.CredentialStore;
 class AndroidCredentialStore implements CredentialStore {
     private static final String TAG = AndroidCredentialStore.class.getSimpleName();
 
-    HashMap<String, Credential> credentials;
-    Context appContext;
+    private HashMap<String, Credential> credentials;
+    private Context appContext;
+    private boolean encrypted = false;
 
     AndroidCredentialStore(Context context) throws IOException, AndroidCredentialStoreException {
         appContext = context.getApplicationContext();
         credentials = new HashMap<String, Credential>();
+        encrypted = false;
+        try {
+            retrieveCredentialStore();
+        } catch (ClassNotFoundException ex) {
+            credentials = new HashMap<String, Credential>();
+            persistCredentialStore();
+            throw new AndroidCredentialStoreException("Credential store corrupted and was rebuilt");
+        }
+    }
+
+    AndroidCredentialStore(Context context, boolean encrypt) throws IOException, AndroidCredentialStoreException {
+        appContext = context.getApplicationContext();
+        credentials = new HashMap<String, Credential>();
+        encrypted = encrypt;
         try {
             retrieveCredentialStore();
         } catch (ClassNotFoundException ex) {
@@ -56,7 +72,17 @@ class AndroidCredentialStore implements CredentialStore {
     /** {@inheritDoc} */
     @Override
     public Credential load(String userId) throws IOException {
-        return credentials.get(userId);
+        Credential credential = credentials.get(userId);
+        if (encrypted){
+            try{
+                String eID = Crypto.decrypt(userId);
+                String eAuth = Crypto.decrypt(credential.getAuthToken());
+                credential = new Credential(eID, eAuth);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return credential;
     }
 
     /** {@inheritDoc} */
@@ -64,7 +90,15 @@ class AndroidCredentialStore implements CredentialStore {
     public void store(String userId, Credential credential) throws IOException {
         Preconditions.checkNotNull(credential, "credential must not be null");
         Preconditions.checkNotNull(userId, "userId must not be null");
-
+        if (encrypted){
+            try{
+                String eID = Crypto.encrypt(userId);
+                String eAuth = Crypto.encrypt(credential.getAuthToken());
+                credential = new Credential(eID, eAuth);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         credentials.put(userId, credential);
         persistCredentialStore();
     }

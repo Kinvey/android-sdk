@@ -3,13 +3,17 @@ package com.example.secure_signin;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import com.kinvey.android.secure.Crypto;
 import android.util.Base64;
+import com.kinvey.android.secure.Cryptoz;
 
 
 public class Signin extends Activity {
 
     private static final String TAG = "secure-signin";
+    private TextView output;
+
     /**
      * Called when the activity is first created.
      */
@@ -17,6 +21,7 @@ public class Signin extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        output = (TextView) findViewById(R.id.output);
         secureArbitraryString();
     }
 
@@ -24,10 +29,14 @@ public class Signin extends Activity {
     public void secureArbitraryString(){
         try{
             String id = "how about this";
-            String encrypted = Crypto.encrypt(id, "passcode");
-            String decrypted = Crypto.decrypt(encrypted, "passcode");
+            output.setText("Securing arbitrary string: " + id);
 
-            String b64 = Base64.encodeToString(id.getBytes(), Base64.DEFAULT);
+            String encrypted = Crypto.encrypt(id);
+            output.setText(output.getText() + "\n" + encrypted);
+            String decrypted = Crypto.decrypt(encrypted);
+            output.setText(output.getText() + "\n" + decrypted);
+
+
 
 
 
@@ -35,7 +44,6 @@ public class Signin extends Activity {
             Log.i(TAG, "**********");
             Log.i(TAG, id);
             Log.i(TAG, encrypted);
-            Log.i(TAG, b64);
             Log.i(TAG, decrypted);
             Log.i(TAG, "**********");
             Log.i(TAG, "**********");
