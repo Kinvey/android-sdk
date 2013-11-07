@@ -283,9 +283,9 @@ public class OfflineTable<T extends GenericJson> {
 
             String[] resultIDs = s.split(",");
             if (clazz != null) {
-                Class singleClass = clazz.getClass().getComponentType();
+                Class singleClass = clazz.getComponentType();
                 if (singleClass != null) {
-                     ret = (T[]) Array.newInstance(singleClass, resultIDs.length);
+                    ret = (T[]) Array.newInstance(singleClass, resultIDs.length);
 
 
                     for (int i = 0; i < resultIDs.length; i++) {
@@ -293,11 +293,9 @@ public class OfflineTable<T extends GenericJson> {
                     }
                 }
             }
-//            db.close();
 
             return ret;
         }
-//        db.close();
         return null;
 
     }
