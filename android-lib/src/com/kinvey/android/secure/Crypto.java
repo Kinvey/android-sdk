@@ -18,18 +18,18 @@ import android.util.Base64;
 import android.util.Log;
 import com.kinvey.android.secure.PRNGFixes;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Calendar;
 
@@ -49,13 +49,8 @@ public class Crypto{
     private static final String TAG = "Kinvey - Crypto";
 
     private static final int JELLYBEAN43 = 18;
-
     private static final String AES = "AES";
-
     private static final String SECRET_KEY = "kinvey-keys";
-
-    //private static KeyStore keystore;
-    //private static SecretKeySpec keySpec;
 
 
     /**
@@ -105,15 +100,7 @@ public class Crypto{
      * @throws Exception
      */
     private static String encrypt(String text, String secretKey) throws Exception{
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), secretKey.getBytes(), 128, 256);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey key = new SecretKeySpec(tmp.getEncoded(), AES);
-
-        Cipher cipher = Cipher.getInstance(AES);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-
-        return toHex(cipher.doFinal(text.getBytes()));
+        return toHex(getCipher(secretKey, Cipher.ENCRYPT_MODE).doFinal(text.getBytes()));
 
     }
 
@@ -128,32 +115,16 @@ public class Crypto{
      * @throws Exception
      */
     private static String decrypt(String data, String secretKey) throws Exception{
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), secretKey.getBytes(), 128, 256);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKey key = new SecretKeySpec(tmp.getEncoded(), AES);
-
-        Cipher cipher = Cipher.getInstance(AES);
-
-        cipher.init(Cipher.DECRYPT_MODE, key);
-
-        return new String(cipher.doFinal(toByte(data)));
+        return new String(getCipher(secretKey, Cipher.DECRYPT_MODE).doFinal(toByte(data)));
     }
 
 
     /**
      * Create or load public/private keys for encryption.
      *
+     * Returns that secret key
      */
     private static String initKeys() throws NoSuchAlgorithmException{
-
-
-//        if (keySpec != null){
-//            return;
-//        }
-
-//        return "hrm";
-
         KeyStore keystore;
         //get store wrapper dependant on runtime version
         if(Build.VERSION.SDK_INT >= JELLYBEAN43){
@@ -161,29 +132,18 @@ public class Crypto{
         }else{
             keystore = KeyStore.getInstance();
         }
-        //deleteKeys();
 
         //check if the keys exist in the store
-        if(keystore.contains(SECRET_KEY)){// && keystore.contains(KINVEY_PRIVATE_EXP)){
+        if(keystore.contains(SECRET_KEY)){
             //load bytes
             byte[] secretSpec = keystore.get(SECRET_KEY);
             return toHex(secretSpec);
-
-
-
-
         }else{
             //generate and save
-
             String secret = generateKey();
             keystore.put(SECRET_KEY, toByte(secret));
             return secret;
-
-
         }
-
-
-
     }
 
     public static void deleteKeys(){
@@ -196,6 +156,36 @@ public class Crypto{
         }
         keystore.delete(SECRET_KEY);
     }
+
+    public static CipherInputStream encryptInputStream(InputStream stream) throws Exception{
+        return new CipherInputStream(stream, getCipher(initKeys(), Cipher.ENCRYPT_MODE));
+    }
+
+    public static CipherOutputStream encryptOutputStream(OutputStream stream) throws Exception{
+        return new CipherOutputStream(stream, getCipher(initKeys(), Cipher.ENCRYPT_MODE));
+    }
+
+    public static InputStream decryptInputStream(CipherInputStream stream) throws Exception{
+        return new CipherInputStream(stream, getCipher(initKeys(), Cipher.DECRYPT_MODE));
+    }
+
+    public static OutputStream decryptOutputStream(CipherOutputStream stream) throws Exception{
+        return new CipherOutputStream(stream, getCipher(initKeys(), Cipher.DECRYPT_MODE));
+    }
+
+    private static Cipher getCipher(String secretKey, int mode) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException{
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), secretKey.getBytes(), 128, 256);
+        SecretKey tmp = factory.generateSecret(spec);
+        SecretKey key = new SecretKeySpec(tmp.getEncoded(), AES);
+
+        Cipher cipher = Cipher.getInstance(AES);
+        cipher.init(mode, key);
+
+        return cipher;
+    }
+
+
 
     private static byte[] toByte(String hexString) {
         int length = hexString.length()/2;
