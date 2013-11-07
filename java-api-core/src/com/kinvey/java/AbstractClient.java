@@ -383,7 +383,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /** debug mode, used for HTTP logging **/
             DEBUG_MODE("debug"),
             /** securely store credentials **/
-            SECURE_CRED("cred.secure");
+            SECURE_CRED("cred.secure"),
+            /** securely download files **/
+            SECURE_FILE("file.secure");
 
             private final String value;
 

@@ -95,6 +95,7 @@ public class Client extends AbstractClient {
     private AsyncUser currentUser;
 //    private AsyncCustomEndpoints customEndpoints;
     private long syncRate;
+    private boolean encryptFiles;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -234,7 +235,7 @@ public class Client extends AbstractClient {
     public AsyncFile file() {
         synchronized (lock) {
             if (file == null) {
-                file = new AsyncFile(this);
+                file = new AsyncFile(this, this.encryptFiles);
             }
             return file;
         }
@@ -509,6 +510,7 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean sharedPrefCredentials = false;
         private boolean encryptCredentials = false;
+        private boolean encryptFiles = false;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
 
@@ -535,7 +537,7 @@ public class Client extends AbstractClient {
                  this.setCredentialStore(new SharedPrefCredentialStore(this.context));
             }else{
                 try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                    this.setCredentialStore(new AndroidCredentialStore(this.context, this.encryptCredentials));
                 } catch (Exception ex) {
                     //TODO Add handling
                 }
@@ -614,6 +616,10 @@ public class Client extends AbstractClient {
                 this.encryptCredentials = Boolean.parseBoolean(super.getString(Option.SECURE_CRED));
             }
 
+            if (super.getString(Option.SECURE_FILE) != null){
+                this.encryptFiles = Boolean.parseBoolean(super.getString(Option.SECURE_FILE));
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -626,7 +632,7 @@ public class Client extends AbstractClient {
                 this.setCredentialStore(new SharedPrefCredentialStore(this.context));
             }else{
                 try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                    this.setCredentialStore(new AndroidCredentialStore(this.context, this.encryptCredentials));
                 } catch (AndroidCredentialStoreException ex) {
                     Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
                 } catch (IOException ex) {
@@ -664,8 +670,12 @@ public class Client extends AbstractClient {
             }
 
             //GCM explicitely enabled
-            if (this.GCM_Enabled ==  true){
+            if (this.GCM_Enabled){
                 client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+            }
+
+            if (this.encryptFiles){
+                client.encryptFiles = true;
             }
 
             if (this.debugMode){
@@ -771,7 +781,7 @@ public class Client extends AbstractClient {
                     if (sharedPrefCredentials){
                         store = new SharedPrefCredentialStore(context);
                     }else{
-                        store = new AndroidCredentialStore(context);
+                        store = new AndroidCredentialStore(context, this.encryptCredentials);
                     }
                     CredentialManager manager = new CredentialManager(store);
                     credential = manager.loadCredential(userID);
