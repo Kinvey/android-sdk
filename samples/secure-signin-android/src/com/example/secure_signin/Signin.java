@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.kinvey.android.secure.Crypto;
 
 
@@ -30,9 +31,9 @@ public class Signin extends Activity {
             output.setText("Securing arbitrary string: " + id);
 
             String encrypted = Crypto.encrypt(id);
-            output.setText(output.getText() + "\n" + encrypted);
+            output.setText(output.getText() + "\n\n" + encrypted);
             String decrypted = Crypto.decrypt(encrypted);
-            output.setText(output.getText() + "\n" + decrypted);
+            output.setText(output.getText() + "\n\n" + decrypted);
 
 
 
@@ -47,6 +48,7 @@ public class Signin extends Activity {
             Log.i(TAG, "**********");
         }catch (Exception e){
             e.printStackTrace();
+            Toast.makeText(this, "uh oh -> " + e.getMessage(), Toast.LENGTH_SHORT);
         }
 
 

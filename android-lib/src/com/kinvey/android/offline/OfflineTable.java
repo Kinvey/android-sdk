@@ -47,25 +47,25 @@ public class OfflineTable<T extends GenericJson> {
     private final String TAG = Client.TAG + " " + this.getClass().getSimpleName();
 
     //every row must have an _id
-    public static final String COLUMN_ID = "_id";
+    private static final String COLUMN_ID = "_id";
     //every row must have a json body
-    public static final String COLUMN_JSON = "_json";
+    private static final String COLUMN_JSON = "_json";
     //every row must have a user who made the initial request
-    public static final String COLUMN_USER = "_user";
+    private static final String COLUMN_USER = "_user";
     //for lazy-delete support, add a deleted flag (0 false, 1 true)
-    public static final String COLUMN_DELETED = "_deleted";
+    private static final String COLUMN_DELETED = "_deleted";
     //for the unique index on the collection store
-    public static final String UNIQUE_INDEX_IDS = "SOME_INDEX";
+    private static final String UNIQUE_INDEX_IDS = "SOME_INDEX";
     //for the unique index on the request queue
-    public static final String UNIQUE_INDEX_QUEUE = "ANOTHER_INDEX";
+    private static final String UNIQUE_INDEX_QUEUE = "ANOTHER_INDEX";
     //for the queued action
-    public static final String COLUMN_ACTION = "_action";
+    private static final String COLUMN_ACTION = "_action";
     //for query strings
-    public static final String COLUMN_QUERY_STRING = "_queryString";
+    private static final String COLUMN_QUERY_STRING = "_queryString";
     //for results of request,(0 false, 1 true)
-    public static final String COLUMN_RESULT = "_result";
+    private static final String COLUMN_RESULT = "_result";
     //unique key for queued requests, using Mongo db's algorithm
-    public static final String COLUMN_UNIQUE_KEY = "_key";
+    private static final String COLUMN_UNIQUE_KEY = "_key";
 
     //Each collection has multiple tables, these are the prefixes of the table names
     public static final String PREFIX_OFFLINE = "offline_";
@@ -73,10 +73,10 @@ public class OfflineTable<T extends GenericJson> {
     public static final String PREFIX_QUERY = "query_";
     public static final String PREFIX_RESULTS = "results_";
 
-    public String TABLE_NAME;
-    public String QUERY_NAME;
-    public String QUEUE_NAME;
-    public String RESULTS_NAME;
+    private String TABLE_NAME;
+    private String QUERY_NAME;
+    private String QUEUE_NAME;
+    private String RESULTS_NAME;
 
 
     public OfflineTable(String collection){
