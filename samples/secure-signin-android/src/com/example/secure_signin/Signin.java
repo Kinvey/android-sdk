@@ -28,16 +28,12 @@ public class Signin extends Activity {
     public void secureArbitraryString(){
         try{
             String id = "how about this";
-            output.setText("Securing arbitrary string: " + id);
+            output.setText(id);
 
-            String encrypted = Crypto.encrypt(id);
+            String encrypted = Crypto.encrypt(id, "someuserID");
             output.setText(output.getText() + "\n\n" + encrypted);
-            String decrypted = Crypto.decrypt(encrypted);
+            String decrypted = Crypto.decrypt(encrypted, "someuserID");
             output.setText(output.getText() + "\n\n" + decrypted);
-
-
-
-
 
             Log.i(TAG, "**********");
             Log.i(TAG, "**********");

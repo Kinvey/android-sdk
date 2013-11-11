@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLConnection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -38,6 +39,7 @@ import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;
@@ -48,6 +50,9 @@ import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.FileMetaData;
+
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -485,6 +490,24 @@ public class Client extends AbstractClient {
     public Context getContext(){
         return this.context;
     }
+
+    public String encrypt(String plainText){
+        return Crypto.encrypt(plainText, user().getId());
+    }
+
+    public String decrypt(String cipherText){
+        return Crypto.decrypt(cipherText, user().getId());
+    }
+
+    public OutputStream encryptStream(OutputStream output){
+        return Crypto.encryptOutput(output,  user().getId());
+    }
+
+    public InputStream decryptStream(InputStream input){
+        return Crypto.decryptInput(input, user().getId());
+    }
+
+
 
     /**
      * Create a client for interacting with Kinvey's services from an Android Activity.

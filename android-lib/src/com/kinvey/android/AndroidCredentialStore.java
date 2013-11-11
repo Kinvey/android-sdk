@@ -74,13 +74,9 @@ class AndroidCredentialStore implements CredentialStore {
     public Credential load(String userId) throws IOException {
         Credential credential = credentials.get(userId);
         if (encrypted){
-            try{
-                String eID = Crypto.decrypt(credential.getUserId());
-                String eAuth = Crypto.decrypt(credential.getAuthToken());
-                credential = new Credential(eID, eAuth);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            String eID = Crypto.decrypt(credential.getUserId(), userId);
+            String eAuth = Crypto.decrypt(credential.getAuthToken(), userId);
+            credential = new Credential(eID, eAuth);
         }
         return credential;
     }
@@ -91,13 +87,9 @@ class AndroidCredentialStore implements CredentialStore {
         Preconditions.checkNotNull(credential, "credential must not be null");
         Preconditions.checkNotNull(userId, "userId must not be null");
         if (encrypted){
-            try{
-                String eID = Crypto.encrypt(credential.getUserId());
-                String eAuth = Crypto.encrypt(credential.getAuthToken());
-                credential = new Credential(eID, eAuth);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            String eID = Crypto.encrypt(credential.getUserId(), userId);
+            String eAuth = Crypto.encrypt(credential.getAuthToken(), userId);
+            credential = new Credential(eID, eAuth);
         }
         credentials.put(userId, credential);
         persistCredentialStore();

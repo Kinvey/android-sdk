@@ -154,7 +154,7 @@ public class KinveySyncService extends IntentService {
         for (String s : collectionNames) {
             boolean done = false;
 
-            while (!done && saveToAttempExecution()){
+            while (!done && safeToAttempExecution()){
                 OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
                 if (req == null){
                     done = true;
@@ -328,7 +328,7 @@ public class KinveySyncService extends IntentService {
      *
      * @return
      */
-    private boolean saveToAttempExecution(){
+    private boolean safeToAttempExecution(){
         Long currentTime = Calendar.getInstance().getTimeInMillis();
         Long lastFail = getLastFailureTime();
 

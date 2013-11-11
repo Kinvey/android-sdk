@@ -24,12 +24,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Calendar;
 
@@ -39,7 +34,7 @@ import java.util.Calendar;
  * It assumes Keys are stored locally, which are managed by the version dependant KeyStore
  * </p>
  * <p>
- * This class applies the PRNG fixes recommended by Google to handle possible low entropy in /dev/urandom
+ * This class applies the PRNG fixes recommended by Google to handle possible low entropy in /dev/random
  * </p>
  *
  * @author edwardf
@@ -65,14 +60,17 @@ public class Crypto{
      * @return the encrypted string
      * @throws Exception
      */
-    public final static String encrypt(String text) throws Exception{
+    public final static String encrypt(String text, String id){
 
         if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
             return text;
         }
-
-        String key = initKeys();
-        return encrypt(text, key);
+        try{
+            String key = initKeys(id);
+            return encryptString(text, key);
+        }catch (Exception e){
+            return text;
+        }
     }
 
     /**
@@ -84,12 +82,16 @@ public class Crypto{
      * @return a decrypted version of the string
      * @throws Exception
      */
-    public final static String decrypt(String data) throws Exception{
+    public final static String decrypt(String data, String id){
         if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
             return data;
         }
-        String key = initKeys();
-        return decrypt(data, key);
+        try{
+            String key = initKeys(id);
+            return decryptString(data, key);
+        }catch (Exception e){
+            return data;
+        }
     }
 
     /**
@@ -98,7 +100,7 @@ public class Crypto{
      * If encryption is not supported on the device, it will do nothing
      *
      */
-    public static void deleteKeys(){
+    public static void deleteKeys(String id){
         if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
             return;
         }
@@ -109,9 +111,37 @@ public class Crypto{
         }else{
             keystore = KeyStore.getInstance();
         }
-        keystore.delete(SECRET_KEY);
+        keystore.delete(SECRET_KEY + id);
     }
 
+    public static OutputStream encryptOutput(OutputStream out, String userID) {
+        try{
+            //generate secret key and IV
+            String key = initKeys(userID);
+            byte[] IV = generateIV();
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(IV);
+            //write IV t output stream
+            out.write(IV);
+            return new CipherOutputStream(out, getCipher(key, ivParameterSpec, Cipher.ENCRYPT_MODE));
+        }catch(Exception e){
+            return out;
+        }
+
+
+    }
+
+    public static InputStream decryptInput(InputStream input, String userID){
+        try{
+            String key = initKeys(userID);
+            byte[] IV = new byte[IV_SIZE];
+            input.read(IV);
+
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(IV);
+            return new CipherInputStream(input, getCipher(key, ivParameterSpec, Cipher.DECRYPT_MODE));
+        }catch(Exception e){
+            return input;
+        }
+    }
 
     /**
      * This method will generate a secret key
@@ -134,14 +164,13 @@ public class Crypto{
      * @return - an encrypted representation of the input text
      * @throws Exception
      */
-    private static String encrypt(String text, String secretKey) throws Exception{
+    private static String encryptString(String text, String secretKey) throws Exception{
         //generate IV and pass it to cipher
         byte[] IV = generateIV();
         IvParameterSpec ivParameterSpec = new IvParameterSpec(IV);
 
         byte[] cipherText = getCipher(secretKey, ivParameterSpec, Cipher.ENCRYPT_MODE).doFinal(text.getBytes());
 
-        //return toHex(getCipher(secretKey, ivParameterSpec, Cipher.ENCRYPT_MODE).doFinal(text.getBytes()));
         byte[] full = new byte[cipherText.length + IV.length];
         //prepend IV to encrypted string
         System.arraycopy(IV, 0, full, 0, IV.length);
@@ -161,7 +190,7 @@ public class Crypto{
      * @return a decrypted byte[]
      * @throws Exception
      */
-    private static String decrypt(String data, String secretKey) throws Exception{
+    private static String decryptString(String data, String secretKey) throws Exception{
         //pull IV off of encrypted string and pass it to cipher
         byte[] full = toByte(data);
         byte[] iv = new byte[IV_SIZE];
@@ -172,9 +201,6 @@ public class Crypto{
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
         return new String(getCipher(secretKey, ivParameterSpec, Cipher.DECRYPT_MODE).doFinal(cipher));
-
-
-        //return new String(getCipher(secretKey, ivParameterSpec, Cipher.DECRYPT_MODE).doFinal(toByte(data)));
     }
 
 
@@ -183,7 +209,7 @@ public class Crypto{
      *
      * Returns that secret key
      */
-    private static String initKeys() throws NoSuchAlgorithmException{
+    private static String initKeys(String id) throws NoSuchAlgorithmException{
         KeyStore keystore;
         //get store wrapper dependant on runtime version
         if(Build.VERSION.SDK_INT >= JELLYBEAN43){
@@ -193,14 +219,14 @@ public class Crypto{
         }
 
         //check if the keys exist in the store
-        if(keystore.contains(SECRET_KEY)){
+        if(keystore.contains(SECRET_KEY + id)){
             //load bytes
-            byte[] secretSpec = keystore.get(SECRET_KEY);
+            byte[] secretSpec = keystore.get(SECRET_KEY + id);
             return toHex(secretSpec);
         }else{
             //generate and save
             String secret = generateKey();
-            keystore.put(SECRET_KEY, toByte(secret));
+            keystore.put(SECRET_KEY + id, toByte(secret));
             return secret;
         }
     }
