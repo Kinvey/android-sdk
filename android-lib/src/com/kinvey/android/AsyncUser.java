@@ -551,9 +551,7 @@ public class AsyncUser extends User {
     @Override
     public LogoutRequest logout() {
         if (clearStorage){
-            new SqlLiteOfflineStore<GenericJson>(getClient().getContext()).clearStorage();
-            Crypto.deleteKeys(getId());
-            getClient().file().clearFileStorage(getClient().getContext().getApplicationContext());
+            getClient().performLockDown();
         }
         return super.logout();
 

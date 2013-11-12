@@ -126,6 +126,11 @@ public class Client extends AbstractClient {
         }
     }
 
+    @Override
+    public void performLockDown() {
+        //native java doesn't have any lockdown support as of yet
+    }
+
     /**
      * Custom Endpoints factory method
      *<p>

@@ -132,6 +132,8 @@ public abstract class AbstractKinveyClient {
         return this.httpRequestFactory;
     }
 
+    public abstract void performLockDown();
+
     /* (non-Javadoc)
      * @see com.google.api.client.http.HttpRequestInitializer#initialize(com.google.api.client.http.HttpRequest)
      */

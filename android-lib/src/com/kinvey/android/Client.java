@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.secure.Crypto;
@@ -244,6 +245,13 @@ public class Client extends AbstractClient {
             }
             return file;
         }
+    }
+
+    @Override
+    public void performLockDown() {
+        new SqlLiteOfflineStore<GenericJson>(getContext()).clearStorage();
+        Crypto.deleteKeys(this.user().getId());
+        this.file().clearFileStorage(getContext().getApplicationContext());
     }
 
     /**

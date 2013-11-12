@@ -110,6 +110,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     private String appKey;
 
     /**
+     * The message received when a user has been locked down
+     */
+    private static final String LOCKED_DOWN = "UserLockedDown";
+
+    /**
      * @param abstractKinveyClient the abstract kinvey client
      * @param requestMethod the request method, PUT, GET, POST, or DELETE
      * @param uriTemplate valid uri template
@@ -329,6 +334,10 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             lastResponseCode = response.getStatusCode();
             lastResponseMessage = response.getStatusMessage();
             lastResponseHeaders = response.getHeaders();
+
+            if (lastResponseMessage != null && lastResponseMessage.equals(LOCKED_DOWN)){
+                this.abstractKinveyClient.performLockDown();
+            }
             // process any errors
             if (throwExceptionOnError && !response.isSuccessStatusCode()) {
                 throw newExceptionOnError(response);

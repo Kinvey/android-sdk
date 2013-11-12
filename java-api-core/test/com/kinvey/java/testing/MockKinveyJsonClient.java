@@ -41,6 +41,11 @@ public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
         return null;
     }
 
+    @Override
+    public void performLockDown() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public static class Builder extends AbstractKinveyJsonClient.Builder {
 
         public Builder() {
