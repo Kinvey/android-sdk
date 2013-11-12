@@ -92,19 +92,8 @@ public class KinveySyncService extends IntentService {
         return START_STICKY;
     }
 
-    /**
-     * This class is called by the Android OS, when a registered intent is fired off.
-     * <p/>
-     * Check <intent-filter> elements in the Manifest.xml to see which intents are handled by this method.
-     *
-     * @param intent the intent to act upon.
-     */
     @Override
-    protected void onHandleIntent(Intent intent) {
-        if (isOnline()) {
-            initClientAndKickOffSync();
-        }
-    }
+    protected void onHandleIntent(Intent intent) {}
 
     public boolean isOnline() {
 
