@@ -15,6 +15,7 @@
  */
 package com.kinvey.android;
 
+import android.content.Context;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import com.google.api.client.http.AbstractInputStreamContent;
@@ -308,6 +309,20 @@ public class AsyncFile extends File {
      */
     public void uploadMetaData(FileMetaData meta, KinveyClientCallback<Void> callback) {
         new UploadMetaData(meta, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void clearFileStorage(Context applicationContext){
+        deleteRecursive(applicationContext.getFilesDir());
+
+    }
+
+    private void deleteRecursive(java.io.File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()){
+            for (java.io.File child : fileOrDirectory.listFiles()){
+                deleteRecursive(child);
+            }
+        }
+        fileOrDirectory.delete();
     }
 
 

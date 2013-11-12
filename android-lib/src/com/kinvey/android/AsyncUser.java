@@ -24,6 +24,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.*;
 
 import com.kinvey.android.offline.SqlLiteOfflineStore;
+import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -551,6 +552,8 @@ public class AsyncUser extends User {
     public LogoutRequest logout() {
         if (clearStorage){
             new SqlLiteOfflineStore<GenericJson>(getClient().getContext()).clearStorage();
+            Crypto.deleteKeys(getId());
+            getClient().file().clearFileStorage(getClient().getContext().getApplicationContext());
         }
         return super.logout();
 

@@ -87,13 +87,20 @@ public class KinveySyncService extends IntentService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, startId, startId);
         Log.i(TAG, "Received start id " + startId + ": " + intent);
-        onHandleIntent(intent);
+        kickOffSync();
 
         return START_STICKY;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {}
+
+    private void kickOffSync(){
+        if (isOnline()) {
+            initClientAndKickOffSync();
+        }
+
+    }
 
     public boolean isOnline() {
 

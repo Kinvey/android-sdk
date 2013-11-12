@@ -46,6 +46,7 @@ public class Crypto{
     private static final int JELLYBEAN43 = 18;
     private static final int MIN_SUPPORTED = 14;
     private static final String AES = "AES/CBC/PKCS5Padding";
+    private static final String AES_KEY = "AES";
     private static final String SECRET_KEY = "kinvey-keys";
     private static final int ITERATIONS = 1000;
     private static final int IV_SIZE = 16;
@@ -61,14 +62,15 @@ public class Crypto{
      * @throws Exception
      */
     public final static String encrypt(String text, String id){
-
-        if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
+        if (!isDeviceReady()){
             return text;
         }
         try{
             String key = initKeys(id);
             return encryptString(text, key);
         }catch (Exception e){
+          //  Log.e(TAG, "couldn't encrypt -> " + e.getMessage());
+            e.printStackTrace();
             return text;
         }
     }
@@ -83,13 +85,15 @@ public class Crypto{
      * @throws Exception
      */
     public final static String decrypt(String data, String id){
-        if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
+        if (!isDeviceReady()){
             return data;
         }
         try{
             String key = initKeys(id);
             return decryptString(data, key);
         }catch (Exception e){
+           // Log.e(TAG, "couldn't decrypt -> " + e.getMessage());
+            e.printStackTrace();
             return data;
         }
     }
@@ -101,20 +105,24 @@ public class Crypto{
      *
      */
     public static void deleteKeys(String id){
-        if (Build.VERSION.SDK_INT < MIN_SUPPORTED){
+        if (!isDeviceReady()){
             return;
         }
-        KeyStore keystore;
-        //get store wrapper dependant on runtime version
-        if(Build.VERSION.SDK_INT >= JELLYBEAN43){
-            keystore = KeyStoreJb43.getInstance();
-        }else{
-            keystore = KeyStore.getInstance();
-        }
+        KeyStore keystore = getKeystore();
         keystore.delete(SECRET_KEY + id);
     }
 
+    /**
+     * This method will encrypt an output stream, so that encrypted files can be written to disk.  If encryption fails it will return the provided outputstream
+     *
+     * @param out the output stream to encrypt
+     * @param userID the id of the current user
+     * @return an encrypted CipherOutputStream or the provided OutputStream if something goes wrong
+     */
     public static OutputStream encryptOutput(OutputStream out, String userID) {
+        if (!isDeviceReady()){
+            return out;
+        }
         try{
             //generate secret key and IV
             String key = initKeys(userID);
@@ -130,7 +138,18 @@ public class Crypto{
 
     }
 
+    /**
+     * This method will decrypt a provided input stream and return a CipherInputStream.  If decryption fails it will return the input stream
+     *
+     *
+     * @param input the stream to decrypt
+     * @param userID the id of the current user
+     * @return either a CipherInputStream which will decrypt the contents of input, or just input if an error occurs
+     */
     public static InputStream decryptInput(InputStream input, String userID){
+        if (!isDeviceReady()){
+            return input;
+        }
         try{
             String key = initKeys(userID);
             byte[] IV = new byte[IV_SIZE];
@@ -143,6 +162,29 @@ public class Crypto{
         }
     }
 
+    public static boolean isLockScreenEnabled(){
+        KeyStore keystore = getKeystore();
+        return (keystore.state() == KeyStore.State.UNLOCKED);
+
+    }
+
+    public static boolean isVersionSupported(){
+        return (Build.VERSION.SDK_INT >= MIN_SUPPORTED);
+    }
+
+    private static boolean isDeviceReady(){
+        return (isVersionSupported() && isLockScreenEnabled());
+    }
+
+    private static KeyStore getKeystore(){
+        //get store wrapper dependant on runtime version
+        if(Build.VERSION.SDK_INT >= JELLYBEAN43){
+            return KeyStoreJb43.getInstance();
+        }else{
+            return KeyStore.getInstance();
+        }
+    }
+
     /**
      * This method will generate a secret key
      * @throws Exception
@@ -151,9 +193,9 @@ public class Crypto{
         PRNGFixes.apply();
         SecureRandom sr = new SecureRandom();
         sr.setSeed(Calendar.getInstance().getTimeInMillis());
-        KeyGenerator kg = KeyGenerator.getInstance(AES);
+        KeyGenerator kg = KeyGenerator.getInstance(AES_KEY);
         kg.init(128, sr);
-        return toHex(new SecretKeySpec((kg.generateKey()).getEncoded(), AES).getEncoded());
+        return toHex(new SecretKeySpec((kg.generateKey()).getEncoded(), AES_KEY).getEncoded());
 
     }
 
@@ -209,15 +251,8 @@ public class Crypto{
      *
      * Returns that secret key
      */
-    private static String initKeys(String id) throws NoSuchAlgorithmException{
-        KeyStore keystore;
-        //get store wrapper dependant on runtime version
-        if(Build.VERSION.SDK_INT >= JELLYBEAN43){
-            keystore = KeyStoreJb43.getInstance();
-        }else{
-            keystore = KeyStore.getInstance();
-        }
-
+    private static String initKeys(String id) throws Exception{
+        KeyStore keystore = getKeystore();
         //check if the keys exist in the store
         if(keystore.contains(SECRET_KEY + id)){
             //load bytes
