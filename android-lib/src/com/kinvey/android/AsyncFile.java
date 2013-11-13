@@ -107,11 +107,6 @@ public class AsyncFile extends File {
         setMimeTypeManager(new AndroidMimeTypeFinder());
     }
 
-    AsyncFile(AbstractClient client, boolean encrypt){
-        super(client, encrypt);
-        setMimeTypeManager(new AndroidMimeTypeFinder());
-    }
-
     /**
      * Uploads a given file and its contents to the Kinvey file service.
      *

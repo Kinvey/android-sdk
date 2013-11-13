@@ -101,6 +101,13 @@
             <artifactId>android-lib</artifactId>
 	    <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.kinvey</groupId>
+            <artifactId>android-secure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.actionbarsherlock</groupId>
             <artifactId>actionbarsherlock</artifactId>

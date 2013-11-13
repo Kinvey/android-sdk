@@ -23,6 +23,7 @@
     <modules>
         <module>java-api-core</module>
         <module>android-lib</module>
+        <module>android-secure</module>
         <module>java-lib</module>
         <module>samples</module>
         <module>samples-java</module>

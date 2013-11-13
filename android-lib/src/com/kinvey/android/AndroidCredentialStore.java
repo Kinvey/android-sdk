@@ -28,7 +28,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
 
@@ -41,25 +40,10 @@ class AndroidCredentialStore implements CredentialStore {
 
     private HashMap<String, Credential> credentials;
     private Context appContext;
-    private boolean encrypted = false;
 
     AndroidCredentialStore(Context context) throws IOException, AndroidCredentialStoreException {
         appContext = context.getApplicationContext();
         credentials = new HashMap<String, Credential>();
-        encrypted = false;
-        try {
-            retrieveCredentialStore();
-        } catch (ClassNotFoundException ex) {
-            credentials = new HashMap<String, Credential>();
-            persistCredentialStore();
-            throw new AndroidCredentialStoreException("Credential store corrupted and was rebuilt");
-        }
-    }
-
-    AndroidCredentialStore(Context context, boolean encrypt) throws IOException, AndroidCredentialStoreException {
-        appContext = context.getApplicationContext();
-        credentials = new HashMap<String, Credential>();
-        encrypted = encrypt;
         try {
             retrieveCredentialStore();
         } catch (ClassNotFoundException ex) {
@@ -73,11 +57,6 @@ class AndroidCredentialStore implements CredentialStore {
     @Override
     public Credential load(String userId) throws IOException {
         Credential credential = credentials.get(userId);
-        if (encrypted){
-            String eID = Crypto.decrypt(credential.getUserId(), userId);
-            String eAuth = Crypto.decrypt(credential.getAuthToken(), userId);
-            credential = new Credential(eID, eAuth);
-        }
         return credential;
     }
 
@@ -86,11 +65,7 @@ class AndroidCredentialStore implements CredentialStore {
     public void store(String userId, Credential credential) throws IOException {
         Preconditions.checkNotNull(credential, "credential must not be null");
         Preconditions.checkNotNull(userId, "userId must not be null");
-        if (encrypted){
-            String eID = Crypto.encrypt(credential.getUserId(), userId);
-            String eAuth = Crypto.encrypt(credential.getAuthToken(), userId);
-            credential = new Credential(eID, eAuth);
-        }
+
         credentials.put(userId, credential);
         persistCredentialStore();
     }

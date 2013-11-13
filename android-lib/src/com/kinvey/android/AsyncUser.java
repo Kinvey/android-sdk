@@ -20,11 +20,8 @@ import java.util.ArrayList;
 
 import android.util.Log;
 
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.*;
 
-import com.kinvey.android.offline.SqlLiteOfflineStore;
-import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;

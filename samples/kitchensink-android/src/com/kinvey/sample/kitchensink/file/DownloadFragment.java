@@ -22,11 +22,16 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.User;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.kitchensink.KitchenSink;
+import com.kinvey.sample.kitchensink.MyEntity;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
 
@@ -64,6 +69,7 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
 
     private void download(File target) throws IOException {
         FileOutputStream fos= new FileOutputStream(target);
+
 
         // call kinvey specific task to perform download
         FileMetaData meta = new FileMetaData(FileActivity.FILENAME);

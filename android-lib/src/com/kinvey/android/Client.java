@@ -19,18 +19,14 @@ package com.kinvey.android;
 
 import android.content.Context;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -40,7 +36,6 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.secure.Crypto;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;
@@ -50,10 +45,6 @@ import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.model.FileMetaData;
-
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -101,7 +92,6 @@ public class Client extends AbstractClient {
     private AsyncUser currentUser;
 //    private AsyncCustomEndpoints customEndpoints;
     private long syncRate;
-    private boolean encryptFiles;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -241,7 +231,7 @@ public class Client extends AbstractClient {
     public AsyncFile file() {
         synchronized (lock) {
             if (file == null) {
-                file = new AsyncFile(this, this.encryptFiles);
+                file = new AsyncFile(this);
             }
             return file;
         }
@@ -250,7 +240,7 @@ public class Client extends AbstractClient {
     @Override
     public void performLockDown() {
         new SqlLiteOfflineStore<GenericJson>(getContext()).clearStorage();
-        Crypto.deleteKeys(this.user().getId());
+        //Crypto.deleteKeys(this.user().getId());
         this.file().clearFileStorage(getContext().getApplicationContext());
     }
 
@@ -499,24 +489,6 @@ public class Client extends AbstractClient {
         return this.context;
     }
 
-    public String encrypt(String plainText){
-        return Crypto.encrypt(plainText, user().getId());
-    }
-
-    public String decrypt(String cipherText){
-        return Crypto.decrypt(cipherText, user().getId());
-    }
-
-    public OutputStream encryptStream(OutputStream output){
-        return Crypto.encryptOutput(output,  user().getId());
-    }
-
-    public InputStream decryptStream(InputStream input){
-        return Crypto.decryptInput(input, user().getId());
-    }
-
-
-
     /**
      * Create a client for interacting with Kinvey's services from an Android Activity.
      * <pre>
@@ -539,9 +511,6 @@ public class Client extends AbstractClient {
         private String GCM_SenderID = "";
         private boolean GCM_Enabled = false;
         private boolean GCM_InProduction = true;
-        private boolean sharedPrefCredentials = false;
-        private boolean encryptCredentials = false;
-        private boolean encryptFiles = false;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
 
@@ -564,11 +533,9 @@ public class Client extends AbstractClient {
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
 
-            if (this.sharedPrefCredentials){
-                 this.setCredentialStore(new SharedPrefCredentialStore(this.context));
-            }else{
+            if (getCredentialStore() == null){
                 try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context, this.encryptCredentials));
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (Exception ex) {
                     //TODO Add handling
                 }
@@ -631,24 +598,12 @@ public class Client extends AbstractClient {
                 this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
             }
 
-            if (super.getString(Option.SHARED_PREF) != null){
-                this.sharedPrefCredentials = Boolean.parseBoolean(super.getString(Option.SHARED_PREF));
-            }
-
             if (super.getString(Option.DEBUG_MODE) != null){
                 this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
             if (super.getString(Option.SYNC_RATE) != null){
                 this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
-            }
-
-            if (super.getString(Option.SECURE_CRED) != null){
-                this.encryptCredentials = Boolean.parseBoolean(super.getString(Option.SECURE_CRED));
-            }
-
-            if (super.getString(Option.SECURE_FILE) != null){
-                this.encryptFiles = Boolean.parseBoolean(super.getString(Option.SECURE_FILE));
             }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
@@ -659,11 +614,9 @@ public class Client extends AbstractClient {
 
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            if (this.sharedPrefCredentials){
-                this.setCredentialStore(new SharedPrefCredentialStore(this.context));
-            }else{
-                try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context, this.encryptCredentials));
+            if (getCredentialStore() == null){
+                try{
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (AndroidCredentialStoreException ex) {
                     Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
                 } catch (IOException ex) {
@@ -705,10 +658,6 @@ public class Client extends AbstractClient {
                 client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
             }
 
-            if (this.encryptFiles){
-                client.encryptFiles = true;
-            }
-
             if (this.debugMode){
                 client.enableDebugLogging();
             }
@@ -729,6 +678,18 @@ public class Client extends AbstractClient {
          */
         public void build(KinveyClientBuilderCallback buildCallback) {
             new Build(buildCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        }
+
+
+        /**
+         * Define how credentials will be stored
+         *
+         * @param store something implpemting CredentialStore interface
+         * @return this builder, with the new credential store set
+         */
+        public Builder setCredentialStore(CredentialStore store) {
+            super.setCredentialStore(store);
+            return this;
         }
 
 
@@ -795,11 +756,6 @@ public class Client extends AbstractClient {
             this.GCM_InProduction = inProduction;
             return this;
         }
-//        Might want to expose this someday, but don't yet
-//        public Client.Builder useSharedPrefCredentials(){
-//            this.sharedPrefCredentials = true;
-//            return this;
-//        }
 
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws AndroidCredentialStoreException, IOException {
@@ -807,12 +763,10 @@ public class Client extends AbstractClient {
             if (!client.user().isUserLoggedIn()) {
                 String userID = client.getClientUsers().getCurrentUser();
                 if (userID != null && !userID.equals("")) {
-                    CredentialStore store;
+                    CredentialStore store = getCredentialStore();
 
-                    if (sharedPrefCredentials){
-                        store = new SharedPrefCredentialStore(context);
-                    }else{
-                        store = new AndroidCredentialStore(context, this.encryptCredentials);
+                    if (store == null){
+                        store = new AndroidCredentialStore(context);
                     }
                     CredentialManager manager = new CredentialManager(store);
                     credential = manager.loadCredential(userID);

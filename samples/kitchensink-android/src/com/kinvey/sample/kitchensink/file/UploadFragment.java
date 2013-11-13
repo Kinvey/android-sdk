@@ -23,14 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
@@ -92,12 +85,13 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
 
     private void save(String text, File target) throws IOException {
         FileOutputStream fos=new FileOutputStream(target);
-        OutputStreamWriter out=new OutputStreamWriter(fos);
+        OutputStreamWriter outwriter = new OutputStreamWriter(fos);
 
-        out.write(text);
-        out.flush();
+        outwriter.write(text);
+        outwriter.flush();
         fos.getFD().sync();
-        out.close();
+        outwriter.close();
+        fos.close();
 
     }
 
@@ -112,6 +106,7 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
 
         try {
             InputStream in=new FileInputStream(target);
+
 
             if (in != null) {
                 InputStreamReader tmp=new InputStreamReader(in);

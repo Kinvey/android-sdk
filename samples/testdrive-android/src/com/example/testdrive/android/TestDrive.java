@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
+import com.kinvey.android.SharedPrefCredentialStore;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -69,7 +70,7 @@ public class TestDrive extends Activity {
         bar = (ProgressBar) findViewById(R.id.refresh_progress);
         bar.setIndeterminate(true);
 
-        kinveyClient = new Client.Builder(this).build();
+        kinveyClient = new Client.Builder(this).setCredentialStore(new SharedPrefCredentialStore(this)).build();
         kinveyClient.enableDebugLogging();
 
         if (!kinveyClient.user().isUserLoggedIn()) {
@@ -179,6 +180,7 @@ public class TestDrive extends Activity {
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
+                Log.e(TAG, "AppData.saved " + result.get("_id"));
                 bar.setVisibility(View.GONE);
                 Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
             }

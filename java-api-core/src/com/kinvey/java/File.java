@@ -105,8 +105,6 @@ public class File {
     /** Used to calculate the MimeType of files **/
     protected MimeTypeFinder mimeTypeFinder;
 
-    private boolean encrypt;
-
     /**
      * Base constructor requires the client instance to be passed in.
      * <p>
@@ -119,12 +117,6 @@ public class File {
     protected File(AbstractClient client) {
         this.client = Preconditions.checkNotNull(client);
     }
-
-    protected File(AbstractClient client, boolean encrypt){
-        this.client = Preconditions.checkNotNull(client);
-        this.encrypt = encrypt;
-    }
-
 
     /**
      * Set a {@code MimeTypeFinder}
