@@ -97,6 +97,13 @@
 		</dependency>
 
         <dependency>
+            <groupId>com.sqlcipher</groupId>
+            <artifactId>sqlcipher</artifactId>
+            <version>3.0.0</version>
+
+        </dependency>
+
+        <dependency>
             <groupId>com.kinvey</groupId>
             <artifactId>android-lib</artifactId>
 	    <version>${project.version}</version>

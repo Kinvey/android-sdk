@@ -6,6 +6,9 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.kinvey.android.secure.Crypto;
+import net.sqlcipher.database.SQLiteDatabase;
+
+import java.io.File;
 
 
 public class Signin extends Activity {
@@ -51,6 +54,18 @@ public class Signin extends Activity {
 
 
 
+        InitializeSQLCipher();
+    }
+
+    private void InitializeSQLCipher() {
+        SQLiteDatabase.loadLibs(this);
+        File databaseFile = getDatabasePath("demo.db");
+        databaseFile.mkdirs();
+        databaseFile.delete();
+        SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(databaseFile, "test123", null);
+        database.execSQL("create table t1(a, b)");
+        database.execSQL("insert into t1(a, b) values(?, ?)", new Object[]{"one for the money",
+                "two for the show"});
     }
 
 

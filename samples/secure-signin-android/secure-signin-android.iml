@@ -58,6 +58,7 @@
     <orderEntry type="library" name="Maven: com.google.api-client:google-api-client-android:1.16.0-rc" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-gson:1.16.0-rc" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sqlcipher:sqlcipher:3.0.0" level="project" />
     <orderEntry type="module" module-name="android-lib" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-android:1.16.0-rc" level="project" />
     <orderEntry type="library" name="Maven: com.google.gcm:gcm-client:3" level="project" />
@@ -66,7 +67,6 @@
     <orderEntry type="module" module-name="java-api-core" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:14.0.1" level="project" />
     <orderEntry type="module" module-name="android-secure" />
-    <orderEntry type="library" name="Maven: com.actionbarsherlock:actionbarsherlock:apklib:4.2.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.android:support-v4:r7" level="project" />
     <orderEntry type="library" name="Maven: com.google.android.gms:google-play-services:2.0.12" level="project" />
     <orderEntry type="jdk" jdkName="Android 4.1.2 Platform" jdkType="Android SDK" />
