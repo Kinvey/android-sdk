@@ -151,7 +151,11 @@
             <type>jar</type>
         </dependency>
 
-
+        <dependency>
+            <groupId>com.sqlcipher</groupId>
+            <artifactId>sqlcipher</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.robolectric</groupId>

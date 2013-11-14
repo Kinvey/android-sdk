@@ -17,7 +17,7 @@ package com.kinvey.android.offline;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+//import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
 import com.google.api.client.json.GenericJson;
@@ -86,7 +86,7 @@ public class OfflineTable<T extends GenericJson> {
         this.RESULTS_NAME = PREFIX_RESULTS + collection;
     }
 
-    public void onCreate(SQLiteDatabase database) {
+    public void onCreate(DatabaseHandler handler) {
         if (this.TABLE_NAME == null || this.TABLE_NAME == ""){
             Log.e(TAG, "cannot create a table without a name!");
             return;
@@ -103,7 +103,7 @@ public class OfflineTable<T extends GenericJson> {
                 + ");";
 
 
-        runCommand(database, createCommand);
+        handler.runCommand(createCommand);
         //create the local action queue
         createCommand = "CREATE TABLE IF NOT EXISTS "
                 + QUEUE_NAME
@@ -115,7 +115,7 @@ public class OfflineTable<T extends GenericJson> {
 
                 + ");";
 
-        runCommand(database, createCommand);
+        handler.runCommand(createCommand);
 
         //create the local query store
         createCommand = "CREATE TABLE IF NOT EXISTS "
@@ -125,7 +125,7 @@ public class OfflineTable<T extends GenericJson> {
                 + COLUMN_ID + " TEXT not null"
                 + ");";
 
-        runCommand(database, createCommand);
+        handler.runCommand(createCommand);
 
         //create the local results store
         createCommand = "CREATE TABLE IF NOT EXISTS "
@@ -137,43 +137,43 @@ public class OfflineTable<T extends GenericJson> {
                 + COLUMN_RESULT + " INTEGER not null"
                 + ");";
 
-        runCommand(database, createCommand);
+        handler.runCommand(createCommand);
 
         //set a unique index on the local offline entity store
         String primaryKey = "CREATE UNIQUE INDEX IF NOT EXISTS " + UNIQUE_INDEX_IDS + " ON " + TABLE_NAME + " (" + COLUMN_ID + " ASC);";
-        runCommand(database, primaryKey);
+        handler.runCommand(primaryKey);
         //set a unique key on the queued request store
         primaryKey = "CREATE UNIQUE INDEX IF NOT EXISTS " + UNIQUE_INDEX_QUEUE + " ON " + QUEUE_NAME + " (" + COLUMN_UNIQUE_KEY + " ASC);";
-        runCommand(database, primaryKey);
+        handler.runCommand(primaryKey);
 
 
     }
 
-    public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-
-    }
-
-
-    /**
-     * Run a SQLLite command against a database
-     *
-     * @param database
-     * @param command
-     */
-    public static void runCommand(SQLiteDatabase database, String command){
-        database.beginTransaction();
-        try {
-            database.execSQL(command);
-            database.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
+//    public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
+//
+//    }
 
 
-
-    }
+//    /**
+//     * Run a SQLLite command against a database
+//     *
+//     * @param database
+//     * @param command
+//     */
+//    public static void runCommand(SQLiteDatabase database, String command){
+//        database.beginTransaction();
+//        try {
+//            database.execSQL(command);
+//            database.setTransactionSuccessful();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            database.endTransaction();
+//        }
+//
+//
+//
+//    }
 
 
     /**
@@ -185,9 +185,9 @@ public class OfflineTable<T extends GenericJson> {
      * @param offlineEntity
      * @return
      */
-    public T insertEntity(OfflineHelper helper, AbstractClient client, GenericJson offlineEntity){
+    public T insertEntity(DatabaseHandler helper, AbstractClient client, GenericJson offlineEntity){
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+//        SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
 
@@ -211,18 +211,14 @@ public class OfflineTable<T extends GenericJson> {
 
         Log.v(TAG, "insert entity -> " + offlineEntity.get("_id").toString());
 
-        int change = db.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null, db.CONFLICT_REPLACE);
+        int change = helper.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null,  5); //5 is CONFLICT_REPLACE
         if (change == 0){
-            db.insert(TABLE_NAME, null, values);
+            helper.insert(TABLE_NAME, null, values);
             //Log.v(TAG, "offline inserting new entity -> " + values.get(COLUMN_JSON));
         }else{
             //Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
         }
 
-
-
-
-//        db.close();
         return (T) offlineEntity;
     }
 
@@ -231,15 +227,14 @@ public class OfflineTable<T extends GenericJson> {
      * Retrive an entity from this offline table
      *
      *
-     * @param helper
+     * @param handler
      * @param client
      * @param id
      * @param responseClass
      * @return
      */
-    public T getEntity(OfflineHelper helper, AbstractClient client, String id, Class<T> responseClass){
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, new String[] {COLUMN_JSON},COLUMN_ID + "='" + id + "'",
+    public T getEntity(DatabaseHandler handler, AbstractClient client, String id, Class<T> responseClass){
+        Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},COLUMN_ID + "='" + id + "'",
                null, null, null, null, null);
 
 
@@ -265,17 +260,17 @@ public class OfflineTable<T extends GenericJson> {
     /**
      * Retrieve the results of a query from this offline table
      *
-     * @param helper
+     * @param handler
      * @param client
      * @param q
      * @param clazz
      * @return
      */
-    public T[] getQuery(OfflineHelper helper, AbstractClient client, String q, Class clazz){
+    public T[] getQuery(DatabaseHandler handler, AbstractClient client, String q, Class clazz){
 
-        SQLiteDatabase db = helper.getReadableDatabase();
+        //SQLiteDatabase db = helper.getReadableDatabase();
 
-        Cursor c =  db.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null);
+        Cursor c =  handler.query(QUERY_NAME, new String[]{COLUMN_ID}, COLUMN_QUERY_STRING + "=?", new String[]{q}, null, null, null, null);
         if (c.moveToFirst() && c.getColumnCount() > 0) {
             String s = c.getString(0);
             //Log.e(TAG, "get query entity -> " + s);
@@ -289,7 +284,7 @@ public class OfflineTable<T extends GenericJson> {
 
 
                     for (int i = 0; i < resultIDs.length; i++) {
-                        ret[i] = getEntity(helper, client, resultIDs[i], singleClass);
+                        ret[i] = getEntity(handler, client, resultIDs[i], singleClass);
                     }
                 }
             }
@@ -304,13 +299,13 @@ public class OfflineTable<T extends GenericJson> {
     /**
      * Store the results of a query
      *
-     * @param helper
+     * @param handler
      * @param queryString
      * @param resultIds
      */
-    public void storeQueryResults(OfflineHelper helper, String queryString, List<String> resultIds){
+    public void storeQueryResults(DatabaseHandler handler, String queryString, List<String> resultIds){
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        //SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_QUERY_STRING, queryString);
@@ -321,9 +316,9 @@ public class OfflineTable<T extends GenericJson> {
 
        // Log.v(TAG, "inserting query: " + queryString);
 
-        int change = db.updateWithOnConflict(QUERY_NAME, values, null, null, db.CONFLICT_REPLACE);
+        int change = handler.updateWithOnConflict(QUERY_NAME, values, null, null, 5); //5 is conflict_replace
         if (change == 0){
-            db.insert(QUERY_NAME, null, values);
+            handler.insert(QUERY_NAME, null, values);
            // Log.v(TAG, "inserting new query -> " + values.get(COLUMN_ID));
         }else{
            // Log.v(TAG, "updating query -> " + values.get(COLUMN_ID));
@@ -337,13 +332,13 @@ public class OfflineTable<T extends GenericJson> {
     /**
      * Flag an entity for deletion
      *
-     * @param helper
+     * @param handler
      * @param client
      * @param id
      * @return
      */
-    public KinveyDeleteResponse delete(OfflineHelper helper, AbstractClient client, String id){
-        SQLiteDatabase db = helper.getWritableDatabase();
+    public KinveyDeleteResponse delete(DatabaseHandler handler, AbstractClient client, String id){
+        //SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, id);
@@ -352,7 +347,7 @@ public class OfflineTable<T extends GenericJson> {
         // Setting delete flag on row
         KinveyDeleteResponse ret =  new KinveyDeleteResponse();
 
-        ret.setCount(db.updateWithOnConflict(TABLE_NAME, values, null, null, db.CONFLICT_REPLACE));
+        ret.setCount(handler.updateWithOnConflict(TABLE_NAME, values, null, null, 5)); //5 is conflict_replace
 //        db.close();
         return ret;
     }
@@ -360,14 +355,13 @@ public class OfflineTable<T extends GenericJson> {
     /**
      * enqueue a request for later execution
      *
-     * @param helper
+     * @param handler
      * @param verb
      * @param id
      */
-    public void enqueueRequest(OfflineHelper helper, String verb, String id){
-        SQLiteDatabase db = helper.getWritableDatabase();
+    public void enqueueRequest(DatabaseHandler handler, String verb, String id){
 
-        Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null);
+        Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null, null);
 
         if (c.getCount() == 0){
             Log.v(TAG, "offline queueing -> " + id);
@@ -375,7 +369,7 @@ public class OfflineTable<T extends GenericJson> {
             values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
             values.put(COLUMN_ID, id);
             values.put(COLUMN_ACTION, verb);
-            db.insert(QUEUE_NAME, null, values);
+            handler.insert(QUEUE_NAME, null, values);
         }
 
         c.close();
@@ -388,17 +382,15 @@ public class OfflineTable<T extends GenericJson> {
     /**
      * Pop a queued request and remove it from the queue
      *
-     * @param helper
+     * @param handler
      * @return
      */
-    public OfflineRequestInfo popSingleQueue(OfflineHelper helper){
+    public OfflineRequestInfo popSingleQueue(DatabaseHandler handler){
         OfflineRequestInfo ret = null;
-
-        SQLiteDatabase db = helper.getReadableDatabase();
 
         String curKey = null;
 
-        Cursor c = db.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null);
+        Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null, null);
             if (c.moveToFirst()){
                 ret = new OfflineRequestInfo(c.getString(1), c.getString(0));
                 curKey = c.getString(2);
@@ -407,7 +399,7 @@ public class OfflineTable<T extends GenericJson> {
         //remove the popped request
         if (curKey != null){
             Log.v(TAG, "offline popped queue, current id is: " + ret.getEntityID());
-            db.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
+            handler.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
         }
 //        db.close();
         return ret;
@@ -426,34 +418,33 @@ public class OfflineTable<T extends GenericJson> {
      */
     public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
         //no-op haven't found a use for this yet
-        if (false) {
-            SQLiteDatabase db = helper.getWritableDatabase();
-            ContentValues values = new ContentValues();
-
-            values.put(COLUMN_ID, info.getEntityID());
-            values.put(COLUMN_ACTION, info.getHttpVerb());
-            values.put(COLUMN_JSON, returnValue);
-            values.put(COLUMN_RESULT, (success ? 1 : 0));
-
-            db.insert(RESULTS_NAME, null, values);
-
-//            db.close();
-        }
-        return;
+//        if (false) {
+//            SQLiteDatabase db = helper.getWritableDatabase();
+//            ContentValues values = new ContentValues();
+//
+//            values.put(COLUMN_ID, info.getEntityID());
+//            values.put(COLUMN_ACTION, info.getHttpVerb());
+//            values.put(COLUMN_JSON, returnValue);
+//            values.put(COLUMN_RESULT, (success ? 1 : 0));
+//
+//            db.insert(RESULTS_NAME, null, values);
+//
+//        }
+//        return;
     }
 
 
     /**
      * return a list of all historical offline requests
      *
-     * @param helper
+     * @param handler
      * @return
      * @deprecated removed, as table would grow infinitely
      */
-    public List<OfflineResponseInfo> getHistoricalRequests(OfflineHelper helper){
+    public List<OfflineResponseInfo> getHistoricalRequests(DatabaseHandler handler){
         if (false) {
-            SQLiteDatabase db = helper.getReadableDatabase();
-            Cursor c = db.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null);
+
+            Cursor c = handler.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null, null);
 
             ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
 

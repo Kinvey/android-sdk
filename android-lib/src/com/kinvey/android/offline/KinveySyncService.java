@@ -65,12 +65,10 @@ public class KinveySyncService extends IntentService {
 
     public KinveySyncService(String name) {
         super(name);
-
     }
 
     public KinveySyncService() {
         super("Kinvey Sync Service");
-
     }
 
 
@@ -240,14 +238,13 @@ public class KinveySyncService extends IntentService {
     }
 
     private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Throwable error) {
-         //  Might want this someday but not yet
 
-        OfflineHelper dbHelper = OfflineHelper.getInstance(getApplicationContext());
 //        dbHelper.getTable(collectionName).storeCompletedRequestInfo(dbHelper, collectionName, success, info, returnValue);
 
         //if request failed on client side, re-queue it
         if (!success && !(error instanceof HttpResponseException)){
             Log.i(TAG, "requeing request");
+            OfflineHelper dbHelper = OfflineHelper.getInstance(getApplicationContext());
             dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
             registerFailure();
         }
@@ -320,9 +317,9 @@ public class KinveySyncService extends IntentService {
     }
 
     /**
-     * Comapre current time to last failure and sync rate to determine if sync should occur
+     * Compare current time to last failure and sync rate to determine if sync should occur
      *
-     * @return
+     * @return true if it has been long enough since last failure to attempt sync again
      */
     private boolean safeToAttempExecution(){
         Long currentTime = Calendar.getInstance().getTimeInMillis();
