@@ -49,8 +49,14 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     }
 
     /**
-     * Execute a get request against this offline store
-     *
+     * Execute a get request against this offline store.  This will method will expand the target URI into a String, and then grab the index of character right after "<CollectionName>/".
+     * This character represents either:
+     * an empty string, which is an empty query,
+     * an _id, so the GET request is by _id
+     * or a query string, beginning with "?query="
+     * <p/>
+     * Dependant on which case, this method will execute the apppriate GET method on the set {@link DatabaseHandler}.
+     * <p/>
      * @param client - an instance of a client
      * @param appData - an instance of AppData
      * @param request - an Offline Client Request to be executed (must be a GET)
@@ -66,26 +72,18 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         DatabaseHandler handler = getDatabaseHandler();
 
-        //expand the URI from the template
+        //expand the URI from the template and grab the index of where the get paremeters will be
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
-        //find the index after {collectionName}/
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
-
-
         T ret;
-        //determine if it is a query or get by id
+        //is it a query? or nothing, which is a full query
         if (targetURI.contains("query") || idIndex == targetURI.length()){
-            //it's a query
+            //Since it's a query, pull the actual query string out and get rid of the "?query"
             String query = targetURI.substring(idIndex, targetURI.length());
-
             query = query.replace("?query=","");
             try{
                 query = URLDecoder.decode(query, "UTF-8");
-            }catch (Exception e){}
-//
-//            Log.e("Offline", "targeturi string is: " + targetURI);
-//            Log.e("Offline", "idIndex  is: " + idIndex );
-//            Log.e("Offline", "query string is: " + query);
+            }catch (Exception e){}//if this happens it will also happen with online mode.
 
             ret = (T) handler.getTable(appData.getCollectionName()).getQuery(handler, client, query, appData.getCurrentClass());
 
@@ -180,7 +178,6 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         GenericJson jsonContent = (GenericJson) entity;
 
         handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent);
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -201,13 +198,8 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     }
 
 
-    @Override
-    public void kickOffSync(){
-        Intent syncIt = new Intent(this.context, KinveySyncService.class);
-        syncIt.setAction(KinveySyncService.ACTION_OFFLINE_SYNC);
-        this.context.startService(syncIt);
 
-    }
+
 
     protected abstract DatabaseHandler getDatabaseHandler();
 

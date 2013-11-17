@@ -13,8 +13,21 @@
  */
 package com.kinvey.android.secure;
 
+import android.content.Intent;
+import com.kinvey.android.offline.AbstractSyncService;
+import com.kinvey.android.offline.DatabaseHandler;
+
 /**
  * @author edwardf
  */
-public class SecureSyncService {
+public class SecureSyncService extends AbstractSyncService {
+
+    public SecureSyncService(){
+        super("Kinvey Secure Sync");
+    }
+
+    @Override
+    protected DatabaseHandler getDatabaseHandler() {
+        return SecureHelper.getInstance(getApplicationContext());
+    }
 }

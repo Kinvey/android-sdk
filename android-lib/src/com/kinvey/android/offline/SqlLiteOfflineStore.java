@@ -16,14 +16,11 @@
 package com.kinvey.android.offline;
 
 import android.content.Context;
+import android.content.Intent;
 import com.kinvey.java.offline.OfflineStore;
 
 /**
  * This class is an implementation of an {@link AbstractSqliteOfflineStore}, which provides a native android sqlite3 database
- * <p/>
- * This class delegates requests to an appropriate {@link OfflineTable}, which is associated with the current collection.
- * <p/>
- * It also enqueues requests in that same {@link OfflineTable}, and can start an Android Service to begin background sync.
  *
  *
  * @author edwardf
@@ -41,5 +38,11 @@ public class SqlLiteOfflineStore<T> extends AbstractSqliteOfflineStore{
         return OfflineHelper.getInstance(getContext());
     }
 
+    @Override
+    public void kickOffSync(){
+        Intent syncIt = new Intent(this.getContext(), KinveySyncService.class);
+        syncIt.setAction(AbstractSyncService.ACTION_OFFLINE_SYNC);
+        this.getContext().startService(syncIt);
 
+    }
 }

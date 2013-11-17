@@ -15,10 +15,17 @@ package com.kinvey.android.offline;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.AppData;
 
 import java.util.List;
 
 /**
+ * This class provides declarations for "methods you would perform on a database".  This abstraction allows for various implementations of the actual database itself.
+ * <p/> note the method parameters match Android's native SQLite3 implementation.
+ *
+ *
  * @author edwardf
  */
 public interface DatabaseHandler {
@@ -42,6 +49,8 @@ public interface DatabaseHandler {
     public OfflineTable getTable(String collectionName);
 
     public List<String> getCollectionTables();
+
+    public GenericJson getEntity(AbstractClient client, AppData appData, String id);
 
 
 }

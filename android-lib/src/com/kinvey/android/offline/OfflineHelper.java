@@ -22,15 +22,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.google.api.client.json.GenericJson;
-import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
-import com.kinvey.java.offline.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class manages a set of {@link OfflineTable}s.  Tables are not maintained in memory, and are created on demand.
@@ -64,7 +61,6 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
 
 
     /**
-     * used for accessing ALREADY existing tables
      *
      * @param context
      */
@@ -93,15 +89,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-//        if (newVersion <= oldVersion){
-//            return;
-//        }
-//        List<String> collectionTables = getCollectionTables();
-//        OfflineTable tb;
-//        for (String s : collectionTables){
-//            tb = new OfflineTable(s);
-//             tb.onUpgrade(database, oldVersion, newVersion);
-//        }
+        //haven't had to change database yet.
     }
 
     /**
