@@ -62,7 +62,7 @@ public class Crypto{
      * @throws Exception
      */
     public final static String encrypt(String text, String id){
-        if (!isDeviceReady()){
+        if (!isEncryptionSupported()){
             return text;
         }
         try{
@@ -85,7 +85,7 @@ public class Crypto{
      * @throws Exception
      */
     public final static String decrypt(String data, String id){
-        if (!isDeviceReady()){
+        if (!isEncryptionSupported()){
             return data;
         }
         try{
@@ -105,7 +105,7 @@ public class Crypto{
      *
      */
     public static void deleteKeys(String id){
-        if (!isDeviceReady()){
+        if (!isEncryptionSupported()){
             return;
         }
         KeyStore keystore = getKeystore();
@@ -120,7 +120,7 @@ public class Crypto{
      * @return an encrypted CipherOutputStream or the provided OutputStream if something goes wrong
      */
     public static OutputStream encryptOutput(OutputStream out, String userID) {
-        if (!isDeviceReady()){
+        if (!isEncryptionSupported()){
             return out;
         }
         try{
@@ -147,7 +147,7 @@ public class Crypto{
      * @return either a CipherInputStream which will decrypt the contents of input, or just input if an error occurs
      */
     public static InputStream decryptInput(InputStream input, String userID){
-        if (!isDeviceReady()){
+        if (!isEncryptionSupported()){
             return input;
         }
         try{
@@ -172,7 +172,7 @@ public class Crypto{
         return (Build.VERSION.SDK_INT >= MIN_SUPPORTED);
     }
 
-    private static boolean isDeviceReady(){
+    private static boolean isEncryptionSupported(){
         return (isVersionSupported() && isLockScreenEnabled());
     }
 
@@ -251,7 +251,7 @@ public class Crypto{
      *
      * Returns that secret key
      */
-    private static String initKeys(String id) throws Exception{
+    public static String initKeys(String id) throws Exception{
         KeyStore keystore = getKeystore();
         //check if the keys exist in the store
         if(keystore.contains(SECRET_KEY + id)){

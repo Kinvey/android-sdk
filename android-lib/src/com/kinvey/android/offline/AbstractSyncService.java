@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Binder;
 import android.util.Log;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;

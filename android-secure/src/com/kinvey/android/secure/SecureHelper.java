@@ -235,7 +235,13 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
 
 
 
-    private String getPassword(){return "ok";}
+    private String getPassword(){
+        try{
+            return Crypto.initKeys("offline");
+        }catch (Exception e){
+            return "defualt";
+        }
+    }
 
 
 }
