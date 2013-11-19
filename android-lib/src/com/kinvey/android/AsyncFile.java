@@ -36,6 +36,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.model.KinveyMetaData;
 
 /**
  * Wraps the {@link com.kinvey.java.File} public methods in asynchronous functionality using native Android AsyncTask.
@@ -291,7 +292,7 @@ public class AsyncFile extends File {
      * @param id the metadata of the file
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
-    public void downloadMetaData(String id, KinveyClientCallback<Void> callback) {
+    public void downloadMetaData(String id, KinveyClientCallback<FileMetaData> callback) {
         new DownloadMetaData(id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -302,7 +303,7 @@ public class AsyncFile extends File {
      * @param meta the {@link FileMetaData} to update
      * @param callback an implementation of a client callback to get results on the UI thread from the async call.
      */
-    public void uploadMetaData(FileMetaData meta, KinveyClientCallback<Void> callback) {
+    public void uploadMetaData(FileMetaData meta, KinveyClientCallback<FileMetaData> callback) {
         new UploadMetaData(meta, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
