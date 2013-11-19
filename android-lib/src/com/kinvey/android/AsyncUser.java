@@ -54,7 +54,7 @@ import com.kinvey.java.core.KinveyClientCallback;
                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
            }
            public void onSuccess(User u) {
-               CharSequence text = "Welcome back," + u.getUserName() + ".";
+               CharSequence text = "Welcome back," + u.getUsername() + ".";
                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                LoginActivity.this.startActivity(new Intent(LoginActivity.this,
                        SessionsActivity.class));
@@ -150,7 +150,7 @@ public class AsyncUser extends User {
                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                }
                public void onSuccess(User u) {
-                   CharSequence text = "Welcome back," + u.getUserName() + ".";
+                   CharSequence text = "Welcome back," + u.getUsername() + ".";
                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                    LoginActivity.this.startActivity(new Intent(LoginActivity.this,
                            SessionsActivity.class));
@@ -377,10 +377,10 @@ public class AsyncUser extends User {
             public void onFailure(Throwable t) {
                 CharSequence text = "Unable to create account.";
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-            }
+    }
 
-            public void onSuccess(User u) {
-                CharSequence text = "Welcome " + u.getUserName() + ".";
+    public void onSuccess(User u) {
+                CharSequence text = "Welcome " + u.getUsername() + ".";
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
             }
         });
