@@ -53,7 +53,12 @@ public abstract class AbstractSyncService extends IntentService{
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {}
+    protected void onHandleIntent(Intent intent) {
+        Log.i(TAG, "Received intent: " + intent);
+        if (isOnline()){
+            initClientAndKickOffSync();
+        }
+    }
 
 
     /**
@@ -76,21 +81,6 @@ public abstract class AbstractSyncService extends IntentService{
 
 
     }
-
-    /**
-     * This method is called by the operating system when one of the registered intents is fired.
-     * <p/>It wil check if the device is online, and if it is will call the method to initialize the client and get started.
-     */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, startId, startId);
-        Log.i(TAG, "Received start id " + startId + ": " + intent);
-        if (isOnline()){
-            initClientAndKickOffSync();
-        }
-        return START_STICKY;
-    }
-
 
     /**
      *  This method creates a client, and after login, will start the sync process.
