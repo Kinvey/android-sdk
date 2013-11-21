@@ -30,12 +30,12 @@ public class UserTest extends KinveyMockUnitTest {
     private User currentUser;
 
     private void initializeUser() {
-        currentUser = new User(mockClient, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
+        currentUser = new User(mockClient, User.class, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
                 mockClient.getJsonFactory(), "mockAppKey","mockAppSecret",null));
     }
 
     public void testInitializeUser() {
-        User user = new User(mockClient, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
+        User user = new User(mockClient, User.class, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
                 mockClient.getJsonFactory(), "mockAppKey","mockAppSecret",null));
         assertNotNull(user);
         assertEquals(mockClient,user.getClient());
@@ -44,7 +44,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeUserNullClient() {
         try {
-            User user = new User(null, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
+            User user = new User(null, User.class, new MockKinveyAuthRequest.MockBuilder(mockClient.getRequestFactory().getTransport(),
                     mockClient.getJsonFactory(), "mockAppKey","mockAppSecret",null));
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
@@ -52,7 +52,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeNoBuilder() {
         try {
-            User user = new User(mockClient, null);
+            User user = new User(mockClient, User.class, null);
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }

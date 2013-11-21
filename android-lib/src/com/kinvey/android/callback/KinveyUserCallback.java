@@ -24,7 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserCallback extends KinveyClientCallback<User> {
+public interface KinveyUserCallback extends KinveyUserTypeCallback<User> {
 
 
     @Override

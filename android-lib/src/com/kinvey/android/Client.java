@@ -90,7 +90,6 @@ public class Client extends AbstractClient {
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
     private AsyncUser currentUser;
-//    private AsyncCustomEndpoints customEndpoints;
     private long syncRate;
 
     /**
@@ -398,7 +397,7 @@ public class Client extends AbstractClient {
             if (getCurrentUser() == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                setCurrentUser(new AsyncUser(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
+                setCurrentUser(new AsyncUser(this, User.class, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
                         getBaseUrl(), appKey, appSecret, null)));
             }
             return (AsyncUser) getCurrentUser();
@@ -639,6 +638,7 @@ public class Client extends AbstractClient {
                     getRequestBackoffPolicy());
             client.setContext(context);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
+            client.setUserClass(AsyncUser.class);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

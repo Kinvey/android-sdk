@@ -14,10 +14,6 @@
 package com.kinvey.android.secure;
 
 import android.os.Build;
-import android.util.Base64;
-import android.util.Log;
-import com.kinvey.android.secure.PRNGFixes;
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -62,7 +58,7 @@ public class Crypto{
      * @throws Exception
      */
     public final static String encrypt(String text, String id){
-        if (!isEncryptionSupported()){
+        if (!isDeviceSecure()){
             return text;
         }
         try{
@@ -85,7 +81,7 @@ public class Crypto{
      * @throws Exception
      */
     public final static String decrypt(String data, String id){
-        if (!isEncryptionSupported()){
+        if (!isDeviceSecure()){
             return data;
         }
         try{
@@ -105,7 +101,7 @@ public class Crypto{
      *
      */
     public static void deleteKeys(String id){
-        if (!isEncryptionSupported()){
+        if (!isDeviceSecure()){
             return;
         }
         KeyStore keystore = getKeystore();
@@ -120,7 +116,7 @@ public class Crypto{
      * @return an encrypted CipherOutputStream or the provided OutputStream if something goes wrong
      */
     public static OutputStream encryptOutput(OutputStream out, String userID) {
-        if (!isEncryptionSupported()){
+        if (!isDeviceSecure()){
             return out;
         }
         try{
@@ -147,7 +143,7 @@ public class Crypto{
      * @return either a CipherInputStream which will decrypt the contents of input, or just input if an error occurs
      */
     public static InputStream decryptInput(InputStream input, String userID){
-        if (!isEncryptionSupported()){
+        if (!isDeviceSecure()){
             return input;
         }
         try{
@@ -172,7 +168,7 @@ public class Crypto{
         return (Build.VERSION.SDK_INT >= MIN_SUPPORTED);
     }
 
-    private static boolean isEncryptionSupported(){
+    private static boolean isDeviceSecure(){
         return (isVersionSupported() && isLockScreenEnabled());
     }
 

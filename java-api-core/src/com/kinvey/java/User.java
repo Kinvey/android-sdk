@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.Set;
 
 import com.kinvey.java.auth.*;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
@@ -37,7 +38,7 @@ import com.kinvey.java.model.KinveyMetaData;
  * @author mjsalinger
  * @since 2.0
  */
-public class User extends GenericJson   {
+public class User<T extends User> extends GenericJson   {
 
     public static final String USER_COLLECTION_NAME = "user";
 
@@ -54,6 +55,8 @@ public class User extends GenericJson   {
         THIRDPARTY
     }
 
+    Class<T> myClazz;
+
     @Key("_id")
     private String id;
 
@@ -61,8 +64,6 @@ public class User extends GenericJson   {
 
     @Key("username")
     private String username;
-
-    private Class thisClass = User.class;
 
     public String getId(){
         return this.id;
@@ -114,11 +115,12 @@ public class User extends GenericJson   {
      *
      * @param client - an instance of Kinvey AbstractClient, configured for the application
      */
-    protected User(AbstractClient client, KinveyAuthRequest.Builder builder) {
+    protected User(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
         this.builder = builder;
+        this.myClazz = userClass;
         builder.setUser(this);
     }
 
@@ -144,27 +146,34 @@ public class User extends GenericJson   {
      * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
      */
-    private User initUser(KinveyAuthResponse response, String userType) throws IOException {
+    private T initUser(KinveyAuthResponse response, String userType, T userObject) throws IOException {
 
+        userObject.setId(response.getUserId());
+        userObject.put("_kmd", response.getMetadata());
+        userObject.putAll(response.getUnknownKeys());
         this.setId(response.getUserId());
-        this.put("_kmd",response.getMetadata());
+        this.put("_kmd", response.getMetadata());
         this.putAll(response.getUnknownKeys());
         if (response.containsKey("username")){
             this.setUsername(response.get("username").toString());
         }
         this.setAuthToken(response.getAuthToken());
+
         CredentialManager credentialManager = new CredentialManager(client.getStore());
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer())
-                .setCredential(credentialManager.createAndStoreCredential(response, this.getId()));
+                .setCredential(credentialManager.createAndStoreCredential(response, userObject.getId()));
         getClient().getClientUsers().addUser(getId(),userType);
         getClient().getClientUsers().setCurrentUser(getId());
-        return this;
+
+        return userObject;
     }
 
-    private User initUser(Credential credential) {
+    private T initUser(Credential credential, T userObject) {
         setId(credential.getUserId());
         setAuthToken(credential.getAuthToken());
-        return this;
+        userObject.setId(credential.getUserId());
+        userObject.setAuthToken(credential.getAuthToken());
+        return userObject;
     }
 
     private void removeFromStore(String userID) {
@@ -374,9 +383,9 @@ public class User extends GenericJson   {
      * @return Retrieve Request
      * @throws IOException
      */
-    public Retrieve<User> retrieveBlocking() throws IOException{
+    public Retrieve retrieveBlocking() throws IOException{
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        Retrieve<User> retrieve = new Retrieve(this.getId(), thisClass);
+        Retrieve retrieve = new Retrieve(this.getId(), myClazz);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -387,9 +396,9 @@ public class User extends GenericJson   {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve<User[]> retrieveBlocking(Query query) throws IOException{
+    public RetrieveUsers retrieveBlocking(Query query) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        Retrieve<User[]> retrieve = new Retrieve(query, Array.newInstance(thisClass,0).getClass());
+        RetrieveUsers retrieve = new RetrieveUsers(query, Array.newInstance(myClazz,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -401,9 +410,9 @@ public class User extends GenericJson   {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve<User> retrieveBlocking(String[] resolves) throws IOException{
+    public Retrieve retrieveBlocking(String[] resolves) throws IOException{
         Preconditions.checkNotNull(this.getId(), "userID must not be null");
-        Retrieve<User> retrieve = new Retrieve(this.getId(), resolves, 1, true, thisClass);
+        Retrieve retrieve = new Retrieve(this.getId(), resolves, 1, true, myClazz);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -416,9 +425,9 @@ public class User extends GenericJson   {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve<User[]> retrieveBlocking(Query query, String[] resolves) throws IOException{
+    public RetrieveUsers retrieveBlocking(Query query, String[] resolves) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        Retrieve<User[]> retrieve = new Retrieve(query, resolves, 1, true,  Array.newInstance(thisClass,0).getClass());
+        RetrieveUsers retrieve = new RetrieveUsers(query, resolves, 1, true,  Array.newInstance(myClazz,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -431,7 +440,7 @@ public class User extends GenericJson   {
      */
     public Update updateBlocking() throws IOException{
         Preconditions.checkNotNull(this.getId(), "user must not be null");
-        Update update = new Update(this);
+        Update update = new Update(this, myClazz);
         client.initializeRequest(update);
         return update;
     }
@@ -445,7 +454,7 @@ public class User extends GenericJson   {
      */
     public Update updateBlocking(User user) throws IOException{
         Preconditions.checkNotNull(user.getId(), "user must not be null");
-        Update update = new Update(user);
+        Update update = new Update(user, myClazz);
         client.initializeRequest(update);
         return update;
     }
@@ -475,6 +484,15 @@ public class User extends GenericJson   {
         EmailVerification verify = new EmailVerification(this.getId());
         client.initializeRequest(verify);
         return verify;
+    }
+
+
+    /**
+     * Enforce the Generic Json typing to be <String, Object>
+     * @return the keyset of <String> objects in this GenericJson
+     */
+    public Set<String> keySet() {
+        return super.keySet();
     }
 
     /**
@@ -514,15 +532,23 @@ public class User extends GenericJson   {
             return this;
         }
 
-        public User execute() throws IOException {
+        public T execute() throws IOException {
             if (isUserLoggedIn()){
                 throw new KinveyException("Attempting to login when a user is already logged in",
                         "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
             String userType = "";
+            T ret;
+            try{
+                ret = myClazz.newInstance();
+            }catch (Exception e){
+                e.printStackTrace();
+                throw new NullPointerException(e.getMessage());
+
+            }
             if (this.type == LoginType.CREDENTIALSTORE) {
-                return initUser(credential);
+                return initUser(credential, ret);
             } else {
                switch (this.type) {
                    case IMPLICIT:
@@ -541,14 +567,14 @@ public class User extends GenericJson   {
             }
             KinveyAuthResponse response = this.request.execute();
             //if (response.)
-            return initUser(response, userType);
+            return initUser(response, userType, ret);
         }
     }
 
     /**
      * Logout Request Class.  Constructs the HTTP request object for Logout requests.
      */
-    public class LogoutRequest {
+    public final class LogoutRequest {
 
         private CredentialStore store;
 
@@ -568,7 +594,7 @@ public class User extends GenericJson   {
      * Delete Request Class, extends AbstractKinveyJsonClientRequest<Void>.  Constructs the HTTP request object for
      * Delete User requests.
      */
-    public class Delete extends AbstractKinveyJsonClientRequest<Void> {
+    public final class Delete extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "user/{appKey}/{userID}?hard={hard}";
 
         @Key
@@ -597,7 +623,7 @@ public class User extends GenericJson   {
      * Retrieve Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
      * Retrieve User requests.
      */
-    public class Retrieve<T> extends AbstractKinveyJsonClientRequest<T> {
+    public final class Retrieve extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
@@ -618,12 +644,12 @@ public class User extends GenericJson   {
         @Key("retainReferences")
         private String retainReferences;
 
-        Retrieve(String userID, Class myClass) {
+        Retrieve(String userID, Class<T> myClass) {
             super(client, "GET", REST_PATH, null, myClass);
             this.userID = userID;
         }
 
-        Retrieve(Query query, Class myClass){
+        Retrieve(Query query, Class<T> myClass){
             super(client, "GET", REST_PATH, null, myClass);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -633,7 +659,7 @@ public class User extends GenericJson   {
             this.sortFilter = query.getSortString();
         }
 
-        Retrieve(String userID, String[] resolve, int resolve_depth, boolean retain, Class myClass){
+        Retrieve(String userID, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
             super(client, "GET", REST_PATH, null, myClass);
             this.userID = userID;
 
@@ -642,7 +668,58 @@ public class User extends GenericJson   {
             this.retainReferences = Boolean.toString(retain);
         }
 
-        Retrieve(Query query, String[] resolve, int resolve_depth, boolean retain, Class myClass){
+        Retrieve(Query query, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
+            super(client, "GET", REST_PATH, null, myClass);
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            this.sortFilter = query.getSortString();
+
+            this.resolve = Joiner.on(",").join(resolve);
+            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+            this.retainReferences = Boolean.toString(retain);
+
+        }
+    }
+
+    /**
+     * Retrieve Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
+     * Retrieve User requests.
+     */
+    public final class RetrieveUsers extends AbstractKinveyJsonClientRequest<T[]> {
+        private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
+
+        @Key
+        private String userID;
+        @Key("query")
+        private String queryFilter;
+        @Key("sort")
+        private String sortFilter;
+        @Key
+        private String limit;
+        @Key
+        private String skip;
+
+        @Key("resolve")
+        private String resolve;
+        @Key("resolve_depth")
+        private String resolve_depth;
+        @Key("retainReferences")
+        private String retainReferences;
+
+        RetrieveUsers(Query query, Class myClass){
+            super(client, "GET", REST_PATH, null, myClass);
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            this.sortFilter = query.getSortString();
+        }
+
+        RetrieveUsers(Query query, String[] resolve, int resolve_depth, boolean retain, Class myClass){
             super(client, "GET", REST_PATH, null, myClass);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -662,21 +739,21 @@ public class User extends GenericJson   {
      * Update Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
      * Update User requests.
      */
-    public class Update extends AbstractKinveyJsonClientRequest<User> {
+    public final class Update extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "user/{appKey}/{userID}";
 
         @Key
         private String userID;
 
-        Update(User user) {
-            super(client, "PUT", REST_PATH, user, User.class);
+        Update(User user, Class<T> myClass) {
+            super(client, "PUT", REST_PATH, user, myClass);
             this.userID = user.getId();
 
         }
 
-        public User execute() throws IOException {
+        public T execute() throws IOException {
 
-            User u = super.execute();
+            T u = super.execute();
 
             if (u.getId().equals(User.this.getId())){
                 KinveyAuthResponse auth = new KinveyAuthResponse();
@@ -687,13 +764,13 @@ public class User extends GenericJson   {
                 kmd.putAll((ArrayMap) u.get("_kmd"));
                 auth.put("_kmd", kmd);
                 auth.put("username", u.get("username"));
-                for (String key : u.keySet()){
-                    if (!key.equals("_kmd")){
-                        auth.put(key, u.get(key));
+                for (Object key : u.keySet()){
+                    if (!key.toString().equals("_kmd")){
+                        auth.put(key.toString(), u.get(key));
                     }
                 }
                 String userType = client.getClientUsers().getCurrentUserType();
-                return initUser(auth, userType);
+                return initUser(auth, userType, u);
             }else{
                 return u;
             }
@@ -706,7 +783,7 @@ public class User extends GenericJson   {
      * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object
      * for ResetPassword User requests.
      */
-    public class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
+    public final class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate";
 
         @Key
@@ -724,7 +801,7 @@ public class User extends GenericJson   {
      * EmailVerification Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request
      * object for EmailVerification requests.
      */
-    public class EmailVerification extends AbstractKinveyJsonClientRequest<Void> {
+    public final class EmailVerification extends AbstractKinveyJsonClientRequest<Void> {
         private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-email-verification-initiate";
 
         @Key

@@ -11,19 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.nativejava;
+package com.kinvey.android.callback;
 
-import com.google.common.base.Preconditions;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
 
 /**
  * @author edwardf
  */
-public class User extends com.kinvey.java.User {
-
-
-    protected User(AbstractClient client, KinveyAuthRequest.Builder builder) {
-        super(client, User.class, builder);
-    }
+public interface KinveyUserTypeCallback<T extends User> extends KinveyClientCallback<T> {
 }
