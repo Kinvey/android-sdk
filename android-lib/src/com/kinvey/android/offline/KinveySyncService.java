@@ -40,7 +40,7 @@ public class KinveySyncService extends AbstractSyncService {
     }
 
     @Override
-    protected DatabaseHandler getDatabaseHandler() {
+    protected DatabaseHandler getDatabaseHandler(String userid) {
         return OfflineHelper.getInstance(getApplicationContext());
     }
 

@@ -51,6 +51,8 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         super(client, userClass, builder);
     }
 
+    public AbstractAsyncUser(){}
+
     /**
      * Asynchronous implicit user login.
      * <p>

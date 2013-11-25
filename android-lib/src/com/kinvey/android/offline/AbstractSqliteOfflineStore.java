@@ -70,7 +70,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
             return null;
         }
 
-        DatabaseHandler handler = getDatabaseHandler();
+        DatabaseHandler handler = getDatabaseHandler(client.user().getId());
 
         //expand the URI from the template and grab the index of where the get paremeters will be
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
@@ -122,7 +122,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
             return null;
         }
 
-        DatabaseHandler handler = getDatabaseHandler();
+        DatabaseHandler handler = getDatabaseHandler(client.user().getId());
 
         //set deleted flag in table
         //expand the URI from the template
@@ -158,7 +158,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         }
 
 
-        DatabaseHandler handler = getDatabaseHandler();
+        DatabaseHandler handler = getDatabaseHandler(client.user().getId());
 
         //grab json content and put it in the store
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
@@ -174,16 +174,16 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     @Override
     public void insertEntity(AbstractClient client, AppData<T> appData, T entity) {
 
-        DatabaseHandler handler = getDatabaseHandler();
+        DatabaseHandler handler = getDatabaseHandler(client.user().getId());
         GenericJson jsonContent = (GenericJson) entity;
 
         handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent);
     }
 
     @Override
-    public void clearStorage() {
+    public void clearStorage(String userid) {
 
-        DatabaseHandler handler = getDatabaseHandler();
+        DatabaseHandler handler = getDatabaseHandler(userid);
 
         List<String> collections = handler.getCollectionTables();
 
@@ -201,7 +201,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
 
 
-    protected abstract DatabaseHandler getDatabaseHandler();
+    protected abstract DatabaseHandler getDatabaseHandler(String userid);
 
     public Context getContext(){
         return this.context;

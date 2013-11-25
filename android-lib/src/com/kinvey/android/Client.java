@@ -27,6 +27,8 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -37,6 +39,7 @@ import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.ClientExtension;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;
 import com.kinvey.java.auth.ClientUsers;
@@ -89,7 +92,7 @@ public class Client extends AbstractClient {
     private AsyncFile file;
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
-    private AsyncUser currentUser;
+//    private AsyncUser currentUser;
     private long syncRate;
 
     /**
@@ -238,9 +241,12 @@ public class Client extends AbstractClient {
 
     @Override
     public void performLockDown() {
-        new SqlLiteOfflineStore<GenericJson>(getContext()).clearStorage();
-        //Crypto.deleteKeys(this.user().getId());
+        new SqlLiteOfflineStore<GenericJson>(getContext()).clearStorage(user().getId());
         this.file().clearFileStorage(getContext().getApplicationContext());
+        List<ClientExtension> extensions = getExtensions();
+        for (ClientExtension e : extensions){
+            e.performLockdown(user().getId());
+        }
     }
 
     /**
@@ -388,20 +394,24 @@ public class Client extends AbstractClient {
      }
      * </pre>
      * </p>
-     *
-     * @return Instance of {@link com.kinvey.java.User} for the defined collection
+     * @param myUserClass a custom `User` class, which can maintain custom JSON fields associated with a User
+     * @param <T> the type of the custom `User` class, which must extend {@link com.kinvey.java.User}
+     * @return Instance of {@link com.kinvey.java.User}, maintaining data in the provided `myUserClass`
      */
-    @Override
-    public AsyncUser user() {
+    public <T extends User> T user(Class<T> myUserClass) {
         synchronized (lock) {
             if (getCurrentUser() == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                setCurrentUser(new AsyncUser(this, User.class, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
-                        getBaseUrl(), appKey, appSecret, null)));
+                setCurrentUser(new AsyncUser(this, myUserClass, new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null)));
             }
-            return (AsyncUser) getCurrentUser();
+            return (T) getCurrentUser();
         }
+    }
+
+    public AsyncUser user(){
+        return user(AsyncUser.class);
     }
 
 
@@ -638,7 +648,6 @@ public class Client extends AbstractClient {
                     getRequestBackoffPolicy());
             client.setContext(context);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
-            client.setUserClass(AsyncUser.class);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

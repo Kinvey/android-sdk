@@ -113,7 +113,7 @@ public abstract class AbstractSyncService extends IntentService{
      * This method grabs a list of all collection names from the db helper, iterates through them, and pops all their queues.
      */
     public void getFromStoreAndExecute() {
-        DatabaseHandler dbHelper = getDatabaseHandler();
+        DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
         List<String> collectionNames = dbHelper.getCollectionTables();
 
 
@@ -233,7 +233,7 @@ public abstract class AbstractSyncService extends IntentService{
         //if request failed on client side, re-queue it
         if (!success && error != null && !(error instanceof HttpResponseException)){
             Log.i(TAG, "requeing request");
-            DatabaseHandler dbHelper = getDatabaseHandler();
+            DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
             dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
             registerFailure();
         }
@@ -280,7 +280,7 @@ public abstract class AbstractSyncService extends IntentService{
 
     }
 
-    protected abstract DatabaseHandler getDatabaseHandler();
+    protected abstract DatabaseHandler getDatabaseHandler(String userid);
 
 
 }

@@ -39,6 +39,7 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
     private static SecureHelper _instance;
 
     private Context context;
+    private String userId;
 
     /**
      * This class is a synchronized Singleton, and this is how you get an instance of it.
@@ -46,9 +47,10 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @param context the current active application context
      * @return an instance of the OfflineHelper class
      */
-    public static synchronized SecureHelper getInstance(Context context){
+    public static synchronized SecureHelper getInstance(Context context, String userid){
         if (_instance == null){
             _instance = new SecureHelper(context);
+            _instance.userId = userid;
         }
         return _instance;
     }
@@ -237,10 +239,12 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
 
     private String getPassword(){
         try{
-            return Crypto.initKeys("offline");
+            return Crypto.initKeys(userId);
         }catch (Exception e){
-            return "defualt";
+            return "offline";
         }
+
+
     }
 
 

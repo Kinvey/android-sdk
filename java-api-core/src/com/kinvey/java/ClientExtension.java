@@ -11,24 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.kitchensink.user;
-
-import com.kinvey.sample.kitchensink.FeatureActivity;
-import com.kinvey.sample.kitchensink.UseCaseFragment;
-import com.kinvey.sample.kitchensink.push.PushFragment;
-
-import java.util.Arrays;
-import java.util.List;
+package com.kinvey.java;
 
 /**
  * @author edwardf
  */
-public class UserActivity extends FeatureActivity {
+public interface ClientExtension {
 
-    @Override
-    public List<UseCaseFragment> getFragments() {
-        return Arrays.asList(new UseCaseFragment[]{
-                new LookupFragment() , new UpdateFragment(), new CustomUserFragment()
-        });
-    }
+    public void performLockdown(String userid);
+
+
+
 }
+
+

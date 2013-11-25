@@ -34,7 +34,7 @@ public class SqlLiteOfflineStore<T> extends AbstractSqliteOfflineStore{
     }
 
     @Override
-    protected DatabaseHandler getDatabaseHandler() {
+    protected DatabaseHandler getDatabaseHandler(String userid) {
         return OfflineHelper.getInstance(getContext());
     }
 

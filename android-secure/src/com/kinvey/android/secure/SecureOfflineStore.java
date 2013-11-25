@@ -32,8 +32,8 @@ public class SecureOfflineStore<T> extends AbstractSqliteOfflineStore<T>{
     }
 
     @Override
-    protected DatabaseHandler getDatabaseHandler() {
-        return SecureHelper.getInstance(getContext());
+    protected DatabaseHandler getDatabaseHandler(String userid) {
+        return SecureHelper.getInstance(getContext(), userid);
     }
 
 

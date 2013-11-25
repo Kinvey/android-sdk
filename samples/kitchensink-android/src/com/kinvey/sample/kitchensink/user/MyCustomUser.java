@@ -13,22 +13,17 @@
  */
 package com.kinvey.sample.kitchensink.user;
 
-import com.kinvey.sample.kitchensink.FeatureActivity;
-import com.kinvey.sample.kitchensink.UseCaseFragment;
-import com.kinvey.sample.kitchensink.push.PushFragment;
-
-import java.util.Arrays;
-import java.util.List;
+import com.google.api.client.util.Key;
+import com.kinvey.android.AbstractAsyncUser;
+import com.kinvey.android.AsyncUser;
 
 /**
  * @author edwardf
  */
-public class UserActivity extends FeatureActivity {
+public class MyCustomUser extends AbstractAsyncUser {
 
-    @Override
-    public List<UseCaseFragment> getFragments() {
-        return Arrays.asList(new UseCaseFragment[]{
-                new LookupFragment() , new UpdateFragment(), new CustomUserFragment()
-        });
-    }
+    @Key
+    private String myCustomField;
+
+
 }

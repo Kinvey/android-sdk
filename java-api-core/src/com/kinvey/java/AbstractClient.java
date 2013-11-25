@@ -26,6 +26,7 @@ import com.google.api.client.json.JsonObjectParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,10 +65,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     private User currentUser;
     private CredentialStore store;
-    private Class userClass = User.class;
 
     /** used to synchronized access to the local api wrappers **/
     protected final Object lock = new Object();
+
+    private ArrayList<ClientExtension> extensions;
 
 
     /**
@@ -113,9 +115,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract UserGroup userGroup();
 
-    //public abstract <T extends User> T user();
-
-    public <T extends User> T user() {
+    public <T extends User> T user(Class<T> myUserClass) {
         synchronized (lock) {
             if (currentUser == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
@@ -125,6 +125,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             }
             return (T) currentUser;
         }
+    }
+
+    public User user(){
+        return user(User.class);
     }
 
     protected abstract ClientUsers getClientUsers();
@@ -200,27 +204,23 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
     }
 
+    public void registerExtension(ClientExtension extension){
+        if(extensions == null){
+            extensions = new ArrayList<ClientExtension>();
+        }
+        extensions.add(extension);
+    }
+
+    public ArrayList<ClientExtension> getExtensions(){
+        return extensions;
+    }
+
     /**
      * Disable logging for the HttpTransport class to Level.FINEST.
      */
     public void disableDebugLogging() {
         AbstractClient.enableRequestLogging = false;
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
-    }
-
-    /**
-     * Set a custom User class for the Client to use
-     */
-    public <T extends User> void setUserClass(Class<T> userClass){
-        this.userClass = userClass;
-    }
-
-    /**
-     * Get the class which represents the User
-     * @return the user class
-     */
-    public Class getUserClass(){
-        return userClass;
     }
 
     /**

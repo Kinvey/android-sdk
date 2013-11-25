@@ -115,7 +115,7 @@ public class User<T extends User> extends GenericJson   {
      *
      * @param client - an instance of Kinvey AbstractClient, configured for the application
      */
-    protected User(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
+    public User(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;

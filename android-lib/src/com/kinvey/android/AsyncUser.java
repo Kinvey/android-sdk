@@ -103,4 +103,6 @@ public class AsyncUser<T extends User> extends AbstractAsyncUser<T> {
     public AsyncUser(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
+
+    public AsyncUser(){}
 }

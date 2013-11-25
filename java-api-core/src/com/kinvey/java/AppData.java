@@ -98,7 +98,7 @@ public class AppData<T> {
         }
 
         @Override
-        public void clearStorage(){}
+        public void clearStorage(String userid){}
 
         @Override
         public void kickOffSync() {}

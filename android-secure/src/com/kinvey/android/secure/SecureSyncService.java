@@ -27,7 +27,7 @@ public class SecureSyncService extends AbstractSyncService {
     }
 
     @Override
-    protected DatabaseHandler getDatabaseHandler() {
-        return SecureHelper.getInstance(getApplicationContext());
+    protected DatabaseHandler getDatabaseHandler(String userid) {
+        return SecureHelper.getInstance(getApplicationContext(), userid);
     }
 }

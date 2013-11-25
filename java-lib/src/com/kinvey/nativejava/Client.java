@@ -346,7 +346,6 @@ public class Client extends AbstractClient {
                     getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy());
             client.clientUsers = InMemoryClientUsers.getClientUsers();
-            client.setUserClass(User.class);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

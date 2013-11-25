@@ -14,6 +14,8 @@
 package com.kinvey.android.secure;
 
 import android.os.Build;
+import com.kinvey.java.ClientExtension;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -35,7 +37,7 @@ import java.util.Calendar;
  *
  * @author edwardf
  */
-public class Crypto{
+public class Crypto implements ClientExtension{
 
     private static final String TAG = "Kinvey - Crypto";
 
@@ -47,6 +49,8 @@ public class Crypto{
     private static final int ITERATIONS = 1000;
     private static final int IV_SIZE = 16;
 
+
+    public Crypto(){};
 
     /**
      * Public wrapper method to encrypt a string.
@@ -101,7 +105,7 @@ public class Crypto{
      *
      */
     public static void deleteKeys(String id){
-        if (!isDeviceSecure()){
+        if (!isDeviceSecure() || id == null){
             return;
         }
         KeyStore keystore = getKeystore();
@@ -340,6 +344,10 @@ public class Crypto{
     /** all possible hex values **/
     private final static String HEX = "0123456789ABCDEF";
 
+    @Override
+    public void performLockdown(String userid) {
+        deleteKeys(userid);
+    }
 }
 
 
