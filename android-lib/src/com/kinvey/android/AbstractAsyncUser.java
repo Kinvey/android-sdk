@@ -76,7 +76,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
-    public void login(KinveyUserTypeCallback callback) {
+    public void login(KinveyClientCallback<T> callback) {
         new Login(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -113,7 +113,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param password password of the Kinvey user
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
-    public void login(String userid, String password, KinveyUserTypeCallback callback) {
+    public void login(String userid, String password, KinveyClientCallback<T> callback) {
         new Login(userid, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -143,7 +143,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param accessToken Facebook-generated access token.
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
-    public void loginFacebook(String accessToken, KinveyUserCallback callback) {
+    public void loginFacebook(String accessToken, KinveyClientCallback<T> callback) {
         new Login(accessToken, LoginType.FACEBOOK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -177,7 +177,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param accessToken Google-generated access token.
      * @param callback {@link KinveyUserCallback} that contains a valid logged in user
      */
-    public void loginGoogle(String accessToken, KinveyUserCallback callback)  {
+    public void loginGoogle(String accessToken, KinveyClientCallback<T> callback)  {
         new Login(accessToken, LoginType.GOOGLE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -190,7 +190,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param id - the salesforce id of the user
      * @param callback - {@link KinveyUserCallback} that contains a valid logged in user
      */
-    public void loginSalesForce (String accessToken, String clientid, String refreshToken, String id, KinveyUserCallback callback){
+    public void loginSalesForce (String accessToken, String clientid, String refreshToken, String id, KinveyClientCallback<T> callback){
         new Login(accessToken, clientid, refreshToken, id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
@@ -207,7 +207,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @return a LoginRequest ready to be executed
      * @throws IOException
      */
-    public void loginKinveyAuthToken(String userId, String authToken, KinveyUserCallback callback){
+    public void loginKinveyAuthToken(String userId, String authToken, KinveyClientCallback<T> callback){
         new LoginKinveyAuth(userId, authToken, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -245,7 +245,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
-                             KinveyUserCallback callback)  {
+                             KinveyClientCallback<T> callback)  {
         new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.TWITTER, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -281,12 +281,12 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
-                              KinveyUserCallback callback) {
+                              KinveyClientCallback<T> callback) {
         new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
-    public void loginAuthLink(String accessToken, String refreshToken, KinveyUserCallback callback) {
+    public void loginAuthLink(String accessToken, String refreshToken, KinveyClientCallback<T> callback) {
         new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -300,7 +300,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      * @param callback KinveyUserCallback
      */
-    public void retrieveMetadata(KinveyUserCallback callback) {
+    public void retrieveMetadata(KinveyClientCallback<T> callback) {
         new RetrieveMetaData(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
@@ -340,7 +340,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param password password of the Kinvey user
      * @param callback {@link KinveyUserCallback} containing a new User instance.
      */
-    public void create(String username, String password, KinveyUserCallback callback) {
+    public void create(String username, String password, KinveyClientCallback<T> callback) {
         new Create(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -427,7 +427,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
-    public void retrieve(String[] resolves, KinveyUserCallback callback){
+    public void retrieve(String[] resolves, KinveyClientCallback<T> callback){
         new Retrieve(resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -533,7 +533,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
-    public void update(KinveyUserCallback callback) {
+    public void update(KinveyClientCallback<T> callback) {
         new Update(AbstractAsyncUser.this, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -564,7 +564,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
-    public void update(User user, KinveyUserCallback callback){
+    public void update(User user, KinveyClientCallback<T> callback){
         new Update(user, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -615,7 +615,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
     private class RetrieveMetaData extends AsyncClientRequest<User> {
 
-        private RetrieveMetaData(KinveyUserCallback callback) {
+        private RetrieveMetaData(KinveyClientCallback<T> callback) {
             super(callback);
         }
 
@@ -677,7 +677,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         private String authToken;
         private String userID;
 
-        private LoginKinveyAuth(String userId, String authToken, KinveyUserCallback callback){
+        private LoginKinveyAuth(String userId, String authToken, KinveyClientCallback<T> callback){
             super(callback);
             this.userID = userId;
             this.authToken = authToken;
@@ -744,7 +744,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
-        private Login(String accessToken, String clientID, String refresh, String id, KinveyUserCallback callback){
+        private Login(String accessToken, String clientID, String refresh, String id, KinveyClientCallback<T> callback){
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refresh;
@@ -790,7 +790,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         String username;
         String password;
 
-        private Create(String username, String password, KinveyUserCallback callback) {
+        private Create(String username, String password, KinveyClientCallback<T> callback) {
             super(callback);
             this.username=username;
             this.password=password;

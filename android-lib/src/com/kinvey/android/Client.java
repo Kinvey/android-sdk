@@ -18,6 +18,7 @@ package com.kinvey.android;
 
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.*;
@@ -390,30 +391,25 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-     User currentUser = kinveyClient.currentUser();
+     User currentUser = kinveyClient.user();
      }
      * </pre>
      * </p>
-     * @param myUserClass a custom `User` class, which can maintain custom JSON fields associated with a User
      * @param <T> the type of the custom `User` class, which must extend {@link com.kinvey.java.User}
-     * @return Instance of {@link com.kinvey.java.User}, maintaining data in the provided `myUserClass`
+     * @return Instance of {@link com.kinvey.java.User}
      */
-    public <T extends User> T user(Class<T> myUserClass) {
+    @Override
+    public <T extends User> AsyncUser<T> user(){
         synchronized (lock) {
             if (getCurrentUser() == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                setCurrentUser(new AsyncUser(this, myUserClass, new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                setCurrentUser(new AsyncUser(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null)));
             }
-            return (T) getCurrentUser();
+            return (AsyncUser) getCurrentUser();
         }
     }
-
-    public AsyncUser user(){
-        return user(AsyncUser.class);
-    }
-
 
     /**
      * Push factory method
@@ -522,6 +518,7 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
+        private Class userClass = AsyncUser.class;
 
 
         /**
@@ -635,6 +632,11 @@ public class Client extends AbstractClient {
 
         }
 
+        public Builder setUserClass(Class userClass){
+            this.userClass = userClass;
+            return this;
+        }
+
 
         /**
          * @return an instantiated Kinvey Android Client,
@@ -647,6 +649,7 @@ public class Client extends AbstractClient {
                     getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy());
             client.setContext(context);
+            client.setUserClass(userClass);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
@@ -791,27 +794,41 @@ public class Client extends AbstractClient {
             } catch (IOException ex) {
                 Log.e(TAG, "Could not retrieve user Credentials");
             }
+            new AsyncTask<Void, Void, User>(){
 
-            client.user().retrieveMetadata(new KinveyUserCallback() {
+                private Exception error = null;
                 @Override
-                public void onSuccess(User result) {
-                    client.setCurrentUser(result);
-                    if (retrieveUserCallback != null){
-                        retrieveUserCallback.onSuccess(result);
+                protected User doInBackground(Void... voids) {
+                    User result = null;
+                    try{
+                        result = client.user().retrieveMetadataBlocking();
+                        client.setCurrentUser(result);
+                    }catch (Exception error){
+                        this.error = error;
+                        if ((error instanceof HttpResponseException)) {
+                            client.user().logout().execute();
+                        }
                     }
+                    return result;
                 }
 
                 @Override
-                public void onFailure(Throwable error) {
-                    if ((error instanceof HttpResponseException)){
-                        client.user().logout().execute();
+                protected void onPostExecute(User response) {
+                    if(retrieveUserCallback == null){
+                        return;
                     }
-                    if (retrieveUserCallback != null){
+
+                    if(error != null){
                         retrieveUserCallback.onFailure(error);
+                    }else{
+                        retrieveUserCallback.onSuccess(response);
                     }
-
                 }
-            });
+
+            }.execute();
+
+
+
         }
 
         /**

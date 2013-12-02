@@ -21,6 +21,7 @@ import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.sample.kitchensink.R;
 import com.kinvey.sample.kitchensink.UseCaseFragment;
@@ -54,24 +55,40 @@ public class UpdateFragment extends UseCaseFragment implements View.OnClickListe
 
     private void performUserUpdate(){
 
-        AsyncUser user = getApplicationContext().getClient().user();
+        final AsyncUser<MyCustomUser> user = getApplicationContext().getClient().user();
         user.put("email", "Smith@ks.com");
-        user.update(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-                Toast.makeText(getSherlockActivity(), "updated user!", Toast.LENGTH_SHORT).show();
 
-                AsyncUser user = getApplicationContext().getClient().user();
-                user.put("last_name", "Smith");
-                user.update(new KinveyUserCallback(){
+        user.retrieve(new KinveyClientCallback<MyCustomUser>() {
+            @Override
+            public void onSuccess(MyCustomUser result) {
+                Toast.makeText(getSherlockActivity(), "retrieved custom user!", Toast.LENGTH_SHORT).show();
+                result.setCustomeField("custom field");
+                result.put("last_name", "Smith");
+                user.update(result, new KinveyClientCallback<MyCustomUser>() {
                     @Override
-                    public void onSuccess(User result) {
-                        Toast.makeText(getSherlockActivity(), "updated user again!!", Toast.LENGTH_SHORT).show();                    }
+                    public void onSuccess(MyCustomUser result) {
+                        Toast.makeText(getSherlockActivity(), "updated user, custom ->" + result.getCustomField(), Toast.LENGTH_SHORT).show();
+                    }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        Toast.makeText(getSherlockActivity(), "updating user failed -> " + error, Toast.LENGTH_SHORT).show();                    }
+                        Toast.makeText(getSherlockActivity(), "updating user failed -> " + error, Toast.LENGTH_SHORT).show();
+                    }
                 });
+
+                getApplicationContext().getClient().user().update(result, new KinveyUserCallback() {
+                    @Override
+                    public void onSuccess(User result) {
+                        Toast.makeText(getSherlockActivity(), "updated user, custom ->" + result.get("myCustomField"), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        Toast.makeText(getSherlockActivity(), "updating user failed -> " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
             }
 
             @Override

@@ -25,5 +25,15 @@ public class MyCustomUser extends AbstractAsyncUser {
     @Key
     private String myCustomField;
 
+    public MyCustomUser(){}
+
+    public void setCustomeField(String custom){
+        this.myCustomField = custom;
+    }
+
+    public String getCustomField(){
+        return this.myCustomField;
+    }
+
 
 }

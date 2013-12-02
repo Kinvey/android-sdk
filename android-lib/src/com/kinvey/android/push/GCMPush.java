@@ -119,20 +119,7 @@ public class GCMPush extends AbstractPush {
                 getClient().push().enablePushViaRest(new KinveyClientCallback() {
                     @Override
                     public void onSuccess(Object result) {
-
-                        getClient().user().retrieve(new KinveyUserCallback() {
-                            @Override
-                            public void onSuccess(User result) {
-                                Log.v(TAG, "User is registered for push!");
-//                                KinveyGCMService.this.onRegistered(gcmRegID);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable error) {
-                                Log.v(Client.TAG, "GCM - user update error: " + error);
-                            }
-                        });
-
+                        Log.v(TAG, "User is registered for push!");
                     }
 
                     @Override

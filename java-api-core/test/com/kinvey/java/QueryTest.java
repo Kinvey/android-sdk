@@ -894,17 +894,17 @@ public class QueryTest extends TestCase {
         } catch (NullPointerException ex) {}
     }
 
-    public void testEndsWith() {
-        myQuery.endsWith("lastname","oe");
-        LinkedHashMap<String, Object> expected = new LinkedHashMap<String,Object>();
-        expected.put("$regex","oe$");
-        assertEquals(expected,myQuery.getQueryFilterMap().get("lastname"));
-    }
+//    public void testEndsWith() {
+//        myQuery.endsWith("lastname","oe");
+//        LinkedHashMap<String, Object> expected = new LinkedHashMap<String,Object>();
+//        expected.put("$regex","oe$");
+//        assertEquals(expected,myQuery.getQueryFilterMap().get("lastname"));
+//    }
 
-    public void testEndsWithNullKey() {
-        try {
-            myQuery.endsWith(null,"oe");
-            fail(NULL_EXCEPTION_FAILURE);
-        } catch (NullPointerException ex) {}
-    }
+//    public void testEndsWithNullKey() {
+//        try {
+//            myQuery.endsWith(null,"oe");
+//            fail(NULL_EXCEPTION_FAILURE);
+//        } catch (NullPointerException ex) {}
+//    }
 }

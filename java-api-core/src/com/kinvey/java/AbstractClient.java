@@ -69,8 +69,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     /** used to synchronized access to the local api wrappers **/
     protected final Object lock = new Object();
 
+    /** List of extensions, if they need to be locked down **/
     private ArrayList<ClientExtension> extensions;
 
+    /** Class to use for representing a User **/
+    private Class userModelClass = User.class;
 
     /**
      * Private constructor.  Use AbstractClient.Builder to initialize the AbstractClient.
@@ -115,20 +118,28 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract UserGroup userGroup();
 
-    public <T extends User> T user(Class<T> myUserClass) {
+    //public abstract <T extends User> T user();
+
+    public <T extends User> User<T> user(){
         synchronized (lock) {
             if (currentUser == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                this.currentUser = new User(this, User.class, new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                this.currentUser = new User(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
             return (T) currentUser;
         }
     }
 
-    public User user(){
-        return user(User.class);
+
+
+    public Class getUserClass(){
+        return this.userModelClass;
+    }
+
+    public void setUserClass(Class userClass){
+        this.userModelClass = userClass;
     }
 
     protected abstract ClientUsers getClientUsers();

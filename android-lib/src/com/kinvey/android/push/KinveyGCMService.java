@@ -206,20 +206,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-
-                    client.user().retrieve(new KinveyUserCallback() {
-                        @Override
-                        public void onSuccess(User result) {
-                            Log.v(TAG, "Successfully retrieved user, calling onRegister");
-                            KinveyGCMService.this.onRegistered(gcmRegID);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            Log.v(Client.TAG, "GCM - user update error: " + error);
-                        }
-                    });
-
+                    KinveyGCMService.this.onRegistered(gcmRegID);
                 }
 
                 @Override
@@ -232,17 +219,7 @@ public abstract class KinveyGCMService extends GCMBaseIntentService {
             client.push().disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                    client.user().update(new KinveyUserCallback() {
-                        @Override
-                        public void onSuccess(User result) {
-                            KinveyGCMService.this.onUnregistered(gcmRegID);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            Log.v(Client.TAG, "GCM - user update error: " + error);
-                        }
-                    });
+                    KinveyGCMService.this.onUnregistered(gcmRegID);
                 }
 
                 @Override
