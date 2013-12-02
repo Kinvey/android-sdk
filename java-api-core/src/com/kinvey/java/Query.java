@@ -167,12 +167,23 @@ public class Query extends AbstractQuery implements Serializable {
 
     /**
      * Add a filter condition for a specific field compared to a regular expression
+     * <p/>
+     * A regex must begin with a carat `^`, and case-insensitive queries `/i` are not supported.
+     * <p/>
      *
      * @param key Field to filter on
      * @param value Value condition for filter
      * @return Query object
      */
     public Query regEx(String key, Object value) {
+
+
+        if (value.toString().contains("/i")){
+            throw new UnsupportedOperationException("Cannot perform regex which contains an `/i`");
+        }
+        if (!value.toString().startsWith("^")){
+            throw new UnsupportedOperationException("All regex must be anchored, it must begin with a carat `^`");
+        }
         Preconditions.checkNotNull(key);
         builder.addFilter(builder.getOperator(QueryFilterBuilder.Operators.REGEX), key, value);
         return this;
@@ -191,18 +202,19 @@ public class Query extends AbstractQuery implements Serializable {
         return this;
     }
 
-    /**
-     * Add a filter condition for a specific field for strings that ends with the given value.
-     *
-     * @param key Field to filter on
-     * @param value  Value condition for filter
-     * @return Query object
-     */
-    public Query endsWith(String key, Object value) {
-        Preconditions.checkNotNull(key);
-        builder.addFilter(builder.getOperator(QueryFilterBuilder.Operators.REGEX), key, value + "$");
-        return this;
-    }
+//    /**
+//     * Add a filter condition for a specific field for strings that ends with the given value.
+//     *
+//     * @param key Field to filter on
+//     * @param value  Value condition for filter
+//     * @return Query object
+//     */
+//    @Deprecated
+//    public Query endsWith(String key, Object value) {
+//        Preconditions.checkNotNull(key);
+//        builder.addFilter(builder.getOperator(QueryFilterBuilder.Operators.REGEX), key, value + "$");
+//        return this;
+//    }
     /**
      * Add a filter condition for a specific field holds an array and containsa ll the values
      *

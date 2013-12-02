@@ -125,7 +125,7 @@ public abstract class AbstractQuery implements Serializable{
     public abstract AbstractQuery notIn(String key, Object[] value);
     public abstract AbstractQuery regEx(String key, Object value);
     public abstract AbstractQuery startsWith(String key, Object value);
-    public abstract AbstractQuery endsWith(String key, Object value);
+    //public abstract AbstractQuery endsWith(String key, Object value);
     public abstract AbstractQuery all(String key, Object[] value);
     public abstract AbstractQuery size(String key, int value);
     public abstract AbstractQuery and(AbstractQuery query);
