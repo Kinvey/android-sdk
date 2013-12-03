@@ -16,11 +16,16 @@ package com.kinvey.sample.contentviewr;
 import android.view.View;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
+import com.kinvey.sample.contentviewr.dslv.DragSortController;
+import com.kinvey.sample.contentviewr.dslv.DragSortListView;
 
 /**
  * @author edwardf
  */
 public class ReorderFragment extends ContentFragment {
+
+    private DragSortListView list;
+    private DragSortController controller;
 
 
     @Override
@@ -30,7 +35,7 @@ public class ReorderFragment extends ContentFragment {
 
     @Override
     public void bindViews(View v) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override

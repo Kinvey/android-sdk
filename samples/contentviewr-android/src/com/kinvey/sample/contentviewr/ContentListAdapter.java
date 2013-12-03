@@ -55,7 +55,7 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
         ContentItem rowData = getItem(position);
 
         if (null == convertView) {
-            convertView = mInflater.inflate(R.layout.content_list_item, null);
+            convertView = mInflater.inflate(R.layout.row_content_item, null);
             holder = new FeatureViewHolder(convertView);
             convertView.setTag(holder);
         }
