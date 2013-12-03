@@ -20,8 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
+import com.kinvey.sample.contentviewr.model.ContentType;
+import com.kinvey.sample.contentviewr.model.Target;
 import com.kinvey.sample.contentviewr.windows.InfographViewer;
+
+import java.util.List;
 
 /**
  * @author edwardf
@@ -60,7 +65,7 @@ public abstract class ContentFragment extends SherlockFragment {
      */
     public abstract void bindViews(View v);
 
-
+    public abstract String getTitle();
 
     public void replaceFragment(ContentFragment newOne, boolean backstack){
 
@@ -73,7 +78,16 @@ public abstract class ContentFragment extends SherlockFragment {
 
     }
 
-    public abstract String getTitle();
+    public Contentviewr getContentViewr(){
+        return (Contentviewr) getSherlockActivity();
+    }
 
+    public List<Target> getTargets(){
+        return getContentViewr().getTargets();
+    }
+
+    public List<ContentType> getContentType(){
+        return getContentViewr().getContentTypes();
+    }
 
 }

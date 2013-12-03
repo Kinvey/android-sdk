@@ -48,5 +48,12 @@ public class InfographViewer extends ContentFragment {
         webview.loadUrl(content.getLocation());
     }
 
+    @Override
+    public String getTitle() {
+
+        return "WebViewer";
+
+    }
+
 
 }

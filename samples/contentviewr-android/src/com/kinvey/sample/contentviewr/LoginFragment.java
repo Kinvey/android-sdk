@@ -13,14 +13,15 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
  * @author edwardf
  */
-public class LoginFragment extends SherlockFragment {
+public class LoginFragment extends ContentFragment implements View.OnClickListener {
 
     Button login;
     Button register;
@@ -28,6 +29,40 @@ public class LoginFragment extends SherlockFragment {
     EditText password;
 
 
+    @Override
+    public int getViewID() {
+        return R.layout.fragment_login;
+    }
 
+    @Override
+    public void bindViews(View v) {
+        login = (Button) v.findViewById(R.id.login_go);
+        register = (Button) v.findViewById(R.id.login_register);
+        username = (EditText) v.findViewById(R.id.login_username);
+        password = (EditText) v.findViewById(R.id.login_password);
+        login.setOnClickListener(this);
+        register.setOnClickListener(this);
+    }
 
+    @Override
+    public String getTitle() {
+        return "Login";
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == login){
+            login(username.getText().toString(), password.getText().toString());
+        }else if(v == register){
+            register(username.getText().toString(), password.getText().toString());
+        }
+    }
+
+    private void login(String username, String password){
+
+    }
+
+    private void register(String username, String password){
+
+    }
 }

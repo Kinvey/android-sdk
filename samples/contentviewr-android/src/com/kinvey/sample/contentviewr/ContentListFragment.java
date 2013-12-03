@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.windows.InfographViewer;
 
 import java.util.ArrayList;
@@ -29,10 +30,17 @@ import java.util.ArrayList;
 /**
  * @author edwardf
  */
-public class ContentList extends ContentFragment implements AdapterView.OnItemClickListener {
+public class ContentListFragment extends ContentFragment implements AdapterView.OnItemClickListener {
 
     private ListView contentList;
     private ContentListAdapter adapter;
+    private ContentType type;
+
+    public static ContentListFragment newInstance(ContentType type){
+        ContentListFragment ret = new ContentListFragment();
+        ret.setType(type);
+        return ret;
+    }
 
 
     @Override
@@ -67,13 +75,19 @@ public class ContentList extends ContentFragment implements AdapterView.OnItemCl
 
     }
 
-    @Override
-    public String getTitle() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public String getTitle(){
+        return type.getDisplayName();
     }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         replaceFragment(InfographViewer.newInstance(adapter.getItem(position)), true);
+    }
+
+    public ContentType getType() {
+        return type;
+    }
+
+    public void setType(ContentType type) {
+        this.type = type;
     }
 }

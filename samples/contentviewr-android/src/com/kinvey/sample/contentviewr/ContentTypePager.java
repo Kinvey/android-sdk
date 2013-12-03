@@ -18,7 +18,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import com.actionbarsherlock.app.SherlockFragment;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
+import com.kinvey.sample.contentviewr.model.ContentType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,11 @@ public class ContentTypePager extends ContentFragment {
 
 
         fragments = new ArrayList<ContentFragment>();
+        fragments.add(new ReorderFragment());
+
+        for (ContentType c : getContentType()){
+            fragments.add(ContentListFragment.newInstance(c));
+        }
 
         adapter = new ContentTypeAdapter(getSherlockActivity().getSupportFragmentManager());
         pager.setAdapter(adapter);
@@ -50,9 +57,8 @@ public class ContentTypePager extends ContentFragment {
 
     @Override
     public String getTitle() {
-        return "Content Type Pager";
+        return "Content Pager";
     }
-
 
     private class ContentTypeAdapter extends FragmentPagerAdapter {
 

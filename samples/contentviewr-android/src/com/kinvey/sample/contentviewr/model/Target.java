@@ -14,9 +14,27 @@
 package com.kinvey.sample.contentviewr.model;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
+
+import java.security.KeyException;
 
 /**
  * @author edwardf
  */
 public class Target extends GenericJson {
+
+    @Key
+    private String name;
+
+
+    public Target(){}
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

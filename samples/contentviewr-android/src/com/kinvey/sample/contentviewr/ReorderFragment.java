@@ -13,12 +13,28 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import android.view.View;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
  * @author edwardf
  */
-public class ReorderFragment extends SherlockFragment {
+public class ReorderFragment extends ContentFragment {
 
 
+    @Override
+    public int getViewID() {
+        return R.layout.fragment_reorder;
+    }
+
+    @Override
+    public void bindViews(View v) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public String getTitle() {
+        return "reorder";
+    }
 }
