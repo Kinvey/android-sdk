@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.contentviewr.windows;
+package com.kinvey.sample.contentviewr.model;
+
+import com.google.api.client.json.GenericJson;
 
 /**
  * @author edwardf
  */
-public interface ContentWindow {
-
-
+public class ContentType extends GenericJson {
 }

@@ -11,47 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.contentviewr;
+package com.kinvey.sample.contentviewr.model;
 
 import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
 
 /**
  * @author edwardf
  */
-public class ContentItem extends GenericJson{
-
-    @Key
-    private String name;
-
-    @Key
-    private String blurb;
-
-    @Key
-    private String location;
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getBlurb() {
-        return blurb;
-    }
-
-    public void setBlurb(String blurb) {
-        this.blurb = blurb;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
+public class Target extends GenericJson {
 }

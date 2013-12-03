@@ -18,15 +18,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.sample.contentviewr.core.ContentFragment;
+import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.windows.InfographViewer;
 
 import java.util.ArrayList;
 
 /**
  * @author edwardf
  */
-public class ContentList extends SherlockFragment {
+public class ContentList extends ContentFragment implements AdapterView.OnItemClickListener {
 
     private ListView contentList;
     private ContentListAdapter adapter;
@@ -39,8 +42,13 @@ public class ContentList extends SherlockFragment {
         return v;
     }
 
+    @Override
+    public int getViewID() {
+        return R.layout.fragment_content_list;
+    }
 
-    private void bindViews(View v){
+
+    public void bindViews(View v){
         contentList = (ListView) v.findViewById(R.id.content_list);
 
         ArrayList<ContentItem> content = new ArrayList<ContentItem>();
@@ -55,16 +63,17 @@ public class ContentList extends SherlockFragment {
                         Activity.LAYOUT_INFLATER_SERVICE));
 
         contentList.setAdapter(adapter);
+        contentList.setOnItemClickListener(this);
 
     }
 
+    @Override
+    public String getTitle() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
-
-
-
-
-
-
-
-
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        replaceFragment(InfographViewer.newInstance(adapter.getItem(position)), true);
+    }
 }

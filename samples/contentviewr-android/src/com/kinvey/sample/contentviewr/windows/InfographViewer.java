@@ -13,32 +13,39 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
-import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
+import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
  * @author edwardf
  */
-public class InfographViewer extends SherlockFragment implements ContentWindow {
-
-    WebView webview;
+public class InfographViewer extends ContentFragment {
 
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup group, Bundle saved) {
-        View v = inflater.inflate(R.layout.fragment_infographic, group, false);
-        bindViews(v);
-        return v;
+    private WebView webview;
+
+    private ContentItem content;
+
+    public static InfographViewer newInstance(ContentItem item){
+        InfographViewer frag = new InfographViewer();
+        frag.content = item;
+        return frag;
+
     }
 
 
-    private void bindViews(View v){
+    @Override
+    public int getViewID() {
+        return R.layout.fragment_infographic;
+    }
+
+    @Override
+    public void bindViews(View v){
         webview = (WebView) v.findViewById(R.id.infographic_webview);
+        webview.loadUrl(content.getLocation());
     }
 
 

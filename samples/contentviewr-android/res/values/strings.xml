@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">contentviewr</string>
+
+    <!-- login -->
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_go">Login</string>
+    <string name="login_register">Register</string>
+
+
 </resources>
