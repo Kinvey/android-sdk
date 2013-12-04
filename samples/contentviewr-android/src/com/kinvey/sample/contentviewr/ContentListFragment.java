@@ -13,6 +13,8 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import static com.kinvey.sample.contentviewr.Contentviewr.CONTENT_COLLECTION;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,12 +22,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.Query;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.windows.InfographViewer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author edwardf
@@ -35,6 +41,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     private ListView contentList;
     private ContentListAdapter adapter;
     private ContentType type;
+
+    private List<ContentItem> content;
 
     public static ContentListFragment newInstance(ContentType type){
         ContentListFragment ret = new ContentListFragment();
@@ -59,20 +67,47 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     public void bindViews(View v){
         contentList = (ListView) v.findViewById(R.id.content_list);
 
-        ArrayList<ContentItem> content = new ArrayList<ContentItem>();
-        ContentItem ok = new ContentItem();
-        ok.setName("BaaS EcoSystem Map");
-        ok.setBlurb("The Backend as a Service Ecosystem Map Update: A Growing Market ");
-        ok.setLocation("http://www.kinvey.com/blog/images/2013/01/kinvey_backend-as-a-service_mobileecosystem_jan-14-2013_2100px.png");
-        content.add(ok);
 
-        adapter = new ContentListAdapter(getSherlockActivity(), content,
-                (LayoutInflater) getSherlockActivity().getSystemService(
-                        Activity.LAYOUT_INFLATER_SERVICE));
-
-        contentList.setAdapter(adapter);
+        reset();
+//        ArrayList<ContentItem> content = new ArrayList<ContentItem>();
+//        ContentItem ok = new ContentItem();
+//        ok.setName("BaaS EcoSystem Map");
+//        ok.setBlurb("The Backend as a Service Ecosystem Map Update: A Growing Market ");
+//        ok.setLocation("http://www.kinvey.com/blog/images/2013/01/kinvey_backend-as-a-service_mobileecosystem_jan-14-2013_2100px.png");
+//        content.add(ok);
+//
+//        adapter = new ContentListAdapter(getSherlockActivity(), content,
+//                (LayoutInflater) getSherlockActivity().getSystemService(
+//                        Activity.LAYOUT_INFLATER_SERVICE));
+//
+//        contentList.setAdapter(adapter);
         contentList.setOnItemClickListener(this);
 
+    }
+
+
+    public void reset(){
+        Query q = new Query().equals("type", type.getName());
+        getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
+            @Override
+            public void onSuccess(ContentItem[] result) {
+                content = Arrays.asList(result);
+
+                adapter = new ContentListAdapter(getSherlockActivity(), content,
+                        (LayoutInflater) getSherlockActivity().getSystemService(
+                                Activity.LAYOUT_INFLATER_SERVICE));
+
+                contentList.setAdapter(adapter);
+
+
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+               Util.Error(ContentListFragment.this, error);
+            }
+        });
     }
 
     public String getTitle(){

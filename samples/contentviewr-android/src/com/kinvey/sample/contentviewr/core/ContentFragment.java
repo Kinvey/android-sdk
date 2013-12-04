@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
 import com.kinvey.sample.contentviewr.model.ContentType;
@@ -88,6 +89,14 @@ public abstract class ContentFragment extends SherlockFragment {
 
     public List<ContentType> getContentType(){
         return getContentViewr().getContentTypes();
+    }
+
+    public Client getClient(){
+        return getContentViewr().getClient();
+    }
+
+    public String getSelectedTarget(){
+        return getContentViewr().getSelectedTarget();
     }
 
 }

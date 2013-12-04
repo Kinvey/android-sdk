@@ -3,13 +3,16 @@ package com.kinvey.sample.contentviewr;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
+import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
 
@@ -22,7 +25,10 @@ public class Contentviewr extends SherlockFragmentActivity{
     public static final String TAG = "contentviewr";
     public static final String TARGET_COLLECTION = "Targets";
     public static final String TYPE_COLLECTION = "ContentTypes";
+    public static final String CONTENT_COLLECTION = "Content";
     private static final int PRELOAD_COUNT = 2; //this is used as semaphore, should match number of collections to preload
+
+    private String selectedTarget;
 
     private Client client;
     private int preLoadSemaphore;
@@ -43,6 +49,8 @@ public class Contentviewr extends SherlockFragmentActivity{
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.contentviewr);
 
+        getActionBar().setDisplayShowTitleEnabled(false);
+
         client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
@@ -59,9 +67,6 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (!client.user().isUserLoggedIn()){
             showLogin();;
         }
-
-
-
     }
 
     private void preload(){
@@ -111,7 +116,23 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
     private void showPager(){
+
+        ArrayAdapter<String> listnav = new ArrayAdapter<String>(this, R.layout.sherlock_spinner_item, getTargetList());
+        listnav.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        getSupportActionBar().setListNavigationCallbacks(listnav, new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                selectedTarget = getTargetList().get(itemPosition);
+                return false;
+            }
+        });
+
         replaceFragment(new ContentTypePager(), false);
+
+
     }
 
     private void showLogin(){
@@ -124,9 +145,9 @@ public class Contentviewr extends SherlockFragmentActivity{
 
               @Override
               public void onFailure(Throwable error) {
-                  //To change body of implemented methods use File | Settings | File Templates.
+                  Util.Error(Contentviewr.this, error);
               }
-          })    ;
+          });
 
 
     }
@@ -140,6 +161,8 @@ public class Contentviewr extends SherlockFragmentActivity{
         }
         tr.commit();
 
+
+
     }
 
     public List<Target> getTargets(){
@@ -151,4 +174,17 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
 
+
+    public List<String> getTargetList(){
+        List<String> ret = new ArrayList<String>();
+        for (Target t : getTargets()){
+            ret.add(t.getName());
+        }
+        return ret;
+    }
+
+
+    public String getSelectedTarget() {
+        return selectedTarget;
+    }
 }

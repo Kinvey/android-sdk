@@ -21,6 +21,7 @@ import android.view.View;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentType;
+import com.viewpagerindicator.TitlePageIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,8 @@ public class ContentTypePager extends ContentFragment {
     private ViewPager pager;
     private ContentTypeAdapter adapter;
     private List<ContentFragment> fragments;
+    private TitlePageIndicator mIndicator;
+
 
     @Override
     public int getViewID() {
@@ -42,7 +45,7 @@ public class ContentTypePager extends ContentFragment {
     @Override
     public void bindViews(View v) {
         pager = (ViewPager) v.findViewById(R.id.content_type_pager);
-
+        mIndicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
 
         fragments = new ArrayList<ContentFragment>();
         fragments.add(new ReorderFragment());
@@ -53,6 +56,10 @@ public class ContentTypePager extends ContentFragment {
 
         adapter = new ContentTypeAdapter(getSherlockActivity().getSupportFragmentManager());
         pager.setAdapter(adapter);
+        mIndicator.setViewPager(pager);
+        mIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
+        mIndicator.setTextColor(R.color.ebony);
+        mIndicator.setSelectedColor(R.color.ghost_white);
     }
 
     @Override

@@ -25,18 +25,13 @@ under the License.
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <com.viewpagerindicator.TitlePageIndicator
+            android:id="@+id/feature_indicator"
+            android:layout_height="wrap_content"
+            android:textColor="@color/ebony"
+            android:layout_width="fill_parent" />
+
     <android.support.v4.view.ViewPager android:id="@+id/content_type_pager"
                android:layout_width="match_parent"
-               android:layout_height="match_parent">
-        <android.support.v4.view.PagerTabStrip
-                android:id="@+id/pager_title_strip"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:background="#FFFFFF"
-                android:textColor="#003366"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"/>
-    </android.support.v4.view.ViewPager>
-
+               android:layout_height="match_parent"/>
 </LinearLayout>

@@ -39,7 +39,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/row_filter_details"
+            android:id="@+id/row_type_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Filter details"

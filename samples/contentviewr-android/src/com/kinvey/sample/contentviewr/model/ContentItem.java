@@ -16,6 +16,8 @@ package com.kinvey.sample.contentviewr.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
+import java.util.ArrayList;
+
 /**
  * @author edwardf
  */
@@ -29,6 +31,9 @@ public class ContentItem extends GenericJson{
 
     @Key
     private String location;
+
+    @Key
+    private ArrayList<String> target;
 
 
     public String getName() {
@@ -53,5 +58,13 @@ public class ContentItem extends GenericJson{
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public ArrayList<String> getTarget() {
+        return target;
+    }
+
+    public void setTarget(ArrayList<String> target) {
+        this.target = target;
     }
 }

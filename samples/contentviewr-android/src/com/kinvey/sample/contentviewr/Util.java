@@ -11,30 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.contentviewr.model;
+package com.kinvey.sample.contentviewr;
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
-
-import java.security.KeyException;
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+import com.actionbarsherlock.app.SherlockFragment;
 
 /**
  * @author edwardf
  */
-public class Target extends GenericJson {
-
-    @Key
-    private String name;
-
-    public Target(){}
+public class Util {
 
 
-    public String getName() {
-        return name;
+    public static void Error(Context context, Throwable msg){
+        Toast.makeText(context, msg.getMessage(), Toast.LENGTH_SHORT);
+        Log.e(Contentviewr.TAG, "something went wrong ->" + msg.getMessage());
+        msg.printStackTrace();
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public static void Error(SherlockFragment frag, Throwable msg){
+        Util.Error(frag.getSherlockActivity(), msg);
     }
+
 
 }
