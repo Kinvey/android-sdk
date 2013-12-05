@@ -48,13 +48,13 @@ public class ContentTypePager extends ContentFragment {
         mIndicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
 
         fragments = new ArrayList<ContentFragment>();
-        fragments.add(new ReorderFragment());
+        //fragments.add(new ReorderFragment());
 
         for (ContentType c : getContentType()){
             fragments.add(ContentListFragment.newInstance(c));
         }
 
-        adapter = new ContentTypeAdapter(getSherlockActivity().getSupportFragmentManager());
+        adapter = new ContentTypeAdapter(getChildFragmentManager());
         pager.setAdapter(adapter);
         mIndicator.setViewPager(pager);
         mIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);

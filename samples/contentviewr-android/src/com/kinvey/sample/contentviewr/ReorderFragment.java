@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.dslv.DragSortController;
@@ -73,27 +74,11 @@ public class ReorderFragment extends ContentFragment {
     public String getTitle() {
         return "reorder";
     }
-
     private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
         @Override
         public void drop(int from, int to) {
-//            String curKey = adapter.getItem(from).title;
-//
-//
-//            ordering.remove(from);
-//            ordering.add(to, curKey);
-//
-//            resetAdapter();
-//            if (type == FORECASTTYPE.FORECAST) {
-//
-//                DataStore.persistQuery(getSherlockActivity(), new QueryWrapper(filters, ordering, timeframe, true),
-//                        DataStore.QUERY_FORECAST);
-//            } else {
-//                DataStore
-//                        .persistQuery(getSherlockActivity(), new QueryWrapper(filters, ordering, timeframe, false), DataStore.QUERY_CLOSED);
-//
-//            }
-//
+
+
         }
     };
 
@@ -131,6 +116,10 @@ public class ReorderFragment extends ContentFragment {
             }
             holder = (FilterViewHolder) convertView.getTag();
 
+            if (!rowData.isOrderable()){
+                holder.getDrag().setVisibility(View.GONE);
+            }
+
             name = holder.getName();
             subtext = holder.getSubtext();
 
@@ -157,6 +146,7 @@ public class ReorderFragment extends ContentFragment {
 
             private TextView name = null;
             private TextView subtext = null;
+            private ImageView drag = null;
 
             public FilterViewHolder(View row) {
                 mRow = row;
@@ -175,7 +165,15 @@ public class ReorderFragment extends ContentFragment {
                 }
                 return subtext;
             }
+
+            public ImageView getDrag(){
+                if (drag == null){
+                    drag = (ImageView) mRow.findViewById(R.id.drag_handle);
+                }
+                return drag;
+            }
         }
 
     }
+
 }

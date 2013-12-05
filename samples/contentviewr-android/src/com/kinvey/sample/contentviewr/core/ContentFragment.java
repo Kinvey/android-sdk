@@ -69,14 +69,7 @@ public abstract class ContentFragment extends SherlockFragment {
     public abstract String getTitle();
 
     public void replaceFragment(ContentFragment newOne, boolean backstack){
-
-        FragmentTransaction tr = getSherlockActivity().getSupportFragmentManager().beginTransaction();
-        tr.replace(android.R.id.content, newOne, "content");
-        if (backstack){
-            tr.addToBackStack("back");
-        }
-        tr.commit();
-
+        getContentViewr().replaceFragment(newOne, backstack);
     }
 
     public Contentviewr getContentViewr(){

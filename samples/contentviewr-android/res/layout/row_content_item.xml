@@ -60,7 +60,7 @@ under the License.
                     android:ellipsize="end"
                     android:gravity="left"
                     android:text="name"
-                    android:textSize="36sp"
+                    android:textSize="24sp"
                     />
 
             <TextView

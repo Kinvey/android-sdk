@@ -30,6 +30,8 @@ public class ContentType extends GenericJson {
     @Key
     private String windowStyle;
 
+    private boolean isOrderable = true;
+
     public ContentType(){}
 
 
@@ -63,5 +65,13 @@ public class ContentType extends GenericJson {
 
     public void setWindowStyle(String windowStyle) {
         this.windowStyle = windowStyle;
+    }
+
+    public boolean isOrderable(){
+        return isOrderable;
+    }
+
+    public void setOrderable(boolean order){
+        this.isOrderable = order;
     }
 }
