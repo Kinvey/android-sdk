@@ -20,7 +20,7 @@ KIND, either express or implied.  See the License for the
 under the License.
 
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
@@ -28,8 +28,29 @@ under the License.
     <ListView android:id="@+id/content_list"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:layout_margin="8dp"
+              android:dividerHeight="16dp"
+              android:divider="#00000000"
               />
 
+    <LinearLayout android:id="@+id/content_loadingbox"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:padding="20dp"
+                  android:background="@color/alphad_ebony"
+                  android:layout_centerInParent="true">
+
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
 
 
-</LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>

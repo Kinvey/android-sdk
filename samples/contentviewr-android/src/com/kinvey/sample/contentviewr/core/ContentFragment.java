@@ -60,7 +60,7 @@ public abstract class ContentFragment extends SherlockFragment {
      *
      * TextView mytext = (TextView) v.findViewById(R.id.mytextview);
      *
-     * This is called once from onCreate.
+     * This is called once from onCreateView.
      *
      * @param v  the View object inflated by the Fragment, this will be the parent of any View Widget within the fragment.
      */

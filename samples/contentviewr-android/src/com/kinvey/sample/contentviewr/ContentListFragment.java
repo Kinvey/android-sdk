@@ -21,7 +21,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.Query;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
@@ -41,6 +44,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     private ListView contentList;
     private ContentListAdapter adapter;
     private ContentType type;
+    private LinearLayout loading;
 
     private List<ContentItem> content;
 
@@ -48,6 +52,14 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         ContentListFragment ret = new ContentListFragment();
         ret.setType(type);
         return ret;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        getSherlockActivity().invalidateOptionsMenu();
+
     }
 
 
@@ -66,31 +78,21 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
     public void bindViews(View v){
         contentList = (ListView) v.findViewById(R.id.content_list);
-
+        loading = (LinearLayout) v.findViewById(R.id.content_loadingbox);
 
         reset();
-//        ArrayList<ContentItem> content = new ArrayList<ContentItem>();
-//        ContentItem ok = new ContentItem();
-//        ok.setName("BaaS EcoSystem Map");
-//        ok.setBlurb("The Backend as a Service Ecosystem Map Update: A Growing Market ");
-//        ok.setLocation("http://www.kinvey.com/blog/images/2013/01/kinvey_backend-as-a-service_mobileecosystem_jan-14-2013_2100px.png");
-//        content.add(ok);
-//
-//        adapter = new ContentListAdapter(getSherlockActivity(), content,
-//                (LayoutInflater) getSherlockActivity().getSystemService(
-//                        Activity.LAYOUT_INFLATER_SERVICE));
-//
-//        contentList.setAdapter(adapter);
         contentList.setOnItemClickListener(this);
 
     }
 
 
     public void reset(){
+        loading.setVisibility(View.VISIBLE);
         Query q = new Query().equals("type", type.getName());
         getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
+                loading.setVisibility(View.GONE);
                 content = Arrays.asList(result);
 
                 adapter = new ContentListAdapter(getSherlockActivity(), content,
@@ -105,7 +107,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
             @Override
             public void onFailure(Throwable error) {
-               Util.Error(ContentListFragment.this, error);
+                loading.setVisibility(View.GONE);
+                Util.Error(ContentListFragment.this, error);
             }
         });
     }
@@ -124,5 +127,21 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
     public void setType(ContentType type) {
         this.type = type;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                reset();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

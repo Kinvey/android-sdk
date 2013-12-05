@@ -21,7 +21,9 @@ under the License.
 
 -->
 <resources>
+    <!-- general -->
     <string name="app_name">contentviewr</string>
+    <string name="refresh">refresh</string>
 
     <!-- login -->
     <string name="login_username">Username</string>

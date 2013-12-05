@@ -1,6 +1,7 @@
 package com.kinvey.sample.contentviewr;
 
 import android.os.Bundle;
+
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -12,7 +13,6 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
-import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
 

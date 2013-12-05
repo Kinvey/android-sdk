@@ -24,4 +24,5 @@ under the License.
 
     <color name="ghost_white">#F8F8FF</color>
     <color name="ebony">#555D50</color>
+    <color name="alphad_ebony">#70555D50</color>
 </resources>

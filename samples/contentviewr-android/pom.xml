@@ -101,14 +101,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>r7</version>
-        </dependency>
-        <dependency>
             <groupId>com.actionbarsherlock</groupId>
             <artifactId>library</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.0</version>
             <type>apklib</type>
             <exclusions>
                 <exclusion>
