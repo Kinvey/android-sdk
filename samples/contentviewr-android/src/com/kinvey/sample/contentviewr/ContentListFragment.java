@@ -41,12 +41,12 @@ import java.util.List;
  */
 public class ContentListFragment extends ContentFragment implements AdapterView.OnItemClickListener {
 
-    private ListView contentList;
-    private ContentListAdapter adapter;
-    private ContentType type;
-    private LinearLayout loading;
+    protected ListView contentList;
+    protected ContentListAdapter adapter;
+    protected ContentType type;
+    protected LinearLayout loading;
 
-    private List<ContentItem> content;
+    protected List<ContentItem> content;
 
     public static ContentListFragment newInstance(ContentType type){
         ContentListFragment ret = new ContentListFragment();
@@ -92,6 +92,9 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
                 loading.setVisibility(View.GONE);
                 content = Arrays.asList(result);
 

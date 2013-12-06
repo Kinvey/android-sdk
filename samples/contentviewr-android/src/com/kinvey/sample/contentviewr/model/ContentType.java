@@ -30,7 +30,8 @@ public class ContentType extends GenericJson {
     @Key
     private String windowStyle;
 
-    private boolean isOrderable = true;
+    private boolean isLabel = false;
+    private boolean isSetting = false;
 
     public ContentType(){}
 
@@ -67,11 +68,19 @@ public class ContentType extends GenericJson {
         this.windowStyle = windowStyle;
     }
 
-    public boolean isOrderable(){
-        return isOrderable;
+    public boolean isLabel() {
+        return isLabel;
     }
 
-    public void setOrderable(boolean order){
-        this.isOrderable = order;
+    public void setLabel(boolean label) {
+        isLabel = label;
+    }
+
+    public boolean isSetting() {
+        return isSetting;
+    }
+
+    public void setSetting(boolean setting) {
+        isSetting = setting;
     }
 }

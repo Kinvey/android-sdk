@@ -3,6 +3,7 @@ package com.kinvey.sample.contentviewr;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -52,11 +53,14 @@ public class Contentviewr extends SherlockFragmentActivity{
     private List<ContentType> contentTypes;
 
 
+    private LinearLayout loading;
     private DragSortListView drawer;
     private DrawerLayout drawerLayout;
     private DragSortController controller;
     private ContentTypeAdapter adapter;
     private ActionBarDrawerToggle drawerToggle;
+    private Typeface roboto;
+
 
     public Client getClient(){
         if (client == null){
@@ -71,8 +75,10 @@ public class Contentviewr extends SherlockFragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contentviewr);
 
+        roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
         drawer = (DragSortListView) findViewById(R.id.left_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        loading = (LinearLayout) findViewById(R.id.content_loadingbox);
 
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
                 GravityCompat.START);
@@ -216,12 +222,13 @@ public class Contentviewr extends SherlockFragmentActivity{
 
     private void showPager(){
 
+        loading.setVisibility(View.GONE);
 
         adapter = new ContentTypeAdapter(this, getDrawerContents(), (LayoutInflater) getSystemService(
                 Activity.LAYOUT_INFLATER_SERVICE));
         drawer.setAdapter(adapter);
 
-        ArrayAdapter<String> listnav = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getTargetList());
+        ArrayAdapter<String> listnav = new ArrayAdapter<String>(getSupportActionBar().getThemedContext(), R.layout.sherlock_spinner_dropdown_item, getTargetList());
         listnav.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 
 
@@ -240,7 +247,6 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
     private void showLogin(){
-        //replaceFragment(new LoginFragment(), false);
           client.user().login("hello", "hello", new KinveyUserCallback() {
               @Override
               public void onSuccess(User result) {
@@ -280,17 +286,23 @@ public class Contentviewr extends SherlockFragmentActivity{
     public List<ContentType> getDrawerContents(){
         List<ContentType> drawer = new ArrayList<ContentType>();
 
-        ContentType account = new ContentType();
-        account.setDisplayName("Account");
-        account.setOrderable(false);
 
         ContentType settings = new ContentType();
         settings.setDisplayName("Settings");
-        settings.setOrderable(false);
+        settings.setLabel(true);
 
-        drawer.add(account);
+        ContentType account = new ContentType();
+        account.setDisplayName("Account");
+        account.setSetting(true);
+
+        ContentType notifications = new ContentType();
+        notifications.setDisplayName("Notifications");
+        notifications.setSetting(true);
+
         drawer.add(settings);
-        drawer.addAll(getContentTypes());
+        drawer.add(account);
+        drawer.add(notifications);
+
         return drawer;
 
 
@@ -317,6 +329,8 @@ public class Contentviewr extends SherlockFragmentActivity{
         public void drop(int from, int to) {
 
 
+
+
         }
     };
 
@@ -337,26 +351,92 @@ public class Contentviewr extends SherlockFragmentActivity{
         }
 
         @Override
+        public int getViewTypeCount(){
+            return 3;
+        }
+
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
-            FilterViewHolder holder = null;
 
-            TextView name = null;
-            TextView subtext = null;
-            // TextView value = null;
 
             ContentType rowData = getItem(position);
 
+
+            if(rowData.isLabel()){
+                return getLabelView(position, convertView, parent);
+            }else if (rowData.isSetting()){
+                return getSettingView(position, convertView, parent);
+            }else{
+                return getContentTypeView(position, convertView, parent);
+            }
+
+        }
+
+
+        public View getSettingView(int position, View convertView, ViewGroup parent){
+
+            TextView name = null;
+
+            ContentType rowData = getItem(position);
+
+            SettingViewHolder holder = null;
+
             if (null == convertView) {
-                convertView = mInflater.inflate(R.layout.row_content_type, null);
-                holder = new FilterViewHolder(convertView);
+                convertView = mInflater.inflate(R.layout.row_setting, null);
+                holder = new SettingViewHolder(convertView);
                 convertView.setTag(holder);
             }
-            holder = (FilterViewHolder) convertView.getTag();
 
-            if (!rowData.isOrderable()){
-                holder.getDrag().setVisibility(View.GONE);
+            holder = (SettingViewHolder) convertView.getTag();
+
+            name = holder.getName();
+
+            name.setText(rowData.getDisplayName());
+
+            return convertView;
+        }
+
+
+        public View getLabelView(int position, View convertView, ViewGroup parent){
+
+            TextView name = null;
+
+            ContentType rowData = getItem(position);
+
+            LabelViewHolder holder = null;
+
+            if (null == convertView) {
+                convertView = mInflater.inflate(R.layout.row_label, null);
+                holder = new LabelViewHolder(convertView);
+                convertView.setTag(holder);
             }
+
+            holder = (LabelViewHolder) convertView.getTag();
+
+            name = holder.getName();
+
+            name.setText(rowData.getDisplayName());
+
+            return convertView;
+        }
+
+        public View getContentTypeView(int position, View convertView, ViewGroup parent){
+
+            TextView name = null;
+            TextView subtext = null;
+
+            ContentType rowData = getItem(position);
+
+            ContentTypeViewHolder holder = null;
+
+            if (null == convertView) {
+                convertView = mInflater.inflate(R.layout.row_content_type, null);
+                holder = new ContentTypeViewHolder(convertView);
+                convertView.setTag(holder);
+            }
+
+            holder = (ContentTypeViewHolder) convertView.getTag();
 
             name = holder.getName();
             subtext = holder.getSubtext();
@@ -366,6 +446,7 @@ public class Contentviewr extends SherlockFragmentActivity{
 
             return convertView;
         }
+
 
         /**
          * This pattern is used as an optimization for Android ListViews.
@@ -379,37 +460,80 @@ public class Contentviewr extends SherlockFragmentActivity{
          * performance (especially with large lists on large screen devices).
          *
          */
-        private class FilterViewHolder {
-            private View mRow;
+        private class ContentTypeViewHolder {
+            private View row;
 
             private TextView name = null;
             private TextView subtext = null;
             private ImageView drag = null;
 
-            public FilterViewHolder(View row) {
-                mRow = row;
+            public ContentTypeViewHolder(View row) {
+                this.row = row;
             }
 
             public TextView getName() {
                 if (name == null) {
-                    name = (TextView) mRow.findViewById(R.id.row_type_name);
+                    name = (TextView) row.findViewById(R.id.row_type_name);
+                    name.setTypeface(roboto);
                 }
                 return name;
             }
 
             public TextView getSubtext() {
                 if (subtext == null) {
-                    subtext = (TextView) mRow.findViewById(R.id.row_type_details);
+                    subtext = (TextView) row.findViewById(R.id.row_type_details);
                 }
                 return subtext;
             }
 
             public ImageView getDrag(){
                 if (drag == null){
-                    drag = (ImageView) mRow.findViewById(R.id.drag_handle);
+                    drag = (ImageView) row.findViewById(R.id.drag_handle);
                 }
                 return drag;
             }
+        }
+
+        private class LabelViewHolder{
+            private View row;
+
+            private TextView name;
+
+            public LabelViewHolder(View row){
+                this.row = row;
+            }
+
+            public TextView getName(){
+                if (name == null){
+                    name = (TextView) row.findViewById(R.id.row_label_name);
+                    name.setTypeface(roboto);
+                }
+
+                return name;
+            }
+
+
+        }
+
+        private class SettingViewHolder{
+            private View row;
+
+            private TextView name;
+
+            public SettingViewHolder(View row){
+                this.row = row;
+            }
+
+            public TextView getName(){
+                if (name == null){
+                    name = (TextView) row.findViewById(R.id.row_setting_name);
+                    name.setTypeface(roboto);
+                }
+
+                return name;
+            }
+
+
         }
 
     }

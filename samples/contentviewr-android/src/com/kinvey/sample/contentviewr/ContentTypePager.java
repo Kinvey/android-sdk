@@ -48,7 +48,8 @@ public class ContentTypePager extends ContentFragment {
         mIndicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
 
         fragments = new ArrayList<ContentFragment>();
-        //fragments.add(new ReorderFragment());
+        fragments.add(new ReorderFragment());
+        fragments.add(new RecentFragment());
 
         for (ContentType c : getContentType()){
             fragments.add(ContentListFragment.newInstance(c));

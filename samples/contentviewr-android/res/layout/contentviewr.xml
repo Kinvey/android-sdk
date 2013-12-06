@@ -30,7 +30,22 @@ under the License.
     <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+        <LinearLayout android:id="@+id/content_loadingbox"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:padding="20dp"
+                      android:layout_gravity="center"
+                      android:background="@color/alphad_ebony">
+            <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+        </LinearLayout>
+
+
+    </FrameLayout>
     <!-- The navigation drawer -->
     <com.kinvey.sample.contentviewr.dslv.DragSortListView
             android:id="@+id/left_drawer"
@@ -38,8 +53,8 @@ under the License.
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:choiceMode="singleChoice"
-            android:divider="@color/ebony"
-            android:dividerHeight="2dp"
+            android:divider="@color/alphad_ebony"
+            android:dividerHeight="1dp"
             android:background="#111"
             dslv:collapsed_height="2dp"
             dslv:drag_enabled="true"
