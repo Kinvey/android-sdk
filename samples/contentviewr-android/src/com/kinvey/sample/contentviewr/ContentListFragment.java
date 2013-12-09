@@ -107,7 +107,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
                 //Lazy load images
                 for (ContentItem c : content){
-                    c.loadThumbnail(adapter);
+                    c.loadThumbnail(getClient(), adapter);
                 }
 
 
@@ -127,7 +127,6 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //replaceFragment(WindowFactory.getViewer(getType().getWindowStyle()).newInstance(adapter.getItem(position)), true);
         Viewer viewer = new WindowFactory().getViewer(getType().getWindowStyle());
         viewer.loadContent(adapter.getItem(position));
         replaceFragment(viewer, true);

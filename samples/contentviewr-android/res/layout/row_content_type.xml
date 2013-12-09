@@ -12,7 +12,7 @@
   the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
         <LinearLayout
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:background="@drawable/drag_handle"/>
 
 </RelativeLayout>

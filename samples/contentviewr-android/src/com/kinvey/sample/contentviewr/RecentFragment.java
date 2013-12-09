@@ -56,7 +56,7 @@ public class RecentFragment extends ContentListFragment {
                 contentList.setAdapter(adapter);
 
                 for (ContentItem c : content){
-                    c.loadThumbnail(adapter);
+                    c.loadThumbnail(getClient(), adapter);
                 }
 
 

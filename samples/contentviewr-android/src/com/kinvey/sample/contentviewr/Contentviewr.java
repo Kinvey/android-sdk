@@ -54,9 +54,8 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 
     private LinearLayout loading;
-    private DragSortListView drawer;
+    private ListView drawer;
     private DrawerLayout drawerLayout;
-    private DragSortController controller;
     private ContentTypeAdapter adapter;
     private ActionBarDrawerToggle drawerToggle;
     private Typeface roboto;
@@ -76,7 +75,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         setContentView(R.layout.contentviewr);
 
         roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
-        drawer = (DragSortListView) findViewById(R.id.left_drawer);
+        drawer = (ListView) findViewById(R.id.left_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         loading = (LinearLayout) findViewById(R.id.content_loadingbox);
 
@@ -85,18 +84,6 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        controller = new DragSortController(drawer);
-        controller.setDragHandleId(R.id.drag_handle);
-        controller.setRemoveEnabled(false);
-        controller.setSortEnabled(true);
-        controller.setDragInitMode(DragSortController.ON_DOWN);
-        controller.setRemoveMode(DragSortController.FLING_REMOVE);
-
-        drawer.setFloatViewManager(controller);
-        drawer.setOnTouchListener(controller);
-        drawer.setDragEnabled(true);
-        drawer.setDropListener(onDrop);
 
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {

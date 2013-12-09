@@ -46,7 +46,7 @@ public class ImageViewer extends Viewer  {
     public void bindViews(View v){
         webview = (WebView) v.findViewById(R.id.infographic_webview);
         webview.getSettings().setBuiltInZoomControls(true);
-        webview.loadUrl(content.getLocation());
+        webview.loadUrl(content.getSource().getReference());
     }
 
     @Override

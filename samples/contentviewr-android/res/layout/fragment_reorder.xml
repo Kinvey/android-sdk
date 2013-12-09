@@ -39,5 +39,6 @@ under the License.
             dslv:max_drag_scroll_speed="0.5"
             dslv:slide_shuffle_speed="0.3"
             dslv:track_drag_sort="false"
-            dslv:use_default_controller="true" />
+            dslv:use_default_controller="true"
+             />
 </LinearLayout>

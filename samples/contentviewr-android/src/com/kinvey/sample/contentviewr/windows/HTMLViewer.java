@@ -35,7 +35,7 @@ public class HTMLViewer extends Viewer {
     @Override
     public void bindViews(View v){
         webview = (WebView) v.findViewById(R.id.infographic_webview);
-        webview.loadUrl(content.getLocation());
+        webview.loadUrl(content.getSource().getReference());
     }
 
     @Override

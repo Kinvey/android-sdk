@@ -25,6 +25,7 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.ContentListAdapter;
+import com.kinvey.sample.contentviewr.SourceFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,13 +47,13 @@ public class ContentItem extends LinkedGenericJson {
     private String blurb;
 
     @Key
-    private String location;
+    private SourceType source;
 
     @Key
     private ArrayList<String> target;
 
     @Key
-    private String thumbnail;
+    private SourceType thumbnail;
 
     @Key
     private String type;
@@ -83,14 +84,6 @@ public class ContentItem extends LinkedGenericJson {
         this.blurb = blurb;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public ArrayList<String> getTarget() {
         return target;
     }
@@ -110,69 +103,34 @@ public class ContentItem extends LinkedGenericJson {
         return thumbnailImage;
     }
 
-    public void loadThumbnail(ContentListAdapter adapter){
-        new loadThumbnailTask().execute(adapter);
+    public void setThumbnailImage(Bitmap thumb){
+        this.thumbnailImage = thumb;
+    }
+
+    public void loadThumbnail(Client client, ContentListAdapter adapter){
+        //new loadThumbnailTask().execute(adapter);
+        SourceFactory.asyncLoadThumbnail(client, this, adapter);
 
 
     }
 
-    public String getThumbnail() {
+    public SourceType getThumbnail() {
         return thumbnail;
     }
 
-    public void setThumbnail(String thumbnail) {
+    public void setThumbnail(SourceType thumbnail) {
         this.thumbnail = thumbnail;
     }
 
-    private class loadThumbnailTask extends AsyncTask<ContentListAdapter, Void, ContentListAdapter> {
-
-
-        @Override
-        protected ContentListAdapter doInBackground(ContentListAdapter ... adapter) {
-            if (thumbnailImage == null) {
-                thumbnailImage = getBitmapFromURL(thumbnail);
-                //and there is an actual LinkedFile behind the Key
-//                if (getFile(attachmentName) != null) {
-//                    //Then decode from the output stream and get the image.
-//                    thumbnailImage = BitmapFactory.decodeByteArray(getFile(attachmentName).getOutput().toByteArray(), 0, getFile(attachmentName).getOutput().toByteArray().length);
-//                    try {
-//                        //close the output stream
-//                        getFile(attachmentName).getOutput().close();
-//                    } catch (Exception e) {
-//
-//                    }
-//                }
-            }
-            return adapter[0];
-        }
-
-        @Override
-        protected void onPostExecute(ContentListAdapter adapter){
-            if (adapter != null){
-                adapter.notifyDataSetChanged();
-            }
-
-        }
-
-
-    };
-
-    public static Bitmap getBitmapFromURL(String src) {
-        try {
-            URL url = new URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            Log.i(Client.TAG, "got image, for setting image " + src);
-            return myBitmap;
-        } catch (IOException e) {
-            Log.i(Client.TAG, "cant be setting image!" + e);
-            e.printStackTrace();
-            return null;
-        }
+    public SourceType getSource() {
+        return source;
     }
+
+    public void setSource(SourceType source) {
+        this.source = source;
+    }
+
+
 
     public String getType(){
         return this.type;
