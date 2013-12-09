@@ -15,6 +15,8 @@ package com.kinvey.sample.contentviewr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Debug;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,7 @@ import com.kinvey.sample.contentviewr.dslv.DragSortController;
 import com.kinvey.sample.contentviewr.dslv.DragSortListView;
 import com.kinvey.sample.contentviewr.model.ContentType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,9 +38,15 @@ public class ReorderFragment extends ContentFragment {
 
     private DragSortListView list;
     private DragSortController controller;
-    private ContentTypeAdapter adapter;
+    private DraggableTypeAdapter adapter;
+
+    private ContentTypePager pager;
 
 
+
+    public ReorderFragment(ContentTypePager pager){
+        this.pager = pager;
+    }
 
 
     @Override
@@ -65,30 +74,54 @@ public class ReorderFragment extends ContentFragment {
     }
 
     private void setAdapter(){
-        adapter = new ContentTypeAdapter(getSherlockActivity(), getContentType(), (LayoutInflater) getSherlockActivity().getSystemService(
+
+        List<String> order = (List<String>) getClient().user().get("ordering");
+        List<ContentType> contents = new ArrayList<ContentType>();
+
+        for (String s : order){
+            contents.add(getContentType().get(s));
+        }
+
+        adapter = new DraggableTypeAdapter(getSherlockActivity(), contents, (LayoutInflater) getSherlockActivity().getSystemService(
                 Activity.LAYOUT_INFLATER_SERVICE));
         list.setAdapter(adapter);
     }
 
     @Override
     public String getTitle() {
-        return "reorder";
+        return "Reorder";
     }
     private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
         @Override
         public void drop(int from, int to) {
 
 
+            Log.i("OK", "wtf, " + from + " + " + to);
+            List<String> order = (List<String>) getClient().user().get("ordering");
+
+            String current =  order.get(from);
+            order.remove(from);
+            order.add(to, current);
+
+            getClient().user().put("ordering", order);
+            getClient().user().update(null);
+
+            pager.loadOrderInAdapter();
+            //adapter.notifyDataSetChanged();
+            setAdapter();
+
+
+
+
+
         }
     };
 
-    public class ContentTypeAdapter extends ArrayAdapter<ContentType> {
-
-        public static final int TYPE_TOTAL_COUNT = 5;
+    public class DraggableTypeAdapter extends ArrayAdapter<ContentType> {
 
         private LayoutInflater mInflater;
 
-        public ContentTypeAdapter(Context context, List<ContentType> objects, LayoutInflater inf) {
+        public DraggableTypeAdapter(Context context, List<ContentType> objects, LayoutInflater inf) {
             // NOTE: I pass an arbitrary textViewResourceID to the super
             // constructor-- Below I override
             // getView(...), which causes the underlying adapter to ignore this

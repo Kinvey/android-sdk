@@ -76,7 +76,7 @@ public class RecentFragment extends ContentListFragment {
 
         ContentType type = null;
 
-        for (ContentType t :getContentType()){
+        for (ContentType t : getContentType().values()){
             if (t.getName().equals(adapter.getItem(position).getType())){
                 type = t;
             }

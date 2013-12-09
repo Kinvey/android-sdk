@@ -23,6 +23,7 @@ import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -76,7 +77,7 @@ public abstract class ContentFragment extends SherlockFragment {
         return getContentViewr().getTargets();
     }
 
-    public List<ContentType> getContentType(){
+    public HashMap<String, ContentType> getContentType(){
         return getContentViewr().getContentTypes();
     }
 

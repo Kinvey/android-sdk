@@ -47,15 +47,16 @@ public class ContentTypePager extends ContentFragment {
         pager = (ViewPager) v.findViewById(R.id.content_type_pager);
         mIndicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
 
-        fragments = new ArrayList<ContentFragment>();
-        fragments.add(new ReorderFragment());
-        fragments.add(new RecentFragment());
 
-        for (ContentType c : getContentType()){
-            fragments.add(ContentListFragment.newInstance(c));
-        }
 
         adapter = new ContentTypeAdapter(getChildFragmentManager());
+
+        fragments = new ArrayList<ContentFragment>();
+        fragments.add(new ReorderFragment(this));
+        fragments.add(new RecentFragment());
+        loadOrderInAdapter();
+
+
         pager.setAdapter(adapter);
         mIndicator.setViewPager(pager);
         mIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
@@ -68,7 +69,19 @@ public class ContentTypePager extends ContentFragment {
         return "Content Pager";
     }
 
-    private class ContentTypeAdapter extends FragmentPagerAdapter {
+    public void loadOrderInAdapter(){
+
+        fragments = fragments.subList(0,2);
+
+        List<String> order = (List<String>) getClient().user().get("ordering");
+        for (String s : order){
+        //for (ContentType c : getContentType()){
+            fragments.add(ContentListFragment.newInstance(getContentType().get(s)));
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    public class ContentTypeAdapter extends FragmentPagerAdapter {
 
         public ContentTypeAdapter(FragmentManager fm) {
             super(fm);

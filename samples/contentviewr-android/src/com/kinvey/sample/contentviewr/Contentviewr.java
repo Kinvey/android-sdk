@@ -20,20 +20,24 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.kinvey.android.AsyncAppData;
+import com.kinvey.android.AsyncUser;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.AppData;
 import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.sample.contentviewr.dslv.DragSortController;
 import com.kinvey.sample.contentviewr.dslv.DragSortListView;
 import com.kinvey.sample.contentviewr.model.ContentType;
+import com.kinvey.sample.contentviewr.model.ContentUser;
 import com.kinvey.sample.contentviewr.model.Target;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class Contentviewr extends SherlockFragmentActivity{
@@ -50,13 +54,13 @@ public class Contentviewr extends SherlockFragmentActivity{
     private int preLoadSemaphore;
 
     private List<Target> targets;
-    private List<ContentType> contentTypes;
-
+//    private List<ContentType> contentTypes;
+    private HashMap<String, ContentType> contentTypes;
 
     private LinearLayout loading;
     private ListView drawer;
     private DrawerLayout drawerLayout;
-    private ContentTypeAdapter adapter;
+    private DrawerAdapter adapter;
     private ActionBarDrawerToggle drawerToggle;
     private Typeface roboto;
 
@@ -117,7 +121,7 @@ public class Contentviewr extends SherlockFragmentActivity{
             public void onFailure(Throwable error) {
                 showLogin();
             }
-        }).build();
+        }).setUserClass(ContentUser.class).build();
         client.enableDebugLogging();
 
         if (!client.user().isUserLoggedIn()){
@@ -186,7 +190,38 @@ public class Contentviewr extends SherlockFragmentActivity{
         contentAppData.get(new KinveyListCallback<ContentType>() {
             @Override
             public void onSuccess(ContentType[] result) {
-                contentTypes = Arrays.asList(result);
+                contentTypes = new HashMap<String, ContentType>();
+                for (ContentType c : result){
+                    contentTypes.put(c.getName(), c);
+                }
+
+                boolean needsUpdate = false;
+                if (getClient().user().containsKey("ordering")){
+                    for (String s : (List<String>) getClient().user().get("ordering")){
+                        if (!contentTypes.keySet().contains(s)){
+                            ((List<String>) getClient().user().get("ordering")).remove(s);
+                            needsUpdate = true;
+                        }
+                    }
+
+                    for (String s : contentTypes.keySet()){
+                        if (!((List<String>) getClient().user().get("ordering")).contains(s)){
+                            ((List<String>) getClient().user().get("ordering")).add(s);
+                            needsUpdate = true;
+
+                        }
+
+                    }
+
+                    if (needsUpdate){
+                        client.user().update(null);
+                    }
+
+                }else{
+                    getClient().user().put("ordering", Arrays.asList(contentTypes.keySet().toArray(new String[0])));
+                    client.user().update(null);
+                }
+
                 preLoadSemaphore = preLoadSemaphore - 1;
                 if (preLoadSemaphore == 0) {
                     showPager();
@@ -200,18 +235,14 @@ public class Contentviewr extends SherlockFragmentActivity{
                 error.printStackTrace();
             }
         });
-
-
-
-
-
     }
+
 
     private void showPager(){
 
         loading.setVisibility(View.GONE);
 
-        adapter = new ContentTypeAdapter(this, getDrawerContents(), (LayoutInflater) getSystemService(
+        adapter = new DrawerAdapter(this, getDrawerContents(), (LayoutInflater) getSystemService(
                 Activity.LAYOUT_INFLATER_SERVICE));
         drawer.setAdapter(adapter);
 
@@ -266,7 +297,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         return this.targets;
     }
 
-    public List<ContentType> getContentTypes(){
+    public HashMap<String, ContentType> getContentTypes(){
         return this.contentTypes;
     }
 
@@ -321,13 +352,13 @@ public class Contentviewr extends SherlockFragmentActivity{
         }
     };
 
-    public class ContentTypeAdapter extends ArrayAdapter<ContentType> {
+    public class DrawerAdapter extends ArrayAdapter<ContentType> {
 
         public static final int TYPE_TOTAL_COUNT = 5;
 
         private LayoutInflater mInflater;
 
-        public ContentTypeAdapter(Context context, List<ContentType> objects, LayoutInflater inf) {
+        public DrawerAdapter(Context context, List<ContentType> objects, LayoutInflater inf) {
             // NOTE: I pass an arbitrary textViewResourceID to the super
             // constructor-- Below I override
             // getView(...), which causes the underlying adapter to ignore this
@@ -523,7 +554,10 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         }
 
+
+
     }
+
 }
 
 
