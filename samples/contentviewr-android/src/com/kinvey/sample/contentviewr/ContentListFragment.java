@@ -30,9 +30,10 @@ import com.kinvey.java.Query;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
-import com.kinvey.sample.contentviewr.windows.InfographViewer;
+import com.kinvey.sample.contentviewr.windows.ImageViewer;
+import com.kinvey.sample.contentviewr.windows.Viewer;
+import com.kinvey.sample.contentviewr.windows.WindowFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,7 +127,11 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        replaceFragment(InfographViewer.newInstance(adapter.getItem(position)), true);
+        //replaceFragment(WindowFactory.getViewer(getType().getWindowStyle()).newInstance(adapter.getItem(position)), true);
+        Viewer viewer = new WindowFactory().getViewer(getType().getWindowStyle());
+        viewer.loadContent(adapter.getItem(position));
+        replaceFragment(viewer, true);
+
     }
 
     public ContentType getType() {

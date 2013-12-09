@@ -15,6 +15,7 @@ package com.kinvey.sample.contentviewr;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 
 import java.util.List;
@@ -72,11 +74,13 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
 
         thumb = holder.getThumb();
         loading = holder.getLoading();
-        if (rowData.getThumbnail() != null){
-            thumb.setImageBitmap(rowData.getThumbnail());
+        if (rowData.getThumbnailImage() != null){
+            Log.i(Client.TAG, "setting image");
+            thumb.setImageBitmap(rowData.getThumbnailImage());
             thumb.setVisibility(View.VISIBLE);
             loading.setVisibility(View.GONE);
         }else{
+            Log.i(Client.TAG, "not setting image");
             thumb.setVisibility(View.GONE);
             loading.setVisibility(View.VISIBLE);
 

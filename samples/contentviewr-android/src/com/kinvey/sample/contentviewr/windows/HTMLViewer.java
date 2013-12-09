@@ -22,20 +22,10 @@ import com.kinvey.sample.contentviewr.core.ContentFragment;
 /**
  * @author edwardf
  */
-public class InfographViewer extends ContentFragment {
+public class HTMLViewer extends Viewer {
 
 
     private WebView webview;
-
-    private ContentItem content;
-
-    public static InfographViewer newInstance(ContentItem item){
-        InfographViewer frag = new InfographViewer();
-        frag.content = item;
-        return frag;
-
-    }
-
 
     @Override
     public int getViewID() {
@@ -54,6 +44,4 @@ public class InfographViewer extends ContentFragment {
         return "WebViewer";
 
     }
-
-
 }

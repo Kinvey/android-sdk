@@ -16,10 +16,14 @@ package com.kinvey.sample.contentviewr;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.model.ContentType;
+import com.kinvey.sample.contentviewr.windows.Viewer;
+import com.kinvey.sample.contentviewr.windows.WindowFactory;
 
 import java.util.Arrays;
 
@@ -51,6 +55,10 @@ public class RecentFragment extends ContentListFragment {
 
                 contentList.setAdapter(adapter);
 
+                for (ContentItem c : content){
+                    c.loadThumbnail(adapter);
+                }
+
 
 
             }
@@ -61,6 +69,24 @@ public class RecentFragment extends ContentListFragment {
                 Util.Error(RecentFragment.this, error);
             }
         });
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        ContentType type = null;
+
+        for (ContentType t :getContentType()){
+            if (t.getName().equals(adapter.getItem(position).getType())){
+                type = t;
+            }
+
+        }
+
+        Viewer viewer = new WindowFactory().getViewer(type.getWindowStyle());
+        viewer.loadContent(adapter.getItem(position));
+        replaceFragment(viewer, true);
+
     }
 
     @Override

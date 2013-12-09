@@ -14,18 +14,14 @@
 package com.kinvey.sample.contentviewr.core;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.Contentviewr;
-import com.kinvey.sample.contentviewr.R;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
-import com.kinvey.sample.contentviewr.windows.InfographViewer;
 
 import java.util.List;
 

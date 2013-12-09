@@ -16,6 +16,7 @@ package com.kinvey.sample.contentviewr.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.kinvey.android.Client;
@@ -50,10 +51,13 @@ public class ContentItem extends LinkedGenericJson {
     @Key
     private ArrayList<String> target;
 
+    @Key
+    private String thumbnail;
 
+    @Key
+    private String type;
 
-    private Bitmap thumbnail;
-
+    private Bitmap thumbnailImage;
     public static final String attachmentName = "kinvey_attachment";
 
 
@@ -102,8 +106,8 @@ public class ContentItem extends LinkedGenericJson {
      *
      * @return null or the image attachment
      */
-    public Bitmap getThumbnail() {
-        return thumbnail;
+    public Bitmap getThumbnailImage() {
+        return thumbnailImage;
     }
 
     public void loadThumbnail(ContentListAdapter adapter){
@@ -112,23 +116,32 @@ public class ContentItem extends LinkedGenericJson {
 
     }
 
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
     private class loadThumbnailTask extends AsyncTask<ContentListAdapter, Void, ContentListAdapter> {
 
 
         @Override
         protected ContentListAdapter doInBackground(ContentListAdapter ... adapter) {
-            if (thumbnail == null) {
-                thumbnail = getBitmapFromURL(location);
+            if (thumbnailImage == null) {
+                thumbnailImage = getBitmapFromURL(thumbnail);
                 //and there is an actual LinkedFile behind the Key
-                if (getFile(attachmentName) != null) {
-                    //Then decode from the output stream and get the image.
-                    thumbnail = BitmapFactory.decodeByteArray(getFile(attachmentName).getOutput().toByteArray(), 0, getFile(attachmentName).getOutput().toByteArray().length);
-                    try {
-                        //close the output stream
-                        getFile(attachmentName).getOutput().close();
-                    } catch (Exception e) {
-                    }
-                }
+//                if (getFile(attachmentName) != null) {
+//                    //Then decode from the output stream and get the image.
+//                    thumbnailImage = BitmapFactory.decodeByteArray(getFile(attachmentName).getOutput().toByteArray(), 0, getFile(attachmentName).getOutput().toByteArray().length);
+//                    try {
+//                        //close the output stream
+//                        getFile(attachmentName).getOutput().close();
+//                    } catch (Exception e) {
+//
+//                    }
+//                }
             }
             return adapter[0];
         }
@@ -152,11 +165,21 @@ public class ContentItem extends LinkedGenericJson {
             connection.connect();
             InputStream input = connection.getInputStream();
             Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            Log.i(Client.TAG, "got image, for setting image " + src);
             return myBitmap;
         } catch (IOException e) {
+            Log.i(Client.TAG, "cant be setting image!" + e);
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getType(){
+        return this.type;
+    }
+
+    public void setType(String type){
+        this.type = type;
     }
 
 }

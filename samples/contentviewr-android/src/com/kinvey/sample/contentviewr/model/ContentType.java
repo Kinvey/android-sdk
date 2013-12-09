@@ -26,8 +26,6 @@ public class ContentType extends GenericJson {
     @Key
     private String name;
     @Key
-    private String rowStyle;
-    @Key
     private String windowStyle;
 
     private boolean isLabel = false;
@@ -50,14 +48,6 @@ public class ContentType extends GenericJson {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getRowStyle() {
-        return rowStyle;
-    }
-
-    public void setRowStyle(String rowStyle) {
-        this.rowStyle = rowStyle;
     }
 
     public String getWindowStyle() {
