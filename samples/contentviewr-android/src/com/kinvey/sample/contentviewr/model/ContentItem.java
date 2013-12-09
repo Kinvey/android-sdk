@@ -13,15 +13,30 @@
  */
 package com.kinvey.sample.contentviewr.model;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.android.Client;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
+import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.sample.contentviewr.ContentListAdapter;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
  * @author edwardf
  */
-public class ContentItem extends GenericJson{
+public class ContentItem extends LinkedGenericJson {
 
     @Key
     private String name;
@@ -34,6 +49,18 @@ public class ContentItem extends GenericJson{
 
     @Key
     private ArrayList<String> target;
+
+
+
+    private Bitmap thumbnail;
+
+    public static final String attachmentName = "kinvey_attachment";
+
+
+    public ContentItem(){
+        putFile(attachmentName);
+    }
+
 
 
     public String getName() {
@@ -67,4 +94,69 @@ public class ContentItem extends GenericJson{
     public void setTarget(ArrayList<String> target) {
         this.target = target;
     }
+
+    /**
+     * Get the thumbnail from the LinkedResource
+     *
+     * Note it closes the output stream.
+     *
+     * @return null or the image attachment
+     */
+    public Bitmap getThumbnail() {
+        return thumbnail;
+    }
+
+    public void loadThumbnail(ContentListAdapter adapter){
+        new loadThumbnailTask().execute(adapter);
+
+
+    }
+
+    private class loadThumbnailTask extends AsyncTask<ContentListAdapter, Void, ContentListAdapter> {
+
+
+        @Override
+        protected ContentListAdapter doInBackground(ContentListAdapter ... adapter) {
+            if (thumbnail == null) {
+                thumbnail = getBitmapFromURL(location);
+                //and there is an actual LinkedFile behind the Key
+                if (getFile(attachmentName) != null) {
+                    //Then decode from the output stream and get the image.
+                    thumbnail = BitmapFactory.decodeByteArray(getFile(attachmentName).getOutput().toByteArray(), 0, getFile(attachmentName).getOutput().toByteArray().length);
+                    try {
+                        //close the output stream
+                        getFile(attachmentName).getOutput().close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+            return adapter[0];
+        }
+
+        @Override
+        protected void onPostExecute(ContentListAdapter adapter){
+            if (adapter != null){
+                adapter.notifyDataSetChanged();
+            }
+
+        }
+
+
+    };
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

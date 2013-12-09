@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>ticketview-android</artifactId>
-	<name>Sample: com.kinvey.sample.ticketview.TicketViewApplication</name>
+	<name>Sample: TicketView</name>
 	<packaging>apk</packaging>
 
 	<parent>

@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 
@@ -51,6 +53,8 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
 
         TextView name = null;
         TextView blurb = null;
+        ImageView thumb = null;
+        LinearLayout loading = null;
 
         ContentItem rowData = getItem(position);
 
@@ -65,6 +69,19 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
         name.setText(rowData.getName());
         blurb = holder.getBlurb();
         blurb.setText(rowData.getBlurb());
+
+        thumb = holder.getThumb();
+        loading = holder.getLoading();
+        if (rowData.getThumbnail() != null){
+            thumb.setImageBitmap(rowData.getThumbnail());
+            thumb.setVisibility(View.VISIBLE);
+            loading.setVisibility(View.GONE);
+        }else{
+            thumb.setVisibility(View.GONE);
+            loading.setVisibility(View.VISIBLE);
+
+        }
+
 
         return convertView;
     }
@@ -86,6 +103,8 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
 
         private TextView name = null;
         private TextView blurb = null;
+        private ImageView thumb = null;
+        private LinearLayout loading = null;
 
         public FeatureViewHolder(View row) {
             this.row = row;
@@ -105,6 +124,20 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
             }
             blurb.setTypeface(roboto);
             return blurb;
+        }
+
+        public ImageView getThumb(){
+            if (thumb == null){
+                thumb = (ImageView) row.findViewById(R.id.content_row_thumb);
+            }
+            return thumb;
+        }
+
+        public LinearLayout getLoading(){
+            if (loading == null){
+                loading = (LinearLayout) row.findViewById(R.id.content_row_loadingbox);
+            }
+            return loading;
         }
 
 

@@ -35,7 +35,7 @@ under the License.
             android:orientation="horizontal">
 
         <ImageView
-                android:id="@+id/row_update_image"
+                android:id="@+id/content_row_thumb"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:contentDescription="Photo"
@@ -43,6 +43,20 @@ under the License.
                 android:scaleType="centerCrop"
                 android:layout_weight=".33"
                 />
+
+
+        <LinearLayout android:id="@+id/content_row_loadingbox"
+                      android:layout_width="0px"
+                      android:layout_height="wrap_content"
+                      android:layout_weight=".33"
+                      android:padding="20dp"
+                      android:background="@color/alphad_ebony"
+                      >
+            <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+        </LinearLayout>
 
         <LinearLayout
                 android:layout_width="0px"

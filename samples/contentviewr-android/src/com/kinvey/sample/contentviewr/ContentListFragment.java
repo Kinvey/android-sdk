@@ -104,6 +104,11 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
                 contentList.setAdapter(adapter);
 
+                //Lazy load images
+                for (ContentItem c : content){
+                    c.loadThumbnail(adapter);
+                }
+
 
 
             }
