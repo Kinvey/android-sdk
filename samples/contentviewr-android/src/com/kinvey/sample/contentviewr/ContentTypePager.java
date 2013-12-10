@@ -73,6 +73,8 @@ public class ContentTypePager extends ContentFragment {
         mIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
         mIndicator.setTextColor(R.color.ebony);
         mIndicator.setSelectedColor(R.color.ghost_white);
+        pager.setCurrentItem(1);
+        pager.setOffscreenPageLimit(3);
     }
 
     @Override

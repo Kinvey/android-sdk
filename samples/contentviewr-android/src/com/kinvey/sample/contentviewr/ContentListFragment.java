@@ -113,6 +113,9 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
             @Override
             public void onFailure(Throwable error) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
                 loading.setVisibility(View.GONE);
                 Util.Error(ContentListFragment.this, error);
             }

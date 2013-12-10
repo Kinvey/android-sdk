@@ -13,9 +13,13 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.User;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
@@ -27,6 +31,9 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
     Button register;
     EditText username;
     EditText password;
+    TextView userLabel;
+    TextView passLabel;
+    private Typeface roboto;
 
 
     @Override
@@ -36,10 +43,23 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
 
     @Override
     public void bindViews(View v) {
+        roboto = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
+
         login = (Button) v.findViewById(R.id.login_go);
         register = (Button) v.findViewById(R.id.login_register);
         username = (EditText) v.findViewById(R.id.login_username);
         password = (EditText) v.findViewById(R.id.login_password);
+        userLabel = (TextView) v.findViewById(R.id.login_userlabel);
+        passLabel = (TextView) v.findViewById(R.id.login_passlabel);
+
+        login.setTypeface(roboto);
+        register.setTypeface(roboto);
+        username.setTypeface(roboto);
+        password.setTypeface(roboto);
+        passLabel.setTypeface(roboto);
+        userLabel.setTypeface(roboto);
+
+
         login.setOnClickListener(this);
         register.setOnClickListener(this);
     }
@@ -60,9 +80,44 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
 
     private void login(String username, String password){
 
+        getClient().user().login(username, password, new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+
     }
 
     private void register(String username, String password){
+        getClient().user().create(username, password, new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
 
     }
 }

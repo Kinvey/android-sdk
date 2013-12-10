@@ -54,7 +54,6 @@ public class Contentviewr extends SherlockFragmentActivity{
     private int preLoadSemaphore;
 
     private List<Target> targets;
-//    private List<ContentType> contentTypes;
     private HashMap<String, ContentType> contentTypes;
 
     private LinearLayout loading;
@@ -245,6 +244,19 @@ public class Contentviewr extends SherlockFragmentActivity{
         adapter = new DrawerAdapter(this, getDrawerContents(), (LayoutInflater) getSystemService(
                 Activity.LAYOUT_INFLATER_SERVICE));
         drawer.setAdapter(adapter);
+        drawer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 1){
+                    replaceFragment(new LoginFragment(), true);
+                    drawerLayout.closeDrawer(drawer);
+                }else if (position == 2){
+                    replaceFragment(new NotificationFragment(), true);
+                    drawerLayout.closeDrawer(drawer);
+
+                }
+            }
+        });
 
         ArrayAdapter<String> listnav = new ArrayAdapter<String>(getSupportActionBar().getThemedContext(), R.layout.sherlock_spinner_dropdown_item, getTargetList());
         listnav.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
@@ -547,7 +559,6 @@ public class Contentviewr extends SherlockFragmentActivity{
                     name = (TextView) row.findViewById(R.id.row_setting_name);
                     name.setTypeface(roboto);
                 }
-
                 return name;
             }
 

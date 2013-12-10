@@ -65,6 +65,9 @@ public class RecentFragment extends ContentListFragment {
 
             @Override
             public void onFailure(Throwable error) {
+                if (getSherlockActivity() == null){
+                    return;
+                }
                 loading.setVisibility(View.GONE);
                 Util.Error(RecentFragment.this, error);
             }

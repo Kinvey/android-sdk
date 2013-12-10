@@ -51,6 +51,9 @@ public class SourceFactory {
 
                     @Override
                     public void onSuccess(Void result) {
+                        if (adapter == null || item == null){
+                            return;
+                        }
                         Bitmap ret = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.toByteArray().length);
                         item.setThumbnailImage(ret);
                         adapter.notifyDataSetChanged();
