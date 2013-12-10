@@ -81,15 +81,15 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         contentList = (ListView) v.findViewById(R.id.content_list);
         loading = (LinearLayout) v.findViewById(R.id.content_loadingbox);
 
-        reset();
+        refresh();
         contentList.setOnItemClickListener(this);
 
     }
 
 
-    public void reset(){
+    public void refresh(){
         loading.setVisibility(View.VISIBLE);
-        Query q = new Query().equals("type", type.getName());
+        Query q = new Query().equals("type", type.getName()).equals("target", getContentViewr().getSelectedTarget());
         getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
@@ -109,9 +109,6 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
                 for (ContentItem c : content){
                     c.loadThumbnail(getClient(), adapter);
                 }
-
-
-
             }
 
             @Override
@@ -151,7 +148,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                reset();
+                refresh();
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -13,12 +13,15 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.viewpagerindicator.TitlePageIndicator;
@@ -35,6 +38,14 @@ public class ContentTypePager extends ContentFragment {
     private ContentTypeAdapter adapter;
     private List<ContentFragment> fragments;
     private TitlePageIndicator mIndicator;
+
+
+    @Override
+    public void onCreate(Bundle saved){
+        super.onCreate(saved);
+        setHasOptionsMenu(true);
+        getSherlockActivity().invalidateOptionsMenu();
+    }
 
 
     @Override
@@ -79,6 +90,27 @@ public class ContentTypePager extends ContentFragment {
             fragments.add(ContentListFragment.newInstance(getContentType().get(s)));
         }
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        if (pager.getCurrentItem() != 0){
+            inflater.inflate(R.menu.menu_list, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                if (pager.getCurrentItem() != 0){
+                    ((ContentFragment)adapter.getItem(pager.getCurrentItem())).refresh();
+                }
+
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public class ContentTypeAdapter extends FragmentPagerAdapter {

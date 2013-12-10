@@ -65,6 +65,8 @@ public abstract class ContentFragment extends SherlockFragment {
 
     public abstract String getTitle();
 
+    public void refresh(){}
+
     public void replaceFragment(ContentFragment newOne, boolean backstack){
         getContentViewr().replaceFragment(newOne, backstack);
     }

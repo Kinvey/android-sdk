@@ -36,10 +36,10 @@ public class RecentFragment extends ContentListFragment {
 
 
     @Override
-    public void reset(){
+    public void refresh(){
         loading.setVisibility(View.VISIBLE);
         Query q = new Query().setLimit(10);
-        q.addSort("_kmd.ect", AbstractQuery.SortOrder.DESC);
+        q.addSort("_kmd.ect", AbstractQuery.SortOrder.DESC).equals("target", getContentViewr().getSelectedTarget());
         getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
