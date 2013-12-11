@@ -43,6 +43,7 @@ public class ReorderFragment extends ContentFragment {
     private ContentTypePager pager;
 
 
+    public ReorderFragment(){}
 
     public ReorderFragment(ContentTypePager pager){
         this.pager = pager;

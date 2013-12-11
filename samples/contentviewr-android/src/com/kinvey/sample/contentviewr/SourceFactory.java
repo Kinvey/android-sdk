@@ -94,26 +94,8 @@ public class SourceFactory {
     }
 
 
-//    private class loadThumbnailTask extends AsyncTask<ContentListAdapter, Void, ContentListAdapter> {
-//
-//
-//        @Override
-//        protected ContentListAdapter doInBackground(ContentListAdapter ... adapter) {
-//            if (thumbnailImage == null) {
-//                thumbnailImage = getBitmapFromURL(thumbnail.getReference());
-//            }
-//            return adapter[0];
-//        }
-//
-//        @Override
-//        protected void onPostExecute(ContentListAdapter adapter){
-//            if (adapter != null){
-//                adapter.notifyDataSetChanged();
-//            }
-//        }
-//
-//
-//    };
+    private static void loadFile(Client client, final ContentItem item, final ArrayAdapter adapter){}
+    private static void loadWebsite(Client client, final ContentItem item, final ArrayAdapter adapter){}
 
     public static Bitmap getBitmapFromURL(String src) {
         try {

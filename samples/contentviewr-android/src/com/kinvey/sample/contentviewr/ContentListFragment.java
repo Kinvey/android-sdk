@@ -17,6 +17,7 @@ import static com.kinvey.sample.contentviewr.Contentviewr.CONTENT_COLLECTION;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +26,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.kinvey.android.AsyncAppData;
+import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.Query;
+import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
@@ -88,12 +93,18 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
 
     public void refresh(){
+        Log.i(Client.TAG, "refresh on: " + type.getDisplayName());
+        if (loading == null){
+            return;
+        }
         loading.setVisibility(View.VISIBLE);
         Query q = new Query().equals("type", type.getName()).equals("target", getContentViewr().getSelectedTarget());
-        getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
+        AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
+        //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
+        app.get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
-                if (getSherlockActivity() == null){
+                if (getSherlockActivity() == null) {
                     return;
                 }
                 loading.setVisibility(View.GONE);
@@ -106,14 +117,14 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
                 contentList.setAdapter(adapter);
 
                 //Lazy load images
-                for (ContentItem c : content){
+                for (ContentItem c : content) {
                     c.loadThumbnail(getClient(), adapter);
                 }
             }
 
             @Override
             public void onFailure(Throwable error) {
-                if (getSherlockActivity() == null){
+                if (getSherlockActivity() == null) {
                     return;
                 }
                 loading.setVisibility(View.GONE);
@@ -127,7 +138,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Viewer viewer = new WindowFactory().getViewer(getType().getWindowStyle());
+        ContentItem item = adapter.getItem(position);
+        Viewer viewer = new WindowFactory().getViewer(item.getSource());
         viewer.loadContent(adapter.getItem(position));
         replaceFragment(viewer, true);
 

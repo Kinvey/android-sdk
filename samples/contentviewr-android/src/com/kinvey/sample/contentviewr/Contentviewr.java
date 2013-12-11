@@ -20,19 +20,13 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.kinvey.android.AsyncAppData;
-import com.kinvey.android.AsyncUser;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
-import com.kinvey.java.AppData;
 import com.kinvey.java.User;
-import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.offline.OfflinePolicy;
-import com.kinvey.sample.contentviewr.dslv.DragSortController;
-import com.kinvey.sample.contentviewr.dslv.DragSortListView;
 import com.kinvey.sample.contentviewr.model.ContentType;
-import com.kinvey.sample.contentviewr.model.ContentUser;
 import com.kinvey.sample.contentviewr.model.Target;
 
 import java.util.ArrayList;
@@ -50,7 +44,7 @@ public class Contentviewr extends SherlockFragmentActivity{
 
     private String selectedTarget;
 
-    private Client client;
+
     private int preLoadSemaphore;
 
     private List<Target> targets;
@@ -63,12 +57,11 @@ public class Contentviewr extends SherlockFragmentActivity{
     private ActionBarDrawerToggle drawerToggle;
     private Typeface roboto;
 
+    private ContentTypePager pager;
+
 
     public Client getClient(){
-        if (client == null){
-            client = new Client.Builder(getApplicationContext()).build();
-        }
-        return client;
+        return ((ContentViewrApplication)getApplication()).getClient();
     }
 
     /** Called when the activity is first created. */
@@ -93,13 +86,11 @@ public class Contentviewr extends SherlockFragmentActivity{
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
-                //getActionBar().setTitle(mTitle);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
-                //getActionBar().setTitle(mDrawerTitle);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
@@ -110,7 +101,7 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         getActionBar().setDisplayShowTitleEnabled(false);
 
-        client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
+        ((ContentViewrApplication)getApplication()).loadClient(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 preload();
@@ -120,10 +111,10 @@ public class Contentviewr extends SherlockFragmentActivity{
             public void onFailure(Throwable error) {
                 showLogin();
             }
-        }).setUserClass(ContentUser.class).build();
-        client.enableDebugLogging();
+        });
+        getClient().enableDebugLogging();
 
-        if (!client.user().isUserLoggedIn()){
+        if (!getClient().user().isUserLoggedIn()){
             showLogin();
         }
     }
@@ -133,7 +124,6 @@ public class Contentviewr extends SherlockFragmentActivity{
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
         drawerToggle.syncState();
     }
 
@@ -162,8 +152,8 @@ public class Contentviewr extends SherlockFragmentActivity{
     private void preload(){
         preLoadSemaphore = PRELOAD_COUNT;
 
-        AsyncAppData<Target> targetAppData = client.appData(TARGET_COLLECTION, Target.class);
-        //targetAppData.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getApplication()));
+        AsyncAppData<Target> targetAppData = getClient().appData(TARGET_COLLECTION, Target.class);
+        targetAppData.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getApplication()));
 
         targetAppData.get(new KinveyListCallback<Target>() {
             @Override
@@ -184,8 +174,8 @@ public class Contentviewr extends SherlockFragmentActivity{
             }
         });
 
-        AsyncAppData<ContentType> contentAppData = client.appData(TYPE_COLLECTION, ContentType.class);
-        //contentAppData.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getApplication()));
+        AsyncAppData<ContentType> contentAppData = getClient().appData(TYPE_COLLECTION, ContentType.class);
+        contentAppData.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getApplication()));
         contentAppData.get(new KinveyListCallback<ContentType>() {
             @Override
             public void onSuccess(ContentType[] result) {
@@ -213,12 +203,12 @@ public class Contentviewr extends SherlockFragmentActivity{
                     }
 
                     if (needsUpdate){
-                        client.user().update(null);
+                        getClient().user().update(null);
                     }
 
                 }else{
                     getClient().user().put("ordering", Arrays.asList(contentTypes.keySet().toArray(new String[0])));
-                    client.user().update(null);
+                    getClient().user().update(null);
                 }
 
                 preLoadSemaphore = preLoadSemaphore - 1;
@@ -247,13 +237,11 @@ public class Contentviewr extends SherlockFragmentActivity{
         drawer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                drawerLayout.closeDrawer(drawer);
                 if (position == 1){
                     replaceFragment(new LoginFragment(), true);
-                    drawerLayout.closeDrawer(drawer);
                 }else if (position == 2){
                     replaceFragment(new NotificationFragment(), true);
-                    drawerLayout.closeDrawer(drawer);
-
                 }
             }
         });
@@ -267,17 +255,21 @@ public class Contentviewr extends SherlockFragmentActivity{
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
                 selectedTarget = getTargetList().get(itemPosition);
+                if (pager != null){
+                    pager.refresh();
+                }
                 return false;
             }
         });
 
-        replaceFragment(new ContentTypePager(), false);
+        pager = new ContentTypePager();
+        replaceFragment(pager, false);
 
 
     }
 
     private void showLogin(){
-          client.user().login("hello", "hello", new KinveyUserCallback() {
+          getClient().user().login("hello", "hello", new KinveyUserCallback() {
               @Override
               public void onSuccess(User result) {
                   preload();
@@ -293,13 +285,17 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
     public void replaceFragment(SherlockFragment newOne, boolean backstack){
-
+        if (getBaseContext() == null){
+            return;
+        }
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
         tr.replace(R.id.content_frame, newOne, "content");
         if (backstack){
             tr.addToBackStack("back");
         }
-        tr.commitAllowingStateLoss();
+        if (!isFinishing()){
+            tr.commitAllowingStateLoss();
+        }
 
 
 
@@ -352,17 +348,6 @@ public class Contentviewr extends SherlockFragmentActivity{
     public String getSelectedTarget() {
         return selectedTarget;
     }
-
-
-    private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
-        @Override
-        public void drop(int from, int to) {
-
-
-
-
-        }
-    };
 
     public class DrawerAdapter extends ArrayAdapter<ContentType> {
 

@@ -14,6 +14,7 @@
 package com.kinvey.sample.contentviewr.windows;
 
 import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.model.SourceType;
 
 /**
  * @author edwardf
@@ -63,6 +64,41 @@ public class WindowFactory {
 
 
         return ret;
+    }
+
+    public static Viewer getViewer(SourceType source){
+
+        Viewer ret = null;
+        switch (source.getType()){
+
+            case WEBSITE:
+                ret = new HTMLViewer();
+                break;
+            case FILE:
+                ret = new ImageViewer();
+                break;
+
+        }
+
+        return ret;
+
+
+//        TYPE type = TYPE.getByName(jsontype);
+//        Viewer ret = null;
+//        switch (type){
+//            case HTML:
+//                ret = new HTMLViewer();
+//                break;
+//            case IMAGE:
+//                ret = new ImageViewer();
+//                break;
+//            case PDF:
+//                break;
+//
+//        }
+//
+//
+//        return ret;
     }
 
 

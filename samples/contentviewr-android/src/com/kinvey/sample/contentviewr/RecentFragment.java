@@ -17,8 +17,11 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.Query;
+import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.model.ContentType;
@@ -37,13 +40,19 @@ public class RecentFragment extends ContentListFragment {
 
     @Override
     public void refresh(){
+        if (loading == null){
+            return;
+        }
         loading.setVisibility(View.VISIBLE);
         Query q = new Query().setLimit(10);
         q.addSort("_kmd.ect", AbstractQuery.SortOrder.DESC).equals("target", getContentViewr().getSelectedTarget());
-        getClient().appData(CONTENT_COLLECTION, ContentItem.class).get(q, new KinveyListCallback<ContentItem>() {
+        AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
+        //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
+
+        app.get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
-                if (getSherlockActivity() == null){
+                if (getSherlockActivity() == null) {
                     return;
                 }
                 loading.setVisibility(View.GONE);
@@ -55,17 +64,16 @@ public class RecentFragment extends ContentListFragment {
 
                 contentList.setAdapter(adapter);
 
-                for (ContentItem c : content){
+                for (ContentItem c : content) {
                     c.loadThumbnail(getClient(), adapter);
                 }
-
 
 
             }
 
             @Override
             public void onFailure(Throwable error) {
-                if (getSherlockActivity() == null){
+                if (getSherlockActivity() == null) {
                     return;
                 }
                 loading.setVisibility(View.GONE);
@@ -86,7 +94,8 @@ public class RecentFragment extends ContentListFragment {
 
         }
 
-        Viewer viewer = new WindowFactory().getViewer(type.getWindowStyle());
+        ContentItem item = adapter.getItem(position);
+        Viewer viewer = new WindowFactory().getViewer(item.getSource());
         viewer.loadContent(adapter.getItem(position));
         replaceFragment(viewer, true);
 

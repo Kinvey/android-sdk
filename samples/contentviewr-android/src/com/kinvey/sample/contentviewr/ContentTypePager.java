@@ -18,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -74,7 +75,8 @@ public class ContentTypePager extends ContentFragment {
         mIndicator.setTextColor(R.color.ebony);
         mIndicator.setSelectedColor(R.color.ghost_white);
         pager.setCurrentItem(1);
-        pager.setOffscreenPageLimit(3);
+        //pager.setOffscreenPageLimit(5);
+
     }
 
     @Override
@@ -85,12 +87,12 @@ public class ContentTypePager extends ContentFragment {
     public void loadOrderInAdapter(){
 
         fragments = fragments.subList(0,2);
-
         List<String> order = (List<String>) getClient().user().get("ordering");
         for (String s : order){
         //for (ContentType c : getContentType()){
             fragments.add(ContentListFragment.newInstance(getContentType().get(s)));
         }
+        refresh();
         adapter.notifyDataSetChanged();
     }
 
@@ -113,6 +115,13 @@ public class ContentTypePager extends ContentFragment {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void refresh(){
+        if (pager.getCurrentItem() != 0){
+            ((ContentFragment)adapter.getItem(pager.getCurrentItem())).refresh();
+        }
     }
 
     public class ContentTypeAdapter extends FragmentPagerAdapter {

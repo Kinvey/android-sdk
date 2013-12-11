@@ -25,8 +25,8 @@ public class ContentType extends GenericJson {
     private String displayName;
     @Key
     private String name;
-    @Key
-    private String windowStyle;
+    //@Key
+    //private String windowStyle;
 
     private boolean isLabel = false;
     private boolean isSetting = false;
@@ -50,13 +50,13 @@ public class ContentType extends GenericJson {
         this.name = name;
     }
 
-    public String getWindowStyle() {
-        return windowStyle;
-    }
-
-    public void setWindowStyle(String windowStyle) {
-        this.windowStyle = windowStyle;
-    }
+//    public String getWindowStyle() {
+//        return windowStyle;
+//    }
+//
+//    public void setWindowStyle(String windowStyle) {
+//        this.windowStyle = windowStyle;
+//    }
 
     public boolean isLabel() {
         return isLabel;
