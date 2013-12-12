@@ -30,6 +30,7 @@ public class ContentType extends GenericJson {
 
     private boolean isLabel = false;
     private boolean isSetting = false;
+    private long uniqueID;
 
     public ContentType(){}
 
@@ -72,5 +73,13 @@ public class ContentType extends GenericJson {
 
     public void setSetting(boolean setting) {
         isSetting = setting;
+    }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
     }
 }

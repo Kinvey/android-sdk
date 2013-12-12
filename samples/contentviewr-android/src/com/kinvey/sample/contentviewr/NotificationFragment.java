@@ -13,7 +13,12 @@
  */
 package com.kinvey.sample.contentviewr;
 
+import android.graphics.Typeface;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.TextView;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
@@ -21,18 +26,34 @@ import com.kinvey.sample.contentviewr.core.ContentFragment;
  */
 public class NotificationFragment extends ContentFragment {
 
+
+    TextView notifyTitle;
+    TextView updatesLabel;
+    Switch updates;
+
+    private Typeface roboto;
+
     @Override
     public int getViewID() {
-        return R.layout.fragment_login;
+        return R.layout.fragment_notification;
     }
 
     @Override
     public void bindViews(View v) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        roboto = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
+
+        notifyTitle = (TextView) v.findViewById(R.id.notify_update_title);
+        updatesLabel = (TextView) v.findViewById(R.id.notify_update_label);
+        updates = (Switch) v.findViewById(R.id.notify_updates);
+
+        notifyTitle.setTypeface(roboto);
+        updatesLabel.setTypeface(roboto);
     }
 
     @Override
     public String getTitle() {
         return "Notifications";
     }
+
+
 }

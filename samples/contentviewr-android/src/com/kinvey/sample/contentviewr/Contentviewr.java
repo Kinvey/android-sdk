@@ -150,6 +150,10 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 
     private void preload(){
+
+        //if (!getClient().push().isPushEnabled()){
+            getClient().push().initialize(getApplication());
+        //}
         preLoadSemaphore = PRELOAD_COUNT;
 
         AsyncAppData<Target> targetAppData = getClient().appData(TARGET_COLLECTION, Target.class);
@@ -180,7 +184,9 @@ public class Contentviewr extends SherlockFragmentActivity{
             @Override
             public void onSuccess(ContentType[] result) {
                 contentTypes = new HashMap<String, ContentType>();
+                long id = 0;
                 for (ContentType c : result){
+                    c.setUniqueID(id++);
                     contentTypes.put(c.getName(), c);
                 }
 
@@ -256,7 +262,11 @@ public class Contentviewr extends SherlockFragmentActivity{
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
                 selectedTarget = getTargetList().get(itemPosition);
                 if (pager != null){
+                    Log.i(TAG, "refreshing view pager");
                     pager.refresh();
+
+                }   else{
+                    Log.i(TAG, "not refreshing view pager");
                 }
                 return false;
             }

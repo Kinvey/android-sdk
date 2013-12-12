@@ -15,6 +15,7 @@ package com.kinvey.sample.contentviewr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Debug;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,9 +42,6 @@ public class ReorderFragment extends ContentFragment {
     private DraggableTypeAdapter adapter;
 
     private ContentTypePager pager;
-
-
-    public ReorderFragment(){}
 
     public ReorderFragment(ContentTypePager pager){
         this.pager = pager;
@@ -97,7 +95,6 @@ public class ReorderFragment extends ContentFragment {
         public void drop(int from, int to) {
 
 
-            Log.i("OK", "wtf, " + from + " + " + to);
             List<String> order = (List<String>) getClient().user().get("ordering");
 
             String current =  order.get(from);
@@ -107,9 +104,10 @@ public class ReorderFragment extends ContentFragment {
             getClient().user().put("ordering", order);
             getClient().user().update(null);
 
-            pager.loadOrderInAdapter();
-            //adapter.notifyDataSetChanged();
+            pager.reorder(from, to);
+
             setAdapter();
+            //adapter.notifyDataSetInvalidated();
 
 
 
@@ -122,12 +120,16 @@ public class ReorderFragment extends ContentFragment {
 
         private LayoutInflater mInflater;
 
+        private Typeface roboto;
+
+
         public DraggableTypeAdapter(Context context, List<ContentType> objects, LayoutInflater inf) {
             // NOTE: I pass an arbitrary textViewResourceID to the super
             // constructor-- Below I override
             // getView(...), which causes the underlying adapter to ignore this
             // field anyways, it is just needed in the constructor.
             super(context, 0, objects);
+            roboto = Typeface.createFromAsset(context.getAssets(), "Roboto-Thin.ttf");
             this.mInflater = inf;
 
         }
@@ -189,6 +191,7 @@ public class ReorderFragment extends ContentFragment {
             public TextView getName() {
                 if (name == null) {
                     name = (TextView) mRow.findViewById(R.id.row_type_name);
+                    name.setTypeface(roboto);
                 }
                 return name;
             }
@@ -196,6 +199,7 @@ public class ReorderFragment extends ContentFragment {
             public TextView getSubtext() {
                 if (subtext == null) {
                     subtext = (TextView) mRow.findViewById(R.id.row_type_details);
+                    subtext.setTypeface(roboto);
                 }
                 return subtext;
             }

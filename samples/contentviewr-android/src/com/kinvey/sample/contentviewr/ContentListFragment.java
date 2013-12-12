@@ -97,6 +97,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         if (loading == null){
             return;
         }
+
+
         loading.setVisibility(View.VISIBLE);
         Query q = new Query().equals("type", type.getName()).equals("target", getContentViewr().getSelectedTarget());
         AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
@@ -153,19 +155,19 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         this.type = type;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.menu_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_refresh:
-                refresh();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        menu.clear();
+//        inflater.inflate(R.menu.menu_list, menu);
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.menu_refresh:
+//                refresh();
+//                return true;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 }
