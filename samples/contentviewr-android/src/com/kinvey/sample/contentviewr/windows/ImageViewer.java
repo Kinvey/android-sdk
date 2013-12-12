@@ -13,19 +13,26 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.ImageView;
+import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
-import com.kinvey.sample.contentviewr.core.ContentFragment;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * @author edwardf
  */
 public class ImageViewer extends Viewer  {
 
-
-    private WebView webview;
+    private ImageView image;
 
     private ContentItem content;
 
@@ -39,20 +46,38 @@ public class ImageViewer extends Viewer  {
 
     @Override
     public int getViewID() {
-        return R.layout.fragment_infographic;
+        return R.layout.fragment_imageviewer;
     }
 
     @Override
     public void bindViews(View v){
-        webview = (WebView) v.findViewById(R.id.infographic_webview);
-        webview.getSettings().setBuiltInZoomControls(true);
-        webview.loadUrl(content.getSource().getReference());
+        image = (ImageView) v.findViewById(R.id.imageview);
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        FileMetaData meta = new FileMetaData(content.getSource().getReference());
+        getClient().file().download(meta, out, new DownloaderProgressListener() {
+            @Override
+            public void progressChanged(MediaHttpDownloader downloader) throws IOException {}
+
+            @Override
+            public void onSuccess(Void result) {
+                if (image == null){
+                    return;
+                }
+                Bitmap ret = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.toByteArray().length);
+                image.setImageBitmap(ret);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {}
+        });
+
     }
 
     @Override
     public String getTitle() {
 
-        return "WebViewer";
+        return "ImageViewer";
 
     }
 

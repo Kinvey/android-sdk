@@ -21,50 +21,6 @@ import com.kinvey.sample.contentviewr.model.SourceType;
  */
 public class WindowFactory {
 
-    public enum TYPE {
-        HTML("html"), IMAGE("image"), PDF("");
-
-        private String jsonname;
-
-        private TYPE(String name){
-            this.jsonname = name;
-
-        }
-
-        public String getName(){
-            return this.jsonname;
-        }
-
-        public static TYPE getByName(String name){
-            for (TYPE t : TYPE.values()){
-                if (t.getName().equals(name)){
-                    return t;
-                }
-            }
-            return HTML;
-        }
-    }
-
-
-
-    public static Viewer getViewer(String jsontype){
-        TYPE type = TYPE.getByName(jsontype);
-        Viewer ret = null;
-        switch (type){
-            case HTML:
-                ret = new HTMLViewer();
-                break;
-            case IMAGE:
-                ret = new ImageViewer();
-                break;
-            case PDF:
-                break;
-
-        }
-
-
-        return ret;
-    }
 
     public static Viewer getViewer(SourceType source){
 

@@ -99,7 +99,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         drawerLayout.setDrawerListener(drawerToggle);
 
 
-        getActionBar().setDisplayShowTitleEnabled(false);
+       // getActionBar().setDisplayShowTitleEnabled(false);
 
         ((ContentViewrApplication)getApplication()).loadClient(new KinveyUserCallback() {
             @Override
@@ -163,6 +163,10 @@ public class Contentviewr extends SherlockFragmentActivity{
             @Override
             public void onSuccess(Target[] result) {
                 targets = Arrays.asList(result);
+                selectedTarget = getTargetList().get(0);
+                getSupportActionBar().setTitle(selectedTarget);
+
+
                 preLoadSemaphore = preLoadSemaphore - 1;
                 if (preLoadSemaphore == 0) {
                     showPager();
@@ -243,32 +247,22 @@ public class Contentviewr extends SherlockFragmentActivity{
         drawer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                drawerLayout.closeDrawer(drawer);
-                if (position == 1){
-                    replaceFragment(new LoginFragment(), true);
-                }else if (position == 2){
-                    replaceFragment(new NotificationFragment(), true);
-                }
-            }
-        });
 
-        ArrayAdapter<String> listnav = new ArrayAdapter<String>(getSupportActionBar().getThemedContext(), R.layout.sherlock_spinner_dropdown_item, getTargetList());
-        listnav.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-
-
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getSupportActionBar().setListNavigationCallbacks(listnav, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                selectedTarget = getTargetList().get(itemPosition);
-                if (pager != null){
-                    Log.i(TAG, "refreshing view pager");
+                if (position < getTargetList().size()){
+                    selectedTarget = getTargetList().get(position);
                     pager.refresh();
-
-                }   else{
-                    Log.i(TAG, "not refreshing view pager");
+                    drawerLayout.closeDrawer(drawer);
+                    getSupportActionBar().setTitle(selectedTarget);
                 }
-                return false;
+
+
+                if (position == getDrawerContents().size() - 2){
+                    replaceFragment(new LoginFragment(), true);
+                    drawerLayout.closeDrawer(drawer);
+                }else if (position == getDrawerContents().size() - 1){
+                    replaceFragment(new NotificationFragment(), true);
+                    drawerLayout.closeDrawer(drawer);
+                }
             }
         });
 
@@ -334,6 +328,13 @@ public class Contentviewr extends SherlockFragmentActivity{
         ContentType notifications = new ContentType();
         notifications.setDisplayName("Notifications");
         notifications.setSetting(true);
+
+        for (Target t : getTargets()){
+            ContentType targ = new ContentType();
+            targ.setDisplayName(t.getName());
+            targ.setSetting(true);
+            drawer.add(targ);
+        }
 
         drawer.add(settings);
         drawer.add(account);

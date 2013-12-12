@@ -15,9 +15,7 @@ package com.kinvey.sample.contentviewr.windows;
 
 import android.view.View;
 import android.webkit.WebView;
-import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
-import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
  * @author edwardf
@@ -29,12 +27,12 @@ public class HTMLViewer extends Viewer {
 
     @Override
     public int getViewID() {
-        return R.layout.fragment_infographic;
+        return R.layout.fragment_webviewer;
     }
 
     @Override
     public void bindViews(View v){
-        webview = (WebView) v.findViewById(R.id.infographic_webview);
+        webview = (WebView) v.findViewById(R.id.webview);
         webview.loadUrl(content.getSource().getReference());
     }
 
