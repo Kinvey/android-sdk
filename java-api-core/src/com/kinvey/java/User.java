@@ -495,9 +495,12 @@ public class User<T extends User> extends GenericJson   {
         return super.keySet();
     }
 
-    public LockDownUser lockDownUserBlocking(String userid) throws IOException{
+    public LockDownUser lockDownUserBlocking(String userid, boolean setLockdownStateTo) throws IOException{
         Preconditions.checkNotNull(userid, "userID must not be null");
-        LockDownUser lockdown = new LockDownUser(userid);
+        GenericJson lock = new GenericJson();
+        lock.put("userId", userid);
+        lock.put("setLockdownStateTo", setLockdownStateTo);
+        LockDownUser lockdown = new LockDownUser(lock);
         client.initializeRequest(lockdown);
         return lockdown;
     }
@@ -822,17 +825,11 @@ public class User<T extends User> extends GenericJson   {
     }
 
     public final class LockDownUser extends AbstractKinveyJsonClientRequest<Void>{
-        private static final String REST_PATH = "/rpc/{appkey}/lockdownUser/{userID}";
+        private static final String REST_PATH = "/rpc/{appkey}/lockdownUser";
 
-        @Key
-        private String userID;
-
-        LockDownUser(String userID){
-            super(client, "POST", REST_PATH, null, Void.class);
-            this.userID = userID;
-
+        LockDownUser(GenericJson lock){
+            super(client, "POST", REST_PATH, lock, Void.class);
         }
-
     }
 
 }

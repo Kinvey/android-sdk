@@ -223,6 +223,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public ArrayList<ClientExtension> getExtensions(){
+        if (extensions == null){
+            extensions = new ArrayList<ClientExtension>();
+        }
         return extensions;
     }
 
