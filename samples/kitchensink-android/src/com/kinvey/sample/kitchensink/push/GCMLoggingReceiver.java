@@ -14,15 +14,32 @@
 package com.kinvey.sample.kitchensink.push;
 
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.kinvey.android.Client;
 import com.kinvey.android.push.KinveyGCMService;
+import com.kinvey.sample.kitchensink.R;
 
 
 public class GCMLoggingReceiver extends KinveyGCMService {
     @Override
     public void onMessage(String message) {
         Log.i(Client.TAG, "GCM - onMessage: " + message);
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.icon_small)
+                        .setContentTitle("My notification")
+                        .setContentText("Hello World!");
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+        mNotificationManager.notify(1, mBuilder.build());
+
+
     }
 
     @Override

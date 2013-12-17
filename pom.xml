@@ -58,6 +58,16 @@
             <id>google-api-services</id>
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
         </repository>
+
+        <repository>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <layout>default</layout>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
 

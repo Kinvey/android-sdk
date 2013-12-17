@@ -495,6 +495,13 @@ public class User<T extends User> extends GenericJson   {
         return super.keySet();
     }
 
+    public LockDownUser lockDownUserBlocking(String userid) throws IOException{
+        Preconditions.checkNotNull(userid, "userID must not be null");
+        LockDownUser lockdown = new LockDownUser(userid);
+        client.initializeRequest(lockdown);
+        return lockdown;
+    }
+
     /**
      * Login Request Class.  Constructs the HTTP request object for Login requests.
      */
@@ -813,4 +820,19 @@ public class User<T extends User> extends GenericJson   {
             this.setRequireAppCredentials(true);
         }
     }
+
+    public final class LockDownUser extends AbstractKinveyJsonClientRequest<Void>{
+        private static final String REST_PATH = "/rpc/{appkey}/lockdownUser/{userID}";
+
+        @Key
+        private String userID;
+
+        LockDownUser(String userID){
+            super(client, "POST", REST_PATH, null, Void.class);
+            this.userID = userID;
+
+        }
+
+    }
+
 }

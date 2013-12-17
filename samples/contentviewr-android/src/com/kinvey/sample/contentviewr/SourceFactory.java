@@ -105,10 +105,10 @@ public class SourceFactory {
             connection.connect();
             InputStream input = connection.getInputStream();
             Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            Log.i(Client.TAG, "got image, for setting image " + src);
+            Log.i(Contentviewr.TAG, "got image, for setting image " + src);
             return myBitmap;
         } catch (IOException e) {
-            Log.i(Client.TAG, "cant be setting image!" + e);
+            Log.i(Contentviewr.TAG, "cant be setting image!" + e);
             e.printStackTrace();
             return null;
         }

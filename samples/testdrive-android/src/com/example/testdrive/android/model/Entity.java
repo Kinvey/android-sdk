@@ -13,6 +13,7 @@
  */
 package com.example.testdrive.android.model;
 
+import android.app.Activity;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
@@ -49,4 +50,5 @@ public class Entity extends GenericJson {
     }
 
     public enum test{@Value ONE, @Value TWO}
+
 }

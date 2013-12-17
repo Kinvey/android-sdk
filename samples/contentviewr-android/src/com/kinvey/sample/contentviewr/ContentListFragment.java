@@ -93,7 +93,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
 
     public void refresh(){
-        Log.i(Client.TAG, "refresh on: " + type.getDisplayName());
+        Log.i(Contentviewr.TAG, "refresh on: " + type.getDisplayName());
         if (loading == null){
             return;
         }
@@ -155,19 +155,4 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         this.type = type;
     }
 
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        menu.clear();
-//        inflater.inflate(R.menu.menu_list, menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_refresh:
-//                refresh();
-//                return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 }

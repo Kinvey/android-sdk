@@ -34,16 +34,6 @@ public class ImageViewer extends Viewer  {
 
     private ImageView image;
 
-    private ContentItem content;
-
-    public static ImageViewer newInstance(ContentItem item){
-        ImageViewer frag = new ImageViewer();
-        frag.content = item;
-        return frag;
-
-    }
-
-
     @Override
     public int getViewID() {
         return R.layout.fragment_imageviewer;

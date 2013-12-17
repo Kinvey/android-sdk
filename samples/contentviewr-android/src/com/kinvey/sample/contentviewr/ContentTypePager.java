@@ -157,12 +157,6 @@ public class ContentTypePager extends ContentFragment {
             super(fm);
         }
 
-        //private ArrayList<String> order;
-
-//        public ContentTypeAdapter() {
-////            this.dataset = objects;
-//        }
-
         @Override
         public int getCount() {
             return getContentType().keySet().size() + STATIC;
@@ -182,6 +176,7 @@ public class ContentTypePager extends ContentFragment {
             if(mItems.get(id) != null) {
                 return mItems.get(id);
             }
+            Log.i(Contentviewr.TAG, "creating new fragment");
             List<String> order = (List<String>) getClient().user().get("ordering");
             ContentFragment f = ContentListFragment.newInstance(getContentType().get(order.get(position - STATIC)));
 
@@ -211,13 +206,13 @@ public class ContentTypePager extends ContentFragment {
 
                 Fragment item = (Fragment) getItem(i);
                 if(item.equals(f)) {
-                    Log.i(Client.TAG, "get item position it's in pager");
+                    Log.i(Contentviewr.TAG, "get item position it's in pager");
                     return i;
                 }
             }
             for(Map.Entry<Long, ContentFragment> entry : mItems.entrySet()) {
                 if(entry.getValue().equals(f)) {
-                    Log.i(Client.TAG, "get item position removed from pager");
+                    Log.i(Contentviewr.TAG, "get item position removed from pager");
 
                     mItems.remove(entry.getKey());
                     break;
@@ -237,8 +232,6 @@ public class ContentTypePager extends ContentFragment {
 
             List<String> order = (List<String>) getClient().user().get("ordering");
             return getContentType().get(order.get(position - STATIC)).getDisplayName();
-
-            //return ((List<String>) getClient().user().get("ordering")).get(position - STATIC);
         }
 
 

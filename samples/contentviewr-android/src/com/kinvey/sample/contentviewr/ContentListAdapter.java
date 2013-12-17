@@ -75,12 +75,12 @@ public class ContentListAdapter extends ArrayAdapter<ContentItem> {
         thumb = holder.getThumb();
         loading = holder.getLoading();
         if (rowData.getThumbnailImage() != null){
-            Log.i(Client.TAG, "setting image");
+            Log.i(Contentviewr.TAG, "setting image");
             thumb.setImageBitmap(rowData.getThumbnailImage());
             thumb.setVisibility(View.VISIBLE);
             loading.setVisibility(View.GONE);
         }else{
-            Log.i(Client.TAG, "not setting image");
+            Log.i(Contentviewr.TAG, "not setting image");
             thumb.setVisibility(View.GONE);
             loading.setVisibility(View.VISIBLE);
 
