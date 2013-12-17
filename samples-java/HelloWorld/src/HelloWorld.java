@@ -27,13 +27,13 @@ import java.io.*;
  */
 public class HelloWorld {
 
-    public static final String appKey = "kid_ePZ9kJuZMi";
-    public static final String appSecret = "3b16c9a8fb8e4b90bf1c71e5b0fe87eb";
+    public static final String appKey = "kid_Pe0tK5Dcyi";
+    public static final String appSecret = "060a2f1f723c40bcb7875eaba4438f54";
 
     public static void main(String[] args){
         System.out.println("Hello World");
 
-        Client myJavaClient = new Client.Builder(appKey, appSecret).build();
+        Client myJavaClient = new Client.Builder(appKey, appSecret).setBaseUrl("http://v3yk1n.kinvey.com").build();
         myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
         System.out.println("Client ping -> " + ping);
@@ -105,5 +105,15 @@ public class HelloWorld {
             System.out.println("Couldn't upload! -> " + e);
             e.printStackTrace();
         }
+
+        try{
+
+            myJavaClient.user().lockDownUserBlocking("52b0c4bca73e1db53e66cb1b", true).execute();
+            System.out.println("locked out");
+        }catch (Exception e){
+            System.out.println("couldnt locked out");
+            e.printStackTrace();
+        }
+
     }
 }

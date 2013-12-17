@@ -26,4 +26,6 @@ public class User extends com.kinvey.java.User {
     protected User(AbstractClient client, KinveyAuthRequest.Builder builder) {
         super(client, User.class, builder);
     }
+
+    public User(){}
 }

@@ -812,7 +812,7 @@ public class User<T extends User> extends GenericJson   {
      * object for EmailVerification requests.
      */
     public final class EmailVerification extends AbstractKinveyJsonClientRequest<Void> {
-        private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-email-verification-initiate";
+        private static final String REST_PATH = "rpc/{appKey}/{userID}/user-email-verification-initiate";
 
         @Key
         private String userID;
@@ -825,7 +825,7 @@ public class User<T extends User> extends GenericJson   {
     }
 
     public final class LockDownUser extends AbstractKinveyJsonClientRequest<Void>{
-        private static final String REST_PATH = "/rpc/{appkey}/lockdownUser";
+        private static final String REST_PATH = "rpc/{appKey}/lockdown-user";
 
         LockDownUser(GenericJson lock){
             super(client, "POST", REST_PATH, lock, Void.class);
