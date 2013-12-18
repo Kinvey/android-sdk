@@ -73,6 +73,7 @@ under the License.
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="left"
+                    android:includeFontPadding="false"
                     android:text="name"
                     android:textSize="24sp"
                     />
@@ -82,6 +83,7 @@ under the License.
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
+                    android:includeFontPadding="false"
                     android:gravity="right"
                     android:text="blurb"/>
         </LinearLayout>

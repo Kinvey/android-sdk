@@ -14,10 +14,13 @@
 package com.kinvey.sample.contentviewr;
 
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
@@ -35,6 +38,12 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
     TextView passLabel;
     private Typeface roboto;
 
+
+    @Override
+    public void onCreate(Bundle saved){
+        super.onCreate(saved);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public int getViewID() {
@@ -80,6 +89,10 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
 
     private void login(String username, String password){
 
+        if (getClient().user().isUserLoggedIn()){
+            getClient().user().logout().execute();
+        }
+
         getClient().user().login(username, password, new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
@@ -119,5 +132,22 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
             }
         });
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_login, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_sign_out:
+                getClient().user().logout().execute();
+                getSherlockActivity().finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

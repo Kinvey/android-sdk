@@ -97,7 +97,7 @@ public class RecentFragment extends ContentListFragment {
         ContentItem item = adapter.getItem(position);
         Viewer viewer = new WindowFactory().getViewer(item.getSource());
         viewer.loadContent(adapter.getItem(position));
-        replaceFragment(viewer, true);
+        showWindow(viewer);
 
     }
 

@@ -71,6 +71,10 @@ public abstract class ContentFragment extends SherlockFragment {
         getContentViewr().replaceFragment(newOne, backstack);
     }
 
+    public void showWindow(ContentFragment newOne){
+        getContentViewr().showWindow(newOne);
+    }
+
     public Contentviewr getContentViewr(){
         return (Contentviewr) getSherlockActivity();
     }

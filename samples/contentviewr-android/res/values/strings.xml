@@ -32,6 +32,7 @@ under the License.
     <string name="login_password">Password</string>
     <string name="login_go">Login</string>
     <string name="login_register">Register</string>
+    <string name="description_sign_out">Sign Out</string>
 
 
 </resources>

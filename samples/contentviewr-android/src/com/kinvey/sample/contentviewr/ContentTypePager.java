@@ -41,7 +41,6 @@ public class ContentTypePager extends ContentFragment {
 
     private ViewPager pager;
     private ContentTypeAdapter adapter;
-    //private List<ContentFragment> fragments;
     private TitlePageIndicator mIndicator;
 
     private static final int STATIC = 2;//reorder, recent
@@ -70,17 +69,11 @@ public class ContentTypePager extends ContentFragment {
 
         setAdapter();
         pager.setCurrentItem(1);
-        //pager.setOffscreenPageLimit(5);
 
     }
 
     private void setAdapter(){
         adapter = new ContentTypeAdapter(getChildFragmentManager());
-
-//        fragments = new ArrayList<ContentFragment>();
-//        fragments.add(new ReorderFragment(this));
-//        fragments.add(new RecentFragment());
-        loadOrderInAdapter();
 
 
         pager.setAdapter(adapter);
@@ -93,30 +86,6 @@ public class ContentTypePager extends ContentFragment {
     @Override
     public String getTitle() {
         return "Content Pager";
-    }
-
-    public void reorder(int from ,int to){
-
-
-//        ContentFragment moved = fragments.get(from + 2);
-//        fragments.remove(from + 2);
-//
-//        fragments.add(to + 2, moved);
-//        adapter.notifyDataSetChanged();
-
-    }
-
-    public void loadOrderInAdapter(){
-
-//        fragments = fragments.subList(0,2);
-//        List<String> order = (List<String>) getClient().user().get("ordering");
-//        for (String s : order){
-//        //for (ContentType c : getContentType()){
-//            fragments.add(ContentListFragment.newInstance(getContentType().get(s)));
-//        }
-//        adapter.notifyDataSetChanged();
-        //refresh();
-       // adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -134,11 +103,6 @@ public class ContentTypePager extends ContentFragment {
                 for (int i = 1; i < adapter.getCount(); i++){
                     ((ContentListFragment)adapter.getItem(i)).refresh();
                 }
-//                if (pager.getCurrentItem() != 0){
-//                    ((ContentFragment)adapter.getItem(pager.getCurrentItem())).refresh();
-//
-//                }
-
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -224,6 +188,7 @@ public class ContentTypePager extends ContentFragment {
         }
         @Override
         public String getPageTitle(int position){
+
             if (position == 0){
                 return "Reorder";
             }else if (position == 1){
@@ -231,6 +196,12 @@ public class ContentTypePager extends ContentFragment {
             }
 
             List<String> order = (List<String>) getClient().user().get("ordering");
+
+            if (order == null || getContentType() == null || getContentType().get(order.get(position - STATIC)) == null){
+                return "";
+                //This only happens if the app is being closed, so it won't be rendered anyways
+            }
+
             return getContentType().get(order.get(position - STATIC)).getDisplayName();
         }
 

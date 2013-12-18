@@ -26,4 +26,5 @@ under the License.
     <color name="ebony">#555D50</color>
     <color name="alphad_ebony">#70555D50</color>
     <color name="light_gray">#DFDFDF</color>
+    <color name="light_back">#E6E6E6</color>
 </resources>

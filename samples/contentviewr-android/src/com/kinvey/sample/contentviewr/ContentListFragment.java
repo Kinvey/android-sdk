@@ -143,7 +143,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
         ContentItem item = adapter.getItem(position);
         Viewer viewer = new WindowFactory().getViewer(item.getSource());
         viewer.loadContent(adapter.getItem(position));
-        replaceFragment(viewer, true);
+        showWindow(viewer);
 
     }
 

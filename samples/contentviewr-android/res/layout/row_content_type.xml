@@ -30,9 +30,10 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:paddingTop="10dp"
+                    android:singleLine="true"
                     android:paddingBottom="10dp"
                     android:paddingLeft="20dp"
-                    android:text="Filter name"
+                    android:text="Filter name probably has to be long to reproduce cutting off but maybe not I guess we'll see!"
                     android:textSize="18sp"
                     />
 

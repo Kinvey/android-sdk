@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -37,13 +36,14 @@ import java.util.List;
 public class Contentviewr extends SherlockFragmentActivity{
 
     public static final String TAG = "contentviewr";
-    public static final String TARGET_COLLECTION = "Targets";
+    public static final String MARKET_COLLECTION = "Markets";
     public static final String TYPE_COLLECTION = "ContentTypes";
     public static final String CONTENT_COLLECTION = "Content";
     private static final int PRELOAD_COUNT = 2; //this is used as semaphore, should match number of collections to preload
 
     private String selectedTarget;
 
+    private long lastBackPressAt = 0;
 
     private int preLoadSemaphore;
 
@@ -59,6 +59,10 @@ public class Contentviewr extends SherlockFragmentActivity{
 
     private ContentTypePager pager;
 
+//    private FrameLayout listbox;
+//    private FrameLayout viewbox;
+    private FrameLayout fullContent;
+
 
     public Client getClient(){
         return ((ContentViewrApplication)getApplication()).getClient();
@@ -69,6 +73,9 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contentviewr);
+
+        fullContent = (FrameLayout) findViewById(R.id.content_full);
+        fullContent.setVisibility(View.GONE);
 
         roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
         drawer = (ListView) findViewById(R.id.left_drawer);
@@ -156,7 +163,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         //}
         preLoadSemaphore = PRELOAD_COUNT;
 
-        AsyncAppData<Target> targetAppData = getClient().appData(TARGET_COLLECTION, Target.class);
+        AsyncAppData<Target> targetAppData = getClient().appData(MARKET_COLLECTION, Target.class);
         targetAppData.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getApplication()));
 
         targetAppData.get(new KinveyListCallback<Target>() {
@@ -236,6 +243,23 @@ public class Contentviewr extends SherlockFragmentActivity{
         });
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if (fullContent.getVisibility() == View.VISIBLE){
+            fullContent.setVisibility(View.GONE);
+            return;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastBackPressAt > 5000) {
+            Toast.makeText(getBaseContext(), "Press back again to exit", Toast.LENGTH_LONG).show();
+            lastBackPressAt = currentTime;
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 
     private void showPager(){
 
@@ -248,8 +272,15 @@ public class Contentviewr extends SherlockFragmentActivity{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (position < getTargetList().size()){
-                    selectedTarget = getTargetList().get(position);
+                //TODO this is awkward, need a better way-- perhaps delegate onclick event to contentType item in list
+                //TODO because this is tightly coupled with what is displayed, and the order
+
+                if (position == 0){
+                    return;
+                }
+
+                if (position - 1 < getTargetList().size()){
+                    selectedTarget = getTargetList().get(position - 1);
                     pager.refresh();
                     drawerLayout.closeDrawer(drawer);
                     getSupportActionBar().setTitle(selectedTarget);
@@ -257,10 +288,13 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 
                 if (position == getDrawerContents().size() - 2){
-                    replaceFragment(new LoginFragment(), true);
+                    //replaceFragment(new LoginFragment(), true);
+                    showFull(new LoginFragment());
                     drawerLayout.closeDrawer(drawer);
                 }else if (position == getDrawerContents().size() - 1){
-                    replaceFragment(new NotificationFragment(), true);
+                    //replaceFragment(new NotificationFragment(), true);
+                    //showWindow(new NotificationFragment());
+                    showFull(new NotificationFragment());
                     drawerLayout.closeDrawer(drawer);
                 }
             }
@@ -292,8 +326,9 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (getBaseContext() == null){
             return;
         }
+        fullContent.setVisibility(View.GONE);
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_frame, newOne, "content");
+        tr.replace(R.id.content_left, newOne, "list");
         if (backstack){
             tr.addToBackStack("back");
         }
@@ -304,6 +339,37 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 
     }
+
+    public void showWindow(SherlockFragment newOne){
+        if (getBaseContext() == null){
+            return;
+        }
+        fullContent.setVisibility(View.GONE);
+        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+        tr.replace(R.id.content_right, newOne, "content");
+        if (!isFinishing()){
+            tr.commitAllowingStateLoss();
+        }
+    }
+
+    public void showFull(SherlockFragment newOne){
+        if (getBaseContext() == null){
+            return;
+        }
+        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+        tr.replace(R.id.content_full, newOne, "content");
+        if (!isFinishing()){
+            tr.commitAllowingStateLoss();
+            fullContent.setVisibility(View.VISIBLE);
+
+        }
+
+    }
+
+    public void hideFull(){
+        fullContent.setVisibility(View.GONE);
+    }
+
 
     public List<Target> getTargets(){
         return this.targets;
@@ -328,6 +394,12 @@ public class Contentviewr extends SherlockFragmentActivity{
         ContentType notifications = new ContentType();
         notifications.setDisplayName("Notifications");
         notifications.setSetting(true);
+
+        ContentType markets = new ContentType();
+        markets.setDisplayName("Markets");
+        markets.setLabel(true);
+
+        drawer.add(markets);
 
         for (Target t : getTargets()){
             ContentType targ = new ContentType();

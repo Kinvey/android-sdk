@@ -104,7 +104,7 @@ public class ReorderFragment extends ContentFragment {
             getClient().user().put("ordering", order);
             getClient().user().update(null);
 
-            pager.reorder(from, to);
+            //pager.reorder(from, to);
 
             setAdapter();
             //adapter.notifyDataSetInvalidated();
