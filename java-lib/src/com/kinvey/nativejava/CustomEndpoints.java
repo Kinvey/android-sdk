@@ -16,9 +16,10 @@ package com.kinvey.nativejava;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class CustomEndpoints<I extends GenericJson, O extends GenericJson> extends com.kinvey.java.CustomEndpoints<I, O> {
 
     public CustomEndpoints(Class<O> responseClass, AbstractClient client) {

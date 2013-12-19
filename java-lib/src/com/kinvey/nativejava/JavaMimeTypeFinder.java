@@ -19,9 +19,10 @@ import com.kinvey.java.model.FileMetaData;
 import java.io.*;
 import java.io.File;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class JavaMimeTypeFinder implements MimeTypeFinder {
     @Override
     public void getMimeType(FileMetaData meta, InputStream stream) {

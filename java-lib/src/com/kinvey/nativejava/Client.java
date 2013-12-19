@@ -26,9 +26,10 @@ import com.kinvey.java.auth.*;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class Client extends AbstractClient {
 
 

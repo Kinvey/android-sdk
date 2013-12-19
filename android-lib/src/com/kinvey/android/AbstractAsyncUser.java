@@ -24,6 +24,61 @@ import com.kinvey.java.core.KinveyClientCallback;
 import java.io.IOException;
 
 /**
+ * Maintains definitions of all asyncronous user operation methods, this class is meant to be extended.
+ * <p/>
+ *
+ * Wraps the {@link com.kinvey.java.User} public methods in asynchronous functionality using native Android AsyncTask.
+ *
+ * <p>
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#user()} convenience method.
+ * </p>
+ *
+ * <p>
+ * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, login, and
+ * user creation, or the general-purpose {@link com.kinvey.java.core.KinveyClientCallback} used for User data retrieval,
+ * updating, and management.
+ * </p>
+ *
+ * <p>
+ * Login sample:
+ * <pre>
+ * {@code
+public void submit(View view) {
+kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+new KinveyUserCallback() {
+public void onFailure(Throwable t) {
+CharSequence text = "Wrong username or password.";
+Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+}
+public void onSuccess(User u) {
+CharSequence text = "Welcome back," + u.getUsername() + ".";
+Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+LoginActivity.this.startActivity(new Intent(LoginActivity.this,
+SessionsActivity.class));
+LoginActivity.this.finish();
+}
+});
+}
+ * </pre>
+ *
+ * </p>
+ * <p>
+ * Saving user data sample:
+ * <pre>
+ * {@code
+User user = kinveyClient.user();
+user.put("fav_food", "bacon");
+user.update(new KinveyClientCallback<User.Update>() {
+
+public void onFailure(Throwable e) { ... }
+
+public void onSuccess(User u) { ... }
+});
+}
+ * </pre>
+ * </p>
+ *
+ * <p>This class is not thread-safe.</p>
  * @author edwardf
  */
 public abstract class AbstractAsyncUser<T extends User> extends User<T> {

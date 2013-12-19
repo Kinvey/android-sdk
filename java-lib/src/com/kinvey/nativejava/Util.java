@@ -15,9 +15,10 @@ package com.kinvey.nativejava;
 
 import com.kinvey.java.AbstractClient;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class Util extends com.kinvey.java.Util {
     public Util(AbstractClient client) {
         super(client);

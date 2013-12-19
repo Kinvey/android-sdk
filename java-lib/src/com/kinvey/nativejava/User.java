@@ -17,9 +17,10 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.KinveyAuthRequest;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class User extends com.kinvey.java.User {
 
 

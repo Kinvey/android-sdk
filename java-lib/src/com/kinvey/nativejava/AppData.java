@@ -16,9 +16,10 @@ package com.kinvey.nativejava;
 
 import com.kinvey.java.AbstractClient;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class AppData<T> extends com.kinvey.java.AppData<T> {
 
     /**

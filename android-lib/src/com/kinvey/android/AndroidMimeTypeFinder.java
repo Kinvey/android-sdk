@@ -26,10 +26,21 @@ import java.io.InputStream;
 import java.net.URLConnection;
 
 /**
+ * Uses Android features to determine the MIME type of a provided file.
+ * <p/>
+ * There are various `getMimeType(...)` methods, which all take various parameters as well as a {@link FileMetaData} object.
+ * When the mimetype is found, it will be set in the provided {@link FileMetaData}
+ *
  * @author edwardf
  */
 public class AndroidMimeTypeFinder implements MimeTypeFinder {
 
+    /**
+     * Calculate MimeType from an InputStream
+     *
+     * @param meta the {@link FileMetaData} to populate
+     * @param stream the stream of the data
+     */
     @Override
     public void getMimeType(FileMetaData meta, InputStream stream) {
         String mimetype = null;
@@ -71,6 +82,12 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
         meta.setSize(numBytes);
     }
 
+    /**
+     * Calculate MimeType from a {@link File} object
+     *
+     * @param meta the {@link FileMetaData} to populate
+     * @param file the file of the data
+     */
     @Override
     public void getMimeType(FileMetaData meta, File file) {
         if (file == null || file.getName() == null || meta == null) {
@@ -113,6 +130,11 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
         meta.setSize(file.length());
     }
 
+    /**
+     * Calculate MimeType from a file name
+     *
+     * @param metaData the {@link FileMetaData} to populate, also containing the filename (with file extension)
+     */
     @Override
     public void getMimeType(FileMetaData metaData) {
         if (metaData.getMimetype() != null && metaData.getMimetype().length() > 0) {

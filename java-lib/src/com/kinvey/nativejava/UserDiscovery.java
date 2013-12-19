@@ -16,9 +16,10 @@ package com.kinvey.nativejava;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class UserDiscovery extends com.kinvey.java.UserDiscovery {
     /**
      * Constructor to access Kinvey's UserDiscovery management.

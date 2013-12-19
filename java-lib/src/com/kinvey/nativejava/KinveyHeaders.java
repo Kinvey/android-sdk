@@ -15,9 +15,10 @@ package com.kinvey.nativejava;
 
 import com.google.api.client.util.Key;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
 
     @Key("x-kinvey-device-information")

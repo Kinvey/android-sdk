@@ -16,9 +16,10 @@ package com.kinvey.nativejava;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
-/**
+/** {@inheritDoc}
+ *
  * @author edwardf
- */
+ * */
 public class UserGroup extends com.kinvey.java.UserGroup {
     /**
      * Constructor to access Kinvey's UserGroup management.

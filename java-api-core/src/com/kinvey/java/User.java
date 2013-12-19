@@ -495,6 +495,18 @@ public class User<T extends User> extends GenericJson   {
         return super.keySet();
     }
 
+    /**
+     * modify the locked down state of the provided user id.
+     * <p/>
+     * This operation must be performed with the master secret
+     * <p/>
+     * Locking down a user will prevent them from logging in and remove all locally stored content on their device
+     *
+     * @param userid  the id to lockdown
+     * @param setLockdownStateTo true to lockdown, false to remove lockdown state
+     * @return a LockDownUser request ready to execute
+     * @throws IOException
+     */
     public LockDownUser lockDownUserBlocking(String userid, boolean setLockdownStateTo) throws IOException{
         Preconditions.checkNotNull(userid, "userID must not be null");
         GenericJson lock = new GenericJson();
