@@ -253,7 +253,7 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastBackPressAt > 5000) {
-            Toast.makeText(getBaseContext(), "Press back again to exit", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "back again to exit", Toast.LENGTH_LONG).show();
             lastBackPressAt = currentTime;
         } else {
             super.onBackPressed();

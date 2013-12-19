@@ -68,6 +68,9 @@ public class RecentFragment extends ContentListFragment {
                     c.loadThumbnail(getClient(), adapter);
                 }
 
+                click(0);
+
+
 
             }
 
@@ -85,6 +88,11 @@ public class RecentFragment extends ContentListFragment {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+        click(position);
+
+    }
+
+    public void click(int position){
         ContentType type = null;
 
         for (ContentType t : getContentType().values()){
