@@ -17,7 +17,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.kinvey.java.model.FileMetaData;
-import junit.framework.Assert;
+import com.google.common.base.Preconditions;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,8 +40,8 @@ public class FileCache {
      * @return an `OutputStream` for the file associated with the provided id, or null
      */
     public FileOutputStream get(Context context, String id){
-        Assert.assertNotNull("String id cannot be null!", id);
-        Assert.assertNotNull("Context context cannot be null!", context);
+        Preconditions.checkNotNull(id, "String id cannot be null!");
+        Preconditions.checkNotNull(context, "Context context cannot be null!");
 
         FileCacheSqlHelper helper = new FileCacheSqlHelper(context);
         String filename = helper.getFileNameForId(id);
@@ -74,10 +74,10 @@ public class FileCache {
     }
 
     public void save(Context context, FileMetaData meta, byte[] data){
-        Assert.assertNotNull("FileMetaData meta cannot be null!", meta);
-        Assert.assertNotNull("FileMetaData meta.getId() cannot be null!", meta.getId());
-        Assert.assertNotNull("FileMetaData meta.getFileName() cannot be null!", meta.getFileName());
-        Assert.assertNotNull("byte[] data cannot be null!", data);
+        Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
+        Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
+        Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
+        Preconditions.checkNotNull(data, "byte[] data cannot be null!");
 
         //insert into database table
         FileCacheSqlHelper helper = new FileCacheSqlHelper(context);
