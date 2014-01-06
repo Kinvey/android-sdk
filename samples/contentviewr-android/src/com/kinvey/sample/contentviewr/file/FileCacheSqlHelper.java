@@ -30,6 +30,8 @@ import java.io.StringWriter;
  */
 public class FileCacheSqlHelper extends SQLiteOpenHelper {
 
+    private static FileCacheSqlHelper _instance;
+
     private static final String DB_NAME = "KINVEY_FILE.db";
     private static final String FILE_CACHE_TABLE = "file_cache";
     private static final int DB_VERSION = 1;
@@ -39,8 +41,22 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     private static final String COLUMN_JSON = "json";
 
 
+    /**
+     * This class is a synchronized Singleton, and this is how you get an instance of it.
+     *
+     * @param context the current active application context
+     * @return an instance of the OfflineHelper class
+     */
+    public static synchronized FileCacheSqlHelper getInstance(Context context){
+        if (_instance == null){
+            _instance = new FileCacheSqlHelper(context);
+            //_instance.setContext(context);
+        }
+        return _instance;
+    }
 
-    public FileCacheSqlHelper(Context context) {
+
+    private FileCacheSqlHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
@@ -53,7 +69,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
                 + COLUMN_FILENAME + " TEXT not null, "
                 + COLUMN_JSON + " TEXT not null"
                 + ");";
-        runCommand(command);
+        runCommand(command, sqLiteDatabase);
     }
 
     @Override
@@ -61,8 +77,8 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
         //no need for this method yet
     }
 
-    public void runCommand(String command) {
-        SQLiteDatabase db = getWritableDatabase();
+    public void runCommand(String command, SQLiteDatabase db) {
+        //SQLiteDatabase db = getWritableDatabase();
         db.execSQL(command);
 
     }

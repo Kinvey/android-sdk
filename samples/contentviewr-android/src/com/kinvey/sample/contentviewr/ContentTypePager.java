@@ -100,9 +100,7 @@ public class ContentTypePager extends ContentFragment {
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                for (int i = 1; i < adapter.getCount(); i++){
-                    ((ContentListFragment)adapter.getItem(i)).refresh();
-                }
+               ((ContentListFragment) adapter.getItem(pager.getCurrentItem())).refresh();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -131,7 +129,7 @@ public class ContentTypePager extends ContentFragment {
 
 
             //if the fragment is cached, load it
-            long id = getItemId(position - STATIC);
+            long id = getItemId(position);//() - STATIC);
 
             if(mItems.get(id) != null) {
                 return mItems.get(id);
@@ -139,16 +137,18 @@ public class ContentTypePager extends ContentFragment {
             //if haven't returned, have to create a new fragment
             Log.i(Contentviewr.TAG, "creating new fragment");
 
+            ContentFragment f;
             if (position == 0){
                 return new ReorderFragment(ContentTypePager.this);
+            }else if (position == 1){
+                f = new RecentFragment();
+            }else{
+                List<String> order = (List<String>) getClient().user().get("ordering");
+                f = ContentListFragment.newInstance(getContentType().get(order.get(position - STATIC)));
             }
 
-            if (position == 1){
-                return new RecentFragment();
-            }
 
-            List<String> order = (List<String>) getClient().user().get("ordering");
-            ContentFragment f = ContentListFragment.newInstance(getContentType().get(order.get(position - STATIC)));
+            //ContentFragment f = ContentListFragment.newInstance(getContentType().get(order.get(position - STATIC)));
 
             mItems.put(id, f);
 

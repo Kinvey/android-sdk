@@ -214,6 +214,10 @@ public class MediaHttpDownloader {
 
         // Make initial request to get the unique upload URL.
         FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
+        if (progressListener != null && (progressListener instanceof DownloadWithMetadataProgressListener)) {
+            ((DownloadWithMetadataProgressListener)progressListener).metaDataRetrieved(initialResponse);
+        }
+
         GenericUrl downloadUrl;
         if(initialResponse.getDownloadURL() != null){
             downloadUrl = new GenericUrl(initialResponse.getDownloadURL());

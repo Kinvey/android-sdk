@@ -46,7 +46,7 @@ public class FileCache {
         Preconditions.checkNotNull(id, "String id cannot be null!");
         Preconditions.checkNotNull(context, "Context context cannot be null!");
 
-        FileCacheSqlHelper helper = new FileCacheSqlHelper(context);
+        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
         String filename = helper.getFileNameForId(id);
 
         if (filename == null){
@@ -82,7 +82,7 @@ public class FileCache {
         Preconditions.checkNotNull(data, "byte[] data cannot be null!");
 
         //insert into database table
-        FileCacheSqlHelper helper = new FileCacheSqlHelper(context);
+        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);//new FileCacheSqlHelper(context);
         helper.insertRecord(client, meta);
 
         //write to cache dir
