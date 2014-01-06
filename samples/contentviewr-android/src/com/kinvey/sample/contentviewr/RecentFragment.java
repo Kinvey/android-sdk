@@ -68,7 +68,7 @@ public class RecentFragment extends ContentListFragment {
                     c.loadThumbnail(getClient(), adapter);
                 }
 
-                click(0);
+//                click(0);
 
 
 

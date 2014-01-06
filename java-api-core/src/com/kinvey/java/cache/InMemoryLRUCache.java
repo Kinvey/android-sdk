@@ -25,7 +25,7 @@ import java.util.Map;
  * </p>
  *
  * <p>
- * This interface is thread-safe. All accessors (get/put) are synchronized on the cache object itself.
+ * This implementation is thread-safe. All accessors (get/put) are synchronized on the cache object itself.
  * </p>
  * @author edwardf
  * @since 2.0

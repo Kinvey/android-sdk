@@ -129,18 +129,24 @@ public class ContentTypePager extends ContentFragment {
         @Override
         public Fragment getItem(int position) {
 
-            if (position == 0){
-                return new ReorderFragment(ContentTypePager.this);
-            }else if (position == 1){
-                return new RecentFragment();
-            }
 
+            //if the fragment is cached, load it
             long id = getItemId(position - STATIC);
 
             if(mItems.get(id) != null) {
                 return mItems.get(id);
             }
+            //if haven't returned, have to create a new fragment
             Log.i(Contentviewr.TAG, "creating new fragment");
+
+            if (position == 0){
+                return new ReorderFragment(ContentTypePager.this);
+            }
+
+            if (position == 1){
+                return new RecentFragment();
+            }
+
             List<String> order = (List<String>) getClient().user().get("ordering");
             ContentFragment f = ContentListFragment.newInstance(getContentType().get(order.get(position - STATIC)));
 

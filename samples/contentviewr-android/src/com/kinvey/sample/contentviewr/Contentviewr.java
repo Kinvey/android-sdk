@@ -61,7 +61,7 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 //    private FrameLayout listbox;
 //    private FrameLayout viewbox;
-    private FrameLayout fullContent;
+//    private FrameLayout fullContent;
 
 
     public Client getClient(){
@@ -73,9 +73,9 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contentviewr);
-
-        fullContent = (FrameLayout) findViewById(R.id.content_full);
-        fullContent.setVisibility(View.GONE);
+//
+//        fullContent = (FrameLayout) findViewById(R.id.content_full);
+//        fullContent.setVisibility(View.GONE);
 
         roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
         drawer = (ListView) findViewById(R.id.left_drawer);
@@ -243,22 +243,22 @@ public class Contentviewr extends SherlockFragmentActivity{
         });
     }
 
-    @Override
-    public void onBackPressed() {
-
-        if (fullContent.getVisibility() == View.VISIBLE){
-            fullContent.setVisibility(View.GONE);
-            return;
-        }
-
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBackPressAt > 5000) {
-            Toast.makeText(getBaseContext(), "back again to exit", Toast.LENGTH_LONG).show();
-            lastBackPressAt = currentTime;
-        } else {
-            super.onBackPressed();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+//
+////        if (fullContent.getVisibility() == View.VISIBLE){
+////            fullContent.setVisibility(View.GONE);
+////            return;
+////        }
+//
+//        long currentTime = System.currentTimeMillis();
+//        if (currentTime - lastBackPressAt > 5000) {
+//            Toast.makeText(getBaseContext(), "back again to exit", Toast.LENGTH_LONG).show();
+//            lastBackPressAt = currentTime;
+//        } else {
+//            super.onBackPressed();
+//        }
+//    }
 
 
     private void showPager(){
@@ -273,7 +273,7 @@ public class Contentviewr extends SherlockFragmentActivity{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 //TODO this is awkward, need a better way-- perhaps delegate onclick event to contentType item in list
-                //TODO because this is tightly coupled with what is displayed, and the order
+                //TODO the problem is how this is tightly coupled with what is displayed, and the order of the items
 
                 if (position == 0){
                     return;
@@ -326,9 +326,9 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (getBaseContext() == null){
             return;
         }
-        fullContent.setVisibility(View.GONE);
+//        fullContent.setVisibility(View.GONE);
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_left, newOne, "list");
+        tr.replace(R.id.content_full, newOne, "list");
         if (backstack){
             tr.addToBackStack("back");
         }
@@ -344,9 +344,10 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (getBaseContext() == null){
             return;
         }
-        fullContent.setVisibility(View.GONE);
+//        fullContent.setVisibility(View.GONE);
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_right, newOne, "content");
+        tr.replace(R.id.content_full, newOne, "content");
+        tr.addToBackStack("back");
         if (!isFinishing()){
             tr.commitAllowingStateLoss();
         }
@@ -358,17 +359,18 @@ public class Contentviewr extends SherlockFragmentActivity{
         }
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
         tr.replace(R.id.content_full, newOne, "content");
+        tr.addToBackStack("back");
         if (!isFinishing()){
             tr.commitAllowingStateLoss();
-            fullContent.setVisibility(View.VISIBLE);
+//            fullContent.setVisibility(View.VISIBLE);
 
         }
 
     }
 
-    public void hideFull(){
-        fullContent.setVisibility(View.GONE);
-    }
+//    public void hideFull(){
+//        fullContent.setVisibility(View.GONE);
+//    }
 
 
     public List<Target> getTargets(){
