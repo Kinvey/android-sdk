@@ -13,11 +13,17 @@
  */
 package com.kinvey.sample.contentviewr.file;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import com.google.api.client.json.JsonGenerator;
+import com.kinvey.android.Client;
 import com.kinvey.java.model.FileMetaData;
+
+import java.io.StringWriter;
 
 /**
  * @author edwardf
@@ -30,7 +36,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
 
     private static final String COLUMN_FILENAME = "filename";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_TIMESTAMP = "timestamp";
+    private static final String COLUMN_JSON = "json";
 
 
 
@@ -45,13 +51,9 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
                 + "("
                 + COLUMN_ID + " TEXT not null, "
                 + COLUMN_FILENAME + " TEXT not null, "
-                + COLUMN_TIMESTAMP + " INTEGER not null"
+                + COLUMN_JSON + " TEXT not null"
                 + ");";
-
-                ;
         runCommand(command);
-
-
     }
 
     @Override
@@ -66,16 +68,55 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     }
 
     public String getFileNameForId(String id){
-        //Cursor c = getReadableDatabase().query()
-        return "";
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_FILENAME}, null, null, null, null, null);
+
+        String filename = null;
+        if (c.moveToFirst()){
+            filename = c.getString(0);
+        }
+        c.close();
+
+        return filename;
+
 
     }
 
-    public void insertRecord(FileMetaData meta){
+    public void insertRecord(Client client, FileMetaData meta){
 
+        ContentValues values = new ContentValues();
+
+        String jsonResult = "";
+        StringWriter writer = new StringWriter();
+        try {
+            JsonGenerator generator = client.getJsonFactory().createJsonGenerator(writer);
+            generator.serialize(meta);
+            generator.flush();
+            jsonResult = writer.toString();
+        } catch (Exception ex) {
+            Log.e(FileCache.TAG, "unable to serialize JSON! -> " + ex);
+        }
+
+        values.put(COLUMN_JSON, jsonResult);
+
+        values.put(COLUMN_ID, meta.getId());
+        values.put(COLUMN_FILENAME, meta.getFileName());
+
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        int change = db.updateWithOnConflict(FILE_CACHE_TABLE, values, null, null, db.CONFLICT_REPLACE);
+        if (change == 0){
+            db.insert(FILE_CACHE_TABLE, null, values);
+        }
+        db.close();
     }
 
-    public void deleteRecord(FileMetaData meta){
+    public void deleteRecord(String id){
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(FILE_CACHE_TABLE, COLUMN_ID+"='" + id +"'", null);
 
     }
 

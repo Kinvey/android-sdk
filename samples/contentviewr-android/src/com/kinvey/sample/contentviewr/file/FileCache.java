@@ -16,18 +16,21 @@ package com.kinvey.sample.contentviewr.file;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import com.kinvey.android.Client;
 import com.kinvey.java.model.FileMetaData;
 import com.google.common.base.Preconditions;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Calendar;
 
 /**
  * @author edwardf
  */
 public class FileCache {
 
-    private static final String TAG = "kinvey - filecache";
+    public static final String TAG = "kinvey - filecache";
     private static final long CACHE_LIMIT = 5242880L; // 5 mb default
 
 
@@ -37,9 +40,9 @@ public class FileCache {
      *
      * @param context the current active context of the running application
      * @param id the id of the file to attempt to load
-     * @return an `OutputStream` for the file associated with the provided id, or null
+     * @return a `FileInputStream` for the file associated with the provided id, or null
      */
-    public FileOutputStream get(Context context, String id){
+    public FileInputStream get(Context context, String id){
         Preconditions.checkNotNull(id, "String id cannot be null!");
         Preconditions.checkNotNull(context, "Context context cannot be null!");
 
@@ -56,15 +59,14 @@ public class FileCache {
 
         if (!cachedFile.exists()){
             //file name is in the metadata table, but the file doesn't exist
-            //this should never happen, unless the sqlite table has been modified externally.
+            //so remove it from the metadata table
+            helper.deleteRecord(id);
             return null;
         }
 
-        FileOutputStream ret = null;
+        FileInputStream ret = null;
         try{
-            //ret = new FileOutputStream()
-
-
+            ret = new FileInputStream(cachedFile);
         }catch (Exception e){
             Log.e(TAG, "couldn't load cached file -> " + e.getMessage());
             e.printStackTrace();
@@ -73,7 +75,7 @@ public class FileCache {
         return ret;
     }
 
-    public void save(Context context, FileMetaData meta, byte[] data){
+    public void save(Context context, Client client, FileMetaData meta, byte[] data){
         Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
@@ -81,7 +83,7 @@ public class FileCache {
 
         //insert into database table
         FileCacheSqlHelper helper = new FileCacheSqlHelper(context);
-        helper.insertRecord(meta);
+        helper.insertRecord(client, meta);
 
         //write to cache dir
         File cacheDir = context.getCacheDir();
@@ -101,28 +103,22 @@ public class FileCache {
                     os.close();
                 }
             }catch(Exception e){}//couldn't clean up, no need to report
-
-
         }
-
-
 
         //check size of cachedir
         //delete older files if necessary, until down to threshold size limit
         trimCache(context);
-
-
-
-
-
-
-
-
-
     }
 
+    /**
+     * This method compares the current size of all files in the cache dir to the limit size.  If there are too many files,
+     * an async task will be kicked off to delete older files.
+     *
+     * @param context - the current application's context
+     */
     public void trimCache(Context context){
         new TrimCache().execute(context);
+
     }
 
     /**
@@ -135,22 +131,57 @@ public class FileCache {
 
         @Override
         protected Void doInBackground(Context ... context) {
-            File cachedir = context[0].getCacheDir();
+            //first check current size of cache, and compare it to cache limit.
+            File cacheDir = context[0].getCacheDir();
 
-            for (File f : cachedir.listFiles()){
 
+            long deleted = 0;
+            long oldest = Calendar.getInstance().getTimeInMillis();
+            long cacheSize = getDirSize(cacheDir);
+            File toDelete = null;
+
+            //while the starting size minus any deleted is still greater than the limit
+            //iterate through all files and grab a reference to the oldest one
+            //and then delete that oldest one
+            //and add it's size to the deleted counter.
+
+            while (cacheSize - deleted > CACHE_LIMIT){
+
+                for (File f : cacheDir.listFiles()){
+                    if (f.lastModified() < oldest){
+                        oldest = f.lastModified();
+                        toDelete = f;
+                    }
+                }
+
+                if (toDelete != null){
+                    deleted += toDelete.length();
+                    toDelete.delete();
+                    toDelete = null;
+                }
             }
 
-
-
-
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
         }
     }
 
 
+    /**
+     * Iterate through all files in a provided directory, and add up their sizes.
+     *
+     * @param dir the directory to get the total file size of
+     * @return the size of all files in the provided directory
+     */
+    private static long getDirSize(File dir) {
 
-
-
+        long size = 0;
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (file.isFile()) {
+                size += file.length();
+            }
+        }
+        return size;
+    }
 
 }
