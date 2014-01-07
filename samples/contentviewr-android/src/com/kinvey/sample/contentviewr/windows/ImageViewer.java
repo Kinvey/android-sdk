@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.sample.contentviewr.component.ZoomImageView;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
 
@@ -32,7 +33,7 @@ import java.io.IOException;
  */
 public class ImageViewer extends Viewer  {
 
-    private ImageView image;
+    private ZoomImageView image;
 
     @Override
     public int getViewID() {
@@ -41,7 +42,7 @@ public class ImageViewer extends Viewer  {
 
     @Override
     public void bindViews(View v){
-        image = (ImageView) v.findViewById(R.id.imageview);
+        image = (ZoomImageView) v.findViewById(R.id.imageview);
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         FileMetaData meta = new FileMetaData(content.getSource().getReference());

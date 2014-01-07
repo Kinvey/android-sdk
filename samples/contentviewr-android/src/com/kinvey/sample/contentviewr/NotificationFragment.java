@@ -48,6 +48,10 @@ public class NotificationFragment extends ContentFragment {
 
         notifyTitle.setTypeface(roboto);
         updatesLabel.setTypeface(roboto);
+
+        if (getClient().user().containsKey("_push")){
+            updates.setChecked(true);
+        }
     }
 
     @Override

@@ -22,7 +22,7 @@ under the License.
 -->
 <resources>
     <!-- general -->
-    <string name="app_name">contentviewr</string>
+    <string name="app_name">Content Box</string>
     <string name="refresh">refresh</string>
     <string name="drawer_open">open drawer</string>
     <string name="drawer_close">close drawer</string>

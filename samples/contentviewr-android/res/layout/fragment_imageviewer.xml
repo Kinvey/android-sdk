@@ -25,7 +25,7 @@ under the License.
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <ImageView
+    <com.kinvey.sample.contentviewr.component.ZoomImageView
         android:id="@+id/imageview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
