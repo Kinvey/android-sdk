@@ -534,14 +534,14 @@ public class User<T extends User> extends GenericJson   {
             builder.setUsernameAndPassword(username, password);
             builder.setCreate(setCreate);
             builder.setUser(User.this);
-            this.type=LoginType.KINVEY;
+            this.type = LoginType.KINVEY;
         }
 
         public LoginRequest(ThirdPartyIdentity identity) {
             builder.setThirdPartyIdentity(identity);
             builder.setUser(User.this);
             builder.setCreate(false);
-            this.type=LoginType.THIRDPARTY;
+            this.type = LoginType.THIRDPARTY;
         }
 
         public LoginRequest(Credential credential) {

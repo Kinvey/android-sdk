@@ -49,6 +49,7 @@ import com.google.common.io.LimitInputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -362,7 +363,15 @@ public class MediaHttpUploader {
             //if there are custom headers, add them
             if (headers != null){
                 for (String header : headers.keySet()){
-                    currentRequest.getHeaders().put(header, headers.get(header));
+
+                    String curHeader = headers.get(header);
+                    //then it's a list
+                    if (curHeader.contains(", ")){
+                        String[] listheaders =  curHeader.split(", ");
+                        currentRequest.getHeaders().put(header, Arrays.asList(listheaders));
+                    }else{
+                        currentRequest.getHeaders().put(header,curHeader);
+                    }
                 }
             }
             response = currentRequest.execute();
@@ -790,6 +799,10 @@ public class MediaHttpUploader {
         this.uploadState = uploadState;
         if (progressListener != null) {
             progressListener.progressChanged(this);
+            if (uploadState == UploadState.UPLOAD_COMPLETE){
+                progressListener.onSuccess(null);
+            }
+
         }
     }
 

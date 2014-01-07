@@ -74,6 +74,7 @@ public class HelloWorld {
             e.printStackTrace();
         }
 
+
         try{
 
             InputStream is = new FileInputStream("/Users/edwardflemingiii/ic_lockscreen_decline_activated.png");
@@ -81,6 +82,7 @@ public class HelloWorld {
             FileMetaData fm = new FileMetaData();
             fm.setFileName("lockscreen.png");
             fm.setMimetype("image/png");
+            fm.setPublic(true);
 
             UploaderProgressListener progressListener = new UploaderProgressListener() {
                 @Override
