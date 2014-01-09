@@ -31,7 +31,6 @@
 package com.kinvey.java.core;
 
 
-import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -46,12 +45,9 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
 
-import com.kinvey.java.File;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.model.UriLocResponse;
 
 /**
  * Media HTTP Downloader, with support for both direct and resumable media downloads. Documentation
@@ -214,8 +210,8 @@ public class MediaHttpDownloader {
 
         // Make initial request to get the unique upload URL.
         FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
-        if (progressListener != null && (progressListener instanceof DownloadWithMetadataProgressListener)) {
-            ((DownloadWithMetadataProgressListener)progressListener).metaDataRetrieved(initialResponse);
+        if (progressListener != null && (progressListener instanceof MetaDownloadProgressListener)) {
+            ((MetaDownloadProgressListener)progressListener).metaDataRetrieved(initialResponse);
         }
 
         GenericUrl downloadUrl;

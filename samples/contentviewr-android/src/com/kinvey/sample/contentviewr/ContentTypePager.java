@@ -40,12 +40,22 @@ import java.util.Map;
 public class ContentTypePager extends ContentFragment {
 
     private ViewPager pager;
-    private ContentTypeAdapter adapter;
-    private TitlePageIndicator mIndicator;
+    //private ContentTypeAdapter adapter;
+    private TitlePageIndicator indicator;
 
     private static final int STATIC = 2;//reorder, recent
 
 
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.i(Contentviewr.TAG, "pager got onresume");
+        //setAdapter();
+        //pager.setCurrentItem(1);
+        pager.getAdapter().notifyDataSetChanged();
+        //pager.getAdapter()./
+    }
 
     @Override
     public void onCreate(Bundle saved){
@@ -62,8 +72,9 @@ public class ContentTypePager extends ContentFragment {
 
     @Override
     public void bindViews(View v) {
+        Log.i(Contentviewr.TAG, "pager got bindviews");
         pager = (ViewPager) v.findViewById(R.id.content_type_pager);
-        mIndicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
+        indicator = (TitlePageIndicator) v.findViewById(R.id.feature_indicator);
 
 
 
@@ -73,14 +84,20 @@ public class ContentTypePager extends ContentFragment {
     }
 
     private void setAdapter(){
-        adapter = new ContentTypeAdapter(getChildFragmentManager());
 
+//        if (adapter != null){
+//            return;
+//        }
+     //   adapter = new ContentTypeAdapter(getChildFragmentManager());
 
-        pager.setAdapter(adapter);
-        mIndicator.setViewPager(pager);
-        mIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
-        mIndicator.setTextColor(R.color.ebony);
-        mIndicator.setSelectedColor(R.color.ghost_white);
+        if (pager.getAdapter() == null){
+            pager.setAdapter(new ContentTypeAdapter(getChildFragmentManager()));
+        }
+        pager.getAdapter().notifyDataSetChanged();;
+        indicator.setViewPager(pager);
+        indicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
+        indicator.setTextColor(R.color.ebony);
+        indicator.setSelectedColor(R.color.ghost_white);
     }
 
     @Override
@@ -100,7 +117,7 @@ public class ContentTypePager extends ContentFragment {
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-               ((ContentListFragment) adapter.getItem(pager.getCurrentItem())).refresh();
+               ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(pager.getCurrentItem())).refresh();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -113,11 +130,14 @@ public class ContentTypePager extends ContentFragment {
 
     public class ContentTypeAdapter extends FragmentPagerAdapter {
 
-        private HashMap<Long, ContentFragment> mItems = new HashMap<Long, ContentFragment>();
+        private HashMap<Long, ContentFragment> mItems;// = new HashMap<Long, ContentFragment>();
 
         public ContentTypeAdapter(FragmentManager fm) {
             super(fm);
+            mItems = new HashMap<Long, ContentFragment>();
+            Log.i(Contentviewr.TAG, "constructor, item size: " + mItems.keySet().size());
         }
+
 
         @Override
         public int getCount() {
@@ -132,6 +152,7 @@ public class ContentTypePager extends ContentFragment {
             long id = getItemId(position);//() - STATIC);
 
             if(mItems.get(id) != null) {
+                Log.i(Contentviewr.TAG, "returning cached fragment");
                 return mItems.get(id);
             }
             //if haven't returned, have to create a new fragment
@@ -139,7 +160,7 @@ public class ContentTypePager extends ContentFragment {
 
             ContentFragment f;
             if (position == 0){
-                return new ReorderFragment(ContentTypePager.this);
+                return new ReorderFragment();
             }else if (position == 1){
                 f = new RecentFragment();
             }else{
@@ -168,13 +189,15 @@ public class ContentTypePager extends ContentFragment {
 
         }
 
+
+
         @Override
         public int getItemPosition(Object object) {
             Fragment f = (Fragment) object;
 
             for(int i = 0; i < getCount(); i++) {
 
-                Fragment item = (Fragment) getItem(i);
+                Fragment item =  getItem(i);
                 if(item.equals(f)) {
                     Log.i(Contentviewr.TAG, "get item position it's in pager");
                     return i;
@@ -189,7 +212,7 @@ public class ContentTypePager extends ContentFragment {
                 }
             }
 
-
+            Log.i(Contentviewr.TAG, "ok it's none");
             return POSITION_NONE;
         }
         @Override

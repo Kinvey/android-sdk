@@ -36,7 +36,7 @@ public class FileCache {
 
     /**
      * Get a file from the local file cache.  If the file is not present, then this method will return null.
-     * </p> the file cache uses a sqlite table internally to maintain metadata about all locally stored files.
+     * <p/> the file cache uses a sqlite table internally to maintain metadata about all locally stored files.
      *
      * @param context the current active context of the running application
      * @param id the id of the file to attempt to load
@@ -51,18 +51,22 @@ public class FileCache {
 
         if (filename == null){
             //file name is not in the metadata table
+            Log.i(TAG, "cache miss -> (" + id + ")" );
             return null;
         }
 
         File cacheDir = context.getCacheDir();
         File cachedFile = new File(cacheDir, filename);
 
+
         if (!cachedFile.exists()){
             //file name is in the metadata table, but the file doesn't exist
             //so remove it from the metadata table
+            Log.i(TAG, "cache miss -> (" + id + ", " + filename + ")" );
             helper.deleteRecord(id);
             return null;
         }
+        Log.i(TAG, "cache hit -> (" + id + ", " + filename + ")" );
 
         FileInputStream ret = null;
         try{
@@ -80,6 +84,8 @@ public class FileCache {
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
         Preconditions.checkNotNull(data, "byte[] data cannot be null!");
+
+        Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ")" );
 
         //insert into database table
         FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);//new FileCacheSqlHelper(context);
@@ -107,7 +113,8 @@ public class FileCache {
 
         //check size of cachedir
         //delete older files if necessary, until down to threshold size limit
-        trimCache(context);
+
+        //trimCache(context);
     }
 
     /**

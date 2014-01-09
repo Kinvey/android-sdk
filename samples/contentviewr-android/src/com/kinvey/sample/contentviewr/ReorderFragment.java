@@ -41,11 +41,7 @@ public class ReorderFragment extends ContentFragment {
     private DragSortController controller;
     private DraggableTypeAdapter adapter;
 
-    private ContentTypePager pager;
-
-    public ReorderFragment(ContentTypePager pager){
-        this.pager = pager;
-    }
+    public ReorderFragment(){}
 
 
     @Override

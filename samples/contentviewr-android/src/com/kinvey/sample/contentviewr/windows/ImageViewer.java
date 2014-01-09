@@ -15,6 +15,7 @@ package com.kinvey.sample.contentviewr.windows;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
@@ -22,10 +23,12 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.component.ZoomImageView;
+import com.kinvey.sample.contentviewr.file.FileCache;
 import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -43,8 +46,31 @@ public class ImageViewer extends Viewer  {
     @Override
     public void bindViews(View v){
         image = (ZoomImageView) v.findViewById(R.id.imageview);
+        getImage();
+
+
+
+    }
+
+
+    private void getImage(){
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        FileCache cache = new FileCache();
+        FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
+        if (in != null){
+            if (image == null){
+                return;
+            }
+            Bitmap ret = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.toByteArray().length);
+            image.setImageBitmap(ret);
+            Log.i("zoomImage", "set from cache");
+            return;
+
+        }
+
+
         FileMetaData meta = new FileMetaData(content.getSource().getReference());
         getClient().file().download(meta, out, new DownloaderProgressListener() {
             @Override

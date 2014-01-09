@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
+import android.os.Parcelable;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -59,9 +60,11 @@ public class Contentviewr extends SherlockFragmentActivity{
 
     private ContentTypePager pager;
 
-//    private FrameLayout listbox;
-//    private FrameLayout viewbox;
-//    private FrameLayout fullContent;
+    //these two are for horizontal
+    private FrameLayout listbox;
+    private FrameLayout viewbox;
+    //this one is for portrait
+    private FrameLayout fullContent;
 
 
     public Client getClient(){
@@ -73,14 +76,38 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contentviewr);
-//
-//        fullContent = (FrameLayout) findViewById(R.id.content_full);
-//        fullContent.setVisibility(View.GONE);
+        Log.i(TAG, "contentviewr got oncreate");
+
+        if (savedInstanceState != null){
+
+
+            String[] contentKeys = savedInstanceState.getStringArray("contentKeys"); // contentTypes.keySet().toArray(new String[contentTypes.keySet().size()]);
+            Parcelable[] parcecontents = savedInstanceState.getParcelableArray("contentValues");// contentTypes.values().toArray(new String[contentTypes.values().size()]);
+
+            ContentType[] contentValues = Arrays.copyOf(parcecontents, parcecontents.length, ContentType[].class);
+
+
+            contentTypes = new HashMap<String, ContentType>();
+
+            for (int i = 0; i < contentValues.length; i++){
+
+                contentTypes.put(contentKeys[i], contentValues[i]);
+            }
+
+            //saved.putStringArray("contentKeys", contentKeys);
+            //saved.putStringArray("contentValues", contentValues);
+
+        }
+
+        fullContent = (FrameLayout) findViewById(R.id.content_full);
+        listbox = (FrameLayout) findViewById(R.id.content_left);
+        viewbox = (FrameLayout) findViewById(R.id.content_right);
 
         roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
         drawer = (ListView) findViewById(R.id.left_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         loading = (LinearLayout) findViewById(R.id.content_loadingbox);
+
 
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
                 GravityCompat.START);
@@ -106,8 +133,6 @@ public class Contentviewr extends SherlockFragmentActivity{
         drawerLayout.setDrawerListener(drawerToggle);
 
 
-       // getActionBar().setDisplayShowTitleEnabled(false);
-
         ((ContentViewrApplication)getApplication()).loadClient(new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
@@ -127,6 +152,12 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.i(TAG, "contentviewr got onresume");
+    }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -138,6 +169,21 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    protected void onSaveInstanceState(Bundle saved) {
+        super.onSaveInstanceState(saved);
+        if (contentTypes == null){
+            return;
+        }
+        String[] contentKeys = contentTypes.keySet().toArray(new String[contentTypes.keySet().size()]);
+        ContentType[] contentValues = contentTypes.values().toArray(new ContentType[contentTypes.values().size()]);
+
+        saved.putStringArray("contentKeys", contentKeys);
+        saved.putParcelableArray("contentValues", contentValues);
+
+        //saved.putLong("param", value);
+        //saved.putStringArrayList("types", getCon);
     }
 
     @Override
@@ -262,6 +308,9 @@ public class Contentviewr extends SherlockFragmentActivity{
 
 
     private void showPager(){
+        if (getBaseContext() == null){
+            return;
+        }
 
         loading.setVisibility(View.GONE);
 
@@ -301,7 +350,8 @@ public class Contentviewr extends SherlockFragmentActivity{
         });
 
         pager = new ContentTypePager();
-        replaceFragment(pager, false);
+        //replaceFragment(pager, false);
+        showList(pager);
 
 
     }
@@ -322,21 +372,44 @@ public class Contentviewr extends SherlockFragmentActivity{
 
     }
 
-    public void replaceFragment(SherlockFragment newOne, boolean backstack){
+    public void replaceFragment(SherlockFragment newOne, int id, String descriptor,  boolean backstack){
         if (getBaseContext() == null){
             return;
         }
-//        fullContent.setVisibility(View.GONE);
+
         FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_full, newOne, "list");
+        tr.replace(id, newOne, descriptor);
+
         if (backstack){
-            tr.addToBackStack("back");
+            tr.addToBackStack(descriptor);
         }
         if (!isFinishing()){
             tr.commitAllowingStateLoss();
         }
+    }
 
+    public void addFragment(SherlockFragment newOne, int id, String descriptor,  boolean backstack){
+        if (getBaseContext() == null){
+            return;
+        }
 
+        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+        tr.add(id, newOne, descriptor);
+
+        if (backstack){
+            tr.addToBackStack(descriptor);
+        }
+        if (!isFinishing()){
+            tr.commitAllowingStateLoss();
+        }
+    }
+    public void showList(SherlockFragment newOne){
+        if (listbox != null){
+            fullContent.setVisibility(View.GONE);
+            replaceFragment(newOne, listbox.getId(), "list", false);
+        }else{
+            replaceFragment(newOne, fullContent.getId(), "list", false);
+        }
 
     }
 
@@ -344,33 +417,47 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (getBaseContext() == null){
             return;
         }
-//        fullContent.setVisibility(View.GONE);
-        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_full, newOne, "content");
-        tr.addToBackStack("back");
-        if (!isFinishing()){
-            tr.commitAllowingStateLoss();
+
+        if (viewbox != null){
+            fullContent.setVisibility(View.GONE);
+            replaceFragment(newOne, viewbox.getId(), "window", false);
+        }else{
+            addFragment(newOne, fullContent.getId(), "window", true);
         }
+//        return;
+//        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+//
+//
+//        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+//            tr.replace(viewbox.getId(), newOne, "content");
+//        }else{
+//            tr.replace(fullContent.getId(), newOne, "content");
+//        }
+//
+//        tr.addToBackStack("back");
+//        if (!isFinishing()){
+//            tr.commitAllowingStateLoss();
+//        }
     }
 
     public void showFull(SherlockFragment newOne){
-        if (getBaseContext() == null){
-            return;
-        }
-        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-        tr.replace(R.id.content_full, newOne, "content");
-        tr.addToBackStack("back");
-        if (!isFinishing()){
-            tr.commitAllowingStateLoss();
-//            fullContent.setVisibility(View.VISIBLE);
-
-        }
+        replaceFragment(newOne, fullContent.getId(), "full", true);
+//        return;
+//        if (getBaseContext() == null){
+//            return;
+//        }
+//        FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+//        tr.replace(R.id.content_full, newOne, "content");
+//        tr.addToBackStack("back");
+//        if (!isFinishing()){
+//            tr.commitAllowingStateLoss();
+//
+//        }
 
     }
 
-//    public void hideFull(){
-//        fullContent.setVisibility(View.GONE);
-//    }
+
+
 
 
     public List<Target> getTargets(){

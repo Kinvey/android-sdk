@@ -13,20 +13,22 @@
  */
 package com.kinvey.sample.contentviewr.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+
+import java.io.Serializable;
 
 /**
  * @author edwardf
  */
-public class ContentType extends GenericJson {
+public class ContentType extends GenericJson implements Parcelable {
 
     @Key
     private String displayName;
     @Key
     private String name;
-    //@Key
-    //private String windowStyle;
 
     private boolean isLabel = false;
     private boolean isSetting = false;
@@ -51,14 +53,6 @@ public class ContentType extends GenericJson {
         this.name = name;
     }
 
-//    public String getWindowStyle() {
-//        return windowStyle;
-//    }
-//
-//    public void setWindowStyle(String windowStyle) {
-//        this.windowStyle = windowStyle;
-//    }
-
     public boolean isLabel() {
         return isLabel;
     }
@@ -82,4 +76,65 @@ public class ContentType extends GenericJson {
     public void setUniqueID(long uniqueID) {
         this.uniqueID = uniqueID;
     }
+
+
+    // Parcelling part
+    public ContentType(Parcel in){
+
+        this.displayName = in.readString();
+        this.name = in.readString();
+        boolean[] whatitis = new boolean[2];
+        in.readBooleanArray(whatitis);
+        this.isLabel = whatitis[0];
+        this.isSetting = whatitis[1];
+        this.uniqueID = in.readLong();
+
+
+
+
+//        String[] data = new String[3];
+//
+//        in.readStringArray(data);
+//        this.id = data[0];
+//        this.name = data[1];
+//        this.grade = data[2];
+    }
+
+    @Override
+    public int describeContents(){
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+//        dest.writeStringArray(new String[] {this.id,
+//                this.name,
+//                this.grade});
+
+        dest.writeString(this.displayName);
+        dest.writeString(this.name);
+        dest.writeBooleanArray(new boolean[]{isLabel, isSetting});
+        dest.writeLong(uniqueID);
+
+
+
+    }
+
+    public static final Parcelable.Creator<ContentType> CREATOR = new Parcelable.Creator<ContentType>() {
+        public ContentType createFromParcel(Parcel in) {
+            return new ContentType(in);
+        }
+        public ContentType[] newArray(int size) {
+            return new ContentType[size];
+        }
+    };
+//    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+//        public Student createFromParcel(Parcel in) {
+//            return new Student(in);
+//        }
+//
+//        public Student[] newArray(int size) {
+//            return new Student[size];
+//        }
+//    };
 }

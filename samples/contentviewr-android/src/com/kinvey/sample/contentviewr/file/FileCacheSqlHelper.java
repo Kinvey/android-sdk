@@ -86,7 +86,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     public String getFileNameForId(String id){
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_FILENAME}, null, null, null, null, null);
+        Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_FILENAME},  COLUMN_ID+"='" + id +"'", null, null, null, null);
 
         String filename = null;
         if (c.moveToFirst()){

@@ -34,6 +34,17 @@ public class ContentViewrApplication extends Application {
     }
 
     public void loadClient(KinveyUserCallback callback){
-        client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(callback).setUserClass(ContentUser.class).build();
+        if (client == null){
+            client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(callback).setUserClass(ContentUser.class).build();
+        }else{
+            if(callback != null){
+                if (client.user().isUserLoggedIn()){
+                    callback.onSuccess(client.user());
+                }else{
+                    callback.onFailure(new NullPointerException(""));
+                }
+
+            }
+        }
     }
 }

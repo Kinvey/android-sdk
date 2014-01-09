@@ -17,18 +17,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
-import android.widget.SimpleAdapter;
 import com.kinvey.android.Client;
-import com.kinvey.java.core.DownloadWithMetadataProgressListener;
 import com.kinvey.java.core.DownloaderProgressListener;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.file.FileCache;
 import com.kinvey.sample.contentviewr.model.ContentItem;
-import com.kinvey.sample.contentviewr.model.SourceType;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -59,8 +55,13 @@ public class SourceFactory {
                 }
 
                 final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                final FileMetaData meta = new FileMetaData(item.getThumbnail().getReference());
-                client.file().download(meta, out, new DownloadWithMetadataProgressListener() {
+                FileMetaData meta = new FileMetaData(item.getThumbnail().getReference());
+                MetaDownloadProgressListener dpl =  new MetaDownloadProgressListener() {
+
+//                    public FileMetaData currentData = meta;
+
+
+
                     @Override
                     public void progressChanged(MediaHttpDownloader downloader) throws IOException {}
 
@@ -71,13 +72,14 @@ public class SourceFactory {
                         }
 
                         FileCache cache = new FileCache();
-                        cache.save(client.getContext(), client, meta, out.toByteArray());
+                        byte[] outarray = out.toByteArray();
 
 
+                        if (getMetadata() != null){
+                            cache.save(client.getContext(), client, getMetadata(), outarray);
+                        }
 
-
-
-                        Bitmap ret = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.toByteArray().length);
+                        Bitmap ret = BitmapFactory.decodeByteArray(outarray, 0, outarray.length);
                         item.setThumbnailImage(ret);
                         adapter.notifyDataSetChanged();
                     }
@@ -85,12 +87,16 @@ public class SourceFactory {
                     @Override
                     public void onFailure(Throwable error) {}
 
-                    @Override
-                    public void metaDataRetrieved(FileMetaData metadata) {
-                        meta.setFileName(metadata.getFileName());
+//                    @Override
+//                    public void metaDataRetrieved(FileMetaData metadata) {
+//                        currentData.setFileName(metadata.getFileName());
+//
+//                    }
+                };
 
-                    }
-                });
+                client.file().download(meta, out, dpl);
+
+
 
                 break;
             case WEBSITE:

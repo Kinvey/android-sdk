@@ -259,31 +259,31 @@
             </build>
         </profile>
 
-        <profile>
-            <id>dev</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>install</phase>
-                                <configuration>
-                                    <tasks>
-                                        <copy todir="${devcenter.home}/content/reference/android/api">
-                                            <fileset dir="${project.build.directory}/apidocs/"/>
-                                        </copy>
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!--<profile>-->
+            <!--<id>dev</id>-->
+            <!--<build>-->
+                <!--<plugins>-->
+                    <!--<plugin>-->
+                        <!--<artifactId>maven-antrun-plugin</artifactId>-->
+                        <!--<executions>-->
+                            <!--<execution>-->
+                                <!--<phase>install</phase>-->
+                                <!--<configuration>-->
+                                    <!--<tasks>-->
+                                        <!--<copy todir="${devcenter.home}/content/reference/android/api">-->
+                                            <!--<fileset dir="${project.build.directory}/apidocs/"/>-->
+                                        <!--</copy>-->
+                                    <!--</tasks>-->
+                                <!--</configuration>-->
+                                <!--<goals>-->
+                                    <!--<goal>run</goal>-->
+                                <!--</goals>-->
+                            <!--</execution>-->
+                        <!--</executions>-->
+                    <!--</plugin>-->
+                <!--</plugins>-->
+            <!--</build>-->
+        <!--</profile>-->
     </profiles>
 
 </project>

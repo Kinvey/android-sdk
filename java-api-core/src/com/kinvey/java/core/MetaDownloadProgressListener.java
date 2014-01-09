@@ -21,14 +21,27 @@ import com.kinvey.java.model.FileMetaData;
  *
  * @author edwardf
  */
-public interface DownloadWithMetadataProgressListener extends DownloaderProgressListener {
+public abstract class MetaDownloadProgressListener implements DownloaderProgressListener {
+
+
+    private FileMetaData metadata;
+    public MetaDownloadProgressListener(){}
+
 
     /**
      * Called when metadata has been successfully retrieved from blob, this will occur before the actual file is downloaded.
      *
      * @param meta the metadata object of the file being downloaded.
      */
-    public void metaDataRetrieved(FileMetaData meta);
+    public void metaDataRetrieved(FileMetaData meta){
+        this.metadata = new FileMetaData();
+        this.metadata.setFileName(meta.getFileName());
+        this.metadata.setId(meta.getId());
+    }
+
+    public FileMetaData getMetadata(){
+        return metadata;
+    }
 
 
 

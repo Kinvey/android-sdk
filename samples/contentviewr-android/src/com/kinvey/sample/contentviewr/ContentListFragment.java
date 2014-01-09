@@ -63,14 +63,29 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null){
+            type = savedInstanceState.getParcelable("type");
+        }
         setHasOptionsMenu(true);
         getSherlockActivity().invalidateOptionsMenu();
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle saved){
+        super.onSaveInstanceState(saved);
+        saved.putParcelable("type", type);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup group, Bundle saved) {
+        Log.i(Contentviewr.TAG, "content list got oncreateview");
         View v = inflater.inflate(R.layout.fragment_content_list, group, false);
         bindViews(v);
         return v;
