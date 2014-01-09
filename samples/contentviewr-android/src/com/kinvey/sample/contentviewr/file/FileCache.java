@@ -14,6 +14,7 @@
 package com.kinvey.sample.contentviewr.file;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.kinvey.android.Client;
@@ -48,10 +49,11 @@ public class FileCache {
 
         FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
         String filename = helper.getFileNameForId(id);
+        helper.dump();
 
         if (filename == null){
             //file name is not in the metadata table
-            Log.i(TAG, "cache miss -> (" + id + ")" );
+            Log.i(TAG, "cache miss on db -> (" + id + ")" );
             return null;
         }
 
@@ -62,7 +64,7 @@ public class FileCache {
         if (!cachedFile.exists()){
             //file name is in the metadata table, but the file doesn't exist
             //so remove it from the metadata table
-            Log.i(TAG, "cache miss -> (" + id + ", " + filename + ")" );
+            Log.i(TAG, "cache miss on filesystem-> (" + id + ", " + filename + ")" );
             helper.deleteRecord(id);
             return null;
         }
@@ -77,6 +79,11 @@ public class FileCache {
         }
 
         return ret;
+    }
+
+    public String getFilenameForID(Context context, String id){
+        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
+        return helper.getFileNameForId(id);
     }
 
     public void save(Context context, Client client, FileMetaData meta, byte[] data){
@@ -99,6 +106,7 @@ public class FileCache {
         try {
             os = new FileOutputStream(file);
             os.write(data);
+
         }catch (Exception e){
             Log.e(TAG, "couldn't write file to cache -> " + e.getMessage());
             e.printStackTrace();
@@ -108,7 +116,9 @@ public class FileCache {
                     os.flush();
                     os.close();
                 }
-            }catch(Exception e){}//couldn't clean up, no need to report
+            }catch(Exception e){
+                e.printStackTrace();
+            }
         }
 
         //check size of cachedir

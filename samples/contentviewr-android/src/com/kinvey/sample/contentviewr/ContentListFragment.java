@@ -117,6 +117,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
         loading.setVisibility(View.VISIBLE);
         Query q = new Query().equals("type", type.getName()).equals("target", getContentViewr().getSelectedTarget());
+        q.equals("groups", getClient().user().get("group")) ;
+
         AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
         //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
         app.get(q, new KinveyListCallback<ContentItem>() {
@@ -157,7 +159,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ContentItem item = adapter.getItem(position);
-        Viewer viewer = new WindowFactory().getViewer(item.getSource());
+
+        Viewer viewer = new WindowFactory().getViewer(type.getWindowstyle());
         viewer.loadContent(adapter.getItem(position));
         showWindow(viewer);
 

@@ -13,8 +13,14 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
+import android.os.Bundle;
+import android.os.Parcelable;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.model.ContentType;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author edwardf
@@ -25,6 +31,12 @@ public abstract class Viewer extends ContentFragment{
 
     public void loadContent(ContentItem item){
         this.content = item;
+    }
+
+    @Override
+    public void onCreate(Bundle saved){
+        super.onCreate(saved);
+        setHasOptionsMenu(false);
     }
 
 }

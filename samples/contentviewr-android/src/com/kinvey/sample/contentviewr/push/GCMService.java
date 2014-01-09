@@ -29,7 +29,7 @@ public class GCMService extends KinveyGCMService {
         Log.i("PUSH", "MESSAGE RECIEVED!");
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.icon)
                         .setContentTitle(getApplicationContext().getResources().getString(R.string.app_name))
                         .setContentText(message);
 

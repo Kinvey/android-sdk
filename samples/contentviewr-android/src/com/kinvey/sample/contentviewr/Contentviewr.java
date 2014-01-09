@@ -181,9 +181,6 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         saved.putStringArray("contentKeys", contentKeys);
         saved.putParcelableArray("contentValues", contentValues);
-
-        //saved.putLong("param", value);
-        //saved.putStringArrayList("types", getCon);
     }
 
     @Override
@@ -407,6 +404,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         if (listbox != null){
             fullContent.setVisibility(View.GONE);
             replaceFragment(newOne, listbox.getId(), "list", false);
+
         }else{
             replaceFragment(newOne, fullContent.getId(), "list", false);
         }

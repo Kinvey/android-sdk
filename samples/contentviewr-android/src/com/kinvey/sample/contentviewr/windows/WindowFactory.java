@@ -14,6 +14,7 @@
 package com.kinvey.sample.contentviewr.windows;
 
 import com.kinvey.sample.contentviewr.model.ContentItem;
+import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.SourceType;
 
 /**
@@ -22,24 +23,27 @@ import com.kinvey.sample.contentviewr.model.SourceType;
 public class WindowFactory {
 
 
-    public static Viewer getViewer(SourceType source){
+    public static Viewer getViewer(ContentType.WINDOWTYPE source){
 
         Viewer ret = null;
-        switch (source.getType()){
+        switch (source){
 
-            case WEBSITE:
+            case WEB:
                 ret = new HTMLViewer();
                 break;
-            case FILE:
+            case IMAGE:
                 ret = new ImageViewer();
                 break;
+            case PDF:
+                ret = new PDFViewer();
+
 
         }
 
         return ret;
 
 
-//        TYPE type = TYPE.getByName(jsontype);
+//        SOURCELOCATION type = SOURCELOCATION.getByName(jsontype);
 //        Viewer ret = null;
 //        switch (type){
 //            case HTML:

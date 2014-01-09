@@ -23,7 +23,7 @@ import com.google.api.client.util.Value;
 public class SourceType extends GenericJson {
 
     @Key
-    private TYPE type;
+    private SOURCELOCATION type;
 
 
     //Dependant on type, this is either a URL or a file ID
@@ -34,11 +34,11 @@ public class SourceType extends GenericJson {
 
     public SourceType(){}
 
-    public TYPE getType() {
+    public SOURCELOCATION getType() {
         return type;
     }
 
-    public void setType(TYPE type) {
+    public void setType(SOURCELOCATION type) {
         this.type = type;
     }
 
@@ -51,10 +51,12 @@ public class SourceType extends GenericJson {
     }
 
 
-    public enum TYPE{
+    public enum SOURCELOCATION {
         @Value
         WEBSITE,
         @Value
         FILE}
+
+
 
 }

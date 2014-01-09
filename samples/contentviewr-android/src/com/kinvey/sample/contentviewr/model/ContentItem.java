@@ -16,6 +16,8 @@ package com.kinvey.sample.contentviewr.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
@@ -56,6 +58,9 @@ public class ContentItem extends LinkedGenericJson {
     private SourceType thumbnail;
 
     @Key
+    private ArrayList<String> groups;
+
+    @Key
     private String type;
 
     private Bitmap thumbnailImage;
@@ -92,13 +97,6 @@ public class ContentItem extends LinkedGenericJson {
         this.target = target;
     }
 
-    /**
-     * Get the thumbnail from the LinkedResource
-     *
-     * Note it closes the output stream.
-     *
-     * @return null or the image attachment
-     */
     public Bitmap getThumbnailImage() {
         return thumbnailImage;
     }
@@ -139,5 +137,14 @@ public class ContentItem extends LinkedGenericJson {
     public void setType(String type){
         this.type = type;
     }
+
+    public ArrayList<String> getGroups(){
+        return groups;
+    }
+
+    public void setGroups(ArrayList<String> groups){
+        this.groups = groups;
+    }
+
 
 }

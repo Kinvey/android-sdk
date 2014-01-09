@@ -17,6 +17,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.google.api.client.util.Value;
+import com.joanzapata.pdfview.PDFView;
 
 import java.io.Serializable;
 
@@ -29,6 +31,9 @@ public class ContentType extends GenericJson implements Parcelable {
     private String displayName;
     @Key
     private String name;
+
+    @Key
+    private WINDOWTYPE windowstyle;
 
     private boolean isLabel = false;
     private boolean isSetting = false;
@@ -89,15 +94,6 @@ public class ContentType extends GenericJson implements Parcelable {
         this.isSetting = whatitis[1];
         this.uniqueID = in.readLong();
 
-
-
-
-//        String[] data = new String[3];
-//
-//        in.readStringArray(data);
-//        this.id = data[0];
-//        this.name = data[1];
-//        this.grade = data[2];
     }
 
     @Override
@@ -107,17 +103,10 @@ public class ContentType extends GenericJson implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-//        dest.writeStringArray(new String[] {this.id,
-//                this.name,
-//                this.grade});
-
         dest.writeString(this.displayName);
         dest.writeString(this.name);
         dest.writeBooleanArray(new boolean[]{isLabel, isSetting});
         dest.writeLong(uniqueID);
-
-
-
     }
 
     public static final Parcelable.Creator<ContentType> CREATOR = new Parcelable.Creator<ContentType>() {
@@ -128,13 +117,23 @@ public class ContentType extends GenericJson implements Parcelable {
             return new ContentType[size];
         }
     };
-//    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-//        public Student createFromParcel(Parcel in) {
-//            return new Student(in);
-//        }
-//
-//        public Student[] newArray(int size) {
-//            return new Student[size];
-//        }
-//    };
+
+    public WINDOWTYPE getWindowstyle() {
+        return windowstyle;
+    }
+
+    public void WINDOWTYPE(WINDOWTYPE windowstyle) {
+        this.windowstyle = windowstyle;
+    }
+
+    public enum WINDOWTYPE{
+
+        @Value
+        IMAGE,
+        @Value
+        WEB,
+        @Value
+        PDF;
+
+    }
 }

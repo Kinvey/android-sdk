@@ -122,7 +122,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
 
-        int change = db.updateWithOnConflict(FILE_CACHE_TABLE, values, null, null, db.CONFLICT_REPLACE);
+        int change = db.updateWithOnConflict(FILE_CACHE_TABLE, values,  COLUMN_ID+"='" + meta.getId() +"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(FILE_CACHE_TABLE, null, values);
         }
@@ -137,4 +137,19 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     }
 
 
+    public void dump() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_ID, COLUMN_FILENAME}, null, null, null, null, null);
+        while(c.moveToNext()){
+            Log.i("DUMP", "********");
+            Log.i("DUMP", "********");
+            Log.i("DUMP", "********");
+            Log.i("DUMP", c.getString(0) + " and " + c.getString(1));
+            Log.i("DUMP", "********");
+            Log.i("DUMP", "********");
+            Log.i("DUMP", "********");
+        }
+        c.close();;
+
+    }
 }
