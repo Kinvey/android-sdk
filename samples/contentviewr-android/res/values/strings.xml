@@ -34,5 +34,7 @@ under the License.
     <string name="login_register">Register</string>
     <string name="description_sign_out">Sign Out</string>
 
+    <string name="no_content">No Content of this type!</string>
+
 
 </resources>

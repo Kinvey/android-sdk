@@ -14,6 +14,7 @@
 package com.kinvey.sample.contentviewr;
 
 import android.app.Application;
+import android.util.Log;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
@@ -35,7 +36,10 @@ public class ContentViewrApplication extends Application {
 
     public void loadClient(KinveyUserCallback callback){
         if (client == null){
+            Log.i("Settings", "ok it's a new client");
+
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(callback).setUserClass(ContentUser.class).build();
+            client.enableDebugLogging();
         }else{
             if(callback != null){
                 if (client.user().isUserLoggedIn()){

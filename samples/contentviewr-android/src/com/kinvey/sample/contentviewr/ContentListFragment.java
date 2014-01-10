@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.AsyncAppData;
@@ -51,6 +52,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     protected ContentListAdapter adapter;
     protected ContentType type;
     protected LinearLayout loading;
+    private TextView empty;
 
     protected List<ContentItem> content;
 
@@ -100,6 +102,8 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
     public void bindViews(View v){
         contentList = (ListView) v.findViewById(R.id.content_list);
         loading = (LinearLayout) v.findViewById(R.id.content_loadingbox);
+        empty = (TextView) v.findViewById(R.id.content_none);
+        empty.setVisibility(View.GONE);
 
         refresh();
         contentList.setOnItemClickListener(this);
@@ -131,6 +135,13 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
                 }
                 loading.setVisibility(View.GONE);
                 content = Arrays.asList(result);
+
+                if (content.size() == 0){
+                    empty.setVisibility(View.VISIBLE);
+                }else{
+                    empty.setVisibility(View.GONE);
+                }
+
 
                 adapter = new ContentListAdapter(getSherlockActivity(), content,
                         (LayoutInflater) getSherlockActivity().getSystemService(

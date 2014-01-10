@@ -40,7 +40,7 @@ under the License.
                 android:layout_height="match_parent"
                 android:contentDescription="Photo"
                 android:src="@drawable/ic_launcher"
-                android:scaleType="centerCrop"
+                android:scaleType="centerInside"
                 android:layout_weight=".33"
                 />
 

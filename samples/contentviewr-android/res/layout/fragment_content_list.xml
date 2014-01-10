@@ -46,6 +46,14 @@ under the License.
                 />
     </LinearLayout>
 
+    <TextView android:id="@+id/content_none"
+              android:layout_width="match_parent"
+              android:gravity="center"
+              android:layout_height="wrap_content"
+              android:layout_centerInParent="true"
+              android:text="@string/no_content"/>
+
+
 
 
 

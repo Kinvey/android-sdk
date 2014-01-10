@@ -134,21 +134,23 @@ public class Contentviewr extends SherlockFragmentActivity{
         drawerLayout.setDrawerListener(drawerToggle);
 
 
-        ((ContentViewrApplication)getApplication()).loadClient(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-                preload();
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                showLogin();
-            }
-        });
-        getClient().enableDebugLogging();
+//        ((ContentViewrApplication)getApplication()).loadClient(new KinveyUserCallback() {
+//            @Override
+//            public void onSuccess(User result) {
+//                preload();
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable error) {
+//                showLogin();
+//            }
+//        });
+//        getClient().enableDebugLogging();
 
         if (!getClient().user().isUserLoggedIn()){
             showLogin();
+        }  else{
+            preload();
         }
     }
 
@@ -342,9 +344,13 @@ public class Contentviewr extends SherlockFragmentActivity{
                 if (position == getDrawerContents().size() - 2){
                     //replaceFragment(new LoginFragment(), true);
                     drawerLayout.closeDrawer(drawer);
+                    getClient().user().logout().execute();
+                    //Contentviewr.this.finish();
                     Intent i = new Intent(Contentviewr.this, SettingsActivity.class);
                     i.putExtra(SettingsActivity.EXTRA_TYPE, SettingsActivity.LOGIN);
-                    startActivityForResult(i, 0);
+
+                    startActivity(i);
+                    Contentviewr.this.finish();
 
 
 
@@ -379,17 +385,9 @@ public class Contentviewr extends SherlockFragmentActivity{
     }
 
     private void showLogin(){
-          getClient().user().login("hello", "hello", new KinveyUserCallback() {
-              @Override
-              public void onSuccess(User result) {
-                  preload();
-              }
-
-              @Override
-              public void onFailure(Throwable error) {
-                  Util.Error(Contentviewr.this, error);
-              }
-          });
+        Intent i = new Intent(Contentviewr.this, SettingsActivity.class);
+        i.putExtra(SettingsActivity.EXTRA_TYPE, SettingsActivity.LOGIN);
+        startActivityForResult(i, 0);
 
 
     }
@@ -500,7 +498,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         settings.setLabel(true);
 
         ContentType account = new ContentType();
-        account.setDisplayName("Account");
+        account.setDisplayName("Logout");
         account.setSetting(true);
 
         ContentType notifications = new ContentType();

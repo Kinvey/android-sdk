@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.Client;
@@ -69,6 +70,10 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
         passLabel.setTypeface(roboto);
         userLabel.setTypeface(roboto);
 
+        if (client().user().isUserLoggedIn()){
+            login.setText("Logout");
+        }
+
 
         login.setOnClickListener(this);
         register.setOnClickListener(this);
@@ -90,17 +95,20 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
 
     private void login(String username, String password){
 
-        if (getClient().user().isUserLoggedIn()){
-            getClient().user().logout().execute();
+        if (client().user().isUserLoggedIn()){
+            client().user().logout().execute();
+            getSherlockActivity().finish();
+            return;
         }
 
-        getClient().user().login(username, password, new KinveyUserCallback() {
+        client().user().login(username, password, new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 if (getSherlockActivity() == null){
                     return;
+
                 }
-                //To change body of implemented methods use File | Settings | File Templates.
+                ((SettingsActivity) getSherlockActivity()).showContent();
             }
 
             @Override
@@ -108,6 +116,7 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
                 if (getSherlockActivity() == null){
                     return;
                 }
+                Toast.makeText(getSherlockActivity(), "Couldn't login: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 //To change body of implemented methods use File | Settings | File Templates.
             }
         });
@@ -115,7 +124,7 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
     }
 
     private void register(String username, String password){
-        getClient().user().create(username, password, new KinveyUserCallback() {
+        client().user().create(username, password, new KinveyUserCallback() {
             @Override
             public void onSuccess(User result) {
                 if (getSherlockActivity() == null){
