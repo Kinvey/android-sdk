@@ -33,7 +33,7 @@ import com.kinvey.sample.contentviewr.core.ContentFragment;
 public class LoginFragment extends ContentFragment implements View.OnClickListener {
 
     Button login;
-    Button register;
+    //Button register;
     EditText username;
     EditText password;
     TextView userLabel;
@@ -57,16 +57,16 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
         roboto = Typeface.createFromAsset(getSherlockActivity().getAssets(), "Roboto-Thin.ttf");
 
         login = (Button) v.findViewById(R.id.login_go);
-        register = (Button) v.findViewById(R.id.login_register);
+        //register = (Button) v.findViewById(R.id.login_register);
         username = (EditText) v.findViewById(R.id.login_username);
         password = (EditText) v.findViewById(R.id.login_password);
         userLabel = (TextView) v.findViewById(R.id.login_userlabel);
         passLabel = (TextView) v.findViewById(R.id.login_passlabel);
 
-        login.setTypeface(roboto);
-        register.setTypeface(roboto);
-        username.setTypeface(roboto);
-        password.setTypeface(roboto);
+//        login.setTypeface(roboto);
+//        register.setTypeface(roboto);
+//        username.setTypeface(roboto);
+//        password.setTypeface(roboto);
         passLabel.setTypeface(roboto);
         userLabel.setTypeface(roboto);
 
@@ -76,7 +76,7 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
 
 
         login.setOnClickListener(this);
-        register.setOnClickListener(this);
+        //register.setOnClickListener(this);
     }
 
     @Override
@@ -88,8 +88,8 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
     public void onClick(View v) {
         if (v == login){
             login(username.getText().toString(), password.getText().toString());
-        }else if(v == register){
-            register(username.getText().toString(), password.getText().toString());
+//        }else if(v == register){
+//            register(username.getText().toString(), password.getText().toString());
         }
     }
 
