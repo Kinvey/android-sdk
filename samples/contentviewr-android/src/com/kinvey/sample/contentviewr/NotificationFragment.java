@@ -15,10 +15,7 @@ package com.kinvey.sample.contentviewr;
 
 import android.graphics.Typeface;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Switch;
-import android.widget.TextView;
+import android.widget.*;
 import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 
@@ -49,6 +46,18 @@ public class NotificationFragment extends ContentFragment {
 
         notifyTitle.setTypeface(roboto);
         updatesLabel.setTypeface(roboto);
+
+        updates.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b){
+                    client().push().initialize(getSherlockActivity().getApplication());
+                }else{
+                    client().user().remove("_push");
+
+                }
+            }
+        });
 
 
 

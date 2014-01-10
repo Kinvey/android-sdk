@@ -210,7 +210,8 @@ public class Contentviewr extends SherlockFragmentActivity{
     private void preload(){
 
         //if (!getClient().push().isPushEnabled()){
-            getClient().push().initialize(getApplication());
+
+//            getClient().push().initialize(getApplication());
         //}
         preLoadSemaphore = PRELOAD_COUNT;
 
