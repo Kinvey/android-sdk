@@ -69,7 +69,7 @@ public class HTMLViewer extends Viewer {
 
     private void loadPDF(){
 
-            if (content == null){
+            if (content == null || webview == null){
                 return;
             }
 
@@ -112,7 +112,7 @@ public class HTMLViewer extends Viewer {
 
                 @Override
                 public void onSuccess(Void result) {
-                    if (webview == null){
+                    if (webview == null || getSherlockActivity() == null){
                         Log.i("zoomImage", "nulled out");
 
                         return;
@@ -134,6 +134,9 @@ public class HTMLViewer extends Viewer {
 
                 @Override
                 public void onFailure(Throwable error) {
+                    if (getSherlockActivity() == null){
+                        return;
+                    }
                     Log.i("zoomImage", "failure " + error );
                     error.printStackTrace();
 

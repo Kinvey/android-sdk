@@ -47,7 +47,10 @@ public class SourceFactory {
                     if (adapter == null || item == null){
                         return;
                     }
-                    Bitmap ret = BitmapFactory.decodeStream(in, null, null);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 4;
+
+                    Bitmap ret = BitmapFactory.decodeStream(in, null, options);
                     Log.i("source", "" + ret.getByteCount());
                     item.setThumbnailImage(ret);
                     adapter.notifyDataSetChanged();

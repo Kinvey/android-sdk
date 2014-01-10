@@ -96,6 +96,7 @@ public class SettingsActivity extends SherlockFragmentActivity {
     }
 
         public void replaceFragment(ContentFragment frag, boolean backstack){
+
             FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
             tr.replace(android.R.id.content, frag);
             tr.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -103,7 +104,10 @@ public class SettingsActivity extends SherlockFragmentActivity {
             if(backstack){
                 tr.addToBackStack("back");
             }
-            tr.commit();
+            if (!isFinishing()){
+                tr.commitAllowingStateLoss();
+            }
+            //tr.commitAllowingStateLoss();
         }
 
     public void showContent(){
