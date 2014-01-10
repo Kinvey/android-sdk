@@ -27,6 +27,7 @@ import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
@@ -597,7 +598,10 @@ public class AsyncAppData<T> extends AppData<T> {
 
         @Override
         public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-
+            AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args);
+            if (request instanceof AbstractKinveyCachedClientRequest){
+                ((AbstractKinveyCachedClientRequest) request).setCallback(getCallback());
+            }
             return ((AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args)).execute();
 
         }

@@ -112,6 +112,15 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
     }
 
     /**
+     * Get the callback for this request
+     *
+     * @return the callback for this request, or {@code null} if one hasn't been set.
+     */
+    public KinveyClientCallback getCallback(){
+        return callback;
+    }
+
+    /**
      * This class is a copy of the native SerialExecutor from AOSP.  It is duplicated here to allow
      * AsyncClientRequest to run in their own Thread Pool seperate from the main application's AsyncTasks, but keep
      * the concurrency benefits of only having a single AsyncTask thread.  AndroidClientRequest will run in
