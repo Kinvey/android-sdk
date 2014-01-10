@@ -16,6 +16,7 @@ package com.kinvey.sample.contentviewr;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import com.kinvey.android.Client;
@@ -36,7 +37,7 @@ import java.net.URL;
 public class SourceFactory {
 
 
-    public static void asyncLoadThumbnail(final Client client, final ContentItem item, final ArrayAdapter adapter){
+    public void asyncLoadThumbnail(final Client client, final ContentItem item, final ArrayAdapter adapter){
         switch(item.getThumbnail().getType()){
             case FILE:
 
@@ -58,10 +59,6 @@ public class SourceFactory {
                 FileMetaData meta = new FileMetaData(item.getThumbnail().getReference());
                 MetaDownloadProgressListener dpl =  new MetaDownloadProgressListener() {
 
-//                    public FileMetaData currentData = meta;
-
-
-
                     @Override
                     public void progressChanged(MediaHttpDownloader downloader) throws IOException {}
 
@@ -73,6 +70,9 @@ public class SourceFactory {
 
                         FileCache cache = new FileCache();
                         byte[] outarray = out.toByteArray();
+
+                        Log.i("source factory", "cache array size: " + outarray.length);
+                        Log.i("source factory", "cache metadata: " + (getMetadata() != null));
 
 
                         if (getMetadata() != null){

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
@@ -49,7 +50,9 @@ public class NotificationFragment extends ContentFragment {
         notifyTitle.setTypeface(roboto);
         updatesLabel.setTypeface(roboto);
 
-        if (getClient().user().containsKey("_push")){
+
+
+        if (client().user().containsKey("_push")){
             updates.setChecked(true);
         }
     }
@@ -57,6 +60,10 @@ public class NotificationFragment extends ContentFragment {
     @Override
     public String getTitle() {
         return "Notifications";
+    }
+
+    private Client client(){
+        return ((ContentViewrApplication)((SettingsActivity) getSherlockActivity()).getApplicationContext()).getClient();
     }
 
 

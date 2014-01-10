@@ -62,14 +62,15 @@ under the License.
         <Button android:id="@+id/login_register"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:paddingRight="6dp"
+                android:gravity="center"
                 android:layout_height="wrap_content"
                 android:text="@string/login_register"/>
         <Button android:id="@+id/login_go"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="6dp"
+                android:gravity="center"
                 android:layout_height="wrap_content"
+
                 android:text="@string/login_go"/>
     </LinearLayout>
 

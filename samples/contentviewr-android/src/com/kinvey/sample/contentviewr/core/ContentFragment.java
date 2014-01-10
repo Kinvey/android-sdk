@@ -89,7 +89,11 @@ public abstract class ContentFragment extends SherlockFragment {
     }
 
     public Client getClient(){
-        return getContentViewr().getClient();
+        if (getContentViewr() != null){
+            return getContentViewr().getClient();
+        }else{
+            return null;
+        }
     }
 
     public String getSelectedTarget(){

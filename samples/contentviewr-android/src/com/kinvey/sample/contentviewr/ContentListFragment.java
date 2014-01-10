@@ -116,8 +116,10 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
 
         loading.setVisibility(View.VISIBLE);
-        Query q = new Query().equals("type", type.getName()).equals("target", getContentViewr().getSelectedTarget());
-        q.equals("groups", getClient().user().get("group")) ;
+        Query q = new Query()
+                .equals("type", type.getName())
+                .equals("target", getContentViewr().getSelectedTarget())
+                .equals("groups", getClient().user().get("group")) ;
 
         AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
         //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));

@@ -107,7 +107,7 @@ public class ContentItem extends LinkedGenericJson {
 
     public void loadThumbnail(Client client, ContentListAdapter adapter){
         //new loadThumbnailTask().execute(adapter);
-        SourceFactory.asyncLoadThumbnail(client, this, adapter);
+        new SourceFactory().asyncLoadThumbnail(client, this, adapter);
 
 
     }

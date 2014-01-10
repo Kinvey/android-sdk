@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
@@ -144,10 +145,14 @@ public class LoginFragment extends ContentFragment implements View.OnClickListen
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sign_out:
-                getClient().user().logout().execute();
+                client().user().logout().execute();
                 getSherlockActivity().finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private Client client(){
+        return ((ContentViewrApplication)((SettingsActivity) getSherlockActivity()).getApplicationContext()).getClient();
     }
 }

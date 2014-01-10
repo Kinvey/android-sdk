@@ -2,6 +2,7 @@ package com.kinvey.sample.contentviewr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -51,7 +52,7 @@ public class Contentviewr extends SherlockFragmentActivity{
     private List<Target> targets;
     private HashMap<String, ContentType> contentTypes;
 
-    private LinearLayout loading;
+    private RelativeLayout loading;
     private ListView drawer;
     private DrawerLayout drawerLayout;
     private DrawerAdapter adapter;
@@ -106,7 +107,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         roboto = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
         drawer = (ListView) findViewById(R.id.left_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        loading = (LinearLayout) findViewById(R.id.content_loadingbox);
+        loading = (RelativeLayout) findViewById(R.id.content_loadingbox);
 
 
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -156,6 +157,11 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onResume(){
         super.onResume();
         Log.i(TAG, "contentviewr got onresume");
+        if (!getClient().user().isUserLoggedIn()){
+            showLogin();
+        }else{
+            Log.i(TAG, "err logged in as: " + getClient().user().getUsername());
+        }
     }
 
 
@@ -335,13 +341,23 @@ public class Contentviewr extends SherlockFragmentActivity{
 
                 if (position == getDrawerContents().size() - 2){
                     //replaceFragment(new LoginFragment(), true);
-                    showFull(new LoginFragment());
                     drawerLayout.closeDrawer(drawer);
+                    Intent i = new Intent(Contentviewr.this, SettingsActivity.class);
+                    i.putExtra(SettingsActivity.EXTRA_TYPE, SettingsActivity.LOGIN);
+                    startActivityForResult(i, 0);
+
+
+
                 }else if (position == getDrawerContents().size() - 1){
+                    drawerLayout.closeDrawer(drawer);
+                    Intent i = new Intent(Contentviewr.this, SettingsActivity.class);
+                    i.putExtra(SettingsActivity.EXTRA_TYPE, SettingsActivity.PUSH);
+                    startActivity(i);
+
                     //replaceFragment(new NotificationFragment(), true);
                     //showWindow(new NotificationFragment());
-                    showFull(new NotificationFragment());
-                    drawerLayout.closeDrawer(drawer);
+//                    showFull(new NotificationFragment());
+//                    drawerLayout.closeDrawer(drawer);
                 }
             }
         });
@@ -350,6 +366,15 @@ public class Contentviewr extends SherlockFragmentActivity{
         //replaceFragment(pager, false);
         showList(pager);
 
+
+    }
+
+    @Override
+    public void onActivityResult(int req, int res, Intent data){
+        super.onActivityResult(req, res, data);
+        if (!getClient().user().isUserLoggedIn()){
+            this.finish();;
+        }
 
     }
 

@@ -109,7 +109,9 @@ public class PDFViewer extends Viewer {
                 }
 
 
-
+                if (getClient() == null){
+                    return;
+                }
                 File pdf = new File(getClient().getContext().getCacheDir(), getMetadata().getFileName());
                 pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
 

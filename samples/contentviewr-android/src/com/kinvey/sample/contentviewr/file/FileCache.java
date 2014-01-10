@@ -92,7 +92,7 @@ public class FileCache {
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
         Preconditions.checkNotNull(data, "byte[] data cannot be null!");
 
-        Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ")" );
+        Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
 
         //insert into database table
         FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);//new FileCacheSqlHelper(context);

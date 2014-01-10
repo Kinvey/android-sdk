@@ -18,7 +18,6 @@ import android.os.Parcelable;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
-import com.joanzapata.pdfview.PDFView;
 
 import java.io.Serializable;
 

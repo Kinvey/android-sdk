@@ -44,8 +44,13 @@ public class RecentFragment extends ContentListFragment {
             return;
         }
         loading.setVisibility(View.VISIBLE);
-        Query q = new Query().setLimit(10);
-        q.addSort("_kmd.ect", AbstractQuery.SortOrder.DESC).equals("target", getContentViewr().getSelectedTarget());
+        Query q = new Query()
+                .equals("target", getContentViewr().getSelectedTarget())
+                .equals("groups", getClient().user().get("group"));
+        q.addSort("_kmd.ect", AbstractQuery.SortOrder.DESC);
+                //.setLimit(10);
+
+
         AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
         //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
 

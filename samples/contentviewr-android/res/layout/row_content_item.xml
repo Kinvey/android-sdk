@@ -84,7 +84,7 @@ under the License.
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:includeFontPadding="false"
-                    android:gravity="right"
+                    android:gravity="left"
                     android:text="blurb"/>
         </LinearLayout>
 
