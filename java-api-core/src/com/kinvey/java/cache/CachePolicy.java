@@ -17,8 +17,6 @@ package com.kinvey.java.cache;
 
 import java.io.IOException;
 
-
-
 /**
  * Set the caching policy on AppData to getdifferent desired behavior for you app.
  *
@@ -114,18 +112,23 @@ public enum CachePolicy{
      * </p>
      */
     BOTH{
-        public <T> T execute(AbstractKinveyCachedClientRequest< T> cachedRequest) throws IOException{
-            if (cachedRequest.getCallback() == null){
+        public <T> T execute(AbstractKinveyCachedClientRequest<T> cachedRequest) throws IOException{
+            if (cachedRequest.getExecutor() == null){
+                System.out.println("executor is null");
                 return cachedRequest.fromService(false);
             }
-
             T ret = cachedRequest.fromCache();
+
             if (ret != null){
-                cachedRequest.getCallback().onSuccess(ret);
+                System.out.println("executor and ret are good to go");
+
+                cachedRequest.getExecutor().notify(ret);
+            }else{
+                System.out.println("executor is good ret is not");
+
+
             }
             ret = cachedRequest.fromService(true);
-            cachedRequest.getCallback().onSuccess(ret);
-
             return ret;
         }
     };

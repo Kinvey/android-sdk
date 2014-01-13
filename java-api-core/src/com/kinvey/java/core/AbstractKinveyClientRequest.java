@@ -109,6 +109,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     @Key
     private String appKey;
 
+    private KinveyClientCallback<T> callback;
+
     /**
      * The message received when a user has been locked down
      */
@@ -445,5 +447,13 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
     public void setRequireAppCredentials(boolean requireAppCredentials) {
         this.requireAppCredentials = requireAppCredentials;
+    }
+
+    public KinveyClientCallback<T> getCallback() {
+        return callback;
+    }
+
+    public void setCallback(KinveyClientCallback<T> callback) {
+        this.callback = callback;
     }
 }

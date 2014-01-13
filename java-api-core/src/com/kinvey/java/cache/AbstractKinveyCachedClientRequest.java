@@ -17,8 +17,7 @@ package com.kinvey.java.cache;
 
 import com.google.api.client.http.UriTemplate;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 import java.io.IOException;
@@ -53,8 +52,8 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
         }
     };
 
-    private KinveyClientCallback<T>  callback;
     private Object lock = new Object();
+    private AsyncExecutor executor;
 
 
     /**
@@ -122,15 +121,16 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
 
     @Override
     public T execute() throws IOException{
-        return policy.execute(this);
+        T ret =  policy.execute(this);
+        System.out.println("cached request returning");
+        return ret;
     }
 
-    public KinveyClientCallback<T> getCallback(){
-        return callback;
+    public AsyncExecutor getExecutor() {
+        return executor;
     }
 
-
-    public void setCallback(KinveyClientCallback<T> callback) {
-        this.callback = callback;
+    public void setExecutor(AsyncExecutor executor) {
+        this.executor = executor;
     }
 }

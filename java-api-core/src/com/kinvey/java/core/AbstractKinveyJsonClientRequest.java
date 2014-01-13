@@ -29,7 +29,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
 
   /** raw json data **/
   private final Object jsonContent;
-  
+
   /**
    * @param abstractKinveyJsonClient kinvey credential JSON client
    * @param requestMethod HTTP Method

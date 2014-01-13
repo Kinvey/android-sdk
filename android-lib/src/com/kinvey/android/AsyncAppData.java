@@ -599,10 +599,11 @@ public class AsyncAppData<T> extends AppData<T> {
         @Override
         public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
             AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args);
+            request.setCallback(getCallback());
             if (request instanceof AbstractKinveyCachedClientRequest){
-                ((AbstractKinveyCachedClientRequest) request).setCallback(getCallback());
+                ((AbstractKinveyCachedClientRequest) request).setExecutor(this);
             }
-            return ((AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args)).execute();
+            return request.execute();
 
         }
     }

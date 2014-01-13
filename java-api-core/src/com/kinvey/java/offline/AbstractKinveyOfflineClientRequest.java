@@ -47,7 +47,6 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
     private OfflineStore<T> store = null;
 
-    private KinveyClientCallback<T>  callback;
     private Object lock = new Object();
 
     private String collectionName;
@@ -157,16 +156,6 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
         this.store.kickOffSync();
         return ret;
     }
-
-    public KinveyClientCallback<T> getCallback(){
-        return callback;
-    }
-
-
-    public void setCallback(KinveyClientCallback<T> callback) {
-        this.callback = callback;
-    }
-
 
     /**
      * Generate a unique mongodb style id.

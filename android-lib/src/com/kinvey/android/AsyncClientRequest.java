@@ -23,6 +23,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyClientCallback;
 
 /**
@@ -32,7 +36,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
+public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> implements AsyncExecutor<T> {
 
     public enum ExecutorType {
         KINVEYSERIAL,
@@ -150,6 +154,28 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> {
                 THREAD_POOL_EXECUTOR.execute(mActive);
             }
         }
+    }
+
+    @Override
+    public void notify(final T object){
+        Log.i(Client.TAG, "notifying async client request");
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (getCallback() != null) {
+                    Log.i(Client.TAG, "notifying callback");
+
+                    getCallback().onSuccess(object);
+                }
+
+            }
+        };
+        mainHandler.post(myRunnable);
+
+
+
     }
 
 }
