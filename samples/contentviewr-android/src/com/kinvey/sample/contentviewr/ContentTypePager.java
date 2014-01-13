@@ -126,6 +126,18 @@ public class ContentTypePager extends ContentFragment {
     @Override
     public void refresh(){
 
+
+        int index = pager.getCurrentItem();
+        if (index - 1 > 0){
+            ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index - 1)).refresh();
+        }
+        if (index + 1 < pager.getAdapter().getCount() + STATIC){
+            ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index + 1)).refresh();
+        }
+
+        ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index)).refresh();
+
+
     }
 
     public class ContentTypeAdapter extends FragmentPagerAdapter {
