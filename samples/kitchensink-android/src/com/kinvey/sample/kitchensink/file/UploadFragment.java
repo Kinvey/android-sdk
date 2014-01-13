@@ -26,6 +26,7 @@ import android.widget.Toast;
 import java.io.*;
 
 import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.MetaUploadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.kitchensink.KitchenSink;
@@ -175,13 +176,14 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                 //Call the kinvey specific task to perform upload
                 FileMetaData meta = new FileMetaData(getTarget().getName())     ;
                 meta.setId(getTarget().getName());
+                meta.setPublic(true);
 
 
-                getApplicationContext().getClient().file().upload(meta, getTarget(), new UploaderProgressListener() {
+                getApplicationContext().getClient().file().upload(meta, getTarget(), new MetaUploadProgressListener() {
                     @Override
                     public void onSuccess(Void result) {
                         Log.i(KitchenSink.TAG, "successfully upload: " + getTarget().length() + " byte file.");
-                        Toast.makeText(getSherlockActivity(), "Upload finished.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getSherlockActivity(), "Upload finished. " + (getMetadata() != null), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -204,6 +206,8 @@ public class UploadFragment extends UseCaseFragment implements View.OnClickListe
                             }
                         });
                     }
+
+
 
                 });
             }

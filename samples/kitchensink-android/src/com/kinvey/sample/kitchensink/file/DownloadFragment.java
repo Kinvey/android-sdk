@@ -29,6 +29,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.kitchensink.KitchenSink;
 import com.kinvey.sample.kitchensink.MyEntity;
@@ -74,7 +75,8 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
         // call kinvey specific task to perform download
         FileMetaData meta = new FileMetaData(FileActivity.FILENAME);
         meta.setId(FileActivity.FILENAME);
-        getApplicationContext().getClient().file().downloadWithTTL(meta.getId(), 1200000, fos, new DownloaderProgressListener() {
+
+        getApplicationContext().getClient().file().downloadWithTTL(meta.getId(), 1200000, fos, new MetaDownloadProgressListener() {
             @Override
             public void progressChanged(MediaHttpDownloader downloader) throws IOException {
                 Log.i(KitchenSink.TAG, "progress updated: "+downloader.getDownloadState());
@@ -92,7 +94,7 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
             @Override
             public void onSuccess(Void result) {
                 Log.i(KitchenSink.TAG, "successfully download: " + getTarget().getName() + " file.");
-                Toast.makeText(getSherlockActivity(), "Download finished.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getSherlockActivity(), "Download finished. " + (getMetadata() != null), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -100,6 +102,7 @@ public class DownloadFragment extends UseCaseFragment implements View.OnClickLis
                 Log.e(KitchenSink.TAG, "failed to download: "+ getTarget().getName()+" file.", error);
                 Toast.makeText(getSherlockActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
             }
+
         });
 
     }

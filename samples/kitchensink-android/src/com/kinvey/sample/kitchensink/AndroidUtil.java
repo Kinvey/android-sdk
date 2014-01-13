@@ -14,6 +14,7 @@
  package com.kinvey.sample.kitchensink;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class AndroidUtil {
      * @param message - the message to be displayed in the toast
      */
     public static void toast(SherlockFragment fragment, String message){
+        Log.i("kitchensink", message);
         Toast.makeText(fragment.getSherlockActivity(), message, Toast.LENGTH_SHORT).show();
     }
 

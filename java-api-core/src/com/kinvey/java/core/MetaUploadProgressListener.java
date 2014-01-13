@@ -16,16 +16,12 @@ package com.kinvey.java.core;
 import com.kinvey.java.model.FileMetaData;
 
 /**
- * This class is an extension of the {@link DownloaderProgressListener}, which also provides a callback for the retrieval of the metadata.
- *
- *
  * @author edwardf
  */
-public abstract class MetaDownloadProgressListener implements DownloaderProgressListener {
-
+public abstract class MetaUploadProgressListener implements UploaderProgressListener{
 
     private FileMetaData metadata;
-    public MetaDownloadProgressListener(){}
+    public MetaUploadProgressListener(){}
 
 
     /**
@@ -44,8 +40,6 @@ public abstract class MetaDownloadProgressListener implements DownloaderProgress
     public FileMetaData getMetadata(){
         return metadata;
     }
-
-
 
 
 }

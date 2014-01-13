@@ -799,10 +799,6 @@ public class MediaHttpUploader {
         this.uploadState = uploadState;
         if (progressListener != null) {
             progressListener.progressChanged(this);
-            if (uploadState == UploadState.UPLOAD_COMPLETE){
-                progressListener.onSuccess(null);
-            }
-
         }
     }
 
@@ -813,6 +809,9 @@ public class MediaHttpUploader {
         if (this.progressListener != null){
             if(this.progressListener instanceof SaveLinkedResourceClientRequest.MetaUploadListener){
                 ((SaveLinkedResourceClientRequest.MetaUploadListener)this.progressListener).metaDataUploaded(meta);
+            }
+            if (this.progressListener instanceof MetaUploadProgressListener){
+                ((MetaUploadProgressListener) this.progressListener).metaDataRetrieved(meta);
             }
 
         }
