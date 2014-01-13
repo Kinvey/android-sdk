@@ -21,9 +21,12 @@ import android.view.View;
 import android.widget.*;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.AsyncCustomEndpoints;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.cache.CachePolicy;
+import com.kinvey.java.cache.InMemoryLRUCache;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.sample.kitchensink.*;
 import com.kinvey.sample.kitchensink.R;
@@ -40,10 +43,13 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
     private TextView currentID;
     private Button getIt;
 
+    private InMemoryLRUCache cache;
+
 
     @Override
     public void onResume() {
         super.onResume();
+        cache = new InMemoryLRUCache();
         getCount();
 
     }
@@ -101,12 +107,14 @@ public class GetFragment extends UseCaseFragment implements View.OnClickListener
 
 
     public void getIt() {
-        getCount();
+        //getCount();
 
         if (viewingID.getSelectedItem() == null){
             return;
         }
 
+        AsyncAppData app = getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class);
+        app.setCache(cache, CachePolicy.BOTH);
 
         getApplicationContext().getClient().appData(KitchenSink.collectionName, MyEntity.class).getEntity(viewingID.getSelectedItem().toString(), new KinveyClientCallback<MyEntity>() {
             @Override
