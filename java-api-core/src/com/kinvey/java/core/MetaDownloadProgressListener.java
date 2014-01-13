@@ -16,7 +16,7 @@ package com.kinvey.java.core;
 import com.kinvey.java.model.FileMetaData;
 
 /**
- * This class is an extension of the {@link DownloaderProgressListener}, which also provides a callback for the retrieval of the metadata.
+ * This class is an extension of the {@link DownloaderProgressListener}, which also provides a method for the retrieval of the metadata.
  *
  *
  * @author edwardf
@@ -30,7 +30,7 @@ public abstract class MetaDownloadProgressListener implements DownloaderProgress
 
     /**
      * Called when metadata has been successfully retrieved from blob, this will occur before the actual file is downloaded.
-     *                                                                   http://www.shapeways.com/model/1436296/glasskap-optigrab.html?li=search-results&materialId=25
+     *
      * @param meta the metadata object of the file being downloaded.
      */
     public void metaDataRetrieved(FileMetaData meta){
@@ -41,6 +41,11 @@ public abstract class MetaDownloadProgressListener implements DownloaderProgress
         System.out.println("cache meta: " + this.metadata.getFileName() + " and id: " + this.metadata.getId());
     }
 
+    /**
+     * Get the {@link FileMetaData} object associated with this download
+     *
+     * @return the FileMetaData object
+     */
     public FileMetaData getMetadata(){
         return metadata;
     }
