@@ -55,15 +55,15 @@ public enum OfflinePolicy {
         @Override
         public <T> T execute(AbstractKinveyOfflineClientRequest<T> offlineRequest) throws IOException {
             T ret = null;
-        try{
-            ret = offlineRequest.offlineFromService(false);
-        }catch(HttpResponseException e){
-            if (e.getLocalizedMessage().contains("DLC")){
-                throw e;
+            try{
+                ret = offlineRequest.offlineFromService(false);
+            }catch(HttpResponseException e){
+                if (e.getLocalizedMessage().contains("DLC")){
+                    throw e;
+                }
+            } catch (Exception e){
+                System.out.println("caught an online exception, but it's ok -> " + e.getMessage());
             }
-
-        }
-
             if (ret == null){
                 ret = offlineRequest.offlineFromStore();
             }

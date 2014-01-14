@@ -138,6 +138,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
 
 
     public void dump() {
+        if (false){
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_ID, COLUMN_FILENAME}, null, null, null, null, null);
         while(c.moveToNext()){
@@ -150,6 +151,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
             Log.i("DUMP", "********");
         }
         c.close();;
+        }
 
     }
 }
