@@ -13,9 +13,13 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
-import com.joanzapata.pdfview.PDFView;
+import android.webkit.WebView;
+import android.widget.Toast;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -29,7 +33,7 @@ import java.io.*;
  */
 public class PDFViewer extends Viewer {
 
-    PDFView pdfView;
+    WebView pdfView;
 
     @Override
     public int getViewID() {
@@ -38,22 +42,17 @@ public class PDFViewer extends Viewer {
 
     @Override
     public void bindViews(View v) {
-        pdfView = (com.joanzapata.pdfview.PDFView) v.findViewById(R.id.pdfview);
+        pdfView = (WebView) v.findViewById(R.id.pdfview);
+
+        pdfView.getSettings().setJavaScriptEnabled(true);
 
         loadPDF();
+//        String pdf = "http://www.adobe.com/devnet/acrobat/pdfs/pdf_open_parameters.pdf";
+//        pdfView.loadUrl("http://docs.google.com/gview?embedded=true&url=" + pdf);
 
-//        File pdf = new File(getClient().getContext().getCacheDir(), "")
-
-//        pdfView.fromFile(").
-////                .pages(0, 2, 1, 3, 3, 3)
-//                .defaultPage(1)
-//                .showMinimap(false)
-//                .enableSwipe(true)
-////                .onDraw(onDrawListener)
-////                .onLoad(onLoadCompleteListener)
-////                .onPageChange(onPageChangeListener)
-//                .load();
-
+//        webview.getSettings().setJavaScriptEnabled(true);
+//        webview.getSettings().setPluginsEnabled(true);
+//        webview.loadUrl("http://docs.google.com/gview?embedded=true&url=
 
     }
 
@@ -63,12 +62,17 @@ public class PDFViewer extends Viewer {
     }
 
 
+
+
+
+
     private void loadPDF(){
         if (content == null){
             return;
         }
 
-        //final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+
 
         FileCache cache = new FileCache();
         String filename = cache.getFilenameForID(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
@@ -80,7 +84,27 @@ public class PDFViewer extends Viewer {
 
             //String uri = getClient().getContext().getCacheDir() + filename;
             File pdf = new File(getClient().getContext().getCacheDir(), filename);
-            pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
+
+
+//            pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
+
+            //File  = new File("/sdcard/example.pdf");
+
+            if (pdf.exists()) {
+                Uri path = Uri.fromFile(pdf);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(path, "application/pdf");
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                try {
+                    startActivity(intent);
+                }
+                catch (ActivityNotFoundException e) {
+                    Toast.makeText(getSherlockActivity(),
+                            "No Application Available to View PDF",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
 
 
 
@@ -113,8 +137,24 @@ public class PDFViewer extends Viewer {
                     return;
                 }
                 File pdf = new File(getClient().getContext().getCacheDir(), getMetadata().getFileName());
-                pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
+//                pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
 
+
+                if (pdf.exists()) {
+                    Uri path = Uri.fromFile(pdf);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(path, "application/pdf");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    try {
+                        startActivity(intent);
+                    }
+                    catch (ActivityNotFoundException e) {
+                        Toast.makeText(getSherlockActivity(),
+                                "No Application Available to View PDF",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
 
             }
 
