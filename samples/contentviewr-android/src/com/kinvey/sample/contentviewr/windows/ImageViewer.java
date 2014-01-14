@@ -24,6 +24,7 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.component.ZoomImageView;
 import com.kinvey.sample.contentviewr.file.FileCache;
 import com.kinvey.sample.contentviewr.model.ContentItem;
@@ -64,7 +65,7 @@ public class ImageViewer extends Viewer  {
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        FileCache cache = new FileCache();
+        FileCache cache = new FileCache(Contentviewr.cacheLocation);
         FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
         if (in != null){
             if (image == null){
@@ -93,7 +94,7 @@ public class ImageViewer extends Viewer  {
                     return;
                 }
                 Log.i("zoomImage", "set from service");
-                FileCache cache = new FileCache();
+                FileCache cache = new FileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
                     cache.save(getClient().getContext(), getClient(), getMetadata(), outarray);

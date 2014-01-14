@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
+import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentTransaction;
@@ -30,6 +31,7 @@ import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +44,9 @@ public class Contentviewr extends SherlockFragmentActivity{
     public static final String TYPE_COLLECTION = "ContentTypes";
     public static final String CONTENT_COLLECTION = "Content";
     private static final int PRELOAD_COUNT = 2; //this is used as semaphore, should match number of collections to preload
+
+
+    public static File cacheLocation;
 
     private String selectedTarget;
 
@@ -78,6 +83,9 @@ public class Contentviewr extends SherlockFragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contentviewr);
         Log.i(TAG, "contentviewr got oncreate");
+
+        cacheLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/contentbox");
+
 
         if (savedInstanceState != null){
 

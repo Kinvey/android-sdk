@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Calendar;
 
@@ -33,6 +34,36 @@ public class FileCache {
 
     public static final String TAG = "kinvey - filecache";
     private static final long CACHE_LIMIT = 5242880L; // 5 mb default
+
+    //Maintains a file pointer to the location of the cache-- this better be a directory
+    private File cacheDir;
+
+    /**
+     * Load up a file cache using internal storage's cache directory
+     *
+     * @param context
+     */
+    public FileCache(Context context){
+        cacheDir = context.getCacheDir();
+    }
+
+    /**
+     * Load up a file cache using a custom defined location
+     *
+     * @param location
+     */
+    public FileCache(File location){
+        if (!location.exists()){
+             location.mkdirs();
+        }
+
+        if (location.isDirectory()){
+            cacheDir = location;
+        }else{
+            Log.e(TAG, "File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
+            throw new NullPointerException("File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
+        }
+    }
 
 
     /**
@@ -57,7 +88,6 @@ public class FileCache {
             return null;
         }
 
-        File cacheDir = context.getCacheDir();
         File cachedFile = new File(cacheDir, filename);
 
 
@@ -81,11 +111,29 @@ public class FileCache {
         return ret;
     }
 
+
+    /**
+     * Retrieve the filename of the file associated with the provided id
+     *
+     * @param context the applications' context
+     * @param id the id of the file to lookup
+     * @return {@code null} or the filename
+     */
     public String getFilenameForID(Context context, String id){
         FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
         return helper.getFileNameForId(id);
     }
 
+
+    /**
+     * Save a file into the file cache
+     *
+     *
+     * @param context the application's context
+     * @param client the current client
+     * @param meta the filemetadata associated with the file
+     * @param data the data of the file to write to disk
+     */
     public void save(Context context, Client client, FileMetaData meta, byte[] data){
         Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
@@ -99,7 +147,6 @@ public class FileCache {
         helper.insertRecord(client, meta);
 
         //write to cache dir
-        File cacheDir = context.getCacheDir();
 
         File file = new File(cacheDir, meta.getFileName());
         FileOutputStream os = null;
@@ -149,7 +196,7 @@ public class FileCache {
         @Override
         protected Void doInBackground(Context ... context) {
             //first check current size of cache, and compare it to cache limit.
-            File cacheDir = context[0].getCacheDir();
+
 
 
             long deleted = 0;

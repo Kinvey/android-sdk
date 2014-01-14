@@ -37,6 +37,7 @@ public abstract class Viewer extends ContentFragment{
     public void onCreate(Bundle saved){
         super.onCreate(saved);
         setHasOptionsMenu(false);
+        getSherlockActivity().invalidateOptionsMenu();
     }
 
 }

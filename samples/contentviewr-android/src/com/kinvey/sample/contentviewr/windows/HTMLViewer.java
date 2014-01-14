@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
 import com.kinvey.sample.contentviewr.file.FileCache;
 
@@ -47,104 +48,11 @@ public class HTMLViewer extends Viewer {
         webview = (WebView) v.findViewById(R.id.webview);
 
         String url = content.getSource().getReference();
-
-//        if (url.startsWith("http")){
-            Log.i("HTML Viewer", "it's a website");
-            webview.loadUrl(url);
-
-
-//        }else{
-//            Log.i("HTML Viewer", "it's a pdf");
-//            loadPDF();
-//
-//
-//
-//        }
-
-
-
-
-        //webview.loadUrl(content.getSource().getReference());
-    }
-
-    private void loadPDF(){
-
-            if (content == null || webview == null){
-                return;
-            }
-
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            FileCache cache = new FileCache();
-        String filename = cache.getFilenameForID(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
-        if (filename != null){
-
-
-            String url = getClient().getContext().getCacheDir() + filename;
-//
-
-                String googleDocs = "https://docs.google.com/viewer?url=";
-                webview.loadUrl(googleDocs + url);
-
-            return;
-        }
-//            FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
-//            if (in != null){
-//                if (webview == null){
-//                    Log.i("zoomImage", "nulled out");
-//                    return;
-//                }
-//
-//
-//                String url = getClient().getContext().getCacheDir() + cache.().getFileName() ;
-//
-//                String googleDocs = "https://docs.google.com/viewer?url=";
-//                webview.loadUrl(googleDocs + url);
-//                return;
-//
-//            }
-
-
-            FileMetaData meta = new FileMetaData(content.getSource().getReference());
-            getClient().file().download(meta, out, new MetaDownloadProgressListener() {
-                @Override
-                public void progressChanged(MediaHttpDownloader downloader) throws IOException {}
-
-                @Override
-                public void onSuccess(Void result) {
-                    if (webview == null || getSherlockActivity() == null){
-                        Log.i("zoomImage", "nulled out");
-
-                        return;
-                    }
-                    Log.i("zoomImage", "set from service");
-                    FileCache cache = new FileCache();
-                    byte[] outarray = out.toByteArray();
-                    if (getMetadata() != null){
-                        cache.save(getClient().getContext(), getClient(), getMetadata(), outarray);
-                    }
-
-                    String url = getClient().getContext().getCacheDir() + getMetadata().getFileName();
-                    Log.i("htmlviewer", url );
-                    String googleDocs = "https://docs.google.com/viewer?url=";
-                    webview.loadUrl(googleDocs + url);
-
-
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    if (getSherlockActivity() == null){
-                        return;
-                    }
-                    Log.i("zoomImage", "failure " + error );
-                    error.printStackTrace();
-
-                }
-            });
+        webview.loadUrl(url);
 
 
     }
+
 
     @Override
     public String getTitle() {

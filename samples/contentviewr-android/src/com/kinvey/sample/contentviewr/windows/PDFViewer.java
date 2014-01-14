@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
 import com.kinvey.sample.contentviewr.file.FileCache;
 
@@ -33,7 +34,7 @@ import java.io.*;
  */
 public class PDFViewer extends Viewer {
 
-    WebView pdfView;
+//    WebView pdfView;
 
     @Override
     public int getViewID() {
@@ -42,9 +43,9 @@ public class PDFViewer extends Viewer {
 
     @Override
     public void bindViews(View v) {
-        pdfView = (WebView) v.findViewById(R.id.pdfview);
-
-        pdfView.getSettings().setJavaScriptEnabled(true);
+//        pdfView = (WebView) v.findViewById(R.id.pdfview);
+//
+//        pdfView.getSettings().setJavaScriptEnabled(true);
 
         loadPDF();
 //        String pdf = "http://www.adobe.com/devnet/acrobat/pdfs/pdf_open_parameters.pdf";
@@ -68,22 +69,25 @@ public class PDFViewer extends Viewer {
 
     private void loadPDF(){
         if (content == null){
+            Log.i("ok", "content is null");
             return;
         }
 
 
 
 
-        FileCache cache = new FileCache();
+        FileCache cache = new FileCache(Contentviewr.cacheLocation);
         String filename = cache.getFilenameForID(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
         if (filename != null){
-            if (pdfView == null){
-                return;
-            }
+            Log.i("ok", "filename is not null");
+//            if (pdfView == null){
+//                Log.i("ok", "pdf exists from cache");
+//                return;
+//            }
 
 
             //String uri = getClient().getContext().getCacheDir() + filename;
-            File pdf = new File(getClient().getContext().getCacheDir(), filename);
+            File pdf = new File(Contentviewr.cacheLocation,  filename);
 
 
 //            pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
@@ -91,24 +95,29 @@ public class PDFViewer extends Viewer {
             //File  = new File("/sdcard/example.pdf");
 
             if (pdf.exists()) {
+                Log.i("ok", "pdf exists from cache");
                 Uri path = Uri.fromFile(pdf);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(path, "application/pdf");
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                try {
-                    startActivity(intent);
-                }
-                catch (ActivityNotFoundException e) {
-                    Toast.makeText(getSherlockActivity(),
-                            "No Application Available to View PDF",
-                            Toast.LENGTH_SHORT).show();
-                }
+                startActivity(intent);
+//
+//                try {
+//                    startActivity(intent);
+//                }
+//                catch (ActivityNotFoundException e) {
+//                    Toast.makeText(getSherlockActivity(),
+//                            "No Application Available to View PDF",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+                return;
+            } else{
+                Log.i("ok", "pdf doesnt exists from cache");
             }
 
 
 
-            return;
+            //return;
         }
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -120,13 +129,13 @@ public class PDFViewer extends Viewer {
 
             @Override
             public void onSuccess(Void result) {
-                if (pdfView == null){
-                    Log.i("zoomImage", "nulled out");
-
-                    return;
-                }
+//                if (pdfView == null){
+//                    Log.i("zoomImage", "nulled out");
+//
+//                    return;
+//                }
                 Log.i("zoomImage", "set from service");
-                FileCache cache = new FileCache();
+                FileCache cache = new FileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
                     cache.save(getClient().getContext(), getClient(), getMetadata(), outarray);
@@ -136,24 +145,22 @@ public class PDFViewer extends Viewer {
                 if (getClient() == null){
                     return;
                 }
-                File pdf = new File(getClient().getContext().getCacheDir(), getMetadata().getFileName());
+                File pdf = new File(Contentviewr.cacheLocation, getMetadata().getFileName());
 //                pdfView.fromFile(pdf).defaultPage(1).enableSwipe(true).load();
 
 
                 if (pdf.exists()) {
+                    Log.i("ok", "pdf exists from api");
                     Uri path = Uri.fromFile(pdf);
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(path, "application/pdf");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                    try {
+
                         startActivity(intent);
-                    }
-                    catch (ActivityNotFoundException e) {
-                        Toast.makeText(getSherlockActivity(),
-                                "No Application Available to View PDF",
-                                Toast.LENGTH_SHORT).show();
-                    }
+
+                }else{
+                    Log.e("ok", "pdf doesn't exist");
                 }
 
             }

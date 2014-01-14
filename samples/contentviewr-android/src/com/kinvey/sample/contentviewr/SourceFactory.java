@@ -41,7 +41,7 @@ public class SourceFactory {
         switch(item.getThumbnail().getType()){
             case FILE:
 
-                FileCache cache = new FileCache();
+                FileCache cache = new FileCache(Contentviewr.cacheLocation);
                 FileInputStream in = cache.get(client.getContext(), item.getThumbnail().getReference());
                 if (in != null){
                     if (adapter == null || item == null){
@@ -71,7 +71,7 @@ public class SourceFactory {
                             return;
                         }
 
-                        FileCache cache = new FileCache();
+                        FileCache cache = new FileCache(Contentviewr.cacheLocation);
                         byte[] outarray = out.toByteArray();
 
                         Log.i("source factory", "cache array size: " + outarray.length);
