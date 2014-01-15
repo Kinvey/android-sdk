@@ -35,11 +35,13 @@ public class InMemoryLRUCache<T, V> implements Cache<T, V> {
 
     protected LinkedHashMap<T, V> mCache;
 
-    //these are defaults declared by Oracle: http://docs.oracle.com/javase/1.4.2/docs/api/java/util/LinkedHashMap.html
+    //these are defaults declared by Oracle: http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashMap.html
     int cacheSize = 16;
     float loadFactor = 0.75f;
 
-    /**Use the default cache size and load factor for a new in-memory cache
+    /**Use the default cache size and load factor for a new in-memory cache.
+     * <p/>
+     * the default cacheSize is 16 elements, and the default load factor is 0.75
      */
     public InMemoryLRUCache(){
         initCache();
