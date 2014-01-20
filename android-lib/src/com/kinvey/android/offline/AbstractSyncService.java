@@ -87,7 +87,7 @@ public abstract class AbstractSyncService extends IntentService{
      */
     private void initClientAndKickOffSync() {
 
-        if (client == null) {
+        if (client == null || !client.user().isUserLoggedIn()) {
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
@@ -101,6 +101,7 @@ public abstract class AbstractSyncService extends IntentService{
                 }
             }).build();
 
+            client.enableDebugLogging();
 
 
         } else {
@@ -236,6 +237,9 @@ public abstract class AbstractSyncService extends IntentService{
             DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
             dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
             registerFailure();
+        }else{
+            Log.i(TAG, "not requeing request");
+
         }
 
     }

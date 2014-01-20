@@ -296,19 +296,25 @@ public class OfflineTable<T extends GenericJson> {
     }
 
     public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass){
+        Log.e(TAG, "it's a get all");
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},null ,
                 null, null, null, null, null);
 
         List<T> asList = new ArrayList<T>();
-        if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()){
-            try{
-                String s  = cursor.getString(0);
-                asList.add(client.getJsonFactory().fromString(s, responseClass));
-            }catch(Exception e){
-                Log.e(TAG, "cannot parse json into object! -> " + e);
+        if (cursor != null && cursor.getCount() > 0){
+            while (cursor.moveToNext()){
+                Log.e(TAG, "added one");
+                try{
+                   String s  = cursor.getString(0);
+                   asList.add(client.getJsonFactory().fromString(s, responseClass));
+                }catch(Exception e){
+                    Log.e(TAG, "cannot parse json into object! -> " + e);
+                }
             }
 
             cursor.close();
+        }else{
+            Log.e(TAG, "cursor is no good");
         }
         T[] asArray = (T[]) Array.newInstance(responseClass, asList.size());
         for (int i = 0; i < asList.size(); i++){

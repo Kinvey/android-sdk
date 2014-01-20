@@ -87,7 +87,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         cacheLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/contentbox");
 
 
-        if (savedInstanceState != null){
+        if (savedInstanceState != null && savedInstanceState.containsKey("contentKeys") && savedInstanceState.containsKey("contentValues")){
 
 
             String[] contentKeys = savedInstanceState.getStringArray("contentKeys"); // contentTypes.keySet().toArray(new String[contentTypes.keySet().size()]);
@@ -169,7 +169,9 @@ public class Contentviewr extends SherlockFragmentActivity{
     public void onResume(){
         super.onResume();
         Log.i(TAG, "contentviewr got onresume");
-        if (!getClient().user().isUserLoggedIn()){
+        if (getClient() == null || getClient().user() == null){
+            showLogin();
+        } else if (!getClient().user().isUserLoggedIn()){
             showLogin();
         }else{
             Log.i(TAG, "err logged in as: " + getClient().user().getUsername());

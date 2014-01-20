@@ -126,11 +126,11 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
                 .equals("groups", getClient().user().get("group")) ;
 
         AsyncAppData<ContentItem> app = getClient().appData(CONTENT_COLLECTION, ContentItem.class);
-        //app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
+        app.setOffline(OfflinePolicy.LOCAL_FIRST, new SqlLiteOfflineStore(getSherlockActivity().getApplicationContext()));
         app.get(q, new KinveyListCallback<ContentItem>() {
             @Override
             public void onSuccess(ContentItem[] result) {
-                if (getSherlockActivity() == null) {
+                if (getSherlockActivity() == null || getClient() == null) {
                     return;
                 }
                 loading.setVisibility(View.GONE);
