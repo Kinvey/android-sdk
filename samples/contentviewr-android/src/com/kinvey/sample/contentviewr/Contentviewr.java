@@ -155,9 +155,11 @@ public class Contentviewr extends SherlockFragmentActivity{
 //        });
 //        getClient().enableDebugLogging();
 
-        if (!getClient().user().isUserLoggedIn()){
+        if (getClient() == null || getClient().user() == null){
             showLogin();
-        }  else{
+        }else if(!getClient().user().isUserLoggedIn()){
+            showLogin();
+        }else{
             preload();
         }
     }
@@ -515,7 +517,7 @@ public class Contentviewr extends SherlockFragmentActivity{
         notifications.setSetting(true);
 
         ContentType markets = new ContentType();
-        markets.setDisplayName("Markets");
+        markets.setDisplayName("Audience");
         markets.setLabel(true);
 
         drawer.add(markets);

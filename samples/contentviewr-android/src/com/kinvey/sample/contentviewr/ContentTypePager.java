@@ -195,11 +195,9 @@ public class ContentTypePager extends ContentFragment {
             }else if (position == 1){
                 return -2;
             }
-
-            if (position >= 4){
+            if (position >= ((List<String>) getClient().user().get("ordering")).size() + STATIC){
                 return 0;
             }
-
             Log.i(Client.TAG, "content type pager, position is: " + position + " and ordered is: " + (position - STATIC));
             List<String> order = (List<String>) getClient().user().get("ordering");
             return getContentType().get(order.get(position - STATIC)).getUniqueID();

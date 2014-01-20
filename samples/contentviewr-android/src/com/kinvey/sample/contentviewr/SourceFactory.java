@@ -51,7 +51,7 @@ public class SourceFactory {
                     options.inSampleSize = 4;
 
                     Bitmap ret = BitmapFactory.decodeStream(in, null, options);
-                    Log.i("source", "" + ret.getByteCount());
+                    Log.i(FileCache.TAG, "" + ret.getByteCount());
                     item.setThumbnailImage(ret);
                     adapter.notifyDataSetChanged();
                     return;
@@ -74,15 +74,17 @@ public class SourceFactory {
                         FileCache cache = new FileCache(Contentviewr.cacheLocation);
                         byte[] outarray = out.toByteArray();
 
-                        Log.i("source factory", "cache array size: " + outarray.length);
-                        Log.i("source factory", "cache metadata: " + (getMetadata() != null));
+                        Log.i(FileCache.TAG, "cache array size: " + outarray.length);
+                        Log.i(FileCache.TAG, "cache metadata: " + (getMetadata() != null));
 
 
                         if (getMetadata() != null){
                             cache.save(client.getContext(), client, getMetadata(), outarray);
                         }
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inSampleSize = 4;
+                        Bitmap ret = BitmapFactory.decodeByteArray(outarray, 0, outarray.length, options);
 
-                        Bitmap ret = BitmapFactory.decodeByteArray(outarray, 0, outarray.length);
                         item.setThumbnailImage(ret);
                         adapter.notifyDataSetChanged();
                     }
@@ -90,11 +92,6 @@ public class SourceFactory {
                     @Override
                     public void onFailure(Throwable error) {}
 
-//                    @Override
-//                    public void metaDataRetrieved(FileMetaData metadata) {
-//                        currentData.setFileName(metadata.getFileName());
-//
-//                    }
                 };
 
                 client.file().download(meta, out, dpl);
