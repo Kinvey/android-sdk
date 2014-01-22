@@ -39,6 +39,8 @@ import java.io.IOException;
  */
 public class ImageViewer extends Viewer  {
 
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+
 
 
     private ZoomImageView image;
@@ -63,7 +65,7 @@ public class ImageViewer extends Viewer  {
             return;
         }
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
 
         FileCache cache = new FileCache(Contentviewr.cacheLocation);
         FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
@@ -73,7 +75,9 @@ public class ImageViewer extends Viewer  {
                 return;
             }
 
-            Bitmap ret = BitmapFactory.decodeStream(in);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+            Bitmap ret = BitmapFactory.decodeStream(in, null, options);
             image.setImageBitmap(ret);
             Log.i("zoomImage", "set from cache");
             return;
@@ -88,7 +92,7 @@ public class ImageViewer extends Viewer  {
 
             @Override
             public void onSuccess(Void result) {
-                if (image == null){
+                if (image == null || getSherlockActivity() == null){
                     Log.i("zoomImage", "nulled out");
 
                     return;
@@ -97,10 +101,17 @@ public class ImageViewer extends Viewer  {
                 FileCache cache = new FileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
-                    cache.save(getClient().getContext(), getClient(), getMetadata(), outarray);
+                    Log.e("WAT", "" + (getSherlockActivity() != null));
+                    Log.e("WAT", "" + (getSherlockActivity().getApplicationContext() != null));
+                    Log.e("WAT", "" + (getClient() != null));
+                    Log.e("WAT", "" + (getMetadata() != null));
+                    Log.e("WAT", "" + (outarray != null));
+                    cache.save(getSherlockActivity().getApplicationContext(), getClient(), getMetadata(), outarray);
                 }
 
-                Bitmap ret = BitmapFactory.decodeByteArray(outarray, 0, outarray.length);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 2;
+                Bitmap ret = BitmapFactory.decodeByteArray(outarray, 0, outarray.length, options);
 
                 image.setImageBitmap(ret);
             }

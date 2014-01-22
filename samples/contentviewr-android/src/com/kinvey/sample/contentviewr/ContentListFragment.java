@@ -138,6 +138,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
                 if (content.size() == 0){
                     empty.setVisibility(View.VISIBLE);
+                    return;
                 }else{
                     empty.setVisibility(View.GONE);
                 }
@@ -151,7 +152,9 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
                 //Lazy load images
                 for (ContentItem c : content) {
-                    c.loadThumbnail(getClient(), adapter);
+                    if (c != null && getClient() != null){
+                        c.loadThumbnail(getClient(), adapter);
+                    }
                 }
             }
 

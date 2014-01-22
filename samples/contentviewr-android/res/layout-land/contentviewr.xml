@@ -53,10 +53,21 @@ under the License.
                              android:layout_width="0dp"
                              android:layout_height="match_parent"
                              android:layout_weight="1.618"/>
-                <FrameLayout android:id="@+id/content_right"
-                             android:layout_width="0dp"
-                             android:layout_height="match_parent"
-                             android:layout_weight="3.236"/>
+
+                <RelativeLayout android:layout_width="0dp" android:layout_height="match_parent" android:background="@color/icon_blue" android:layout_weight="3.236">
+                    <ImageView android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:background="@drawable/splashicon"
+                               android:layout_centerInParent="true"/>
+                    <FrameLayout android:id="@+id/content_right"
+                                 android:layout_width="match_parent"
+                                 android:layout_height="match_parent"
+
+                                 />
+
+
+                </RelativeLayout>
+
 
             </LinearLayout>
 

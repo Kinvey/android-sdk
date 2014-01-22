@@ -49,7 +49,6 @@ under the License.
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
                     android:inputType="textEmailAddress"
-                    android:padding="-500dp"
                     android:nextFocusDown="@+id/et_password"/>
 
             <TextView android:id="@+id/login_passlabel"

@@ -94,6 +94,7 @@ public class ContentTypePager extends ContentFragment {
             pager.setAdapter(new ContentTypeAdapter(getChildFragmentManager()));
         }
         pager.getAdapter().notifyDataSetChanged();;
+        pager.setOffscreenPageLimit(5);
         indicator.setViewPager(pager);
         indicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
         indicator.setTextColor(R.color.ebony);

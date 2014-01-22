@@ -14,6 +14,7 @@
 package com.kinvey.sample.contentviewr;
 
 import android.app.Activity;
+import android.graphics.Point;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +42,7 @@ public class RecentFragment extends ContentListFragment {
 
     @Override
     public void refresh(){
-        if (loading == null){
+        if (loading == null || getContentViewr() == null){
             return;
         }
         loading.setVisibility(View.VISIBLE);
@@ -71,13 +72,27 @@ public class RecentFragment extends ContentListFragment {
                 contentList.setAdapter(adapter);
 
                 for (ContentItem c : content) {
-                    c.loadThumbnail(getClient(), adapter);
+                    if (c != null && getClient() != null){
+                        c.loadThumbnail(getClient(), adapter);
+                    }
                 }
 
-//                click(0);
 
-
-
+                //TODO this won't work if first content item is PDF-- it will just pop the pdf viewing intent
+//                if (content.size() >= 1 && content.get(0) != null){
+//                    Point size = new Point(0,0);
+//                    if (getSherlockActivity() != null){
+//                        getSherlockActivity().getWindowManager().getDefaultDisplay().getSize(size);
+//                        if (size.x > size.y){
+//                            //it's landscape
+//                            click(0);
+//                        }
+//
+//
+//                    }
+//
+//
+//                }
             }
 
             @Override

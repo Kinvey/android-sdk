@@ -32,10 +32,7 @@ import com.kinvey.sample.contentviewr.model.ContentType;
 import com.kinvey.sample.contentviewr.model.Target;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Contentviewr extends SherlockFragmentActivity{
 
@@ -288,7 +285,7 @@ public class Contentviewr extends SherlockFragmentActivity{
                     }
 
                 }else{
-                    getClient().user().put("ordering", Arrays.asList(contentTypes.keySet().toArray(new String[0])));
+                    getClient().user().put("ordering", new LinkedList(Arrays.asList(contentTypes.keySet().toArray(new String[0]))));
                     getClient().user().update(null);
                 }
 

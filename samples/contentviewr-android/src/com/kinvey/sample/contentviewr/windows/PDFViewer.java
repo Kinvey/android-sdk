@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
@@ -35,6 +36,9 @@ import java.io.*;
 public class PDFViewer extends Viewer {
 
 //    WebView pdfView;
+    ProgressBar progress;
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     @Override
     public int getViewID() {
@@ -47,6 +51,7 @@ public class PDFViewer extends Viewer {
 //
 //        pdfView.getSettings().setJavaScriptEnabled(true);
 
+        progress = (ProgressBar) v.findViewById(R.id.pdf_progress);
         loadPDF();
 //        String pdf = "http://www.adobe.com/devnet/acrobat/pdfs/pdf_open_parameters.pdf";
 //        pdfView.loadUrl("http://docs.google.com/gview?embedded=true&url=" + pdf);
@@ -72,6 +77,8 @@ public class PDFViewer extends Viewer {
             Log.i("ok", "content is null");
             return;
         }
+
+        progress.setVisibility(View.VISIBLE);
 
 
 
@@ -100,6 +107,7 @@ public class PDFViewer extends Viewer {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(path, "application/pdf");
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                progress.setVisibility(View.GONE);
                 startActivity(intent);
 //
 //                try {
@@ -120,7 +128,6 @@ public class PDFViewer extends Viewer {
             //return;
         }
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         FileMetaData meta = new FileMetaData(content.getSource().getReference());
         getClient().file().download(meta, out, new MetaDownloadProgressListener() {
@@ -129,16 +136,25 @@ public class PDFViewer extends Viewer {
 
             @Override
             public void onSuccess(Void result) {
-//                if (pdfView == null){
-//                    Log.i("zoomImage", "nulled out");
-//
-//                    return;
-//                }
-                Log.i("zoomImage", "set from service");
+                if (getSherlockActivity() == null){
+                    Log.i("zoomImage", "nulled out");
+                    if (progress != null){
+                        progress.setVisibility(View.GONE);
+                    }
+
+                    return;
+                }
+                Log.i("pdfview", "set from service");
                 FileCache cache = new FileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
-                    cache.save(getClient().getContext(), getClient(), getMetadata(), outarray);
+                    Log.e("WAT", "" + (getSherlockActivity() != null));
+                    Log.e("WAT", "" + (getSherlockActivity().getApplicationContext() != null));
+                    Log.e("WAT", "" + (getClient() != null));
+                    Log.e("WAT", "" + (getMetadata() != null));
+                    Log.e("WAT", "" + (outarray != null));
+
+                    cache.save(getSherlockActivity().getApplicationContext(), getClient(), getMetadata(), outarray);
                 }
 
 
@@ -155,7 +171,7 @@ public class PDFViewer extends Viewer {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(path, "application/pdf");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
+                    progress.setVisibility(View.GONE);
 
                         startActivity(intent);
 
