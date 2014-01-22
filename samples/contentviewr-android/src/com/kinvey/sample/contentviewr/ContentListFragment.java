@@ -112,9 +112,7 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
 
 
     public void refresh(){
-        Log.i(Contentviewr.TAG, "refresh on: " + type.getDisplayName());
-        if (loading == null){
-            Log.i(Contentviewr.TAG,  "view is redrawn");
+        if (loading == null || getContentViewr() == null || getClient() == null){
             return;
         }
 

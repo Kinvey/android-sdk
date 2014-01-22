@@ -44,6 +44,9 @@ public class HTMLViewer extends Viewer {
 
     @Override
     public void bindViews(View v){
+        if (content == null){
+            return;
+        }
         Log.i("HTML Viewer", "binding views");
         webview = (WebView) v.findViewById(R.id.webview);
 

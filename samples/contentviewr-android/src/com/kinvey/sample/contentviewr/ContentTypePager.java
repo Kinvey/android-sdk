@@ -129,6 +129,11 @@ public class ContentTypePager extends ContentFragment {
 
 
         int index = pager.getCurrentItem();
+        //check page before, after, and current and refresh them
+
+
+        //note if index is 0, it is reorder fragment, so don't refresh
+
         if (index - 1 > 0){
             ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index - 1)).refresh();
         }
@@ -136,7 +141,9 @@ public class ContentTypePager extends ContentFragment {
             ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index + 1)).refresh();
         }
 
-        ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index)).refresh();
+        if (index != 0){
+            ((ContentListFragment) ((ContentTypeAdapter)pager.getAdapter()).getItem(index)).refresh();
+        }
 
 
     }

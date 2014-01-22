@@ -54,6 +54,10 @@ public class SourceFactory {
                     Log.i(FileCache.TAG, "" + ret.getByteCount());
                     item.setThumbnailImage(ret);
                     adapter.notifyDataSetChanged();
+                    try{
+                        in.close();
+                    }catch (IOException e){}
+
                     return;
 
                 }
@@ -87,6 +91,10 @@ public class SourceFactory {
 
                         item.setThumbnailImage(ret);
                         adapter.notifyDataSetChanged();
+                        try{
+                            out.close();
+                        } catch (IOException e) {}
+
                     }
 
                     @Override

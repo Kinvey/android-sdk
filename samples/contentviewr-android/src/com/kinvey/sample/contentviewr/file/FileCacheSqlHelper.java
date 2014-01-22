@@ -50,7 +50,6 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     public static synchronized FileCacheSqlHelper getInstance(Context context){
         if (_instance == null){
             _instance = new FileCacheSqlHelper(context);
-            //_instance.setContext(context);
         }
         return _instance;
     }

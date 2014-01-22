@@ -31,6 +31,7 @@ import com.kinvey.sample.contentviewr.windows.Viewer;
 import com.kinvey.sample.contentviewr.windows.WindowFactory;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import static com.kinvey.sample.contentviewr.Contentviewr.CONTENT_COLLECTION;
 
@@ -42,7 +43,7 @@ public class RecentFragment extends ContentListFragment {
 
     @Override
     public void refresh(){
-        if (loading == null || getContentViewr() == null){
+        if (loading == null || getContentViewr() == null || getClient() == null){
             return;
         }
         loading.setVisibility(View.VISIBLE);
@@ -63,8 +64,11 @@ public class RecentFragment extends ContentListFragment {
                     return;
                 }
                 loading.setVisibility(View.GONE);
-                content = Arrays.asList(result);
+                content = new LinkedList<ContentItem>();
+                for (int i = result.length - 1; i >= 0; i-- ){
+                    content.add(result[i]);
 
+                }
                 adapter = new ContentListAdapter(getSherlockActivity(), content,
                         (LayoutInflater) getSherlockActivity().getSystemService(
                                 Activity.LAYOUT_INFLATER_SERVICE));
@@ -114,6 +118,10 @@ public class RecentFragment extends ContentListFragment {
     }
 
     public void click(int position){
+
+        if (getSherlockActivity() == null){
+            return;
+        }
         ContentType type = null;
 
         for (ContentType t : getContentType().values()){
@@ -121,6 +129,10 @@ public class RecentFragment extends ContentListFragment {
                 type = t;
             }
 
+        }
+
+        if (type == null || adapter == null){
+            return;
         }
 
         ContentItem item = adapter.getItem(position);
