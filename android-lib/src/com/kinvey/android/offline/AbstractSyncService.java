@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
@@ -43,6 +44,7 @@ public abstract class AbstractSyncService extends IntentService{
     public static final String ACTION_OFFLINE_SYNC = "com.kinvey.android.ACTION_OFFLINE_SYNC";
     private static final String shared_pref = "Kinvey_Offline_Sync";
     private static final String pref_last_failure_at = "last_failure";
+    private static final String pref_last_batch_at = "last_batch";
 
     private Client client;
 
@@ -114,22 +116,32 @@ public abstract class AbstractSyncService extends IntentService{
      * This method grabs a list of all collection names from the db helper, iterates through them, and pops all their queues.
      */
     public void getFromStoreAndExecute() {
-        DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
-        List<String> collectionNames = dbHelper.getCollectionTables();
+        new AsyncTask<Void, Void, Void>(){
 
 
-        for (String s : collectionNames) {
-            boolean done = false;
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
+                List<String> collectionNames = dbHelper.getCollectionTables();
 
-            while (!done && safeToAttempExecution()){
-                OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
-                if (req == null){
-                    done = true;
-                }else{
-                    executeRequest(dbHelper, req, s);
+
+                for (String s : collectionNames) {
+                    boolean done = false;
+
+                    while (!done && safeToAttempExecution()){
+                        OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
+                        if (req == null){
+                            done = true;
+                        }else{
+                            executeRequest(dbHelper, req, s);
+                        }
+                    }
                 }
+                return null;
             }
-        }
+        }.execute();
+
+
     }
 
     /**
@@ -230,17 +242,27 @@ public abstract class AbstractSyncService extends IntentService{
      * @param info the id and varb of the request
      * @param error instance of an error
      */
-    private void storeCompletedRequestInfo(String collectionName, boolean success, OfflineRequestInfo info, Throwable error) {
-        //if request failed on client side, re-queue it
-        if (!success && error != null && !(error instanceof HttpResponseException)){
-            Log.i(TAG, "requeing request");
-            DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
-            dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
-            registerFailure();
-        }else{
-            Log.i(TAG, "not requeing request");
+    private void storeCompletedRequestInfo(final String collectionName,final boolean success, final OfflineRequestInfo info,final Throwable error) {
 
-        }
+        new AsyncTask<Void, Void, Void>(){
+
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                //if request failed on client side, re-queue it
+                if (!success && error != null && !(error instanceof HttpResponseException)){
+                    Log.i(TAG, "requeing request");
+                    DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
+                    dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
+                    registerFailure();
+                }else{
+                    Log.i(TAG, "not requeing request");
+
+                }
+                return null;
+            }
+        }.execute();
+
 
     }
 
@@ -250,11 +272,34 @@ public abstract class AbstractSyncService extends IntentService{
      * @return the time of the last failure, or a safe number if there haven't been any
      */
     private Long getLastFailureTime(){
-
         SharedPreferences pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE);
         long lastFail = pref.getLong(pref_last_failure_at, Calendar.getInstance().getTimeInMillis() - client.getSyncRate() - 100);
 
         return lastFail;
+    }
+
+
+    /**
+     *
+     *
+     * @return the time the last batch of requests was executed
+     */
+    private Long getLastBatchTime(){
+        SharedPreferences pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE);
+        long lastBatch = pref.getLong(pref_last_batch_at, Calendar.getInstance().getTimeInMillis() - client.getBatchRate() - 100);
+        return lastBatch;
+
+    }
+
+    /**
+     * register completion of a batch of sync operations
+     *
+     */
+    private void registerSync(){
+        Long currentTime = Calendar.getInstance().getTimeInMillis();
+        SharedPreferences.Editor pref = getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+        pref.putLong(pref_last_batch_at, currentTime);
+        pref.commit();
     }
 
     /**
@@ -270,17 +315,24 @@ public abstract class AbstractSyncService extends IntentService{
     }
 
     /**
-     * Compare current time to last failure and sync rate to determine if sync should occur
+     * Compare current time to last failure time, and also check sync rate to determine if sync should occur
      *
-     * @return true if it has been long enough since last failure to attempt sync again
+     * @return true if it has been long enough since last failure to attempt sync again, and the sync rate has passed
      */
     private boolean safeToAttempExecution(){
         Long currentTime = Calendar.getInstance().getTimeInMillis();
         Long lastFail = getLastFailureTime();
 
         boolean safe = ((lastFail + client.getSyncRate()) < currentTime);
-        //Log.e("OK", "is it safe -> " + safe);
-        return safe;
+        if (!safe){
+            //can short circuit here because it hasn't been long enough since last failure
+            return false;
+        }
+        //sync hasn't failed recently, so check batch timing
+
+        long lastBatch = getLastBatchTime();
+
+        return (lastBatch + client.getBatchRate() < currentTime);
 
     }
 

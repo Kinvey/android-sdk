@@ -410,6 +410,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             GCM_PROD_MODE("gcm.production"),
             /** time limit for retrying failed offline requests **/
             SYNC_RATE("sync.rate"),
+            /**time between batches of offline requests **/
+            BATCH_RATE("batch.rate"),
+            /**size of batch of offline requests **/
+            BATCH_SIZE("batch.size"),
             /** debug mode, used for HTTP logging **/
             DEBUG_MODE("debug");
 

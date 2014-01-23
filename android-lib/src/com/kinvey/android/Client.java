@@ -95,6 +95,8 @@ public class Client extends AbstractClient {
     private ClientUsers clientUsers;
 //    private AsyncUser currentUser;
     private long syncRate;
+    private long batchRate;
+    private int batchSize;
 
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -484,6 +486,14 @@ public class Client extends AbstractClient {
      */
     public long getSyncRate(){
         return this.syncRate;
+    }
+
+    public long getBatchRate(){
+        return this.batchRate;
+    }
+
+    public int getBatchSize(){
+        return this.batchSize;
     }
 
     /**
