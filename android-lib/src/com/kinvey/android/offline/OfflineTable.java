@@ -301,22 +301,25 @@ public class OfflineTable<T extends GenericJson> {
                 null, null, null, null, null);
 
         List<T> asList = new ArrayList<T>();
+        Class singleClass = responseClass.getComponentType();
         if (cursor != null && cursor.getCount() > 0){
             while (cursor.moveToNext()){
                 Log.e(TAG, "added one");
                 try{
                    String s  = cursor.getString(0);
-                   asList.add(client.getJsonFactory().fromString(s, responseClass));
+                   asList.add((T) client.getJsonFactory().fromString(s, singleClass));
                 }catch(Exception e){
                     Log.e(TAG, "cannot parse json into object! -> " + e);
+                    e.printStackTrace();
                 }
             }
 
             cursor.close();
         }else{
             Log.e(TAG, "cursor is no good");
+            return null;
         }
-        T[] asArray = (T[]) Array.newInstance(responseClass, asList.size());
+        T[] asArray = (T[]) Array.newInstance(singleClass, asList.size());
         for (int i = 0; i < asList.size(); i++){
             asArray[i] = asList.get(i);
         }

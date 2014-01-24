@@ -77,7 +77,10 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
         T ret;
         //is it a query?
-        if (targetURI.contains("query")){
+        if (targetURI.contains("query") && (targetURI.indexOf("query") + 12) != targetURI.length()){
+
+
+       //     Log.i(TAG, "it's a GET query " + targetURI.indexOf("query") + " and " + targetURI.length());
             //Since it's a query, pull the actual query string out and get rid of the "?query"
             String query = targetURI.substring(idIndex, targetURI.length());
             query = query.replace("?query=","");
@@ -89,12 +92,14 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
             handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", query);
 
-        }else if (idIndex == targetURI.length()) {
+        }else if (idIndex == targetURI.length() || targetURI.contains("query")) {
             //is it a get all?
 
+        //    Log.i(TAG, "it's a GET all");
             ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass());
 
         }else{
+        //    Log.i(TAG, "it's a GET by id");
             //it's get by id
             String targetID = targetURI.substring(idIndex, targetURI.length());
             ret = (T) handler.getTable(appData.getCollectionName()).getEntity(handler, client, targetID, appData.getCurrentClass());
