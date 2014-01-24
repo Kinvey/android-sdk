@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import com.kinvey.java.core.AsyncExecutor;
+import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 
 /**
@@ -66,7 +67,9 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
         T result = null;
 
         try{
-            result = executeAsync();
+            if (!hasCancelled()){
+                result = executeAsync();
+            }
         }catch(Throwable e){
             e.printStackTrace();
             error = e;
@@ -80,8 +83,9 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
         if(callback == null){
             return;
         }
-
-        if(error != null){
+        if (hasCancelled()){
+            ((KinveyCancellableCallback) callback).onCancelled();
+        }else if(error != null){
             callback.onFailure(error);
         }else{
             callback.onSuccess(response);
@@ -176,6 +180,16 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
 
 
 
+    }
+
+
+    /**
+     * Check if there is callback, it is cancellable, and finally, if it has cancelled.
+     *
+     * @return
+     */
+    private boolean hasCancelled(){
+        return (callback != null && (callback instanceof KinveyCancellableCallback) && ((KinveyCancellableCallback) callback).isCancelled());
     }
 
 }
