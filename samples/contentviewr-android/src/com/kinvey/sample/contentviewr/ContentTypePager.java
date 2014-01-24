@@ -109,6 +109,9 @@ public class ContentTypePager extends ContentFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
+        if (pager == null){
+            return;
+        }
         if (pager.getCurrentItem() != 0){
             inflater.inflate(R.menu.menu_list, menu);
         }

@@ -16,10 +16,12 @@ package com.kinvey.sample.contentviewr;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.widget.RelativeLayout;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.User;
 import com.kinvey.sample.contentviewr.LoginFragment;
@@ -47,7 +49,7 @@ public class SettingsActivity extends SherlockFragmentActivity {
         //loading = (RelativeLayout) findViewById(R.id.content_loadingbox);
 
 
-
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         String type = "";
         if (getIntent().hasExtra(EXTRA_TYPE)) {
@@ -114,6 +116,17 @@ public class SettingsActivity extends SherlockFragmentActivity {
         Intent i = new Intent(this, Contentviewr.class);
         startActivity(i);
         this.finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 

@@ -31,6 +31,7 @@ public class NotificationFragment extends ContentFragment {
 
     private Typeface roboto;
 
+
     @Override
     public int getViewID() {
         return R.layout.fragment_notification;
@@ -52,8 +53,10 @@ public class NotificationFragment extends ContentFragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
                     client().push().initialize(getSherlockActivity().getApplication());
+                    updates.setChecked(true);
                 }else{
                     client().user().remove("_push");
+                    updates.setChecked(false);
 
                 }
             }
@@ -63,6 +66,8 @@ public class NotificationFragment extends ContentFragment {
 
         if (client().user().containsKey("_push")){
             updates.setChecked(true);
+        }else{
+            updates.setChecked(false);
         }
     }
 
