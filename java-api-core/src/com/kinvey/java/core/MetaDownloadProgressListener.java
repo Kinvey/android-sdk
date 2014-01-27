@@ -34,11 +34,8 @@ public abstract class MetaDownloadProgressListener implements DownloaderProgress
      * @param meta the metadata object of the file being downloaded.
      */
     public void metaDataRetrieved(FileMetaData meta){
-//        this.metadata = meta;
-        this.metadata = new FileMetaData();
-        this.metadata.setFileName(new String(meta.getFileName()));
-        this.metadata.setId(new String(meta.getId()));
-        System.out.println("cache meta: " + this.metadata.getFileName() + " and id: " + this.metadata.getId());
+        this.metadata = meta;
+
     }
 
     /**
