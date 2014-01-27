@@ -134,7 +134,7 @@ public class FileCache {
      * @param meta the filemetadata associated with the file
      * @param data the data of the file to write to disk
      */
-    public void save(Context context, Client client, FileMetaData meta, byte[] data){
+    public synchronized void save(Context context, Client client, FileMetaData meta, byte[] data){
         Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
@@ -145,6 +145,7 @@ public class FileCache {
         //insert into database table
         FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);//new FileCacheSqlHelper(context);
         helper.insertRecord(client, meta);
+        helper.dump();
 
         //write to cache dir
 

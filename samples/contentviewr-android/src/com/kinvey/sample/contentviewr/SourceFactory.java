@@ -64,7 +64,8 @@ public class SourceFactory {
 
                 final ByteArrayOutputStream out = new ByteArrayOutputStream();
                 FileMetaData meta = new FileMetaData(item.getThumbnail().getReference());
-                MetaDownloadProgressListener dpl =  new MetaDownloadProgressListener() {
+
+                client.file().download(meta, out, new MetaDownloadProgressListener() {
 
                     @Override
                     public void progressChanged(MediaHttpDownloader downloader) throws IOException {}
@@ -77,10 +78,6 @@ public class SourceFactory {
 
                         FileCache cache = new FileCache(Contentviewr.cacheLocation);
                         byte[] outarray = out.toByteArray();
-
-                        Log.i(FileCache.TAG, "cache array size: " + outarray.length);
-                        Log.i(FileCache.TAG, "cache metadata: " + (getMetadata() != null));
-
 
                         if (getMetadata() != null){
                             cache.save(client.getContext(), client, getMetadata(), outarray);
@@ -100,9 +97,7 @@ public class SourceFactory {
                     @Override
                     public void onFailure(Throwable error) {}
 
-                };
-
-                client.file().download(meta, out, dpl);
+                });
 
 
 
