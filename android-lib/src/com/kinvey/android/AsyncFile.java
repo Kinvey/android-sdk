@@ -1,5 +1,5 @@
 /** 
- * Copyright (c) 2013, Kinvey, Inc. All rights reserved.
+ * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 
+import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.File;
 import com.kinvey.java.Query;
@@ -92,6 +93,21 @@ import com.kinvey.java.model.KinveyMetaData;
  */
 public class AsyncFile extends File {
 
+
+    private FileCache cache = new FileCache() {
+        @Override
+        public FileInputStream get(Context context, String id) {
+            return null;
+        }
+
+        @Override
+        public String getFilenameForID(Context context, String id) {
+            return null;
+        }
+
+        @Override
+        public void save(Context context, Client client, FileMetaData meta, byte[] data) {}
+    };
 
     /**
      * Base constructor requires the client instance to be passed in.

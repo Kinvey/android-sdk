@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
+ * Copyright (c) 2014, Kinvey, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.View;
-import com.kinvey.android.offline.FileCache;
+import com.kinvey.android.offline.SQLiteFileCache;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -61,7 +61,7 @@ public class ImageViewer extends Viewer  {
 
 
 
-        FileCache cache = new FileCache(Contentviewr.cacheLocation);
+        SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
         FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
         if (in != null){
             if (image == null){
@@ -92,7 +92,7 @@ public class ImageViewer extends Viewer  {
                     return;
                 }
                 Log.i("zoomImage", "set from service");
-                FileCache cache = new FileCache(Contentviewr.cacheLocation);
+                SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
                     Log.e("WAT", "" + (getSherlockActivity() != null));

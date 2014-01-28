@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
+ * Copyright (c) 2014, Kinvey, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.model.FileMetaData;
 
 import java.io.StringWriter;
@@ -150,7 +149,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
             generator.flush();
             jsonResult = writer.toString();
         } catch (Exception ex) {
-            Log.e(FileCache.TAG, "unable to serialize JSON! -> " + ex);
+            Log.e(SQLiteFileCache.TAG, "unable to serialize JSON! -> " + ex);
         }
 
         values.put(COLUMN_JSON, jsonResult);

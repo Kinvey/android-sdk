@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
+ * Copyright (c) 2014, Kinvey, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.FileCache;
+import com.kinvey.android.offline.SQLiteFileCache;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
@@ -38,7 +38,7 @@ public class SourceFactory {
         switch(item.getThumbnail().getType()){
             case FILE:
 
-                FileCache cache = new FileCache(Contentviewr.cacheLocation);
+                SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                 FileInputStream in = cache.get(client.getContext(), item.getThumbnail().getReference());
                 if (in != null){
                     if (adapter == null || item == null){
@@ -48,7 +48,7 @@ public class SourceFactory {
                     options.inSampleSize = 4;
 
                     Bitmap ret = BitmapFactory.decodeStream(in, null, options);
-                    Log.i(FileCache.TAG, "" + ret.getByteCount());
+                    Log.i(SQLiteFileCache.TAG, "" + ret.getByteCount());
                     item.setThumbnailImage(ret);
                     adapter.notifyDataSetChanged();
                     try{
@@ -73,7 +73,7 @@ public class SourceFactory {
                             return;
                         }
 
-                        FileCache cache = new FileCache(Contentviewr.cacheLocation);
+                        SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                         byte[] outarray = out.toByteArray();
 
                         if (getMetadata() != null){

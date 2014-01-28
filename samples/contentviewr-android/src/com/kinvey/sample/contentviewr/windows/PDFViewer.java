@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
+ * Copyright (c) 2014, Kinvey, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-import com.kinvey.android.offline.FileCache;
+import com.kinvey.android.offline.SQLiteFileCache;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -79,7 +79,7 @@ public class PDFViewer extends Viewer {
 
 
 
-        FileCache cache = new FileCache(Contentviewr.cacheLocation);
+        SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
         String filename = cache.getFilenameForID(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
         if (filename != null){
             Log.i("ok", "filename is not null");
@@ -141,7 +141,7 @@ public class PDFViewer extends Viewer {
                     return;
                 }
                 Log.i("pdfview", "set from service");
-                FileCache cache = new FileCache(Contentviewr.cacheLocation);
+                SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
                     Log.e("WAT", "" + (getSherlockActivity() != null));
