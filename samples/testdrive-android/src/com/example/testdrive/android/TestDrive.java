@@ -76,7 +76,7 @@ public class TestDrive extends Activity {
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
 
-            kinveyClient.user().login(new KinveyUserCallback() {
+            kinveyClient.user().login("tester", "tester", new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     bar.setVisibility(View.GONE);

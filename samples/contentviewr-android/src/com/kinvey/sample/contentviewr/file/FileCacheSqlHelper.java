@@ -26,6 +26,11 @@ import com.kinvey.java.model.FileMetaData;
 import java.io.StringWriter;
 
 /**
+ * This class manages a sqlite database for maintaining metadata about cached files.
+ * Each file must have a unique identifier and a filename.  If the filename is unique, that can be used as the unique id.
+ * <p/>
+ * This class provides methods for saving new records, retrieving records, and deleting records.
+ *
  * @author edwardf
  */
 public class FileCacheSqlHelper extends SQLiteOpenHelper {
@@ -54,11 +59,21 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
         return _instance;
     }
 
-
+    /**
+     * Private constructor to force a singleton
+     *
+     * @param context
+     */
     private FileCacheSqlHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
+
+    /**
+     * Called by android first time this database is accessed, to create it.
+     *
+     * @param sqLiteDatabase
+     */
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String command = "CREATE TABLE IF NOT EXISTS "
@@ -76,12 +91,29 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
         //no need for this method yet
     }
 
+
+    /**
+     * Execute an arbitrary sqlite command against a sqlite database.
+     * <p/>
+     * no validation is performed here.
+     *
+     * @param command the command to execute
+     * @param db the database to execute the command against
+     */
     public void runCommand(String command, SQLiteDatabase db) {
         //SQLiteDatabase db = getWritableDatabase();
         db.execSQL(command);
 
     }
 
+
+    /**
+     * Return the filename of the file on disc relavant to the provided id
+     *
+     *
+     * @param id the id of the filename to look up
+     * @return the filename of the file or {@code null}
+     */
     public String getFileNameForId(String id){
 
         SQLiteDatabase db = getReadableDatabase();
@@ -98,6 +130,13 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
 
     }
 
+
+    /**
+     * Insert a new record into the file cache metadata table.
+     *
+     * @param client a Kinvey Client, needed for JSON serialization
+     * @param meta the {@link FileMetaData} object for the file, containing an id and a filename
+     */
     public void insertRecord(Client client, FileMetaData meta){
 
         ContentValues values = new ContentValues();
@@ -128,6 +167,12 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+
+    /**
+     * Remove a record from the table
+     *
+     * @param id the id of the record to remove
+     */
     public void deleteRecord(String id){
 
         SQLiteDatabase db = getWritableDatabase();
@@ -136,6 +181,10 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
     }
 
 
+    /**
+     * Dump the contents of the database to the logs, used for debugging purposes.
+     *
+     */
     public void dump() {
         if (false){
         SQLiteDatabase db = getReadableDatabase();

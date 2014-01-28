@@ -28,12 +28,16 @@ import java.io.FileOutputStream;
 import java.util.Calendar;
 
 /**
+ * File Caching allows your application to store files locally in an arbitrary location, and maintains metadata about the contents of the cache in sqlite table.
+ * <p/>
+ * When saving a new file into the directory, an AsyncTask will be kicked off which will delete the oldest files until the cache size is under the threshold.
+ *
  * @author edwardf
  */
 public class FileCache {
 
     public static final String TAG = "kinvey - filecache";
-    private static final long CACHE_LIMIT = 5242880L; // 5 mb default
+    private static final long CACHE_LIMIT = 1024L * 1024L * 20; // 20 mb default
 
     //Maintains a file pointer to the location of the cache-- this better be a directory
     private File cacheDir;
@@ -172,7 +176,7 @@ public class FileCache {
         //check size of cachedir
         //delete older files if necessary, until down to threshold size limit
 
-        //trimCache(context);
+        trimCache(context);
     }
 
     /**
