@@ -114,19 +114,12 @@ public enum CachePolicy{
     BOTH{
         public <T> T execute(AbstractKinveyCachedClientRequest<T> cachedRequest) throws IOException{
             if (cachedRequest.getExecutor() == null){
-                System.out.println("executor is null");
                 return cachedRequest.fromService(false);
             }
             T ret = cachedRequest.fromCache();
 
             if (ret != null){
-                System.out.println("executor and ret are good to go");
-
                 cachedRequest.getExecutor().notify(ret);
-            }else{
-                System.out.println("executor is good ret is not");
-
-
             }
             ret = cachedRequest.fromService(true);
             return ret;

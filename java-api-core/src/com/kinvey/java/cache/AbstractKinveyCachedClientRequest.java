@@ -122,7 +122,6 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
     @Override
     public T execute() throws IOException{
         T ret =  policy.execute(this);
-        System.out.println("cached request returning");
         return ret;
     }
 

@@ -45,24 +45,25 @@ public class KitchenSinkTest {
         Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
 
-//        activity = Robolectric.buildActivity(KitchenSink.class).create().get();
-//
-//        featureList = (ListView) activity.findViewById(R.id.ks_list);
+        activity = Robolectric.buildActivity(KitchenSink.class).create().get();
+
+        featureList = (ListView) activity.findViewById(R.id.ks_list);
 
     }
 
 //
     @Test
     public void testAppName() throws Exception {
-//        String appName = activity.getResources().getString(R.string.app_name);
-//        assertThat(appName, equalTo("Kitchensink"));
+        String appName = activity.getResources().getString(R.string.app_name);
+        assertThat(appName, equalTo("Kitchensink"));
 //
     }
 //
-//    @Test
-//    public void testListContents(){
-//        //yes, 5 is a magic number.  At the time of writing this test, there are 5 features--
-//        //so, anytime in the future, there should be at least 5
-//        assertTrue(featureList.getAdapter().getCount() >=5);
-//    }
+    @Test
+    public void testListContents(){
+        //yes, 5 is a magic number.  At the time of writing this test, there are 5 features--
+        //so, anytime in the future, there should be at least 5
+        // :( sorry.
+        assertTrue(featureList.getAdapter().getCount() >=5);
+    }
 }
