@@ -13,21 +13,17 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
-import com.kinvey.sample.contentviewr.file.FileCache;
-
 import java.io.*;
 
 /**

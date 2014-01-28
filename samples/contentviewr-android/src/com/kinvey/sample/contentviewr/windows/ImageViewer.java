@@ -15,21 +15,15 @@ package com.kinvey.sample.contentviewr.windows;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebView;
-import android.widget.ImageView;
-import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.component.ZoomImageView;
-import com.kinvey.sample.contentviewr.file.FileCache;
-import com.kinvey.sample.contentviewr.model.ContentItem;
 import com.kinvey.sample.contentviewr.R;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;

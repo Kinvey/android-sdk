@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kinvey Inc.
+ * Copyright (c) 2014 Kinvey Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,13 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.contentviewr.file;
+package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.kinvey.android.Client;
+import com.kinvey.android.offline.FileCacheSqlHelper;
 import com.kinvey.java.model.FileMetaData;
 import com.google.common.base.Preconditions;
 
@@ -58,7 +59,7 @@ public class FileCache {
      */
     public FileCache(File location){
         if (!location.exists()){
-             location.mkdirs();
+            location.mkdirs();
         }
 
         if (location.isDirectory()){

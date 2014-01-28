@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.sample.contentviewr.file;
+package com.kinvey.android.offline;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,6 +21,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
+import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.model.FileMetaData;
 
 import java.io.StringWriter;
@@ -187,18 +188,18 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
      */
     public void dump() {
         if (false){
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_ID, COLUMN_FILENAME}, null, null, null, null, null);
-        while(c.moveToNext()){
-            Log.i("DUMP", "********");
-            Log.i("DUMP", "********");
-            Log.i("DUMP", "********");
-            Log.i("DUMP", c.getString(0) + " and " + c.getString(1));
-            Log.i("DUMP", "********");
-            Log.i("DUMP", "********");
-            Log.i("DUMP", "********");
-        }
-        c.close();;
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_ID, COLUMN_FILENAME}, null, null, null, null, null);
+            while(c.moveToNext()){
+                Log.i("DUMP", "********");
+                Log.i("DUMP", "********");
+                Log.i("DUMP", "********");
+                Log.i("DUMP", c.getString(0) + " and " + c.getString(1));
+                Log.i("DUMP", "********");
+                Log.i("DUMP", "********");
+                Log.i("DUMP", "********");
+            }
+            c.close();;
         }
 
     }

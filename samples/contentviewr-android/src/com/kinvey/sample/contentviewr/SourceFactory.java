@@ -16,17 +16,14 @@ package com.kinvey.sample.contentviewr;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Debug;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import com.kinvey.android.Client;
-import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.sample.contentviewr.file.FileCache;
 import com.kinvey.sample.contentviewr.model.ContentItem;
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;

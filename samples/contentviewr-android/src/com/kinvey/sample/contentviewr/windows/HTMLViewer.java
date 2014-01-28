@@ -13,21 +13,10 @@
  */
 package com.kinvey.sample.contentviewr.windows;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
-import com.kinvey.java.core.MediaHttpDownloader;
-import com.kinvey.java.core.MetaDownloadProgressListener;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.sample.contentviewr.Contentviewr;
 import com.kinvey.sample.contentviewr.R;
-import com.kinvey.sample.contentviewr.file.FileCache;
-
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * @author edwardf
