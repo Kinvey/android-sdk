@@ -41,21 +41,21 @@ public class KitchenSinkTest {
 
     @Before
     public void setUp() throws Exception {
-//        //config robolectric for real HTTP and persistance
-//        Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
-//        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
-//
-//        activity = Robolectric.buildActivity(KitchenSink.class).create().get();
-//
-//        featureList = (ListView) activity.findViewById(R.id.ks_list);
+        //config robolectric for real HTTP and persistance
+        Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+
+        activity = Robolectric.buildActivity(KitchenSink.class).create().get();
+
+        featureList = (ListView) activity.findViewById(R.id.ks_list);
 
     }
 
 //
     @Test
     public void testAppName() throws Exception {
-//        String appName = activity.getResources().getString(R.string.app_name);
-//        assertThat(appName, equalTo("Kitchensink"));
+        String appName = activity.getResources().getString(R.string.app_name);
+        assertThat(appName, equalTo("Kitchensink"));
 //
     }
 //
@@ -63,7 +63,6 @@ public class KitchenSinkTest {
     public void testListContents(){
         //yes, 5 is a magic number.  At the time of writing this test, there are 5 features--
         //so, anytime in the future, there should be at least 5
-        // :( sorry.
-        //assertTrue(featureList.getAdapter().getCount() >=5);
+        assertTrue(featureList.getAdapter().getCount() >=5);
     }
 }

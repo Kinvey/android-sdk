@@ -72,10 +72,15 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
         appdata.count(fields, q, new KinveyAggregateCallback() {
             @Override
             public void onFailure(Throwable error) {
-                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();            }
+                Toast.makeText(getSherlockActivity(), "something went wrong -> " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
 
             @Override
             public void onSuccess(Aggregation res) {
+                if (res == null || res.results == null || res.results[0] == null){
+                    Toast.makeText(getSherlockActivity(), "got success but it's null!", Toast.LENGTH_SHORT ).show();
+                    return;
+                }
 
                 Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
@@ -91,7 +96,9 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
 
             @Override
             public void onSuccess(Aggregation res) {
-
+                if (res == null || res.results == null || res.results[0] == null){
+                    Toast.makeText(getSherlockActivity(), "got success but it's null!", Toast.LENGTH_SHORT ).show();
+                }
                 Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
             }
@@ -106,7 +113,9 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
 
             @Override
             public void onSuccess(Aggregation res) {
-
+                if (res == null || res.results == null || res.results[0] == null){
+                    Toast.makeText(getSherlockActivity(), "got success but it's null!", Toast.LENGTH_SHORT ).show();
+                }
                 Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
             }
@@ -121,7 +130,9 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
 
             @Override
             public void onSuccess(Aggregation res) {
-
+                if (res == null || res.results == null || res.results[0] == null){
+                    Toast.makeText(getSherlockActivity(), "got success but it's null!", Toast.LENGTH_SHORT ).show();
+                }
                 Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
             }
@@ -136,8 +147,10 @@ public class AggregateFragment extends UseCaseFragment implements View.OnClickLi
 
             @Override
             public void onSuccess(Aggregation res) {
-
-                Toast.makeText(getSherlockActivity(), "got: " +res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
+                if (res == null || res.results == null || res.results[0] == null){
+                    Toast.makeText(getSherlockActivity(), "got success but it's null!", Toast.LENGTH_SHORT ).show();
+                }
+                Toast.makeText(getSherlockActivity(), "got: " + res.results[0].get("_result"), Toast.LENGTH_SHORT ).show();
 
             }
         });

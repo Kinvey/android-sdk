@@ -59,6 +59,7 @@ public class KitchenSinkApplication extends Application {
                 }
             }
         }).setUserClass(MyCustomUser.class).build();
+        myClient.enableDebugLogging();
 
     }
 

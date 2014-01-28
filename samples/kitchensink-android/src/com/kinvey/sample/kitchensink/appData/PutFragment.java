@@ -153,7 +153,9 @@ public class PutFragment extends UseCaseFragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v == putIt) {
-            putIt(Integer.valueOf(countToAdd.getSelectedItem().toString()));
+            int x = Integer.valueOf(countToAdd.getSelectedItem().toString());
+            if (x == 0)x = 1;
+            putIt(x);
         }  else if(v == deleteAll){
             deleteAll();
 
