@@ -254,4 +254,13 @@ public class SQLiteFileCache implements FileCache {
         return size;
     }
 
+    /**
+     * get a pointer to the current cache dir
+     *
+     * @return the cache directory
+     */
+    public File getCacheDir(){
+        return this.cacheDir;
+    }
+
 }
