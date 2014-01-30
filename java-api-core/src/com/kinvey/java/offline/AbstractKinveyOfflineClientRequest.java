@@ -125,9 +125,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
      * @throws IOException
      */
     public T offlineFromService(boolean assumeOnline) throws IOException{
-        this.store.kickOffSync();
         if (assumeOnline){
-
             return super.execute();
         }
 
@@ -152,9 +150,15 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
     @Override
     public T execute() throws IOException{
-
-        T ret =  policy.execute(this);
+        T ret = null;
+        try{
+            ret =  policy.execute(this);
+        }catch (IOException e){
+            this.store.kickOffSync();
+            throw e;
+        }
         this.store.kickOffSync();
+
         return ret;
     }
 

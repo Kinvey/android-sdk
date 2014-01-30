@@ -57,7 +57,7 @@ public abstract class AbstractSyncService extends IntentService{
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.i(TAG, "Received intent: " + intent);
-        if (isOnline()){
+        if (isOnline() && client == null){
             initClientAndKickOffSync();
         }
     }
@@ -90,6 +90,7 @@ public abstract class AbstractSyncService extends IntentService{
     private void initClientAndKickOffSync() {
 
         if (client == null || !client.user().isUserLoggedIn()) {
+            Log.i(TAG, "wat building new...");
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
@@ -104,6 +105,10 @@ public abstract class AbstractSyncService extends IntentService{
                     Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> " + error);
                 }
             }).build();
+
+            if (!client.user().isUserLoggedIn()){
+                Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> don't call logout! need an active current user!");
+            }
 
             client.enableDebugLogging();
 
