@@ -529,6 +529,8 @@ public class Client extends AbstractClient {
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
         private Class userClass = AsyncUser.class;
+        private int batchSize = 5;
+        private long batchRate = 1000L * 30L; //30 seconds
 
 
         /**
@@ -622,6 +624,14 @@ public class Client extends AbstractClient {
                 this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
             }
 
+            if (super.getString(Option.BATCH_SIZE) != null){
+                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
+            }
+
+            if (super.getString(Option.BATCH_RATE) != null){
+                this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -685,6 +695,8 @@ public class Client extends AbstractClient {
             }
 
             client.syncRate = this.syncRate;
+            client.batchRate = this.batchRate;
+            client.batchSize = this.batchSize;
 
             return client;
         }

@@ -13,7 +13,9 @@
  */
 package com.kinvey.android.offline;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,9 +34,7 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author edwardf
@@ -93,12 +93,14 @@ public abstract class AbstractSyncService extends IntentService{
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
-                    Log.i(TAG, "offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                    Log.v(TAG, "offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                    Log.v(TAG, "offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
                     getFromStoreAndExecute();
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
+                    Log.e(TAG, "don't call logout when expecting an offline sync to occur!  Sync needs a current user");
                     Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> " + error);
                 }
             }).build();
@@ -124,19 +126,31 @@ public abstract class AbstractSyncService extends IntentService{
                 DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
                 List<String> collectionNames = dbHelper.getCollectionTables();
 
+                boolean done = false;
+                for (int i = 0; i < client.getBatchSize(); i++){
+                    for (String s : collectionNames) {
+                        done = false;
 
-                for (String s : collectionNames) {
-                    boolean done = false;
 
-                    while (!done && safeToAttempExecution()){
-                        OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
-                        if (req == null){
-                            done = true;
-                        }else{
-                            executeRequest(dbHelper, req, s);
+
+                        if (!done && safeToAttempExecution()){
+                            OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
+                            if (req == null){
+                                done = true;
+                            }else{
+                                executeRequest(dbHelper, req, s);
+                            }
                         }
                     }
                 }
+
+                if (!done){
+                    startResetTimer();
+                }
+
+
+
+
                 return null;
             }
         }.execute();
@@ -337,6 +351,23 @@ public abstract class AbstractSyncService extends IntentService{
     }
 
     protected abstract DatabaseHandler getDatabaseHandler(String userid);
+
+    private void startResetTimer(){
+
+        if (client == null || getApplicationContext() == null){
+            return;
+        }
+
+        AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+
+        Intent syncIt = new Intent(getApplicationContext(), KinveySyncService.class);
+        syncIt.setAction(AbstractSyncService.ACTION_OFFLINE_SYNC);
+        getApplicationContext().startService(syncIt);
+
+        PendingIntent pi= PendingIntent.getService(AbstractSyncService.this, 0, syncIt, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.set(AlarmManager.RTC, client.getBatchRate(), pi);
+
+    }
 
 
 }

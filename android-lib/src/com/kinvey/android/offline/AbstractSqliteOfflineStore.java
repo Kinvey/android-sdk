@@ -76,7 +76,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
         T ret;
-        //is it a query?
+        //is it a query?  (12 is magic number for decoding empty url)
         if (targetURI.contains("query") && (targetURI.indexOf("query") + 12) != targetURI.length()){
 
 
