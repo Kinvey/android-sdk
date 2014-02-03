@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TicTac</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_login">Login</string>
+    <string name="menu_newgame">New game</string>
+    <string name="menu_logout">Logout</string>
+
+</resources>
