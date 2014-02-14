@@ -77,7 +77,7 @@ public class KinveyJsonResponseException extends HttpResponseException {
       }
     } catch (IOException exception) {
       // it would be bad to throw an exception while throwing an exception
-      exception.printStackTrace();
+     // exception.printStackTrace();
     }
 
     String detailMessage =

@@ -43,6 +43,8 @@ public class SQLiteFileCache implements FileCache {
     //Maintains a file pointer to the location of the cache-- this better be a directory
     private File cacheDir;
 
+    private static FileCacheSqlHelper helper;
+
     /**
      * Load up a file cache using internal storage's cache directory
      *
@@ -83,9 +85,8 @@ public class SQLiteFileCache implements FileCache {
         Preconditions.checkNotNull(id, "String id cannot be null!");
         Preconditions.checkNotNull(context, "Context context cannot be null!");
 
-        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
-        String filename = helper.getFileNameForId(id);
-        helper.dump();
+        String filename = getHelper(context).getFileNameForId(id);
+        getHelper(context).dump();
 
         if (filename == null){
             //file name is not in the metadata table
@@ -100,7 +101,7 @@ public class SQLiteFileCache implements FileCache {
             //file name is in the metadata table, but the file doesn't exist
             //so remove it from the metadata table
             Log.i(TAG, "cache miss on filesystem-> (" + id + ", " + filename + ")" );
-            helper.deleteRecord(id);
+            getHelper(context).deleteRecord(id);
             return null;
         }
         Log.i(TAG, "cache hit -> (" + id + ", " + filename + ")" );
@@ -125,8 +126,7 @@ public class SQLiteFileCache implements FileCache {
      * @return {@code null} or the filename
      */
     public String getFilenameForID(Context context, String id){
-        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);// new FileCacheSqlHelper(context);
-        return helper.getFileNameForId(id);
+        return getHelper(context).getFileNameForId(id);
     }
 
 
@@ -148,9 +148,8 @@ public class SQLiteFileCache implements FileCache {
         Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
 
         //insert into database table
-        FileCacheSqlHelper helper = FileCacheSqlHelper.getInstance(context);//new FileCacheSqlHelper(context);
-        helper.insertRecord(client, meta);
-        helper.dump();
+        getHelper(context).insertRecord(client, meta);
+        getHelper(context).dump();
 
         //write to cache dir
 
@@ -261,6 +260,13 @@ public class SQLiteFileCache implements FileCache {
      */
     public File getCacheDir(){
         return this.cacheDir;
+    }
+
+    private static FileCacheSqlHelper getHelper(Context context){
+        if (helper == null){
+            helper = FileCacheSqlHelper.getInstance(context);
+        }
+        return helper;
     }
 
 }

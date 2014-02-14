@@ -14,6 +14,7 @@
 package com.kinvey.android;
 
 import android.app.Activity;
+import com.google.common.io.ByteStreams;
 import com.kinvey.android.offline.FileCacheSqlHelper;
 import com.kinvey.android.offline.SQLiteFileCache;
 import com.kinvey.java.model.FileMetaData;
@@ -23,8 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 
 /**
@@ -35,6 +37,8 @@ public class FileCacheTest {
 
     Activity activity;
     Client client;
+
+    SQLiteFileCache cache;
 
     @Before
     public void setUp() throws Exception {
@@ -73,6 +77,28 @@ public class FileCacheTest {
         }
         dir.delete();
     }
+
+    @Test
+    public void testSaveAndLoad(){
+        cache = new SQLiteFileCache(activity);
+        String fileID = "123";
+        FileMetaData fm = new FileMetaData(fileID);
+        fm.setFileName("duck.txt");
+
+        cache.save(activity, client, fm, new byte[5]);
+        FileInputStream fis = cache.get(activity, fileID);
+        Assert.assertNotNull(fis);
+        byte[] res = null;
+        try{
+            res = ByteStreams.toByteArray(fis);
+        }catch (IOException e){
+            Assert.assertTrue("converting to byte array threw an exception", false);
+        }
+        Assert.assertNotNull(res);
+        Assert.assertEquals(5, res.length);
+    }
+
+
 
 
 
