@@ -35,12 +35,15 @@ public enum FilePolicy {
     },
 
 
-    OFFLINE_FIRST {
+    LOCAL_FIRST {
         @Override
         public void download(AbstractKinveyClientRequest initiationClientRequest, OutputStream out) throws IOException {
             MediaOfflineDownloader downloader = getDownloader(initiationClientRequest);
             if (downloader != null){
-                downloader.fromService(initiationClientRequest, out);
+                downloader.fromCache((AbstractClient) initiationClientRequest.getAbstractKinveyClient(), initiationClientRequest, out);
+                if (out == null){
+                    downloader.fromService(initiationClientRequest, out);
+                }
             }
         }
 
@@ -52,7 +55,12 @@ public enum FilePolicy {
         public void download(AbstractKinveyClientRequest initiationClientRequest, OutputStream out) throws IOException {
             MediaOfflineDownloader downloader = getDownloader(initiationClientRequest);
             if (downloader != null){
-                downloader.fromCache((AbstractClient) initiationClientRequest.getAbstractKinveyClient(), initiationClientRequest, out);
+                try{
+                    downloader.fromService(initiationClientRequest, out);
+                }catch(Exception e){
+                    downloader.fromCache((AbstractClient) initiationClientRequest.getAbstractKinveyClient(), initiationClientRequest, out);
+                }
+
             }
         }
 
