@@ -22,10 +22,16 @@ import com.kinvey.java.cache.Cache;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.sun.corba.se.spi.ior.ObjectId;
 
 import java.io.IOException;
+import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
+import java.util.Enumeration;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
 /**
  * Implementation of a Client Request, which can either pull a response from a Cache instance or from online.
@@ -172,9 +178,10 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
     public static String generateMongoDBID() {
         //from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
 
+
         int _time = (int) (System.currentTimeMillis() / 1000);
-        int _machine = 1;
-        int _inc = 25;
+        int _machine = _genmachine;
+        int _inc = _nextInc.getAndIncrement();
 
 
         byte b[] = new byte[12];
@@ -194,6 +201,67 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             buf.append(s);
         }
         return buf.toString();
+    }
+
+    /* incrementing atomic integer based off a random number
+     * from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
+     */
+    private static AtomicInteger _nextInc = new AtomicInteger( (new java.util.Random()).nextInt() );
+
+    /* unique ID for machine
+     * from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
+     */
+    private static final int _genmachine;
+    static {
+
+        try {
+            // build a 2-byte machine piece based on NICs info
+            int machinePiece;
+            {
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+                    while ( e.hasMoreElements() ){
+                        NetworkInterface ni = e.nextElement();
+                        sb.append( ni.toString() );
+                    }
+                    machinePiece = sb.toString().hashCode() << 16;
+                } catch (Throwable e) {
+                    // exception sometimes happens with IBM JVM, use random
+                    //LOGGER.log(Level.WARNING, e.getMessage(), e);
+                    machinePiece = (new Random().nextInt()) << 16;
+                }
+              //  LOGGER.fine( "machine piece post: " + Integer.toHexString( machinePiece ) );
+            }
+
+            // add a 2 byte process piece. It must represent not only the JVM but the class loader.
+            // Since static var belong to class loader there could be collisions otherwise
+            final int processPiece;
+            {
+                int processId = new java.util.Random().nextInt();
+                try {
+                    processId = java.lang.management.ManagementFactory.getRuntimeMXBean().getName().hashCode();
+                }
+                catch ( Throwable t ){
+                }
+
+                ClassLoader loader = ObjectId.class.getClassLoader();
+                int loaderId = loader != null ? System.identityHashCode(loader) : 0;
+
+                StringBuilder sb = new StringBuilder();
+                sb.append(Integer.toHexString(processId));
+                sb.append(Integer.toHexString(loaderId));
+                processPiece = sb.toString().hashCode() & 0xFFFF;
+              //  LOGGER.fine( "process piece: " + Integer.toHexString( processPiece ) );
+            }
+
+            _genmachine = machinePiece | processPiece;
+           // LOGGER.fine( "machine : " + Integer.toHexString( _genmachine ) );
+        }
+        catch ( Exception e ){
+            throw new RuntimeException( e );
+        }
+
     }
 
     public static String getUUID(){
