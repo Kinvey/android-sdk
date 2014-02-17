@@ -30,6 +30,9 @@ import com.google.api.client.http.UriTemplate;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.offline.FileCache;
+import com.kinvey.java.offline.FilePolicy;
+import com.kinvey.java.offline.MediaOfflineDownloader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -258,6 +261,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         downloader.setProgressListener(progressListener);
     }
 
+    protected final void initializeMediaOfflineDownloader(DownloaderProgressListener progressListener, FilePolicy policy, FileCache cache) {
+        HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+        downloader = new MediaOfflineDownloader(requestFactory.getTransport(), requestFactory.getInitializer(), policy, cache);
+        downloader.setDirectDownloadEnabled(true);
+        downloader.setProgressListener(progressListener);
+    }
     /**
      * @return the downloader
      */

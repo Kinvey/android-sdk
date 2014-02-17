@@ -14,17 +14,16 @@
 package com.kinvey.android.offline;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.FileCacheSqlHelper;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.model.FileMetaData;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.offline.FileCache;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Calendar;
 
@@ -77,13 +76,19 @@ public class SQLiteFileCache implements FileCache {
      * Get a file from the local file cache.  If the file is not present, then this method will return null.
      * <p/> the file cache uses a sqlite table internally to maintain metadata about all locally stored files.
      *
-     * @param context the current active context of the running application
+     * @param client the current active client associated with the applications
      * @param id the id of the file to attempt to load
      * @return a `FileInputStream` for the file associated with the provided id, or null
      */
-    public FileInputStream get(Context context, String id){
+    public FileInputStream get(AbstractClient client, String id){
         Preconditions.checkNotNull(id, "String id cannot be null!");
-        Preconditions.checkNotNull(context, "Context context cannot be null!");
+        if (!(client instanceof Client)){
+            throw new NullPointerException("This implemenation only works on Android!");
+        }
+
+        Context context = ((Client) client).getContext();
+        Preconditions.checkNotNull(context, "Context cannot be null!");
+
 
         String filename = getHelper(context).getFileNameForId(id);
         getHelper(context).dump();
@@ -121,11 +126,17 @@ public class SQLiteFileCache implements FileCache {
     /**
      * Retrieve the filename of the file associated with the provided id
      *
-     * @param context the applications' context
+     * @param client the applications' client
      * @param id the id of the file to lookup
      * @return {@code null} or the filename
      */
-    public String getFilenameForID(Context context, String id){
+    public String getFilenameForID(AbstractClient client, String id){
+        if (!(client instanceof Client)){
+            throw new NullPointerException("This implemenation only works on Android!");
+        }
+
+        Context context = ((Client) client).getContext();
+        Preconditions.checkNotNull(context, "Context cannot be null!");
         return getHelper(context).getFileNameForId(id);
     }
 
@@ -134,21 +145,27 @@ public class SQLiteFileCache implements FileCache {
      * Save a file into the file cache
      *
      *
-     * @param context the application's context
+     * @param client the application's client
      * @param client the current client
      * @param meta the filemetadata associated with the file
      * @param data the data of the file to write to disk
      */
-    public synchronized void save(Context context, Client client, FileMetaData meta, byte[] data){
+    public synchronized void save(AbstractClient client, FileMetaData meta, byte[] data){
         Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
         Preconditions.checkNotNull(data, "byte[] data cannot be null!");
+        if (!(client instanceof Client)){
+            throw new NullPointerException("This implemenation only works on Android!");
+        }
+        Context context = ((Client) client).getContext();
+
+        Preconditions.checkNotNull(context, "Context cannot be null!");
 
         Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
 
         //insert into database table
-        getHelper(context).insertRecord(client, meta);
+        getHelper(context).insertRecord((Client)client, meta);
         getHelper(context).dump();
 
         //write to cache dir

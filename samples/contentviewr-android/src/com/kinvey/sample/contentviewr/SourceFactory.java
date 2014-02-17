@@ -39,7 +39,7 @@ public class SourceFactory {
             case FILE:
 
                 SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
-                FileInputStream in = cache.get(client.getContext(), item.getThumbnail().getReference());
+                FileInputStream in = cache.get(client, item.getThumbnail().getReference());
                 if (in != null){
                     if (adapter == null || item == null){
                         return;
@@ -77,7 +77,7 @@ public class SourceFactory {
                         byte[] outarray = out.toByteArray();
 
                         if (getMetadata() != null){
-                            cache.save(client.getContext(), client, getMetadata(), outarray);
+                            cache.save(client, getMetadata(), outarray);
                         }
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inSampleSize = 4;

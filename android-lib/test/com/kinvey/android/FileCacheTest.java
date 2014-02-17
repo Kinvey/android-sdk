@@ -85,8 +85,8 @@ public class FileCacheTest {
         FileMetaData fm = new FileMetaData(fileID);
         fm.setFileName("duck.txt");
 
-        cache.save(activity, client, fm, new byte[5]);
-        FileInputStream fis = cache.get(activity, fileID);
+        cache.save(client, fm, new byte[5]);
+        FileInputStream fis = cache.get(client, fileID);
         Assert.assertNotNull(fis);
         byte[] res = null;
         try{

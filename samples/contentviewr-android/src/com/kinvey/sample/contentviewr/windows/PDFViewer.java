@@ -80,7 +80,7 @@ public class PDFViewer extends Viewer {
 
 
         SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
-        String filename = cache.getFilenameForID(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
+        String filename = cache.getFilenameForID(getClient(), content.getSource().getReference());
         if (filename != null){
             Log.i("ok", "filename is not null");
 //            if (pdfView == null){
@@ -144,13 +144,7 @@ public class PDFViewer extends Viewer {
                 SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
-                    Log.e("WAT", "" + (getSherlockActivity() != null));
-                    Log.e("WAT", "" + (getSherlockActivity().getApplicationContext() != null));
-                    Log.e("WAT", "" + (getClient() != null));
-                    Log.e("WAT", "" + (getMetadata() != null));
-                    Log.e("WAT", "" + (outarray != null));
-
-                    cache.save(getSherlockActivity().getApplicationContext(), getClient(), getMetadata(), outarray);
+                    cache.save(getClient(), getMetadata(), outarray);
                 }
 
 

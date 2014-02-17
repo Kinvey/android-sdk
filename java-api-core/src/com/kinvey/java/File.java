@@ -24,6 +24,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,6 +37,8 @@ import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.model.UriLocResponse;
+import com.kinvey.java.offline.FileCache;
+import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.query.AbstractQuery;
 
 /**
@@ -104,6 +107,21 @@ public class File {
 
     /** Used to calculate the MimeType of files **/
     protected MimeTypeFinder mimeTypeFinder;
+
+    private FileCache cache = new FileCache(){
+        @Override
+        public FileInputStream get(AbstractClient client, String id) { return null; }
+
+        @Override
+        public String getFilenameForID(AbstractClient client, String id) { return null; }
+
+        @Override
+        public void save(AbstractClient client, FileMetaData meta, byte[] data) {}
+    };
+
+    private FilePolicy policy = FilePolicy.ALWAYS_ONLINE;
+    private Object cacheLock = new Object();
+
 
     /**
      * Base constructor requires the client instance to be passed in.
@@ -276,7 +294,6 @@ public class File {
     public DownloadMetadataAndFileQuery downloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
-//        q.setLimit(1);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
         client.initializeRequest(download);
@@ -362,6 +379,13 @@ public class File {
         this.downloaderProgressListener = downloaderProgressListener;
     }
 
+    public void setCache(FilePolicy policy, FileCache cache){
+        synchronized (cacheLock){
+            this.policy = policy;
+            this.cache = cache;
+        }
+    }
+
     //----------------------------------------------------Client Requests
 
     /**
@@ -435,7 +459,7 @@ public class File {
 
         private DownloadMetadataAndFile(FileMetaData meta, DownloaderProgressListener progressListener) {
             super(client, "GET", REST_URL, null, FileMetaData.class);
-            initializeMediaHttpDownloader(progressListener);
+            initializeMediaOfflineDownloader(progressListener, policy, cache);
             this.id = Preconditions.checkNotNull(meta.getId());
         }
 

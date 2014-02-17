@@ -62,7 +62,7 @@ public class ImageViewer extends Viewer  {
 
 
         SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
-        FileInputStream in = cache.get(getSherlockActivity().getApplicationContext(), content.getSource().getReference());
+        FileInputStream in = cache.get(getClient(), content.getSource().getReference());
         if (in != null){
             if (image == null){
                 Log.i("zoomImage", "nulled out");
@@ -95,12 +95,7 @@ public class ImageViewer extends Viewer  {
                 SQLiteFileCache cache = new SQLiteFileCache(Contentviewr.cacheLocation);
                 byte[] outarray = out.toByteArray();
                 if (getMetadata() != null){
-                    Log.e("WAT", "" + (getSherlockActivity() != null));
-                    Log.e("WAT", "" + (getSherlockActivity().getApplicationContext() != null));
-                    Log.e("WAT", "" + (getClient() != null));
-                    Log.e("WAT", "" + (getMetadata() != null));
-                    Log.e("WAT", "" + (outarray != null));
-                    cache.save(getSherlockActivity().getApplicationContext(), getClient(), getMetadata(), outarray);
+                    cache.save(getClient(), getMetadata(), outarray);
                 }
 
                 BitmapFactory.Options options = new BitmapFactory.Options();

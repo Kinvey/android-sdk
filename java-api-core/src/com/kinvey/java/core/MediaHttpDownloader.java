@@ -459,7 +459,7 @@ public class MediaHttpDownloader {
      *
      * @param downloadState value to set to
      */
-    private void updateStateAndNotifyListener(DownloadState downloadState) throws IOException {
+    protected void updateStateAndNotifyListener(DownloadState downloadState) throws IOException {
         this.downloadState = downloadState;
         if (progressListener != null) {
             progressListener.progressChanged(this);

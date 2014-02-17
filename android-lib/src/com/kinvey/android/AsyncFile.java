@@ -16,9 +16,6 @@
 package com.kinvey.android;
 
 import android.content.Context;
-import android.util.Log;
-import android.webkit.MimeTypeMap;
-import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.common.base.Preconditions;
 
@@ -26,9 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLConnection;
 
-import com.kinvey.android.offline.FileCache;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.File;
 import com.kinvey.java.Query;
@@ -37,7 +32,6 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import com.kinvey.java.model.KinveyMetaData;
 
 /**
  * Wraps the {@link com.kinvey.java.File} public methods in asynchronous functionality using native Android AsyncTask.
@@ -93,21 +87,6 @@ import com.kinvey.java.model.KinveyMetaData;
  */
 public class AsyncFile extends File {
 
-
-    private FileCache cache = new FileCache() {
-        @Override
-        public FileInputStream get(Context context, String id) {
-            return null;
-        }
-
-        @Override
-        public String getFilenameForID(Context context, String id) {
-            return null;
-        }
-
-        @Override
-        public void save(Context context, Client client, FileMetaData meta, byte[] data) {}
-    };
 
     /**
      * Base constructor requires the client instance to be passed in.
