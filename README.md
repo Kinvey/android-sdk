@@ -9,7 +9,9 @@ building Android apps and Java6 server applications.
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
-* [maven 3.0.3](http://maven.apache.org/download.cgi)
+* [maven 3.0.3/3.0.4/3.0.5](http://maven.apache.org/download.cgi)
+
+* On OSX Mavericks ->  (get homebrew if you don't have it) brew install maven30
    
 ```
 mvn install

@@ -18,11 +18,8 @@ package com.kinvey.java.offline;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.cache.Cache;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.sun.corba.se.spi.ior.ObjectId;
 
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -31,7 +28,6 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 /**
  * Implementation of a Client Request, which can either pull a response from a Cache instance or from online.
@@ -245,7 +241,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 catch ( Throwable t ){
                 }
 
-                ClassLoader loader = ObjectId.class.getClassLoader();
+                ClassLoader loader = AbstractKinveyOfflineClientRequest.class.getClassLoader();
                 int loaderId = loader != null ? System.identityHashCode(loader) : 0;
 
                 StringBuilder sb = new StringBuilder();

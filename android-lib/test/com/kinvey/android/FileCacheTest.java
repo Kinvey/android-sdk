@@ -78,25 +78,6 @@ public class FileCacheTest {
         dir.delete();
     }
 
-    @Test
-    public void testSaveAndLoad(){
-        cache = new SQLiteFileCache(activity);
-        String fileID = "123";
-        FileMetaData fm = new FileMetaData(fileID);
-        fm.setFileName("duck.txt");
-
-        cache.save(client, fm, new byte[5]);
-        FileInputStream fis = cache.get(client, fileID);
-        Assert.assertNotNull(fis);
-        byte[] res = null;
-        try{
-            res = ByteStreams.toByteArray(fis);
-        }catch (IOException e){
-            Assert.assertTrue("converting to byte array threw an exception", false);
-        }
-        Assert.assertNotNull(res);
-        Assert.assertEquals(5, res.length);
-    }
 
 
 

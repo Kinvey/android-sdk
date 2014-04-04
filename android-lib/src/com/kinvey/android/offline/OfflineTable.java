@@ -80,10 +80,10 @@ public class OfflineTable<T extends GenericJson> {
 
 
     public OfflineTable(String collection){
-        this.TABLE_NAME = PREFIX_OFFLINE + collection;
-        this.QUEUE_NAME = PREFIX_QUEUE + collection;
-        this.QUERY_NAME = PREFIX_QUERY + collection;
-        this.RESULTS_NAME = PREFIX_RESULTS + collection;
+        this.TABLE_NAME = "[" + PREFIX_OFFLINE + collection + "]";
+        this.QUEUE_NAME = "[" + PREFIX_QUEUE + collection + "]";
+        this.QUERY_NAME = "[" + PREFIX_QUERY + collection + "]";
+        this.RESULTS_NAME = "[" + PREFIX_RESULTS + collection + "]";
     }
 
     public void onCreate(DatabaseHandler handler) {
@@ -148,32 +148,6 @@ public class OfflineTable<T extends GenericJson> {
 
 
     }
-
-//    public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-//
-//    }
-
-
-//    /**
-//     * Run a SQLLite command against a database
-//     *
-//     * @param database
-//     * @param command
-//     */
-//    public static void runCommand(SQLiteDatabase database, String command){
-//        database.beginTransaction();
-//        try {
-//            database.execSQL(command);
-//            database.setTransactionSuccessful();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            database.endTransaction();
-//        }
-//
-//
-//
-//    }
 
 
     /**
@@ -446,7 +420,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param success
      * @param info
      * @param returnValue
-     * @deprecated removed, as trable would grow infinitely
+     * @deprecated removed, as table would grow infinitely and currently not needed
      */
     public void storeCompletedRequestInfo(OfflineHelper helper, String collectionName, boolean success, OfflineRequestInfo info, String returnValue) {
         //no-op haven't found a use for this yet
