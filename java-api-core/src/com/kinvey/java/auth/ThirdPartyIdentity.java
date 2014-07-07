@@ -40,6 +40,7 @@ public class ThirdPartyIdentity extends GenericJson{
         TWITTER,
         GOOGLE,
         LINKED_IN,
+        MOBILE_IDENTITY,
         SALESFORCE,
         AUTH_LINK
     }
@@ -56,7 +57,6 @@ public class ThirdPartyIdentity extends GenericJson{
         private Provider(Type type, T credential) {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(credential);
-
             switch (type) {
                 case FACEBOOK:
                     this.put("facebook", credential);
@@ -75,6 +75,9 @@ public class ThirdPartyIdentity extends GenericJson{
                     break;
                 case SALESFORCE:
                     this.put("salesforce", credential);
+                    break;
+                case MOBILE_IDENTITY:
+                    this.put("kinveyAuth", credential);
                     break;
                 default:
                     throw new IllegalArgumentException("No known third party identity type was specified");
@@ -222,8 +225,13 @@ public class ThirdPartyIdentity extends GenericJson{
 
     }
 
+    public static class MobileIdentityCredential extends OAuth2 {
 
+        public MobileIdentityCredential(String accessToken){
+            super(accessToken);
+        }
 
+    }
 
     /**
      * A factory method to use when constructor authentication provider and credential link objects that will be used
@@ -327,6 +335,10 @@ public class ThirdPartyIdentity extends GenericJson{
                 Provider<SalesForceCredential> salesForceCredentialProvider = new Provider<SalesForceCredential>(type, new SalesForceCredential(params[0], params[1], params[2], params[3]));
                 return new ThirdPartyIdentity(salesForceCredentialProvider);
 
+            case MOBILE_IDENTITY:
+                Preconditions.checkArgument(params.length == 1, "Expected %s arguments for Mobile Identity but found %s", 1, params.length);
+                Provider<MobileIdentityCredential> mobileIdentityCredentialProvider = new Provider<MobileIdentityCredential>(type, new MobileIdentityCredential(params[0]));
+                return new ThirdPartyIdentity(mobileIdentityCredentialProvider);
 
 
             default:

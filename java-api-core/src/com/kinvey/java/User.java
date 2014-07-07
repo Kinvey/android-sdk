@@ -50,6 +50,7 @@ public class User<T extends User> extends GenericJson   {
         FACEBOOK,
         LINKED_IN,
         AUTH_LINK,
+        MOBILE_IDENTITY,
         CREDENTIALSTORE,
         SALESFORCE,
         THIRDPARTY
@@ -317,6 +318,18 @@ public class User<T extends User> extends GenericJson   {
         this.setId(userId);
         Credential c = Credential.from(this);
         return login(c);
+
+    }
+
+    /***
+     * Login to Kinvey Services using Mobile Identity Connect
+     *
+     * @param authToken
+     * @return
+     * @throws IOException
+     */
+    public LoginRequest loginMobileIdentityBlocking(String authToken) throws IOException {
+        return login(ThirdPartyIdentity.Type.MOBILE_IDENTITY, authToken);
 
     }
 

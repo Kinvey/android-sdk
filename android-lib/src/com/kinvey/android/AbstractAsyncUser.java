@@ -251,6 +251,15 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     }
 
 
+    /**
+     * Login to Kinvey Service using Kinvey Mobile Identity Connect Service
+     *
+     * @param accessToken - a MIC access token
+     * @param callback -
+     */
+    public void loginMobileIdentity(String accessToken, KinveyUserCallback callback){
+        new Login(accessToken, LoginType.MOBILE_IDENTITY, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
 
     /**
      * Login to Kinvey services using a Kinvey user's _id and their valid Kinvey Auth Token.  This method is provided
@@ -833,7 +842,8 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
                     return AbstractAsyncUser.this.loginAuthLinkBlocking(accessToken, refreshToken).execute();
                 case SALESFORCE:
                     return AbstractAsyncUser.this.loginSalesForceBlocking(accessToken, client_id, refreshToken, id).execute();
-
+                case MOBILE_IDENTITY:
+                    return AbstractAsyncUser.this.loginMobileIdentityBlocking(accessToken).execute();
                 case CREDENTIALSTORE:
                     return AbstractAsyncUser.this.login(credential).execute();
             }
