@@ -43,7 +43,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm-util:4.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm-analysis:4.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.ximpleware:vtd-xml:2.11" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.google.android:support-v4:r7" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.google.android:support-v4:r19" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.easytesting:fest-util:1.2.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.easytesting:fest-reflect:1.4.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.googlecode.catch-exception:catch-exception:1.0.4" level="project" />
