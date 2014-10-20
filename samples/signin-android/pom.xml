@@ -14,15 +14,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-    <repositories>
-        <repository>
-            <id>The mavenized Facebook Android API</id>
-            <url>http://avianey.github.com/facebook-api-android-maven/</url>
-        </repository>
-    </repositories>
-
-
-
 	<dependencies>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -35,10 +26,10 @@
             <version>1.2.1.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.avianey</groupId>
+            <groupId>fr.avianey</groupId>
             <artifactId>facebook-android-api</artifactId>
-            <version>3.0.0</version>
-            <type>apklib</type>
+            <version>3.18.0</version>
+            <type>aar</type>
         </dependency>
         <dependency>
             <groupId>com.google.android</groupId>

@@ -145,7 +145,6 @@
 	<build>
         <finalName>${project.artifactId}</finalName>
 		<sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
         <plugins>
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
