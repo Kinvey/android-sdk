@@ -71,28 +71,26 @@ public abstract class AbstractKinveyJsonClient extends AbstractKinveyClient {
 
     /**
     * @param transport  HTTP transport
-    * @param jsonFactory the json parser or {@code null} if none
     * @param defaultRootUrl the root url for this service
     * @param defaultServicePath the service path
     * @param httpRequestInitializer the http request initializer
     */
-    protected Builder(HttpTransport transport, JsonFactory jsonFactory, String defaultRootUrl,
+    protected Builder(HttpTransport transport, String defaultRootUrl,
                     String defaultServicePath, HttpRequestInitializer httpRequestInitializer) {
-      super(transport, jsonFactory, defaultRootUrl, defaultServicePath, httpRequestInitializer);
+      super(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer);
     }
 
 
     /**
      * @param transport  HTTP transport
-     * @param jsonFactory the json parser or {@code null} if none
      * @param defaultRootUrl the root url for this service
      * @param defaultServicePath the service path
      * @param httpRequestInitializer the http request initializer
      * @param kinveyRequestInitializer initializer to handle kinvey specific headers and authorization tokens
      */
-    protected Builder(HttpTransport transport, JsonFactory jsonFactory, String defaultRootUrl,
+    protected Builder(HttpTransport transport, String defaultRootUrl,
         String defaultServicePath, HttpRequestInitializer httpRequestInitializer, KinveyClientRequestInitializer kinveyRequestInitializer) {
-      super(transport, jsonFactory, defaultRootUrl, defaultServicePath, httpRequestInitializer, kinveyRequestInitializer);
+      super(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer, kinveyRequestInitializer);
     }
 
     /* (non-Javadoc)

@@ -94,7 +94,8 @@ public abstract class KinveyMockUnitTest extends TestCase {
             public Builder(HttpTransport transport, JsonFactory jsonFactory,
                            HttpRequestInitializer httpRequestInitializer,
                            KinveyClientRequestInitializer clientRequestInitializer) {
-                super(transport, jsonFactory, null , null);
+                super(transport, null , null);
+                this.setJsonFactory(jsonFactory);
             }
 
             @Override

@@ -23,6 +23,7 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 
@@ -531,6 +532,7 @@ public class Client extends AbstractClient {
         private Class userClass = AsyncUser.class;
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
+        private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
 
 
         /**
@@ -546,8 +548,9 @@ public class Client extends AbstractClient {
          * @param context Your Android Application Context
          */
         public Builder(String appKey, String appSecret, Context context) {
-            super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null
+            super(AndroidHttp.newCompatibleTransport(), null
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
+            this.setJsonFactory(factory);
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
 
@@ -581,7 +584,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            super(AndroidHttp.newCompatibleTransport(), AndroidJson.newCompatibleJsonFactory(), null);
+            super(AndroidHttp.newCompatibleTransport(), null);
 
             try {
                 final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
@@ -631,6 +634,18 @@ public class Client extends AbstractClient {
             if (super.getString(Option.BATCH_RATE) != null){
                 this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
             }
+
+            if (super.getString(Option.PARSER) != null){
+                try {
+                    AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
+                    this.factory = AndroidJson.newCompatibleJsonFactory(parser);
+                }catch (Exception e){
+                    Log.e(TAG, "Invalid Parser name: " + super.getString(Option.PARSER) + " must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                    Log.e(TAG, "Defaulting to: GSON");
+                    e.printStackTrace();
+                }
+            }
+            setJsonFactory(factory);
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
@@ -723,6 +738,16 @@ public class Client extends AbstractClient {
          */
         public Builder setCredentialStore(CredentialStore store) {
             super.setCredentialStore(store);
+            return this;
+        }
+
+        /**
+         *
+         * @param factory - the JSON factory for this client to use
+         * @return
+         */
+        public Builder setJsonFactory(JsonFactory factory){
+            super.setJsonFactory(factory);
             return this;
         }
 

@@ -189,7 +189,7 @@ public abstract class AbstractKinveyClient {
     public abstract static class Builder {
 
         private final HttpTransport transport;
-        private final JsonObjectParser objectParser;
+        private JsonObjectParser objectParser;
         private String baseUrl;
         private String servicePath;
         private HttpRequestInitializer httpRequestInitializer;
@@ -199,28 +199,25 @@ public abstract class AbstractKinveyClient {
 
         /**
          * @param transport HTTP transport
-         * @param jsonFactory json factory or {@code null} if none
          * @param defaultRootUrl root url
          * @param defaultServicePath service path
          * @param httpRequestInitializer http request initializer
          */
-        public Builder(HttpTransport transport, JsonFactory jsonFactory, String defaultRootUrl,
+        public Builder(HttpTransport transport, String defaultRootUrl,
                        String defaultServicePath, HttpRequestInitializer httpRequestInitializer) {
-            this(transport, jsonFactory, defaultRootUrl, defaultServicePath, httpRequestInitializer, null);
+            this(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer, null);
         }
 
         /**
          * @param transport HTTP transport
-         * @param jsonFactory json factory or {@code null} if none
          * @param defaultRootUrl root url
          * @param defaultServicePath service path
          * @param httpRequestInitializer request initializer
          * @param kinveyRequestInitializer kinvey request initializer
          */
-        public Builder(HttpTransport transport, JsonFactory jsonFactory, String defaultRootUrl,
+        public Builder(HttpTransport transport, String defaultRootUrl,
                        String defaultServicePath, HttpRequestInitializer httpRequestInitializer, KinveyClientRequestInitializer kinveyRequestInitializer) {
             this.transport = transport;
-            this.objectParser = new JsonObjectParser(jsonFactory);
             setBaseUrl(defaultRootUrl);
             setServiceUrl(defaultServicePath);
             this.httpRequestInitializer = httpRequestInitializer;
@@ -252,6 +249,18 @@ public abstract class AbstractKinveyClient {
         public Builder setBaseUrl(String baseUrl) {
             this.baseUrl = normalizeRootUrl(baseUrl);
             return this;
+        }
+
+        /**
+         * Set the JsonFactory, which will be used to create an object parser
+         *
+         * @param factory - the JSON factory for this client to use
+         * @return the current client builder
+         */
+        public Builder setJsonFactory(JsonFactory factory){
+            this.objectParser = new JsonObjectParser(factory);
+            return this;
+
         }
 
 

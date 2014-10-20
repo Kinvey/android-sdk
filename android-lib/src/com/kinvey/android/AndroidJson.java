@@ -19,6 +19,8 @@ import android.os.Build;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.json.jackson.JacksonFactory;
+import com.kinvey.java.core.RawJsonFactory;
 
 /**
  * @author m0rganic
@@ -40,8 +42,38 @@ class AndroidJson {
      * on the GSON library
      * </p>
      */
-    public static JsonFactory newCompatibleJsonFactory() {
-        return (Build.VERSION.SDK_INT >= HONEYCOMB) ? new AndroidJsonFactory() : new GsonFactory();
+    public static JsonFactory newCompatibleJsonFactory(JSONPARSER parser) {
+        switch (parser){
+            case GSON:
+                return (Build.VERSION.SDK_INT >= HONEYCOMB) ? new AndroidJsonFactory() : new GsonFactory();
+            case JACKSON:
+                return new JacksonFactory();
+            case RAW:
+                return new RawJsonFactory();
+            default:
+                return (Build.VERSION.SDK_INT >= HONEYCOMB) ? new AndroidJsonFactory() : new GsonFactory();
+        }
+
     }
+
+
+    public enum JSONPARSER {
+        GSON,
+        JACKSON,
+        RAW;
+
+        public static String getOptions(){
+            StringBuilder values = new StringBuilder();
+            for (JSONPARSER p : JSONPARSER.values()){
+                values.append(p + ", ");
+            }
+
+            values.setLength(values.length() - 2);
+
+            return values.toString();
+        }
+    }
+
+
 
 }

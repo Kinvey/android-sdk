@@ -53,7 +53,7 @@
     <orderEntry type="module" module-name="android-lib" />
     <orderEntry type="library" name="Maven: com.google.gcm:gcm-client:3" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-jackson:1.16.0-rc" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.12" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.8.2" level="project" />
     <orderEntry type="module" module-name="java-api-core" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:14.0.1" level="project" />
     <orderEntry type="module" module-name="android-secure" />

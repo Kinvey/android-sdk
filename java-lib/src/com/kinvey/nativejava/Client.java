@@ -17,6 +17,7 @@ package com.kinvey.nativejava;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
@@ -320,7 +321,7 @@ public class Client extends AbstractClient {
          * @param appSecret Your Kinvey Application Secret
          */
         public Builder(String appKey, String appSecret) {
-            super(new NetHttpTransport(), JavaJson.newCompatibleJsonFactory(), null
+            super(new NetHttpTransport(), null
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders()));
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
             try {
@@ -328,9 +329,6 @@ public class Client extends AbstractClient {
             } catch (Exception ex) {
                 System.out.println("KINVEY" +  "Credential store failed to load" + ex);
             }
-
-
-
         }
 
         /*
@@ -345,6 +343,11 @@ public class Client extends AbstractClient {
             return (Builder) super.setBaseUrl(baseUrl);
         }
 
+
+        @Override
+        public Builder setJsonFactory(JsonFactory factory){
+            return (Builder) super.setJsonFactory(factory);
+        }
 
 
 

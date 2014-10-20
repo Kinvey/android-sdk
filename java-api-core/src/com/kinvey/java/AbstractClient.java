@@ -248,41 +248,38 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
         /**
          * @param transport              HttpTransport
-         * @param jsonFactory            JsonFactory
          * @param httpRequestInitializer HttpRequestInitializer
          */
-        public Builder(HttpTransport transport, JsonFactory jsonFactory,
+        public Builder(HttpTransport transport,
                        HttpRequestInitializer httpRequestInitializer) {
-            super(transport, jsonFactory, DEFAULT_BASE_URL,
+            super(transport, DEFAULT_BASE_URL,
                     DEFAULT_SERVICE_PATH, httpRequestInitializer);
         }
 
         /**
          * @param transport                HttpTransport
-         * @param jsonFactory              JsonFactory
          * @param httpRequestInitializer   HttpRequestInitializer
          * @param clientRequestInitializer KinveyClientRequestInitializer
          */
-        public Builder(HttpTransport transport, JsonFactory jsonFactory,
+        public Builder(HttpTransport transport,
                        HttpRequestInitializer httpRequestInitializer,
                        KinveyClientRequestInitializer clientRequestInitializer) {
-            super(transport, jsonFactory, DEFAULT_BASE_URL,
+            super(transport, DEFAULT_BASE_URL,
                     DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer);
         }
 
         /**
          *
          * @param transport                HttpTransport
-         * @param jsonFactory              JsonFactory
          * @param baseUrl
          * @param httpRequestInitializer   HttpRequestInitializer
          * @param clientRequestInitializer KinveyClientRequestInitializer
          */
-        public Builder(HttpTransport transport, JsonFactory jsonFactory,
+        public Builder(HttpTransport transport,
                        String baseUrl,
                        HttpRequestInitializer httpRequestInitializer,
                        KinveyClientRequestInitializer clientRequestInitializer) {
-            super(transport, jsonFactory, baseUrl,
+            super(transport, baseUrl,
                     DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer);
         }
 
@@ -415,7 +412,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**size of batch of offline requests **/
             BATCH_SIZE("batch.size"),
             /** debug mode, used for HTTP logging **/
-            DEBUG_MODE("debug");
+            DEBUG_MODE("debug"),
+            /** JSON parser**/
+            PARSER("parser");
+
 
             private final String value;
 
