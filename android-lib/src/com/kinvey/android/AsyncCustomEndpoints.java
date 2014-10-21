@@ -49,7 +49,7 @@ import java.io.IOException;
  * @author edwardf
  * @since 2.0.2
  */
-public class AsyncCustomEndpoints<I extends GenericJson, O extends GenericJson> extends CustomEndpoints<I, O> {
+public class AsyncCustomEndpoints<I, O> extends CustomEndpoints<I, O> {
 
     /**
      * Constructor for this Asyncronous Custom Endpoint class

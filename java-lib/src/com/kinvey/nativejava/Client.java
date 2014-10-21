@@ -153,7 +153,7 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    public <I extends GenericJson, O extends GenericJson> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+    public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
         synchronized (lock) {
             return new CustomEndpoints(myClass, this);
         }
@@ -311,6 +311,7 @@ public class Client extends AbstractClient {
     public static class Builder extends AbstractClient.Builder {
 
         private boolean debugMode = false;
+        private JsonFactory factory = JavaJson.newCompatibleJsonFactory(JavaJson.JSONPARSER.GSON);
 
 
         /**
@@ -329,6 +330,7 @@ public class Client extends AbstractClient {
             } catch (Exception ex) {
                 System.out.println("KINVEY" +  "Credential store failed to load" + ex);
             }
+
         }
 
         /*

@@ -15,7 +15,6 @@
  */
 package com.kinvey.java;
 
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
@@ -32,7 +31,7 @@ import java.lang.reflect.Array;
  * @author edwardf
  * @since 2.0.2
  */
-public class CustomEndpoints<I extends GenericJson, O extends GenericJson> {
+public class CustomEndpoints<I, O> {
 
     private AbstractClient client;
     private Class<O> currentResponseClass;

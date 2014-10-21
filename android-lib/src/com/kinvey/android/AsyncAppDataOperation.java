@@ -15,13 +15,8 @@
  */
 package com.kinvey.android;
 
-import com.google.api.client.json.GenericJson;
-import com.google.common.base.Preconditions;
-import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+
 import com.kinvey.java.AppDataOperation;
-import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 

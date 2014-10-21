@@ -299,7 +299,7 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    public <I extends GenericJson, O extends GenericJson> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+    public <I, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
         synchronized (lock) {
             return new AsyncCustomEndpoints(myClass, this);
         }

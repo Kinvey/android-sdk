@@ -19,7 +19,6 @@ package com.kinvey.java;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 
@@ -145,7 +144,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     protected abstract ClientUsers getClientUsers();
 
 
-    public abstract  <I extends GenericJson, O extends GenericJson> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
+    public abstract  <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
 
     /**
      * Pings the Kinvey backend service with a logged in user.

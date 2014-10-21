@@ -85,7 +85,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <I extends GenericJson, O extends GenericJson> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
