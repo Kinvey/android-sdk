@@ -5,6 +5,9 @@
               android:layout_height="fill_parent"
         >
 
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
 
         <TextView
@@ -84,9 +87,9 @@
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Client Build Time"
+            android:text="GSON Client Build Time"
             android:textStyle="bold"
-            android:id="@+id/title_build"
+            android:id="@+id/gson_title_build"
 
             />
 
@@ -95,8 +98,7 @@
             android:layout_height="wrap_content"
             android:text="--"
             android:gravity="right"
-            android:id="@+id/value_build"
-
+            android:id="@+id/gson_value_build"
             />
 
 
@@ -104,9 +106,9 @@
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Login Time"
+            android:text="GSON Login Time"
             android:textStyle="bold"
-            android:id="@+id/title_login"
+            android:id="@+id/gson_title_login"
 
             />
 
@@ -115,90 +117,171 @@
             android:layout_height="wrap_content"
             android:text="--"
             android:gravity="right"
-            android:id="@+id/value_login"
+            android:id="@+id/gson_value_login"
 
             />
 
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Empty Time"
+            android:text="GSON Empty Time"
             android:textStyle="bold"
-            android:id="@+id/title_empty"
+            android:id="@+id/gson_title_empty"
 
             />
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/empty_min_label" android:text="Min:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/empty_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/empty_max_label" android:text="Max:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/empty_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/empty_avg_label" android:text="Avg:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/empty_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_min_label" android:text="Min:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_max_label" android:text="Max:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_avg_label" android:text="Avg:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-
-
-
-
-    <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="12 Fields Time"
-            android:textStyle="bold"
-            android:id="@+id/title_fields"
-
-            />
-
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/fields_min_label" android:text="Min:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/fields_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/fields_max_label" android:text="Max:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/fields_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/fields_avg_label" android:text="Avg:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/fields_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_min_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_max_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_empty_avg_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
     </LinearLayout>
 
 
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="12 Full Fields Time"
+            android:text="GSON 12 Fields Time"
             android:textStyle="bold"
-            android:id="@+id/title_full"
+            android:id="@+id/gson_title_fields"
 
             />
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/full_min_label" android:text="Min:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/full_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_min_label" android:text="Min:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_max_label" android:text="Max:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_avg_label" android:text="Avg:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/full_max_label" android:text="Max:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/full_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <LinearLayout android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"></LinearLayout>
-        <TextView android:id="@+id/full_avg_label" android:text="Avg:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/full_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_fields_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
     </LinearLayout>
 
 
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GSON 12 Full Fields Time"
+            android:textStyle="bold"
+            android:id="@+id/gson_title_full"
+            />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/gson_full_min_label" android:text="Min:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_full_max_label" android:text="Max:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_full_avg_label" android:text="Avg:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/gson_full_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_full_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/gson_full_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jackson Client Build Time"
+            android:textStyle="bold"
+            android:id="@+id/jackson_title_build"
+
+            />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:gravity="right"
+            android:id="@+id/jackson_value_build"
+            />
+
+
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jackson Login Time"
+            android:textStyle="bold"
+            android:id="@+id/jackson_title_login"
+
+            />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:gravity="right"
+            android:id="@+id/jackson_value_login"
+
+            />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jackson Empty Time"
+            android:textStyle="bold"
+            android:id="@+id/jackson_title_empty"
+
+            />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_empty_min_label" android:text="Min:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_empty_max_label" android:text="Max:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_empty_avg_label" android:text="Avg:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_empty_min_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_empty_max_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_empty_avg_value" android:text="--" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jackson 12 Fields Time"
+            android:textStyle="bold"
+            android:id="@+id/jackson_title_fields"
+
+            />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_fields_min_label" android:text="Min:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_fields_max_label" android:text="Max:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_fields_avg_label" android:text="Avg:" android:layout_width="match_parent" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_fields_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_fields_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_fields_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jackson 12 Full Fields Time"
+            android:textStyle="bold"
+            android:id="@+id/jackson_title_full"
+            />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_full_min_label" android:text="Min:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_full_max_label" android:text="Max:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_full_avg_label" android:text="Avg:" android:layout_width="match_parent" android:gravity="right" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/jackson_full_min_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_full_max_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/jackson_full_avg_value" android:text="--" android:layout_width="match_parent" android:gravity="left" android:layout_weight="33" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
 </LinearLayout>
-

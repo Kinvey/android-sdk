@@ -26,6 +26,7 @@
         <module>secure-signin-android</module>
         <module>contentviewr-android</module>
         <module>tictactoetorial</module>
+        <module>SpeedTest-Android</module>
 
     </modules>
 

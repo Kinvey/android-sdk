@@ -26,7 +26,7 @@ import com.kinvey.java.core.RawJsonFactory;
  * @author m0rganic
  * @since 2.0.6
  */
-class AndroidJson {
+public class AndroidJson {
 
     //TODO(mbickle): make json factory configurable
 
