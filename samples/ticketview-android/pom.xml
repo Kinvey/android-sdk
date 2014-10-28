@@ -130,9 +130,13 @@
 				<version>${android-maven.version}</version>
                 <configuration>
                     <sdk>
-                        <path>${env.ANDROID_HOME}</path>
+                        <path>${android.home}</path>
                         <platform>${android.platform}</platform>
                     </sdk>
+                    <androidManifestFile>AndroidManifest.xml</androidManifestFile>
+                    <resourceDirectory>res/</resourceDirectory>
+                    <assetsDirectory>assets/</assetsDirectory>
+                    <nativeLibrariesDirectory>libs/</nativeLibrariesDirectory>                    
                 </configuration>
 				<extensions>true</extensions>
 			</plugin>

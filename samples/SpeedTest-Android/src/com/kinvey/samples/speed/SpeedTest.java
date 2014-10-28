@@ -619,18 +619,21 @@ public class SpeedTest extends Activity {
         gson_buildView.setText("" + gson_buildTime);
         viewView.setText("" + viewTime);
         gson_loginView.setText("" + gson_loginTime);
+        
+        jackson_buildView.setText("" + jackson_buildTime);
+        jackson_loginView.setText("" + jackson_loginTime);
 
-        if (jackson_emptyTimes == null){
-            jackson_minEmpty.setText("--");
-            jackson_maxEmpty.setText("--");
-            jackson_avgEmpty.setText("--");
-            jackson_minFields.setText("--");
-            jackson_maxFields.setText("--");
-            jackson_avgFields.setText("--");
-            jackson_minFull.setText("--");
-            jackson_maxFull.setText("--");
-            jackson_avgFull.setText("--");
-        }
+//        if (jackson_emptyTimes == null){
+//            jackson_minEmpty.setText("--");
+//            jackson_maxEmpty.setText("--");
+//            jackson_avgEmpty.setText("--");
+//            jackson_minFields.setText("--");
+//            jackson_maxFields.setText("--");
+//            jackson_avgFields.setText("--");
+//            jackson_minFull.setText("--");
+//            jackson_maxFull.setText("--");
+//            jackson_avgFull.setText("--");
+//        }
 
         if (gson_emptyTimes == null){
             gson_minEmpty.setText("--");
@@ -714,6 +717,20 @@ public class SpeedTest extends Activity {
         min = 10000000L;
         max = 0L;
         sum = 0L;
+        
+        if (jackson_emptyTimes == null){
+        	jackson_minEmpty.setText("--");
+        	jackson_maxEmpty.setText("--");
+        	jackson_avgEmpty.setText("--");
+        	jackson_minFields.setText("--");
+        	jackson_maxFields.setText("--");
+        	jackson_avgFields.setText("--");
+        	jackson_minFull.setText("--");
+        	jackson_maxFull.setText("--");
+        	jackson_avgFull.setText("--");
+            return;
+        }
+        
 
         for (long f : jackson_emptyTimes) {
             sum += f;

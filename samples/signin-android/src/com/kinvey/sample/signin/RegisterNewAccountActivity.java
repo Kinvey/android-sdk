@@ -101,6 +101,7 @@ public class RegisterNewAccountActivity extends Activity {
 	 */
 	public void processSignup(View view) {
 		Toast.makeText(this, "Creating user...", Toast.LENGTH_SHORT).show();
+        kinveyClient.user().put("email","edflem@gmail.com");
 	    kinveyClient.user().create(mEditEmailAddress.getText().toString(), mEditPassword.getText().toString(), new KinveyUserCallback() {
             public void onFailure(Throwable t) {
                 CharSequence text = "Could not sign up -> " + t.getMessage();

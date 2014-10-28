@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SpeedTest-Android</string>
+    <string name="request_count">Request Count</string>
+    <string name="entity_count">Entity Count</string>
 </resources>

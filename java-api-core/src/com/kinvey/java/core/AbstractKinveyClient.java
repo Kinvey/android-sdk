@@ -302,6 +302,9 @@ public abstract class AbstractKinveyClient {
          * @return the objectParser
          */
         public ObjectParser getObjectParser() {
+        	System.out.println("----------");
+        	System.out.println("parser " + objectParser.getJsonFactory().getClass().getName());
+        	System.out.println("----------");
             return objectParser;
         }
 
