@@ -215,7 +215,7 @@
                     <!--
                       | bootclasspath required by Sun's JVM
                     -->
-                    <bootclasspath>${sun.boot.class.path}</bootclasspath>
+                    <bootclasspath>${sun.boot.class.path}:${android.home}/platforms/android-16/android.jar</bootclasspath>
                     <additionalparam>
                         -hdf project.name "${project.name}"
                         -hdf JavaApiCore "JavaApiCore"
