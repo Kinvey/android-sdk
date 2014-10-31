@@ -40,7 +40,7 @@
         <android.version>4.0.1.2</android.version>
         <android.platform>16</android.platform>
         <android-support.version>r19</android-support.version>
-        <android.home>/Users/edward/code/android-sdk-macosx/</android.home>
+        <android.home>${ENV.ANDROID_HOME}</android.home>
 
         <android-maven.version>4.0.0-rc.1</android-maven.version>
         <junit.version>4.10</junit.version>
