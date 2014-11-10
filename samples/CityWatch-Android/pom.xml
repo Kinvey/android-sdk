@@ -48,6 +48,10 @@
 					<artifactId>android</artifactId>
 					<groupId>com.google.android</groupId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -63,6 +67,10 @@
 				<exclusion>
 					<artifactId>android</artifactId>
 					<groupId>com.google.android</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

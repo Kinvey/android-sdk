@@ -42,6 +42,10 @@
 					<artifactId>android</artifactId>
 					<groupId>com.google.android</groupId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -53,7 +57,10 @@
 					<artifactId>xpp3</artifactId>
 					<groupId>xpp3</groupId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
+				</exclusion>
 				<exclusion>
 					<artifactId>android</artifactId>
 					<groupId>com.google.android</groupId>
@@ -74,7 +81,10 @@
 					<artifactId>xpp3</artifactId>
 					<groupId>xpp3</groupId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -87,7 +97,10 @@
 					<artifactId>xpp3</artifactId>
 					<groupId>xpp3</groupId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava-jdk5</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -97,71 +110,71 @@
 
 		</dependency>
 
-        <dependency>
-            <groupId>com.kinvey</groupId>
-            <artifactId>java-api-core</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
+		<dependency>
+			<groupId>com.kinvey</groupId>
+			<artifactId>java-api-core</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
 
-        <dependency>
-            <groupId>com.kinvey</groupId>
-            <artifactId>android-lib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.kinvey</groupId>
+			<artifactId>android-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.robolectric</groupId>
-            <artifactId>robolectric</artifactId>
-            <version>2.1.1</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.robolectric</groupId>
+			<artifactId>robolectric</artifactId>
+			<version>2.1.1</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
 	<build>
-        <finalName>${project.artifactId}</finalName>
+		<finalName>${project.artifactId}</finalName>
 		<sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <plugins>
+		<testSourceDirectory>test</testSourceDirectory>
+		<plugins>
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
 				<version>${android-maven.version}</version>
-                <configuration>
-                    <sdk>
-                        <path>${android.home}</path>
-                        <platform>${android.platform}</platform>
-                    </sdk>
-                    <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-                    <resourceDirectory>res/</resourceDirectory>
-                    <assetsDirectory>assets/</assetsDirectory>
-                    <nativeLibrariesDirectory>libs/</nativeLibrariesDirectory>                    
-                </configuration>
-                <extensions>true</extensions>
+				<configuration>
+					<sdk>
+						<path>${android.home}</path>
+						<platform>${android.platform}</platform>
+					</sdk>
+					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
+					<resourceDirectory>res/</resourceDirectory>
+					<assetsDirectory>assets/</assetsDirectory>
+					<nativeLibrariesDirectory>libs/</nativeLibrariesDirectory>
+				</configuration>
+				<extensions>true</extensions>
 			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 
 		</plugins>
