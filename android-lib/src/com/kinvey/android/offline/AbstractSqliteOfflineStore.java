@@ -97,6 +97,9 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         //    Log.i(TAG, "it's a GET all");
             ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass());
+            
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", "{}");
+
 
         }else{
         //    Log.i(TAG, "it's a GET by id");

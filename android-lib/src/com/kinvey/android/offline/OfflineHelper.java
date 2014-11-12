@@ -119,8 +119,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, collectionName);
-
-        int change = db.updateWithOnConflict(COLLECTION_TABLE, values, null, null, db.CONFLICT_REPLACE);
+        int change = db.updateWithOnConflict(COLLECTION_TABLE, values, COLUMN_NAME+"='" + collectionName +"'", null, db.CONFLICT_REPLACE);
         if (change == 0){
             db.insert(COLLECTION_TABLE, null, values);
         }

@@ -14,7 +14,6 @@
 package com.kinvey.sample.contentviewr;
 
 import static com.kinvey.sample.contentviewr.Contentviewr.CONTENT_COLLECTION;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.kinvey.android.AsyncAppData;
@@ -40,6 +40,7 @@ import com.kinvey.sample.contentviewr.windows.ImageViewer;
 import com.kinvey.sample.contentviewr.windows.Viewer;
 import com.kinvey.sample.contentviewr.windows.WindowFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -132,7 +133,12 @@ public class ContentListFragment extends ContentFragment implements AdapterView.
                     return;
                 }
                 loading.setVisibility(View.GONE);
-                content = Arrays.asList(result);
+                if (result != null){
+                	content = Arrays.asList(result);
+                }else{
+                	content = new ArrayList<ContentItem>();
+                }
+                
 
                 if (content.size() == 0){
                     empty.setVisibility(View.VISIBLE);

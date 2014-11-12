@@ -185,13 +185,16 @@ public class OfflineTable<T extends GenericJson> {
 
         Log.v(TAG, "insert entity -> " + offlineEntity.get("_id").toString());
 
+        long sqlid = -2;
         int change = helper.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null,  5); //5 is CONFLICT_REPLACE
         if (change == 0){
-            helper.insert(TABLE_NAME, null, values);
+           sqlid =  helper.insert(TABLE_NAME, null, values);
             //Log.v(TAG, "offline inserting new entity -> " + values.get(COLUMN_JSON));
         }else{
             //Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
         }
+        
+        Log.v(TAG, "done insertion " + TABLE_NAME+ " -> " + (change !=  0 ? "update" : "!update") + ", " + (sqlid >= 0 ? "create" : "!create" ) + (sqlid == -1 ? " with error" : ""));
 
         return (T) offlineEntity;
     }
@@ -321,8 +324,8 @@ public class OfflineTable<T extends GenericJson> {
         values.put(COLUMN_ID, commaDelimitedIds);
 
        // Log.v(TAG, "inserting query: " + queryString);
-
-        int change = handler.updateWithOnConflict(QUERY_NAME, values, null, null, 5); //5 is conflict_replace
+        
+        int change = handler.updateWithOnConflict(QUERY_NAME, values, COLUMN_QUERY_STRING+"='" + queryString +"'", null, 5); //5 is conflict_replace
         if (change == 0){
             handler.insert(QUERY_NAME, null, values);
            // Log.v(TAG, "inserting new query -> " + values.get(COLUMN_ID));
@@ -353,7 +356,7 @@ public class OfflineTable<T extends GenericJson> {
         // Setting delete flag on row
         KinveyDeleteResponse ret =  new KinveyDeleteResponse();
 
-        ret.setCount(handler.updateWithOnConflict(TABLE_NAME, values, null, null, 5)); //5 is conflict_replace
+        ret.setCount(handler.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID+"='" + id +"'", null, 5)); //5 is conflict_replace
 //        db.close();
         return ret;
     }

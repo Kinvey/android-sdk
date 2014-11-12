@@ -213,7 +213,7 @@ public class RegisterFragment extends KinveyFragment implements View.OnClickList
                 if (getSherlockActivity() == null){
                     return;
                 }
-                CharSequence text = "Username already exists.";
+                CharSequence text = t.getMessage();
                 Toast toast = Toast.makeText(getSherlockActivity(), text, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
                 toast.show();

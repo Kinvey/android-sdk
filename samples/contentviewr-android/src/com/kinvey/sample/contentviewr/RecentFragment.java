@@ -65,6 +65,9 @@ public class RecentFragment extends ContentListFragment {
                 }
                 loading.setVisibility(View.GONE);
                 content = new LinkedList<ContentItem>();
+                if (result == null){
+                	result = new ContentItem[0];
+                }
                 for (int i = result.length - 1; i >= 0; i-- ){
                     content.add(result[i]);
 

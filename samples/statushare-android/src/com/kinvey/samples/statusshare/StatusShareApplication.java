@@ -57,6 +57,7 @@ public class StatusShareApplication extends Application{
     public Client getClient() {
         if (client == null){
             client = new Client.Builder(getApplicationContext()).build();
+            client.enableDebugLogging();
         }
         return client;
     }
