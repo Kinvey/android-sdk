@@ -19,7 +19,7 @@ import android.os.Build;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.kinvey.java.core.RawJsonFactory;
 
 /**

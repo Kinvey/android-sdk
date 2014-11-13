@@ -44,9 +44,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
-import com.google.common.io.LimitInputStream;
+import com.google.common.io.ByteStreams;
 
 import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -486,8 +487,8 @@ public class MediaHttpUploader {
             // Mark the current position in case we need to retry the request.
             contentInputStream.mark(blockSize);
 
-            // TODO(rmistry): Add tests for LimitInputStream.
-            InputStream limitInputStream = new LimitInputStream(contentInputStream, blockSize);
+            InputStream limitInputStream = ByteStreams.limit(contentInputStream, blockSize);
+            
             contentChunk = new InputStreamContent(mediaContent.getType(), limitInputStream)
                     .setRetrySupported(true)
                     .setLength(blockSize)
@@ -503,7 +504,7 @@ public class MediaHttpUploader {
             int contentBufferStartIndex = 0;
             if (currentRequestContentBuffer == null) {
                 bytesAllowedToRead = cachedByte == null ? blockSize + 1 : blockSize;
-                InputStream limitInputStream = new LimitInputStream(contentInputStream, bytesAllowedToRead);
+                InputStream limitInputStream =  ByteStreams.limit(contentInputStream, bytesAllowedToRead);
 
                 currentRequestContentBuffer = new byte[blockSize + 1];
                 if (cachedByte != null) {
