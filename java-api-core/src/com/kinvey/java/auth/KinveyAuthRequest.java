@@ -133,7 +133,7 @@ public class KinveyAuthRequest extends GenericJson {
         this.appKey = appKeyAuthentication.getUsername();
         this.requestPayload = (username == null || password == null) ? null : new AuthRequestPayload(username, password);
         if (user != null) {
-            this.putAll(user.getUnknownKeys());
+            this.requestPayload.putAll(user);
         }
         this.create = create;
         this.type = requestPayload == null ? LoginType.IMPLICIT : LoginType.KINVEY;
@@ -150,7 +150,7 @@ public class KinveyAuthRequest extends GenericJson {
         this.appKey = appKeyAuthentication.getUsername();
         this.requestPayload = thirdPartyIdentity;
         if (user != null) {
-            this.putAll(user.getUnknownKeys());
+            this.requestPayload.putAll(user);
         }
         this.create = create;
         this.type=LoginType.THIRDPARTY;
