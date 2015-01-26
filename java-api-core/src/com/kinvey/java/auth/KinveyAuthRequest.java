@@ -131,7 +131,7 @@ public class KinveyAuthRequest extends GenericJson {
         this.baseUrl = baseUrl;
         this.appKeyAuthentication = appKeyAuthentication;
         this.appKey = appKeyAuthentication.getUsername();
-        this.requestPayload = (username == null || password == null) ? null : new AuthRequestPayload(username, password);
+        this.requestPayload = (username == null || password == null) ? new GenericJson() : new AuthRequestPayload(username, password);
         if (user != null) {
             this.requestPayload.putAll(user);
         }
