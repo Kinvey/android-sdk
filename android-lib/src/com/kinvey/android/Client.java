@@ -643,6 +643,7 @@ public class Client extends AbstractClient {
                     Log.e(TAG, "Invalid Parser name: " + super.getString(Option.PARSER) + " must be one of: " + AndroidJson.JSONPARSER.getOptions());
                     Log.e(TAG, "Defaulting to: GSON");
                     e.printStackTrace();
+                    this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
                 }
             }
             setJsonFactory(factory);
@@ -681,7 +682,7 @@ public class Client extends AbstractClient {
         public Client build() {
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
-                    getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
+                    getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy());
             client.setContext(context);
             client.setUserClass(userClass);

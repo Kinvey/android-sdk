@@ -13,7 +13,7 @@
     <groupId>com.kinvey</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.15</version>
+    <version>2.6.17</version>
 
     <name>Kinvey (Parent)</name>
     <description></description>
@@ -25,8 +25,8 @@
         <module>android-lib</module>
         <module>android-secure</module>
         <module>java-lib</module>
-        <module>samples</module>
-        <module>samples-java</module>
+        <!--<module>samples</module> -->
+        <!--<module>samples-java</module>-->
     </modules>
 
     <properties>
@@ -34,13 +34,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.6</java.version>
 
-        <devcenter.home>${project.basedir}/../../../../../wrkspace/devcenter/</devcenter.home>
+        <devcenter.home>${project.basedir}/../../../devcenter/</devcenter.home>
         <devcenter.baseurl>http://localhost:3000</devcenter.baseurl>
 
         <android.version>4.0.1.2</android.version>
         <android.platform>16</android.platform>
         <android-support.version>r19</android-support.version>
-        <android.home>${ENV.ANDROID_HOME}</android.home>
+        <android.home>/Users/edward/code/thirdparty/android-sdk-macosx/</android.home>
 
         <android-maven.version>4.0.0-rc.1</android-maven.version>
         <junit.version>4.10</junit.version>

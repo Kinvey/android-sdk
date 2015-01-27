@@ -332,9 +332,6 @@ public class AsyncFile extends File {
             this.meta = meta;
         }
 
-
-
-
         //TODO somebody might want this someday
 //        public FileUpload(FileMetaData meta, byte [] byteContent, KinveyClientCallback callback) {
 //            super(callback);

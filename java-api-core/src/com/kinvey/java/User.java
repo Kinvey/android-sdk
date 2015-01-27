@@ -549,7 +549,7 @@ public class User<T extends User> extends GenericJson   {
             builder.setUser(User.this);
             this.type = LoginType.KINVEY;
         }
-
+        
         public LoginRequest(ThirdPartyIdentity identity) {
             builder.setThirdPartyIdentity(identity);
             builder.setUser(User.this);
