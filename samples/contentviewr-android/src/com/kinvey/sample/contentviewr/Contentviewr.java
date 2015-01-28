@@ -83,7 +83,6 @@ public class Contentviewr extends SherlockFragmentActivity{
 
         cacheLocation = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/contentbox");
 
-
         if (savedInstanceState != null && savedInstanceState.containsKey("contentKeys") && savedInstanceState.containsKey("contentValues")){
 
 
