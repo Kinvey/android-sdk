@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.widget.*;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
@@ -58,6 +59,11 @@ public class NotificationFragment extends ContentFragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
                 	
+                	if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()) != 0){
+                		throw new NullPointerException("" + GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()));
+                		
+                	}
+                	
                     final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(NotificationFragment.this.getActivity());
                 	//final String regid;
                     
@@ -66,6 +72,8 @@ public class NotificationFragment extends ContentFragment {
                         protected String doInBackground(Void... params) {
                             String msg = "";
                             try {
+                            	
+                            	
 //                                if (gcm == null) {
 //                                    gcm = GoogleCloudMessaging.getInstance(NotificationFragment.this.getActivity());
 //                                }

@@ -72,8 +72,8 @@ public class GCMPush extends AbstractPush {
 
     public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
-        this.senderIDs = senderIDs;
-        this.inProduction = inProduction;
+        GCMPush.senderIDs = senderIDs;
+        GCMPush.inProduction = inProduction;
     }
 
 

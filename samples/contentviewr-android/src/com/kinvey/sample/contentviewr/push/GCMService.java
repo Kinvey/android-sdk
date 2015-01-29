@@ -38,6 +38,7 @@ public class GCMService extends IntentService {
         // The getMessageType() intent parameter must be the intent you received
         // in your BroadcastReceiver.
         String messageType = gcm.getMessageType(intent);
+        Log.i("GCM", "handling intent");
 
         if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
             /*

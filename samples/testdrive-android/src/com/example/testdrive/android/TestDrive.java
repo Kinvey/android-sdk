@@ -76,7 +76,11 @@ public class TestDrive extends Activity {
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
 
-            kinveyClient.user().login("tester", "tester", new KinveyUserCallback() {
+            kinveyClient.user().put("email", "myemail@domain.com");
+            
+            
+            
+            kinveyClient.user().login(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     bar.setVisibility(View.GONE);
@@ -173,7 +177,11 @@ public class TestDrive extends Activity {
         Entity entity = new Entity("myEntity");
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
+        
+        byte[] b = new byte[]{(byte)0xe0, 0x4f, (byte)0xd0, (byte)0xea, (byte)0x20};
+        
 
+        entity.put("bytearray", b);
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
