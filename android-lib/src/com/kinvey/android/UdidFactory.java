@@ -16,14 +16,14 @@
 
 package com.kinvey.android;
 
+import java.io.UnsupportedEncodingException;
+import java.util.UUID;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
-
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
 
 /**
  * @see <a href="http://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id">

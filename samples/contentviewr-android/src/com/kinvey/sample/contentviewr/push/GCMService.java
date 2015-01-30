@@ -30,6 +30,10 @@ public class GCMService extends IntentService {
     public GCMService(String name) {
 		super(name);
 	}
+    
+    public GCMService(){
+    	super("push");
+    }
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
@@ -58,15 +62,15 @@ public class GCMService extends IntentService {
             } else if (GoogleCloudMessaging.
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // This loop represents the service doing some work.
-                for (int i=0; i<5; i++) {
-                    Log.i("GCM", "Working... " + (i+1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                Log.i("GCM", "Completed work @ " + SystemClock.elapsedRealtime());
+                //for (int i=0; i<5; i++) {
+                //    Log.i("GCM", "Working... " + (i+1)
+                //            + "/5 @ " + SystemClock.elapsedRealtime());
+                //    try {
+                //        Thread.sleep(5000);
+                //    } catch (InterruptedException e) {
+                //    }
+                //}
+                //Log.i("GCM", "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 Log.i("GCM", "Received: " + extras.toString());
             }

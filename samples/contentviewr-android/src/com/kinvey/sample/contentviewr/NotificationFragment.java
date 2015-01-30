@@ -17,12 +17,19 @@ import java.io.IOException;
 
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
-import android.widget.*;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.push.KinveyGCMService;
+import com.kinvey.java.User;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.sample.contentviewr.core.ContentFragment;
 
 /**
@@ -37,6 +44,7 @@ public class NotificationFragment extends ContentFragment {
 
     private Typeface roboto;
 
+    
 
     @Override
     public int getViewID() {
@@ -59,17 +67,20 @@ public class NotificationFragment extends ContentFragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
                 	
-                	if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()) != 0){
-                		throw new NullPointerException("" + GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()));
-                		
-                	}
+                	client().push().initialize(getSherlockActivity().getApplication());
                 	
+//                	if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()) != 0){
+//                		throw new NullPointerException("" + GooglePlayServicesUtil.isGooglePlayServicesAvailable(NotificationFragment.this.getActivity()));
+//                		
+//                	}
+//                	
                     final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(NotificationFragment.this.getActivity());
                 	//final String regid;
-                    
+                    //Log.i("GCM", "wat");
                     new AsyncTask<Void, Void, String>() {
                         @Override
                         protected String doInBackground(Void... params) {
+                        	Log.i("GCM", "doinbackground");
                             String msg = "";
                             try {
                             	
@@ -77,14 +88,25 @@ public class NotificationFragment extends ContentFragment {
 //                                if (gcm == null) {
 //                                    gcm = GoogleCloudMessaging.getInstance(NotificationFragment.this.getActivity());
 //                                }
-                                String regid = gcm.register("");
+                            	Log.i("GCM", "bout to register");
+                            	
+                            	Client c = ((ContentViewrApplication)NotificationFragment.this.getActivity().getApplication()).getClient();
+                            	
+                                final String regid = gcm.register(c.push().getSenderIDs());
                                 msg = "Device registered, registration ID=" + regid;
+                                Log.i("GCM", "regid is " + regid);
 
                                 // You should send the registration ID to your server over HTTP,
                                 // so it can use GCM/HTTP or CCS to send messages to your app.
                                 // The request to your server should be authenticated if your app
                                 // is using accounts.
-                                client().push().initialize(getSherlockActivity().getApplication());
+                                
+                                registerWithKinvey(c, regid, true);
+              
+                                
+                                
+                                //client().push().initialize(getSherlockActivity().getApplication());
+                                
 
                                 // For this demo: we don't need to send it because the device
                                 // will send upstream messages to a server that echo back the
@@ -126,6 +148,50 @@ public class NotificationFragment extends ContentFragment {
             updates.setChecked(false);
         }
     }
+    
+    public void registerWithKinvey(final Client client, final String gcmRegID, boolean register) {
+        //registered on GCM but not on Kinvey?
+        Log.v(Client.TAG, "about to register with Kinvey");
+        if (client == null) {
+            Log.e(Client.TAG, "GCMService got garbage collected, cannot complete registration!");
+            return;
+        }
+
+        if (!client.user().isUserLoggedIn()) {
+            Log.e(Client.TAG, "Need to login a current user before registering for push!");
+            return;
+        }
+
+        if (register) {
+
+            client.push().enablePushViaRest(new KinveyClientCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                	Log.i("GCM", "registered with Kinvey");
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    Log.v(Client.TAG, "GCM - user update error: " + error);
+                }
+            }, gcmRegID);
+
+        } else {
+            client.push().disablePushViaRest(new KinveyClientCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                 
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    Log.v(Client.TAG, "GCM - user update error: " + error);
+                }
+            }, gcmRegID);
+
+        }
+    }
+
 
     @Override
     public String getTitle() {

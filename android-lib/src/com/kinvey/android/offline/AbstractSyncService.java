@@ -13,6 +13,10 @@
  */
 package com.kinvey.android.offline;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -23,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
+
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
@@ -33,8 +38,6 @@ import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
-
-import java.util.*;
 
 /**
  * @author edwardf

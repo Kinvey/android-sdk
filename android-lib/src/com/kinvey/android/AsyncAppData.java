@@ -18,22 +18,26 @@ package com.kinvey.android;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
-import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
+import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.offline.OfflineStore;
 
 /**

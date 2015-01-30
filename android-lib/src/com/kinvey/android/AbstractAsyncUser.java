@@ -13,15 +13,19 @@
  */
 package com.kinvey.android;
 
-import com.kinvey.android.callback.*;
+import java.io.IOException;
+
+import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.callback.KinveyUserDeleteCallback;
+import com.kinvey.android.callback.KinveyUserListCallback;
+import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-
-import java.io.IOException;
 
 /**
  * Maintains definitions of all asyncronous user operation methods, this class is meant to be extended.

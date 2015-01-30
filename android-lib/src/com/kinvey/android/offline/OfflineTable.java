@@ -15,22 +15,23 @@
  */
 package com.kinvey.android.offline;
 
+import java.io.StringWriter;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 //import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
-
-import java.io.StringWriter;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class manages the necessary tables for offline to function associated with one specific {@link com.kinvey.android.AsyncAppData} collection.

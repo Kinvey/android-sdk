@@ -15,19 +15,20 @@
  */
 package com.kinvey.android.offline;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class manages a set of {@link OfflineTable}s.  Tables are not maintained in memory, and are created on demand.

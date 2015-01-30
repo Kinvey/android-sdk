@@ -15,12 +15,12 @@
  */
 package com.kinvey.android;
 
+import java.io.IOException;
+
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
-
-import java.io.IOException;
 
 /**
  * Wraps the {@link com.kinvey.java.CustomEndpoints} public methods in asynchronous functionality using native Android AsyncTask.

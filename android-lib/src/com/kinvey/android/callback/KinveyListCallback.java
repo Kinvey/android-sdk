@@ -17,8 +17,6 @@ package com.kinvey.android.callback;
 
 import com.kinvey.java.core.KinveyClientCallback;
 
-import java.util.List;
-
 /** Use this for async callbacks when retrieving multiple entities
  *
  * @author edwardf

@@ -15,10 +15,8 @@
  */
 package com.kinvey.android.callback;
 
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.model.KinveyDeleteResponse;
-
 import com.kinvey.android.Client;
+import com.kinvey.java.core.KinveyClientCallback;
 
 /**
  * This class provides callbacks for an creation of the client.

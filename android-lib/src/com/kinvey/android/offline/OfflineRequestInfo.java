@@ -15,8 +15,6 @@
  */
 package com.kinvey.android.offline;
 
-import com.kinvey.java.Query;
-
 import java.io.Serializable;
 
 /**

@@ -17,12 +17,12 @@ package com.kinvey.android.push;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
+
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.android.Client;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-
-import com.kinvey.android.Client;
 
 
 /**

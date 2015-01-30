@@ -20,8 +20,6 @@ import com.kinvey.java.AppDataOperation;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 
-import java.io.IOException;
-
 /**
  * Builder for asynchronous app data requests.
  * <p>

@@ -13,20 +13,12 @@
  */
 package com.kinvey.android;
 
-import android.app.Activity;
-import com.google.common.io.ByteStreams;
-import com.kinvey.android.offline.FileCacheSqlHelper;
-import com.kinvey.android.offline.SQLiteFileCache;
-import com.kinvey.java.model.FileMetaData;
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+
+import android.app.Activity;
+
+import com.kinvey.android.offline.SQLiteFileCache;
 
 
 /**

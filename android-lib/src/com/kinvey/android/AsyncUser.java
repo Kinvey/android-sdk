@@ -15,19 +15,9 @@
  */
 package com.kinvey.android;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import android.util.Log;
-
-import com.kinvey.android.callback.*;
-
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.Query;
 import com.kinvey.java.User;
-import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
-import com.kinvey.java.core.KinveyClientCallback;
 
 /**
  * Wraps the {@link com.kinvey.java.User} public methods in asynchronous functionality using native Android AsyncTask.

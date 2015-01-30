@@ -13,10 +13,12 @@
  */
 package com.kinvey.android.offline;
 
+import java.net.URLDecoder;
+import java.util.List;
+
 import android.content.Context;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
@@ -24,9 +26,6 @@ import com.kinvey.java.AppData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
-
-import java.net.URLDecoder;
-import java.util.List;
 
 /**
  * This class is an implementation of an {@link OfflineStore}

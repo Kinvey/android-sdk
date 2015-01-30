@@ -15,13 +15,6 @@
  */
 package com.kinvey.android;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.util.Log;
-import com.google.common.base.Preconditions;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,8 +22,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.util.Log;
+
+import com.google.common.base.Preconditions;
 import com.kinvey.java.auth.ClientUsers;
 
 /**

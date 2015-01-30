@@ -13,17 +13,18 @@
  */
 package com.kinvey.android.offline;
 
+import java.io.StringWriter;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
 import com.kinvey.java.model.FileMetaData;
-
-import java.io.StringWriter;
 
 /**
  * This class manages a sqlite database for maintaining metadata about cached files.

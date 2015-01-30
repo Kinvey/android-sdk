@@ -16,6 +16,7 @@
 package com.kinvey.android;
 
 import android.os.Build;
+
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;

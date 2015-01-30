@@ -16,6 +16,7 @@
 package com.kinvey.android;
 
 import android.content.Context;
+
 import com.google.api.client.util.Key;
 
 /**

@@ -15,34 +15,26 @@
  */
 package com.kinvey.android.push;
 
-import static com.google.android.gcm.GCMConstants.ERROR_SERVICE_NOT_AVAILABLE;
-import static com.google.android.gcm.GCMConstants.EXTRA_ERROR;
-import static com.google.android.gcm.GCMConstants.EXTRA_REGISTRATION_ID;
-import static com.google.android.gcm.GCMConstants.EXTRA_SPECIAL_MESSAGE;
-import static com.google.android.gcm.GCMConstants.EXTRA_TOTAL_DELETED;
-import static com.google.android.gcm.GCMConstants.EXTRA_UNREGISTERED;
-import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_LIBRARY_RETRY;
-import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE;
-import static com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK;
-import static com.google.android.gcm.GCMConstants.VALUE_DELETED_MESSAGES;
-
-import android.app.Application;
-import android.content.Intent;
-import android.util.Log;
-import com.google.android.gcm.GCMRegistrar;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
-import com.kinvey.android.AsyncClientRequest;
-import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.java.KinveyException;
-import com.kinvey.java.User;
-import com.kinvey.java.core.KinveyClientCallback;
-
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+
+import android.app.Application;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
+import com.kinvey.android.AsyncClientRequest;
+import com.kinvey.android.Client;
+import com.kinvey.java.KinveyException;
+import com.kinvey.java.core.KinveyClientCallback;
+
 
 
 /**
@@ -93,6 +85,17 @@ public class GCMPush extends AbstractPush {
         if (!getClient().user().isUserLoggedIn()){
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
+        
+        
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
+        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");
+        	
+        }
+        
+        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(currentApp);
+       
+       
+        
 
         //First check runtime and grab current registration ID
         GCMRegistrar.checkDevice(currentApp);

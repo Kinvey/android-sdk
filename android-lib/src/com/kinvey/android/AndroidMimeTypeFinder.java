@@ -16,14 +16,15 @@ package com.kinvey.android;
 
 import static com.kinvey.android.Client.TAG;
 
-import android.util.Log;
-import android.webkit.MimeTypeMap;
-import com.kinvey.java.MimeTypeFinder;
-import com.kinvey.java.model.FileMetaData;
-
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLConnection;
+
+import android.util.Log;
+import android.webkit.MimeTypeMap;
+
+import com.kinvey.java.MimeTypeFinder;
+import com.kinvey.java.model.FileMetaData;
 
 /**
  * Uses Android features to determine the MIME type of a provided file.

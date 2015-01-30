@@ -17,8 +17,6 @@ package com.kinvey.android.callback;
 
 import com.kinvey.java.core.KinveyClientCallback;
 
-import java.util.List;
-
 /**
  * This class provides callbacks for an asynchronous Ping
  *

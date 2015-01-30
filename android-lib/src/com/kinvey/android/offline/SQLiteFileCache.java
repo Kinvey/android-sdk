@@ -13,19 +13,20 @@
  */
 package com.kinvey.android.offline;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-import com.kinvey.android.Client;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.model.FileMetaData;
-import com.google.common.base.Preconditions;
-import com.kinvey.java.offline.FileCache;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Calendar;
+
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.google.common.base.Preconditions;
+import com.kinvey.android.Client;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.offline.FileCache;
 
 /**
  * File Caching allows your application to store files locally in an arbitrary location, and maintains metadata about the contents of the cache in sqlite table.

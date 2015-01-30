@@ -15,15 +15,13 @@
  */
 package com.kinvey.android;
 
-import com.google.common.base.Preconditions;
-
 import java.io.IOException;
 
+import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.User;
 import com.kinvey.java.UserDiscovery;
-import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.UserLookup;
 

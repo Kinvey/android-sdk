@@ -15,17 +15,17 @@
  */
 package com.kinvey.android;
 
-import android.os.AsyncTask;
-import android.os.Build;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;

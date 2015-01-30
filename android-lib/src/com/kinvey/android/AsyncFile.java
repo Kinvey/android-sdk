@@ -15,15 +15,15 @@
  */
 package com.kinvey.android;
 
-import android.content.Context;
-import com.google.api.client.http.InputStreamContent;
-import com.google.common.base.Preconditions;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.content.Context;
+
+import com.google.api.client.http.InputStreamContent;
+import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.File;
 import com.kinvey.java.Query;

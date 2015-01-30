@@ -17,23 +17,26 @@
 package com.kinvey.android;
 
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.*;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.common.base.Preconditions;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.BackOffPolicy;
+import com.google.api.client.http.ExponentialBackOffPolicy;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonObjectParser;
+import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -42,8 +45,8 @@ import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.User;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;

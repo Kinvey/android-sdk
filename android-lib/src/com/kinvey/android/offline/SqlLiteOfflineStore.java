@@ -17,7 +17,6 @@ package com.kinvey.android.offline;
 
 import android.content.Context;
 import android.content.Intent;
-import com.kinvey.java.offline.OfflineStore;
 
 /**
  * This class is an implementation of an {@link AbstractSqliteOfflineStore}, which provides a native android sqlite3 database

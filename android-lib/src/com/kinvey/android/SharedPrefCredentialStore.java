@@ -12,13 +12,14 @@ package com.kinvey.android;/*
  * the License.
  */
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
-
-import java.io.IOException;
 
 /**
  * Implementation of a {@link com.kinvey.java.auth.CredentialStore} utilizing a private instance of Android's Shared Preferences

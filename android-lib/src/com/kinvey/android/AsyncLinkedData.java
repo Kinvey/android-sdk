@@ -15,16 +15,16 @@
  */
 package com.kinvey.android;
 
+import java.io.IOException;
+
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedData;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.Query;
+import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
-
-import java.io.IOException;
 
 /**
  * Wraps the {@link com.kinvey.java.LinkedData} public methods in asynchronous functionality using native Android AsyncTask.
