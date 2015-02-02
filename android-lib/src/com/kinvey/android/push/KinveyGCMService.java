@@ -47,6 +47,13 @@ public abstract class KinveyGCMService extends IntentService {
 
     public static final String MESSAGE_FROM_GCM = "msg";
     public static final String TAG = "KINVEY-GCM";
+    
+    public static final String TRIGGER = "KINVEY_ACTION";
+    public static final String REGISTERED = "REGISTERED";
+    public static final String UNREGISTERED = "UNREGISTERED";
+    
+    		
+    		
 
     private Client client;
 
@@ -60,58 +67,58 @@ public abstract class KinveyGCMService extends IntentService {
     
 	@Override
 	protected void onHandleIntent(Intent intent) {
-    
-    new AsyncTask<Void, Void, String>() {
-        @Override
-        protected String doInBackground(Void... params) {
-        	Log.i("GCM", "doinbackground");
-            String msg = "";
-            try {
-            	
-            	
-//                if (gcm == null) {
-                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-//                }
-            	Log.i("GCM", "bout to register");
-            	
-            	Client c = null;//
-            	
-                final String regid = gcm.register(c.push().getSenderIDs());
-                msg = "Device registered, registration ID=" + regid;
-                Log.i("GCM", "regid is " + regid);
-
-                // You should send the registration ID to your server over HTTP,
-                // so it can use GCM/HTTP or CCS to send messages to your app.
-                // The request to your server should be authenticated if your app
-                // is using accounts.
-                
-                registerWithKinvey(c, regid, true);
-
-                
-                
-                //client().push().initialize(getSherlockActivity().getApplication());
-                
-
-                // For this demo: we don't need to send it because the device
-                // will send upstream messages to a server that echo back the
-                // message using the 'from' address in the message.
-
-                // Persist the regID - no need to register again.
-               // storeRegistrationId(NotificationFragment.this.getActivity(), regid);
-            } catch (IOException ex) {
-                msg = "Error :" + ex.getMessage();
-                // If there is an error, don't just keep trying to register.
-                // Require the user to click a button again, or perform
-                // exponential back-off.
-            }
-            return msg;
-        }
-
-        @Override
-        protected void onPostExecute(String msg) {
-            //mDisplay.append(msg + "\n");
-        }
-    }.execute(null, null, null);
+//    
+//    new AsyncTask<Void, Void, String>() {
+//        @Override
+//        protected String doInBackground(Void... params) {
+//        	Log.i("GCM", "doinbackground");
+//            String msg = "";
+//            try {
+//            	
+//            	
+////                if (gcm == null) {
+//                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+////                }
+//            	Log.i("GCM", "bout to register");
+//            	
+//            	Client c = null;//
+//            	
+//                final String regid = gcm.register(c.push().getSenderIDs());
+//                msg = "Device registered, registration ID=" + regid;
+//                Log.i("GCM", "regid is " + regid);
+//
+//                // You should send the registration ID to your server over HTTP,
+//                // so it can use GCM/HTTP or CCS to send messages to your app.
+//                // The request to your server should be authenticated if your app
+//                // is using accounts.
+//                
+//                registerWithKinvey(c, regid, true);
+//
+//                
+//                
+//                //client().push().initialize(getSherlockActivity().getApplication());
+//                
+//
+//                // For this demo: we don't need to send it because the device
+//                // will send upstream messages to a server that echo back the
+//                // message using the 'from' address in the message.
+//
+//                // Persist the regID - no need to register again.
+//               // storeRegistrationId(NotificationFragment.this.getActivity(), regid);
+//            } catch (IOException ex) {
+//                msg = "Error :" + ex.getMessage();
+//                // If there is an error, don't just keep trying to register.
+//                // Require the user to click a button again, or perform
+//                // exponential back-off.
+//            }
+//            return msg;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String msg) {
+//            //mDisplay.append(msg + "\n");
+//        }
+//    }.execute(null, null, null);
 
     
 	}

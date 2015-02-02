@@ -38,7 +38,7 @@ public abstract class AbstractPush {
 
     private Class<? extends BroadcastReceiver> pushReceiverClass;
 
-    private Client client;
+    protected Client client;
 
     private AbstractPush() {
     }
