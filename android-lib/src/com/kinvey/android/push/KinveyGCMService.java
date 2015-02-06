@@ -16,20 +16,17 @@
 package com.kinvey.android.push;
 
 
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
-import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.java.User;
-import com.kinvey.java.core.KinveyClientCallback;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -49,6 +46,7 @@ public abstract class KinveyGCMService extends IntentService {
     public static final String TAG = "KINVEY-GCM";
     
     public static final String TRIGGER = "KINVEY_ACTION";
+    public static final String REG_ID = "REGID";
     public static final String REGISTERED = "REGISTERED";
     public static final String UNREGISTERED = "UNREGISTERED";
     
@@ -67,243 +65,46 @@ public abstract class KinveyGCMService extends IntentService {
     
 	@Override
 	protected void onHandleIntent(Intent intent) {
-//    
-//    new AsyncTask<Void, Void, String>() {
-//        @Override
-//        protected String doInBackground(Void... params) {
-//        	Log.i("GCM", "doinbackground");
-//            String msg = "";
-//            try {
-//            	
-//            	
-////                if (gcm == null) {
-//                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-////                }
-//            	Log.i("GCM", "bout to register");
-//            	
-//            	Client c = null;//
-//            	
-//                final String regid = gcm.register(c.push().getSenderIDs());
-//                msg = "Device registered, registration ID=" + regid;
-//                Log.i("GCM", "regid is " + regid);
-//
-//                // You should send the registration ID to your server over HTTP,
-//                // so it can use GCM/HTTP or CCS to send messages to your app.
-//                // The request to your server should be authenticated if your app
-//                // is using accounts.
-//                
-//                registerWithKinvey(c, regid, true);
-//
-//                
-//                
-//                //client().push().initialize(getSherlockActivity().getApplication());
-//                
-//
-//                // For this demo: we don't need to send it because the device
-//                // will send upstream messages to a server that echo back the
-//                // message using the 'from' address in the message.
-//
-//                // Persist the regID - no need to register again.
-//               // storeRegistrationId(NotificationFragment.this.getActivity(), regid);
-//            } catch (IOException ex) {
-//                msg = "Error :" + ex.getMessage();
-//                // If there is an error, don't just keep trying to register.
-//                // Require the user to click a button again, or perform
-//                // exponential back-off.
-//            }
-//            return msg;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String msg) {
-//            //mDisplay.append(msg + "\n");
-//        }
-//    }.execute(null, null, null);
+		
+		if (intent.getExtras().getString(TRIGGER, "default").equals(REGISTERED)){
+			String regID = intent.getExtras().getString(REG_ID);
+			onRegistered(regID);
+			
+		}else if (intent.getExtras().getString(TRIGGER, "default").equals(REGISTERED)){
+			String regID = intent.getExtras().getString(REG_ID);
+			onUnregistered(regID);
+		}
+		
+        Bundle extras = intent.getExtras();
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+        
+        String messageType = gcm.getMessageType(intent);
+        Log.i("GCM", "handling intent");
 
+        if (!extras.isEmpty()) {
+            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+                Log.i("GCM", "Send error: " + extras.toString());
+                onError(extras.toString());
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+            	Log.i("GCM", "Deleted messages on server: " + extras.toString());
+            	onDelete(extras.toString());
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+                Log.i("GCM", "Received: " + extras.toString());
+                onMessage(extras.toString());
+            }
+        }
+        
+        try {
+        	Method complete = getReceiver().getMethod("completeWakefulIntent", Intent.class);
+			complete.invoke(null, intent);
+		} catch (Exception e) {
+			Log.e(TAG, "couldn't complete wakeful intent!");
+			e.printStackTrace();
+		}
+        
     
 	}
-    
-    
-    
-    
-    
-    
-    protected void onRegistered(Context context, final String registrationId) {
-        Log.v(TAG, "Device registered: regId = " + registrationId);
-
-
-        Client.Builder builder;
-        if (getAppKey() == null) {
-            builder = new Client.Builder(context);
-        } else {
-            builder = new Client.Builder(getAppKey(), getAppSecret(), context);
-        }
-
-        if (gcmEnabled()) {
-            builder.setSenderIDs(getSenderIDs());
-            builder.setGcmInProduction(inProduction());
-            builder.enableGCM(gcmEnabled());
-        }
-        if (getBaseURL() != null) {
-            builder.setBaseUrl(getBaseURL());
-        }
-
-        builder.setRetrieveUserCallback(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-                registerWithKinvey(registrationId, true);
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Log.e(TAG, "GCM registration failed to retrieve user!");
-            }
-        });
-
-        client = builder.build();
-
-
-    }
-
-    public String getSenderIDs() {
-        return null;
-    }
-
-    public String getAppKey() {
-        return null;
-    }
-
-    public String getAppSecret() {
-        return null;
-    }
-
-    public boolean gcmEnabled() {
-        return false;
-    }
-
-    public boolean inProduction() {
-        return true;
-    }
-
-    public String getBaseURL() {
-        return null;
-    }
-
-
-    
-    protected void onUnregistered(Context context, final String registrationId) {
-        Log.v(TAG, "Device unregistered");
-
-        Client.Builder builder;
-        if (getAppKey() == null) {
-            builder = new Client.Builder(context);
-        } else {
-            builder = new Client.Builder(getAppKey(), getAppSecret(), context);
-        }
-
-        if (gcmEnabled()) {
-            builder.setSenderIDs(getSenderIDs());
-            builder.setGcmInProduction(inProduction());
-            builder.enableGCM(gcmEnabled());
-        }
-        if (getBaseURL() != null) {
-            builder.setBaseUrl(getBaseURL());
-        }
-
-        builder.setRetrieveUserCallback(new KinveyUserCallback() {
-            @Override
-            public void onSuccess(User result) {
-                Log.v(TAG, "retrieved user, about to register with Kinvey.");
-                registerWithKinvey(registrationId, false);
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Log.e(TAG, "GCM registration failed to retrieve user!");
-            }
-        });
-
-        client = builder.build();
-
-    }
-
-    
-    protected void onMessage(Context context, Intent intent) {
-        String message = intent.getStringExtra(MESSAGE_FROM_GCM);
-        Log.v(TAG, "Received message -> " + message);
-        onMessage(message);
-
-    }
-
-    
-    protected void onDeletedMessages(Context context, int total) {
-        Log.v(TAG, "Received deleted messages notification");
-        onDelete(total);
-
-    }
-
-    
-    public void onError(Context context, String errorId) {
-        Log.v(TAG, "Received error: " + errorId);
-        onError(errorId);
-    }
-
-
-
-
-    private void registerWithKinvey(String gcmID, boolean register) {
-        registerWithKinvey(client, gcmID, register);
-    }
-
-    public void registerWithKinvey(final Client client, final String gcmRegID, boolean register) {
-        //registered on GCM but not on Kinvey?
-        Log.v(Client.TAG, "about to register with Kinvey");
-        if (client == null) {
-            Log.e(Client.TAG, "GCMService got garbage collected, cannot complete registration!");
-            return;
-        }
-
-        if (!client.user().isUserLoggedIn()) {
-            Log.e(Client.TAG, "Need to login a current user before registering for push!");
-            return;
-        }
-
-        if (register) {
-
-            client.push().enablePushViaRest(new KinveyClientCallback() {
-                @Override
-                public void onSuccess(Object result) {
-                    KinveyGCMService.this.onRegistered(gcmRegID);
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    Log.v(Client.TAG, "GCM - user update error: " + error);
-                }
-            }, gcmRegID);
-
-        } else {
-            client.push().disablePushViaRest(new KinveyClientCallback() {
-                @Override
-                public void onSuccess(Object result) {
-                    KinveyGCMService.this.onUnregistered(gcmRegID);
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    Log.v(Client.TAG, "GCM - user update error: " + error);
-                }
-            }, gcmRegID);
-
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        GCMRegistrar.onDestroy(getApplicationContext());
-    }
-
+   
 
     /**
      * This method is called when a message is received through GCM via Kinvey.
@@ -325,7 +126,7 @@ public abstract class KinveyGCMService extends IntentService {
      *
      * @param deleteCount the number of deleted messages
      */
-    public abstract void onDelete(int deleteCount);
+    public abstract void onDelete(String deleted);
 
     /**
      * This method is called after successful registration.  This includes both registering with GCM as well as Kinvey.
@@ -340,6 +141,10 @@ public abstract class KinveyGCMService extends IntentService {
      * @param oldID the old GCM registration ID of the now unregistered user.
      */
     public abstract void onUnregistered(String oldID);
+    
+	public abstract Class getReceiver() ;
+    	
+    
 
 
 }

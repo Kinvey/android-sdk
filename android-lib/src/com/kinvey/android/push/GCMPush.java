@@ -87,10 +87,8 @@ public class GCMPush extends AbstractPush {
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
-        
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
-        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");
-        	
+        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");	
         }
         
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(currentApp);
@@ -99,81 +97,24 @@ public class GCMPush extends AbstractPush {
             @Override
             protected Void doInBackground(Void... params) {
     
-                try {
-                	Log.i("GCM", "bout to register");            	
-                	Client c = null;//
-                	
-                    final String regid = gcm.register(c.push().getSenderIDs());
-                    
+                try {                	
+                    final String regid = gcm.register(getSenderIDs());                    
                     Log.i("GCM", "regid is " + regid);
 
-                    // You should send the registration ID to your server over HTTP,
-                    // so it can use GCM/HTTP or CCS to send messages to your app.
-                    // The request to your server should be authenticated if your app
-                    // is using accounts.
-                    
-                    registerWithKinvey(c, regid, true);
+                    registerWithKinvey(regid, true);
 
-                    
-      
                 } catch (IOException ex) {
                 	Log.e(TAG, "unable to register with GCM: " + ex.getMessage());
                 	ex.printStackTrace();
                 }
 				return null;
-      
             }
-
         }.execute(null, null, null);
 
-       
-       
-        
-//
-//        //First check runtime and grab current registration ID
-//        GCMRegistrar.checkDevice(currentApp);
-//        GCMRegistrar.checkManifest(currentApp);
-//
-//        final String regId = GCMRegistrar.getRegistrationId(currentApp);
-//
-//        //if we are not registered on GCM, then register
-//        if (regId.equals("")) {
-//            Log.v(Client.TAG, "GCM - Registration Id is empty, about to use GCMRegistrar for SenderIDs:");
-//            for (String s: senderIDs){
-//                Log.v(Client.TAG, "GCM Id -> " + s);
-//            }
-//            //Registration comes back via an intent
-//            GCMRegistrar.register(currentApp, senderIDs);
-//            Log.v(Client.TAG, "GCM - just registered with the GCMRegistrar");
-//        }else{
-//            Log.v(Client.TAG, "Client is already initialized with GCMid: " + regId);
-//            if (isPushEnabled()){
-//                Log.v(Client.TAG, "Client is fully initialized and push is enabled");
-//            }else{
-//                Log.v(Client.TAG, "About to register with Kinvey");
-//
-//                getClient().push().enablePushViaRest(new KinveyClientCallback() {
-//                    @Override
-//                    public void onSuccess(Object result) {
-//                        Log.v(TAG, "User is registered for push!");
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Throwable error) {
-//                        Log.v(Client.TAG, "GCM - user update error: " + error);
-//                    }
-//                }, regId);
-//            }
-//        }
         return this;
     }
 
-    
-    private void registerWithKinvey(String gcmID, boolean register) {
-        registerWithKinvey(client, gcmID, register);
-    }
-
-    public void registerWithKinvey(final Client client, final String gcmRegID, boolean register) {
+    public void registerWithKinvey(final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG, "about to register with Kinvey");
         if (client == null) {
@@ -193,6 +134,7 @@ public class GCMPush extends AbstractPush {
                 public void onSuccess(Object result) {
                 	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
+                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
                 	client.getContext().startService(reg);
                 }
 
@@ -208,7 +150,9 @@ public class GCMPush extends AbstractPush {
                 public void onSuccess(Object result) {
                 	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
-                	client.getContext().startService(reg);                }
+                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
+                	client.getContext().startService(reg);      
+                }
 
                 @Override
                 public void onFailure(Throwable error) {
@@ -218,8 +162,6 @@ public class GCMPush extends AbstractPush {
 
         }
     }
-
-
 
 
     /**
@@ -367,16 +309,11 @@ public class GCMPush extends AbstractPush {
     @Override
     public void enablePushViaRest(KinveyClientCallback callback, String deviceID){
         new AsyncEnablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-
-
-
     }
 
     @Override
     public void disablePushViaRest(KinveyClientCallback callback, String deviceID){
         new AsyncDisablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-
-
     }
 
 

@@ -13,70 +13,66 @@
  */
 package com.kinvey.sample.contentviewr.push;
 
-import android.app.IntentService;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.WakefulBroadcastReceiver;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.kinvey.android.push.KinveyGCMService;
+import com.kinvey.sample.contentviewr.R;
 
 /**
  * @author edwardf
  */
-public class GCMService extends IntentService {
-
-    
-    public GCMService(String name) {
-		super(name);
-	}
-    
-    public GCMService(){
-    	super("push");
-    }
+public class GCMService extends KinveyGCMService {
 
 	@Override
-	protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
-        Log.i("GCM", "handling intent");
+	public void onMessage(String message) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+				.setSmallIcon(R.drawable.icon)
+				.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(message);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
+	}
 
-        if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
-            /*
-             * Filter messages based on message type. Since it is likely that GCM
-             * will be extended in the future with new message types, just ignore
-             * any message types you're not interested in, or that you don't
-             * recognize.
-             */
-            if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                Log.i("GCM", "Send error: " + extras.toString());
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_DELETED.equals(messageType)) {
-            	Log.i("GCM", "Deleted messages on server: " +
-                        extras.toString());
-            // If it's a regular GCM message, do some work.
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                //for (int i=0; i<5; i++) {
-                //    Log.i("GCM", "Working... " + (i+1)
-                //            + "/5 @ " + SystemClock.elapsedRealtime());
-                //    try {
-                //        Thread.sleep(5000);
-                //    } catch (InterruptedException e) {
-                //    }
-                //}
-                //Log.i("GCM", "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                Log.i("GCM", "Received: " + extras.toString());
-            }
-        }
-        // Release the wake lock provided by the WakefulBroadcastReceiver.
-        GCMReceiver.completeWakefulIntent(intent);
-    }
+	@Override
+	public void onError(String error) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setSmallIcon(R.drawable.icon)
+			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(error);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
+	}
+
+	@Override
+	public void onDelete(String deleted) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setSmallIcon(R.drawable.icon)
+			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(deleted);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
+	}
+
+	@Override
+	public void onRegistered(String gcmID) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setSmallIcon(R.drawable.icon)
+			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(gcmID);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
+	}
+
+	@Override
+	public void onUnregistered(String oldID) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setSmallIcon(R.drawable.icon)
+			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(oldID);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
+	}
+
+	public Class getReceiver() {
+		return GCMReceiver.class;
+	}
 
 }
