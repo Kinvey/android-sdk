@@ -16,6 +16,8 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.nativejava.Client;
+import com.kinvey.nativejava.JavaJson;
+import com.kinvey.nativejava.JavaJson.JSONPARSER;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -33,7 +35,9 @@ public class HelloWorld {
     public static void main(String[] args){
         System.out.println("Hello World");
 
-        Client myJavaClient = new Client.Builder(appKey, appSecret).setBaseUrl("http://v3yk1n.kinvey.com").build();
+        Client myJavaClient = new Client.Builder(appKey, appSecret)
+        	.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
+        	.build();
         myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
         System.out.println("Client ping -> " + ping);

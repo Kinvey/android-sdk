@@ -19,6 +19,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
 import com.kinvey.android.Client;
 import com.kinvey.android.push.KinveyGCMService;
 import com.kinvey.sample.kitchensink.R;
@@ -48,7 +49,7 @@ public class GCMLoggingReceiver extends KinveyGCMService {
     }
 
     @Override
-    public void onDelete(int deleteCount) {
+    public void onDelete(String deleteCount) {
         Log.i(Client.TAG, "GCM - onDelete, message deleted count: " + deleteCount);
     }
 
@@ -62,6 +63,12 @@ public class GCMLoggingReceiver extends KinveyGCMService {
     public void onUnregistered(String oldID) {
         Log.i(Client.TAG, "GCM - onUnregister");
     }
+
+	@Override
+	public Class getReceiver() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 

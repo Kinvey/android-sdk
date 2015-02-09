@@ -90,7 +90,7 @@ public abstract class KinveyGCMService extends IntentService {
             	onDelete(extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Log.i("GCM", "Received: " + extras.toString());
-                onMessage(extras.toString());
+                onMessage(extras.get(MESSAGE_FROM_GCM).toString());
             }
         }
         

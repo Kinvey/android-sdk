@@ -330,6 +330,7 @@ public class Client extends AbstractClient {
             } catch (Exception ex) {
                 System.out.println("KINVEY" +  "Credential store failed to load" + ex);
             }
+            this.setJsonFactory(this.factory);
 
         }
 
@@ -342,13 +343,15 @@ public class Client extends AbstractClient {
         */
         @Override
         public Builder setBaseUrl(String baseUrl) {
-            return (Builder) super.setBaseUrl(baseUrl);
+            super.setBaseUrl(baseUrl);
+            return this;
         }
 
 
         @Override
         public Builder setJsonFactory(JsonFactory factory){
-            return (Builder) super.setJsonFactory(factory);
+            super.setJsonFactory(factory);
+            return this;
         }
 
 
