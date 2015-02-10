@@ -16,13 +16,11 @@
 package com.kinvey.android.push;
 
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
