@@ -139,8 +139,6 @@ public abstract class AbstractSyncService extends IntentService{
                     for (String s : collectionNames) {
                         done = false;
 
-
-
                         if (!done && safeToAttempExecution()){
                             OfflineRequestInfo req = dbHelper.getTable(s).popSingleQueue(dbHelper);
                             if (req == null){
@@ -155,9 +153,6 @@ public abstract class AbstractSyncService extends IntentService{
                 if (!done){
                     startResetTimer();
                 }
-
-
-
 
                 return null;
             }
@@ -225,9 +220,15 @@ public abstract class AbstractSyncService extends IntentService{
                 }
             });
         }else if (cur.getHttpVerb().equals("QUERY")){
-
+        	//sanitize the query string by url decoding specific characters which should not be encoded
+            //known list is `&` and `?` and `=`
+        	String queryString = cur.getEntityID();
+        	queryString.replace("%3F", "?");
+        	queryString.replace("%3D","=");
+        	queryString.replace("%26","&");
+        	
             Query q = new Query();
-            q.setQueryString(cur.getEntityID());
+            q.setQueryString(queryString);
 
             client.appData(collectionName, GenericJson.class).get(q, new KinveyListCallback<GenericJson>()
             {
@@ -284,8 +285,6 @@ public abstract class AbstractSyncService extends IntentService{
                 return null;
             }
         }.execute();
-
-
     }
 
 
