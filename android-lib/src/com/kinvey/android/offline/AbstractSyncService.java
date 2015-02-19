@@ -172,7 +172,7 @@ public abstract class AbstractSyncService extends IntentService{
      * @param collectionName the name of the collection for this request
      */
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
-
+    	Log.i("OFFLINE", cur.getHttpVerb());
 
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
             GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
@@ -219,39 +219,26 @@ public abstract class AbstractSyncService extends IntentService{
                     AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
                 }
             });
-        }else if (cur.getHttpVerb().equals("QUERY")){
-        	//sanitize the query string by url decoding specific characters which should not be encoded
-            //known list is `&` and `?` and `=`
-        	String queryString = cur.getEntityID();
-        	queryString.replace("%3F", "?");
-        	queryString.replace("%3D","=");
-        	queryString.replace("%26","&");
+        }else if (cur.getHttpVerb().equals("QUERY")){        	
+        	String queryString = cur.getEntityID();    
         	
-            Query q = new Query();
+        	Query q = new Query();            
             q.setQueryString(queryString);
 
-            client.appData(collectionName, GenericJson.class).get(q, new KinveyListCallback<GenericJson>()
-            {
-                @Override
-                public void onSuccess(GenericJson[] result) {
-                    List<String> resultIds = new ArrayList<String>();
-
-                    for (GenericJson res : result){
-//                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
-                        //update datastore with response
-                        dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);
-                        resultIds.add(res.get("_id").toString());
-                    }
-
-                    dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(), resultIds);
+            try{
+            	GenericJson[] result = client.appData(collectionName, GenericJson.class).getBlocking(queryString).execute();
+            	List<String> resultIds = new ArrayList<String>();
+                for (GenericJson res : result){
+//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
+                    //update datastore with response
+                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);
+                    resultIds.add(res.get("_id").toString());
                 }
+                dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(), resultIds);
+            }catch(Exception e){
+                AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, e);
+            }
 
-                @Override
-                public void onFailure(Throwable error) {
-                    AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                    //dbHelper.getTable(collectionName).deleteEntity(dbHelper, cur.getEntityID());
-                }
-            });
         }
     }
 

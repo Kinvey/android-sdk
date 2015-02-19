@@ -37,17 +37,4 @@ public interface KinveySyncCallback {
      * @param responseInfo - Information about the request and failure.
      */
     public void onFailure(OfflineResponseInfo responseInfo);
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

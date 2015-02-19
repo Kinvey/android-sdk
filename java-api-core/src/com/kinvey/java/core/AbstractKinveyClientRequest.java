@@ -37,6 +37,9 @@ import com.kinvey.java.offline.MediaOfflineDownloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  * @author m0rganic
@@ -108,6 +111,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * Does this request require the appkey/appsecret for authentication or does it require a user context
      */
     private boolean requireAppCredentials = false;
+    
+    /**
+     * Should the request use the default template expansion for encoding the URL
+     */
+    private boolean templateExpand = true;
 
     @Key
     private String appKey;
@@ -278,7 +286,14 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @return
      */
     protected GenericUrl buildHttpRequestUrl() {
-        return new GenericUrl(UriTemplate.expand(abstractKinveyClient.getBaseUrl(), uriTemplate, this, true));
+    	
+    	String encodedURL = UriTemplate.expand(abstractKinveyClient.getBaseUrl(), uriTemplate, this, true);
+    	if (!templateExpand){
+    		encodedURL = encodedURL.replace("%3F", "?");
+    		encodedURL = encodedURL.replace("%3D", "=");
+    		encodedURL = encodedURL.replace("%26", "&");
+    	}
+    	return new GenericUrl(encodedURL);
     }
 
     /**
@@ -452,6 +467,10 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
     public boolean isRequireAppCredentials() {
         return requireAppCredentials;
+    }
+    
+    public void setTemplateExpand(boolean expand){
+    	this.templateExpand = expand;
     }
 
     public void setRequireAppCredentials(boolean requireAppCredentials) {

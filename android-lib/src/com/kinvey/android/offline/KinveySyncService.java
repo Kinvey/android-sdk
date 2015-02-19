@@ -29,8 +29,6 @@ import android.util.Log;
  */
 public class KinveySyncService extends AbstractSyncService {
 
-
-
     //allows clients to bind
     private final IBinder mBinder = new KBinder();
 
@@ -66,9 +64,6 @@ public class KinveySyncService extends AbstractSyncService {
         public KinveySyncService getService(){
             return KinveySyncService.this;
         }
-
     }
-
-
 
 }

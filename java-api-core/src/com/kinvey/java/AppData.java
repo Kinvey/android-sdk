@@ -240,7 +240,21 @@ public class AppData<T> {
         client.initializeRequest(get);
         return get;
     }
-
+    
+    
+    /**
+     * Method to resolve a raw query string
+     *
+     * @param query Query to get
+     * @return Get object
+     * @throws java.io.IOException
+     */
+    public Get getBlocking(String queryString) throws IOException{
+    	Preconditions.checkNotNull(queryString);
+        Get get = new Get(queryString, Array.newInstance(myClass,0).getClass());
+        client.initializeRequest(get);
+        return get;
+    }
 
     /**
      * Method to get a query of entities.  Pass an array of entity _ids to return the entites.
@@ -493,7 +507,6 @@ public class AppData<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
-
         @Key
         private String collectionName;
         @Key("query")
@@ -512,7 +525,6 @@ public class AppData<T> {
         @Key("retainReferences")
         private String retainReferences;
 
-
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
@@ -525,7 +537,6 @@ public class AppData<T> {
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
-
         }
 
 
@@ -545,8 +556,15 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-
-
+        }
+        
+        Get(String queryString, Class myClass){
+        	super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
+        	super.setCache(cache, policy);
+        	super.setStore(offlineStore, offlinePolicy);
+            this.collectionName= AppData.this.collectionName;
+        	this.queryFilter = queryString;
+        	this.setTemplateExpand(false);
         }
 
         @Override
@@ -566,7 +584,6 @@ public class AppData<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{resolve,resolve_depth,retainReference}";
 
-
         @Key
         private String entityID;
         @Key
@@ -578,9 +595,6 @@ public class AppData<T> {
         private String resolve_depth;
         @Key("retainReferences")
         private String retainReferences;
-
-
-
 
         GetEntity(String entityID, Class<T> myClass) {
             super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
@@ -602,16 +616,12 @@ public class AppData<T> {
             this.retainReferences = Boolean.toString(retain);
         }
 
-
-
         @Override
         public T execute() throws IOException {
             T myEntity = super.execute();
 
             return myEntity;
         }
-
-
     }
 
     /** used internally **/
@@ -639,8 +649,6 @@ public class AppData<T> {
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
             }
-
-
         }
 
         Save(T entity, Class<T> myClass, SaveMode update) {
@@ -711,10 +719,6 @@ public class AppData<T> {
     public boolean isOnline() {
         return true;
     }
-
-
-
-
 }
 
 
