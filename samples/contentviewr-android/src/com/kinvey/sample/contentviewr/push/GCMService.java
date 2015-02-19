@@ -16,7 +16,6 @@ package com.kinvey.sample.contentviewr.push;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.kinvey.android.push.KinveyGCMService;
 import com.kinvey.sample.contentviewr.R;
@@ -28,51 +27,42 @@ public class GCMService extends KinveyGCMService {
 
 	@Override
 	public void onMessage(String message) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-				.setSmallIcon(R.drawable.icon)
-				.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(message);
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, mBuilder.build());
+		displayNotification(message);
 	}
 
 	@Override
 	public void onError(String error) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-			.setSmallIcon(R.drawable.icon)
-			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(error);
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, mBuilder.build());
+		displayNotification(error);
 	}
 
 	@Override
 	public void onDelete(String deleted) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-			.setSmallIcon(R.drawable.icon)
-			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(deleted);
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, mBuilder.build());
+		displayNotification(deleted);
 	}
 
 	@Override
 	public void onRegistered(String gcmID) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-			.setSmallIcon(R.drawable.icon)
-			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(gcmID);
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, mBuilder.build());
+		displayNotification(gcmID);
 	}
 
 	@Override
 	public void onUnregistered(String oldID) {
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-			.setSmallIcon(R.drawable.icon)
-			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name)).setContentText(oldID);
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, mBuilder.build());
+		displayNotification(oldID);
 	}
 
 	public Class getReceiver() {
 		return GCMReceiver.class;
+	}
+	
+	
+	
+	private void displayNotification(String message){
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setSmallIcon(R.drawable.ic_launcher)
+			.setContentTitle(getApplicationContext().getResources().getString(R.string.app_name))
+			.setContentText(message);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(1, mBuilder.build());
 	}
 
 }

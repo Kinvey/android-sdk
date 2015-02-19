@@ -12,17 +12,23 @@
  * the License.
  */
 
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.json.GenericJson;
-import com.kinvey.nativejava.Client;
-import com.kinvey.nativejava.JavaJson;
-import com.kinvey.nativejava.JavaJson.JSONPARSER;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.kinvey.java.cache.InMemoryLRUCache;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.KinveyMetaData.AccessControlList;
 
-import java.io.*;
+
+import com.kinvey.java.model.FileMetaData;
+
+import com.kinvey.nativejava.Client;
+
+import com.kinvey.java.Query;
 
 /**
  * @author edwardf
@@ -41,7 +47,7 @@ public class HelloWorld {
         myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
         System.out.println("Client ping -> " + ping);
-
+               
         try {
             myJavaClient.user().loginBlocking(appKey, appSecret).execute();
             System.out.println("Client login -> " + myJavaClient.user().isUserLoggedIn());

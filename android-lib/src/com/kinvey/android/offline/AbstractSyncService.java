@@ -172,8 +172,6 @@ public abstract class AbstractSyncService extends IntentService{
      * @param collectionName the name of the collection for this request
      */
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
-    	Log.i("OFFLINE", cur.getHttpVerb());
-
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
             GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
             if (entity != null){

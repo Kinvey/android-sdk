@@ -13,35 +13,31 @@
  */
 package com.example.testdrive.android;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.example.testdrive.android.model.Entity;
 import com.google.api.client.http.HttpTransport;
-
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
+import com.kinvey.android.Client;
 import com.kinvey.android.SharedPrefCredentialStore;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.java.Query;
-import com.kinvey.android.Client;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import com.kinvey.java.model.KinveyReference;
 import com.kinvey.java.offline.OfflinePolicy;
+import com.kinvey.java.query.AbstractQuery.SortOrder;
 
 public class TestDrive extends Activity {
 
@@ -70,7 +66,7 @@ public class TestDrive extends Activity {
         bar = (ProgressBar) findViewById(R.id.refresh_progress);
         bar.setIndeterminate(true);
 
-        kinveyClient = new Client.Builder(this).setCredentialStore(new SharedPrefCredentialStore(this)).build();
+        kinveyClient = new Client.Builder(this).build();
         kinveyClient.enableDebugLogging();
 
         if (!kinveyClient.user().isUserLoggedIn()) {
@@ -129,8 +125,9 @@ public class TestDrive extends Activity {
         bar.setVisibility(View.VISIBLE);
         Query myQuery = kinveyClient.query();
         myQuery.startsWith("_id", "my");
+        myQuery.addSort("_id", SortOrder.ASC);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, store);
         ad.get(myQuery, new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
@@ -153,7 +150,6 @@ public class TestDrive extends Activity {
     public void onLoadAllClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.get(new Query(), new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
