@@ -2,6 +2,7 @@
 bin/
 gen/
 target/
+build/
 .project
 .classpath
 .metadata/
