@@ -15,6 +15,12 @@
  */
 package com.kinvey.java.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.EmptyContent;
@@ -30,16 +36,10 @@ import com.google.api.client.http.UriTemplate;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 
 /**
  * @author m0rganic
@@ -398,18 +398,16 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             response.ignore();
             return null;
         }
+        
         try{
-        	
+    
             return response.parseAs(responseClass);
             
         }catch(IllegalArgumentException e){
         	
-            System.out.println("unable to parse response -> " + e.getLocalizedMessage());
-            
-            //TODO this is where we need to check if its an array or single object but it's source is a stream...
-            
-            //this prevents a crash when we receive a 200 with null content
-            return null;
+            System.out.println("unable to parse response -> " + e.getCause().toString());
+            throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct.", e.getCause().toString());
+
         }catch (NullPointerException ex){
             return null;
         }

@@ -789,6 +789,10 @@ public class User<T extends User> extends GenericJson   {
         public T execute() throws IOException {
 
             T u = super.execute();
+            
+            if (User.this.getId() == null || u.getId() == null){
+            	return u;
+            }
 
             if (u.getId().equals(User.this.getId())){
                 KinveyAuthResponse auth = new KinveyAuthResponse();
