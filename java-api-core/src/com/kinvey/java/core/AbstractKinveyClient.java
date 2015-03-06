@@ -23,6 +23,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
 import com.kinvey.java.File;
+import com.kinvey.java.KinveyException;
 
 import java.io.IOException;
 
@@ -248,6 +249,9 @@ public abstract class AbstractKinveyClient {
          */
         public Builder setBaseUrl(String baseUrl) {
             this.baseUrl = normalizeRootUrl(baseUrl);
+            if (!this.baseUrl.toUpperCase().startsWith("HTTPS")){
+            	throw new KinveyException("Kinvey requires the usage of SSL over http.  Use `https` as the protocol when setting a base URL");
+            }
             return this;
         }
 

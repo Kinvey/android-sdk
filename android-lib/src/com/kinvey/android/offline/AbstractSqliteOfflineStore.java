@@ -23,6 +23,7 @@ import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
@@ -175,6 +176,10 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
         T ret = (T) handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent);
 
+        if (((GenericJson)request.getJsonContent()).get("_id") == null){
+        	throw new KinveyException("Cannot save an entity without an _id");
+        }
+        
         handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString());
 
         kickOffSync();

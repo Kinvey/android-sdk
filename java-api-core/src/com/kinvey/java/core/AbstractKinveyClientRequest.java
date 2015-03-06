@@ -399,9 +399,15 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             return null;
         }
         try{
+        	
             return response.parseAs(responseClass);
+            
         }catch(IllegalArgumentException e){
+        	
             System.out.println("unable to parse response -> " + e.getLocalizedMessage());
+            
+            //TODO this is where we need to check if its an array or single object but it's source is a stream...
+            
             //this prevents a crash when we receive a 200 with null content
             return null;
         }catch (NullPointerException ex){
@@ -460,7 +466,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     }
 
 
-    public AbstractKinveyClientRequest setAppKey(String appKey) {
+    public AbstractKinveyClientRequest<T> setAppKey(String appKey) {
         this.appKey = appKey;
         return this;
     }

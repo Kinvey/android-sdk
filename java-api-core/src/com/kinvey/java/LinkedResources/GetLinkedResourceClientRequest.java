@@ -16,6 +16,7 @@
 package com.kinvey.java.LinkedResources;
 
 import com.kinvey.java.File;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.core.*;
 import com.kinvey.java.model.FileMetaData;
 
@@ -117,8 +118,6 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 }else if(((Map) entity.get(key)).containsKey("_loc")){
                     meta.setFileName(((Map) entity.get(key)).get("_loc").toString());
                     getAbstractKinveyClient().file().downloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
-
-
                 }
 
 

@@ -29,8 +29,13 @@ public class KinveyException extends RuntimeException{
         this.reason = reason;
         this.fix = fix;
         this.explanation = explanation;
-
-
+    }
+    
+    public KinveyException(String reason){
+    	super(formatMessage(reason));
+    	this.reason = reason;
+    	this.fix = "";
+    	this.explanation = "";
     }
 
 
@@ -60,6 +65,11 @@ public class KinveyException extends RuntimeException{
 
     private static String formatMessage(String reason, String fix, String explanation){
         return "\nREASON: " + reason + "\n" + "FIX: " + fix + "\n" + "EXPLANATION: " + explanation + "\n";
+    }
+    
+    private static String formatMessage(String reason){
+    	return "\nREASON: " + reason;
+    		
     }
 
 }
