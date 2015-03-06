@@ -107,6 +107,12 @@
             <groupId>com.kinvey</groupId>
             <artifactId>android-lib</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>google-play-services</artifactId>
+            		<groupId>com.google.android.gms</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
