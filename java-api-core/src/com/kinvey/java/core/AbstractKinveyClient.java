@@ -248,9 +248,10 @@ public abstract class AbstractKinveyClient {
          * @param baseUrl the baseUrl to set
          */
         public Builder setBaseUrl(String baseUrl) {
+        	
             this.baseUrl = normalizeRootUrl(baseUrl);
             if (!this.baseUrl.toUpperCase().startsWith("HTTPS")){
-            	throw new KinveyException("Kinvey requires the usage of SSL over http.  Use `https` as the protocol when setting a base URL");
+            	throw new KinveyException("Kinvey requires `https` as the protocol when setting a base URL, instead found: " + this.baseUrl.substring(0, this.baseUrl.indexOf(":/")) + " in baseURL: " + this.baseUrl);
             }
             return this;
         }

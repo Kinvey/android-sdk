@@ -38,7 +38,7 @@ public class KinveyClientRequestTest extends TestCase {
 
     @Test
     public void shouldExecuteSuccessfully() {
-        MockKinveyClientRequest<Void> mockClient = new MockKinveyClientRequest<Void>("GET", HttpTesting.SIMPLE_URL, null, Void.class);
+        MockKinveyClientRequest<Void> mockClient = new MockKinveyClientRequest<Void>("GET", "https://www.google.com", null, Void.class);
         try {
             mockClient.execute();
         } catch (IOException e) {
@@ -48,7 +48,7 @@ public class KinveyClientRequestTest extends TestCase {
 
     @Test
     public void uploaderShouldBeCalled() {
-        MockKinveyClientRequest<Void> mockClientRequest = new MockKinveyClientRequest<Void>("GET", HttpTesting.SIMPLE_URL, null, Void.class);
+        MockKinveyClientRequest<Void> mockClientRequest = new MockKinveyClientRequest<Void>("GET", "https://www.google.com", null, Void.class);
 
         try {
             mockClientRequest.initializeMediaHttpUploader(mock(AbstractInputStreamContent.class));

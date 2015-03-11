@@ -48,7 +48,7 @@ public class MediaHttpDownloaderTest extends TestCase {
         //setup and stub out the mocks
         MediaHttpDownloader objectUnderTest = spy(new MediaHttpDownloader(new MockHttpTransport(), null));
         FileMetaData mockUriResponse = mock(FileMetaData.class);
-        when(mockUriResponse.getDownloadURL()).thenReturn(HttpTesting.SIMPLE_URL);
+        when(mockUriResponse.getDownloadURL()).thenReturn("https://www.google.com");
         doReturn(mockUriResponse)
                 .when(objectUnderTest)
                 .parse(any(JsonObjectParser.class), any(HttpResponse.class));
@@ -68,7 +68,7 @@ public class MediaHttpDownloaderTest extends TestCase {
             }
 
         });
-        MockKinveyClientRequest<Void> mockRequest = new MockKinveyClientRequest<Void>("GET", HttpTesting.SIMPLE_URL, null, Void.class);
+        MockKinveyClientRequest<Void> mockRequest = new MockKinveyClientRequest<Void>("GET", "https://www.google.com", null, Void.class);
 
         // Run the simulation
         objectUnderTest.setProgressListener(mockListener);

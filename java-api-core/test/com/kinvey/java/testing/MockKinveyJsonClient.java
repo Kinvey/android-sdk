@@ -49,7 +49,7 @@ public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
     public static class Builder extends AbstractKinveyJsonClient.Builder {
 
         public Builder() {
-            super(new MockHttpTransport(), HttpTesting.SIMPLE_URL, "", null, new SpyKinveyClientRequestInitializer());
+            super(new MockHttpTransport(), "https://www.google.com", "", null, new SpyKinveyClientRequestInitializer());
             this.setJsonFactory(new MockJsonFactory());
         }
 
