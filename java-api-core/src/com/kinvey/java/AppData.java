@@ -103,6 +103,8 @@ public class AppData<T> {
         @Override
         public void kickOffSync() {}
     };
+    
+    private String customerAppVersion = null;
 
 
 
@@ -168,8 +170,15 @@ public class AppData<T> {
             this.policy = policy;
         }
     }
-
-
+    
+    public void setCustomerAppVersion(String appVersion){
+    	this.customerAppVersion = appVersion;	
+    }
+    
+    public void setCustomerAppVersion(String major, String minor, String revision){
+    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    }
+    
     /**
      * Define the policy for Offline sync to use when performing operations in the background
      *
@@ -496,6 +505,12 @@ public class AppData<T> {
     public AppDataOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
         return new AppDataOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
     }
+    
+    
+    private void setCustomerAppVersionHeader(){
+    	
+    	
+    }
 
     /**
      * Generic Get class.  Constructs the HTTP request object for Get
@@ -537,6 +552,7 @@ public class AppData<T> {
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
 
 
@@ -556,6 +572,7 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
         
         Get(String queryString, Class myClass){
@@ -565,6 +582,7 @@ public class AppData<T> {
             this.collectionName= AppData.this.collectionName;
         	this.queryFilter = queryString;
         	this.setTemplateExpand(false);
+        	this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
 
         @Override
@@ -602,6 +620,8 @@ public class AppData<T> {
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            
         }
 
         GetEntity(String entityID, Class<T> myClass, String[] resolves, int resolve_depth, boolean retain){
@@ -614,6 +634,7 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
 
         @Override
@@ -649,10 +670,11 @@ public class AppData<T> {
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
             }
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
 
         Save(T entity, Class<T> myClass, SaveMode update) {
-            this(entity, myClass, null, update);
+            this(entity, myClass, null, update);            
         }
     }
 
@@ -683,6 +705,7 @@ public class AppData<T> {
             super.setStore(offlineStore,  offlinePolicy);
             this.entityID = entityID;
             this.collectionName = AppData.this.collectionName;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
 
         Delete(Query query) {
@@ -695,6 +718,7 @@ public class AppData<T> {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
 
         }
     }
@@ -713,6 +737,7 @@ public class AppData<T> {
             super(client, "POST", REST_PATH, entity,myClass, AppData.this.collectionName);
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
         }
     }
 

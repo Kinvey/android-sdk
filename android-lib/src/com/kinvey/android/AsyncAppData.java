@@ -613,9 +613,7 @@ public class AsyncAppData<T> extends AppData<T> {
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {
-
         T entity;
-
 
         public SaveRequest(T entity, KinveyClientCallback<T> callback) {
             super(callback);

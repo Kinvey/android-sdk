@@ -126,6 +126,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * The message received when a user has been locked down
      */
     private static final String LOCKED_DOWN = "UserLockedDown";
+    
+    private GenericData customRequestParameters; 
 
     /**
      * @param abstractKinveyClient the abstract kinvey client
@@ -314,6 +316,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             httpRequest.setContent(new EmptyContent());
         }
         httpRequest.getHeaders().putAll(requestHeaders);
+        
+        if (getCustomRequestParameters() != null){
+        	httpRequest.getHeaders().putAll(getCustomRequestParameters());        	
+        }
+        
+        
         return httpRequest;
     }
 
@@ -488,4 +496,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     public void setCallback(KinveyClientCallback<T> callback) {
         this.callback = callback;
     }
+
+	public GenericData getCustomRequestParameters() {
+		return customRequestParameters;
+	}
+
+	public void setCustomRequestParameters(GenericData customRequestParameters) {
+		this.customRequestParameters = customRequestParameters;
+	}
 }
