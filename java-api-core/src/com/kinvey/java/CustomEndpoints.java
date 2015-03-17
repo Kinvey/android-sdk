@@ -15,8 +15,11 @@
  */
 package com.kinvey.java;
 
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 import java.io.IOException;
@@ -35,6 +38,23 @@ public class CustomEndpoints<I, O> {
 
     private AbstractClient client;
     private Class<O> currentResponseClass;
+    
+    private String customerAppVersion = null;
+    
+    private GenericData customRequestHeaders = new GenericData();
+
+    public void setCustomerAppVersion(String appVersion){
+    	this.customerAppVersion = appVersion;	
+    }
+    
+    public void setCustomerAppVersion(String major, String minor, String revision){
+    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    }
+    
+    public void setCustomRequestHeaders(GenericJson customheaders){
+    	this.customRequestHeaders = customheaders;
+    }
+
 
     /**
      * Create a new instance, should only be called by an {@link AbstractClient}.
@@ -104,6 +124,10 @@ public class CustomEndpoints<I, O> {
         CustomCommand(String commandName, I args, Class<O> responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", CustomEndpoints.this.customerAppVersion);
+            if (CustomEndpoints.this.customRequestHeaders != null && !CustomEndpoints.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestHeaders) );
+            }
         }
 
 
@@ -122,6 +146,10 @@ public class CustomEndpoints<I, O> {
         CustomCommandArray(String commandName, I args, Class responseClass) {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", CustomEndpoints.this.customerAppVersion);
+            if (CustomEndpoints.this.customRequestHeaders != null && !CustomEndpoints.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestHeaders) );
+            }
         }
 
 

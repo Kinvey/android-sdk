@@ -17,7 +17,9 @@ package com.kinvey.java;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.model.FileMetaData;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import com.kinvey.java.AppDataTest.Entity;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.HttpTesting;
 
@@ -122,6 +125,47 @@ public class FileTest extends KinveyMockUnitTest {
         } catch (IOException e) {
             fail("file api should not throw an exception on delete");
         }
+    }
+    
+    public void testFileCustomVersion() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+        fileApi.setCustomerAppVersion("1.2.3");
+        FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	assertEquals("1.2.3", (String) header);
+    }
+    
+    public void testFileCustomHeader() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+    	GenericJson custom = new GenericJson();
+    	custom.put("First", 1);
+    	custom.put("Second", "two");
+    	fileApi.setCustomRequestHeaders(custom);
+    	FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
+    	
+    }
+    
+    public void testFileCustomVersionNull() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+    	fileApi.setCustomerAppVersion(null);
+    	FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	assertEquals(null, header);    	
+    }
+    
+    public void testFileCustomHeaderNull() throws IOException {
+        File fileApi = new MockFile(super.mockClient);
+    	fileApi.setCustomRequestHeaders(null);
+    	FileMetaData meta = new FileMetaData("testfilename.txt");
+        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals(null, header);      	
     }
 
     private static class MockFile extends File{

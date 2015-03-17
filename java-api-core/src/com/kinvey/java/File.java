@@ -21,8 +21,10 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -121,6 +123,23 @@ public class File {
 
     private FilePolicy policy = FilePolicy.ALWAYS_ONLINE;
     private Object cacheLock = new Object();
+    
+    private String customerAppVersion = null;
+    
+    private GenericData customRequestHeaders = new GenericData();
+
+    public void setCustomerAppVersion(String appVersion){
+    	this.customerAppVersion = appVersion;	
+    }
+    
+    public void setCustomerAppVersion(String major, String minor, String revision){
+    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    }
+    
+    public void setCustomRequestHeaders(GenericJson customheaders){
+    	this.customRequestHeaders = customheaders;
+    }
+
 
 
     /**
@@ -406,6 +425,10 @@ public class File {
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
     }
 
@@ -425,6 +448,10 @@ public class File {
             if (verb.equals(AppData.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
     }
 
@@ -442,7 +469,12 @@ public class File {
         private DownloadMetadata(String id) {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             this.id = id;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
+        
     }
 
 
@@ -461,6 +493,10 @@ public class File {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             initializeMediaOfflineDownloader(progressListener, policy, cache);
             this.id = Preconditions.checkNotNull(meta.getId());
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
 
     }
@@ -484,6 +520,10 @@ public class File {
             initializeMediaHttpDownloader(progressListener);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             this.id = id;
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
     }
 
@@ -501,6 +541,10 @@ public class File {
         public DeleteFile(FileMetaData metaData){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(metaData.getId(), "cannot delete a file without an _id!");
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
         }
 
         //TODO edwardf re-add delete by query support once it is supported in kcs
@@ -512,7 +556,11 @@ public class File {
 
         public DeleteFile(String id){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
-            this.id = Preconditions.checkNotNull(id);;
+            this.id = Preconditions.checkNotNull(id);
+            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            }
 
 
         }

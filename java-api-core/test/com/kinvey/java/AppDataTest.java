@@ -17,7 +17,6 @@ package com.kinvey.java;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-
 import com.kinvey.java.core.KinveyMockUnitTest;
 
 import java.io.IOException;
@@ -472,10 +471,48 @@ public class AppDataTest extends KinveyMockUnitTest {
         assertEquals(expectedCondition, ((GenericJson) myAggregate.getJsonContent()).get("condition").toString());
     }
 
+    public void testAppDataCustomVersion() throws IOException {
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	appData.setCustomerAppVersion("1.2.3");
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	assertEquals("1.2.3", (String) header);
+    }
+    
+    public void testAppDataCustomHeader() throws IOException {
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	GenericJson custom = new GenericJson();
+    	custom.put("First", 1);
+    	custom.put("Second", "two");
+    	appData.setCustomRequestHeaders(custom);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
+    	
+    }
+    
+    public void testAppDataCustomVersionNull() throws IOException {
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	appData.setCustomerAppVersion(null);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	assertEquals(null, header);    	
+    }
+    
+    public void testAppDataCustomHeaderNull() throws IOException {
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	appData.setCustomRequestHeaders(null);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals(null, header);      	
+    }
+    
     private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
         AppData appData = new AppData("myCollection", myClass, mockClient);
         return appData;
     }
+    
+    
 
 
 }

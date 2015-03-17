@@ -110,7 +110,17 @@ public class AppData<T> {
     
     private GenericData customRequestHeaders = new GenericData();
 
-
+    public void setCustomerAppVersion(String appVersion){
+    	this.customerAppVersion = appVersion;	
+    }
+    
+    public void setCustomerAppVersion(String major, String minor, String revision){
+    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    }
+    
+    public void setCustomRequestHeaders(GenericJson customheaders){
+    	this.customRequestHeaders = customheaders;
+    }
 
 
     /**
@@ -187,19 +197,7 @@ public class AppData<T> {
         }
     }
     
-    public void setCustomerAppVersion(String appVersion){
-    	this.customerAppVersion = appVersion;	
-    }
-    
-    public void setCustomerAppVersion(String major, String minor, String revision){
-    	setCustomerAppVersion(major + "." + minor + "." + revision);
-    }
-    
-    public void setCustomRequestHeaders(GenericJson customheaders){
-    	this.customRequestHeaders = customheaders;
-    	
-    	
-    }
+
 
     /**
      * Creates a new instance of {@link Query}
