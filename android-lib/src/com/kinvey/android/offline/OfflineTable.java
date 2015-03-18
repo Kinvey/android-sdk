@@ -160,7 +160,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param offlineEntity
      * @return
      */
-    public T insertEntity(DatabaseHandler helper, AbstractClient client, GenericJson offlineEntity){
+    public T insertEntity(DatabaseHandler helper, AbstractClient client, GenericJson offlineEntity, AbstractKinveyOfflineClientRequest<T> req){
 
 //        SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -211,7 +211,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param responseClass
      * @return
      */
-    public T getEntity(DatabaseHandler handler, AbstractClient client, String id, Class<T> responseClass){
+    public T getEntity(DatabaseHandler handler, AbstractClient client, String id, Class<T> responseClass, AbstractKinveyOfflineClientRequest<T> req){
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},COLUMN_ID + "='" + id + "'",
                null, null, null, null, null);
 
@@ -244,7 +244,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param clazz
      * @return
      */
-    public T[] getQuery(DatabaseHandler handler, AbstractClient client, String q, Class clazz){
+    public T[] getQuery(DatabaseHandler handler, AbstractClient client, String q, Class clazz, AbstractKinveyOfflineClientRequest<T> req){
 
         //SQLiteDatabase db = helper.getReadableDatabase();
 
@@ -262,7 +262,7 @@ public class OfflineTable<T extends GenericJson> {
 
 
                     for (int i = 0; i < resultIDs.length; i++) {
-                        ret[i] = getEntity(handler, client, resultIDs[i], singleClass);
+                        ret[i] = getEntity(handler, client, resultIDs[i], singleClass, req);
                     }
                 }
             }
@@ -273,7 +273,7 @@ public class OfflineTable<T extends GenericJson> {
 
     }
 
-    public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass){
+    public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass, AbstractKinveyOfflineClientRequest<T> req){
         Log.e(TAG, "it's a get all");
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},null ,
                 null, null, null, null, null);
@@ -347,7 +347,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param id
      * @return
      */
-    public KinveyDeleteResponse delete(DatabaseHandler handler, AbstractClient client, String id){
+    public KinveyDeleteResponse delete(DatabaseHandler handler, AbstractClient client, String id, AbstractKinveyOfflineClientRequest<T> req){
         //SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -369,7 +369,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param verb
      * @param id
      */
-    public void enqueueRequest(DatabaseHandler handler, String verb, String id){
+    public void enqueueRequest(DatabaseHandler handler, String verb, String id, AbstractKinveyOfflineClientRequest<T> req){
 
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null, null);
 

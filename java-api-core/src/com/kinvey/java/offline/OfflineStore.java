@@ -25,13 +25,13 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 public interface OfflineStore<T>  {
 
 
-    public T executeGet(AbstractClient client, AppData<T> appData,  AbstractKinveyOfflineClientRequest request);
+    public T executeGet(AbstractClient client, AppData<T> appData,  AbstractKinveyOfflineClientRequest<T> request);
 
-    public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request);
+    public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request);
 
-    public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request);
+    public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request);
 
-    public void insertEntity(AbstractClient client, AppData<T> appData, T entity);
+    public void insertEntity(AbstractClient client, AppData<T> appData, T entity, AbstractKinveyOfflineClientRequest<T> request);
 
     public void clearStorage(String userid);
 

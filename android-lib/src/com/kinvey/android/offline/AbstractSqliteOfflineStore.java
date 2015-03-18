@@ -63,7 +63,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
      * @return the entity or null
      */
     @Override
-    public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+    public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
             Log.e(TAG, "Context is invalid, cannot access sqllite!");
@@ -88,26 +88,26 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
                 query = URLDecoder.decode(query, "UTF-8");
             }catch (Exception e){}//if this happens it will also happen with online mode.
 
-            ret = (T) handler.getTable(appData.getCollectionName()).getQuery(handler, client, query, appData.getCurrentClass());
+            ret = (T) handler.getTable(appData.getCollectionName()).getQuery(handler, client, query, appData.getCurrentClass(), request);
 
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", query);
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", query, request);
 
         }else if (idIndex == targetURI.length() || targetURI.contains("query")) {
             //is it a get all?
 
         //    Log.i(TAG, "it's a GET all");
-            ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass());
+            ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass(), request);
             
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", "{}");
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", "{}", request);
 
 
         }else{
         //    Log.i(TAG, "it's a GET by id");
             //it's get by id
             String targetID = targetURI.substring(idIndex, targetURI.length());
-            ret = (T) handler.getTable(appData.getCollectionName()).getEntity(handler, client, targetID, appData.getCurrentClass());
+            ret = (T) handler.getTable(appData.getCollectionName()).getEntity(handler, client, targetID, appData.getCurrentClass(), request);
 
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "GET", targetURI.substring(idIndex, targetURI.length()));
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "GET", targetURI.substring(idIndex, targetURI.length()), request);
 
 
         }
@@ -127,7 +127,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
      * @return a delete response containing the count of entities deleted
      */
     @Override
-    public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+    public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
             Log.e(TAG, "Context is invalid, cannot access sqllite!");
@@ -143,8 +143,8 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
 
         String targetID = targetURI.substring(idIndex, targetURI.length());
-        KinveyDeleteResponse ret = handler.getTable(appData.getCollectionName()).delete(handler,client, targetID);
-        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "DELETE", targetURI.substring(idIndex, targetURI.length()));
+        KinveyDeleteResponse ret = handler.getTable(appData.getCollectionName()).delete(handler,client, targetID, request);
+        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "DELETE", targetURI.substring(idIndex, targetURI.length()), request);
 
         kickOffSync();
         return ret;
@@ -162,7 +162,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
      * @return the entity saved
      */
     @Override
-    public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest request) {
+    public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
             Log.e(TAG, "Context is invalid, cannot access sqllite!");
@@ -174,13 +174,13 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         //grab json content and put it in the store
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
-        T ret = (T) handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent);
+        T ret = (T) handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent, request);
 
         if (((GenericJson)request.getJsonContent()).get("_id") == null){
         	throw new KinveyException("Cannot save an entity without an _id");
         }
         
-        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString());
+        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString(), request);
 
         kickOffSync();
 
@@ -188,12 +188,12 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     }
 
     @Override
-    public void insertEntity(AbstractClient client, AppData<T> appData, T entity) {
+    public void insertEntity(AbstractClient client, AppData<T> appData, T entity, AbstractKinveyOfflineClientRequest<T> request) {
 
         DatabaseHandler handler = getDatabaseHandler(client.user().getId());
         GenericJson jsonContent = (GenericJson) entity;
 
-        handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent);
+        handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent, request);
     }
 
     @Override
