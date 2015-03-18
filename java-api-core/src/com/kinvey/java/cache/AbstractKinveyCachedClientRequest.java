@@ -16,6 +16,8 @@
 package com.kinvey.java.cache;
 
 import com.google.api.client.http.UriTemplate;
+import com.google.api.client.json.GenericJson;
+import com.google.gson.Gson;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
@@ -94,8 +96,12 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
      * @throws IOException
      */
     public T fromCache() throws IOException{
+    	GenericJson req =  new GenericJson();
+    	req.put("URL", UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true));
+    	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Customer-App-Version"));
+    	req.put("CustomHeaders", this.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties"));
         synchronized (lock) {
-            return this.cache.get(UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true));
+            return this.cache.get(new Gson().toJson(req));
         }
     }
 
@@ -112,8 +118,12 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
         ///if this throws an IO exception, then there is probably no return object and thus nothing to persist...
         T ret = super.execute();
         if (persist && ret != null){
+        	GenericJson req =  new GenericJson();
+        	req.put("URL", UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true));
+        	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Customer-App-Version"));
+        	req.put("CustomHeaders", this.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties"));
             synchronized (lock){
-                this.cache.put(UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true), ret);
+                this.cache.put(new Gson().toJson(req), ret);
             }
         }
         return ret;
