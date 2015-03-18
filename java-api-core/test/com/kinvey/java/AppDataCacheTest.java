@@ -301,12 +301,12 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ret = null;
         try {
 
-            AppData.GetEntity get = appData.getEntityBlocking(ent.getTitle());
-            get.setCallback(new KinveyClientCallback() {
+            AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking(ent.getTitle());
+            get.setCallback(new KinveyClientCallback<CachedEntity>() {
 
                 boolean fired = false;
                 @Override
-                public void onSuccess(Object result) {
+                public void onSuccess(CachedEntity result) {
                     if (!fired){
                         Assert.assertNotNull("Couldn't get object from cache!", result);
                     }else{
@@ -340,12 +340,12 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ret = null;
         try {
 
-            AppData.GetEntity get = appData.getEntityBlocking("Title");
-            get.setCallback(new KinveyClientCallback() {
+            AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking("Title");
+            get.setCallback(new KinveyClientCallback<CachedEntity>() {
 
                 boolean fired = false;
                 @Override
-                public void onSuccess(Object result) {
+                public void onSuccess(CachedEntity result) {
                     if (!fired){
                         Assert.assertNull("Cache should be empty!", result);
                     }else{
@@ -364,6 +364,16 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         } catch (IOException e) {
             fail("IOException -> " + e);
         }
+    }
+    
+    public void testCacheWithClientAppVersion(){
+    	
+    	
+    }
+    
+    public void testCacheWithCustomRequestHeaders(){
+    	
+    
     }
 
 
