@@ -15,18 +15,18 @@
  */
 package com.kinvey.java;
 
+import java.io.IOException;
+
+import junit.framework.Assert;
+
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-
+import com.google.gson.Gson;
 import com.kinvey.java.cache.CachePolicy;
 import com.kinvey.java.cache.InMemoryLRUCache;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.HttpTesting;
-
-import junit.framework.Assert;
-
-import java.io.IOException;
 
 /**
  * @author edwardf
@@ -71,8 +71,10 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         ent.setTitle("Title");
         ent.setName("Name");
         //put entity in the cache, then get it from the cache
-        cache.put(kinveyUrl("Title"), ent);
-
+        GenericJson req =  new GenericJson();
+        req.put("URL", kinveyUrl("Title"));
+        cache.put(new Gson().toJson(req), ent);
+        
         appData.setCache(cache, CachePolicy.CACHEONLY);
 
         CachedEntity ret = null;
@@ -115,7 +117,9 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         ent.setTitle("Title");
         ent.setName("Name");
         //put entity in the cache, then get it from the cache
-        cache.put(kinveyUrl("Title"), ent);
+        GenericJson req =  new GenericJson();
+        req.put("URL", kinveyUrl("Title"));
+        cache.put(new Gson().toJson(req), ent);
 
         appData.setCache(cache, CachePolicy.CACHEFIRST_NOREFRESH);
 
@@ -160,8 +164,10 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         ent.setTitle("Title");
         ent.setName("Name");
 
-        cache.put(kinveyUrl("Title"), ent);
-
+        GenericJson req =  new GenericJson();
+        req.put("URL", kinveyUrl("Title"));
+        cache.put(new Gson().toJson(req), ent);
+        
         appData.setCache(cache, CachePolicy.CACHEFIRST);
 
         CachedEntity ret = null;
@@ -227,7 +233,11 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         ent.setTitle("Title");
         ent.setName("Name");
 
-        cache.put(kinveyUrl("Title"), ent);
+        //cache.put(kinveyUrl("Title"), ent);
+        
+        GenericJson req =  new GenericJson();
+        req.put("URL", kinveyUrl("Title"));
+        cache.put(new Gson().toJson(req), ent);
 
         appData.setCache(cache, CachePolicy.NETWORKFIRST);
 
