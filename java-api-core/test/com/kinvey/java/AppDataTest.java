@@ -473,9 +473,9 @@ public class AppDataTest extends KinveyMockUnitTest {
 
     public void testAppDataCustomVersion() throws IOException {
     	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	appData.setCustomerAppVersion("1.2.3");
+    	appData.setClientAppVersion("1.2.3");
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
     
@@ -493,9 +493,9 @@ public class AppDataTest extends KinveyMockUnitTest {
     
     public void testAppDataCustomVersionNull() throws IOException {
     	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	appData.setCustomerAppVersion(null);
+    	appData.setClientAppVersion(null);
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
     
@@ -505,6 +505,22 @@ public class AppDataTest extends KinveyMockUnitTest {
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	
+    }
+    
+    public void testClientVersion() throws IOException {
+    	mockClient.setClientAppVersion("123");
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
+    	assertEquals("123", (String) header); 
+    }
+    
+    public void testClientCustomHeader() throws IOException{
+    	mockClient.setCustomRequestProperty("hello", "hey");
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals("{\"hello\":\"hey\"}", (String) header);    	
     }
     
     private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {

@@ -49,7 +49,7 @@ public abstract class AbstractKinveyClient {
 
     /** the http request backoff policy **/
     private final BackOffPolicy backoffPolicy;
-
+    
 
     /**
      * @param transport  HTTP transport
@@ -340,9 +340,6 @@ public abstract class AbstractKinveyClient {
             this.kinveyRequestInitializer = kinveyRequestInitializer;
             return this;
         }
-
-
-
 
     }
 

@@ -68,16 +68,16 @@ public class User<T extends User> extends GenericJson   {
     @Key("username")
     private String username;
     
-    private String customerAppVersion = null;
+    private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
 
-    public void setCustomerAppVersion(String appVersion){
-    	this.customerAppVersion = appVersion;	
+    public void setClientAppVersion(String appVersion){
+    	this.clientAppVersion = appVersion;	
     }
     
-    public void setCustomerAppVersion(String major, String minor, String revision){
-    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    public void setClientAppVersion(int major, int minor, int revision){
+    	setClientAppVersion(major + "." + minor + "." + revision);
     }
     
     public void setCustomRequestProperties(GenericJson customheaders){
@@ -153,6 +153,8 @@ public class User<T extends User> extends GenericJson   {
         this.builder = builder;
         this.myClazz = userClass;
         builder.setUser(this);
+        this.clientAppVersion = client.getClientAppVersion();
+        this.customRequestProperties = client.getCustomRequestProperties();
     }
 
     public User() {}
@@ -673,7 +675,7 @@ public class User<T extends User> extends GenericJson   {
             super(client, "DELETE", REST_PATH, null, Void.class);
             this.userID = userID;
             this.hard = hard;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -717,7 +719,7 @@ public class User<T extends User> extends GenericJson   {
         Retrieve(String userID, Class<T> myClass) {
             super(client, "GET", REST_PATH, null, myClass);
             this.userID = userID;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -731,7 +733,7 @@ public class User<T extends User> extends GenericJson   {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -744,7 +746,7 @@ public class User<T extends User> extends GenericJson   {
             this.resolve = Joiner.on(",").join(resolve);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -762,7 +764,7 @@ public class User<T extends User> extends GenericJson   {
             this.resolve = Joiner.on(",").join(resolve);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -803,7 +805,7 @@ public class User<T extends User> extends GenericJson   {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -821,7 +823,7 @@ public class User<T extends User> extends GenericJson   {
             this.resolve = Joiner.on(",").join(resolve);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }
@@ -842,7 +844,7 @@ public class User<T extends User> extends GenericJson   {
         Update(User user, Class<T> myClass) {
             super(client, "PUT", REST_PATH, user, myClass);
             this.userID = user.getId();
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", User.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", User.this.clientAppVersion);
             if (User.this.customRequestProperties != null && !User.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(User.this.customRequestProperties) );
             }

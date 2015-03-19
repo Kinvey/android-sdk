@@ -124,16 +124,16 @@ public class File {
     private FilePolicy policy = FilePolicy.ALWAYS_ONLINE;
     private Object cacheLock = new Object();
     
-    private String customerAppVersion = null;
+    private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
 
-    public void setCustomerAppVersion(String appVersion){
-    	this.customerAppVersion = appVersion;	
+    public void setClientAppVersion(String appVersion){
+    	this.clientAppVersion = appVersion;	
     }
     
-    public void setCustomerAppVersion(String major, String minor, String revision){
-    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    public void setClientAppVersion(int major, int minor, int revision){
+    	setClientAppVersion(major + "." + minor + "." + revision);
     }
     
     public void setCustomRequestProperties(GenericJson customheaders){
@@ -164,6 +164,8 @@ public class File {
      */
     protected File(AbstractClient client) {
         this.client = Preconditions.checkNotNull(client);
+        this.clientAppVersion = client.getClientAppVersion();
+        this.customRequestProperties = client.getCustomRequestProperties();
     }
 
     /**
@@ -436,7 +438,7 @@ public class File {
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -459,7 +461,7 @@ public class File {
             if (verb.equals(AppData.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -480,7 +482,7 @@ public class File {
         private DownloadMetadata(String id) {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             this.id = id;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -504,7 +506,7 @@ public class File {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             initializeMediaOfflineDownloader(progressListener, policy, cache);
             this.id = Preconditions.checkNotNull(meta.getId());
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -531,7 +533,7 @@ public class File {
             initializeMediaHttpDownloader(progressListener);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             this.id = id;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -552,7 +554,7 @@ public class File {
         public DeleteFile(FileMetaData metaData){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(metaData.getId(), "cannot delete a file without an _id!");
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
@@ -568,7 +570,7 @@ public class File {
         public DeleteFile(String id){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(id);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }

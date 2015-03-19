@@ -18,7 +18,6 @@ package com.kinvey.java;
 import java.io.IOException;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AppDataTest.Entity;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.MockKinveyAuthRequest;
@@ -195,9 +194,9 @@ public class UserTest extends KinveyMockUnitTest {
     public void testUserCustomVersion() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-    	currentUser.setCustomerAppVersion("1.2.3");
+    	currentUser.setClientAppVersion("1.2.3");
     	User.Retrieve request = currentUser.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
     
@@ -207,7 +206,7 @@ public class UserTest extends KinveyMockUnitTest {
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
-    	currentUser.setCustomRequestHeaders(custom);
+    	currentUser.setCustomRequestProperties(custom);
     	User.Retrieve request = currentUser.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
@@ -217,16 +216,16 @@ public class UserTest extends KinveyMockUnitTest {
     public void testUserCustomVersionNull() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-    	currentUser.setCustomerAppVersion(null);
+    	currentUser.setClientAppVersion(null);
     	User.Retrieve request = currentUser.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
     
     public void testUserCustomHeaderNull() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-    	currentUser.setCustomRequestHeaders(null);
+    	currentUser.setCustomRequestProperties(null);
     	User.Retrieve request = currentUser.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	

@@ -17,6 +17,10 @@ package com.kinvey.android.offline;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
+import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
+
 /**
  * This class is an abstraction of a REST request.
  * <p/>
@@ -36,12 +40,17 @@ public class OfflineRequestInfo implements Serializable {
     private String verb;
 
     //The id of the entity, or the query string
-    private String id;
+    private SuperID id;
 
 
-    public OfflineRequestInfo(String httpVerb, String entityID) {
+    public OfflineRequestInfo(String httpVerb, SuperID entityID) {
         this.verb = httpVerb;
         this.id = entityID;
+    }
+    
+    public OfflineRequestInfo(String httpVerb, String entityID, String clientAppVersion, GenericJson customProperties){
+    	this.verb = httpVerb;
+    	this.id = new SuperID(entityID, clientAppVersion, customProperties);
     }
 
     /**
@@ -56,8 +65,47 @@ public class OfflineRequestInfo implements Serializable {
      * Get the entity used by this request.
      * @return the _id of the entity affected by this request
      */
-    public String getEntityID() {
+    public SuperID getEntityID() {
         return this.id;
+    }
+    
+    
+    
+    public static class SuperID extends GenericJson{
+    	
+    	@Key
+    	public String id;
+    	
+    	@Key
+    	public String customerVersion;
+    	
+    	@Key
+    	public GenericJson customheader;
+    	
+    	public SuperID(String id, String customerVersion, GenericJson customHeader){
+    		this.id = id;
+    		this.customerVersion = customerVersion;
+    		this.customheader = customHeader;
+    	}
+    	
+    	public SuperID(String id, AbstractKinveyOfflineClientRequest req){
+    		this.id = id;
+    		if (req != null){
+    			this.customerVersion = req.getCustomerAppVersion();
+    			this.customheader = req.getCustomRequestProperties();
+    		}
+    		
+    	}
+    	public SuperID(GenericJson entity, AbstractKinveyOfflineClientRequest req){
+    		this.id = (String) entity.get("_id");
+    		if (req != null){
+    			this.customerVersion = req.getCustomerAppVersion();
+    			this.customheader = req.getCustomRequestProperties();
+    		}
+    	}
+    	
+    	
+    	
     }
 
 }

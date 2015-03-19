@@ -17,9 +17,7 @@ package com.kinvey.java.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.BackOffPolicy;
@@ -33,6 +31,7 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.UriTemplate;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
@@ -487,5 +486,13 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
     public void setCallback(KinveyClientCallback<T> callback) {
         this.callback = callback;
+    }
+    
+    public String getCustomerAppVersion(){
+    	return getRequestHeaders().get("X-Kinvey-Client-App-Version").toString();
+    }
+    
+    public GenericJson getCustomRequestProperties(){
+    	return (GenericJson) getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     }
 }

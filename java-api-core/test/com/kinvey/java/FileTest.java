@@ -129,11 +129,11 @@ public class FileTest extends KinveyMockUnitTest {
     
     public void testFileCustomVersion() throws IOException {
         File fileApi = new MockFile(super.mockClient);
-        fileApi.setCustomerAppVersion("1.2.3");
+        fileApi.setClientAppVersion("1.2.3");
         FileMetaData meta = new FileMetaData("testfilename.txt");
         File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
 
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
     
@@ -152,10 +152,10 @@ public class FileTest extends KinveyMockUnitTest {
     
     public void testFileCustomVersionNull() throws IOException {
         File fileApi = new MockFile(super.mockClient);
-    	fileApi.setCustomerAppVersion(null);
+    	fileApi.setClientAppVersion(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
-        Object header = request.getRequestHeaders().get("X-Kinvey-Customer-App-Version");
+        Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
     

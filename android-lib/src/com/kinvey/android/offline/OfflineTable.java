@@ -28,7 +28,9 @@ import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
+import com.google.gson.Gson;
 import com.kinvey.android.Client;
+import com.kinvey.android.offline.OfflineRequestInfo.SuperID;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
@@ -165,7 +167,7 @@ public class OfflineTable<T extends GenericJson> {
 //        SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-
+               
         values.put(COLUMN_ID, offlineEntity.get("_id").toString());
 
 
@@ -377,7 +379,9 @@ public class OfflineTable<T extends GenericJson> {
             Log.v(TAG, "offline queueing -> " + id);
             ContentValues values = new ContentValues();
             values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
-            values.put(COLUMN_ID, id);
+            
+            OfflineRequestInfo.SuperID idInfo = new SuperID(id, req);
+            values.put(COLUMN_ID, new Gson().toJson(idInfo));
             values.put(COLUMN_ACTION, verb);
             handler.insert(QUEUE_NAME, null, values);
         }
@@ -402,7 +406,8 @@ public class OfflineTable<T extends GenericJson> {
 
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null, null);
             if (c.moveToFirst()){
-                ret = new OfflineRequestInfo(c.getString(1), c.getString(0));
+            	SuperID idInfo = new Gson().fromJson(c.getString(0), SuperID.class);
+                ret = new OfflineRequestInfo(c.getString(1), idInfo);
                 curKey = c.getString(2);
             }
         c.close();
@@ -452,23 +457,25 @@ public class OfflineTable<T extends GenericJson> {
      * @deprecated removed, as table would grow infinitely
      */
     public List<OfflineResponseInfo> getHistoricalRequests(DatabaseHandler handler){
-        if (false) {
-
-            Cursor c = handler.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null, null);
-
-            ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
-
-            while (c.moveToNext()) {
-                ret.add(new OfflineResponseInfo(new OfflineRequestInfo(c.getString(1), c.getString(0)), c.getString(2), (c.getInt(3) == 1 ? true : false)));
-            }
-
-            c.close();
-//            db.close();
-            return ret;
-        }
-        return new ArrayList<OfflineResponseInfo>();
+    	return null;
+//        if (false) {
+//
+//            Cursor c = handler.query(RESULTS_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_JSON, COLUMN_RESULT}, null, null, null, null, null, null);
+//
+//            ArrayList<OfflineResponseInfo> ret = new ArrayList<OfflineResponseInfo>();
+//
+//            while (c.moveToNext()) {
+//                ret.add(new OfflineResponseInfo(new OfflineRequestInfo(c.getString(1), c.getString(0)), c.getString(2), (c.getInt(3) == 1 ? true : false)));
+//            }
+//
+//            c.close();
+////            db.close();
+//            return ret;
+//        }
+//        return new ArrayList<OfflineResponseInfo>();
 
     }
+
 
 }
 

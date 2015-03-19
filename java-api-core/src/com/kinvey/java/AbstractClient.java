@@ -19,8 +19,10 @@ package com.kinvey.java;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.util.GenericData;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +75,41 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     /** Class to use for representing a User **/
     private Class userModelClass = User.class;
+    
+    private String clientAppVersion = null;
+    
+    private GenericData customRequestProperties = new GenericData();
+
+    public void setClientAppVersion(String appVersion){
+    	this.clientAppVersion = appVersion;	
+    }
+    
+    public void setClientAppVersion(int major, int minor, int revision){
+    	setClientAppVersion(major + "." + minor + "." + revision);
+    }
+    
+    public String getClientAppVersion(){
+    	return this.clientAppVersion;
+    }
+    
+    public void setCustomRequestProperties(GenericJson customheaders){
+    	this.customRequestProperties = customheaders;
+    }
+    
+    public void setCustomRequestProperty(String key, Object value){
+    	if (this.customRequestProperties == null){
+    		this.customRequestProperties = new GenericJson();
+    	}
+    	this.customRequestProperties.put(key, value);
+    }
+    
+    public void clearCustomRequestProperties(){
+    	this.customRequestProperties = new GenericJson();
+    }
+    
+    public GenericData getCustomRequestProperties(){
+    	return this.customRequestProperties;
+    }
 
     /**
      * Private constructor.  Use AbstractClient.Builder to initialize the AbstractClient.

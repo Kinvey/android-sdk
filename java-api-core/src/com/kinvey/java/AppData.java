@@ -107,16 +107,16 @@ public class AppData<T> {
 		}
     };
     
-    private String customerAppVersion = null;
+    private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
 
-    public void setCustomerAppVersion(String appVersion){
-    	this.customerAppVersion = appVersion;	
+    public void setClientAppVersion(String appVersion){
+    	this.clientAppVersion = appVersion;	
     }
     
-    public void setCustomerAppVersion(String major, String minor, String revision){
-    	setCustomerAppVersion(major + "." + minor + "." + revision);
+    public void setClientAppVersion(int major, int minor, int patch){
+    	setClientAppVersion(major + "." + minor + "." + patch);
     }
     
     public void setCustomRequestProperties(GenericJson customheaders){
@@ -146,10 +146,11 @@ public class AppData<T> {
     protected AppData(String collectionName, Class<T> myClass, AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName must not be null.");
         Preconditions.checkNotNull(client, "client must not be null.");
-
         this.collectionName = collectionName;
         this.myClass = myClass;
         this.client = client;
+        this.clientAppVersion = client.getClientAppVersion();
+        this.customRequestProperties = client.getCustomRequestProperties();
     }
 
     /**
@@ -569,7 +570,7 @@ public class AppData<T> {
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -592,7 +593,7 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -606,7 +607,7 @@ public class AppData<T> {
             this.collectionName= AppData.this.collectionName;
         	this.queryFilter = queryString;
         	this.setTemplateExpand(false);
-        	this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+        	this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -647,7 +648,7 @@ public class AppData<T> {
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName= AppData.this.collectionName;
             this.entityID = entityID;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -664,7 +665,7 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -703,7 +704,7 @@ public class AppData<T> {
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
             }
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -741,7 +742,7 @@ public class AppData<T> {
             super.setStore(offlineStore,  offlinePolicy);
             this.entityID = entityID;
             this.collectionName = AppData.this.collectionName;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -757,7 +758,7 @@ public class AppData<T> {
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             this.sortFilter = query.getSortString();
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
@@ -779,7 +780,7 @@ public class AppData<T> {
             super(client, "POST", REST_PATH, entity,myClass, AppData.this.collectionName);
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
-            this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", AppData.this.customerAppVersion);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }

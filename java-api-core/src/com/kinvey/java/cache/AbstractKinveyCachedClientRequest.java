@@ -98,7 +98,7 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
     public T fromCache() throws IOException{
     	GenericJson req =  new GenericJson();
     	req.put("URL", UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true));
-    	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Customer-App-Version"));
+    	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Client-App-Version"));
     	req.put("CustomHeaders", this.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties"));
         synchronized (lock) {
             return this.cache.get(new Gson().toJson(req));
@@ -120,7 +120,7 @@ public abstract class AbstractKinveyCachedClientRequest<T> extends AbstractKinve
         if (persist && ret != null){
         	GenericJson req =  new GenericJson();
         	req.put("URL", UriTemplate.expand(super.getAbstractKinveyClient().getBaseUrl(), super.getUriTemplate(), this, true));
-        	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Customer-App-Version"));
+        	req.put("CustomerVersion", this.getRequestHeaders().get("X-Kinvey-Client-App-Version"));
         	req.put("CustomHeaders", this.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties"));
             synchronized (lock){
                 this.cache.put(new Gson().toJson(req), ret);
