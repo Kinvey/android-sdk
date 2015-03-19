@@ -41,7 +41,7 @@ public class CustomEndpoints<I, O> {
     
     private String customerAppVersion = null;
     
-    private GenericData customRequestHeaders = new GenericData();
+    private GenericData customRequestProperties = new GenericData();
 
     public void setCustomerAppVersion(String appVersion){
     	this.customerAppVersion = appVersion;	
@@ -51,8 +51,19 @@ public class CustomEndpoints<I, O> {
     	setCustomerAppVersion(major + "." + minor + "." + revision);
     }
     
-    public void setCustomRequestHeaders(GenericJson customheaders){
-    	this.customRequestHeaders = customheaders;
+    public void setCustomRequestProperties(GenericJson customheaders){
+    	this.customRequestProperties = customheaders;
+    }
+    
+    public void setCustomRequestProperty(String key, Object value){
+    	if (this.customRequestProperties == null){
+    		this.customRequestProperties = new GenericJson();
+    	}
+    	this.customRequestProperties.put(key, value);
+    }
+    
+    public void clearCustomRequestProperties(){
+    	this.customRequestProperties = new GenericJson();
     }
 
 
@@ -125,8 +136,8 @@ public class CustomEndpoints<I, O> {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", CustomEndpoints.this.customerAppVersion);
-            if (CustomEndpoints.this.customRequestHeaders != null && !CustomEndpoints.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestHeaders) );
+            if (CustomEndpoints.this.customRequestProperties != null && !CustomEndpoints.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestProperties) );
             }
         }
 
@@ -147,8 +158,8 @@ public class CustomEndpoints<I, O> {
             super(client, "POST", REST_PATH, args, responseClass);
             this.endpoint = commandName;
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", CustomEndpoints.this.customerAppVersion);
-            if (CustomEndpoints.this.customRequestHeaders != null && !CustomEndpoints.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestHeaders) );
+            if (CustomEndpoints.this.customRequestProperties != null && !CustomEndpoints.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(CustomEndpoints.this.customRequestProperties) );
             }
         }
 

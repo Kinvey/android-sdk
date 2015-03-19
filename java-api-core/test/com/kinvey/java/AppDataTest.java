@@ -484,7 +484,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
-    	appData.setCustomRequestHeaders(custom);
+    	appData.setCustomRequestProperties(custom);
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
@@ -501,7 +501,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     
     public void testAppDataCustomHeaderNull() throws IOException {
     	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	appData.setCustomRequestHeaders(null);
+    	appData.setCustomRequestProperties(null);
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	

@@ -126,7 +126,7 @@ public class File {
     
     private String customerAppVersion = null;
     
-    private GenericData customRequestHeaders = new GenericData();
+    private GenericData customRequestProperties = new GenericData();
 
     public void setCustomerAppVersion(String appVersion){
     	this.customerAppVersion = appVersion;	
@@ -136,8 +136,19 @@ public class File {
     	setCustomerAppVersion(major + "." + minor + "." + revision);
     }
     
-    public void setCustomRequestHeaders(GenericJson customheaders){
-    	this.customRequestHeaders = customheaders;
+    public void setCustomRequestProperties(GenericJson customheaders){
+    	this.customRequestProperties = customheaders;
+    }
+    
+    public void setCustomRequestProperty(String key, Object value){
+    	if (this.customRequestProperties == null){
+    		this.customRequestProperties = new GenericJson();
+    	}
+    	this.customRequestProperties.put(key, value);
+    }
+    
+    public void clearCustomRequestProperties(){
+    	this.customRequestProperties = new GenericJson();
     }
 
 
@@ -426,8 +437,8 @@ public class File {
             }
             this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
     }
@@ -449,8 +460,8 @@ public class File {
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
     }
@@ -470,8 +481,8 @@ public class File {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
         
@@ -494,8 +505,8 @@ public class File {
             initializeMediaOfflineDownloader(progressListener, policy, cache);
             this.id = Preconditions.checkNotNull(meta.getId());
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
 
@@ -521,8 +532,8 @@ public class File {
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
     }
@@ -542,8 +553,8 @@ public class File {
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(metaData.getId(), "cannot delete a file without an _id!");
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
         }
 
@@ -558,8 +569,8 @@ public class File {
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(id);
             this.getRequestHeaders().put("X-Kinvey-Customer-App-Version", File.this.customerAppVersion);
-            if (File.this.customRequestHeaders != null && !File.this.customRequestHeaders.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestHeaders) );
+            if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
 
 

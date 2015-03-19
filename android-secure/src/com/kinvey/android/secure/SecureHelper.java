@@ -156,7 +156,7 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
     public GenericJson getEntity(AbstractClient client, AppData appData, String id) {
         GenericJson ret;
 
-        ret = getTable(appData.getCollectionName()).getEntity(this, client, id, appData.getCurrentClass());
+        ret = getTable(appData.getCollectionName()).getEntity(this, client, id, appData.getCurrentClass(), null);
 
         return ret;
     }

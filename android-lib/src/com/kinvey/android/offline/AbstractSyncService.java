@@ -179,7 +179,7 @@ public abstract class AbstractSyncService extends IntentService{
                 client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
                     @Override
                     public void onSuccess(GenericJson result) {
-                        dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result);
+                        dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result, null);
                     }
 
                     @Override
@@ -196,7 +196,7 @@ public abstract class AbstractSyncService extends IntentService{
                 public void onSuccess(GenericJson result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     //update datastore with response
-                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result);
+                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result, null);
                 }
 
                 @Override
@@ -229,7 +229,7 @@ public abstract class AbstractSyncService extends IntentService{
                 for (GenericJson res : result){
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);
                     //update datastore with response
-                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res);
+                    dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res, null);
                     resultIds.add(res.get("_id").toString());
                 }
                 dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(), resultIds);
@@ -261,7 +261,7 @@ public abstract class AbstractSyncService extends IntentService{
                 if (!success && error != null && !(error instanceof HttpResponseException)){
                     Log.i(TAG, "requeing request");
                     DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
-                    dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID());
+                    dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID(), null);
                     registerFailure();
                 }else{
                     Log.i(TAG, "not requeing request");

@@ -142,7 +142,7 @@ public class FileTest extends KinveyMockUnitTest {
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
-    	fileApi.setCustomRequestHeaders(custom);
+    	fileApi.setCustomRequestProperties(custom);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
@@ -161,7 +161,7 @@ public class FileTest extends KinveyMockUnitTest {
     
     public void testFileCustomHeaderNull() throws IOException {
         File fileApi = new MockFile(super.mockClient);
-    	fileApi.setCustomRequestHeaders(null);
+    	fileApi.setCustomRequestProperties(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
