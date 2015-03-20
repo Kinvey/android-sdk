@@ -188,10 +188,13 @@ public abstract class AbstractSyncService extends IntentService{
                     }
                 });
             }else{
+            	//couldn't load entity needed to perform save request: there is no local copy of the entity to save remotely.   
                 AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, new NullPointerException());
             }
         } else if (cur.getHttpVerb().equals("GET")){
-            client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID(), new KinveyClientCallback<GenericJson>() {
+        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
+            client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -205,8 +208,9 @@ public abstract class AbstractSyncService extends IntentService{
                 }
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
-
-            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID(), new KinveyDeleteCallback() {
+        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
+            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -217,8 +221,12 @@ public abstract class AbstractSyncService extends IntentService{
                     AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
                 }
             });
-        }else if (cur.getHttpVerb().equals("QUERY")){        	
-        	String queryString = cur.getEntityID();    
+        }else if (cur.getHttpVerb().equals("QUERY")){  
+        	
+        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
+        	
+        	String queryString = cur.getEntityID().id;    
         	
         	Query q = new Query();            
             q.setQueryString(queryString);
@@ -232,7 +240,7 @@ public abstract class AbstractSyncService extends IntentService{
                     dbHelper.getTable(collectionName).insertEntity(dbHelper, client, res, null);
                     resultIds.add(res.get("_id").toString());
                 }
-                dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID(), resultIds);
+                dbHelper.getTable(collectionName).storeQueryResults(dbHelper, cur.getEntityID().id, resultIds);
             }catch(Exception e){
                 AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, e);
             }

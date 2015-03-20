@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 
@@ -159,10 +160,10 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @return the entity with the appdata collection and provided id
      */
 
-    public GenericJson getEntity(AbstractClient client, AppData appData, String id) {
+    public GenericJson getEntity(AbstractClient client, AppData appData, OfflineMetaData id) {
         GenericJson ret;
 
-        ret = getTable(appData.getCollectionName()).getEntity(this, client, id, appData.getCurrentClass(), null);
+        ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);
 
         return ret;
     }
@@ -240,4 +241,5 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
         SQLiteDatabase db = getWritableDatabase();
         return db.delete(table, whereClause, whereArgs);
     }
+
 }

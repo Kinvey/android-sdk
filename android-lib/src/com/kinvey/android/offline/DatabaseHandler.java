@@ -19,6 +19,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 
@@ -51,7 +52,7 @@ public interface DatabaseHandler {
 
     public List<String> getCollectionTables();
 
-    public GenericJson getEntity(AbstractClient client, AppData appData, String id);
+    public GenericJson getEntity(AbstractClient client, AppData appData, OfflineMetaData id);
 
 
 }

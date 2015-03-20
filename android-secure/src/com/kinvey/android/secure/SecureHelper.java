@@ -13,22 +13,23 @@
  */
 package com.kinvey.android.secure;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteOpenHelper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-
 import android.util.Log;
+
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.offline.DatabaseHandler;
+import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
+import com.kinvey.android.offline.OfflineTable;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
-import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteOpenHelper;
-import com.kinvey.android.offline.DatabaseHandler;
-import com.kinvey.android.offline.OfflineTable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author edwardf
@@ -153,10 +154,10 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @return the entity with the appdata collection and provided id
      */
 
-    public GenericJson getEntity(AbstractClient client, AppData appData, String id) {
+    public GenericJson getEntity(AbstractClient client, AppData appData, OfflineMetaData id) {
         GenericJson ret;
 
-        ret = getTable(appData.getCollectionName()).getEntity(this, client, id, appData.getCurrentClass(), null);
+        ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);
 
         return ret;
     }
@@ -243,7 +244,6 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
         }catch (Exception e){
             return "offline";
         }
-
 
     }
 

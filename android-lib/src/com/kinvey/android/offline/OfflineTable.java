@@ -30,7 +30,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
 import com.google.gson.Gson;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.OfflineRequestInfo.SuperID;
+import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
@@ -371,7 +371,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param verb
      * @param id
      */
-    public void enqueueRequest(DatabaseHandler handler, String verb, String id, AbstractKinveyOfflineClientRequest<T> req){
+    public void enqueueRequest(DatabaseHandler handler, String verb, OfflineMetaData id, AbstractKinveyOfflineClientRequest<T> req){
 
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null, null);
 
@@ -380,8 +380,8 @@ public class OfflineTable<T extends GenericJson> {
             ContentValues values = new ContentValues();
             values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
             
-            OfflineRequestInfo.SuperID idInfo = new SuperID(id, req);
-            values.put(COLUMN_ID, new Gson().toJson(idInfo));
+            //OfflineRequestInfo.SuperID idInfo = new SuperID(id, req);
+            values.put(COLUMN_ID, new Gson().toJson(id));
             values.put(COLUMN_ACTION, verb);
             handler.insert(QUEUE_NAME, null, values);
         }
@@ -406,7 +406,7 @@ public class OfflineTable<T extends GenericJson> {
 
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null, null);
             if (c.moveToFirst()){
-            	SuperID idInfo = new Gson().fromJson(c.getString(0), SuperID.class);
+            	OfflineMetaData idInfo = new Gson().fromJson(c.getString(0), OfflineMetaData.class);
                 ret = new OfflineRequestInfo(c.getString(1), idInfo);
                 curKey = c.getString(2);
             }

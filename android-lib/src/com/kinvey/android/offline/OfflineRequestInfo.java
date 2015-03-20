@@ -40,17 +40,17 @@ public class OfflineRequestInfo implements Serializable {
     private String verb;
 
     //The id of the entity, or the query string
-    private SuperID id;
+    private OfflineMetaData id;
 
 
-    public OfflineRequestInfo(String httpVerb, SuperID entityID) {
+    public OfflineRequestInfo(String httpVerb, OfflineMetaData entityID) {
         this.verb = httpVerb;
         this.id = entityID;
     }
     
     public OfflineRequestInfo(String httpVerb, String entityID, String clientAppVersion, GenericJson customProperties){
     	this.verb = httpVerb;
-    	this.id = new SuperID(entityID, clientAppVersion, customProperties);
+    	this.id = new OfflineMetaData(entityID, clientAppVersion, customProperties);
     }
 
     /**
@@ -65,13 +65,13 @@ public class OfflineRequestInfo implements Serializable {
      * Get the entity used by this request.
      * @return the _id of the entity affected by this request
      */
-    public SuperID getEntityID() {
+    public OfflineMetaData getEntityID() {
         return this.id;
     }
     
     
     
-    public static class SuperID extends GenericJson{
+    public static class OfflineMetaData extends GenericJson{
     	
     	@Key
     	public String id;
@@ -82,13 +82,17 @@ public class OfflineRequestInfo implements Serializable {
     	@Key
     	public GenericJson customheader;
     	
-    	public SuperID(String id, String customerVersion, GenericJson customHeader){
+    	public OfflineMetaData(String id){
+    		this.id = id;
+    	}
+    	
+    	public OfflineMetaData(String id, String customerVersion, GenericJson customHeader){
     		this.id = id;
     		this.customerVersion = customerVersion;
     		this.customheader = customHeader;
     	}
     	
-    	public SuperID(String id, AbstractKinveyOfflineClientRequest req){
+    	public OfflineMetaData(String id, AbstractKinveyOfflineClientRequest req){
     		this.id = id;
     		if (req != null){
     			this.customerVersion = req.getCustomerAppVersion();
@@ -96,7 +100,7 @@ public class OfflineRequestInfo implements Serializable {
     		}
     		
     	}
-    	public SuperID(GenericJson entity, AbstractKinveyOfflineClientRequest req){
+    	public OfflineMetaData(GenericJson entity, AbstractKinveyOfflineClientRequest req){
     		this.id = (String) entity.get("_id");
     		if (req != null){
     			this.customerVersion = req.getCustomerAppVersion();

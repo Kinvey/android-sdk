@@ -21,6 +21,8 @@ import android.util.Log;
 
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.GenericData;
+import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.KinveyException;
@@ -90,7 +92,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
             ret = (T) handler.getTable(appData.getCollectionName()).getQuery(handler, client, query, appData.getCurrentClass(), request);
 
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", query, request);
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", new OfflineMetaData(query, request), request);
 
         }else if (idIndex == targetURI.length() || targetURI.contains("query")) {
             //is it a get all?
@@ -98,7 +100,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         //    Log.i(TAG, "it's a GET all");
             ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass(), request);
             
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY", "{}", request);
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY",new OfflineMetaData("{}", request) , request);
 
 
         }else{
@@ -107,7 +109,9 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
             String targetID = targetURI.substring(idIndex, targetURI.length());
             ret = (T) handler.getTable(appData.getCollectionName()).getEntity(handler, client, targetID, appData.getCurrentClass(), request);
 
-            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "GET", targetURI.substring(idIndex, targetURI.length()), request);
+            String entityID = targetURI.substring(idIndex, targetURI.length());
+            
+            handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "GET", new OfflineMetaData(entityID, request) , request);
 
 
         }
@@ -144,7 +148,8 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         String targetID = targetURI.substring(idIndex, targetURI.length());
         KinveyDeleteResponse ret = handler.getTable(appData.getCollectionName()).delete(handler,client, targetID, request);
-        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "DELETE", targetURI.substring(idIndex, targetURI.length()), request);
+        String entityID = targetURI.substring(idIndex, targetURI.length());
+        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "DELETE", new OfflineMetaData(entityID, request), request);
 
         kickOffSync();
         return ret;
@@ -176,11 +181,12 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         GenericJson jsonContent = (GenericJson) request.getJsonContent();
         T ret = (T) handler.getTable(appData.getCollectionName()).insertEntity(handler, client, jsonContent, request);
 
-        if (((GenericJson)request.getJsonContent()).get("_id") == null){
+        
+        if (((GenericData) ret).get("_id") == null){
         	throw new KinveyException("Cannot save an entity without an _id");
         }
         
-        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT", ((GenericJson)request.getJsonContent()).get("_id").toString(), request);
+        handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT",new OfflineMetaData(((GenericData)ret).get("_id").toString(), request), request);
 
         kickOffSync();
 
