@@ -489,10 +489,18 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     }
     
     public String getCustomerAppVersion(){
-    	return getRequestHeaders().get("X-Kinvey-Client-App-Version").toString();
+    	Object header = getRequestHeaders().get("X-Kinvey-Client-App-Version");
+    	if (header == null){
+    		return null;
+    	}
+    	return header.toString();
     }
     
     public GenericJson getCustomRequestProperties(){
-    	return (GenericJson) getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	Object header = getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	if (header == null){
+    		return null;
+    	}
+    	return (GenericJson) header;
     }
 }

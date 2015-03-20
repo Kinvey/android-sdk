@@ -32,7 +32,6 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
@@ -146,6 +145,8 @@ public abstract class AbstractSyncService extends IntentService{
                             }else{
                                 executeRequest(dbHelper, req, s);
                             }
+                        }else{
+                        	Log.i("TAG", "not safe to execute!");
                         }
                     }
                 }
@@ -173,6 +174,8 @@ public abstract class AbstractSyncService extends IntentService{
      */
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
+        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
             GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
             if (entity != null){
 
