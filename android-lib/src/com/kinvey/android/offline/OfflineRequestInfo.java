@@ -82,6 +82,8 @@ public class OfflineRequestInfo implements Serializable {
     	@Key
     	public GenericJson customheader;
     	
+    	public OfflineMetaData(){}
+    	
     	public OfflineMetaData(String id){
     		this.id = id;
     	}
