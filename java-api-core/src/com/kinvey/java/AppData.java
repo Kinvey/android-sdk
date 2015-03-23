@@ -652,7 +652,6 @@ public class AppData<T> {
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
-            
         }
 
         GetEntity(String entityID, Class<T> myClass, String[] resolves, int resolve_depth, boolean retain){

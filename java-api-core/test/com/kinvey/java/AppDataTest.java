@@ -523,6 +523,24 @@ public class AppDataTest extends KinveyMockUnitTest {
     	assertEquals("{\"hello\":\"hey\"}", (String) header);    	
     }
     
+    public void testLargeCustomHeaders() throws IOException{
+    	for (int i = 0; i < 200; i++){
+    		mockClient.setCustomRequestProperty("hello" + i, "this needs to be rather large");
+    	}
+    	
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	//assertEquals("{\"hello\":\"hey\"}", (String) header); 
+    	request.buildHttpRequest();
+    	//try{
+    		//request.execute();
+    	//}catch(Exception e){
+    		//e.printStackTrace();
+    	//}
+    	
+    }
+    
     private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
         AppData appData = new AppData("myCollection", myClass, mockClient);
         return appData;

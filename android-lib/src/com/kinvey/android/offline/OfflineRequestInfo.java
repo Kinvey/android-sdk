@@ -48,7 +48,7 @@ public class OfflineRequestInfo implements Serializable {
         this.id = entityID;
     }
     
-    public OfflineRequestInfo(String httpVerb, String entityID, String clientAppVersion, GenericJson customProperties){
+    public OfflineRequestInfo(String httpVerb, String entityID, String clientAppVersion, String customProperties){
     	this.verb = httpVerb;
     	this.id = new OfflineMetaData(entityID, clientAppVersion, customProperties);
     }
@@ -80,7 +80,7 @@ public class OfflineRequestInfo implements Serializable {
     	public String customerVersion;
     	
     	@Key
-    	public GenericJson customheader;
+    	public String customheader;
     	
     	public OfflineMetaData(){}
     	
@@ -88,7 +88,7 @@ public class OfflineRequestInfo implements Serializable {
     		this.id = id;
     	}
     	
-    	public OfflineMetaData(String id, String customerVersion, GenericJson customHeader){
+    	public OfflineMetaData(String id, String customerVersion, String customHeader){
     		this.id = id;
     		this.customerVersion = customerVersion;
     		this.customheader = customHeader;

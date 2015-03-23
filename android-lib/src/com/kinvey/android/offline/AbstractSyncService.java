@@ -30,6 +30,7 @@ import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
+import com.google.gson.Gson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -175,8 +176,7 @@ public abstract class AbstractSyncService extends IntentService{
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
-            GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));            GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
             if (entity != null){
 
                 client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
@@ -196,8 +196,8 @@ public abstract class AbstractSyncService extends IntentService{
             }
         } else if (cur.getHttpVerb().equals("GET")){
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
-            client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -212,8 +212,7 @@ public abstract class AbstractSyncService extends IntentService{
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
-            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
                 @Override
                 public void onSuccess(KinveyDeleteResponse result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -227,8 +226,7 @@ public abstract class AbstractSyncService extends IntentService{
         }else if (cur.getHttpVerb().equals("QUERY")){  
         	
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(cur.getEntityID().customheader);
-        	
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));        	
         	String queryString = cur.getEntityID().id;    
         	
         	Query q = new Query();            

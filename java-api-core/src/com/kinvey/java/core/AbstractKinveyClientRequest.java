@@ -313,6 +313,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             httpRequest.setContent(new EmptyContent());
         }
         httpRequest.getHeaders().putAll(requestHeaders);
+        if (httpRequest.getHeaders().containsKey("x-kinvey-custom-request-properties")){
+        	String customHeaders = (String) httpRequest.getHeaders().get("X-Kinvey-Custom-Request-Properties");
+        	if (customHeaders.getBytes("UTF-8").length > 2000){
+        		throw new KinveyException("Cannot attach more than 2k of Custom Request Properties");
+        	}
+        }
         return httpRequest;
     }
 
@@ -496,11 +502,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     	return header.toString();
     }
     
-    public GenericJson getCustomRequestProperties(){
+    public String getCustomRequestProperties(){
     	Object header = getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	if (header == null){
     		return null;
     	}
-    	return (GenericJson) header;
+    	return (String) header;
     }
 }
