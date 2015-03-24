@@ -25,19 +25,19 @@ import android.widget.Toast;
 
 import com.example.testdrive.android.model.Entity;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
-import com.kinvey.android.SharedPrefCredentialStore;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
+import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.OfflinePolicy;
-import com.kinvey.java.query.AbstractQuery.SortOrder;
 
 public class TestDrive extends Activity {
 
@@ -67,6 +67,14 @@ public class TestDrive extends Activity {
         bar.setIndeterminate(true);
 
         kinveyClient = new Client.Builder(this).build();
+        
+        //set globally
+        kinveyClient.setClientAppVersion("123");
+        kinveyClient.setClientAppVersion(1, 2, 3);
+        kinveyClient.setCustomRequestProperty("region", "FR");
+        
+        
+                
         kinveyClient.enableDebugLogging();
 
         if (!kinveyClient.user().isUserLoggedIn()) {
@@ -99,7 +107,7 @@ public class TestDrive extends Activity {
 	public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -124,10 +132,18 @@ public class TestDrive extends Activity {
     public void onQueryClick(View view) {
         bar.setVisibility(View.VISIBLE);
         Query myQuery = kinveyClient.query();
-        myQuery.startsWith("_id", "my");
-        myQuery.addSort("_id", SortOrder.ASC);
+        //myQuery.startsWith("_id", "my");
+        //myQuery.addSort("_id", SortOrder.ASC);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
         ad.setOffline(OfflinePolicy.LOCAL_FIRST, store);
+        
+        ad.setClientAppVersion(1, 1, 1);
+        
+        GenericJson customheaders = new GenericJson();
+        customheaders.put("hello", "hey");
+        
+        ad.setCustomRequestProperties(null);
+        
         ad.get(myQuery, new KinveyListCallback<Entity>() {
             @Override
             public void onSuccess(Entity[] result) {
@@ -174,14 +190,14 @@ public class TestDrive extends Activity {
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
         
-        byte[] b = new byte[]{(byte)0xe0, 0x4f, (byte)0xd0, (byte)0xea, (byte)0x20};
+        //byte[] b = new byte[]{(byte)0xe0, 0x4f, (byte)0xd0, (byte)0xea, (byte)0x20};
         
 
-        entity.put("bytearray", b);
+        //entity.put("bytearray", b);
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -205,7 +221,7 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.delete("myEntity", new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {

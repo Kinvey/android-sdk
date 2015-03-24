@@ -532,12 +532,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	//assertEquals("{\"hello\":\"hey\"}", (String) header); 
-    	request.buildHttpRequest();
-    	//try{
-    		//request.execute();
-    	//}catch(Exception e){
-    		//e.printStackTrace();
-    	//}
+    	
+    	try{
+        	request.buildHttpRequest();
+        	assertFalse("Should have thrown a 2k size exception!", true);
+    	}catch(Exception e){
+    		assertTrue(e.getMessage().contains("Cannot attach more than 2k of Custom Request Properties"));    
+    	}
     	
     }
     

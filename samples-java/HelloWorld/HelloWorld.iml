@@ -8,9 +8,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="kinvey-java-lib-2.7.2" level="project" />
+    <orderEntry type="library" name="kinvey-java-lib-2.8.0" level="project" />
     <orderEntry type="library" name="dependencies" level="project" />
-    <orderEntry type="library" name="kinvey-java-2.7.2" level="project" />
+    <orderEntry type="library" name="kinvey-java-2.8.0" level="project" />
     <orderEntry type="module" module-name="java-lib" />
     <orderEntry type="module" module-name="java-api-core" />
   </component>
