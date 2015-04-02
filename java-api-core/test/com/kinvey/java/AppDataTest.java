@@ -523,6 +523,17 @@ public class AppDataTest extends KinveyMockUnitTest {
     	assertEquals("{\"hello\":\"hey\"}", (String) header);    	
     }
     
+    public void testClientAppendCustomHeader() throws IOException{
+    	mockClient.setCustomRequestProperty("hello", "hey");
+    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	appData.setCustomRequestProperty("bye", "bye");
+    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	assertEquals("{\"hello\":\"hey\",\"bye\":\"bye\"}", (String) header);    	
+    }
+    
+    
+    
     public void testLargeCustomHeaders() throws IOException{
     	for (int i = 0; i < 200; i++){
     		mockClient.setCustomRequestProperty("hello" + i, "this needs to be rather large");
@@ -537,7 +548,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         	request.buildHttpRequest();
         	assertFalse("Should have thrown a 2k size exception!", true);
     	}catch(Exception e){
-    		assertTrue(e.getMessage().contains("Cannot attach more than 2k of Custom Request Properties"));    
+    		assertTrue(e.getMessage().contains("Cannot attach more than 2000 bytes of Custom Request Properties"));    
     	}
     	
     }

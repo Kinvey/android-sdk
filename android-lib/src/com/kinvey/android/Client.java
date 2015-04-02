@@ -23,7 +23,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -101,7 +105,7 @@ public class Client extends AbstractClient {
     private long syncRate;
     private long batchRate;
     private int batchSize;
-
+    
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
      * called directly.

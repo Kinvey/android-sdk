@@ -15,17 +15,28 @@ package com.kinvey.android;
 
 import java.io.IOException;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.util.Log;
+
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 
 /**
  * Maintains definitions of all asyncronous user operation methods, this class is meant to be extended.
@@ -92,10 +103,17 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      */
     private boolean clearStorage = true;
-
-
-
-
+    
+    /**
+     * The hostname to use for MIC authentication
+     */
+    public String MICHostName = "https://auth.kinvey.com/";
+    
+    /**
+     * The callback for the MIC login, this is maintained because it used by the broadcast reciever after the redirect
+     */
+    protected KinveyMICCallback MICCallback;
+        
     /**
      * Base constructor requires the client instance and a {@link com.kinvey.java.auth.KinveyAuthRequest.Builder} to be passed in.
      * <p>
@@ -109,6 +127,18 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     public AbstractAsyncUser(AbstractClient client, Class<T> userClass,  KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
+    
+    private BroadcastReceiver MICmessageReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.i("Kinvey Client", "intent recieved: " + intent.getAction());
+			final Uri uri = intent.getData();
+			String accessToken = uri.getQueryParameter("code");
+			AbstractAsyncUser.this.getMICAccessToken(accessToken);
+
+		}
+	};
 
     public AbstractAsyncUser(){}
 
@@ -551,9 +581,68 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users.
      * @param <T>
      */
-    public<T> void retrieve(Query q, KinveyListCallback<T> callback) {
+    public void retrieve(Query q, KinveyListCallback<T> callback) {
         new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+    
+    
+    /***
+     * 
+     * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
+     * 
+     * @param redirectURI
+     * @param callback
+     */
+    public void loginWithAuthorizationCodeLoginPage(String redirectURI, KinveyMICCallback callback){
+    	//return URL for login page
+    	//https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
+    	String appkey = ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey();
+    	String myURLToRender = MICHostName + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
+    	//keep a reference to the callback and redirect uri for later
+    	this.MICCallback = callback;
+    	this.MICRedirectURI = redirectURI;
+    	
+    	getClient().getContext().registerReceiver(MICmessageReceiver, new IntentFilter(redirectURI));
+    	
+    
+    	callback.onReadyToRender(myURLToRender);
+    	
+    }
+    
+    /***
+     * 
+     * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
+     * 
+     * @param username
+     * @param password
+     * @param redirectURI
+     * @param callback
+     */
+    public void loginWithAuthorizationCodeAPI(String username, String password, String redirectURI, KinveyUserCallback callback){
+    	
+    }
+    
+    public void getMICAccessToken(String token){
+    	new PostForAccessToken(token,  MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
+    }
+    
+    
+    /**
+     * Change the hostname used by MIC for authentication.  
+     * @param newHostName
+     */
+    public void setMICHostName(String newHostName){
+    	if (!newHostName.toLowerCase().startsWith("https")){
+    		throw new KinveyException("MIC Hostname must use the https protocol, trying to set: " + newHostName);
+    	}
+    	if (!newHostName.endsWith("/")){
+    		newHostName += "/";
+    		
+    	}
+    	this.MICHostName = newHostName;
+    }
+
+    
 
 
     /**
@@ -884,6 +973,22 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
             AbstractAsyncUser.this.deleteBlocking(hardDelete).execute();
             return null;
         }
+    }
+    
+    private class PostForAccessToken extends AsyncClientRequest<T>{
+    	
+    	private String token;
+
+		public PostForAccessToken(String token, KinveyClientCallback callback) {
+			super(callback);
+			this.token = token;
+		}
+
+		@Override
+		protected T executeAsync() throws IOException {
+			GenericJson result = AbstractAsyncUser.this.getMICToken(token).execute();
+			return AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+		}
     }
 
     private class Retrieve<T> extends AsyncClientRequest<T> {

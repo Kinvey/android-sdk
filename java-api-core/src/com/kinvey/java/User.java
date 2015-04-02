@@ -15,6 +15,14 @@
  */
 package com.kinvey.java;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.GenericData;
@@ -22,15 +30,15 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
-
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Set;
-
-import com.kinvey.java.auth.*;
+import com.kinvey.java.auth.Credential;
+import com.kinvey.java.auth.CredentialManager;
+import com.kinvey.java.auth.CredentialStore;
+import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.auth.KinveyAuthResponse;
+import com.kinvey.java.auth.ThirdPartyIdentity;
+import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.model.KinveyMetaData;
 
 /**
  *
@@ -71,6 +79,11 @@ public class User<T extends User> extends GenericJson   {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+    
+    /**
+     * the redirect URI for MIC
+     */
+    protected String MICRedirectURI;
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -407,6 +420,9 @@ public class User<T extends User> extends GenericJson   {
     public LoginRequest createBlocking(String userid, String password) throws IOException {
         return new LoginRequest(userid, password, true).buildAuthRequest();
     }
+    
+    
+    
 
     /**
      * Delete's the given user from the server.
@@ -560,6 +576,25 @@ public class User<T extends User> extends GenericJson   {
         LockDownUser lockdown = new LockDownUser(lock);
         client.initializeRequest(lockdown);
         return lockdown;
+    }
+    
+    public GetMICToken getMICToken(String code) throws IOException{
+    	
+//        grant_type: "authorization_code" - this is always set to this value
+//        code: use the ‘code’ returned in the callback 
+//        redirect_uri: The same redirect uri used when obtaining the auth grant.
+//        client_id:  The appKey (kid) of the app
+        
+    	Map<String, String> data = new HashMap<String, String>();
+    	data.put("grant_type", "authorization_code");
+    	data.put("code", code);
+    	data.put("redirect_uri", User.this.MICRedirectURI);
+    	data.put("client_id", ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey());
+  	
+    	HttpContent content = new UrlEncodedContent(data) ;
+    	GetMICToken getToken = new GetMICToken(content);
+    	client.initializeRequest(getToken);
+    	return getToken;
     }
 
     /**
@@ -924,6 +959,14 @@ public class User<T extends User> extends GenericJson   {
         LockDownUser(GenericJson lock){
             super(client, "POST", REST_PATH, lock, Void.class);
         }
+    }
+    
+    public final class GetMICToken extends AbstractKinveyClientRequest<GenericJson>{
+    	private static final String REST_PATH = "oauth/token";
+    
+    	public GetMICToken(HttpContent content) {
+    		super(client, "POST", REST_PATH, content, GenericJson.class);    		
+    	}
     }
 
 }
