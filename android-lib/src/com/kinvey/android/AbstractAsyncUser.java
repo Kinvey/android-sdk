@@ -107,7 +107,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     /**
      * The callback for the MIC login, this is maintained because it used by the broadcast reciever after the redirect
      */
-    protected KinveyMICCallback MICCallback;
+    protected KinveyUserCallback MICCallback;
         
     /**
      * Base constructor requires the client instance and a {@link com.kinvey.java.auth.KinveyAuthRequest.Builder} to be passed in.
@@ -614,11 +614,16 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param callback
      */
     public void loginWithAuthorizationCodeAPI(String username, String password, String redirectURI, KinveyUserCallback callback){
+    	this.MICCallback = callback;
+    	this.MICRedirectURI = redirectURI;
+    	getClient().getContext().registerReceiver(MICmessageReceiver, new IntentFilter(redirectURI));
     	
+    	//we don't use the callback here -- the below request kicks off the redirect, which is where the callback is used.
+    	new PostForTempURL(username, password, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
     
     public void getMICAccessToken(String token){
-    	new PostForAccessToken(token,  MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
+    	new PostForAccessToken(token,  (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
     }
     
     
@@ -931,6 +936,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
             super(callback);
             this.username=username;
             this.password=password;
+
         }
 
         @Override
@@ -958,7 +964,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	
     	private String token;
 
-		public PostForAccessToken(String token, KinveyClientCallback callback) {
+		public PostForAccessToken(String token, KinveyClientCallback<T> callback) {
 			super(callback);
 			this.token = token;
 		}
@@ -969,6 +975,35 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 			return AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 		}
     }
+    
+    
+    private class PostForTempURL extends AsyncClientRequest<T>{
+    	
+    	
+        String username;
+        String password;
+        
+		public PostForTempURL(String username, String password, KinveyUserCallback callback) {
+			super(callback);
+            this.username=username;
+            this.password=password;
+		}
+
+		@Override
+		protected T executeAsync() throws IOException {
+			GenericJson tempResult = AbstractAsyncUser.this.getMICTempURL().execute();
+			String tempURL = tempResult.get("temp_login_uri").toString();
+			AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
+			
+			return null;
+
+  
+			
+//			return AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+		}
+    }
+    
+    
 
     private class Retrieve<T> extends AsyncClientRequest<T> {
 

@@ -615,7 +615,53 @@ public class User<T extends User> extends GenericJson   {
     	client.initializeRequest(getToken);
     	return getToken;
     }
+    
+    public GetMICTempURL getMICTempURL() throws IOException{
+    	
+//    	client_id:  this is the app’s appKey (the KID)
+//    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
+//    	response_type:  this is always set to “code”
 
+    	Map<String, String> data = new HashMap<String, String>();
+    	data.put("response_type", "code");
+    	data.put("redirect_uri", User.this.MICRedirectURI);
+    	data.put("client_id", ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey());
+  	
+    	HttpContent content = new UrlEncodedContent(data) ;
+    	GetMICTempURL getTemp = new GetMICTempURL(content);
+    	client.initializeRequest(getTemp);
+    	return getTemp;  	
+    
+    }
+    
+    
+    public LoginToTempURL MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
+    	
+//    	client_id:  this is the app’s appKey (the KID)
+//    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
+//    	response_type:  this is always set to “code”
+//    	username
+//    	password
+
+
+    	Map<String, String> data = new HashMap<String, String>();
+    	data.put("client_id", ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey());
+    	data.put("redirect_uri", User.this.MICRedirectURI);
+    	data.put("response_type", "code");
+    	data.put("username", username);
+    	data.put("password", password);
+  	
+    	HttpContent content = new UrlEncodedContent(data) ;
+    	LoginToTempURL loginTemp = new LoginToTempURL(tempURL, content);
+    	client.initializeRequest(loginTemp);
+    	return loginTemp;  	
+    
+    }
+    
+    
+    
+    
+    
     /**
      * Login Request Class.  Constructs the HTTP request object for Login requests.
      */
@@ -989,10 +1035,17 @@ public class User<T extends User> extends GenericJson   {
     }
     
     public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson>{
-    	private static final String REST_PATH = "oauth/token";
+    	private static final String REST_PATH = "oauth/auth";
     
     	public GetMICTempURL(HttpContent content) {
     		super(client, MICHostName, "POST", REST_PATH, content, GenericJson.class);    		
+    	}
+    }    
+    
+    public final class LoginToTempURL extends AbstractKinveyClientRequest<GenericJson>{
+    
+    	public LoginToTempURL(String tempURL, HttpContent content) {
+    		super(client, tempURL, "POST", "", content, GenericJson.class);    		
     	}
     }    
     
