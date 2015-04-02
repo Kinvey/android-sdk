@@ -31,7 +31,6 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.UriTemplate;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
@@ -126,6 +125,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     private static final String LOCKED_DOWN = "UserLockedDown";
     
+    private final String hostName;
+    
     /**
      * @param abstractKinveyClient the abstract kinvey client
      * @param requestMethod the request method, PUT, GET, POST, or DELETE
@@ -136,6 +137,19 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     protected AbstractKinveyClientRequest(AbstractKinveyClient abstractKinveyClient,
                                           String requestMethod, String uriTemplate, HttpContent httpContent,
                                           Class<T> responseClass) {
+    	this(abstractKinveyClient, abstractKinveyClient.getBaseUrl(), requestMethod, uriTemplate, httpContent, responseClass);
+    }
+    
+    /**
+     * @param abstractKinveyClient the abstract kinvey client
+     * @param requestMethod the request method, PUT, GET, POST, or DELETE
+     * @param uriTemplate valid uri template
+     * @param httpContent object to send as the message body or {@code null} if none
+     * @param responseClass expected type in the response of this request
+     */
+    protected AbstractKinveyClientRequest(AbstractKinveyClient abstractKinveyClient, String hostName,
+                                          String requestMethod, String uriTemplate, HttpContent httpContent,
+                                          Class<T> responseClass) {
         Preconditions.checkNotNull(abstractKinveyClient, "abstractKinveyClient must not be null");
         Preconditions.checkNotNull(requestMethod, "requestMethod must not be null");
         this.abstractKinveyClient = abstractKinveyClient;
@@ -144,7 +158,10 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         this.responseClass = responseClass;
         this.httpContent = httpContent;
         this.requestBackoffPolicy = abstractKinveyClient.getBackoffPolicy();
+        this.hostName = hostName;
     }
+    
+    
 
     /**
      * @return the abstractKinveyClient
@@ -286,7 +303,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     protected GenericUrl buildHttpRequestUrl() {
     	
-    	String encodedURL = UriTemplate.expand(abstractKinveyClient.getBaseUrl(), uriTemplate, this, true);
+    	String encodedURL = UriTemplate.expand(hostName, uriTemplate, this, true);
     	if (!templateExpand){
     		encodedURL = encodedURL.replace("%3F", "?");
     		encodedURL = encodedURL.replace("%3D", "=");

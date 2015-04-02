@@ -107,7 +107,11 @@ public class User<T extends User> extends GenericJson   {
     public void clearCustomRequestProperties(){
     	this.customRequestProperties = new GenericJson();
     }
-
+    
+    /**
+     * The hostname to use for MIC authentication
+     */
+    public String MICHostName = "https://auth.kinvey.com/";
 
     public String getId(){
         return this.id;
@@ -147,6 +151,21 @@ public class User<T extends User> extends GenericJson   {
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    /**
+     * Change the hostname used by MIC for authentication.  
+     * @param newHostName
+     */
+    public void setMICHostName(String newHostName){
+    	if (!newHostName.toLowerCase().startsWith("https")){
+    		throw new KinveyException("MIC Hostname must use the https protocol, trying to set: " + newHostName);
+    	}
+    	if (!newHostName.endsWith("/")){
+    		newHostName += "/";
+    		
+    	}
+    	this.MICHostName = newHostName;
     }
 
     private AbstractClient client;
@@ -578,7 +597,7 @@ public class User<T extends User> extends GenericJson   {
         return lockdown;
     }
     
-    public GetMICToken getMICToken(String code) throws IOException{
+    public GetMICAccessToken getMICToken(String code) throws IOException{
     	
 //        grant_type: "authorization_code" - this is always set to this value
 //        code: use the ‘code’ returned in the callback 
@@ -592,7 +611,7 @@ public class User<T extends User> extends GenericJson   {
     	data.put("client_id", ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey());
   	
     	HttpContent content = new UrlEncodedContent(data) ;
-    	GetMICToken getToken = new GetMICToken(content);
+    	GetMICAccessToken getToken = new GetMICAccessToken(content);
     	client.initializeRequest(getToken);
     	return getToken;
     }
@@ -961,12 +980,21 @@ public class User<T extends User> extends GenericJson   {
         }
     }
     
-    public final class GetMICToken extends AbstractKinveyClientRequest<GenericJson>{
+    public final class GetMICAccessToken extends AbstractKinveyClientRequest<GenericJson>{
     	private static final String REST_PATH = "oauth/token";
     
-    	public GetMICToken(HttpContent content) {
-    		super(client, "POST", REST_PATH, content, GenericJson.class);    		
+    	public GetMICAccessToken(HttpContent content) {
+    		super(client, MICHostName,  "POST", REST_PATH, content, GenericJson.class);    		
     	}
     }
+    
+    public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson>{
+    	private static final String REST_PATH = "oauth/token";
+    
+    	public GetMICTempURL(HttpContent content) {
+    		super(client, MICHostName, "POST", REST_PATH, content, GenericJson.class);    		
+    	}
+    }    
+    
 
 }

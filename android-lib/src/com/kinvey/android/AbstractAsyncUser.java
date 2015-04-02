@@ -105,11 +105,6 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     private boolean clearStorage = true;
     
     /**
-     * The hostname to use for MIC authentication
-     */
-    public String MICHostName = "https://auth.kinvey.com/";
-    
-    /**
      * The callback for the MIC login, this is maintained because it used by the broadcast reciever after the redirect
      */
     protected KinveyMICCallback MICCallback;
@@ -626,22 +621,6 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	new PostForAccessToken(token,  MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
     }
     
-    
-    /**
-     * Change the hostname used by MIC for authentication.  
-     * @param newHostName
-     */
-    public void setMICHostName(String newHostName){
-    	if (!newHostName.toLowerCase().startsWith("https")){
-    		throw new KinveyException("MIC Hostname must use the https protocol, trying to set: " + newHostName);
-    	}
-    	if (!newHostName.endsWith("/")){
-    		newHostName += "/";
-    		
-    	}
-    	this.MICHostName = newHostName;
-    }
-
     
 
 
