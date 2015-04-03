@@ -122,18 +122,6 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     public AbstractAsyncUser(AbstractClient client, Class<T> userClass,  KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
-    
-    private BroadcastReceiver MICmessageReceiver = new BroadcastReceiver() {
-		
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.i("Kinvey Client", "intent recieved: " + intent.getAction());
-			final Uri uri = intent.getData();
-			String accessToken = uri.getQueryParameter("code");
-			AbstractAsyncUser.this.getMICAccessToken(accessToken);
-
-		}
-	};
 
     public AbstractAsyncUser(){}
 
@@ -596,10 +584,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	//keep a reference to the callback and redirect uri for later
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
-    	
-    	getClient().getContext().registerReceiver(MICmessageReceiver, new IntentFilter(redirectURI));
-    	
-    
+ 
     	callback.onReadyToRender(myURLToRender);
     	
     }
@@ -616,7 +601,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     public void loginWithAuthorizationCodeAPI(String username, String password, String redirectURI, KinveyUserCallback callback){
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
-    	getClient().getContext().registerReceiver(MICmessageReceiver, new IntentFilter(redirectURI));
+    	//getClient().getContext().registerReceiver(MICmessageReceiver, new IntentFilter(redirectURI));
     	
     	//we don't use the callback here -- the below request kicks off the redirect, which is where the callback is used.
     	new PostForTempURL(username, password, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
