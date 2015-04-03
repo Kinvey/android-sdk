@@ -114,6 +114,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * Should the request use the default template expansion for encoding the URL
      */
     private boolean templateExpand = true;
+    
+    /**
+     * Should the request intercept redirects and route them to an override
+     * 
+     */
+    private boolean overrideRedirect = false;
 
     @Key
     private String appKey;
@@ -376,9 +382,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             throwExceptionOnError = request.getThrowExceptionOnExecuteError();
             request.setThrowExceptionOnExecuteError(false);
             request.setParser(getAbstractKinveyClient().getObjectParser());
+            if (overrideRedirect){
+            	request.setFollowRedirects(false);
+            }
+            
             response = request.execute();
 
-            // process response
             lastResponseCode = response.getStatusCode();
             lastResponseMessage = response.getStatusMessage();
             lastResponseHeaders = response.getHeaders();
@@ -387,8 +396,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 this.abstractKinveyClient.performLockDown();
             }
             // process any errors
-            if (throwExceptionOnError && !response.isSuccessStatusCode()) {
-                throw newExceptionOnError(response);
+            if (throwExceptionOnError && !response.isSuccessStatusCode() &&  response.getStatusCode() != 302) {
+            	throw newExceptionOnError(response);
             }
         } else {
             // execute upload procedure
@@ -414,6 +423,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     public T execute() throws IOException {
         HttpResponse response = executeUnparsed();
+        
+        
+        if (overrideRedirect){
+        	return onRedirect(response.getHeaders().getLocation());
+        }
 
         // special class to handle void or empty responses
         if (Void.class.equals(responseClass) || response.getContent() == null) {
@@ -525,5 +539,14 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     		return null;
     	}
     	return (String) header;
+    }
+    
+    public void setOverrideRedirect(boolean override){
+    	this.overrideRedirect = override;
+    }
+    
+    public T onRedirect(String newLocation)  throws IOException{
+    	System.out.println("Override Redirect in response is expected, but not implemented!");
+    	return null;
     }
 }

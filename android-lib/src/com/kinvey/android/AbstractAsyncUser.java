@@ -991,9 +991,14 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
 		@Override
 		protected T executeAsync() throws IOException {
+			
 			GenericJson tempResult = AbstractAsyncUser.this.getMICTempURL().execute();
 			String tempURL = tempResult.get("temp_login_uri").toString();
-			AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
+			GenericJson accessResult = AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
+			
+			
+			
+			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
 			
 			return null;
 

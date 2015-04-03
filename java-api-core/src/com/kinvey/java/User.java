@@ -612,6 +612,7 @@ public class User<T extends User> extends GenericJson   {
   	
     	HttpContent content = new UrlEncodedContent(data) ;
     	GetMICAccessToken getToken = new GetMICAccessToken(content);
+    	getToken.setRequireAppCredentials(true);
     	client.initializeRequest(getToken);
     	return getToken;
     }
@@ -629,6 +630,7 @@ public class User<T extends User> extends GenericJson   {
   	
     	HttpContent content = new UrlEncodedContent(data) ;
     	GetMICTempURL getTemp = new GetMICTempURL(content);
+    	getTemp.setRequireAppCredentials(true);
     	client.initializeRequest(getTemp);
     	return getTemp;  	
     
@@ -653,6 +655,7 @@ public class User<T extends User> extends GenericJson   {
   	
     	HttpContent content = new UrlEncodedContent(data) ;
     	LoginToTempURL loginTemp = new LoginToTempURL(tempURL, content);
+    	loginTemp.setRequireAppCredentials(true);
     	client.initializeRequest(loginTemp);
     	return loginTemp;  	
     
@@ -1038,14 +1041,38 @@ public class User<T extends User> extends GenericJson   {
     	private static final String REST_PATH = "oauth/auth";
     
     	public GetMICTempURL(HttpContent content) {
-    		super(client, MICHostName, "POST", REST_PATH, content, GenericJson.class);    		
+    		super(client, MICHostName, "POST", REST_PATH, content, GenericJson.class);  
     	}
     }    
     
     public final class LoginToTempURL extends AbstractKinveyClientRequest<GenericJson>{
     
     	public LoginToTempURL(String tempURL, HttpContent content) {
-    		super(client, tempURL, "POST", "", content, GenericJson.class);    		
+    		super(client, tempURL, "POST", "", content, GenericJson.class);  
+     		this.setOverrideRedirect(true);
+    	}
+    	
+    	@Override
+    	public GenericJson onRedirect(String newLocation) throws IOException{
+    		System.out.println("-------------");
+    		System.out.println("------------- " + newLocation);
+    		System.out.println("-------------");
+    		
+    		int codeIndex = newLocation.indexOf("code=");
+    		if (codeIndex == -1){
+    			throw new KinveyException("Redirect does not contain a code=!");
+    		}
+    		
+    		String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());
+    		System.out.println("-------------");
+    		System.out.println("------------- " + accesstoken);
+    		System.out.println("-------------");
+
+    		//User.this.PostForAccessToken(accesstoken);
+    		
+    		return User.this.getMICToken(accesstoken).execute();
+    		
+			
     	}
     }    
     
