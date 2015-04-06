@@ -28,7 +28,7 @@ public class InMemoryCredentialStoreTest extends TestCase{
 
         // store should not throw exception on null key
         try {
-            store.store(null, new Credential("testuserid", "testtoken"));
+            store.store(null, new Credential("testuserid", "testtoken", "testrefresh"));
         } catch (NullPointerException e) {
             fail("store should not throw exception");
         }
@@ -46,7 +46,8 @@ public class InMemoryCredentialStoreTest extends TestCase{
     public void testHappy () {
         String userId = "userId";
         String authotoken = "authotoken";
-        Credential testCredential = new Credential(userId, authotoken);
+        String refresh = "refreshToken";
+        Credential testCredential = new Credential(userId, authotoken, refresh);
 
         InMemoryCredentialStore store = new InMemoryCredentialStore();
 
@@ -59,6 +60,7 @@ public class InMemoryCredentialStoreTest extends TestCase{
 
         assertEquals(emptyCred.getUserId(), userId);
         assertEquals(emptyCred.getAuthToken(), authotoken);
+        assertEquals(emptyCred.getRefreshToken(), refresh);
     }
 
 }

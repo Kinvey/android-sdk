@@ -34,12 +34,15 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
     private String userId;
 
     private String authToken;
+    
+    private String refreshToken;
 
     /** package **/ Credential() {}
 
-    public Credential(String userId, String authToken) {
+    public Credential(String userId, String authToken, String refresh) {
         this.userId = userId;
         this.authToken = authToken;
+        this.refreshToken = refresh;
     }
 
     @Override
@@ -57,18 +60,18 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
      * @return a newly constructed Credential object
      */
     public static Credential from(KinveyAuthResponse response){
-        return new Credential(response.getUserId(), response.getAuthToken());
+        return new Credential(response.getUserId(), response.getAuthToken(), null);
     }
 
     public static Credential from(User user){
-        return new Credential(user.getId(), user.get("authToken").toString());
+        return new Credential(user.getId(), user.get("authToken").toString(), null);
     }
 
     public String getUserId() {
         return userId;
     }
 
-    /** package **/ void setUserId (String userid) {
+    protected void setUserId (String userid) {
         this.userId = userid;
     }
 
@@ -76,7 +79,15 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
         return authToken;
     }
 
-    /** package **/ void setAuthToken(String authToken) {
+    protected void setAuthToken(String authToken) {
         this.authToken = authToken;
+    }
+    
+    public String getRefreshToken(){
+    	return this.refreshToken;
+    }
+    
+    protected void setRefreshToken(String newToken){
+    	this.refreshToken = newToken;
     }
 }

@@ -395,7 +395,16 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             if (lastResponseMessage != null && lastResponseMessage.equals(LOCKED_DOWN)){
                 this.abstractKinveyClient.performLockDown();
             }
-            // process any errors
+            
+            //process refresh token needed
+            if (response.getStatusCode() == 401){
+            	//use refresh token to get new access token
+            	//login with access token
+            	//repeat this request.
+            	
+            }
+            
+            // process any other errors
             if (throwExceptionOnError && !response.isSuccessStatusCode() &&  response.getStatusCode() != 302) {
             	throw newExceptionOnError(response);
             }

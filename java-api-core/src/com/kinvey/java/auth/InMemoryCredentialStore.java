@@ -37,7 +37,7 @@ public class InMemoryCredentialStore implements CredentialStore {
     public void store(String userId, Credential credential) {
         Preconditions.checkNotNull(credential, "credential must not be null");
 
-        Credential cred = new Credential(userId, credential.getAuthToken());
+        Credential cred = new Credential(userId, credential.getAuthToken(), credential.getRefreshToken());
         if (userId != null) {
             store.put(userId, cred);
         }

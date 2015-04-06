@@ -32,6 +32,7 @@ public class SharedPrefCredentialStore implements CredentialStore{
     private static final String PREF_STORE = "kinvey_shared_preferences_";
     private static final String PREF_ID = "kinvey_id";
     private static final String PREF_AUTH = "kinvey_auth";
+    private static final String PREF_REFRESH = "kinvey_refresh";
 
     private Context context;
 
@@ -44,8 +45,9 @@ public class SharedPrefCredentialStore implements CredentialStore{
         SharedPreferences pref = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE);
         String id = pref.getString(PREF_ID, null);
         String auth = pref.getString(PREF_AUTH, null);
+        String refresh = pref.getString(PREF_REFRESH, null);
         if (id != null && auth != null){
-            return new Credential(id, auth);
+            return new Credential(id, auth, refresh);
         }
         return null;
     }
@@ -55,6 +57,7 @@ public class SharedPrefCredentialStore implements CredentialStore{
         SharedPreferences.Editor edit = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE).edit();
         edit.putString(PREF_ID, userId);
         edit.putString(PREF_AUTH, credential.getAuthToken());
+        edit.putString(PREF_REFRESH, credential.getRefreshToken());
         edit.commit();
     }
 
@@ -63,6 +66,7 @@ public class SharedPrefCredentialStore implements CredentialStore{
         SharedPreferences.Editor edit = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE).edit();
         edit.remove(PREF_ID);
         edit.remove(PREF_AUTH);
+        edit.remove(PREF_REFRESH);
         edit.commit();
 
 

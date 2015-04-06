@@ -76,7 +76,8 @@ class AESCredentialStore implements CredentialStore {
         if (encrypted){
             String eID = Crypto.decrypt(credential.getUserId(), userId);
             String eAuth = Crypto.decrypt(credential.getAuthToken(), userId);
-            credential = new Credential(eID, eAuth);
+            String eRefresh = Crypto.decrypt(credential.getRefreshToken(), userId);
+            credential = new Credential(eID, eAuth, eRefresh);
         }
         return credential;
     }
@@ -89,7 +90,8 @@ class AESCredentialStore implements CredentialStore {
         if (encrypted){
             String eID = Crypto.encrypt(credential.getUserId(), userId);
             String eAuth = Crypto.encrypt(credential.getAuthToken(), userId);
-            credential = new Credential(eID, eAuth);
+            String eRefresh = Crypto.encrypt(credential.getRefreshToken(), userId);
+            credential = new Credential(eID, eAuth, eRefresh);
         }
         credentials.put(userId, credential);
         persistCredentialStore();

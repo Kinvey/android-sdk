@@ -617,6 +617,27 @@ public class User<T extends User> extends GenericJson   {
     	return getToken;
     }
     
+    public GetMICAccessToken useRefreshToken(String refreshToken) throws IOException{
+//        grant_type: "refresh_token" - this is always set to this value  - note the difference
+//        refresh_token: use the refresh token 
+//        redirect_uri: The same redirect uri used when obtaining the auth grant.
+//        client_id:  The appKey (kid) of the app
+    	
+    	Map<String, String> data = new HashMap<String, String>();
+    	data.put("grant_type", "refresh_token");
+    	data.put("refresh_token", refreshToken);
+    	data.put("redirect_uri", User.this.MICRedirectURI);
+    	data.put("client_id", ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey());
+  	
+    	HttpContent content = new UrlEncodedContent(data) ;
+    	GetMICAccessToken getToken = new GetMICAccessToken(content);
+    	getToken.setRequireAppCredentials(true);
+    	client.initializeRequest(getToken);
+    	return getToken;
+    	
+    	
+    }
+    
     public GetMICTempURL getMICTempURL() throws IOException{
     	
 //    	client_id:  this is the app’s appKey (the KID)
@@ -1054,27 +1075,18 @@ public class User<T extends User> extends GenericJson   {
     	
     	@Override
     	public GenericJson onRedirect(String newLocation) throws IOException{
-    		System.out.println("-------------");
-    		System.out.println("------------- " + newLocation);
-    		System.out.println("-------------");
-    		
+
     		int codeIndex = newLocation.indexOf("code=");
     		if (codeIndex == -1){
-    			throw new KinveyException("Redirect does not contain a code=!");
+    			throw new KinveyException("Redirect does not contain `code=`, was: " + newLocation);
     		}
     		
     		String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());
-    		System.out.println("-------------");
-    		System.out.println("------------- " + accesstoken);
-    		System.out.println("-------------");
-
     		//User.this.PostForAccessToken(accesstoken);
     		
     		return User.this.getMICToken(accesstoken).execute();
     		
 			
     	}
-    }    
-    
-
+    } 
 }
