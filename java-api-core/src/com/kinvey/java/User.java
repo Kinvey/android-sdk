@@ -737,7 +737,6 @@ public class User<T extends User> extends GenericJson   {
             }catch (Exception e){
                 e.printStackTrace();
                 throw new NullPointerException(e.getMessage());
-
             }
             if (this.type == LoginType.CREDENTIALSTORE) {
                 return initUser(credential, ret);

@@ -410,12 +410,15 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             	if (refreshToken != null){
             		//use the refresh token for a new access token
             		GenericJson result = client.user().useRefreshToken(refreshToken).execute();
+
+    				//login with the access token
+    				client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+    				
             		//store the new refresh token
             		Credential currentCred = client.getStore().load(client.user().getId());
     				currentCred.setRefreshToken(result.get("refresh_token").toString());
     				client.getStore().store(client.user().getId(), currentCred);
-    				//login with the access token
-    				client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+    				
     				return executeUnparsed();
             	}
             	
