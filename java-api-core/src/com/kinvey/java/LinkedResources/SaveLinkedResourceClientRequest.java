@@ -15,15 +15,18 @@
  */
 package com.kinvey.java.LinkedResources;
 
-import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.json.GenericJson;
-import com.kinvey.java.MimeTypeFinder;
-import com.kinvey.java.core.*;
-import com.kinvey.java.model.FileMetaData;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+
+import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.MimeTypeFinder;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 
 /**
  * Implementation of a Client Request, which can upload linked resources.
@@ -56,7 +59,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected SaveLinkedResourceClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+    protected SaveLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
     }
 

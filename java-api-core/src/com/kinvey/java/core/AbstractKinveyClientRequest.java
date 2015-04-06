@@ -31,10 +31,13 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.UriTemplate;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.auth.Credential;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
@@ -48,7 +51,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     /**
      * Kinvey JSON client *
      */
-    private final AbstractKinveyClient abstractKinveyClient;
+    private final AbstractClient client;
 
     /**
      * HTTP method *
@@ -140,7 +143,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @param httpContent object to send as the message body or {@code null} if none
      * @param responseClass expected type in the response of this request
      */
-    protected AbstractKinveyClientRequest(AbstractKinveyClient abstractKinveyClient,
+    protected AbstractKinveyClientRequest(AbstractClient abstractKinveyClient,
                                           String requestMethod, String uriTemplate, HttpContent httpContent,
                                           Class<T> responseClass) {
     	this(abstractKinveyClient, abstractKinveyClient.getBaseUrl(), requestMethod, uriTemplate, httpContent, responseClass);
@@ -153,12 +156,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @param httpContent object to send as the message body or {@code null} if none
      * @param responseClass expected type in the response of this request
      */
-    protected AbstractKinveyClientRequest(AbstractKinveyClient abstractKinveyClient, String hostName,
+    protected AbstractKinveyClientRequest(AbstractClient abstractKinveyClient, String hostName,
                                           String requestMethod, String uriTemplate, HttpContent httpContent,
                                           Class<T> responseClass) {
         Preconditions.checkNotNull(abstractKinveyClient, "abstractKinveyClient must not be null");
         Preconditions.checkNotNull(requestMethod, "requestMethod must not be null");
-        this.abstractKinveyClient = abstractKinveyClient;
+        this.client = abstractKinveyClient;
         this.requestMethod = requestMethod;
         this.uriTemplate = uriTemplate;
         this.responseClass = responseClass;
@@ -173,7 +176,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @return the abstractKinveyClient
      */
     public AbstractKinveyClient getAbstractKinveyClient() {
-        return abstractKinveyClient;
+        return client;
     }
 
     /**
@@ -260,7 +263,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      *                         Optional {@code null} can be passed in.
      */
     protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
-        HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+        HttpRequestFactory requestFactory = client.getRequestFactory();
         uploader = createMediaHttpUploader(content, requestFactory);
         uploader.setDirectUploadEnabled(true);
         uploader.setProgressListener(progressListener);
@@ -285,14 +288,14 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     }
 
     protected final void initializeMediaHttpDownloader(DownloaderProgressListener progressListener) {
-        HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+        HttpRequestFactory requestFactory = client.getRequestFactory();
         downloader = new MediaHttpDownloader(requestFactory.getTransport(), requestFactory.getInitializer());
         downloader.setDirectDownloadEnabled(true);
         downloader.setProgressListener(progressListener);
     }
 
     protected final void initializeMediaOfflineDownloader(DownloaderProgressListener progressListener, FilePolicy policy, FileCache cache) {
-        HttpRequestFactory requestFactory = abstractKinveyClient.getRequestFactory();
+        HttpRequestFactory requestFactory = client.getRequestFactory();
         downloader = new MediaOfflineDownloader(requestFactory.getTransport(), requestFactory.getInitializer(), policy, cache);
         downloader.setDirectDownloadEnabled(true);
         downloader.setProgressListener(progressListener);
@@ -393,14 +396,28 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             lastResponseHeaders = response.getHeaders();
 
             if (lastResponseMessage != null && lastResponseMessage.equals(LOCKED_DOWN)){
-                this.abstractKinveyClient.performLockDown();
+                this.client.performLockDown();
             }
             
             //process refresh token needed
             if (response.getStatusCode() == 401){
-            	//use refresh token to get new access token
-            	//login with access token
-            	//repeat this request.
+            	
+
+            	//get the refresh token
+            	Credential cred = client.getStore().load(client.user().getId());
+            	String refreshToken = cred.getRefreshToken();
+            	
+            	if (refreshToken != null){
+            		//use the refresh token for a new access token
+            		GenericJson result = client.user().useRefreshToken(refreshToken).execute();
+            		//store the new refresh token
+            		Credential currentCred = client.getStore().load(client.user().getId());
+    				currentCred.setRefreshToken(result.get("refresh_token").toString());
+    				client.getStore().store(client.user().getId(), currentCred);
+    				//login with the access token
+    				client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+    				return executeUnparsed();
+            	}
             	
             }
             

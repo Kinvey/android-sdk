@@ -15,12 +15,6 @@
  */
 package com.kinvey.java.offline;
 
-import com.google.api.client.http.UriTemplate;
-import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-
 import java.io.IOException;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
@@ -28,6 +22,11 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.api.client.http.UriTemplate;
+import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 /**
  * Implementation of a Client Request, which can either pull a response from a Cache instance or from online.
@@ -65,7 +64,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
      * @param responseClass response class to parse into
      * @param collectionName the name of the collection this request is associated with
      */
-    protected AbstractKinveyOfflineClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient,
+    protected AbstractKinveyOfflineClientRequest(AbstractClient abstractKinveyJsonClient,
                                                 String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass, String collectionName) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent,
                 responseClass);

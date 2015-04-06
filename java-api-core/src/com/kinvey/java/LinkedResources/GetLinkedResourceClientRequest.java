@@ -15,15 +15,14 @@
  */
 package com.kinvey.java.LinkedResources;
 
-import com.kinvey.java.File;
-import com.kinvey.java.KinveyException;
-import com.kinvey.java.core.*;
-import com.kinvey.java.model.FileMetaData;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
+
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
 
 /**
  * Implementation of a Client Request, which can download linked resources through the File API as well as the AppData API in one request.
@@ -52,7 +51,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected GetLinkedResourceClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+    protected GetLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String uriTemplate, Object jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, "GET", uriTemplate, jsonContent, responseClass);
     }
 

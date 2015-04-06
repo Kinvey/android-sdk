@@ -87,7 +87,7 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
     	return this.refreshToken;
     }
     
-    protected void setRefreshToken(String newToken){
+    public void setRefreshToken(String newToken){
     	this.refreshToken = newToken;
     }
 }

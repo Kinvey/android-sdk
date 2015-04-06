@@ -965,6 +965,9 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 		@Override
 		protected T executeAsync() throws IOException {
 			GenericJson result = AbstractAsyncUser.this.getMICToken(token).execute();
+			Credential currentCred = AbstractAsyncUser.this.getClient().getStore().load(AbstractAsyncUser.this.getId());
+			currentCred.setRefreshToken(result.get("refresh_token").toString());
+			AbstractAsyncUser.this.getClient().getStore().store(AbstractAsyncUser.this.getId(), currentCred);
 			return AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 		}
     }
@@ -989,15 +992,13 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 			String tempURL = tempResult.get("temp_login_uri").toString();
 			GenericJson accessResult = AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
 			
-			
+			Credential currentCred = AbstractAsyncUser.this.getClient().getStore().load(AbstractAsyncUser.this.getId());
+			currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
+			AbstractAsyncUser.this.getClient().getStore().store(AbstractAsyncUser.this.getId(), currentCred);
 			
 			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
 			
-			return null;
-
-  
-			
-//			return AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+			return null;  
 		}
     }
     

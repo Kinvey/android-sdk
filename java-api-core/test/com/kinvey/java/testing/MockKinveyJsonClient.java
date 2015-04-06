@@ -15,27 +15,40 @@
  */
 package com.kinvey.java.testing;
 
+import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.testing.http.HttpTesting;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
-
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.AppData;
+import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.File;
+import com.kinvey.java.UserDiscovery;
+import com.kinvey.java.UserGroup;
+import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyRequestInitializer;
 
 /**
 * @author m0rganic
 * @since 2.0
 */
-public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
+public class MockKinveyJsonClient extends AbstractClient {
 
-    public MockKinveyJsonClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyRequestInitializer kinveyRequestInitializer) {
-        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, null);
-    }
 
+
+    
+    protected MockKinveyJsonClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl,
+            String servicePath, JsonObjectParser objectParser,
+            KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
+            BackOffPolicy requestPolicy) {
+super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
+       requestPolicy);
+}
     @Override
     public File file() {
         return null;
@@ -55,7 +68,37 @@ public class MockKinveyJsonClient extends AbstractKinveyJsonClient {
 
         @Override
         public MockKinveyJsonClient build() {
-            return new MockKinveyJsonClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(), getObjectParser(), getKinveyClientRequestInitializer());
+            return new MockKinveyJsonClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), null, null);
         }
     }
+
+	@Override
+	public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UserDiscovery userDiscovery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UserGroup userGroup() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected ClientUsers getClientUsers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

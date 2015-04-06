@@ -15,11 +15,11 @@
  */
 package com.kinvey.java.core;
 
-import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.Json;
+import com.kinvey.java.AbstractClient;
 
 /**
  * @author m0rganic
@@ -40,7 +40,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
    * @param jsonContent POJO that can be serialized into JSON content or {@code null} for none
    * @param responseClass response class to parse into
    */
-  protected AbstractKinveyJsonClientRequest(AbstractKinveyJsonClient abstractKinveyJsonClient,
+  protected AbstractKinveyJsonClientRequest(AbstractClient abstractKinveyJsonClient,
       String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
     super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent == null
         ? null : new JsonHttpContent(abstractKinveyJsonClient.getJsonFactory(), jsonContent),
