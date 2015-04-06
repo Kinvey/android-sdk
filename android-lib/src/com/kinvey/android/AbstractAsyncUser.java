@@ -589,6 +589,14 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	
     }
     
+    
+    public void OnAuthCallbackRecieved(Intent intent){
+    	
+		final Uri uri = intent.getData();
+		String accessToken = uri.getQueryParameter("code");
+		getMICAccessToken(accessToken);
+    }
+    
     /***
      * 
      * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
