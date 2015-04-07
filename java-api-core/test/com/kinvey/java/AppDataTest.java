@@ -90,7 +90,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testNewQuery() {
-        Query myQuery = mockClient.query();
+        Query myQuery = getClient().query();
         assertEquals(0, myQuery.getLimit());
         assertEquals(0, myQuery.getSkip());
         assertEquals("",myQuery.getSortString());
@@ -101,20 +101,20 @@ public class AppDataTest extends KinveyMockUnitTest {
     // String collectionName, Class<T> myClass, AbstractClient client,KinveyClientRequestInitializer initializer
     public void testAppdataInitialization() {
         AppData<Entity> appData = new AppData<Entity>("testCollection",Entity.class,
-                mockClient);
+        		getClient());
         assertEquals("testCollection",appData.getCollectionName());
         assertEquals(Entity.class, appData.getCurrentClass());
     }
 
     public void testNullCollectionInitialization() {
         try {
-            AppData<Entity> appData = new AppData<Entity>(null, Entity.class, mockClient);
+            AppData<Entity> appData = new AppData<Entity>(null, Entity.class, getClient());
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
 
     public void testNullClassInitialization() {
-        AppData<Entity> appData = new AppData<Entity>("myCollection", null, mockClient);
+        AppData<Entity> appData = new AppData<Entity>("myCollection", null, getClient());
         // Null class types are allowed, should not throw an exception.
         assertNull(appData.getCurrentClass());
     }
@@ -508,7 +508,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
     
     public void testClientVersion() throws IOException {
-    	mockClient.setClientAppVersion("123");
+    	getClient().setClientAppVersion("123");
     	AppData<Entity> appData = getGenericAppData(Entity.class);
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
@@ -516,7 +516,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
     
     public void testClientCustomHeader() throws IOException{
-    	mockClient.setCustomRequestProperty("hello", "hey");
+    	getClient().setCustomRequestProperty("hello", "hey");
     	AppData<Entity> appData = getGenericAppData(Entity.class);
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
@@ -524,7 +524,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
     
     public void testClientAppendCustomHeader() throws IOException{
-    	mockClient.setCustomRequestProperty("hello", "hey");
+    	getClient().setCustomRequestProperty("hello", "hey");
     	AppData<Entity> appData = getGenericAppData(Entity.class);
     	appData.setCustomRequestProperty("bye", "bye");
     	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
@@ -536,7 +536,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     
     public void testLargeCustomHeaders() throws IOException{
     	for (int i = 0; i < 200; i++){
-    		mockClient.setCustomRequestProperty("hello" + i, "this needs to be rather large");
+    		getClient().setCustomRequestProperty("hello" + i, "this needs to be rather large");
     	}
     	
     	AppData<Entity> appData = getGenericAppData(Entity.class);
@@ -554,7 +554,7 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
     
     private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
-        AppData appData = new AppData("myCollection", myClass, mockClient);
+        AppData appData = new AppData("myCollection", myClass, getClient());
         return appData;
     }
     

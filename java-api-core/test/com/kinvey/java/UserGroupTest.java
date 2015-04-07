@@ -34,7 +34,7 @@ public class UserGroupTest extends KinveyMockUnitTest {
 
     public void testUserGroupUpdate(){
 
-        UserGroup group = new UserGroup(mockClient, getKinveyRequestInitializer());
+        UserGroup group = new UserGroup(getClient(), getKinveyRequestInitializer());
 
         try{
             UserGroup.Update update = group.addUserToGroupBlocking("Group1", "user1", "subgroup1");
@@ -48,7 +48,7 @@ public class UserGroupTest extends KinveyMockUnitTest {
     }
 
     public void testUserGroupRetrieve(){
-        UserGroup group = new UserGroup(mockClient, getKinveyRequestInitializer());
+        UserGroup group = new UserGroup(getClient(), getKinveyRequestInitializer());
         try{
             UserGroup.Retrieve ret = group.retrieve("Group1");
             assertNotNull(ret);
@@ -59,7 +59,7 @@ public class UserGroupTest extends KinveyMockUnitTest {
     }
 
     public void testUserGroupDelete(){
-        UserGroup group = new UserGroup(mockClient, getKinveyRequestInitializer());
+        UserGroup group = new UserGroup(getClient(), getKinveyRequestInitializer());
         try{
             UserGroup.Delete delete = group.delete("Group1");
             assertNotNull(delete);

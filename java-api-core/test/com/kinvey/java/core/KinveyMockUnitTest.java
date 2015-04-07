@@ -37,7 +37,21 @@ import com.kinvey.java.query.MongoQueryFilter;
  */
 public abstract class KinveyMockUnitTest extends TestCase {
 
-    public MockTestClient mockClient;
+    private MockTestClient mockClient;
+    
+    public HttpTransport transport = new MockHttpTransport();
+    public JsonFactory factory = new MockJsonFactory();
+    
+    public MockTestClient getClient(){
+    	if (mockClient == null){
+    		mockClient = new MockTestClient.Builder(transport,factory, null, new MockKinveyClientRequestInitializer()).build();
+    	}
+    	return mockClient;
+    }
+    
+    public void nullOutClient(){
+    	this.mockClient = null;
+    }
 
 
     public KinveyClientRequestInitializer getKinveyRequestInitializer(){
@@ -106,16 +120,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
     }
 
-    @Override
-    protected void setUp() {
-        HttpTransport transport = new MockHttpTransport();
-        JsonFactory factory = new MockJsonFactory();
 
-        MockTestClient.Builder builder = new MockTestClient.Builder(transport,factory,
-                null, new MockKinveyClientRequestInitializer());
-
-        mockClient = builder.build();
-    }
 
     static class MockKinveyClientRequestInitializer extends KinveyClientRequestInitializer {
 

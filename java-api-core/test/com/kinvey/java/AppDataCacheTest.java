@@ -427,7 +427,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
 
     private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
-        AppData appData = new AppData("myCollection", myClass, mockClient);
+        AppData appData = new AppData("myCollection", myClass, getClient());
         return appData;
     }
 
