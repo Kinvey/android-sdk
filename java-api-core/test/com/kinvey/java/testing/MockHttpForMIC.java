@@ -37,28 +37,7 @@ public class MockHttpForMIC extends HttpTransport {
 			}
 		};
 
-		// MockLowLevelHttpRequest request = new MockLowLevelHttpRequest(url);
-		//
-		// MockLowLevelHttpResponse response = null;
-		// System.out.println("------------");
-		// System.out.println("------------");
-		// System.out.println("------------");
-		// System.out.println("------------ " + url);
-		// System.out.println("------------");
-		//
-		//
-		// if (url.contains("oauth/token")){
-		// response = oauthToken();
-		// }else if (url.contains("oauth/auth")){
-		// response = oauthAuth();
-		// }else if (url.contains("tempURL")){
-		// response = tempURL();
-		// }
-		//
-		//
-		// request.setResponse(response);
-		//
-		// return request;
+
 	}
 
 	private LowLevelHttpResponse oauthToken() {

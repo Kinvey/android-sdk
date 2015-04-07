@@ -261,8 +261,4 @@ public class UserTest extends KinveyMockUnitTest {
     	assertEquals(true, ret.isUserLoggedIn());
     	
     }
-    
-    public void testMICRefresh() throws IOException{}
-    
-    public void testLoginToTempURL() throws IOException{}
 }
