@@ -36,8 +36,6 @@ public class MockHttpForMIC extends HttpTransport {
 				return null;
 			}
 		};
-
-
 	}
 
 	private LowLevelHttpResponse oauthToken() {

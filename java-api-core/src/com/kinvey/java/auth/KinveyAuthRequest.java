@@ -150,7 +150,11 @@ public class KinveyAuthRequest extends GenericJson {
         this.appKey = appKeyAuthentication.getUsername();
         this.requestPayload = thirdPartyIdentity;
         if (user != null) {
-            this.requestPayload.putAll(user);
+        	for(String key : user.keySet()){        		
+        		if (!key.equals("_kmd") && !key.equals("access_token") && !key.equals("_socialIdentity")){
+        			this.requestPayload.put(key, user.get(key));		
+        		}
+        	}
         }
         this.create = create;
         this.type=LoginType.THIRDPARTY;
