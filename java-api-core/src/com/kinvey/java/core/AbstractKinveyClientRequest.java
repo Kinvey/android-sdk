@@ -33,6 +33,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
+import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
@@ -452,12 +453,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     public T execute() throws IOException {
         HttpResponse response = executeUnparsed();
-        
-        
+       
         if (overrideRedirect){
         	return onRedirect(response.getHeaders().getLocation());
         }
-
+        
         // special class to handle void or empty responses
         if (Void.class.equals(responseClass) || response.getContent() == null) {
             response.ignore();
@@ -469,9 +469,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             return response.parseAs(responseClass);
             
         }catch(IllegalArgumentException e){
-        	
-            System.out.println("unable to parse response -> " + e.getCause().toString());
-            throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct.", e.getCause().toString());
+            System.out.println("unable to parse response -> " + e.toString());
+            throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct.", e.toString());
 
         }catch (NullPointerException ex){
             return null;

@@ -16,16 +16,14 @@
 package com.kinvey.java;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.gson.GsonFactory;
 import com.kinvey.java.User.GetMICAccessToken;
+import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.ThirdPartyIdentity;
-import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyMockUnitTest;
+import com.kinvey.java.testing.MockHttpForMIC;
 import com.kinvey.java.testing.MockKinveyAuthRequest;
 
 /**
@@ -34,15 +32,15 @@ import com.kinvey.java.testing.MockKinveyAuthRequest;
  */
 public class UserTest extends KinveyMockUnitTest {
 
-    private User currentUser;
+    private User<User> currentUser;
 
     private void initializeUser() {
-        currentUser = new User(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+        currentUser = new User<User>(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
     }
 
     public void testInitializeUser() {
-        User user = new User(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+        User<User> user = new User<User>(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
         assertNotNull(user);
         assertEquals(getClient(),user.getClient());
@@ -51,7 +49,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeUserNullClient() {
         try {
-            User user = new User(null, User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+            User<User> user = new User<User>(null, User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                     getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
@@ -59,7 +57,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeNoBuilder() {
         try {
-            User user = new User(getClient(), User.class, null);
+            User<User> user = new User<User>(getClient(), User.class, null);
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
@@ -250,9 +248,21 @@ public class UserTest extends KinveyMockUnitTest {
     	assertEquals("https://www.google.com/oauth/token", getToken.buildHttpRequest().getUrl().toString());
     }
     
-
-    //getMICToken
-    //useRefreshToken
-    //getMICTempURL
-    //MICLoginToTempURL
+    public void testMICLoginWithAccessToken() throws IOException{
+    	
+    	currentUser = new User(getClient(new MockHttpForMIC()), User.class, new KinveyAuthRequest.Builder(new MockHttpForMIC(),
+                new GsonFactory(),"https://baas.kinvey.com",  "mockAppKey","mockAppSecret",null));
+    	
+    	User.GetMICAccessToken token = currentUser.getMICToken("MyToken");
+    	GenericJson result =  (GenericJson) token.execute();
+	
+		User ret =  currentUser.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+		  
+    	assertEquals(true, ret.isUserLoggedIn());
+    	
+    }
+    
+    public void testMICRefresh() throws IOException{}
+    
+    public void testLoginToTempURL() throws IOException{}
 }

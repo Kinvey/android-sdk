@@ -20,11 +20,12 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
-
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.*;
 import com.kinvey.java.auth.ClientUsers;
+
 import junit.framework.TestCase;
 
 import java.util.LinkedHashMap;
@@ -38,20 +39,18 @@ import com.kinvey.java.query.MongoQueryFilter;
 public abstract class KinveyMockUnitTest extends TestCase {
 
     private MockTestClient mockClient;
-    
-    public HttpTransport transport = new MockHttpTransport();
-    public JsonFactory factory = new MockJsonFactory();
-    
+        
     public MockTestClient getClient(){
     	if (mockClient == null){
-    		mockClient = new MockTestClient.Builder(transport,factory, null, new MockKinveyClientRequestInitializer()).build();
+    		mockClient = new MockTestClient.Builder(new MockHttpTransport(),new MockJsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
     	}
     	return mockClient;
     }
     
-    public void nullOutClient(){
-    	this.mockClient = null;
+    public MockTestClient getClient(HttpTransport transport){
+    	return new MockTestClient.Builder(transport, new GsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
     }
+
 
 
     public KinveyClientRequestInitializer getKinveyRequestInitializer(){
@@ -95,7 +94,44 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
         @Override
         public ClientUsers getClientUsers() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return new ClientUsers() {
+				
+				@Override
+				public void switchUser(String userID) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void setCurrentUser(String userID) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void removeUser(String userID) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public String getCurrentUserType() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public String getCurrentUser() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public void addUser(String userID, String type) {
+					// TODO Auto-generated method stub
+					
+				}
+			};
         }
 
         @Override
