@@ -137,6 +137,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     
     private final String hostName;
     
+    private boolean hasRetryed = false;
+    
     /**
      * @param abstractKinveyClient the abstract kinvey client
      * @param requestMethod the request method, PUT, GET, POST, or DELETE
@@ -401,14 +403,18 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             }
             
             //process refresh token needed
-            if (response.getStatusCode() == 401){
+            if (response.getStatusCode() == 401 && !hasRetryed){
             	
 
             	//get the refresh token
             	Credential cred = client.getStore().load(client.user().getId());
             	String refreshToken = cred.getRefreshToken();
             	
-            	if (refreshToken != null){
+            	if (refreshToken != null ){
+            		//logout the current user
+            		
+            		client.user().logout().execute();
+            		
             		//use the refresh token for a new access token
             		GenericJson result = client.user().useRefreshToken(refreshToken).execute();
 
@@ -419,7 +425,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             		Credential currentCred = client.getStore().load(client.user().getId());
     				currentCred.setRefreshToken(result.get("refresh_token").toString());
     				client.getStore().store(client.user().getId(), currentCred);
-    				
+    				hasRetryed = true;
     				return executeUnparsed();
             	}
             	
