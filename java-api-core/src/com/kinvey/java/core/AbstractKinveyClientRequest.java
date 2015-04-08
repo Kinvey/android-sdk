@@ -137,6 +137,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     
     private final String hostName;
     
+    /***
+     * Used for MIC to indicate if a request has been repeated after getting a refresh token
+     */
     private boolean hasRetryed = false;
     
     /**

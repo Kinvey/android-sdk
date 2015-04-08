@@ -1081,7 +1081,6 @@ public class User<T extends User> extends GenericJson   {
     		}
     		
     		String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());
-    		//User.this.PostForAccessToken(accesstoken);
     		
     		return User.this.getMICToken(accesstoken).execute();
     		
