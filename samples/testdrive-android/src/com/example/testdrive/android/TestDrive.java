@@ -17,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,9 +32,9 @@ import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
-import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -41,19 +43,19 @@ import com.kinvey.java.offline.OfflinePolicy;
 
 public class TestDrive extends Activity {
 
-	public static final String TAG = "TestDrive";
+  public static final String TAG = "TestDrive";
     private static final Level LOGGING_LEVEL = Level.FINEST;
 
     private ProgressBar bar;
 
-	private Client kinveyClient;
+  private Client kinveyClient;
 
     private SqlLiteOfflineStore store;
 
     @Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_test_drive);
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_test_drive);
 
         // run the following comamnd to turn on verbose logging:
         //
@@ -67,6 +69,10 @@ public class TestDrive extends Activity {
         bar.setIndeterminate(true);
 
         kinveyClient = new Client.Builder(this).build();
+        
+        if (kinveyClient.user().isUserLoggedIn()){
+          kinveyClient.user().logout().execute();
+        }
         
         //set globally
         kinveyClient.setClientAppVersion("123");
@@ -82,32 +88,72 @@ public class TestDrive extends Activity {
 
             kinveyClient.user().put("email", "myemail@domain.com");
             
+			kinveyClient.user().loginWithAuthorizationCodeAPI("mjs", "demo", "kinveyAuthDeo://", new KinveyUserCallback() {
+
+						@Override
+						public void onSuccess(User result) {
+							Toast.makeText(TestDrive.this, "did it!", Toast.LENGTH_SHORT).show();
+							bar.setVisibility(View.GONE);
+						}
+
+						@Override
+						public void onFailure(Throwable error) {
+							Toast.makeText(TestDrive.this, "nope! " + error.getMessage(), Toast.LENGTH_SHORT).show();
+							error.printStackTrace();
+							bar.setVisibility(View.GONE);
+
+						}
+					});
             
             
-            kinveyClient.user().login(new KinveyUserCallback() {
-                @Override
-                public void onSuccess(User result) {
-                    bar.setVisibility(View.GONE);
-                    Log.i(TAG,"Logged in successfully as " + result.getId());
-                    Toast.makeText(TestDrive.this, "New implicit user logged in successfully as " + result.getId(),
-                            Toast.LENGTH_LONG).show();
-                }
-                @Override
-                public void onFailure(Throwable error) {
-                    bar.setVisibility(View.GONE);
-                    Log.e(TAG, "Login Failure", error);
-                    Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
+//            kinveyClient.user().loginWithAuthorizationCodeLoginPage("kinveyAuthDemo://", new KinveyMICCallback() {
+//        
+//        @Override
+//        public void onSuccess(User result) {
+//          Toast.makeText(TestDrive.this, "did it! with: " + result.getId(), Toast.LENGTH_SHORT).show();
+//          bar.setVisibility(View.GONE);         
+//        }
+//        
+//        @Override
+//        public void onFailure(Throwable error) {
+//          Toast.makeText(TestDrive.this, "nope!", Toast.LENGTH_SHORT).show();
+//          error.printStackTrace();
+//          bar.setVisibility(View.GONE);         
+//        }
+//        
+//        @Override
+//        public void onReadyToRender(String myURLToRender) {
+//           Uri uri = Uri.parse(myURLToRender);
+//           Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//           startActivity(intent);
+//          
+//        }
+//      });
+//            
+//            kinveyClient.user().login(new KinveyUserCallback() {
+//                @Override
+//                public void onSuccess(User result) {
+//                    bar.setVisibility(View.GONE);
+//                    Log.i(TAG,"Logged in successfully as " + result.getId());
+//                    Toast.makeText(TestDrive.this, "New implicit user logged in successfully as " + result.getId(),
+//                            Toast.LENGTH_LONG).show();
+//                }
+//                @Override
+//                public void onFailure(Throwable error) {
+//                    bar.setVisibility(View.GONE);
+//                    Log.e(TAG, "Login Failure", error);
+//                    Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+//                }
+//            });
         }   else {
             Toast.makeText(this, "Using cached implicit user " + kinveyClient.user().getId(), Toast.LENGTH_LONG).show();
         }
-	}
+  }
 
-	public void onLoadClick(View view) {
+  public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        //ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -135,7 +181,7 @@ public class TestDrive extends Activity {
         //myQuery.startsWith("_id", "my");
         //myQuery.addSort("_id", SortOrder.ASC);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, store);
+        //ad.setOffline(OfflinePolicy.LOCAL_FIRST, store);
         
         ad.setClientAppVersion(1, 1, 1);
         
@@ -184,7 +230,7 @@ public class TestDrive extends Activity {
         });
     }
 
-	public void onSaveClick(View view) {
+  public void onSaveClick(View view) {
         bar.setVisibility(View.VISIBLE);
         Entity entity = new Entity("myEntity");
         entity.put("Description", "This is a description of an offline entity!");
@@ -197,7 +243,7 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        //ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -236,7 +282,16 @@ public class TestDrive extends Activity {
                 Toast.makeText(TestDrive.this, "Delete error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+        
+        
     }
+    
+    @Override
+    public void onNewIntent(Intent intent){
+      super.onNewIntent(intent);
+      kinveyClient.user().onOAuthCallbackRecieved(intent);
+    }
+    
 
 
 
