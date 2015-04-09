@@ -411,7 +411,10 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
             	//get the refresh token
             	Credential cred = client.getStore().load(client.user().getId());
-            	String refreshToken = cred.getRefreshToken();
+            	String refreshToken = null;
+            	if (cred != null){
+            		refreshToken = cred.getRefreshToken();
+            	}
             	
             	if (refreshToken != null ){
             		//logout the current user

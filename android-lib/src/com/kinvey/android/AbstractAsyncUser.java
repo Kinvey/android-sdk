@@ -612,12 +612,11 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
     	
-    	//we don't use the callback here -- the below request kicks off the redirect, which is where the callback is used.
-    	new PostForTempURL(username, password, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    	new PostForTempURL(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
     
     public void getMICAccessToken(String token){
-    	new PostForAccessToken(token,  (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
+    	new PostForAccessToken(token, (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
     }
     
     
@@ -997,13 +996,15 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 			String tempURL = tempResult.get("temp_login_uri").toString();
 			GenericJson accessResult = AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
 		
-			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
+//			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
+			User user = AbstractAsyncUser.this.loginMobileIdentityBlocking(accessResult.get("access_token").toString()).execute();
+			
 			
 			Credential currentCred = AbstractAsyncUser.this.getClient().getStore().load(AbstractAsyncUser.this.getId());
 			currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
 			AbstractAsyncUser.this.getClient().getStore().store(AbstractAsyncUser.this.getId(), currentCred);
 			
-			return null;  
+			return (T) user;  
 		}
     }
     
