@@ -57,7 +57,7 @@ public class TestDrive extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_test_drive);
 
-        // run the following comamnd to turn on verbose logging:
+        // run the following command to turn on verbose logging:
         //
         // adb shell setprop log.tag.HttpTransport DEBUG
         //

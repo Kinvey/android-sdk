@@ -16,11 +16,11 @@
     <orderEntry type="library" name="contentviewr-android" level="project" />
     <orderEntry type="library" name="geotag-android" level="project" />
     <orderEntry type="library" name="dependencies" level="project" />
-    <orderEntry type="library" name="kinvey-java-2.8.0" level="project" />
+    <orderEntry type="library" name="kinvey-java-2.9.0" level="project" />
     <orderEntry type="library" name="ticketview-android" level="project" />
     <orderEntry type="library" name="statusshare-android" level="project" />
     <orderEntry type="library" name="android-support-v41" level="project" />
-    <orderEntry type="library" name="kinvey-android-lib-2.8.0" level="project" />
+    <orderEntry type="library" name="kinvey-android-lib-2.9.0" level="project" />
     <orderEntry type="library" name="signin-android" level="project" />
     <orderEntry type="library" name="oracledlc-android" level="project" />
     <orderEntry type="library" name="android-support-v42" level="project" />
