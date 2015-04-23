@@ -22,12 +22,9 @@ import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyMetaData.AccessControlList;
-
-
 import com.kinvey.java.model.FileMetaData;
-
+import com.kinvey.java.query.AbstractQuery.SortOrder;
 import com.kinvey.nativejava.Client;
-
 import com.kinvey.java.Query;
 
 /**
@@ -35,14 +32,14 @@ import com.kinvey.java.Query;
  */
 public class HelloWorld {
 
-    public static final String appKey = "kid_Pe0tK5Dcyi";
-    public static final String appSecret = "060a2f1f723c40bcb7875eaba4438f54";
+    public static final String appKey = "kid_-J7AmdoNC";
+    public static final String appSecret = "b064f25bc52a4ceca8bdb7537dc8aa6e";
 
     public static void main(String[] args){
         System.out.println("Hello World");
 
         Client myJavaClient = new Client.Builder(appKey, appSecret)
-        	.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
+        	//.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
         	.build();
         myJavaClient.enableDebugLogging();
         Boolean ping = myJavaClient.ping();
@@ -83,49 +80,59 @@ public class HelloWorld {
             System.out.println("Couldn't load! -> " + e);
             e.printStackTrace();
         }
-
-
+        
         try{
-
-            InputStream is = new FileInputStream("/Users/edwardflemingiii/ic_lockscreen_decline_activated.png");
-
-            FileMetaData fm = new FileMetaData();
-            fm.setFileName("lockscreen.png");
-            fm.setMimetype("image/png");
-            fm.setPublic(true);
-
-            UploaderProgressListener progressListener = new UploaderProgressListener() {
-                @Override
-                public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                    System.out.println("upload progress change!");
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    System.out.println("upload success!");
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    System.out.println("upload failed -> " + error);
-                }
-            };
-            myJavaClient.file().uploadBlocking(fm, is, progressListener);
-
-            System.out.println("uploading Complete!");
-        }catch(IOException e){
-            System.out.println("Couldn't upload! -> " + e);
+        	
+        	FileMetaData[] metas = myJavaClient.file().downloadBlocking(new Query()).execute();
+        	FileMetaData[] metaSort = myJavaClient.file().downloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
+        	FileMetaData[] metaLimit = myJavaClient.file().downloadBlocking(new Query().setLimit(10)).execute();
+        	
+        	System.out.println("plain query count -> " + metas.length);
+        	System.out.println("plain query first -> " + metas[0].getId());
+        	System.out.println("sort query count -> " + metaSort.length);
+        	System.out.println("sort query first -> " + metaSort[0].getId());
+        	System.out.println("limit query count -> " + metaLimit.length);
+        	System.out.println("limit query first -> " + metaLimit[0].getId());
+        
+        }catch (IOException e){
             e.printStackTrace();
+            
         }
 
-        try{
 
-            myJavaClient.user().lockDownUserBlocking("52b0c4bca73e1db53e66cb1b", true).execute();
-            System.out.println("locked out");
-        }catch (Exception e){
-            System.out.println("couldnt locked out");
-            e.printStackTrace();
-        }
+//        try{
+//
+//            InputStream is = new FileInputStream("/Users/edward/1.png");
+//
+//            FileMetaData fm = new FileMetaData();
+//            fm.setFileName("1.png");
+//            fm.setMimetype("image/png");
+//            fm.setPublic(true);
+//
+//            UploaderProgressListener progressListener = new UploaderProgressListener() {
+//                @Override
+//                public void progressChanged(MediaHttpUploader uploader) throws IOException {
+//                    System.out.println("upload progress change!");
+//                }
+//
+//                @Override
+//                public void onSuccess(Void result) {
+//                    System.out.println("upload success!");
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable error) {
+//                    System.out.println("upload failed -> " + error);
+//                }
+//            };
+//            myJavaClient.file().uploadBlocking(fm, is, progressListener);
+//
+//            System.out.println("uploading Complete!");
+//        }catch(IOException e){
+//            System.out.println("Couldn't upload! -> " + e);
+//            e.printStackTrace();
+//        }
+
 
     }
 }

@@ -519,19 +519,31 @@ public class File {
      */
     public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
 
-        private final static String REST_URL = "blob/{appKey}/{id}" + "?query={query}";
-
-        @Key("query")
-        private String queryFilter;
+        //private final static String REST_URL = "blob/{appKey}/{id}" + "?query={query}";
+        private final static String REST_URL = "blob/{appKey}/{id}" + "{?query,sort,limit,skip}";
 
         @Key("id")
         private String id;
+        
+        @Key("query")
+        private String queryFilter;
+        @Key("sort")
+        private String sortFilter;
+        @Key("limit")
+        private String limit;
+        @Key("skip")
+        private String skip;
 
 
         private DownloadMetadataAndFileQuery(String id, Query query, DownloaderProgressListener progressListener){
             super(client, "GET", REST_URL, null, FileMetaData[].class);
             initializeMediaHttpDownloader(progressListener);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            this.sortFilter = query.getSortString();
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){

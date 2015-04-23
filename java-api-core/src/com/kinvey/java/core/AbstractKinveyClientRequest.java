@@ -121,7 +121,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     
     /**
      * Should the request intercept redirects and route them to an override
-     * 
      */
     private boolean overrideRedirect = false;
 
