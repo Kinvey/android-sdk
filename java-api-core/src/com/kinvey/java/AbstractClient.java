@@ -191,7 +191,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public boolean pingBlocking() throws IOException {
         Util util = new Util(this);
-        return util.pingBlocking().executeUnparsed().getStatusCode() == 200;
+        util.pingBlocking().execute();
+        return true;
     }
 
     protected void setCurrentUser(User user) {

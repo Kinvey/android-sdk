@@ -283,14 +283,8 @@ public class Client extends AbstractClient {
      * </p>
      * @return true if ping is successful, false if it fails
      */
-    public boolean ping() {
-        try{
-            Util util = new Util(this);
-            return util.pingBlocking().executeUnparsed().getStatusCode() == 200;
-        }catch(IOException e){
-            return false;
-        }
-
+    public boolean ping() throws IOException{
+    	return super.pingBlocking();
     }
 
 
