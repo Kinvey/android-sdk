@@ -16,9 +16,9 @@
 package com.kinvey.java;
 
 import com.google.common.base.Preconditions;
-
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.query.AbstractQuery.SortOrder;
 import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 
 import java.io.Serializable;
@@ -124,6 +124,18 @@ public class Query extends AbstractQuery implements Serializable {
         Preconditions.checkNotNull(key);
         builder.addFilter(builder.getOperator(QueryFilterBuilder.Operators.LESSTHANEQUAL), key, value);
         return this;
+    }
+    
+    /**
+     * Adds a sort  sort condition to the Query
+     *
+     * @param field Field to sort on
+     * @param order Order to sort values (Ascending/Descending)
+     * @return  Query object
+     */
+    public Query addSort(String field, SortOrder order) {
+    	super.addSort(field, order);
+    	return this;
     }
 
     /**
