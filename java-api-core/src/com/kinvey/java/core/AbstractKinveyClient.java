@@ -85,6 +85,7 @@ public abstract class AbstractKinveyClient {
                 httpRequestInitializer == null ? transport.createRequestFactory() : transport
                         .createRequestFactory(httpRequestInitializer);
         this.backoffPolicy = requestPolicy;
+        System.out.println("Kinvey Client created, running version: " + KinveyHeaders.VERSION);
     }
 
 
