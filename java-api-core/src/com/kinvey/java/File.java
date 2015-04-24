@@ -347,6 +347,18 @@ public class File {
         client.initializeRequest(delete);
         return delete;
     }
+    
+    /**
+     * Deletes the given file from the Kinvey file service.
+     *
+     * @param fileID the _id of the file to delete
+     * @return a valid DELETE request to be executed
+     * @throws IOException
+     */
+    public DeleteFile deleteBlocking(String fileID) throws IOException {
+    	return deleteBlocking(new FileMetaData(fileID));
+    }
+
 
     /**
      * Deletes the given file from the Kinvey file service.

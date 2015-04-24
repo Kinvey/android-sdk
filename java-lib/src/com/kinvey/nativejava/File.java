@@ -112,6 +112,18 @@ public class File extends com.kinvey.java.File{
         mediaContent.setRetrySupported(false);
         uploadBlocking(meta, mediaContent).execute();
     }
+    
+    /***
+     * 
+     * Uplaods the contents of the stream to the Kinvey file service endpoint, automatically generating a new unique _id and with no metatdata.
+     * 
+     * @param inputStream stream to upload
+     * @param listener an implementation of a client listener to get results on the UI thread from the async call.
+     * @throws IOException
+     */
+    public void uploadBlocking(InputStream inputStream, UploaderProgressListener listener) throws IOException {
+    	this.uploadBlocking(new FileMetaData(),  inputStream, listener);
+    }
 
     /**
      * Uploads the contents of the stream to the Kinvey file service endpoint.
