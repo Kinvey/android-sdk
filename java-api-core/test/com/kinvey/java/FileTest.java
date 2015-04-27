@@ -90,6 +90,7 @@ public class FileTest extends KinveyMockUnitTest {
         File.DownloadMetadataAndFileQuery download =  fileApiUnderTest.downloadWithTTLBlocking("testfilename.txt", 120);
         HttpRequest req = download.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?query";
+        System.out.println(req.getUrl().toString());
         assertEquals(expectedPath, req.getUrl().toString());
     }
 

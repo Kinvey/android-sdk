@@ -555,7 +555,8 @@ public class File {
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
-            this.sortFilter = query.getSortString();
+            String sortString = query.getSortString();
+            this.sortFilter = !(sortString.equals("")) ? sortString : null;
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
