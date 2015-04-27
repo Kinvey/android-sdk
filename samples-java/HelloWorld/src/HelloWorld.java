@@ -12,20 +12,13 @@
  * the License.
  */
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
-import com.kinvey.java.cache.InMemoryLRUCache;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.Query;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.model.KinveyMetaData.AccessControlList;
-import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.AbstractQuery.SortOrder;
 import com.kinvey.nativejava.Client;
-import com.kinvey.java.Query;
 
 /**
  * @author edwardf
@@ -42,7 +35,10 @@ public class HelloWorld {
         	//.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
         	.build();
         myJavaClient.enableDebugLogging();
-        Boolean ping = myJavaClient.ping();
+        boolean ping = false;
+        try{
+        ping= myJavaClient.ping();
+        }catch(Exception e){}
         System.out.println("Client ping -> " + ping);
                
         try {
@@ -97,6 +93,13 @@ public class HelloWorld {
         }catch (IOException e){
             e.printStackTrace();
             
+        }
+        
+        try{
+        	KinveyDeleteResponse delete = myJavaClient.file().deleteBlocking(new FileMetaData("myFileId")).execute();            
+        }catch(IOException e){
+            System.out.println("Couldn't delete! -> " + e);
+            e.printStackTrace();
         }
 
 

@@ -57,7 +57,7 @@ public class TestDrive extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_test_drive);
 
-        // run the following command to turn on verbose logging:
+        // run the following commandf to turn on verbose logging:
         //
         // adb shell setprop log.tag.HttpTransport DEBUG
         //
@@ -74,6 +74,7 @@ public class TestDrive extends Activity {
           kinveyClient.user().logout().execute();
         }
         
+        
         //set globally
         kinveyClient.setClientAppVersion("123");
         kinveyClient.setClientAppVersion(1, 2, 3);
@@ -88,47 +89,47 @@ public class TestDrive extends Activity {
 
             kinveyClient.user().put("email", "myemail@domain.com");
             
-			kinveyClient.user().loginWithAuthorizationCodeAPI("mjs", "demo", "kinveyAuthDeo://", new KinveyUserCallback() {
-
-						@Override
-						public void onSuccess(User result) {
-							Toast.makeText(TestDrive.this, "did it!", Toast.LENGTH_SHORT).show();
-							bar.setVisibility(View.GONE);
-						}
-
-						@Override
-						public void onFailure(Throwable error) {
-							Toast.makeText(TestDrive.this, "nope! " + error.getMessage(), Toast.LENGTH_SHORT).show();
-							error.printStackTrace();
-							bar.setVisibility(View.GONE);
-
-						}
-					});
+//			kinveyClient.user().loginWithAuthorizationCodeAPI("mjs", "demo", "kinveyAuthDeo://", new KinveyUserCallback() {
+//
+//						@Override
+//						public void onSuccess(User result) {
+//							Toast.makeText(TestDrive.this, "did it!", Toast.LENGTH_SHORT).show();
+//							bar.setVisibility(View.GONE);
+//						}
+//
+//						@Override
+//						public void onFailure(Throwable error) {
+//							Toast.makeText(TestDrive.this, "nope! " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//							error.printStackTrace();
+//							bar.setVisibility(View.GONE);
+//
+//						}
+//					});
             
-            
-//            kinveyClient.user().loginWithAuthorizationCodeLoginPage("kinveyAuthDemo://", new KinveyMICCallback() {
-//        
-//        @Override
-//        public void onSuccess(User result) {
-//          Toast.makeText(TestDrive.this, "did it! with: " + result.getId(), Toast.LENGTH_SHORT).show();
-//          bar.setVisibility(View.GONE);         
-//        }
-//        
-//        @Override
-//        public void onFailure(Throwable error) {
-//          Toast.makeText(TestDrive.this, "nope!", Toast.LENGTH_SHORT).show();
-//          error.printStackTrace();
-//          bar.setVisibility(View.GONE);         
-//        }
-//        
-//        @Override
-//        public void onReadyToRender(String myURLToRender) {
-//           Uri uri = Uri.parse(myURLToRender);
-//           Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-//           startActivity(intent);
-//          
-//        }
-//      });
+            //kinveyClient.file().downloadBlocking(new Query()).executeAndDownloadTo(myOutpustStream);
+            kinveyClient.user().loginWithAuthorizationCodeLoginPage("kinveyAuthDemo://", new KinveyMICCallback() {
+        
+        @Override
+        public void onSuccess(User result) {
+          Toast.makeText(TestDrive.this, "did it! with: " + result.getId(), Toast.LENGTH_SHORT).show();
+          bar.setVisibility(View.GONE);         
+        }
+        
+        @Override
+        public void onFailure(Throwable error) {
+          Toast.makeText(TestDrive.this, "nope!", Toast.LENGTH_SHORT).show();
+          error.printStackTrace();
+          bar.setVisibility(View.GONE);         
+        }
+        
+        @Override
+        public void onReadyToRender(String myURLToRender) {
+           Uri uri = Uri.parse(myURLToRender);
+           Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+           startActivity(intent);
+          
+        }
+      });
 //            
 //            kinveyClient.user().login(new KinveyUserCallback() {
 //                @Override

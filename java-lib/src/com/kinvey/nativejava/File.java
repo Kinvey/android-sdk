@@ -115,7 +115,7 @@ public class File extends com.kinvey.java.File{
     
     /***
      * 
-     * Uplaods the contents of the stream to the Kinvey file service endpoint, automatically generating a new unique _id and with no metatdata.
+     * Uploads the contents of the stream to the Kinvey file service endpoint, automatically generating a new unique _id and with no metatdata.
      * 
      * @param inputStream stream to upload
      * @param listener an implementation of a client listener to get results on the UI thread from the async call.
