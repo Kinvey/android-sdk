@@ -137,6 +137,17 @@ public class Query extends AbstractQuery implements Serializable {
     	super.addSort(field, order);
     	return this;
     }
+    
+    /**
+     * Sets the raw query string
+     * 
+     * @param queryString
+     * @return this
+     */
+    public Query setQueryString(String queryString){
+        super.setQueryString(queryString);
+        return this;
+    }
 
     /**
      * Add a filter condition for a specific field being not equal to a value

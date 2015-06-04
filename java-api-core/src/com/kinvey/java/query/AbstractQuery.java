@@ -61,6 +61,13 @@ public abstract class AbstractQuery implements Serializable{
         this.sort = new LinkedHashMap<String, SortOrder>();
     }
 
+    
+    /**
+     * Sets the raw query string
+     * 
+     * @param queryString
+     * @return this
+     */
     public AbstractQuery setQueryString(String queryString){
         this.queryString = queryString;
         return this;

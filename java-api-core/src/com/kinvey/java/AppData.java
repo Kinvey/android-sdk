@@ -756,7 +756,8 @@ public class AppData<T> {
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
-            this.sortFilter = query.getSortString();
+            String sortString = query.getSortString();
+            this.sortFilter = !(sortString.equals("")) ? sortString : null;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );

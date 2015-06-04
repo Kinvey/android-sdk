@@ -212,17 +212,42 @@ public abstract class AbstractSyncService extends IntentService{
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));            client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
-                @Override
-                public void onSuccess(KinveyDeleteResponse result) {
-//                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
-                }
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	
+        	String curID = cur.getEntityID().id;
+        	
+        	if (curID.startsWith("{") && curID.endsWith("}")){
+        		//it's a query
+        		Query q = new Query().setQueryString(curID);
+            	client.appData(collectionName, GenericJson.class).delete(q, new KinveyDeleteCallback() {
+                    @Override
+                    public void onSuccess(KinveyDeleteResponse result) {
+//                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+                    }
 
-                @Override
-                public void onFailure(Throwable error) {
-                    AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable error) {
+                        AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    }
+                });
+        		
+        	}else{
+        		//it's a single ID
+            	client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
+                    @Override
+                    public void onSuccess(KinveyDeleteResponse result) {
+//                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
+                    }
+                });
+        	}
+        	
+        	
+
         }else if (cur.getHttpVerb().equals("QUERY")){  
         	
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);

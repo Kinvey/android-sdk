@@ -593,9 +593,14 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     
     
     public void onOAuthCallbackRecieved(Intent intent){
-    	
+    	if (intent == null || intent.getData() == null){
+    		return;
+    	}
 		final Uri uri = intent.getData();
 		String accessToken = uri.getQueryParameter("code");
+		if (accessToken == null){
+			return;
+		}
 		getMICAccessToken(accessToken);
     }
     
