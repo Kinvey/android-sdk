@@ -13,19 +13,23 @@
  */
 package com.kinvey.sample.kitchensink.push;
 
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
-import com.google.android.gcm.GCMBroadcastReceiver;
+import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
+
 
 /**
  * @author edwardf
  * @since 2.0
  */
-public class GCMReciever extends GCMBroadcastReceiver {
-
+public class GCMReciever extends WakefulBroadcastReceiver {
+	
     @Override
-    public String getGCMIntentServiceClassName(Context context){
-        return "com.kinvey.sample.kitchensink.push.GCMLoggingReceiver";
+    public void onReceive(Context context, Intent intent) {
+        ComponentName comp = new ComponentName(context.getPackageName(), com.kinvey.sample.kitchensink.push.GCMLoggingReceiver.class.getName());
+        startWakefulService(context, (intent.setComponent(comp)));
+        setResultCode(Activity.RESULT_OK);
     }
-
-
 }

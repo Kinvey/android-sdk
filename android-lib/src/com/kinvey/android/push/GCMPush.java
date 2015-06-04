@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -61,15 +62,14 @@ public class GCMPush extends AbstractPush {
 
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
-
+    private static final String shared_pref = "Kinvey_Push";
+    private static final String pref_regid = "reg_id"; 
 
     public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
         GCMPush.senderIDs = senderIDs;
         GCMPush.inProduction = inProduction;
     }
-
-
 
 
     /**
@@ -82,7 +82,7 @@ public class GCMPush extends AbstractPush {
      * @return an instance of GCM push, initialized for the current user.
      */
     @Override
-    public GCMPush initialize(Application currentApp) {
+    public GCMPush initialize(final Application currentApp) {
         if (!getClient().user().isUserLoggedIn()){
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
@@ -90,6 +90,7 @@ public class GCMPush extends AbstractPush {
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
         	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");	
         }
+        
         
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(currentApp);
     
@@ -100,6 +101,10 @@ public class GCMPush extends AbstractPush {
                 try {                	
                     final String regid = gcm.register(getSenderIDs());                    
                     Log.i("GCM", "regid is " + regid);
+                    
+                    SharedPreferences.Editor pref = currentApp.getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+                    pref.putString(pref_regid, regid);
+                    pref.commit();
 
                     registerWithKinvey(regid, true);
 
@@ -173,11 +178,11 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public String getPushId() {
-        if (getClient().getContext() == null){
+        if (getClient() == null || getClient().getContext() == null){
             return "";
-        }else{
-            return GCMRegistrar.getRegistrationId(getClient().getContext());
         }
+        String regid = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
+        return regid;
     }
 
     /**
@@ -192,10 +197,10 @@ public class GCMPush extends AbstractPush {
         if (getClient() == null || getClient().getContext() == null){
             return false;
         }
-        String gcmID = GCMRegistrar.getRegistrationId(getClient().getContext());
+        String gcmID = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
 
-        if (getClient().user().containsKey("_push")){
-            AbstractMap pushField = (AbstractMap) getClient().user().get("_push");
+        if (getClient().user().containsKey("_messaging")){
+            AbstractMap pushField = (AbstractMap) getClient().user().get("_messaging");
             if (pushField.containsKey("GCM")){
                 AbstractMap gcmField = (AbstractMap) pushField.get("GCM");
                 if (gcmField.containsKey("ids")){
@@ -220,7 +225,31 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public void disablePush() {
-        GCMRegistrar.unregister(getClient().getContext());
+    	String regid = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
+    	if (regid != ""){
+    		registerWithKinvey(regid, false);
+    	}
+    	
+    	if (getClient() == null || getClient().getContext() == null){
+    		return;
+    	}
+    	final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
+    	new AsyncTask<Void, Void, Void>(){
+
+			@Override
+			protected Void doInBackground(Void... arg0) {
+				try{
+					gcm.unregister();
+				}catch(Exception e){}
+				return null;
+			}
+    		
+    		
+    	}.execute();
+    	
+//        GCMRegistrar.unregister(getClient().getContext());
+        
+        
     }
 
 

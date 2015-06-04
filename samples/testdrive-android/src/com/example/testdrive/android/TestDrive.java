@@ -107,45 +107,45 @@ public class TestDrive extends Activity {
 //					});
             
             //kinveyClient.file().downloadBlocking(new Query()).executeAndDownloadTo(myOutpustStream);
-            kinveyClient.user().loginWithAuthorizationCodeLoginPage("kinveyAuthDemo://", new KinveyMICCallback() {
-        
-        @Override
-        public void onSuccess(User result) {
-          Toast.makeText(TestDrive.this, "did it! with: " + result.getId(), Toast.LENGTH_SHORT).show();
-          bar.setVisibility(View.GONE);         
-        }
-        
-        @Override
-        public void onFailure(Throwable error) {
-          Toast.makeText(TestDrive.this, "nope!", Toast.LENGTH_SHORT).show();
-          error.printStackTrace();
-          bar.setVisibility(View.GONE);         
-        }
-        
-        @Override
-        public void onReadyToRender(String myURLToRender) {
-           Uri uri = Uri.parse(myURLToRender);
-           Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-           startActivity(intent);
-          
-        }
-      });
+//            kinveyClient.user().loginWithAuthorizationCodeLoginPage("kinveyAuthDemo://", new KinveyMICCallback() {
+//        
+//        @Override
+//        public void onSuccess(User result) {
+//          Toast.makeText(TestDrive.this, "did it! with: " + result.getId(), Toast.LENGTH_SHORT).show();
+//          bar.setVisibility(View.GONE);         
+//        }
+//        
+//        @Override
+//        public void onFailure(Throwable error) {
+//          Toast.makeText(TestDrive.this, "nope!", Toast.LENGTH_SHORT).show();
+//          error.printStackTrace();
+//          bar.setVisibility(View.GONE);         
+//        }
+//        
+//        @Override
+//        public void onReadyToRender(String myURLToRender) {
+//           Uri uri = Uri.parse(myURLToRender);
+//           Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//           startActivity(intent);
+//          
+//        }
+//      });
 //            
-//            kinveyClient.user().login(new KinveyUserCallback() {
-//                @Override
-//                public void onSuccess(User result) {
-//                    bar.setVisibility(View.GONE);
-//                    Log.i(TAG,"Logged in successfully as " + result.getId());
-//                    Toast.makeText(TestDrive.this, "New implicit user logged in successfully as " + result.getId(),
-//                            Toast.LENGTH_LONG).show();
-//                }
-//                @Override
-//                public void onFailure(Throwable error) {
-//                    bar.setVisibility(View.GONE);
-//                    Log.e(TAG, "Login Failure", error);
-//                    Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-//                }
-//            });
+            kinveyClient.user().login(new KinveyUserCallback() {
+                @Override
+                public void onSuccess(User result) {
+                    bar.setVisibility(View.GONE);
+                    Log.i(TAG,"Logged in successfully as " + result.getId());
+                    Toast.makeText(TestDrive.this, "New implicit user logged in successfully as " + result.getId(),
+                            Toast.LENGTH_LONG).show();
+                }
+                @Override
+                public void onFailure(Throwable error) {
+                    bar.setVisibility(View.GONE);
+                    Log.e(TAG, "Login Failure", error);
+                    Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         }   else {
             Toast.makeText(this, "Using cached implicit user " + kinveyClient.user().getId(), Toast.LENGTH_LONG).show();
         }
@@ -269,7 +269,8 @@ public class TestDrive extends Activity {
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
         ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
-        ad.delete("myEntity", new KinveyDeleteCallback() {
+        Query q = new Query().equals("offline", "doit");
+        ad.delete(q, new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {
                 bar.setVisibility(View.GONE);
@@ -284,6 +285,21 @@ public class TestDrive extends Activity {
             }
         });
         
+//        ad.delete("toDelete", new KinveyDeleteCallback() {
+//            @Override
+//            public void onSuccess(KinveyDeleteResponse result) {
+//                bar.setVisibility(View.GONE);
+//                Toast.makeText(TestDrive.this,"Deleted it: " + result.getCount(), Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable error) {
+//                bar.setVisibility(View.GONE);
+//                Log.e(TAG, "AppData.delete Failure", error);
+//                Toast.makeText(TestDrive.this, "Delete error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//        });
+//        
         
     }
     

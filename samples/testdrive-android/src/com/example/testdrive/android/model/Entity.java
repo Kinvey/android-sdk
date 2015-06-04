@@ -14,9 +14,11 @@
 package com.example.testdrive.android.model;
 
 import android.app.Activity;
+
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
+import com.kinvey.java.model.KinveyMetaData;
 
 public class Entity extends GenericJson {
 
@@ -25,6 +27,9 @@ public class Entity extends GenericJson {
 
     @Key
     private test ok = test.ONE;
+    
+    @Key("_acl")
+    private KinveyMetaData.AccessControlList acl;
 
 	public Entity() {}
 	
