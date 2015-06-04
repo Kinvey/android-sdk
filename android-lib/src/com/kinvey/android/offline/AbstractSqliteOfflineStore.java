@@ -144,7 +144,6 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         //expand the URI from the template
         String targetURI = UriTemplate.expand(client.getBaseUrl(), request.getUriTemplate(), request, true);
         //find the index after {collectionName}/
-        Log.i("wat", targetURI);
         int idIndex = targetURI.indexOf(appData.getCollectionName()) + appData.getCollectionName().length() + 1;
 
         String targetID = targetURI.substring(idIndex, targetURI.length());
@@ -152,7 +151,6 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         try{
         	targetID = URLDecoder.decode(targetID, "UTF-8");
         }catch (Exception e){}//if this happens it will also happen with online mode.
-        Log.i("watt", targetID);
         KinveyDeleteResponse ret = handler.getTable(appData.getCollectionName()).delete(handler,client, targetID, request);
         handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "DELETE", new OfflineMetaData(targetID, request), request);
 
