@@ -647,7 +647,7 @@ public class Client extends AbstractClient {
                     AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser);
                 }catch (Exception e){
-                    Log.e(TAG, "Invalid Parser name: " + super.getString(Option.PARSER) + " must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                    Log.e(TAG, "Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
                     Log.e(TAG, "Defaulting to: GSON");
                     e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
