@@ -66,25 +66,18 @@ public class NotificationFragment extends ContentFragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
-                	
                 	client().push().initialize(getSherlockActivity().getApplication());
                 	
                     updates.setChecked(true);
                 }else{
-                    client().user().remove("_push");
+                	client().push().disablePush();
                     updates.setChecked(false);
-
                 }
             }
         });
 
-
-
-        if (client().user().containsKey("_push")){
-            updates.setChecked(true);
-        }else{
-            updates.setChecked(false);
-        }
+        updates.setChecked(client().push().isPushEnabled());
+     
     }
     
     public void registerWithKinvey(final Client client, final String gcmRegID, boolean register) {
@@ -126,8 +119,9 @@ public class NotificationFragment extends ContentFragment {
                     Log.v(Client.TAG, "GCM - user update error: " + error);
                 }
             }, gcmRegID);
-
+            
         }
+        
     }
 
 

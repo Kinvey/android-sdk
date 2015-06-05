@@ -26,6 +26,7 @@ public class GCMService extends KinveyGCMService {
 	@Override
 	public void onRegistered(String gcmID) {
 		displayNotification(gcmID);
+		
 	}
 
 	@Override
