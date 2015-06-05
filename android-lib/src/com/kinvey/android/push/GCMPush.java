@@ -34,7 +34,9 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 
 
@@ -88,7 +90,7 @@ public class GCMPush extends AbstractPush {
         }
         
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
-        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");	
+        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");  
         }
         
         
@@ -137,10 +139,23 @@ public class GCMPush extends AbstractPush {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
-                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
-                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-                	client.getContext().startService(reg);
+                	client.user().retrieve(new KinveyUserCallback() {
+						
+						@Override
+						public void onSuccess(User result) {
+							client.user().put("_messaging", result.get("_messaging"));
+							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
+		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
+		                	client.getContext().startService(reg);							
+						}
+						
+						@Override
+						public void onFailure(Throwable error) {
+							Log.v(Client.TAG, "GCM - user update error: " + error);
+							
+						}
+					});
                 }
 
                 @Override
@@ -198,23 +213,25 @@ public class GCMPush extends AbstractPush {
             return false;
         }
         String gcmID = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
-
+        if (gcmID == null || gcmID.equals("")){
+        	return false;
+        }
         if (getClient().user().containsKey("_messaging")){
-            AbstractMap pushField = (AbstractMap) getClient().user().get("_messaging");
-            if (pushField.containsKey("GCM")){
-                AbstractMap gcmField = (AbstractMap) pushField.get("GCM");
-                if (gcmField.containsKey("ids")){
-                    List<String> ids = (ArrayList<String>) gcmField.get("ids");
-                    for (String s : ids){
-                        if (s.equals(gcmID)){
-                            return true;
-                        }
-                    }
+            AbstractMap<String, Object> pushField = (AbstractMap<String, Object>) getClient().user().get("_messaging");
+            if (pushField.containsKey("pushTokens")){
+                ArrayList<AbstractMap<String, Object>> gcmField = (ArrayList<AbstractMap<String, Object>>) pushField.get("pushTokens");
+                for(AbstractMap<String, Object> gcm : gcmField){
+                	if (gcm.get("platform").equals("android")){
+                		if (gcm.get("token").equals(gcmID)){
+                			return true;
+                			
+                		}
+                	}
+                			
                 }
             }
         }
         return false;
-      //  */
     }
 
     /**
@@ -225,14 +242,20 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public void disablePush() {
+     	if (getClient() == null || getClient().getContext() == null){
+    		return;
+    	}
     	String regid = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
-    	if (regid != ""){
+    	
+    	SharedPreferences.Editor pref = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+        pref.remove(pref_regid);
+        pref.commit();    
+    	
+        if (regid != ""){
     		registerWithKinvey(regid, false);
     	}
     	
-    	if (getClient() == null || getClient().getContext() == null){
-    		return;
-    	}
+   
     	final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
     	new AsyncTask<Void, Void, Void>(){
 
