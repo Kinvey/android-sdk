@@ -34,6 +34,7 @@ import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.Query;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -150,7 +151,7 @@ public class AsyncAppData<T> extends AppData<T> {
 
 
         }catch (NoSuchMethodException e){
-            System.out.println("CHECK METHOD MAP, no such method is declared in AppData!");
+        	Logger.ERROR("CHECK METHOD MAP, no such method is declared in AppData!");
             e.printStackTrace();
         }
 

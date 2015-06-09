@@ -13,6 +13,7 @@
  */
 package com.kinvey.java.core;
 
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**
@@ -37,7 +38,7 @@ public abstract class MetaUploadProgressListener implements UploaderProgressList
         this.metadata = new FileMetaData();
         this.metadata.setFileName(new String(meta.getFileName()));
         this.metadata.setId(new String(meta.getId()));
-        System.out.println("cache meta: " + this.metadata.getFileName() + " and id: " + this.metadata.getId());
+        Logger.INFO("cache meta: " + this.metadata.getFileName() + " and id: " + this.metadata.getId());
     }
 
     /**

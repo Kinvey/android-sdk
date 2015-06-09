@@ -23,6 +23,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.MimeTypeFinder;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
@@ -74,13 +75,13 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
         if (getJsonContent() instanceof LinkedGenericJson) {
 
 
-            System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet().size());
+        	Logger.INFO("Kinvey - LR, " + "linked resource found, file count at: " + ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet().size());
 
 
             for (final String key : ((LinkedGenericJson) getJsonContent()).getAllFiles().keySet()) {
                 if (((LinkedGenericJson) getJsonContent()).getFile(key) != null) {
 
-                    System.out.println("Kinvey - LR, " + "found a LinkedGenericJson: " + key);// + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getId());
+                	Logger.INFO("Kinvey - LR, " + "found a LinkedGenericJson: " + key);// + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getId());
                     if (((LinkedGenericJson) getJsonContent()).getFile(key).isResolve()) {
 
                         InputStream in = ((LinkedGenericJson) getJsonContent()).getFile(key).getInput();
@@ -147,7 +148,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                 }
             }
 
-            System.out.println("Kinvey - LR, " + "saving the entity!");
+            Logger.INFO("Kinvey - LR, " + "saving the entity!");
             return super.execute();
         } else {
             return super.execute();

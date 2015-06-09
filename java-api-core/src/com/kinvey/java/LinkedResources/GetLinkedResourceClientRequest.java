@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -62,7 +63,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
         T entity = super.execute();
 
         if (entity instanceof LinkedGenericJson[]) {
-            System.out.println("Kinvey - LR, " + "linked resource array found");
+        	Logger.INFO("Kinvey - LR, " + "linked resource array found");
             LinkedGenericJson[] casted = (LinkedGenericJson[]) entity;
             for (LinkedGenericJson ent : casted) {
                 downloadResources(ent);
@@ -71,12 +72,12 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
 
         } else if (entity instanceof LinkedGenericJson) {
-            System.out.println("Kinvey - LR, " + "linked resource instance found");
+        	Logger.INFO("Kinvey - LR, " + "linked resource instance found");
             downloadResources((LinkedGenericJson) entity);
             return entity;
 
         } else {
-            System.out.println("Kinvey - LR, " + "not a linked resource, behaving as usual!");
+        	Logger.INFO("Kinvey - LR, " + "not a linked resource, behaving as usual!");
             return entity;
 
         }
@@ -86,12 +87,12 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
     }
 
     private void downloadResources(LinkedGenericJson entity) throws IOException {
-        System.out.println("Kinvey - LR, " + "linked resource found, file count at: " + entity.getAllFiles().keySet().size());
+    	Logger.INFO("Kinvey - LR, " + "linked resource found, file count at: " + entity.getAllFiles().keySet().size());
 
         for (String key : (entity).getAllFiles().keySet()) {
             if (entity.get(key) != null) {
 
-                System.out.println("Kinvey - LR, " + "getting a LinkedGenericJson: " + key  );//-> " + ((Map) entity.get(key)).get("_loc").toString());
+            	Logger.INFO("Kinvey - LR, " + "getting a LinkedGenericJson: " + key  );//-> " + ((Map) entity.get(key)).get("_loc").toString());
 
                 if (entity.getFile(key) == null) {
                     if (((Map)entity.get(key)).containsKey("_id")){

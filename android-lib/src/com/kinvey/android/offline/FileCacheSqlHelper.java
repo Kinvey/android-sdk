@@ -191,13 +191,13 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = getReadableDatabase();
             Cursor c = db.query(FILE_CACHE_TABLE, new String[]{COLUMN_ID, COLUMN_FILENAME}, null, null, null, null, null);
             while(c.moveToNext()){
-                Log.i("DUMP", "********");
-                Log.i("DUMP", "********");
-                Log.i("DUMP", "********");
-                Log.i("DUMP", c.getString(0) + " and " + c.getString(1));
-                Log.i("DUMP", "********");
-                Log.i("DUMP", "********");
-                Log.i("DUMP", "********");
+//                Log.i("DUMP", "********");
+//                Log.i("DUMP", "********");
+//                Log.i("DUMP", "********");
+//                Log.i("DUMP", c.getString(0) + " and " + c.getString(1));
+//                Log.i("DUMP", "********");
+//                Log.i("DUMP", "********");
+//                Log.i("DUMP", "********");
             }
             c.close();;
         }

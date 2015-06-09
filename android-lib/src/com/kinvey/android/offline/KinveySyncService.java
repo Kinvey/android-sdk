@@ -15,6 +15,8 @@
  */
 package com.kinvey.android.offline;
 
+import com.kinvey.java.KinveyLogger.Logger;
+
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -53,7 +55,7 @@ public class KinveySyncService extends AbstractSyncService {
     }
 
     public void pingService() {
-        Log.i(TAG, "\"Hi!\" said the Kinvey Sync Service");
+    	Logger.INFO("\"Hi!\" said the Kinvey Sync Service");
     }
 
     /**

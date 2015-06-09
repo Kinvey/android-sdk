@@ -16,6 +16,7 @@
 package com.kinvey.java.offline;
 
 import com.google.api.client.http.HttpResponseException;
+import com.kinvey.java.KinveyLogger.Logger;
 
 import java.io.IOException;
 
@@ -62,7 +63,7 @@ public enum OfflinePolicy {
                     throw e;
                 }
             } catch (Exception e){
-                System.out.println("caught an online exception, but it's ok -> " + e.getMessage());
+            	Logger.INFO("caught an online exception, but it's ok -> " + e.getMessage());
             }
             if (ret == null){
                 ret = offlineRequest.offlineFromStore();

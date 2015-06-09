@@ -18,6 +18,7 @@ package com.kinvey.java.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
+import com.kinvey.java.KinveyLogger.Logger;
 
 import java.lang.reflect.Constructor;
 
@@ -116,7 +117,7 @@ public class KinveyReference extends GenericJson{
             ret = clazz.newInstance();
             ret.putAll(direct);
         } catch (Exception e) {
-            System.out.println("unable to instantiate class!");
+        	Logger.ERROR("unable to instantiate class!");
             e.printStackTrace();
             return null;
         }

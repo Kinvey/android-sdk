@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,6 +48,7 @@ import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.User;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.ClientUsers;
@@ -88,8 +88,6 @@ public class Client extends AbstractClient {
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
 
-    final static Logger LOGGER = Logger.getLogger(Client.class.getSimpleName());
-
     private Context context = null;
 
     private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
@@ -125,6 +123,7 @@ public class Client extends AbstractClient {
                      BackOffPolicy requestPolicy) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
+        Logger.init(new AndroidLogger());
     }
 
     /**

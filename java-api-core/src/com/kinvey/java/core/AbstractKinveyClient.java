@@ -24,6 +24,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
 import com.kinvey.java.File;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.KinveyLogger.Logger;
 
 import java.io.IOException;
 
@@ -85,7 +86,7 @@ public abstract class AbstractKinveyClient {
                 httpRequestInitializer == null ? transport.createRequestFactory() : transport
                         .createRequestFactory(httpRequestInitializer);
         this.backoffPolicy = requestPolicy;
-        System.out.println("Kinvey Client created, running version: " + KinveyHeaders.VERSION);
+        Logger.INFO("Kinvey Client created, running version: " + KinveyHeaders.VERSION);
     }
 
 

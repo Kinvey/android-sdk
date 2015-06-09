@@ -36,6 +36,7 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
@@ -59,7 +60,7 @@ public abstract class AbstractSyncService extends IntentService{
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.i(TAG, "Received intent: " + intent);
+    	Logger.INFO("Received intent: " + intent);
         if (isOnline() && client == null){
             initClientAndKickOffSync();
         }
@@ -77,10 +78,10 @@ public abstract class AbstractSyncService extends IntentService{
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            Log.v(Client.TAG, "Kinvey Sync Execution is gonna happen!  Device connected.");
+        	Logger.INFO("Kinvey Sync Execution is gonna happen!  Device connected.");
             return true;
         }
-        Log.v(Client.TAG, "Kinvey Sync Execution is not happening, device is offline.");
+        Logger.INFO("Kinvey Sync Execution is not happening, device is offline.");
 
         return false;
 
@@ -93,24 +94,24 @@ public abstract class AbstractSyncService extends IntentService{
     private void initClientAndKickOffSync() {
 
         if (client == null || !client.user().isUserLoggedIn()) {
-            Log.i(TAG, "wat building new...");
+        	Logger.INFO("building new Client");
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
-                    Log.v(TAG, "offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
-                    Log.v(TAG, "offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
+                	Logger.INFO("offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                	Logger.INFO("offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
                     getFromStoreAndExecute();
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.e(TAG, "don't call logout when expecting an offline sync to occur!  Sync needs a current user");
-                    Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> " + error);
+                	Logger.ERROR("don't call logout when expecting an offline sync to occur!  Sync needs a current user");
+                	Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> " + error);
                 }
             }).build();
 
             if (!client.user().isUserLoggedIn()){
-                Log.e(TAG, "offline Unable to login from Kinvey Sync Service! -> don't call logout! need an active current user!");
+            	Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> don't call logout! need an active current user!");
             }
 
             client.enableDebugLogging();
@@ -147,7 +148,7 @@ public abstract class AbstractSyncService extends IntentService{
                                 executeRequest(dbHelper, req, s);
                             }
                         }else{
-                        	Log.i("TAG", "not safe to execute!");
+                        	Logger.INFO("not safe to execute!");
                         }
                     }
                 }
@@ -293,12 +294,12 @@ public abstract class AbstractSyncService extends IntentService{
             protected Void doInBackground(Void... voids) {
                 //if request failed on client side, re-queue it
                 if (!success && error != null && !(error instanceof HttpResponseException)){
-                    Log.i(TAG, "requeing request");
+                	Logger.INFO("requeing request");
                     DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
                     dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID(), null);
                     registerFailure();
                 }else{
-                    Log.i(TAG, "not requeing request");
+                	Logger.INFO("not requeing request");
 
                 }
                 return null;

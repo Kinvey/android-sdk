@@ -38,6 +38,7 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
@@ -480,7 +481,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             return response.parseAs(responseClass);
             
         }catch(IllegalArgumentException e){
-            System.out.println("unable to parse response -> " + e.toString());
+            Logger.ERROR("unable to parse response -> " + e.toString());
             throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
 
         }catch (NullPointerException ex){
@@ -585,7 +586,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     }
     
     public T onRedirect(String newLocation)  throws IOException{
-    	System.out.println("Override Redirect in response is expected, but not implemented!");
+    	Logger.ERROR("Override Redirect in response is expected, but not implemented!");
     	return null;
     }
 }

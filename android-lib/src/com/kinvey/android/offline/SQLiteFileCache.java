@@ -25,6 +25,7 @@ import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.offline.FileCache;
 
@@ -96,7 +97,7 @@ public class SQLiteFileCache implements FileCache {
 
         if (filename == null){
             //file name is not in the metadata table
-            Log.i(TAG, "cache miss on db -> (" + id + ")" );
+        	Logger.INFO("cache miss on db -> (" + id + ")" );
             return null;
         }
 
@@ -106,11 +107,11 @@ public class SQLiteFileCache implements FileCache {
         if (!cachedFile.exists()){
             //file name is in the metadata table, but the file doesn't exist
             //so remove it from the metadata table
-            Log.i(TAG, "cache miss on filesystem-> (" + id + ", " + filename + ")" );
+        	Logger.INFO("cache miss on filesystem-> (" + id + ", " + filename + ")" );
             getHelper(context).deleteRecord(id);
             return null;
         }
-        Log.i(TAG, "cache hit -> (" + id + ", " + filename + ")" );
+        Logger.INFO("cache hit -> (" + id + ", " + filename + ")" );
 
         FileInputStream ret = null;
         try{
@@ -163,7 +164,7 @@ public class SQLiteFileCache implements FileCache {
 
         Preconditions.checkNotNull(context, "Context cannot be null!");
 
-        Log.i(TAG, "cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
+        Logger.INFO("cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
 
         //insert into database table
         getHelper(context).insertRecord((Client)client, meta);

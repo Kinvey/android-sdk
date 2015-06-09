@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 /**
@@ -106,7 +107,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else{
-                System.out.println("Kinvey Offline, unrecognized verb in store! -> " + verb );
+            	Logger.INFO("Kinvey Offline, unrecognized verb in store! -> " + verb );
             }
 
             return ret;
@@ -132,7 +133,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
 
         T ret = null;
         if(((AbstractClient) getAbstractKinveyClient()).appData(collectionName, getResponseClass()).isOnline()){
-            System.out.println("Offline Request - Online execution!");
+        	Logger.INFO("Offline Request - Online execution!");
            
                 ret = super.execute();
                 if (ret != null){

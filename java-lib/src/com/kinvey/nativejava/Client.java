@@ -22,6 +22,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.auth.*;
 
 import java.io.IOException;
@@ -55,6 +56,8 @@ public class Client extends AbstractClient {
      */
     protected Client(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store, BackOffPolicy requestPolicy) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy);
+        Logger.init(new JavaLogger());
+
     }
     /**
      * AppData factory method
@@ -322,7 +325,7 @@ public class Client extends AbstractClient {
             try {
                 this.setCredentialStore(new InMemoryCredentialStore());
             } catch (Exception ex) {
-                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
+            	Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
             }
             this.setJsonFactory(this.factory);
 
@@ -367,7 +370,7 @@ public class Client extends AbstractClient {
                     loginWithCredential(client, credential);
                 }
             } catch (IOException ex) {
-                System.out.println("KINVEY" +  "Credential store failed to load" + ex);
+            	Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
                 client.setCurrentUser(null);
             }
 
@@ -400,13 +403,13 @@ public class Client extends AbstractClient {
             try {
                 client.user().login(credential).execute();
             } catch (IOException ex) {
-                System.out.println("KINVEY" + "Could not retrieve user Credentials");
+            	Logger.INFO("KINVEY" + "Could not retrieve user Credentials");
             }
 
             try{
             client.setCurrentUser(client.user().retrieveMetadataBlocking());
             }catch (IOException ex){
-                System.out.println("KINVEY" +  "Unable to login!" + ex);
+            	Logger.INFO("KINVEY" +  "Unable to login!" + ex);
             }
         }
 
