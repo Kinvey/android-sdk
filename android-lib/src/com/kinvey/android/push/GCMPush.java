@@ -36,6 +36,7 @@ import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 
@@ -102,7 +103,7 @@ public class GCMPush extends AbstractPush {
     
                 try {                	
                     final String regid = gcm.register(getSenderIDs());                    
-                    Log.i("GCM", "regid is " + regid);
+                    Logger.INFO("regid is " + regid);
                     
                     SharedPreferences.Editor pref = currentApp.getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
                     pref.putString(pref_regid, regid);
@@ -111,7 +112,7 @@ public class GCMPush extends AbstractPush {
                     registerWithKinvey(regid, true);
 
                 } catch (IOException ex) {
-                	Log.e(TAG, "unable to register with GCM: " + ex.getMessage());
+                	Logger.ERROR("unable to register with GCM: " + ex.getMessage());
                 	ex.printStackTrace();
                 }
 				return null;
@@ -125,12 +126,12 @@ public class GCMPush extends AbstractPush {
         //registered on GCM but not on Kinvey?
         Log.v(Client.TAG, "about to register with Kinvey");
         if (client == null) {
-            Log.e(Client.TAG, "GCMService got garbage collected, cannot complete registration!");
+        	Logger.ERROR("GCMService got garbage collected, cannot complete registration!");
             return;
         }
 
         if (!client.user().isUserLoggedIn()) {
-            Log.e(Client.TAG, "Need to login a current user before registering for push!");
+        	Logger.ERROR("Need to login a current user before registering for push!");
             return;
         }
 

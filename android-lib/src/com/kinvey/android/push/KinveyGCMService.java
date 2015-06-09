@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
+import com.kinvey.java.KinveyLogger.Logger;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -77,17 +78,17 @@ public abstract class KinveyGCMService extends IntentService {
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         
         String messageType = gcm.getMessageType(intent);
-        Log.i("GCM", "handling intent");
+        Logger.INFO("handling intent");
 
         if (!extras.isEmpty()) {
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                Log.i("GCM", "Send error: " + extras.toString());
+            	Logger.INFO("Send error: " + extras.toString());
                 onError(extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-            	Log.i("GCM", "Deleted messages on server: " + extras.toString());
+            	Logger.INFO("Deleted messages on server: " + extras.toString());
             	onDelete(extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                Log.i("GCM", "Received: " + extras.toString());
+            	Logger.INFO("Received: " + extras.toString());
                 if (extras.get(MESSAGE_FROM_GCM) != null){
                 	onMessage(extras.get(MESSAGE_FROM_GCM).toString());
                 }

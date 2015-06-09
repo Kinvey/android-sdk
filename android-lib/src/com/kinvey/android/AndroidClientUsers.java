@@ -30,6 +30,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.google.common.base.Preconditions;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.auth.ClientUsers;
 
 /**
@@ -189,7 +190,7 @@ class AndroidClientUsers implements ClientUsers {
                 oStream.writeObject(userList);
 
 
-                Log.i(Client.TAG,"Serialization success");
+                Logger.INFO("Serialization of user successful");
             } catch (IOException e) {
                 Log.e(Client.TAG, e.getMessage());
             } finally{

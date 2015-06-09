@@ -26,6 +26,7 @@ import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
@@ -82,7 +83,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         if (targetURI.contains("query") && (targetURI.indexOf("query") + 12) != targetURI.length()){
 
 
-       //     Log.i(TAG, "it's a GET query " + targetURI.indexOf("query") + " and " + targetURI.length());
+//            Logger.INFO("it's a GET query " + targetURI.indexOf("query") + " and " + targetURI.length());
             //Since it's a query, pull the actual query string out and get rid of the "?query"
             String query = targetURI.substring(idIndex, targetURI.length());
             query = query.replace("?query=","");
@@ -97,14 +98,14 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         }else if (idIndex == targetURI.length() || targetURI.contains("query")) {
             //is it a get all?
 
-        //    Log.i(TAG, "it's a GET all");
+        //    Logger.INFO("it's a GET all");
             ret = (T) handler.getTable(appData.getCollectionName()).getAll(handler, client, appData.getCurrentClass(), request);
             
             handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "QUERY",new OfflineMetaData("{}", request) , request);
 
 
         }else{
-        //    Log.i(TAG, "it's a GET by id");
+        //    Logger.INFO("it's a GET by id");
             //it's get by id
             String targetID = targetURI.substring(idIndex, targetURI.length());
             ret = (T) handler.getTable(appData.getCollectionName()).getEntity(handler, client, targetID, appData.getCurrentClass(), request);

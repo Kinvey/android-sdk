@@ -68,17 +68,17 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
             }
 
         } catch (Exception e) {
-            Log.i(TAG, "error reading input stream to get size, setting it to 0");
+        	Logger.WARNING("error reading input stream to get size, setting it to 0");
             numBytes = 0;
         }
         try {
             stream.reset();
         } catch (Exception e) {
-            Log.i(TAG, "error resetting stream!");
+        	Logger.ERROR("error resetting stream!");
 
         }
 
-        Log.i(TAG, "size is: " + numBytes);
+        Logger.INFO("size is: " + numBytes);
 
 
         meta.setSize(numBytes);

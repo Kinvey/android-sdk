@@ -31,14 +31,14 @@ public abstract class KinveyLogger {
 	
 	public static class Logger{
 		
-		private static KinveyLogger log;
+		private static KinveyLogger platformLogger;
 		private static boolean isInitialized = false;
 		
 		public static void init (KinveyLogger log){
 			if (log == null){
 				throw new KinveyException("Logger can't be null!");
 			}
-			Logger.log = log;
+			Logger.platformLogger = log;
 			isInitialized = true;
 		}
 		
@@ -46,35 +46,35 @@ public abstract class KinveyLogger {
 			if (!isInitialized){
 				return;
 			}
-			log.info(message);
+			platformLogger.info(message);
 		}
 		
 		public static void DEBUG(String message){
 			if (!isInitialized){
 				return;
 			}
-			log.debug(message);	
+			platformLogger.debug(message);	
 		}
 		
 		public static void TRACE(String message){
 			if (!isInitialized){
 				return;
 			}
-			log.trace(message);
+			platformLogger.trace(message);
 		}
 		
 		public static void WARNING(String message){
 			if (!isInitialized){
 				return;
 			}
-			log.warning(message);
+			platformLogger.warning(message);
 		}
 		
 		public static void ERROR(String message){
 			if (!isInitialized){
 				return;
 			}
-			log.error(message);
+			platformLogger.error(message);
 		}	
 	}	
 }

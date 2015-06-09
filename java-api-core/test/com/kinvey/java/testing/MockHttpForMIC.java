@@ -22,7 +22,6 @@ public class MockHttpForMIC extends HttpTransport {
 		return new MockLowLevelHttpRequest() {
 			@Override
 			public LowLevelHttpResponse execute() throws IOException {
-				System.out.println("mock HTTP for MIC recieved: " + url);
 				
 				if (url.contains("oauth/token")) {
 					return oauthToken();
@@ -75,7 +74,6 @@ public class MockHttpForMIC extends HttpTransport {
 
 
 		response.setContentType(Json.MEDIA_TYPE);
-		 System.out.println("------------ " + new Gson().toJson(content));
 
 		response.setContent(new Gson().toJson(content));
 		response.setStatusCode(200);

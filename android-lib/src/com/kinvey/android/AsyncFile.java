@@ -52,26 +52,26 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  * {@code
  *    mKinveyClient.file().upload(file,  new UploaderProgressListener() {
  *        public void onSuccess(Void result) {
- *            Log.i(TAG, "successfully upload file");
+ *            //successfully upload file!
  *        }
  *        public void onFailure(Throwable error) {
- *            Log.e(TAG, "failed to upload file.", error);
+ *            //"failed to upload file!
  *        }
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
- *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
+ *            //"upload progress: " + uploader.getUploadState());
  *            switch (uploader.getUploadState()) {
  *                case INITIATION_STARTED:
- *                    Log.i(TAG, "Initiation Started");
+ *                    //Initiation Started
  *                    break;
  *                case INITIATION_COMPLETE:
- *                    Log.i(TAG, "Initiation Completed");
+ *                    //Initiation Completed
  *                    break;
  *                case DOWNLOAD_IN_PROGRESS:
- *                    Log.i(TAG, "Upload in progress");
- *                    Log.i(TAG, "Upload percentage: " + uploader.getProgress());
+ *                    //Upload in progress
+ *                    //Upload percentage:  + uploader.getProgress()
  *                    break;
  *                case DOWNLOAD_COMPLETE:
- *                    Log.i(TAG, "Upload Completed!");
+ *                    //Upload Completed!
  *                    break;
  *            }
  *        }
@@ -119,17 +119,17 @@ public class AsyncFile extends File {
      *         public void progressChanged(MediaHttpUploader uploader) throws IOException {
      *             switch (uploader.getUploadState()) {
      *                 case INITIATION_STARTED:
-     *                     Log.i(TAG, "Initiation Started");
+     *                     //Initiation Started
      *                     break;
      *                 case INITIATION_COMPLETE:
-     *                     Log.i(TAG, "Initiation Completed");
+     *                     //Initiation Completed
      *                     break;
      *                 case DOWNLOAD_IN_PROGRESS:
-     *                     Log.i(TAG, "Upload in progress");
-     *                     Log.i(TAG, "Upload percentage: " + uploader.getProgress());
+     *                     //Upload in progress
+     *                     //Upload percentage:  + uploader.getProgress()
      *                     break;
      *                 case DOWNLOAD_COMPLETE:
-     *                     Log.i(TAG, "Upload Completed!");
+     *                     //Upload Completed!
      *                     break;
      *             }
      *         }
@@ -137,7 +137,7 @@ public class AsyncFile extends File {
      *         public void onSuccess(Void result) {}
      *
      *         public void onFailure(Throwable error) {
-     *             Log.e(TAG, "Upload failed", error);
+     *             //Upload failed
      *         }
      *     }
      * }
@@ -211,11 +211,11 @@ public class AsyncFile extends File {
      *         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
      *             switch (downloader.getDownloadState()) {
      *                 case DOWNLOAD_IN_PROGRESS:
-     *                     Log.i(TAG, "Download in progress");
-     *                     Log.i(TAG, "Download percentage: " + downloader.getProgress());
+     *                     //Download in progress
+     *                     //Download percentage: + downloader.getProgress()
      *                     break;
      *                 case DOWNLOAD_COMPLETE:
-     *                     Log.i(TAG, "Download Completed!");
+     *                     //Download Completed!
      *                     break;
      *             }
      *         }
@@ -224,7 +224,7 @@ public class AsyncFile extends File {
      *         public void onSuccess(Void result) {}
      *
      *         public void onFailure(Throwable error) {
-     *             Log.e(TAG, "Upload failed", error);
+     *             //Upload failed", error
      *         }
      *
      *     }

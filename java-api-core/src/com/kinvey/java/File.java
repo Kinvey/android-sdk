@@ -63,28 +63,28 @@ import com.kinvey.java.query.AbstractQuery;
  *    mKinveyClient.file().uploadBlocking("myFileName.txt", file,  new UploaderProgressListener() {
  *        @Override
  *        public void onSuccess(Void result) {
- *            Log.i(TAG, "successfully upload file");
+ *            //successfully upload file
  *        }
  *        @Override
  *        public void onFailure(Throwable error) {
- *            Log.e(TAG, "failed to upload file.", error);
+ *            //failed to upload file.", error
  *        }
  *        @Override
  *        public void progressChanged(MediaHttpUploader uploader) throws IOException {
- *            Log.i(TAG, "upload progress: " + uploader.getUploadState());
+ *            //upload progress: " + uploader.getUploadState()
  *            switch (uploader.getUploadState()) {
  *                case INITIATION_STARTED:
- *                    Log.i(TAG, "Initiation Started");
+ *                    //Initiation Started
  *                    break;
  *                case INITIATION_COMPLETE:
- *                    Log.i(TAG, "Initiation Completed");
+ *                    //Initiation Completed
  *                    break;
  *                case DOWNLOAD_IN_PROGRESS:
- *                    Log.i(TAG, "Upload in progress");
- *                    Log.i(TAG, "Upload percentage: " + uploader.getProgress());
+ *                    //Upload in progress
+ *                    //Upload percentage: + uploader.getProgress()
  *                    break;
  *                case DOWNLOAD_COMPLETE:
- *                    Log.i(TAG, "Upload Completed!");
+ *                    //Upload Completed!;
  *                    break;
  *            }
  *    });

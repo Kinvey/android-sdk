@@ -46,11 +46,11 @@ import com.kinvey.java.core.KinveyClientCallback;
  *             .setResolveDepth(2)
  *             .setCallback(new KinveyClientCallback<MyEntity> {
  *                 public void onSuccess(MyEntity result) {
- *                     Log.i(TAG, "got it!");
+ *                     //got it!
  *                 }
  *
  *                 public void onFailure(Throwable error) {
- *                     Log.i(TAG, "oh no!");
+ *                     //oh no!
  *                 }
  *             })
  *             .buildAndExecute();

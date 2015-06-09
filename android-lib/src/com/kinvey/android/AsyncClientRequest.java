@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -162,14 +163,14 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
 
     @Override
     public void notify(final T object){
-        Log.i(Client.TAG, "notifying async client request");
+    	Logger.INFO("notifying async client request");
         Handler mainHandler = new Handler(Looper.getMainLooper());
 
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
                 if (getCallback() != null) {
-                    Log.i(Client.TAG, "notifying callback");
+                	Logger.INFO("notifying callback");
 
                     getCallback().onSuccess(object);
                 }

@@ -34,17 +34,17 @@ import java.io.IOException;
     public void progressChanged(MediaHttpUploader uploader) throws IOException {
       switch (uploader.getUploadState()) {
         case INITIATION_STARTED:
-          System.out.println("Initiation Started");
+          //Initiation Started
           break;
         case INITIATION_COMPLETE:
-          System.out.println("Initiation Completed");
+          //Initiation Completed
           break;
         case DOWNLOAD_IN_PROGRESS:
-          System.out.println("Upload in progress");
-          System.out.println("Upload percentage: " + uploader.getProgress());
+          //Upload in progress
+          //Upload percentage: + uploader.getProgress()
           break;
         case DOWNLOAD_COMPLETE:
-          System.out.println("Upload Completed!");
+          //Upload Completed!
           break;
       }
     }

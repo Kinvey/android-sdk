@@ -31,11 +31,11 @@ import java.io.IOException;
     public void progressChanged(MediaHttpDownloader downloader) throws IOException {
       switch (downloader.getDownloadState()) {
         case DOWNLOAD_IN_PROGRESS:
-          System.out.println("Download in progress");
-          System.out.println("Download percentage: " + downloader.getProgress());
+          //Download in progress
+          //Download percentage:  + downloader.getProgress()
           break;
         case DOWNLOAD_COMPLETE:
-          System.out.println("Download Completed!");
+          //Download Completed!
           break;
       }
     }
