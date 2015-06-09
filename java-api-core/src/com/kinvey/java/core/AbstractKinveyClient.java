@@ -15,6 +15,8 @@
  */
 package com.kinvey.java.core;
 
+import java.io.IOException;
+
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -24,9 +26,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
 import com.kinvey.java.File;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.KinveyLogger.Logger;
-
-import java.io.IOException;
+import com.kinvey.java.Logger;
 
 /**
  * @author m0rganic

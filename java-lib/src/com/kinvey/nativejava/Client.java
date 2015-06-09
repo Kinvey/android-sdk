@@ -14,19 +14,27 @@
 package com.kinvey.nativejava;
 
 
-import com.google.api.client.http.*;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.api.client.http.BackOffPolicy;
+import com.google.api.client.http.ExponentialBackOffPolicy;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Logger;
+import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.Credential;
+import com.kinvey.java.auth.CredentialManager;
+import com.kinvey.java.auth.CredentialStore;
+import com.kinvey.java.auth.InMemoryClientUsers;
+import com.kinvey.java.auth.InMemoryCredentialStore;
+import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.KinveyLogger.Logger;
-import com.kinvey.java.auth.*;
-
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /** {@inheritDoc}
  *

@@ -15,10 +15,10 @@
  */
 package com.kinvey.java.offline;
 
-import com.google.api.client.http.HttpResponseException;
-import com.kinvey.java.KinveyLogger.Logger;
-
 import java.io.IOException;
+
+import com.google.api.client.http.HttpResponseException;
+import com.kinvey.java.Logger;
 
 /**
  * This enum set determines behaivor of an Offline Request

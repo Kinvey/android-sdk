@@ -22,11 +22,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -48,7 +44,7 @@ import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.User;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.ClientUsers;

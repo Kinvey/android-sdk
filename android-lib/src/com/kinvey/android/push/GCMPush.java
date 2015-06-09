@@ -18,7 +18,6 @@ package com.kinvey.android.push;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Application;
 import android.content.Context;
@@ -36,7 +35,7 @@ import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 

@@ -25,7 +25,7 @@ import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.offline.FileCache;
 

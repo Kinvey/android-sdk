@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 /**

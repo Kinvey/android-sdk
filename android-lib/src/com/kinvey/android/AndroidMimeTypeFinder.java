@@ -14,8 +14,6 @@
 package com.kinvey.android;
 
 
-import static com.kinvey.android.Client.TAG;
-
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLConnection;
@@ -23,7 +21,7 @@ import java.net.URLConnection;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.MimeTypeFinder;
 import com.kinvey.java.model.FileMetaData;
 
@@ -50,7 +48,7 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
             mimetype = URLConnection.guessContentTypeFromStream(stream);
             Logger.INFO("Kinvey - Client - File | mimetype from stream found as: " + mimetype);
         } catch (Exception e) {
-        	Logger.INFO("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
+        	Logger.WARNING("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
         }
 
         if (mimetype == null) {

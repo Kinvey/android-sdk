@@ -13,7 +13,7 @@
  */
 package com.kinvey.java.core;
 
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**

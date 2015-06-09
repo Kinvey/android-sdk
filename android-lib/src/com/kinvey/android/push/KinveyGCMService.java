@@ -25,7 +25,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 
 /**
  * IntentService responsible for handling GCM messages.

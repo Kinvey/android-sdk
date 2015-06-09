@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.KinveyLogger.Logger;
+import com.kinvey.java.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;

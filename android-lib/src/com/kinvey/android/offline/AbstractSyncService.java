@@ -26,7 +26,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
@@ -34,9 +33,9 @@ import com.google.gson.Gson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
-import com.kinvey.java.KinveyLogger.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 

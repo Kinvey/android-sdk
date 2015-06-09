@@ -15,12 +15,11 @@
  */
 package com.kinvey.android.offline;
 
-import com.kinvey.java.KinveyLogger.Logger;
-
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
+
+import com.kinvey.java.Logger;
 
 /**
  *

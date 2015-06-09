@@ -18,9 +18,7 @@ package com.kinvey.java.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
-import com.kinvey.java.KinveyLogger.Logger;
-
-import java.lang.reflect.Constructor;
+import com.kinvey.java.Logger;
 
 /**
  * A KinveyReference allows for entities to include relational data from other collections and entities.
