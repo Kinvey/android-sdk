@@ -1,6 +1,9 @@
 package com.kinvey.java;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+
+import com.google.api.client.http.HttpTransport;
 
 /**
  * This class is used statically throughout the library.  
@@ -10,6 +13,16 @@ import java.util.HashMap;
  *
  */
 public class Logger {
+	
+	/**
+	 *  log levels
+	 */
+	private static final String INFO = "INFO";
+	private static final String DEBUG = "DEBUG";
+	private static final String TRACE = "TRACE";
+	private static final String NETWORK = "NETWORK";
+	private static final String WARNING = "WARNING";
+	private static final String ERROR = "ERROR";
 	
 	/***
 	 * Singleton pattern
@@ -49,21 +62,32 @@ public class Logger {
 		getInstance().platformLogger = log;
 		
 		getInstance().activeMap = new HashMap<String, Boolean>();
-		getInstance().activeMap.put("INFO", false);
-		getInstance().activeMap.put("DEBUG", false);
-		getInstance().activeMap.put("TRACE", false);
-		getInstance().activeMap.put("WARNING", false);
-		getInstance().activeMap.put("ERROR", false);
+		getInstance().activeMap.put(NETWORK, false);
+		getInstance().activeMap.put(INFO, false);
+		getInstance().activeMap.put(DEBUG, false);
+		getInstance().activeMap.put(TRACE, false);
+		getInstance().activeMap.put(WARNING, false);
+		getInstance().activeMap.put(ERROR, false);
 		
 		getInstance().isInitialized = true;
+	}
+	
+	public static Logger configBuilder(){
+		return getInstance();
+	}
+	
+	public Logger network(){
+		getInstance().activeMap.put(NETWORK, true);
+		java.util.logging.Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
+		return getInstance();
 	}
 	
 	/**
 	 * Enable info level logging
 	 * @return the Logger
 	 */
-	public static Logger info(){
-		getInstance().activeMap.put("INFO", true);
+	public Logger info(){
+		getInstance().activeMap.put(INFO, true);
 		return getInstance();
 	}
 	
@@ -71,8 +95,8 @@ public class Logger {
 	 * Enable debug level logging
 	 * @return the Logger
 	 */
-	public static Logger debug(){
-		getInstance().activeMap.put("DEBUG", true);
+	public Logger debug(){
+		getInstance().activeMap.put(DEBUG, true);
 		return getInstance();
 	}
 	
@@ -80,8 +104,8 @@ public class Logger {
 	 * Enable trace level logging
 	 * @return the Logger
 	 */
-	public static Logger trace(){
-		getInstance().activeMap.put("TRACE", true);
+	public Logger trace(){
+		getInstance().activeMap.put(TRACE, true);
 		return getInstance();
 	}
 	
@@ -89,8 +113,8 @@ public class Logger {
 	 * Enable warning level logging
 	 * @return the Logger
 	 */
-	public static Logger warning(){
-		getInstance().activeMap.put("WARNING", true);
+	public Logger warning(){
+		getInstance().activeMap.put(WARNING, true);
 		return getInstance();
 	}
 	
@@ -98,11 +122,20 @@ public class Logger {
 	 * Enable error level logging
 	 * @return the Logger
 	 */
-	public static Logger error(){
-		getInstance().activeMap.put("ERROR", true);
+	public Logger error(){
+		getInstance().activeMap.put(ERROR, true);
 		return getInstance();
 	}
 	
+	public Logger all(){
+		getInstance().activeMap.put(INFO, true);
+		getInstance().activeMap.put(DEBUG, true);
+		getInstance().activeMap.put(TRACE, true);
+		getInstance().activeMap.put(NETWORK, true);
+		getInstance().activeMap.put(WARNING, true);
+		getInstance().activeMap.put(ERROR, true);
+		return getInstance();
+	}
 	
 	/**
 	 * Log an info message
@@ -112,7 +145,9 @@ public class Logger {
 		if (!getInstance().isInitialized){
 			return;
 		}
-		getInstance().platformLogger.info(message);
+		if (getInstance().activeMap.get(INFO)){
+			getInstance().platformLogger.info(message);
+		}
 	}
 	
 	/***
@@ -123,7 +158,9 @@ public class Logger {
 		if (!getInstance().isInitialized){
 			return;
 		}
-		getInstance().platformLogger.debug(message);	
+		if (getInstance().activeMap.get(DEBUG)){
+			getInstance().platformLogger.debug(message);	
+		}
 	}
 	
 	/**
@@ -134,7 +171,9 @@ public class Logger {
 		if (!getInstance().isInitialized){
 			return;
 		}
-		getInstance().platformLogger.trace(message);
+		if (getInstance().activeMap.get(TRACE)){
+			getInstance().platformLogger.trace(message);
+		}
 	}
 	
 	/**
@@ -145,7 +184,9 @@ public class Logger {
 		if (!getInstance().isInitialized){
 			return;
 		}
-		getInstance().platformLogger.warning(message);
+		if (getInstance().activeMap.get(WARNING)){
+			getInstance().platformLogger.warning(message);
+		}
 	}
 	
 	/**
@@ -156,7 +197,9 @@ public class Logger {
 		if (!getInstance().isInitialized){
 			return;
 		}
-		getInstance().platformLogger.error(message);
+		if (getInstance().activeMap.get(ERROR)){
+			getInstance().platformLogger.error(message);
+		}
 	}	
 
 

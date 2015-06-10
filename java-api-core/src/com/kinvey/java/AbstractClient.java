@@ -59,11 +59,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      * The default encoded service path of the service.
      */
     public static final String DEFAULT_SERVICE_PATH = "";
-
-    /** allows for finer grained logging, useful when debugging **/
-    private static boolean enableRequestLogging;
-
-
+    
     private User currentUser;
     private CredentialStore store;
 
@@ -248,7 +244,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      * </p>
      */
     public void enableDebugLogging() {
-        AbstractClient.enableRequestLogging = true;
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
     }
 
@@ -270,7 +265,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      * Disable logging for the HttpTransport class to Level.FINEST.
      */
     public void disableDebugLogging() {
-        AbstractClient.enableRequestLogging = false;
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
     }
 
