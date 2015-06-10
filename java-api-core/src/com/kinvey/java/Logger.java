@@ -63,6 +63,7 @@ public class Logger {
 		
 		getInstance().activeMap = new HashMap<String, Boolean>();
 		getInstance().activeMap.put(NETWORK, false);
+		java.util.logging.Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.OFF);
 		getInstance().activeMap.put(INFO, false);
 		getInstance().activeMap.put(DEBUG, false);
 		getInstance().activeMap.put(TRACE, false);
@@ -132,6 +133,7 @@ public class Logger {
 		getInstance().activeMap.put(DEBUG, true);
 		getInstance().activeMap.put(TRACE, true);
 		getInstance().activeMap.put(NETWORK, true);
+		java.util.logging.Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST);
 		getInstance().activeMap.put(WARNING, true);
 		getInstance().activeMap.put(ERROR, true);
 		return getInstance();
