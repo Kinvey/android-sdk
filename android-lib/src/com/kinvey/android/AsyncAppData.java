@@ -26,7 +26,6 @@ import java.util.Map;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -639,10 +638,10 @@ public class AsyncAppData<T> extends AppData<T> {
                 (ConnectivityManager)((Client)getClient()).getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            Log.v(Client.TAG, "Device is online");
+        	Logger.INFO("Device is online");
             return true;
         }
-        Log.v(Client.TAG, "Device is offline");
+        Logger.INFO("Device is offline");
 
         return false;
 

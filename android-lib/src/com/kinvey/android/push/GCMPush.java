@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -123,7 +122,7 @@ public class GCMPush extends AbstractPush {
 
     public void registerWithKinvey(final String gcmRegID, boolean register) {
         //registered on GCM but not on Kinvey?
-        Log.v(Client.TAG, "about to register with Kinvey");
+    	Logger.INFO("about to register with Kinvey");
         if (client == null) {
         	Logger.ERROR("GCMService got garbage collected, cannot complete registration!");
             return;

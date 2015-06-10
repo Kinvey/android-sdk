@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
@@ -165,11 +164,11 @@ public class Client extends AbstractClient {
                 appDataInstanceCache = new ConcurrentHashMap<String, AsyncAppData>();
             }
             if (!appDataInstanceCache.containsKey(collectionName)) {            	
-                Log.v(Client.TAG, "adding new instance of AppData, new collection name");
+            	Logger.INFO("adding new instance of AppData, new collection name");
                 appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));
             }
             if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-                Log.v(Client.TAG, "adding new instance of AppData, class doesn't match");
+            	Logger.INFO("adding new instance of AppData, class doesn't match");
                 appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));   
             }
 
@@ -593,11 +592,11 @@ public class Client extends AbstractClient {
 
                 super.getProps().load(in);
             } catch (IOException e) {
-                Log.w(TAG, "Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+            	Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
             } catch (NullPointerException ex){
-                Log.e(TAG, "Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                Log.e(TAG, "If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
                 throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
             }
 
@@ -642,8 +641,8 @@ public class Client extends AbstractClient {
                     AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser);
                 }catch (Exception e){
-                    Log.e(TAG, "Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
-                    Log.e(TAG, "Defaulting to: GSON");
+                	Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                	Logger.WARNING("Defaulting to: GSON");
                     e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
                 }
@@ -662,9 +661,9 @@ public class Client extends AbstractClient {
                 try{
                     this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (AndroidCredentialStoreException ex) {
-                    Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
+                	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
                 } catch (IOException ex) {
-                    Log.e(TAG, "Credential store failed to load", ex);
+                	Logger.ERROR("Credential store failed to load");
                 }
             }
 
@@ -696,10 +695,10 @@ public class Client extends AbstractClient {
                 }
 
             } catch (AndroidCredentialStoreException ex) {
-                Log.e(TAG, "Credential store was in a corrupted state and had to be rebuilt", ex);
+            	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
                 client.setCurrentUser(null);
             } catch (IOException ex) {
-                Log.e(TAG, "Credential store failed to load", ex);
+            	Logger.ERROR("Credential store failed to load");
                 client.setCurrentUser(null);
             }
 
@@ -842,7 +841,7 @@ public class Client extends AbstractClient {
             try {
                 client.user().login(credential).execute();
             } catch (IOException ex) {
-                Log.e(TAG, "Could not retrieve user Credentials");
+            	Logger.ERROR("Could not retrieve user Credentials");
             }
             new AsyncTask<Void, Void, User>(){
 

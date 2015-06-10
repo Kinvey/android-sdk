@@ -24,7 +24,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 //import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonGenerator;
@@ -32,6 +31,7 @@ import com.google.gson.Gson;
 import com.kinvey.android.Client;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
@@ -91,7 +91,7 @@ public class OfflineTable<T extends GenericJson> {
 
     public void onCreate(DatabaseHandler handler) {
         if (this.TABLE_NAME == null || this.TABLE_NAME == ""){
-            Log.e(TAG, "cannot create a table without a name!");
+        	Logger.ERROR("cannot create a table without a name!");
             return;
         }
 
@@ -179,14 +179,14 @@ public class OfflineTable<T extends GenericJson> {
             generator.flush();
             jsonResult = writer.toString();
         } catch (Exception ex) {
-            Log.e(TAG, "unable to serialize JSON! -> " + ex);
+        	Logger.ERROR("unable to serialize JSON! -> " + ex);
         }
 
         values.put(COLUMN_JSON, jsonResult);
         values.put(COLUMN_DELETED, 0);
         values.put(COLUMN_USER, client.user().getId());
 
-        Log.v(TAG, "insert entity -> " + offlineEntity.get("_id").toString());
+        Logger.INFO("insert entity -> " + offlineEntity.get("_id").toString());
 
         long sqlid = -2;
         int change = helper.updateWithOnConflict(TABLE_NAME, values, COLUMN_ID + "='" + offlineEntity.get("_id").toString()+"'", null,  5); //5 is CONFLICT_REPLACE
@@ -197,7 +197,7 @@ public class OfflineTable<T extends GenericJson> {
             //Log.v(TAG, "offline updating entity -> " + values.get(COLUMN_JSON));
         }
         
-        Log.v(TAG, "done insertion " + TABLE_NAME+ " -> " + (change !=  0 ? "update" : "!update") + ", " + (sqlid >= 0 ? "create" : "!create" ) + (sqlid == -1 ? " with error" : ""));
+        Logger.INFO("done insertion " + TABLE_NAME+ " -> " + (change !=  0 ? "update" : "!update") + ", " + (sqlid >= 0 ? "create" : "!create" ) + (sqlid == -1 ? " with error" : ""));
 
         return (T) offlineEntity;
     }
@@ -223,11 +223,11 @@ public class OfflineTable<T extends GenericJson> {
         if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()){
             try{
                 String s  = cursor.getString(0);
-                Log.v(TAG, "get entity -> " + s);
+                Logger.INFO("get entity -> " + s);
 
                 ret =  client.getJsonFactory().fromString(s, responseClass);
             }catch(Exception e){
-                Log.e(TAG, "cannot parse json into object! -> " + e);
+            	Logger.ERROR("cannot parse json into object! -> " + e);
             }
 
             cursor.close();
@@ -276,7 +276,7 @@ public class OfflineTable<T extends GenericJson> {
     }
 
     public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass, AbstractKinveyOfflineClientRequest<T> req){
-        Log.e(TAG, "it's a get all");
+    	Logger.ERROR("it's a get all");
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},null ,
                 null, null, null, null, null);
 
@@ -284,19 +284,19 @@ public class OfflineTable<T extends GenericJson> {
         Class singleClass = responseClass.getComponentType();
         if (cursor != null && cursor.getCount() > 0){
             while (cursor.moveToNext()){
-                Log.e(TAG, "added one");
+            	Logger.ERROR("added one");
                 try{
                    String s  = cursor.getString(0);
                    asList.add((T) client.getJsonFactory().fromString(s, singleClass));
                 }catch(Exception e){
-                    Log.e(TAG, "cannot parse json into object! -> " + e);
+                	Logger.ERROR("cannot parse json into object! -> " + e);
                     e.printStackTrace();
                 }
             }
 
             cursor.close();
         }else{
-            Log.e(TAG, "cursor is no good");
+        	Logger.ERROR("cursor is no good");
             return null;
         }
         T[] asArray = (T[]) Array.newInstance(singleClass, asList.size());
@@ -376,7 +376,7 @@ public class OfflineTable<T extends GenericJson> {
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null, null);
 
         if (c.getCount() == 0){
-            Log.v(TAG, "offline queueing -> " + id);
+        	Logger.INFO("offline queueing -> " + id);
             ContentValues values = new ContentValues();
             values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
             
@@ -419,7 +419,7 @@ public class OfflineTable<T extends GenericJson> {
         c.close();
         //remove the popped request
         if (curKey != null){
-            Log.v(TAG, "offline popped queue, current id is: " + ret.getEntityID());
+        	Logger.INFO("offline popped queue, current id is: " + ret.getEntityID());
             handler.delete(QUEUE_NAME, COLUMN_UNIQUE_KEY + "='" + curKey +"'" ,null);
         }
 //        db.close();

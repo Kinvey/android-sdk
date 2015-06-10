@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
@@ -99,8 +98,7 @@ public abstract class KinveyGCMService extends IntentService {
         	Method complete = getReceiver().getMethod("completeWakefulIntent", Intent.class);
 			complete.invoke(null, intent);
 		} catch (Exception e) {
-			Log.e(TAG, "couldn't complete wakeful intent!");
-			e.printStackTrace();
+			Logger.ERROR("couldn't complete wakeful intent!");
 		}
         
     

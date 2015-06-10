@@ -20,10 +20,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.google.api.client.json.JsonGenerator;
 import com.kinvey.android.Client;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**
@@ -150,7 +150,7 @@ public class FileCacheSqlHelper extends SQLiteOpenHelper {
             generator.flush();
             jsonResult = writer.toString();
         } catch (Exception ex) {
-            Log.e(SQLiteFileCache.TAG, "unable to serialize JSON! -> " + ex);
+        	Logger.ERROR("unable to serialize JSON! -> " + ex);
         }
 
         values.put(COLUMN_JSON, jsonResult);

@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.java.Logger;
@@ -161,7 +160,7 @@ class AndroidClientUsers implements ClientUsers {
         } catch (Exception e) {
             // trap all exceptions and log
             // not propagating this exception
-            Log.e(Client.TAG, "Failed to initialize kinveyUsers.bin", e);
+        	Logger.ERROR("Failed to initialize kinveyUsers.bin");
         } finally {
             try {
                 if (fIn != null) {
@@ -171,7 +170,7 @@ class AndroidClientUsers implements ClientUsers {
                     in.close();
                 }
             } catch (IOException io) {
-                Log.e("AndroidClientUsers", "Failed to clean up resources while reading kinveyUser.bin", io);
+            	Logger.ERROR("Failed to clean up resources while reading kinveyUser.bin");
             }
         }
     }
@@ -192,7 +191,7 @@ class AndroidClientUsers implements ClientUsers {
 
                 Logger.INFO("Serialization of user successful");
             } catch (IOException e) {
-                Log.e(Client.TAG, e.getMessage());
+            	Logger.ERROR(e.getMessage());
             } finally{
                 try {
                     oStream.flush();

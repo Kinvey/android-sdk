@@ -20,7 +20,6 @@ import java.util.Calendar;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.Client;
@@ -68,7 +67,7 @@ public class SQLiteFileCache implements FileCache {
         if (location.isDirectory()){
             cacheDir = location;
         }else{
-            Log.e(TAG, "File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
+        	Logger.ERROR("File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
             throw new NullPointerException("File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
         }
     }
@@ -117,7 +116,7 @@ public class SQLiteFileCache implements FileCache {
         try{
             ret = new FileInputStream(cachedFile);
         }catch (Exception e){
-            Log.e(TAG, "couldn't load cached file -> " + e.getMessage());
+        	Logger.ERROR("couldn't load cached file -> " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -179,8 +178,7 @@ public class SQLiteFileCache implements FileCache {
             os.write(data);
 
         }catch (Exception e){
-            Log.e(TAG, "couldn't write file to cache -> " + e.getMessage());
-            e.printStackTrace();
+        	Logger.ERROR("couldn't write file to cache -> " + e.getMessage());
         }finally {
             try{
                 if (os != null){

@@ -23,13 +23,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.android.Client;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
+import com.kinvey.java.Logger;
 
 /**
  * This class manages a set of {@link OfflineTable}s.  Tables are not maintained in memory, and are created on demand.
@@ -79,7 +78,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      */
     @Override
     public void onCreate(SQLiteDatabase database) {
-        Log.v(Client.TAG, "offline helper onCreate");
+    	Logger.INFO("offline helper onCreate");
     }
 
     /**

@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URLConnection;
 
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.kinvey.java.Logger;
@@ -91,13 +90,13 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
     @Override
     public void getMimeType(FileMetaData meta, File file) {
         if (file == null || file.getName() == null || meta == null) {
-            Log.v(Client.TAG, "cannot calculate mimetype without a file or filename!");
+        	Logger.WARNING("cannot calculate mimetype without a file or filename!");
             meta.setMimetype("application/octet-stream");
             return;
         }
 
         if (meta.getMimetype() != null && meta.getMimetype().length() > 0) {
-            Log.v(Client.TAG, "Mimetype already set");
+        	Logger.INFO("Mimetype already set");
             return;
         }
 

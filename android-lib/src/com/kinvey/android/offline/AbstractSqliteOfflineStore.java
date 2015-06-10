@@ -17,7 +17,6 @@ import java.net.URLDecoder;
 import java.util.List;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
@@ -26,6 +25,7 @@ import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
@@ -68,7 +68,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
-            Log.e(TAG, "Context is invalid, cannot access sqllite!");
+            Logger.ERROR("Context is invalid, cannot access sqllite!");
             return null;
         }
 
@@ -134,7 +134,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
-            Log.e(TAG, "Context is invalid, cannot access sqllite!");
+        	Logger.ERROR("Context is invalid, cannot access sqllite!");
             return null;
         }
 
@@ -173,7 +173,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
     public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
 
         if (this.context == null){
-            Log.e(TAG, "Context is invalid, cannot access sqllite!");
+        	Logger.ERROR("Context is invalid, cannot access sqllite!");
             return null;
         }
 

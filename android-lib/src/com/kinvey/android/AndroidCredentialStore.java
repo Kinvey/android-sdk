@@ -25,9 +25,9 @@ import java.util.HashMap;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
+import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
 
@@ -95,7 +95,7 @@ class AndroidCredentialStore implements CredentialStore {
                 in = new ObjectInputStream(fIn);
                 credentials = (HashMap<String, Credential>) in.readObject();
             } catch (IOException ex) {
-                Log.w(TAG, "Corrupt credential store detected", ex);
+            	Logger.WARNING("Corrupt credential store detected");
             } finally {
                 try {
                     if (fIn != null) {
@@ -107,7 +107,7 @@ class AndroidCredentialStore implements CredentialStore {
                     }
 
                 } catch (IOException ioe) {
-                    Log.w(TAG, "Could not clean up resources", ioe);
+                	Logger.WARNING("Could not clean up resources");
                 }
             }
         } else {
@@ -128,9 +128,9 @@ class AndroidCredentialStore implements CredentialStore {
                 fStream.getFD().sync();
                 oStream.close();
 
-                Log.v(Client.TAG,"Serialization success");
+                Logger.INFO("Serialization success");
             } catch (Exception e) {
-                Log.e(TAG, "Error on persisting credential store", e);
+            	Logger.ERROR("Error on persisting credential store");
             }
             return null;
         }
