@@ -14,6 +14,7 @@
 
 import java.io.IOException;
 
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -34,10 +35,11 @@ public class HelloWorld {
         Client myJavaClient = new Client.Builder(appKey, appSecret)
         	//.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
         	.build();
-        myJavaClient.enableDebugLogging();
+//        Logger.configBuilder().all();
+//        myJavaClient.enableDebugLogging();
         boolean ping = false;
         try{
-        ping= myJavaClient.ping();
+        	ping= myJavaClient.ping();
         }catch(Exception e){}
         System.out.println("Client ping -> " + ping);
                

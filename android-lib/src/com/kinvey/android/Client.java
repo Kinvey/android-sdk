@@ -164,7 +164,7 @@ public class Client extends AbstractClient {
             if (appDataInstanceCache == null) {
                 appDataInstanceCache = new ConcurrentHashMap<String, AsyncAppData>();
             }
-            if (!appDataInstanceCache.containsKey(collectionName)) {
+            if (!appDataInstanceCache.containsKey(collectionName)) {            	
                 Log.v(Client.TAG, "adding new instance of AppData, new collection name");
                 appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));
             }

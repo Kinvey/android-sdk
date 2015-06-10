@@ -14,11 +14,9 @@
 package com.example.testdrive.android;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,15 +24,14 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.testdrive.android.model.Entity;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -61,7 +58,7 @@ public class TestDrive extends Activity {
         //
         // adb shell setprop log.tag.HttpTransport DEBUG
         //
-        Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
+//        Logger.getLogger(HttpTransport.class.getName()).setLevel(LOGGING_LEVEL);
 
         
         this.store = new SqlLiteOfflineStore(getApplicationContext());
@@ -70,6 +67,10 @@ public class TestDrive extends Activity {
         bar.setIndeterminate(true);
 
         kinveyClient = new Client.Builder(this).build();
+        Logger.configBuilder().all();
+ 
+//        com.kinvey.java.Logger.configBuilder().debug().info();
+//        com.kinvey.java.Logger.configBuilder().all();
         
         if (kinveyClient.user().isUserLoggedIn()){
           kinveyClient.user().logout().execute();
@@ -83,7 +84,6 @@ public class TestDrive extends Activity {
         
         
                 
-        kinveyClient.enableDebugLogging();
 
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
@@ -140,17 +140,37 @@ public class TestDrive extends Activity {
                     Toast.makeText(TestDrive.this, "New implicit user logged in successfully as " + result.getId(),
                             Toast.LENGTH_LONG).show();
                     
-                    boolean ispush = kinveyClient.push().isPushEnabled();
-                    Toast.makeText(TestDrive.this, "push init? " + ispush, Toast.LENGTH_LONG).show();
-                    if (!ispush){
-                    	kinveyClient.push().initialize(TestDrive.this.getApplication());
-                    }
+//                    boolean ispush = kinveyClient.push().isPushEnabled();
+//                    Toast.makeText(TestDrive.this, "push init? " + ispush, Toast.LENGTH_LONG).show();
+//                    if (!ispush){
+//                    	kinveyClient.push().initialize(TestDrive.this.getApplication());
+//                    }
                     
                 }
                 @Override
                 public void onFailure(Throwable error) {
                     bar.setVisibility(View.GONE);
-                    Log.e(TAG, "Login Failure", error);
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    
+                    Log.e(TAG, "Login Failure!");
                     Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
@@ -247,10 +267,10 @@ public class TestDrive extends Activity {
         
         //byte[] b = new byte[]{(byte)0xe0, 0x4f, (byte)0xd0, (byte)0xea, (byte)0x20};
         
-        kinveyClient.push().disablePush();
-        
-        boolean ispush = kinveyClient.push().isPushEnabled();
-        Toast.makeText(TestDrive.this, "push init? " + ispush, Toast.LENGTH_LONG).show();
+//        kinveyClient.push().disablePush();
+//        
+//        boolean ispush = kinveyClient.push().isPushEnabled();
+//        Toast.makeText(TestDrive.this, "push init? " + ispush, Toast.LENGTH_LONG).show();
 
         //entity.put("bytearray", b);
 
