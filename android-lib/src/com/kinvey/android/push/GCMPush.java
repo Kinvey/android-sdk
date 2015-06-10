@@ -151,7 +151,7 @@ public class GCMPush extends AbstractPush {
 						
 						@Override
 						public void onFailure(Throwable error) {
-							Log.v(Client.TAG, "GCM - user update error: " + error);
+							Logger.ERROR("GCM - user update error: " + error);
 							
 						}
 					});
@@ -159,7 +159,7 @@ public class GCMPush extends AbstractPush {
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.v(Client.TAG, "GCM - user update error: " + error);
+                	Logger.ERROR("GCM - user update error: " + error);
                 }
             }, gcmRegID);
 
@@ -175,7 +175,7 @@ public class GCMPush extends AbstractPush {
 
                 @Override
                 public void onFailure(Throwable error) {
-                    Log.v(Client.TAG, "GCM - user update error: " + error);
+                	Logger.ERROR("GCM - user update error: " + error);
                 }
             }, gcmRegID);
 
