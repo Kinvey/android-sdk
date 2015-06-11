@@ -12,12 +12,19 @@
  * the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
+import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.AbstractQuery.SortOrder;
 import com.kinvey.nativejava.Client;
 
@@ -96,47 +103,81 @@ public class HelloWorld {
             e.printStackTrace();
             
         }
-        
-        try{
-        	KinveyDeleteResponse delete = myJavaClient.file().deleteBlocking(new FileMetaData("myFileId")).execute();            
-        }catch(IOException e){
-            System.out.println("Couldn't delete! -> " + e);
-            e.printStackTrace();
-        }
-
-
+//        
 //        try{
-//
-//            InputStream is = new FileInputStream("/Users/edward/1.png");
-//
-//            FileMetaData fm = new FileMetaData();
-//            fm.setFileName("1.png");
-//            fm.setMimetype("image/png");
-//            fm.setPublic(true);
-//
-//            UploaderProgressListener progressListener = new UploaderProgressListener() {
-//                @Override
-//                public void progressChanged(MediaHttpUploader uploader) throws IOException {
-//                    System.out.println("upload progress change!");
-//                }
-//
-//                @Override
-//                public void onSuccess(Void result) {
-//                    System.out.println("upload success!");
-//                }
-//
-//                @Override
-//                public void onFailure(Throwable error) {
-//                    System.out.println("upload failed -> " + error);
-//                }
-//            };
-//            myJavaClient.file().uploadBlocking(fm, is, progressListener);
-//
-//            System.out.println("uploading Complete!");
+//        	KinveyDeleteResponse delete = myJavaClient.file().deleteBlocking(new FileMetaData("myFileId")).execute();            
 //        }catch(IOException e){
-//            System.out.println("Couldn't upload! -> " + e);
+//            System.out.println("Couldn't delete! -> " + e);
 //            e.printStackTrace();
 //        }
+
+
+        try{
+
+            InputStream is = new FileInputStream("/Users/edward/1.png");
+
+            FileMetaData fm = new FileMetaData();
+            fm.setFileName("1.png");
+            fm.setMimetype("image/png");
+            fm.setPublic(true);
+
+            UploaderProgressListener progressListener = new UploaderProgressListener() {
+                @Override
+                public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                    System.out.println("upload progress change!");
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    System.out.println("upload success!");
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    System.out.println("upload failed -> " + error);
+                }
+            };
+            myJavaClient.file().uploadBlocking(fm, is, progressListener);
+
+            System.out.println("uploading Complete!");
+        }catch(IOException e){
+            System.out.println("Couldn't upload! -> " + e);
+            e.printStackTrace();
+        }
+        
+        try{
+
+            OutputStream is = new FileOutputStream(new File("/Users/edward/2.png"));
+
+            FileMetaData fm = new FileMetaData();
+            fm.setFileName("2.png");
+            fm.setMimetype("image/png");
+            fm.setPublic(true);
+
+            DownloaderProgressListener progressListener = new DownloaderProgressListener() {
+                @Override
+                public void progressChanged(MediaHttpDownloader uploader) throws IOException {
+                    System.out.println("download progress change!");
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    System.out.println("download success!");
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    System.out.println("download failed -> " + error);
+                }
+            };
+//            myJavaClient.file().downloadBlocking(new FileMetaData("asd"), is, progressListener);
+            myJavaClient.file().downloadBlocking(new Query().equals("_id", "123"), is, progressListener);
+
+            System.out.println("downloading Complete!");
+        }catch(IOException e){
+            System.out.println("Couldn't upload! -> " + e);
+            e.printStackTrace();
+        }
 
 
     }

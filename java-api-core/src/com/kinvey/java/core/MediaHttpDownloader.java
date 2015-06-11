@@ -217,7 +217,9 @@ public class MediaHttpDownloader {
         FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
         
         if (initialResponse == null){
-        	updateStateAndNotifyListener(DownloadState.DOWNLOAD_FAILED_FILE_NOT_FOUND);
+            if (progressListener != null) {
+                progressListener.onFailure(new KinveyException("BlobNotFound", "This blob not found for this app backend", "The file being downloaded does not exist."));
+            }
         	return;
         }
         
