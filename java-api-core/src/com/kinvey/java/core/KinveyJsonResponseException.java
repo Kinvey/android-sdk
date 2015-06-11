@@ -48,6 +48,8 @@ public class KinveyJsonResponseException extends HttpResponseException {
     this.details = details;
     this.message = message;
   }
+  
+
 
     /**
      * @param jsonFactory json factory to use while parsing the response
@@ -66,7 +68,7 @@ public class KinveyJsonResponseException extends HttpResponseException {
           details = KinveyJsonError.parse(jsonFactory, response);
         } catch (IOException exception) {
           // it would be bad to throw an exception while throwing an exception
-          exception.printStackTrace();
+         // exception.printStackTrace();
         } finally {
           if (parser == null) {
             response.ignore();

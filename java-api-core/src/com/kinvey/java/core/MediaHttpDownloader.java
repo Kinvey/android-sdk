@@ -84,7 +84,11 @@ public class MediaHttpDownloader {
         DOWNLOAD_IN_PROGRESS,
 
         /** Set after the complete media file is successfully downloaded. */
-        DOWNLOAD_COMPLETE
+        DOWNLOAD_COMPLETE, 
+        
+        /** Set when a download cannot be completed because the metadata doesn't exist */
+        DOWNLOAD_FAILED_FILE_NOT_FOUND
+        
     }
 
     /**
@@ -179,7 +183,9 @@ public class MediaHttpDownloader {
         try {
             meta = (FileMetaData) parser.parse(FileMetaData.class, false, null);
         } catch (Exception e) {
-            meta = ((FileMetaData[]) parser.parse(FileMetaData[].class, false, null))[0];
+        	try{
+        		meta = ((FileMetaData[]) parser.parse(FileMetaData[].class, false, null))[0];
+        	}catch(Exception arrayError){}
         }finally {
             response.getContent().close();
         }
@@ -203,13 +209,19 @@ public class MediaHttpDownloader {
      * @param out output stream to dump bytes as they stream off the wire
      * @throws IOException
      */
-    public void download(AbstractKinveyClientRequest initiationClientRequest, OutputStream out)
-            throws IOException {
+    public void download(AbstractKinveyClientRequest initiationClientRequest, OutputStream out) throws IOException {
         Preconditions.checkArgument(downloadState == DownloadState.NOT_STARTED);
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
 
         // Make initial request to get the unique upload URL.
         FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
+        
+        if (initialResponse == null){
+        	updateStateAndNotifyListener(DownloadState.DOWNLOAD_FAILED_FILE_NOT_FOUND);
+        	return;
+        }
+        
+        
         if (progressListener != null && (progressListener instanceof MetaDownloadProgressListener)) {
             ((MetaDownloadProgressListener)progressListener).metaDataRetrieved(initialResponse);
         }
