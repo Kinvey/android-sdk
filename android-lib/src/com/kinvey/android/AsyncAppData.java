@@ -151,7 +151,7 @@ public class AsyncAppData<T> extends AppData<T> {
 
         }catch (NoSuchMethodException e){
         	Logger.ERROR("CHECK METHOD MAP, no such method is declared in AppData!");
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         methodMap = Collections.unmodifiableMap(tempMap);

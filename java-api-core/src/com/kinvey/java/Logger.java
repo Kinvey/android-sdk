@@ -59,6 +59,10 @@ public class Logger {
 		if (log == null){
 			throw new KinveyException("Logger can't be null!");
 		}
+		if (getInstance().platformLogger != null){
+			return;
+		}
+		
 		getInstance().platformLogger = log;
 		
 		getInstance().activeMap = new HashMap<String, Boolean>();

@@ -111,7 +111,7 @@ public class GCMPush extends AbstractPush {
 
                 } catch (IOException ex) {
                 	Logger.ERROR("unable to register with GCM: " + ex.getMessage());
-                	ex.printStackTrace();
+//                	ex.printStackTrace();
                 }
 				return null;
             }

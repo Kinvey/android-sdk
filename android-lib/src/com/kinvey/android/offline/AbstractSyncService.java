@@ -315,7 +315,6 @@ public abstract class AbstractSyncService extends IntentService{
                     registerFailure();
                 }else{
                 	Logger.INFO("not requeing request");
-
                 }
                 return null;
             }

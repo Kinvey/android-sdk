@@ -93,7 +93,7 @@ public class AppDataOperation {
             try {
                 this.appData.getClient().initializeRequest(req);
             } catch (IOException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 //TODO edwardf don't want to necessarily catch this here.
             }
             return req;

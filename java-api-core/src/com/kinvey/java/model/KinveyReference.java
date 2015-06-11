@@ -116,7 +116,7 @@ public class KinveyReference extends GenericJson{
             ret.putAll(direct);
         } catch (Exception e) {
         	Logger.ERROR("unable to instantiate class!");
-            e.printStackTrace();
+//            e.printStackTrace();
             return null;
         }
 

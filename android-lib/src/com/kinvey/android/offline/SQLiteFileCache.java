@@ -117,7 +117,7 @@ public class SQLiteFileCache implements FileCache {
             ret = new FileInputStream(cachedFile);
         }catch (Exception e){
         	Logger.ERROR("couldn't load cached file -> " + e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         return ret;
@@ -186,7 +186,7 @@ public class SQLiteFileCache implements FileCache {
                     os.close();
                 }
             }catch(Exception e){
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 

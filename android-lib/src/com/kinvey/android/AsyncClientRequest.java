@@ -71,7 +71,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
                 result = executeAsync();
             }
         }catch(Throwable e){
-            e.printStackTrace();
+//            e.printStackTrace();
             error = e;
         }
         return result;

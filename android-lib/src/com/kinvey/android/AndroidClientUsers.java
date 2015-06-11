@@ -197,12 +197,12 @@ class AndroidClientUsers implements ClientUsers {
                     oStream.flush();
                     fStream.getFD().sync();
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 } finally {
                     try {
                         oStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//                        e.printStackTrace();  
                     }
 
                 }

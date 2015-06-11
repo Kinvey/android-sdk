@@ -290,7 +290,7 @@ public class OfflineTable<T extends GenericJson> {
                    asList.add((T) client.getJsonFactory().fromString(s, singleClass));
                 }catch(Exception e){
                 	Logger.ERROR("cannot parse json into object! -> " + e);
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
 

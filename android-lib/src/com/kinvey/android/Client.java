@@ -643,7 +643,7 @@ public class Client extends AbstractClient {
                 }catch (Exception e){
                 	Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
                 	Logger.WARNING("Defaulting to: GSON");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
                 }
             }

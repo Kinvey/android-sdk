@@ -72,9 +72,9 @@ public class TestDrive extends Activity {
 //        com.kinvey.java.Logger.configBuilder().debug().info();
 //        com.kinvey.java.Logger.configBuilder().all();
         
-        if (kinveyClient.user().isUserLoggedIn()){
-          kinveyClient.user().logout().execute();
-        }
+//        if (kinveyClient.user().isUserLoggedIn()){
+//          kinveyClient.user().logout().execute();
+//        }
         
         
         //set globally
@@ -88,7 +88,7 @@ public class TestDrive extends Activity {
         if (!kinveyClient.user().isUserLoggedIn()) {
             bar.setVisibility(View.VISIBLE);
 
-            kinveyClient.user().put("email", "myemail@domain.com");
+            //kinveyClient.user().put("email", "myemail@domain.com");
             
 //			kinveyClient.user().loginWithAuthorizationCodeAPI("mjs", "demo", "kinveyAuthDeo://", new KinveyUserCallback() {
 //
@@ -132,7 +132,7 @@ public class TestDrive extends Activity {
 //        }
 //      });
 //            
-            kinveyClient.user().login("push", "push", new KinveyUserCallback() {
+            kinveyClient.user().login( new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
                     bar.setVisibility(View.GONE);
@@ -149,27 +149,7 @@ public class TestDrive extends Activity {
                 }
                 @Override
                 public void onFailure(Throwable error) {
-                    bar.setVisibility(View.GONE);
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    
+                    bar.setVisibility(View.GONE);                    
                     Log.e(TAG, "Login Failure!");
                     Toast.makeText(TestDrive.this, "Login error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                 }
@@ -182,7 +162,8 @@ public class TestDrive extends Activity {
   public void onLoadClick(View view) {
         bar.setVisibility(View.VISIBLE);
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        //ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        
         ad.getEntity("myEntity", new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {
@@ -261,9 +242,10 @@ public class TestDrive extends Activity {
 
   public void onSaveClick(View view) {
         bar.setVisibility(View.VISIBLE);
-        Entity entity = new Entity("myEntity");
+        Entity entity = new Entity();
         entity.put("Description", "This is a description of an offline entity!");
         entity.setOk(Entity.test.ONE);
+        entity.put("post", "yes");
         
         //byte[] b = new byte[]{(byte)0xe0, 0x4f, (byte)0xd0, (byte)0xea, (byte)0x20};
         
@@ -275,23 +257,23 @@ public class TestDrive extends Activity {
         //entity.put("bytearray", b);
 
 
-//        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-//        //ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
-//        ad.save(entity, new KinveyClientCallback<Entity>() {
-//            @Override
-//            public void onSuccess(Entity result) {
-//                Log.e(TAG, "AppData.saved " + result.get("_id"));
-//                bar.setVisibility(View.GONE);
-//                Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onFailure(Throwable error) {
-//                bar.setVisibility(View.GONE);
-//                Log.e(TAG, "AppData.save Failure", error);
-//                Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-//            }
-//        });
+        AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
+        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+        ad.save(entity, new KinveyClientCallback<Entity>() {
+            @Override
+            public void onSuccess(Entity result) {
+                Log.e(TAG, "AppData.saved " + result.get("_id"));
+                bar.setVisibility(View.GONE);
+                Toast.makeText(TestDrive.this, "Entity Saved", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                bar.setVisibility(View.GONE);
+                Log.e(TAG, "AppData.save Failure", error);
+                Toast.makeText(TestDrive.this, "Save All error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
 
     }
 
