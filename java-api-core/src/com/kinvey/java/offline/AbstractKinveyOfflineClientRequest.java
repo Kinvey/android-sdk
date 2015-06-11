@@ -103,7 +103,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             }else if (verb.equals("PUT")){
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("POST") && !UriTemplate.expand(getAbstractKinveyClient().getBaseUrl(), this.getUriTemplate(), this, false).contains("_group")){
-                //generate and add id
+                //generate and add temp id
                 ((GenericJson) this.getJsonContent()).put("_id", TEMPID + getUUID());
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("DELETE")){

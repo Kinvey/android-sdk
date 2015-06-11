@@ -179,9 +179,9 @@ public abstract class AbstractSyncService extends IntentService{
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
         	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));           
         	final GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
-        	
+        	//grab entity's id
         	final String curEntityID = entity.get("_id").toString(); 
-        	
+        	//if it's a temp id, remove it before saving
         	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
         		entity.remove("_id");
         	}
@@ -191,20 +191,18 @@ public abstract class AbstractSyncService extends IntentService{
                 client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
                     @Override
                     public void onSuccess(GenericJson result) {
+                    	//if it was successful, and the entity had a temp id, remove the old entity
                     	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
                     		dbHelper.getTable(collectionName).removeEntity(dbHelper, curEntityID);
                     	}
-                    	
+                    	//save the updated entity
                         dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result, null);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                    	if(!entity.containsKey("_id")){
-                    		String tempID = AbstractKinveyOfflineClientRequest.TEMPID + AbstractKinveyOfflineClientRequest.getUUID();
-                    		entity.put("_id", tempID);
-                    		cur.getEntityID().id = tempID;
-                    	}
+                    	//re-adding same temp id if it failed
+                    	entity.put("_id", curEntityID);
                         AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
                     }
                 });
