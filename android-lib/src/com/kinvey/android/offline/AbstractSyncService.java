@@ -38,6 +38,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 /**
  * @author edwardf
@@ -176,17 +177,34 @@ public abstract class AbstractSyncService extends IntentService{
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));            GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
+        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));           
+        	final GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
+        	
+        	final String curEntityID = entity.get("_id").toString(); 
+        	
+        	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
+        		entity.remove("_id");
+        	}
+        	
             if (entity != null){
 
                 client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
                     @Override
                     public void onSuccess(GenericJson result) {
+                    	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
+                    		dbHelper.getTable(collectionName).removeEntity(dbHelper, curEntityID);
+                    	}
+                    	
                         dbHelper.getTable(collectionName).insertEntity(dbHelper, client, result, null);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
+                    	if(!entity.containsKey("_id")){
+                    		String tempID = AbstractKinveyOfflineClientRequest.TEMPID + AbstractKinveyOfflineClientRequest.getUUID();
+                    		entity.put("_id", tempID);
+                    		cur.getEntityID().id = tempID;
+                    	}
                         AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, error);
                     }
                 });

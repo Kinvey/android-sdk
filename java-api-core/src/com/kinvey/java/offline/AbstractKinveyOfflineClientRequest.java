@@ -52,6 +52,8 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
     private Object lock = new Object();
 
     private String collectionName;
+    
+    public static final String TEMPID = "tempOfflineID_";
 
 
     /**
@@ -102,7 +104,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("POST") && !UriTemplate.expand(getAbstractKinveyClient().getBaseUrl(), this.getUriTemplate(), this, false).contains("_group")){
                 //generate and add id
-                ((GenericJson) this.getJsonContent()).put("_id", getUUID());
+                ((GenericJson) this.getJsonContent()).put("_id", TEMPID + getUUID());
                 ret = this.store.executeSave((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
             }else if (verb.equals("DELETE")){
                 ret = (T) this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);

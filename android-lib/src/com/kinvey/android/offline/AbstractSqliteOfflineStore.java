@@ -177,7 +177,6 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
             return null;
         }
 
-
         DatabaseHandler handler = getDatabaseHandler(client.user().getId());
 
         //grab json content and put it in the store
@@ -186,7 +185,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         
         if (((GenericData) ret).get("_id") == null){
-        	throw new KinveyException("Cannot save an entity without an _id");
+        	throw new KinveyException("Cannot save an offline entity without an _id");
         }
         
         handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT",new OfflineMetaData(((GenericData)ret).get("_id").toString(), request), request);

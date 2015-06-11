@@ -363,6 +363,19 @@ public class OfflineTable<T extends GenericJson> {
 //        db.close();
         return ret;
     }
+    
+    /***
+     * Remove an Entity from the entity table directly
+     * 
+     * @param handler
+     * @param client
+     * @param toRemove
+     * @return true if removed
+     */
+    public boolean removeEntity(DatabaseHandler handler,  String IDtoRemove){
+    	handler.delete(TABLE_NAME, COLUMN_ID + "='" + IDtoRemove +"'" ,null);
+    	return false;
+    }
 
     /**
      * enqueue a request for later execution
