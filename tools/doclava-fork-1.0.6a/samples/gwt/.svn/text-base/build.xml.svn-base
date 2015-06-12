@@ -1,0 +1,39 @@
+<project name="GWTDocs" default="doclava" basedir=".">
+
+<!-- To build documentation for GWT:
+
+	1. Download GWT from SVN:
+		cd /path/to/gwtdoc
+		svn checkout http://google-web-toolkit.googlecode.com/svn/trunk/ gwt-src
+
+	2. run: `ant doclava`
+		Documentation will be built for the files listed in input/gwt-src-list.
+		This file was generated with the command:
+		  rm doclava/gwt-src-list; for d in gwt-src/user/src gwt-src/dev gwt-src/user/super; do find $d -name '*.java' >> doclava/gwt-src-list; done
+-->
+
+  <property name="doclava.file" 
+    value="../../build/dist/doclava-0.1.7/doclava-0.1.7.jar"/>
+
+  <target name="doclava" description="Generate documentation">
+    <taskdef name="doclava" classname="com.google.doclava.DoclavaTask" classpath="${doclava.file}"/>
+      <doclava>
+        <arguments>
+        	-quiet
+        	-doclet com.google.doclava.Doclava
+        	-docletpath ${doclava.file}
+        	-classpath /usr/lib/jvm/java-6-sun/jre/lib/rt.jar
+        	-d build/api
+        	-hdf project.name "GWT"
+        	-stubs build/stubs
+        	-apixml build/public_api.xml
+        	@doclava/gwt-src-list
+      	</arguments>
+      </doclava>
+  </target>
+
+  <target name="clean" description="Remove generated files.">
+    <delete dir="build"/> 
+  </target>
+
+</project>

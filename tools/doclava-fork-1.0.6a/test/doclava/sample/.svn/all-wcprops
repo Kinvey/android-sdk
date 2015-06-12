@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/326/trunk/test/doclava/sample
+END
+Bunk.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/200/trunk/test/doclava/sample/Bunk.java
+END
+Abstract.java
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/200/trunk/test/doclava/sample/Abstract.java
+END
+Foo.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/326/trunk/test/doclava/sample/Foo.java
+END
+DeBunk.java
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/200/trunk/test/doclava/sample/DeBunk.java
+END
+Small.java
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/200/trunk/test/doclava/sample/Small.java
+END
+Fieldful.java
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/200/trunk/test/doclava/sample/Fieldful.java
+END
+Face.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/200/trunk/test/doclava/sample/Face.java
+END
+Extender.java
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/200/trunk/test/doclava/sample/Extender.java
+END
