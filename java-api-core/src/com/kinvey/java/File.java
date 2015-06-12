@@ -183,6 +183,31 @@ public class File {
     protected AbstractClient getClient(){
         return this.client;
     }
+    
+    /**
+     * Prepares a request to upload a given file and its contents to the Kinvey file service.
+     *
+     * @param fileMetaData Metadata object about the file to uplaod
+     * @param content  the input stream from which the file contents will be sourced
+     * @return a valid request to be executed for the upload operation to Kinvey
+     * @throws IOException if initializing the request fails
+     */
+    public UploadMetadataAndFile prepUploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
+        Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
+        AppData.SaveMode mode;
+        if (fileMetaData.containsKey(AppData.ID_FIELD_NAME)){
+            mode = AppData.SaveMode.PUT;
+        }else{
+            mode = AppData.SaveMode.POST;
+        }
+
+        UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
+
+        client.initializeRequest(upload);
+        upload.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return upload;
+    }
+    
     /**
      * Uploads a given file and its contents to the Kinvey file service.
      *
@@ -190,6 +215,7 @@ public class File {
      * @param content  the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
+     * @deprecated use upload methods which take an `InputStream` or a `File`
      */
     public UploadMetadataAndFile uploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
@@ -210,21 +236,53 @@ public class File {
 
 
     /**
-     * Uploads a given file and its contents to the Kinvey file service.
+     * Prepares a request to upload a given file and its contents to the Kinvey file service.
      *
      * @param fileName the filename used for the metadata
      * @param content the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
+    public UploadMetadataAndFile prepUploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
+        FileMetaData meta = new FileMetaData();
+        if (fileName != null){
+            meta.setFileName(fileName);
+        }
+        return this.prepUploadBlocking(meta, content);
+    }
+    
+    /**
+     * Uploads a given file and its contents to the Kinvey file service.
+     *
+     * @param fileName the filename used for the metadata
+     * @param content the input stream from which the file contents will be sourced
+     * @return a valid request to be executed for the upload operation to Kinvey
+     * @throws IOException if initializing the request fails
+     * @deprecated use upload methods which take an `InputStream` or a `File`
+     */
     public UploadMetadataAndFile uploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
         FileMetaData meta = new FileMetaData();
         if (fileName != null){
             meta.setFileName(fileName);
         }
-        return this.uploadBlocking(meta, content);
+        return this.prepUploadBlocking(meta, content);
     }
 
+    /**
+     * Prepares a request to download a given file from the Kinvey file service.
+     * <p>
+     *
+     * @param metaData the metadata of the file
+     * @return a valid request to be executed for the download operation from Kinvey file service
+     * @throws IOException
+     */
+    public DownloadMetadataAndFile prepDownloadBlocking(FileMetaData metaData) throws IOException {
+        DownloadMetadataAndFile download = new DownloadMetadataAndFile(metaData, downloaderProgressListener);
+        client.initializeRequest(download);
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return download;
+    }
+    
     /**
      * Download a given file from the Kinvey file service.
      * <p>
@@ -232,6 +290,7 @@ public class File {
      * @param metaData the metadata of the file
      * @return a valid request to be executed for the download operation from Kinvey file service
      * @throws IOException
+     * @deprecated use the download methods which take an `Outputstream` or a `File`
      */
     public DownloadMetadataAndFile downloadBlocking(FileMetaData metaData) throws IOException {
         DownloadMetadataAndFile download = new DownloadMetadataAndFile(metaData, downloaderProgressListener);
@@ -241,12 +300,27 @@ public class File {
     }
 
     /**
-     * Query for files to download
-     *
+     * Prepares a request to Query for files to download
      *
      * @param q the query to execute for file metadata
      * @return a valid request to be executed
      * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery prepDownloadBlocking(Query q) throws IOException {
+        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+        client.initializeRequest(download);
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return download;
+
+    }
+    
+    /**
+     * Query for files to download
+     *
+     * @param q the query to execute for file metadata
+     * @return a valid request to be executed
+     * @throws IOException
+     * @deprecated use the download methods which take an `Outputstream` or a `File`
      */
     public DownloadMetadataAndFileQuery downloadBlocking(Query q) throws IOException {
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
@@ -256,6 +330,38 @@ public class File {
 
     }
 
+    /**
+     * Prepares a request to attach query parameters when requesting metadata for a specific file.
+     *
+     * Use this method to specify a custom time to live.
+     *
+     * <p>
+     * Sample usage:
+     * <pre>
+     * {@code
+     *
+     *    Query q = new Query();
+     *    q.equals("ttl_in_seconds", 3600);  //set a new ttl for the download URL
+     *    OutputStream out = new ByteArrayOutputStream(...);
+     *    mKinveyClient.file().downloadBlocking("myFileName.txt", q).executeAndDownloadTo(out);
+     * }
+     *
+     *
+     *
+     * @param id - the unique id of the file
+     * @param q - the query to execute
+     * @return a valid download request ready to be executed
+     * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery prepDownloadBlocking(String id, Query q) throws IOException {
+
+        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(id, q, downloaderProgressListener);
+        client.initializeRequest(download);
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return download;
+
+    }
+    
     /**
      * Attach query parameters when requesting metadata for a specific file.
      *
@@ -278,6 +384,7 @@ public class File {
      * @param q - the query to execute
      * @return a valid download request ready to be executed
      * @throws IOException
+     * @deprecated use the download methods which take an `Outputstream` or a `File`
      */
     public DownloadMetadataAndFileQuery downloadBlocking(String id, Query q) throws IOException {
 
@@ -288,6 +395,31 @@ public class File {
 
     }
 
+    /**
+     * Prepares a request to download a file with a custom Time-To-Live
+     *
+     * <p>
+     * Sample usage:
+     * <pre>
+     * {@code
+     *
+     *    OutputStream out = new ByteArrayOutputStream(...);
+     *    mKinveyClient.file().downloadBlocking("myFileName.txt", 3600).executeAndDownloadTo(out);
+     * }
+     *
+     *
+     *
+     * @param id - the unique _id of the file to download
+     * @param ttl - a custom TTL, in milliseconds
+     * @return a {@link DownloadMetadataAndFileQuery} request ready to be executed.
+     * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery prepDownloadWithTTLBlocking(String id, int ttl) throws IOException{
+        Query q = new Query();
+        q.equals("ttl_in_seconds", ttl);
+        return prepDownloadBlocking(id, q);
+    }
+    
     /**
      * Download a file with a custom Time-To-Live
      *
@@ -306,14 +438,35 @@ public class File {
      * @param ttl - a custom TTL, in milliseconds
      * @return a {@link DownloadMetadataAndFileQuery} request ready to be executed.
      * @throws IOException
+     * @deprecated use the download methods which take an `Outputstream` or a `File`
      */
     public DownloadMetadataAndFileQuery downloadWithTTLBlocking(String id, int ttl) throws IOException{
         Query q = new Query();
         q.equals("ttl_in_seconds", ttl);
-        return downloadBlocking(id, q);
+        return prepDownloadBlocking(id, q);
     }
 
 
+    /**
+     * Prepares a request to query to find a file by it's filename.
+     *
+     * As Kinvey File now supports non-unique file names, this method will only return a single file with this name.
+     *
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    public DownloadMetadataAndFileQuery prepDownloadBlocking(String filename) throws IOException{
+        Query q = new Query();
+        q.equals("_filename", filename);
+        q.addSort("_kmd.lmt", Query.SortOrder.DESC);
+        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+        client.initializeRequest(download);
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        return download;
+
+    }
+    
     /**
      * This method performs a query to find a file by it's filename.
      *
@@ -322,6 +475,7 @@ public class File {
      * @param filename
      * @return
      * @throws IOException
+     * @deprecated use the download methods which take an `Outputstream` or a `File`
      */
     public DownloadMetadataAndFileQuery downloadBlocking(String filename) throws IOException{
         Query q = new Query();

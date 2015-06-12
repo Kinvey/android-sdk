@@ -65,7 +65,7 @@ public class File extends com.kinvey.java.File{
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        this.uploadBlocking(meta, mediaContent).execute();
+        this.prepUploadBlocking(meta, mediaContent).execute();
     }
 
     /**
@@ -87,7 +87,7 @@ public class File extends com.kinvey.java.File{
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        this.uploadBlocking(meta, mediaContent).execute();        }
+        this.prepUploadBlocking(meta, mediaContent).execute();        }
 
     /**
      * Uploads the contents of the stream to the Kinvey file service endpoint.
@@ -110,7 +110,7 @@ public class File extends com.kinvey.java.File{
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        uploadBlocking(meta, mediaContent).execute();
+        prepUploadBlocking(meta, mediaContent).execute();
     }
     
     /***
@@ -145,12 +145,12 @@ public class File extends com.kinvey.java.File{
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        uploadBlocking(meta, mediaContent).execute();
+        prepUploadBlocking(meta, mediaContent).execute();
     }
 
     public void downloadBlocking(FileMetaData metaData, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
-        this.downloadBlocking(metaData).executeAndDownloadTo(out);
+        this.prepDownloadBlocking(metaData).executeAndDownloadTo(out);
 
     }
 
@@ -165,7 +165,7 @@ public class File extends com.kinvey.java.File{
      */
     public void downloadBlocking(Query query, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
-        this.downloadBlocking(query).executeAndDownloadTo(out);
+        this.prepDownloadBlocking(query).executeAndDownloadTo(out);
     }
 
 
@@ -179,7 +179,7 @@ public class File extends com.kinvey.java.File{
      */
     public void downloadWithTTLBlocking(String id, int ttl, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
-        this.downloadWithTTLBlocking(id, ttl).executeAndDownloadTo(out);
+        this.prepDownloadWithTTLBlocking(id, ttl).executeAndDownloadTo(out);
     }
 
     /**

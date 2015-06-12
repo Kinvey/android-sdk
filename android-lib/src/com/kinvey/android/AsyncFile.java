@@ -365,7 +365,7 @@ public class AsyncFile extends File {
             }
             mediaContent.setCloseInputStream(false);
             mediaContent.setRetrySupported(false);
-            return AsyncFile.this.uploadBlocking(meta, mediaContent).execute();
+            return AsyncFile.this.prepUploadBlocking(meta, mediaContent).execute();
         }
     }
 
@@ -383,7 +383,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.downloadBlocking(meta).executeAndDownloadTo(out);
+            AsyncFile.this.prepDownloadBlocking(meta).executeAndDownloadTo(out);
             return null;
         }
 
@@ -402,7 +402,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.downloadBlocking(query).executeAndDownloadTo(out);
+            AsyncFile.this.prepDownloadBlocking(query).executeAndDownloadTo(out);
             return null;
         }
 
@@ -423,7 +423,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.downloadWithTTLBlocking(this.id, this.ttl).executeAndDownloadTo(out);
+            AsyncFile.this.prepDownloadWithTTLBlocking(this.id, this.ttl).executeAndDownloadTo(out);
             return null;
         }
 

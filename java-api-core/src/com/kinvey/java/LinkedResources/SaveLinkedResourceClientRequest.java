@@ -142,7 +142,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         }
                         mimeTypeFinder.getMimeType(meta, in);
 
-                        FileMetaData file = getAbstractKinveyClient().file().uploadBlocking(meta, mediaContent).execute();
+                        FileMetaData file = getAbstractKinveyClient().file().prepUploadBlocking(meta, mediaContent).execute();
 
                     }
                 }

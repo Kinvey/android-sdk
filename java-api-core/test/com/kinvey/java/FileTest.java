@@ -56,7 +56,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void uploadUrlEndpointMatches() throws IOException {
         File fileApi = new MockFile(super.getClient());
         FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.UploadMetadataAndFile upload = fileApi.uploadBlocking(meta, mockContent);
+        File.UploadMetadataAndFile upload = fileApi.prepUploadBlocking(meta, mockContent);
         HttpRequest request = upload.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
@@ -67,7 +67,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void downloadUrlEndpointMatches() throws IOException {
         File fileApi = new MockFile(super.getClient());
         FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.DownloadMetadataAndFile download = fileApi.downloadBlocking(meta);
+        File.DownloadMetadataAndFile download = fileApi.prepDownloadBlocking(meta);
         HttpRequest request = download.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
@@ -77,7 +77,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileUploadInitializer() {
         fileApiUnderTest = new MockFile(super.getClient());
         try {
-            fileApiUnderTest.uploadBlocking(new FileMetaData("testfilename.txt"), mockContent);
+            fileApiUnderTest.prepUploadBlocking(new FileMetaData("testfilename.txt"), mockContent);
 
         } catch (IOException e) {
             fail("file api should not be throw exception on upload");
@@ -87,7 +87,7 @@ public class FileTest extends KinveyMockUnitTest {
     @Test
     public void testFileDownloadWithTTL() throws  IOException{
         fileApiUnderTest = new MockFile(super.getClient());
-        File.DownloadMetadataAndFileQuery download =  fileApiUnderTest.downloadWithTTLBlocking("testfilename.txt", 120);
+        File.DownloadMetadataAndFileQuery download =  fileApiUnderTest.prepDownloadWithTTLBlocking("testfilename.txt", 120);
         HttpRequest req = download.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?query";
         assertEquals(expectedPath, req.getUrl().toString());
@@ -97,7 +97,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void testFileDownloadInitializer() {
         fileApiUnderTest = new MockFile(super.getClient());
         try {
-            fileApiUnderTest.downloadBlocking(new FileMetaData("testfilename.txt"));
+            fileApiUnderTest.prepDownloadBlocking(new FileMetaData("testfilename.txt"));
         } catch (IOException e) {
             fail("file api should not throw an exception on download");
         }
@@ -108,7 +108,7 @@ public class FileTest extends KinveyMockUnitTest {
     public void downloadShouldThrowNpeOnNullFilename() {
         fileApiUnderTest = new MockFile(super.getClient()) ;
         try {
-            fileApiUnderTest.downloadBlocking(new FileMetaData(null));
+            fileApiUnderTest.prepDownloadBlocking(new FileMetaData(null));
             fail("file api should throw exception on null filename");
         } catch (IOException e) {
             fail("file api should throw a NullPointerException on null filename");
@@ -131,7 +131,7 @@ public class FileTest extends KinveyMockUnitTest {
         File fileApi = new MockFile(super.getClient());
         fileApi.setClientAppVersion("1.2.3");
         FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        File.DownloadMetadataAndFile request = fileApi.prepDownloadBlocking(meta);
 
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
@@ -144,7 +144,7 @@ public class FileTest extends KinveyMockUnitTest {
     	custom.put("Second", "two");
     	fileApi.setCustomRequestProperties(custom);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        File.DownloadMetadataAndFile request = fileApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
     	
@@ -154,7 +154,7 @@ public class FileTest extends KinveyMockUnitTest {
         File fileApi = new MockFile(super.getClient());
     	fileApi.setClientAppVersion(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        File.DownloadMetadataAndFile request = fileApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
@@ -163,7 +163,7 @@ public class FileTest extends KinveyMockUnitTest {
         File fileApi = new MockFile(super.getClient());
     	fileApi.setCustomRequestProperties(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
-        File.DownloadMetadataAndFile request = fileApi.downloadBlocking(meta);
+        File.DownloadMetadataAndFile request = fileApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	
     }

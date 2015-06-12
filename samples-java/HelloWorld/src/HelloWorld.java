@@ -88,9 +88,9 @@ public class HelloWorld {
         
         try{
         	
-        	FileMetaData[] metas = myJavaClient.file().downloadBlocking(new Query()).execute();
-        	FileMetaData[] metaSort = myJavaClient.file().downloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
-        	FileMetaData[] metaLimit = myJavaClient.file().downloadBlocking(new Query().setLimit(10)).execute();
+        	FileMetaData[] metas = myJavaClient.file().prepDownloadBlocking(new Query()).execute();
+        	FileMetaData[] metaSort = myJavaClient.file().prepDownloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
+        	FileMetaData[] metaLimit = myJavaClient.file().prepDownloadBlocking(new Query().setLimit(10)).execute();
         	
         	System.out.println("plain query count -> " + metas.length);
         	System.out.println("plain query first -> " + metas[0].getId());
