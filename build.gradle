@@ -1,8 +1,9 @@
 allprojects  {
   apply plugin: 'maven'
+  apply plugin: 'java'
 
   group = 'com.kinvey'
-version = '2.7.1'
+  version = '2.9.4'
 }
 
 subprojects {
@@ -22,7 +23,58 @@ subprojects {
   }
 
   configurations.all {
+  }
 }
-  
-  
+
+//task release will do the following:
+
+//run clean
+//run build
+//run copyAndroid
+//run copyJava
+//run zipAndroid
+//run zipJava
+//run aarAndroid
+//run docgen
+
+
+task copyAndroid(type: Copy) {
+  from 'android-lib/build/libs'
+  from 'java-api-core/build/libs'
+  into 'release/build/android'
 }
+
+task copyJava(type: Copy) {
+  from 'java-lib/build/libs'
+  from 'java-api-core/build/libs'
+  into 'release/build/nativejava'
+}
+
+task zipAndroid(type: Zip) {
+    from 'release/build/android'
+    from 'release/dependencies'
+    into('release/zipped') 
+    println zipAndroid.archiveName
+    println relativePath(zipAndroid.destinationDir)
+    println relativePath(zipAndroid.archivePath)
+}
+
+task zipJava(type: Zip) {
+    from 'release/build/java'
+    from 'release/dependencies'
+    into('release/zipped') 
+}
+
+task aarAndroid(){}
+task docgen(){}
+
+task release(dependsOn: ['clean', 'build', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'aarAndroid', 'docgen']){
+    description 'Performs the complete release process (except for bumping version number!)'
+}
+build.mustRunAfter clean
+copyAndroid.mustRunAfter build
+copyJava.mustRunAfter copyAndroid
+zipAndroid.mustRunAfter copyJava
+zipJava.mustRunAfter zipAndroid
+aarAndroid.mustRunAfter zipJava
+docgen.mustRunAfter aarAndroid
