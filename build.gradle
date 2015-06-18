@@ -1,13 +1,11 @@
+apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
-  apply plugin: 'java'
-
   group = 'com.kinvey'
   version = '2.9.4'
 }
 
 subprojects {
-  apply plugin: 'java'
   sourceCompatibility = 1.5
   targetCompatibility = 1.5
 
@@ -53,16 +51,29 @@ task copyJava(type: Copy) {
 task zipAndroid(type: Zip) {
     from 'release/build/android'
     from 'release/dependencies'
-    into('release/zipped') 
+    baseName = 'kinvey-android'
+    destinationDir = file('release/zipped')
+    
     println zipAndroid.archiveName
     println relativePath(zipAndroid.destinationDir)
     println relativePath(zipAndroid.archivePath)
 }
 
+//task copyAndRenameAndroid(type: Copy) {
+  //from 'release/'
+  //into '.'
+  //rename { String fileName ->
+//    fileName.replace("input", "output")
+//  }
+//}
+
+
 task zipJava(type: Zip) {
     from 'release/build/java'
     from 'release/dependencies'
-    into('release/zipped') 
+    baseName = 'kinvey-java'
+    destinationDir = file('release/zipped')
+    
 }
 
 task aarAndroid(){}
