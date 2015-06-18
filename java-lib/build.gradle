@@ -1,4 +1,4 @@
-
+apply plugin: 'java'
 description = 'JavaLib'
 dependencies {
     compile(group: 'com.google.http-client', name: 'google-http-client', version:'1.19.0') {
