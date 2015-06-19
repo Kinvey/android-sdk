@@ -1,5 +1,15 @@
 apply plugin: 'java'
 description = 'JavaApiCore'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/com'
+        }
+    }
+}
+
+
 dependencies {
     compile group: 'com.google.guava', name: 'guava', version:'14.0.1'
     compile group: 'com.google.http-client', name: 'google-http-client-jackson', version:'1.19.0'

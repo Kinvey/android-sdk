@@ -1,7 +1,7 @@
 apply plugin: 'java'
-
-
 description = 'AndroidSecure'
+
+
 dependencies {
     compile(group: 'com.google.api-client', name: 'google-api-client', version:'1.19.0') {
 exclude(module: 'xpp3')

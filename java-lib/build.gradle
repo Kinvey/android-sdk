@@ -1,5 +1,15 @@
 apply plugin: 'java'
 description = 'JavaLib'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/com'
+        }
+    }
+}
+
+
 dependencies {
     compile(group: 'com.google.http-client', name: 'google-http-client', version:'1.19.0') {
 exclude(module: 'xpp3')

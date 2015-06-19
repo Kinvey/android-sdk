@@ -120,6 +120,7 @@ public class Client extends AbstractClient {
                 requestPolicy);
         Logger.init(new AndroidLogger());
     }
+    public void testAAR(){}
 
     /**
      * <p>Setter for the field <code>context</code>.</p>
@@ -810,6 +811,18 @@ public class Client extends AbstractClient {
          */
         public Client.Builder setSenderIDs(String senderID){
             this.GCM_SenderID = senderID;
+            return this;
+        }
+        
+        /**
+        *
+        * @see
+        * com.kinvey.java.core.AbstractKinveyJsonClient.Builder#setRootUrl(java
+        * .lang.String)
+        */
+        @Override
+        public Client.Builder setBaseUrl(String baseUrl) {
+            super.setBaseUrl(baseUrl);
             return this;
         }
 

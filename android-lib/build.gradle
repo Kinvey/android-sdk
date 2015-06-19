@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+description = 'AndroidLib'
 
 android {
     compileSdkVersion 22
@@ -14,6 +15,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main {
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+
+        androidTest.setRoot('tests')
+    }
+
+    lintOptions {
+          abortOnError false
+    }
 }
 
 
@@ -26,10 +40,8 @@ buildscript {
     }
 }
 
-
-
-description = 'AndroidLib'
 dependencies {
+    compile project(':java-api-core')
     compile(group: 'com.google.http-client', name: 'google-http-client', version:'1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'httpclient')
@@ -55,7 +67,6 @@ dependencies {
     }
     compile group: 'com.google.guava', name: 'guava', version:'18.0'
     compile group: 'org.codehaus.jackson', name: 'jackson-core-asl', version:'1.9.12'
-    compile project(':java-api-core')
     compile 'com.google.android.gms:play-services:7.5.0'
     testCompile group: 'junit', name: 'junit', version:'4.10'
     testCompile group: 'com.google.android', name: 'support-v4', version:'r19'
