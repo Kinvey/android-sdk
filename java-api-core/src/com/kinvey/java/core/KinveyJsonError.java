@@ -49,8 +49,7 @@ public class KinveyJsonError extends GenericData {
    * @return standard error object
    * @throws IOException error occurred during parse
    */
-  public static KinveyJsonError parse(JsonFactory jsonFactory, HttpResponse response)
-      throws IOException {
+  public static KinveyJsonError parse(JsonFactory jsonFactory, HttpResponse response) throws IOException {
     return new JsonObjectParser(jsonFactory).parseAndClose(response.getContent(),
         response.getContentCharset(), KinveyJsonError.class);
   }

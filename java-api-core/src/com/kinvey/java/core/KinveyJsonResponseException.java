@@ -21,6 +21,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
+import com.kinvey.java.KinveyException;
 
 import java.io.IOException;
 
@@ -66,9 +67,10 @@ public class KinveyJsonResponseException extends HttpResponseException {
         try {
           parser = jsonFactory.createJsonParser(response.getContent());
           details = KinveyJsonError.parse(jsonFactory, response);
-        } catch (IOException exception) {
-          // it would be bad to throw an exception while throwing an exception
-         // exception.printStackTrace();
+        } catch (Exception e) {
+        	throw new KinveyException("Unable to parse the JSON in the response", 
+        			"examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)",
+        			e.toString());
         } finally {
           if (parser == null) {
             response.ignore();
