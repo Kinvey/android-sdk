@@ -3,6 +3,7 @@ allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
   version = '2.9.4'
+  description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
 subprojects {
@@ -43,26 +44,26 @@ subprojects {
 //run aarAndroid
 //run docgen
 
-task makeAndroidJar(type: Copy) {
+task makeAndroidJar(type: Copy) << {
     from('android-lib/build/intermediates/bundles/release/')
     into('android-lib/build/outputs/')
     include('classes.jar')
     rename ('classes.jar', 'ProjectName.jar')
 }
 
-task copyAndroid(type: Copy) {
+task copyAndroid(type: Copy) << {
   from 'android-lib/build/libs'
   from 'java-api-core/build/libs'
   into 'release/build/android'
 }
 
-task copyJava(type: Copy) {
+task copyJava(type: Copy) << {
   from 'java-lib/build/libs'
   from 'java-api-core/build/libs'
   into 'release/build/nativejava'
 }
 
-task zipAndroid(type: Zip) {
+task zipAndroid(type: Zip) << {
     from 'release/build/android'
     from 'release/dependencies'
     baseName = 'kinvey-android'
@@ -74,7 +75,7 @@ task zipAndroid(type: Zip) {
 }
 
 
-task zipJava(type: Zip) {
+task zipJava(type: Zip) << {
     from 'release/build/java'
     from 'release/dependencies'
     baseName = 'kinvey-java'
@@ -82,17 +83,16 @@ task zipJava(type: Zip) {
     
 }
 
-task aarAndroid(){}
 task docgen(){}
 
-task release(dependsOn: ['clean', 'build', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'aarAndroid', 'docgen']){
+task release(dependsOn: ['clean', 'build', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'docgen']){
     description 'Performs the complete release process (except for bumping version number!)'
 }
+
 build.mustRunAfter clean
 makeAndroidJar.mustRunAfter build
 copyAndroid.mustRunAfter makeAndroidJar
 copyJava.mustRunAfter copyAndroid
 zipAndroid.mustRunAfter copyJava
 zipJava.mustRunAfter zipAndroid
-aarAndroid.mustRunAfter zipJava
-docgen.mustRunAfter aarAndroid
+docgen.mustRunAfter zipJava
