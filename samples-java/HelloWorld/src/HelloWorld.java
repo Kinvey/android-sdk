@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
@@ -42,8 +43,8 @@ public class HelloWorld {
         Client myJavaClient = new Client.Builder(appKey, appSecret)
         	//.setBaseUrl("https://v3yk1n-kcs.kinvey.com")
         	.build();
-//        Logger.configBuilder().all();
-//        myJavaClient.enableDebugLogging();
+        Logger.configBuilder().all();
+        myJavaClient.enableDebugLogging();
         boolean ping = false;
         try{
         	ping= myJavaClient.ping();
@@ -92,12 +93,12 @@ public class HelloWorld {
         	FileMetaData[] metaSort = myJavaClient.file().prepDownloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
         	FileMetaData[] metaLimit = myJavaClient.file().prepDownloadBlocking(new Query().setLimit(10)).execute();
         	
-        	System.out.println("plain query count -> " + metas.length);
-        	System.out.println("plain query first -> " + metas[0].getId());
-        	System.out.println("sort query count -> " + metaSort.length);
-        	System.out.println("sort query first -> " + metaSort[0].getId());
-        	System.out.println("limit query count -> " + metaLimit.length);
-        	System.out.println("limit query first -> " + metaLimit[0].getId());
+//        	System.out.println("plain query count -> " + metas.length);
+//        	System.out.println("plain query first -> " + metas[0].getId());
+//        	System.out.println("sort query count -> " + metaSort.length);
+//        	System.out.println("sort query first -> " + metaSort[0].getId());
+//        	System.out.println("limit query count -> " + metaLimit.length);
+//        	System.out.println("limit query first -> " + metaLimit[0].getId());
         
         }catch (IOException e){
             e.printStackTrace();
@@ -114,11 +115,11 @@ public class HelloWorld {
 
         try{
 
-            InputStream is = new FileInputStream("/Users/edward/1.png");
+            InputStream is = new FileInputStream("/Users/edward/alpha.zip");
 
             FileMetaData fm = new FileMetaData();
-            fm.setFileName("1.png");
-            fm.setMimetype("image/png");
+            fm.setFileName("alpha.zip");
+//            fm.setMimetype("image/png");
             fm.setPublic(true);
 
             UploaderProgressListener progressListener = new UploaderProgressListener() {
@@ -145,39 +146,39 @@ public class HelloWorld {
             e.printStackTrace();
         }
         
-        try{
-
-            OutputStream is = new FileOutputStream(new File("/Users/edward/2.png"));
-
-            FileMetaData fm = new FileMetaData();
-            fm.setFileName("2.png");
-            fm.setMimetype("image/png");
-            fm.setPublic(true);
-
-            DownloaderProgressListener progressListener = new DownloaderProgressListener() {
-                @Override
-                public void progressChanged(MediaHttpDownloader uploader) throws IOException {
-                    System.out.println("download progress change!");
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    System.out.println("download success!");
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    System.out.println("download failed -> " + error);
-                }
-            };
-//            myJavaClient.file().downloadBlocking(new FileMetaData("asd"), is, progressListener);
-            myJavaClient.file().downloadBlocking(new Query().equals("_id", "123"), is, progressListener);
-
-            System.out.println("downloading Complete!");
-        }catch(IOException e){
-            System.out.println("Couldn't upload! -> " + e);
-            e.printStackTrace();
-        }
+//        try{
+//
+//            OutputStream is = new FileOutputStream(new File("/Users/edward/alpha.apk"));
+//
+//            FileMetaData fm = new FileMetaData();
+//            fm.setFileName("2.png");
+//            fm.setMimetype("image/png");
+//            fm.setPublic(true);
+//
+//            DownloaderProgressListener progressListener = new DownloaderProgressListener() {
+//                @Override
+//                public void progressChanged(MediaHttpDownloader uploader) throws IOException {
+//                    System.out.println("download progress change!");
+//                }
+//
+//                @Override
+//                public void onSuccess(Void result) {
+//                    System.out.println("download success!");
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable error) {
+//                    System.out.println("download failed -> " + error);
+//                }
+//            };
+////            myJavaClient.file().downloadBlocking(new FileMetaData("asd"), is, progressListener);
+//            myJavaClient.file().downloadBlocking(new Query().equals("_id", "123"), is, progressListener);
+//
+//            System.out.println("downloading Complete!");
+//        }catch(IOException e){
+//            System.out.println("Couldn't upload! -> " + e);
+//            e.printStackTrace();
+//        }
 
 
     }

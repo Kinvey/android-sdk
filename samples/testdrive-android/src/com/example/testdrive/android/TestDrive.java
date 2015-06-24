@@ -258,7 +258,7 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
         ad.save(entity, new KinveyClientCallback<Entity>() {
             @Override
             public void onSuccess(Entity result) {

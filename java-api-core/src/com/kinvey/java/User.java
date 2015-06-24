@@ -167,6 +167,11 @@ public class User<T extends User> extends GenericJson   {
     	}
     	this.MICHostName = newHostName;
     }
+    
+    public void setMICApiVersion(int version){
+    	
+    
+    }
 
     private AbstractClient client;
 
