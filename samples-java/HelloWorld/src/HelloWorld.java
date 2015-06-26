@@ -115,10 +115,10 @@ public class HelloWorld {
 
         try{
 
-            InputStream is = new FileInputStream("/Users/edward/alpha.zip");
+            InputStream is = new FileInputStream("/Users/edward/alpha.apk");
 
             FileMetaData fm = new FileMetaData();
-            fm.setFileName("alpha.zip");
+            fm.setFileName("alpha.apk");
 //            fm.setMimetype("image/png");
             fm.setPublic(true);
 
