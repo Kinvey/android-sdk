@@ -85,8 +85,13 @@ task zipJava(type: Zip) << {
 
 task docgen(){}
 
-task release(dependsOn: ['clean', 'build', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'docgen']){
+task release(dependsOn: ['clean', 'build', 'test', 'cleanTest', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'docgen']){
     description 'Performs the complete release process (except for bumping version number!)'
+}
+
+task release2{
+      dependsOn clean, build, test, cleanTest, makeAndroidJar, copyAndroid, copyJava, zipAndroid, zipJava, docgen
+
 }
 
 build.mustRunAfter clean
@@ -96,3 +101,4 @@ copyJava.mustRunAfter copyAndroid
 zipAndroid.mustRunAfter copyJava
 zipJava.mustRunAfter zipAndroid
 docgen.mustRunAfter zipJava
+release.mustRunAfter docgen

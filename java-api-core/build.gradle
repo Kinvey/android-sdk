@@ -7,6 +7,11 @@ sourceSets {
             srcDir 'src/com'
         }
     }
+    test{
+        java{
+            srcDir 'test/com'
+        }
+    }
 }
 
 
