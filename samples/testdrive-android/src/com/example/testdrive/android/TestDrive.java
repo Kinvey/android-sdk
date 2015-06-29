@@ -282,9 +282,9 @@ public class TestDrive extends Activity {
 
 
         AsyncAppData<Entity> ad = kinveyClient.appData("entityCollection", Entity.class);
-        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
-        Query q = new Query().equals("offline", "doit");
-        ad.delete(q, new KinveyDeleteCallback() {
+//        ad.setOffline(OfflinePolicy.LOCAL_FIRST, this.store);
+//        Query q = new Query().equals("offline", "doit");
+        ad.delete("55883c4ba9e03bd0110c0707", new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse result) {
                 bar.setVisibility(View.GONE);
