@@ -9,33 +9,38 @@ sourceSets {
     }
 }
 
+configurations {
+    jaxDoclet
+}
+
 
 dependencies {
+    jaxDoclet (group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
     compile(group: 'com.google.http-client', name: 'google-http-client', version:'1.19.0') {
-exclude(module: 'xpp3')
-exclude(module: 'httpclient')
-exclude(module: 'junit')
-exclude(module: 'android')
+        exclude(module: 'xpp3')
+        exclude(module: 'httpclient')
+        exclude(module: 'junit')
+        exclude(module: 'android')
     }
     compile(group: 'com.google.api-client', name: 'google-api-client', version:'1.19.0') {
-exclude(module: 'xpp3')
-exclude(module: 'android')
+        exclude(module: 'xpp3')
+        exclude(module: 'android')
     }
     compile(group: 'com.google.api-client', name: 'google-api-client-android', version:'1.19.0') {
-exclude(module: 'google-play-services')
-exclude(module: 'xpp3')
+        exclude(module: 'google-play-services')
+        exclude(module: 'xpp3')
     }
     compile group: 'com.google.http-client', name: 'google-http-client-android', version:'1.19.0'
     compile(group: 'com.google.http-client', name: 'google-http-client-gson', version:'1.19.0') {
-exclude(module: 'xpp3')
+        exclude(module: 'xpp3')
     }
     compile group: 'com.google.code.gson', name: 'gson', version:'2.1'
     compile group: 'com.google.gcm', name: 'gcm-client', version:'3'
     compile(group: 'com.google.http-client', name: 'google-http-client-jackson', version:'1.19.0') {
-exclude(module: 'xpp3')
+        exclude(module: 'xpp3')
     }
     compile group: 'org.codehaus.jackson', name: 'jackson-core-asl', version:'1.9.12'
-  compile project(':java-api-core')
+    compile project(':java-api-core')
     testCompile group: 'junit', name: 'junit', version:'4.10'
     testCompile group: 'org.robolectric', name: 'robolectric', version:'2.1.1'
     compile(group: 'com.google.android', name: 'android', version:'4.0.1.2') {
@@ -43,4 +48,25 @@ exclude(module: 'xpp3')
        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
        Please review and delete this closure when resolved. */
     }
+}
+
+task docgen(type: Javadoc) {
+    
+
+    source = sourceSets.main.java.srcDirs
+
+    options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
+    options.doclet = "com.google.doclava.Doclava"
+    maxMemory = "1024m"
+    classpath = configurations.compile
+    title = null
+
+    options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
+    destinationDir = file("../../../doctestjava")
+    options.addStringOption("hdf", "project.name ${project.name}")
+    options.addStringOption("hdf", /JavaApiCore "JavaApiCore"/)
+    options.addStringOption("stubs", "target/stubs")
+    options.addStringOption("federate", "JavaApiCore http://devcenter.kinvey.com/android/reference/api/java/reference/")
+    options.addStringOption("federationxml", "JavaApiCore ../java-api-core/target/apidocs/api.xml")
+    options.addStringOption("d", "target/apidocs")
 }

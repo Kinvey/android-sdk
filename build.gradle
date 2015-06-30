@@ -27,8 +27,6 @@ subprojects {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   }
 
-  configurations.all {
-  }
 }
 
 
@@ -83,15 +81,14 @@ task zipJava(type: Zip) << {
     
 }
 
-task docgen(){}
 
-task release(dependsOn: ['clean', 'build', 'test', 'cleanTest', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava', 'docgen']){
+
+task release(dependsOn: ['clean', 'build', 'test', 'cleanTest', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 
 task release2{
-      dependsOn clean, build, test, cleanTest, makeAndroidJar, copyAndroid, copyJava, zipAndroid, zipJava, docgen
-
+      dependsOn clean, build, test, cleanTest, makeAndroidJar, copyAndroid, copyJava, zipAndroid, zipJava
 }
 
 build.mustRunAfter clean
@@ -100,5 +97,4 @@ copyAndroid.mustRunAfter makeAndroidJar
 copyJava.mustRunAfter copyAndroid
 zipAndroid.mustRunAfter copyJava
 zipJava.mustRunAfter zipAndroid
-docgen.mustRunAfter zipJava
-release.mustRunAfter docgen
+release.mustRunAfter zipJava

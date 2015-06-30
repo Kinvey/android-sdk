@@ -17,7 +17,7 @@ android {
     }
     sourceSets {
         main {
-            java.srcDirs = ['src']
+            java.srcDirs = ['src/com']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
@@ -35,6 +35,11 @@ android {
     }
 }
 
+configurations {
+    jaxDoclet
+    classpaths
+}
+
 
 buildscript {
     repositories {
@@ -46,6 +51,7 @@ buildscript {
 }
 
 dependencies {
+    jaxDoclet (group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
     compile project(':java-api-core')
     compile(group: 'com.google.http-client', name: 'google-http-client', version:'1.19.0') {
         exclude(module: 'xpp3')
@@ -78,6 +84,31 @@ dependencies {
     testCompile(group: 'org.robolectric', name: 'robolectric', version:'2.2') {
         exclude(module: 'support-v4')
     }
+    classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
+}
+
+task docgen(type: Javadoc) {
+    
+
+    source = android.sourceSets.main.java.srcDirs
+
+    options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
+    options.doclet = "com.google.doclava.Doclava"
+    maxMemory = "1024m"
+    //classpath = configurations.compile 
+    classpath = configurations.classpaths
+    title = null
+
+    options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
+    destinationDir = file("../../../doctest")
+
+    options.addStringOption("quiet")
+    options.addStringOption("hdf", "project.name AndroidLib")
+    //options.addStringOption("hdf", "java-api-core java-api-core")
+    options.addStringOption("stubs", "target/stubs")
+    options.addStringOption("federate", "java-api-core ../java-api-core/target/apidocs/reference")
+    options.addStringOption("federationxml", "java-api-core ../java-api-core/target/apidocs/api.xml")
+    options.addStringOption("d", "target/apidocs")
 }
 
 
