@@ -1,9 +1,0 @@
-include ':java-api-core'
-include ':android-lib'
-include ':android-secure'
-include ':java-lib'
-
-project(':java-api-core').projectDir = "$rootDir/../java-api-core" as File
-project(':android-lib').projectDir = "$rootDir/../android-lib" as File
-project(':android-secure').projectDir = "$rootDir/../android-secure" as File
-project(':java-lib').projectDir = "$rootDir/../java-lib" as File

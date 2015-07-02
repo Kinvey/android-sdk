@@ -48,9 +48,16 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    destinationDir = file("../../../doctestcore")
+    
     options.addStringOption("hdf", "project.name JavaApiCore")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")
     options.addStringOption("d", "target/apidocs")
 }
+
+
+
+cleanTest.mustRunAfter clean
+cleanDocgen.mustRunAfter cleanTest
+build.mustRunAfter cleanDocgen
+docgen.mustRunAfter build

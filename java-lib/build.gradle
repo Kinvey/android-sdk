@@ -62,10 +62,16 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    destinationDir = file("../../../doctestjava")
+    options.overview = "src/javadoc/overview.html"
+
     options.addStringOption("hdf", "project.name ${project.name}")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
     options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
     options.addStringOption("d", "target/apidocs")
 }
+
+cleanTest.mustRunAfter clean
+cleanDocgen.mustRunAfter cleanTest
+build.mustRunAfter cleanDocgen
+docgen.mustRunAfter build

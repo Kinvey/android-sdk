@@ -26,21 +26,7 @@ subprojects {
     maven { url "http://repo1.maven.org/maven2" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   }
-
 }
-
-
-
-//task release will do the following:
-
-//run clean
-//run build
-//run copyAndroid
-//run copyJava
-//run zipAndroid
-//run zipJava
-//run aarAndroid
-//run docgen
 
 task makeAndroidJar(type: Copy) << {
     from('android-lib/build/intermediates/bundles/release/')
@@ -81,21 +67,94 @@ task zipJava(type: Zip) << {
     
 }
 
+//task cleanDocgen{
+//   cleanDocgen.dependsOn(":java-api-core:cleanDocgen") 
+//   cleanDocgen.dependsOn(":android-lib:cleanDocgen") 
+//   cleanDocgen.dependsOn(":java-lib:cleanDocgen") 
+//}
+
+task prepCore{
+  prepCore.dependsOn(":java-api-core:clean")
+  prepCore.dependsOn(":java-api-core:cleanTest")
+  prepCore.dependsOn(":java-api-core:cleanDocgen")
+  prepCore.dependsOn(":java-api-core:build")
+  prepCore.dependsOn(":java-api-core:docgen")
+}
+
+task prepAndroid{
+  prepAndroid.dependsOn(":android-lib:clean")
+  prepAndroid.dependsOn(":android-lib:cleanTest")
+  prepAndroid.dependsOn(":android-lib:cleanDocgen")
+  prepAndroid.dependsOn(":android-lib:build")
+  prepAndroid.dependsOn(":android-lib:docgen")
+}
+
+task prepJava{
+  prepJava.dependsOn(":java-lib:clean")
+  prepJava.dependsOn(":java-lib:cleanTest")
+  prepJava.dependsOn(":java-lib:cleanDocgen")
+  prepJava.dependsOn(":java-lib:build")
+  prepAndroid.dependsOn(":android-lib:docgen")
+}
+
+task prepSecure{
+  prepSecure.dependsOn(":android-secure:clean")
+  prepSecure.dependsOn(":android-secure:cleanTest")
+  prepSecure.dependsOn(":android-secure:build")
+}
+
+//task cleanAll{
+//  cleanAll.dependsOn(":java-api-core:clean") 
+//  cleanAll.dependsOn(":android-lib:clean") 
+//  cleanAll.dependsOn(":java-lib:clean") 
+//  cleanAll.dependsOn(":java-api-core:cleanTest") 
+//  cleanAll.dependsOn(":android-lib:cleanTest") 
+//  cleanAll.dependsOn(":java-lib:cleanTest") 
+//  cleanAll.dependsOn(":java-api-core:cleanDocgen") 
+//  cleanAll.dependsOn(":android-lib:cleanDocgen") 
+//  cleanAll.dependsOn(":java-lib:cleanDocgen") 
+//
+//}
+//
+//task docgen{
+//
+//  docgen.dependsOn(":java-api-core:docgen")
+//  docgen.dependsOn(":android-lib:docgen") 
+//  docgen.dependsOn(":java-lib:docgen") 
+//}
+//
+//
+//task buildAll{
+//
+//  buildAll.dependsOn(":java-api-core:build")
+//  buildAll.dependsOn(":android-lib:build") 
+//  buildAll.dependsOn(":java-lib:build") 
+//  buildAll.dependsOn(":android-secure:build")
+//}
+//
+//task testAll{
+//
+//  testAll.dependsOn(":java-api-core:test")
+//  testAll.dependsOn(":android-lib:test") 
+//  testAll.dependsOn(":java-lib:test") 
+//}
 
 
-task release(dependsOn: ['clean', 'build', 'test', 'cleanTest', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
+
+task release(dependsOn: ['prepCore', 'prepJava', 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 
-task release2{
-      dependsOn clean, build, test, cleanTest, makeAndroidJar, copyAndroid, copyJava, zipAndroid, zipJava
-}
 
 
 
 
-build.mustRunAfter clean
-makeAndroidJar.mustRunAfter build
+//buildAll.mustRunAfter cleanAll
+//testAll.mustRunAfter buildAll
+prepAndroid.mustRunAfter prepCore
+prepJava.mustRunAfter prepAndroid
+prepSecure.mustRunAfter prepJava
+makeAndroidJar.mustRunAfter prepSecure
 copyAndroid.mustRunAfter makeAndroidJar
 copyJava.mustRunAfter copyAndroid
 zipAndroid.mustRunAfter copyJava
