@@ -85,6 +85,7 @@ dependencies {
         exclude(module: 'support-v4')
     }
     classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
+    classpaths files('build/classes/release')
 }
 
 task docgen(type: Javadoc) {
@@ -96,7 +97,7 @@ task docgen(type: Javadoc) {
     options.doclet = "com.google.doclava.Doclava"
     maxMemory = "1024m"
     //classpath = configurations.compile 
-    classpath = configurations.classpaths
+    classpath = configurations.classpaths + configurations.compile + configurations.testCompile
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
@@ -104,10 +105,9 @@ task docgen(type: Javadoc) {
 
     options.addStringOption("quiet")
     options.addStringOption("hdf", "project.name AndroidLib")
-    //options.addStringOption("hdf", "java-api-core java-api-core")
     options.addStringOption("stubs", "target/stubs")
-    options.addStringOption("federate", "java-api-core ../java-api-core/target/apidocs/reference")
-    options.addStringOption("federationxml", "java-api-core ../java-api-core/target/apidocs/api.xml")
+    options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
+    options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
     options.addStringOption("d", "target/apidocs")
 }
 

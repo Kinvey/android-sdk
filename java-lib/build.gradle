@@ -64,9 +64,8 @@ task docgen(type: Javadoc) {
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
     destinationDir = file("../../../doctestjava")
     options.addStringOption("hdf", "project.name ${project.name}")
-    options.addStringOption("hdf", /JavaApiCore "JavaApiCore"/)
     options.addStringOption("stubs", "target/stubs")
-    options.addStringOption("federate", "JavaApiCore http://devcenter.kinvey.com/android/reference/api/java/reference/")
-    options.addStringOption("federationxml", "JavaApiCore ../java-api-core/target/apidocs/api.xml")
+    options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
+    options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
     options.addStringOption("d", "target/apidocs")
 }

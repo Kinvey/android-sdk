@@ -230,7 +230,6 @@
                     <bootclasspath>${sun.boot.class.path}:${android.home}/platforms/android-16/android.jar</bootclasspath>
                     <additionalparam>
                         -hdf project.name "${project.name}"
-                        -hdf JavaApiCore "JavaApiCore"
                         -stubs ${project.build.directory}/stubs
                         -federate JavaApiCore http://devcenter.kinvey.com/android/reference/api/java/reference/
                         -federationxml JavaApiCore ${project.basedir}/../java-api-core/target/apidocs/api.xml

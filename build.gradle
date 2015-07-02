@@ -91,6 +91,9 @@ task release2{
       dependsOn clean, build, test, cleanTest, makeAndroidJar, copyAndroid, copyJava, zipAndroid, zipJava
 }
 
+
+
+
 build.mustRunAfter clean
 makeAndroidJar.mustRunAfter build
 copyAndroid.mustRunAfter makeAndroidJar
