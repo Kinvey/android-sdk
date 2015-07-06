@@ -120,7 +120,6 @@ public class Client extends AbstractClient {
                 requestPolicy);
         Logger.init(new AndroidLogger());
     }
-    public void testAAR(){}
 
     /**
      * <p>Setter for the field <code>context</code>.</p>

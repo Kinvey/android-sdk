@@ -28,50 +28,40 @@ subprojects {
   }
 }
 
-task makeAndroidJar(type: Copy) << {
-    from('android-lib/build/intermediates/bundles/release/')
-    into('android-lib/build/outputs/')
+
+task makeAndroidJar(type: Copy)  {
+    from 'android-lib/build/intermediates/bundles/release'
+    into 'android-lib/build/libs'
     include('classes.jar')
-    rename ('classes.jar', 'ProjectName.jar')
+    rename ('classes.jar', 'android-lib-' + version +'.jar')
 }
 
-task copyAndroid(type: Copy) << {
+task copyAndroid(type: Copy)  {
   from 'android-lib/build/libs'
   from 'java-api-core/build/libs'
   into 'release/build/android'
 }
 
-task copyJava(type: Copy) << {
+task copyJava(type: Copy)  {
   from 'java-lib/build/libs'
   from 'java-api-core/build/libs'
   into 'release/build/nativejava'
 }
 
-task zipAndroid(type: Zip) << {
+task zipAndroid(type: Zip) {
     from 'release/build/android'
     from 'release/dependencies'
     baseName = 'kinvey-android'
     destinationDir = file('release/zipped')
-    
-    println zipAndroid.archiveName
-    println relativePath(zipAndroid.destinationDir)
-    println relativePath(zipAndroid.archivePath)
 }
 
-
-task zipJava(type: Zip) << {
+task zipJava(type: Zip)  {
     from 'release/build/java'
     from 'release/dependencies'
     baseName = 'kinvey-java'
     destinationDir = file('release/zipped')
     
 }
-
-//task cleanDocgen{
-//   cleanDocgen.dependsOn(":java-api-core:cleanDocgen") 
-//   cleanDocgen.dependsOn(":android-lib:cleanDocgen") 
-//   cleanDocgen.dependsOn(":java-lib:cleanDocgen") 
-//}
 
 task prepCore{
   prepCore.dependsOn(":java-api-core:clean")
@@ -103,42 +93,6 @@ task prepSecure{
   prepSecure.dependsOn(":android-secure:build")
 }
 
-//task cleanAll{
-//  cleanAll.dependsOn(":java-api-core:clean") 
-//  cleanAll.dependsOn(":android-lib:clean") 
-//  cleanAll.dependsOn(":java-lib:clean") 
-//  cleanAll.dependsOn(":java-api-core:cleanTest") 
-//  cleanAll.dependsOn(":android-lib:cleanTest") 
-//  cleanAll.dependsOn(":java-lib:cleanTest") 
-//  cleanAll.dependsOn(":java-api-core:cleanDocgen") 
-//  cleanAll.dependsOn(":android-lib:cleanDocgen") 
-//  cleanAll.dependsOn(":java-lib:cleanDocgen") 
-//
-//}
-//
-//task docgen{
-//
-//  docgen.dependsOn(":java-api-core:docgen")
-//  docgen.dependsOn(":android-lib:docgen") 
-//  docgen.dependsOn(":java-lib:docgen") 
-//}
-//
-//
-//task buildAll{
-//
-//  buildAll.dependsOn(":java-api-core:build")
-//  buildAll.dependsOn(":android-lib:build") 
-//  buildAll.dependsOn(":java-lib:build") 
-//  buildAll.dependsOn(":android-secure:build")
-//}
-//
-//task testAll{
-//
-//  testAll.dependsOn(":java-api-core:test")
-//  testAll.dependsOn(":android-lib:test") 
-//  testAll.dependsOn(":java-lib:test") 
-//}
-
 
 
 task release(dependsOn: ['prepCore', 'prepJava', 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
@@ -146,11 +100,6 @@ task release(dependsOn: ['prepCore', 'prepJava', 'prepAndroid', 'prepSecure', 'm
 }
 
 
-
-
-
-//buildAll.mustRunAfter cleanAll
-//testAll.mustRunAfter buildAll
 prepAndroid.mustRunAfter prepCore
 prepJava.mustRunAfter prepAndroid
 prepSecure.mustRunAfter prepJava
