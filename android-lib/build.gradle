@@ -96,7 +96,6 @@ task docgen(type: Javadoc) {
     options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
     options.doclet = "com.google.doclava.Doclava"
     maxMemory = "1024m"
-    //classpath = configurations.compile 
     classpath = configurations.classpaths + configurations.compile + configurations.testCompile
     title = null
 
@@ -108,8 +107,8 @@ task docgen(type: Javadoc) {
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
     options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
-    options.addStringOption("d", "target/apidocs")
-
+    //options.addStringOption("d", "target/apidocs")
+    options.addStringOption("d", "../../../devcenter/content/reference/android/api")
 }
 
 

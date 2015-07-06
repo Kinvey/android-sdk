@@ -94,7 +94,7 @@ task prepJava{
   prepJava.dependsOn(":java-lib:cleanTest")
   prepJava.dependsOn(":java-lib:cleanDocgen")
   prepJava.dependsOn(":java-lib:build")
-  prepAndroid.dependsOn(":android-lib:docgen")
+  prepJava.dependsOn(":java-lib:docgen")
 }
 
 task prepSecure{
