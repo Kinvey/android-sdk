@@ -4,7 +4,7 @@ description = 'JavaApiCore'
 sourceSets {
     main {
         java {
-            srcDir 'src/com'
+            srcDir 'src'
         }
     }
     test{

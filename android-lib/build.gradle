@@ -17,9 +17,11 @@ android {
     }
     sourceSets {
         main {
-            java.srcDirs = ['src/com']
+            java.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
+            manifest.srcFile 'AndroidManifest.xml'
+
         }
         test{
             java{
@@ -100,7 +102,7 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    options.overview = "src/javadoc/overview.html"
+    options.overview = "javadoc/overview.html"
 
     options.addStringOption("quiet")
     options.addStringOption("hdf", "project.name AndroidLib")

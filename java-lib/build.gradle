@@ -4,7 +4,7 @@ description = 'JavaLib'
 sourceSets {
     main {
         java {
-            srcDir 'src/com'
+            srcDir 'src'
         }
     }
 }
@@ -62,7 +62,7 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    options.overview = "src/javadoc/overview.html"
+    options.overview = "javadoc/overview.html"
 
     options.addStringOption("quiet")
     options.addStringOption("hdf", "project.name JavaLib")
