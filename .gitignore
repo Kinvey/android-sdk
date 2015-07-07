@@ -9,3 +9,5 @@ build/
 .recommenders/
 gradle.properties
 release/zipped
+.idea
+.gradle
