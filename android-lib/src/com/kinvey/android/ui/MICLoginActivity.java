@@ -25,19 +25,14 @@ public class MICLoginActivity extends Activity {
 
         Intent i = getIntent();
         String loginURL = i.getStringExtra(KEY_LOGIN_URL);
-        Log.i("WTF", "ok loginurl is: " + loginURL);
         
         if (loginURL == null){
-        	Log.i("WTF", "null enough to finish");
         	onNewIntent(this.getIntent());
         	return;
-        }else{
-        	Log.i("WTF", "not null enough");
         }
         
         
         micView = (WebView) findViewById(R.id.mic_loginview);
-        Log.i("WTF", "ok micWebview is good: " + (micView != null));
         loadLoginPage(loginURL);
     }
 
@@ -49,7 +44,6 @@ public class MICLoginActivity extends Activity {
 
     @Override
     public void onNewIntent(Intent intent){
-        Log.i("WTF", "ok New Itnent");
 
         super.onNewIntent(intent);
         Client.sharedInstance().user().onOAuthCallbackRecieved(intent);
