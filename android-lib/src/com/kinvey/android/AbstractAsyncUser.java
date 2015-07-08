@@ -28,6 +28,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
@@ -560,8 +561,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     }
      * </pre>
      *
-     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users.
-     * @param <T>
+     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
      */
     public void retrieve(Query q, KinveyListCallback<T> callback) {
         new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -622,8 +622,38 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     public void getMICAccessToken(String token){
     	new PostForAccessToken(token, (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
     }
-    
-    
+
+    /***
+     * Initiate the MIC login flow with an Activity containing a Webview
+     *
+     * @param redirectURI
+     * @param callback
+     */
+    public void presentMICLoginActivity(String redirectURI, final KinveyUserCallback callback){
+
+        loginWithAuthorizationCodeLoginPage(redirectURI, new KinveyMICCallback() {
+            @Override
+            public void onReadyToRender(String myURLToRender) {
+                Intent i = new Intent(getClient().getContext(), MICLoginActivity.class);
+                i.putExtra(MICLoginActivity.KEY_LOGIN_URL, myURLToRender);
+                getClient().getContext().startActivity(i);
+            }
+
+            @Override
+            public void onSuccess(User result) {
+                if(callback != null){
+                    callback.onSuccess(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                if(callback != null){
+                    callback.onFailure(error);
+                }
+            }
+        });
+    }
 
 
     /**
