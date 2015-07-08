@@ -13,7 +13,16 @@
 
     <application>
 
-        <activity android:name="com.kinvey.android.ui.MICLogin"></activity>
+        <activity android:name="com.kinvey.android.ui.MICLoginActivity"
+            android:launchMode="singleTask"
+            >
+            <intent-filter>
+            	<action android:name="android.intent.action.VIEW" />
+            	<category android:name="android.intent.category.DEFAULT" />
+            	<category android:name="android.intent.category.BROWSABLE" />
+            	<data android:scheme="kinveyauthdemo" />
+        	</intent-filter>
+		</activity>
     </application>
 
 

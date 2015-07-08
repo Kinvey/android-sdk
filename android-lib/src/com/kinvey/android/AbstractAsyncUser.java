@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
@@ -636,6 +637,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
             public void onReadyToRender(String myURLToRender) {
                 Intent i = new Intent(getClient().getContext(), MICLoginActivity.class);
                 i.putExtra(MICLoginActivity.KEY_LOGIN_URL, myURLToRender);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK  | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 getClient().getContext().startActivity(i);
             }
 

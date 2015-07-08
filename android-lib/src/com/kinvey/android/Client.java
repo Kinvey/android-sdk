@@ -99,6 +99,9 @@ public class Client extends AbstractClient {
     private long batchRate;
     private int batchSize;
     
+    
+    private static Client _sharedInstance;
+    
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
      * called directly.
@@ -119,6 +122,11 @@ public class Client extends AbstractClient {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
         Logger.init(new AndroidLogger());
+        _sharedInstance = this;
+    }
+    
+    public static Client sharedInstance(){
+    	return _sharedInstance;
     }
 
     /**
