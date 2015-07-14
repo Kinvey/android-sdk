@@ -10,4 +10,5 @@ build/
 gradle.properties
 release/zipped
 .idea
-.gradle
+.gradle/
+.iml
