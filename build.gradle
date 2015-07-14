@@ -22,11 +22,11 @@ subprojects {
       url "https://build.kinvey.com/nexus/content/repositories/thirdparty" 
     }
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-    maven { url "file:/Users/edward/.m2/repository/" }
     maven { url "http://repo1.maven.org/maven2" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   }
 }
+
 
 
 task makeAndroidJar(type: Copy)  {

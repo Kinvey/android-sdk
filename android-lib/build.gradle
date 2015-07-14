@@ -74,7 +74,6 @@ dependencies {
         exclude(module: 'xpp3')
     }
     compile 'com.google.code.gson:gson:2.1'
-    compile 'com.google.gcm:gcm-client:3'
     compile('com.google.http-client:google-http-client-jackson:1.19.0') {
         exclude(module: 'xpp3')
     }
@@ -112,6 +111,12 @@ task docgen(type: Javadoc) {
     //options.addStringOption("d", "target/apidocs")
     options.addStringOption("d", "../../../devcenter/content/reference/android/api")
 }
+
+task superJar(type: Jar){
+  from configurations.compile
+  archiveName = "superjar.jar"
+  destinationDir = new File("build/outputs/superjar")
+} 
 
 
 
