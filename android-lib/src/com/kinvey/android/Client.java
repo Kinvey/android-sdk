@@ -516,11 +516,10 @@ public class Client extends AbstractClient {
 
     /**
      * Create a client for interacting with Kinvey's services from an Android Activity.
+     * <p/>
      * <pre>
-     * {@code
-     * Client myClient =  new Client.Builder(appKey, appSecret, getContext()).build();
-     * }
-     * <pre/>
+     * Client myClient =  new Client.Builder(appKey, appSecret, getContext()).build();</pre>
+     * <p/>
      * All features of the library are be accessed through an instance of a client.
      * <p/>
      * It is recommended to maintain a single instance of a {@code Client} while developing with Kinvey, either in an

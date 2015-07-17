@@ -112,6 +112,15 @@ public class User<T extends User> extends GenericJson   {
      * The hostname to use for MIC authentication
      */
     public String MICHostName = "https://auth.kinvey.com/";
+    
+    public String MICApiVersion;
+    
+    public void setMICApiVersion(String version){
+    	if (!version.startsWith("v")){
+    		version = "v" + version;
+    	}	
+    	MICApiVersion = version;
+    }
 
     public String getId(){
         return this.id;
@@ -168,11 +177,6 @@ public class User<T extends User> extends GenericJson   {
     	this.MICHostName = newHostName;
     }
     
-    public void setMICApiVersion(int version){
-    	
-    
-    }
-
     private AbstractClient client;
 
     private KinveyAuthRequest.Builder builder;
@@ -1067,6 +1071,9 @@ public class User<T extends User> extends GenericJson   {
     
     	public GetMICTempURL(HttpContent content) {
     		super(client, MICHostName, "POST", REST_PATH, content, GenericJson.class);  
+    		if (MICApiVersion != null && MICApiVersion.length() > 0){
+    			this.uriTemplate = MICApiVersion + "/" + this.uriTemplate;
+    		}
     	}
     }    
     

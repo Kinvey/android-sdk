@@ -62,7 +62,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     /**
      * URI template of the path relative to the base url *
      */
-    private final String uriTemplate;
+    protected String uriTemplate;
 
     /**
      * http headers to be sent along with the request *

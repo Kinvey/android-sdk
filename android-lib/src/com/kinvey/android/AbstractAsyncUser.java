@@ -580,7 +580,11 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	//return URL for login page
     	//https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
     	String appkey = ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey();
-    	String myURLToRender = MICHostName + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
+    	String host = MICHostName;
+    	if (MICApiVersion != null && MICApiVersion.length() > 0){
+    		host = MICHostName + MICApiVersion + "/";
+    	}
+    	String myURLToRender = host + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
     	//keep a reference to the callback and redirect uri for later
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
