@@ -730,6 +730,7 @@ public class User<T extends User> extends GenericJson   {
 
         public LoginRequest buildAuthRequest() {
             this.request = builder.build();
+            this.request.setKinveyHeaders(((KinveyClientRequestInitializer)client.getKinveyRequestInitializer()).getKinveyHeaders());
             return this;
         }
 

@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 import java.io.EOFException;
 import java.io.IOException;
 
+import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.KinveyJsonResponseException;
 
@@ -111,7 +112,11 @@ public class KinveyAuthRequest extends GenericJson {
     /**
      * standard headers included in all requests
      */
-    private final static KinveyHeaders kinveyHeaders = new KinveyHeaders();
+    private KinveyHeaders kinveyHeaders;
+
+    public void setKinveyHeaders(KinveyHeaders headers){
+        this.kinveyHeaders = headers;
+    }
 
     /**
      * Keep protected for testing support.

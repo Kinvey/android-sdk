@@ -9,7 +9,7 @@ sourceSets {
     }
     test{
         java{
-            srcDir 'test/com'
+            srcDir 'test'
         }
     }
 }

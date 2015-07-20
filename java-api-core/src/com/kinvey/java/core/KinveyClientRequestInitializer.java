@@ -78,6 +78,11 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
     }
 
     /**
+     * @return Kinvey Headers configured for this request initializer
+     */
+    public KinveyHeaders getKinveyHeaders(){return kinveyHeaders;}
+
+    /**
      *
      * @param credential valid authorization context obtained from {@link com.kinvey.java.auth.KinveyAuthRequest}
      * @return client request initializer
