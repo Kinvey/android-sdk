@@ -445,7 +445,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /** debug mode, used for HTTP logging **/
             DEBUG_MODE("debug"),
             /** JSON parser**/
-            PARSER("parser");
+            PARSER("parser"),
+            /**MIC Base URL**/
+            MIC_BASE_URL("mic.base.url"),
+            /**MIC Version**/
+            MIC_VERSION("mic.version");
 
 
             private final String value;

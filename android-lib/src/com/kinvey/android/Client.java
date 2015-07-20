@@ -541,6 +541,8 @@ public class Client extends AbstractClient {
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
+        private String MICVersion;
+        private String MICBaseURL;
 
 
         /**
@@ -656,6 +658,13 @@ public class Client extends AbstractClient {
             }
             setJsonFactory(factory);
 
+            if (super.getString(Option.MIC_BASE_URL) != null) {
+                this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
+            }
+            if (super.getString(Option.MIC_VERSION) != null){
+                this.MICVersion = super.getString(Option.MIC_VERSION);
+            }
+
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
             String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
 
@@ -721,6 +730,12 @@ public class Client extends AbstractClient {
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
+            if (this.MICVersion != null){
+                client.user().setMICApiVersion(this.MICVersion);
+            }
+            if(this.MICBaseURL != null){
+                client.user().setMICHostName(this.MICBaseURL);
+            }
 
             return client;
         }
