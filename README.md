@@ -9,21 +9,22 @@ building Android apps and Java6 server applications.
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
-* [maven 3.0.3/3.0.4/3.0.5](http://maven.apache.org/download.cgi)
+* [gradle build system](http://gradle.org/)
 
-* On OSX Mavericks ->  (get homebrew if you don't have it) brew install maven30
-   
-* Google Play Services, as a local maven library:
-  * zip google-play-services_library, and rename the extension from `.zip` to `.apklib`
-  * terminal to where this apklib is, and run these two commands:
-  * `mvn install:install-file -Dfile=google-play-services_lib.apklib -DgroupId=com.google.android.gms -DartifactId=google-play-services -Dversion=14.0.0 -Dpackaging=apklib`
-  * `mvn install:install-file -Dfile=google-play-services.jar -DgroupId=com.google.android.gms -DartifactId=google-play-services -Dversion=14.0.0 -Dpackaging=jar`
-  * run `mvn package -Pandroid -Psign` to build and sign the apklib.
-   
 ```
-mvn install
+gradle clean build
 ```
 
+```
+gradle release
+```
+
+```
+gradle test jacocoTestReport
+```
+
+
+##Legacy Build (DEPRECATED!)
 ### Regenerate Javadocs
 
 ```
