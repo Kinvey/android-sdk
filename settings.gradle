@@ -1,10 +1,14 @@
 rootProject.name = 'parent'
-include ':java-api-core'
+include ':java-api-core', ':TestDrive', ':StatusShare'
 include ':android-lib'
 include ':android-secure'
 include ':java-lib'
+include ':android-samples'
 
 project(':java-api-core').projectDir = "$rootDir/java-api-core" as File
 project(':android-lib').projectDir = "$rootDir/android-lib" as File
 project(':android-secure').projectDir = "$rootDir/android-secure" as File
 project(':java-lib').projectDir = "$rootDir/java-lib" as File
+project(':android-samples').projectDir = "$rootDir/samples" as File
+project(':TestDrive').projectDir = new File('samples/TestDrive')
+project(':StatusShare').projectDir = new File('samples/StatusShare')
