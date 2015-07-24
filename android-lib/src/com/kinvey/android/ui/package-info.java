@@ -13,19 +13,17 @@
  * contents is a violation of applicable laws.
  * 
  */
-//package com.kinvey.android.push;
-//
-///**
-// * @author mjsalinger
-// * @since 2.0
-// */
-//public interface PushOptions {
-//
-//    public boolean isInProduction();
-//    public void setInProduction(boolean inProduction);
-//    public String getPushAppKey();
-//    public String getPushAppSecret();
-//    public String getAPIKey();
-//    public void setPushAppKey(String appKey);
-//    public void setPushAppSecret(String appSecret);
-//}
+
+/**
+ * Kinvey provides Activities and UI Components to facilitate development of Android Applications.
+ *
+ * <p>
+ * This package contains multiple Activities as well as View Objects which provide basic functionality.
+ * </p>
+ *
+ */
+
+package com.kinvey.android.ui;
+
+
+

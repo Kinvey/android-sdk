@@ -68,9 +68,12 @@ public class OfflineRequestInfo implements Serializable {
     public OfflineMetaData getEntityID() {
         return this.id;
     }
-    
-    
-    
+
+
+	/**
+	 * This class represents the uniqueness of an entity, containing the _id, customerAppVersion, and any CustomHeaders.
+	 *
+	 */
     public static class OfflineMetaData extends GenericJson{
     	
     	@Key

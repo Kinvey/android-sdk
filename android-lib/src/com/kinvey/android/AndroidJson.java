@@ -24,6 +24,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.kinvey.java.core.RawJsonFactory;
 
 /**
+ * This class manages the JSON parser for the Android library, which can be set in `kinvey.properties` as the value of `parser`.
+ *
  * @author m0rganic
  * @since 2.0.6
  */
@@ -33,6 +35,12 @@ public class AndroidJson {
 
     /** SDK 3.0 version build number. */
     private static final int HONEYCOMB = 11;
+
+    /**
+     * This is a factory class, there are no instance methods
+     */
+    @Deprecated
+    public AndroidJson(){}
 
     /**
      * Returns a new json factory instance that is compatible with Android SDKs prior to Honeycomb.

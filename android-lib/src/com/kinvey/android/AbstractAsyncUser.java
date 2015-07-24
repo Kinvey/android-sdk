@@ -124,6 +124,10 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         super(client, userClass, builder);
     }
 
+    /**
+     * The JSON parser require a public empty constructor -- do not use this, access the class through the Client.
+     */
+    @Deprecated
     public AbstractAsyncUser(){}
 
     /**
@@ -368,6 +372,13 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     }
 
 
+    /**
+     * Asyncronous login using a Kinvey Auth Link
+     *
+     * @param accessToken The access token provided by the auth source
+     * @param refreshToken The refresh token provided by the auth source
+     * @param callback {@link KinveyUserCallback} that returns a valid user object
+     */
     public void loginAuthLink(String accessToken, String refreshToken, KinveyClientCallback<T> callback) {
         new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -427,7 +438,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     }
 
     /**
-     * This method is primarily used for testing
+     * Get the Client associated with this instance.
      *
      * @return
      */
@@ -594,8 +605,12 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	}
     	
     }
-    
-    
+
+    /**
+     * Used by the MIC login flow, this method should be called after a successful login in the onNewItent Method of your activity.  See the MIC guide for more information.
+     *
+     * @param intent The intent provided to the application from the redirect
+     */
     public void onOAuthCallbackRecieved(Intent intent){
     	if (intent == null || intent.getData() == null){
     		return;
@@ -623,7 +638,12 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     	
     	new PostForTempURL(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
-    
+
+    /**
+     * Posts for a MIC login Access token
+     *
+     * @param token the access code returned from the MIC Auth service
+     */
     public void getMICAccessToken(String token){
     	new PostForAccessToken(token, (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
     }

@@ -41,6 +41,12 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 /**
+ * This class provides functionality for background execution when in offline mode.
+ *
+ * <p>
+ * This class pops the queue stored in the database, reconstructs requests, and delegates them through AppData.
+ * </p>
+ *
  * @author edwardf
  */
 public abstract class AbstractSyncService extends IntentService{
