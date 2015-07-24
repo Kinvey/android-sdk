@@ -1,9 +1,8 @@
 apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
-  apply plugin: 'idea'
   group = 'com.kinvey'
-  version = '2.9.4'
+  version = '2.10.0'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
