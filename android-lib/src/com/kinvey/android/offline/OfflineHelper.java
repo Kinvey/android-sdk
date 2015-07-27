@@ -41,10 +41,11 @@ import com.kinvey.java.Logger;
  */
 public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
 
-
-
     private static OfflineHelper _instance;
     private Context context;
+    private static final String OFFLINE_SCHEMA = "OFFLINE_SCHEMA";
+
+
 
     /**
      * This class is a synchronized Singleton, and this is how you get an instance of it.
@@ -165,6 +166,49 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
         ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);
 
         return ret;
+    }
+
+    @Override
+    public int getDBSchemaVersion() {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor;
+        try {
+            cursor = db.rawQuery("select * from " + OFFLINE_SCHEMA , null);
+            if (cursor != null && cursor.getCount() > 0) {
+                int ver = cursor.getInt(0);
+                cursor.close();
+                return ver;
+            }else {
+                Logger.ERROR("cursor is no good");
+                cursor.close();
+                return 0;
+            }
+        }catch(Exception e){
+                return 0;
+        }
+    }
+
+    @Override
+    public void updateDBSchemaVersion(int newVersion) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        //Create the local offline entity store
+        String createCommand = "CREATE TABLE IF NOT EXISTS "
+                + OFFLINE_SCHEMA
+                + "("
+                + OFFLINE_SCHEMA + " INTEGER not null"
+                + ");";
+
+        db.execSQL(createCommand);
+
+        ContentValues values = new ContentValues();
+        values.put(OFFLINE_SCHEMA, newVersion);
+
+        int change = db.updateWithOnConflict(OFFLINE_SCHEMA, values, null, null, db.CONFLICT_REPLACE);
+        if (change == 0){
+            db.insert(OFFLINE_SCHEMA, null, values);
+        }
     }
 
 
