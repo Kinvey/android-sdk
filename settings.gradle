@@ -10,5 +10,5 @@ project(':android-lib').projectDir = "$rootDir/android-lib" as File
 project(':android-secure').projectDir = "$rootDir/android-secure" as File
 project(':java-lib').projectDir = "$rootDir/java-lib" as File
 project(':android-samples').projectDir = "$rootDir/samples" as File
-project(':TestDrive').projectDir = new File('samples/TestDrive')
-project(':StatusShare').projectDir = new File('samples/StatusShare')
+project(':TestDrive').projectDir = new File('samples/TestDrive-Android')
+project(':StatusShare').projectDir = new File('samples/StatusShare-Android')

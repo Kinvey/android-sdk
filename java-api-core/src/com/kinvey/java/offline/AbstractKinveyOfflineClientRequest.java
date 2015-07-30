@@ -18,8 +18,8 @@ package com.kinvey.java.offline;
 import java.io.IOException;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
+import java.security.SecureRandom;
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -204,7 +204,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
     /* incrementing atomic integer based off a random number
      * from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
      */
-    private static AtomicInteger _nextInc = new AtomicInteger( (new java.util.Random()).nextInt() );
+    private static AtomicInteger _nextInc = new AtomicInteger( (new SecureRandom()).nextInt() );
 
     /* unique ID for machine
      * from: https://github.com/mongodb/mongo-java-driver/blob/master/src/main/org/bson/types/ObjectId.java
@@ -227,7 +227,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
                 } catch (Throwable e) {
                     // exception sometimes happens with IBM JVM, use random
                     //LOGGER.log(Level.WARNING, e.getMessage(), e);
-                    machinePiece = (new Random().nextInt()) << 16;
+                    machinePiece = (new SecureRandom().nextInt()) << 16;
                 }
               //  LOGGER.fine( "machine piece post: " + Integer.toHexString( machinePiece ) );
             }
@@ -236,7 +236,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
             // Since static var belong to class loader there could be collisions otherwise
             final int processPiece;
             {
-                int processId = new java.util.Random().nextInt();
+                int processId = new SecureRandom().nextInt();
                 try {
                     processId = java.lang.management.ManagementFactory.getRuntimeMXBean().getName().hashCode();
                 }

@@ -1,0 +1,47 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'com.kinvey'
+version = '2.10.0'
+
+description = "Sample: HelloWorld"
+
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
+
+configurations.all {
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'HelloWorld'
+    }
+}
+
+repositories {
+    flatDir {
+       dirs 'libs'
+    }
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'HelloWorld'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+
+}
