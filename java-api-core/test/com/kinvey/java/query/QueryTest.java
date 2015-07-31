@@ -13,7 +13,7 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.java;
+package com.kinvey.java.query;
 
 import junit.framework.TestCase;
 import static org.junit.Assert.assertArrayEquals;

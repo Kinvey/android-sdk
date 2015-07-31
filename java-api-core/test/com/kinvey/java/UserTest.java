@@ -110,7 +110,7 @@ public class UserTest extends KinveyMockUnitTest {
         currentUser.setId("testUser");
         User.Delete del = currentUser.deleteBlocking(true);
         assertEquals(currentUser.getId(), del.get("userID").toString());
-        assertEquals(true,del.get("hard"));
+        assertEquals(true, del.get("hard"));
     }
 
     public void testDeleteHardDeleteFalse() throws IOException {
@@ -203,6 +203,16 @@ public class UserTest extends KinveyMockUnitTest {
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
+
+    public void testUserCustomVesionAsNumber() throws IOException {
+        initializeUser();
+        currentUser.setId("testUser");
+        currentUser.setClientAppVersion(1, 2, 3);
+        User.Retrieve request = currentUser.retrieveBlocking();
+        Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
+        assertEquals("1.2.3", (String) header);
+
+    }
     
     public void testUserCustomHeader() throws IOException {
         initializeUser();
@@ -215,6 +225,19 @@ public class UserTest extends KinveyMockUnitTest {
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
     	
+    }
+
+    public void testUserCustomHeaderOverload() throws IOException {
+        initializeUser();
+        currentUser.setId("testUser");
+
+        currentUser.setCustomRequestProperty("First", 1);
+        currentUser.setCustomRequestProperty("Second", "two");
+
+        User.Retrieve request = currentUser.retrieveBlocking();
+        Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+        assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);
+
     }
     
     public void testUserCustomVersionNull() throws IOException {
@@ -229,7 +252,7 @@ public class UserTest extends KinveyMockUnitTest {
     public void testUserCustomHeaderNull() throws IOException {
         initializeUser();
         currentUser.setId("testUser");
-    	currentUser.setCustomRequestProperties(null);
+        currentUser.clearCustomRequestProperties();
     	User.Retrieve request = currentUser.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	
@@ -243,6 +266,8 @@ public class UserTest extends KinveyMockUnitTest {
     		getClient().user().setMICHostName("http://www.google.com");
     		fail("Library should throw an exception when setting non https base url for MIC");
     	}catch(Exception e){}
+
+
     	
     	GetMICAccessToken getToken = getClient().user().getMICToken("myCODE");
     	assertEquals("https://www.google.com/oauth/token", getToken.buildHttpRequest().getUrl().toString());
@@ -261,4 +286,12 @@ public class UserTest extends KinveyMockUnitTest {
     	assertEquals(true, ret.isUserLoggedIn());
     	
     }
+
+    public void testMICAPIVersionAppendsV() throws IOException{
+        initializeUser();
+        currentUser.setMICApiVersion("2");
+        assertEquals(currentUser.MICApiVersion, "v2");
+    }
+
+
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 
@@ -84,9 +85,7 @@ public class AggregateEntity extends GenericJson {
                 break;
             case AVERAGE:
                 initial.put("_result",0);
-                reduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " +
-                        "out._result =(out._result * count + doc."+aggregateField+") " +
-                        "/ (count + 1); out._kcs_count = count+1;}";
+                reduce = "function(doc,out){ var count = (out._kcs_count == undefined) ? 0 : out._kcs_count; " + "out._result =(out._result * count + doc."+aggregateField+") " + "/ (count + 1); out._kcs_count = count+1;}";
                 break;
         }
 

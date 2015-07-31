@@ -38,7 +38,6 @@ import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyMetaData;
-import com.kinvey.java.model.UriLocResponse;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.query.AbstractQuery;
