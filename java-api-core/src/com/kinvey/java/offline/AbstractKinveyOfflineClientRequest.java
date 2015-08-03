@@ -81,7 +81,7 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
      * @param store - an implementation of an offline store to use
      * @param policy - the offline policy to use for this individual request.
      */
-    protected void setStore(OfflineStore store, OfflinePolicy policy){
+    public void setStore(OfflineStore store, OfflinePolicy policy){
         this.policy = policy;
         this.store = store;
     }

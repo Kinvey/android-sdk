@@ -23,12 +23,14 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
+import com.google.common.base.Preconditions;
 import com.kinvey.java.*;
 import com.kinvey.java.auth.ClientUsers;
 
 import junit.framework.TestCase;
 
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -60,6 +62,9 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
     protected static class MockTestClient extends AbstractClient {
 
+        private ConcurrentHashMap<String, AppData> appDataInstanceCache;
+
+
         MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
                        String rootUrl, String servicePath, JsonObjectParser objectParser,
                        KinveyClientRequestInitializer kinveyRequestInitializer) {
@@ -68,8 +73,20 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
         @Override
         public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
+            synchronized (lock) {
+                Preconditions.checkNotNull(collectionName, "collectionName must not be null");
+                if (appDataInstanceCache == null) {
+                    appDataInstanceCache = new ConcurrentHashMap<String, AppData>();
+                }
+                if (!appDataInstanceCache.containsKey(collectionName)) {
+                    appDataInstanceCache.put(collectionName, new MockAppData(collectionName, myClass, this));
+                }
+                if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
+                    appDataInstanceCache.put(collectionName, new MockAppData(collectionName, myClass, this));
+                }
+
+                return appDataInstanceCache.get(collectionName);
+            }        }
 
         @Override
         public File file() {
@@ -207,6 +224,19 @@ public abstract class KinveyMockUnitTest extends TestCase {
                 super();
             }
 
+        }
+    }
+
+    public static class MockAppData extends AppData{
+        /**
+         * Constructor to instantiate the AppData class.
+         *
+         * @param collectionName Name of the appData collection
+         * @param myClass        Class Type to marshall data between.
+         * @param client
+         */
+        protected MockAppData(String collectionName, Class myClass, AbstractClient client) {
+            super(collectionName, myClass, client);
         }
     }
 
