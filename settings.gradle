@@ -1,5 +1,5 @@
 rootProject.name = 'parent'
-include ':java-api-core', ':TestDrive', ':StatusShare'
+include ':java-api-core', ':TestDrive', ':StatusShare', ':ContentBox-Android'
 include ':android-lib'
 include ':android-secure'
 include ':java-lib'
