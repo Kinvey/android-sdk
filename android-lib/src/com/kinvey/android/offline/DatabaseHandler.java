@@ -54,5 +54,9 @@ public interface DatabaseHandler {
 
     public GenericJson getEntity(AbstractClient client, AppData appData, OfflineMetaData id);
 
+    public int getDBSchemaVersion ();
+
+    public void updateDBSchemaVersion (int newVersion);
+
 
 }

@@ -18,9 +18,11 @@ import java.util.List;
 
 import android.content.Context;
 
+import android.os.AsyncTask;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
+import com.kinvey.android.Client;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.AppData;
@@ -44,10 +46,44 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
     private Context context = null;
     private static final String TAG = "Kinvey - Sqliteoffline store";
+    private static final int databaseSchemaVersion = 1;
 
 
     public AbstractSqliteOfflineStore(Context context) {
         this.context = context.getApplicationContext();
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                kickOffUpgrade(Client.sharedInstance());
+                return null;
+            }
+        }.execute();
+
+
+    }
+
+    private void kickOffUpgrade(AbstractClient client){
+        //get stored version number, if it's null set it to the current dbscheme version and save it it
+        //call onupgrade with current version number and dbsv.
+        DatabaseHandler handler = getDatabaseHandler(client.user().getId());
+        int ver = handler.getDBSchemaVersion();
+        if (ver == 0){
+            handler.updateDBSchemaVersion(1);
+        }
+
+        onUpgrade (ver, databaseSchemaVersion);
+
+    }
+
+    private void onUpgrade(int currentVersion, int newVersion){
+        while (currentVersion < newVersion) {
+            //if (currentVersion == 1){
+            //upgrade to 2
+            //}
+
+            currentVersion++;
+        }
     }
 
     /**
