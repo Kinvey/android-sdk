@@ -98,7 +98,7 @@ public void onSuccess(User u) { ... }
  * @author edwardf
  */
 public abstract class AbstractAsyncUser<T extends User> extends User<T> {
-compilefail
+
     /**
      * Flag indicating if a logout operation should clear all local storage
      *
