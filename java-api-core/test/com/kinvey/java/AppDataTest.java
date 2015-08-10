@@ -104,6 +104,7 @@ public class AppDataTest extends KinveyMockUnitTest {
         		getClient());
         assertEquals("testCollection",appData.getCollectionName());
         assertEquals(Entity.class, appData.getCurrentClass());
+        assertEquals(true, false);
     }
 
     public void testNullCollectionInitialization() {
