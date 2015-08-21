@@ -18,15 +18,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.AbstractQuery.SortOrder;
+import com.kinvey.nativejava.AppData;
 import com.kinvey.nativejava.Client;
 
 /**
@@ -34,8 +38,11 @@ import com.kinvey.nativejava.Client;
  */
 public class HelloWorld {
 
-    public static final String appKey = "kid_-J7AmdoNC";
-    public static final String appSecret = "b064f25bc52a4ceca8bdb7537dc8aa6e";
+    public static final String appKey = "kid_WJxJbK9kC";
+    public static final String appSecret = "f16df5c4be864d34aff7d1cc962f20b9";
+
+//    public static final String appKey = "kid_-J7AmdoNC";
+//    public static final String appSecret = "b064f25bc52a4ceca8bdb7537dc8aa6e";
 
     public static void main(String[] args){
         System.out.println("Hello World");
@@ -59,93 +66,106 @@ public class HelloWorld {
             e.printStackTrace();
         }
 
-        HelloEntity test = new HelloEntity();
-        test.setSomedata("hello");
-        String id = "";
-        try{
-            HelloEntity saved = myJavaClient.appData("native", HelloEntity.class).saveBlocking(test).execute();
-            System.out.println("Client appdata saved -> " + saved.getId());
-            id = saved.getId();
-        }catch (IOException e){
-            System.out.println("Couldn't save! -> " + e);
+
+        AppData<GenericJson[]> ok = myJavaClient.appData("00CCUZones", GenericJson[].class);
+        ArrayList<String> fields = new ArrayList<String>();
+        fields.add("room_id");
+        try {
+            GenericJson[] e = ok.countBlocking(fields, null).execute();
+        }catch (Exception e){
+            System.out.println("Couldn't count! -> " + e);
             e.printStackTrace();
         }
 
-        try{
-            HelloEntity loaded = myJavaClient.appData("native", HelloEntity.class).getEntityBlocking(id).execute();
-            System.out.println("Client appdata loaded by id -> " + loaded.getId());
-        }catch (IOException e){
-            System.out.println("Couldn't load! -> " + e);
-            e.printStackTrace();
-        }
-
-        try{
-            HelloEntity[] loaded = myJavaClient.appData("native", HelloEntity.class).getBlocking(new String[]{id}).execute();
-            System.out.println("Client appdata loaded by query -> " + loaded.length);
-        }catch (IOException e){
-            System.out.println("Couldn't load! -> " + e);
-            e.printStackTrace();
-        }
-        
-        try{
-        	
-        	FileMetaData[] metas = myJavaClient.file().prepDownloadBlocking(new Query()).execute();
-        	FileMetaData[] metaSort = myJavaClient.file().prepDownloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
-        	FileMetaData[] metaLimit = myJavaClient.file().prepDownloadBlocking(new Query().setLimit(10)).execute();
-        	
-//        	System.out.println("plain query count -> " + metas.length);
-//        	System.out.println("plain query first -> " + metas[0].getId());
-//        	System.out.println("sort query count -> " + metaSort.length);
-//        	System.out.println("sort query first -> " + metaSort[0].getId());
-//        	System.out.println("limit query count -> " + metaLimit.length);
-//        	System.out.println("limit query first -> " + metaLimit[0].getId());
-        
-        }catch (IOException e){
-            e.printStackTrace();
-            
-        }
-//        
+//
+//
+//        HelloEntity test = new HelloEntity();
+//        test.setSomedata("hello");
+//        String id = "";
 //        try{
-//        	KinveyDeleteResponse delete = myJavaClient.file().deleteBlocking(new FileMetaData("myFileId")).execute();            
-//        }catch(IOException e){
-//            System.out.println("Couldn't delete! -> " + e);
+//            HelloEntity saved = myJavaClient.appData("native", HelloEntity.class).saveBlocking(test).execute();
+//            System.out.println("Client appdata saved -> " + saved.getId());
+//            id = saved.getId();
+//        }catch (IOException e){
+//            System.out.println("Couldn't save! -> " + e);
 //            e.printStackTrace();
 //        }
-
-
-        try{
-
-            InputStream is = new FileInputStream("/Users/edward/alpha.apk");
-
-            FileMetaData fm = new FileMetaData();
-            fm.setFileName("alpha.apk");
-//            fm.setMimetype("image/png");
-            fm.setPublic(true);
-
-            UploaderProgressListener progressListener = new UploaderProgressListener() {
-                @Override
-                public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                    System.out.println("upload progress change!");
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    System.out.println("upload success!");
-                }
-
-                @Override
-                public void onFailure(Throwable error) {
-                    System.out.println("upload failed -> " + error);
-                }
-            };
-            myJavaClient.file().uploadBlocking(fm, is, progressListener);
-
-            System.out.println("uploading Complete!");
-        }catch(IOException e){
-            System.out.println("Couldn't upload! -> " + e);
-            e.printStackTrace();
-        }
-        
+//
+//        try{
+//            HelloEntity loaded = myJavaClient.appData("native", HelloEntity.class).getEntityBlocking(id).execute();
+//            System.out.println("Client appdata loaded by id -> " + loaded.getId());
+//        }catch (IOException e){
+//            System.out.println("Couldn't load! -> " + e);
+//            e.printStackTrace();
+//        }
+//
+//        try{
+//            HelloEntity[] loaded = myJavaClient.appData("native", HelloEntity.class).getBlocking(new String[]{id}).execute();
+//            System.out.println("Client appdata loaded by query -> " + loaded.length);
+//        }catch (IOException e){
+//            System.out.println("Couldn't load! -> " + e);
+//            e.printStackTrace();
+//        }
+//
+//        try{
+//
+//        	FileMetaData[] metas = myJavaClient.file().prepDownloadBlocking(new Query()).execute();
+//        	FileMetaData[] metaSort = myJavaClient.file().prepDownloadBlocking(new Query().addSort("_id", SortOrder.ASC)).execute();
+//        	FileMetaData[] metaLimit = myJavaClient.file().prepDownloadBlocking(new Query().setLimit(10)).execute();
+//
+////        	System.out.println("plain query count -> " + metas.length);
+////        	System.out.println("plain query first -> " + metas[0].getId());
+////        	System.out.println("sort query count -> " + metaSort.length);
+////        	System.out.println("sort query first -> " + metaSort[0].getId());
+////        	System.out.println("limit query count -> " + metaLimit.length);
+////        	System.out.println("limit query first -> " + metaLimit[0].getId());
+//
+//        }catch (IOException e){
+//            e.printStackTrace();
+//
+//        }
+////
+////        try{
+////        	KinveyDeleteResponse delete = myJavaClient.file().deleteBlocking(new FileMetaData("myFileId")).execute();
+////        }catch(IOException e){
+////            System.out.println("Couldn't delete! -> " + e);
+////            e.printStackTrace();
+////        }
+//
+//
+//        try{
+//
+//            InputStream is = new FileInputStream("/Users/edward/alpha.apk");
+//
+//            FileMetaData fm = new FileMetaData();
+//            fm.setFileName("alpha.apk");
+////            fm.setMimetype("image/png");
+//            fm.setPublic(true);
+//
+//            UploaderProgressListener progressListener = new UploaderProgressListener() {
+//                @Override
+//                public void progressChanged(MediaHttpUploader uploader) throws IOException {
+//                    System.out.println("upload progress change!");
+//                }
+//
+//                @Override
+//                public void onSuccess(Void result) {
+//                    System.out.println("upload success!");
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable error) {
+//                    System.out.println("upload failed -> " + error);
+//                }
+//            };
+//            myJavaClient.file().uploadBlocking(fm, is, progressListener);
+//
+//            System.out.println("uploading Complete!");
+//        }catch(IOException e){
+//            System.out.println("Couldn't upload! -> " + e);
+//            e.printStackTrace();
+//        }
+//
 //        try{
 //
 //            OutputStream is = new FileOutputStream(new File("/Users/edward/alpha.apk"));

@@ -4,8 +4,6 @@ apply plugin: 'maven'
 group = 'com.kinvey'
 version = '2.10.0'
 
-description = "Sample: HelloWorld"
-
 sourceCompatibility = 1.5
 targetCompatibility = 1.5
 

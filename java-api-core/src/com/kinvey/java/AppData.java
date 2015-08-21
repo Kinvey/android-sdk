@@ -777,7 +777,7 @@ public class AppData<T> {
         private String collectionName;
 
         Aggregate(AggregateEntity entity, Class<T> myClass) {
-            super(client, "POST", REST_PATH, entity,myClass, AppData.this.collectionName);
+            super(client, "POST", REST_PATH, entity, myClass, AppData.this.collectionName);
             super.setStore(offlineStore,  offlinePolicy);
             this.collectionName = AppData.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
