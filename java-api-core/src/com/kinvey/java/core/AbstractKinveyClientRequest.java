@@ -15,23 +15,10 @@
  */
 package com.kinvey.java.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import com.google.api.client.http.AbstractInputStreamContent;
-import com.google.api.client.http.BackOffPolicy;
-import com.google.api.client.http.EmptyContent;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpMethods;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.http.UriTemplate;
+import java.io.*;
+import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Charsets;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
@@ -390,6 +377,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             throwExceptionOnError = request.getThrowExceptionOnExecuteError();
             request.setThrowExceptionOnExecuteError(false);
             request.setParser(getAbstractKinveyClient().getObjectParser());
+
             if (overrideRedirect){
             	request.setFollowRedirects(false);
             }
@@ -476,8 +464,16 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         }
         
         try{
-    
-            return response.parseAs(responseClass);
+            int statusCode = response.getStatusCode();
+            if (response.getRequest().getRequestMethod().equals(HttpMethods.HEAD) || statusCode / 100 == 1
+                    || statusCode == HttpStatusCodes.STATUS_CODE_NO_CONTENT
+                    || statusCode == HttpStatusCodes.STATUS_CODE_NOT_MODIFIED) {
+                response.ignore();
+                return null;
+
+            }else{
+                return getAbstractKinveyClient().getObjectParser().parseAndClose(response.getContent(), Charsets.UTF_8, responseClass);
+            }
             
         }catch(IllegalArgumentException e){
             Logger.ERROR("unable to parse response -> " + e.toString());
