@@ -42,4 +42,6 @@ task fatJar(type: Jar) {
 dependencies {
         compile fileTree(dir: 'libs', include: ['*.jar'])
 
+
+
 }
