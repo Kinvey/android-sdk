@@ -191,9 +191,12 @@ public class KinveyAuthRequest extends GenericJson {
                 .setSuppressUserAgentSuffix(true)
                 .setThrowExceptionOnExecuteError(false)
                 .setParser(jsonFactory.createJsonObjectParser())
-                .setHeaders(kinveyHeaders)
                 .setBackOffPolicy(policy)
                 .setRetryOnExecuteIOException(true);
+        if (kinveyHeaders != null) {
+            request.getHeaders().putAll(kinveyHeaders);
+        }
+
         try {
             response = request.execute();
         }  catch (EOFException ex) {
