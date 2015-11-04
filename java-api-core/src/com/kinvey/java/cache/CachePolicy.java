@@ -73,6 +73,7 @@ public enum CachePolicy{
      * Use this policy if you want to set default results, however if a request is made that cannot return these defaults a live request will be made (without modifying those default values)
      * </p>
      */
+    @Deprecated
     CACHEFIRST_NOREFRESH{
         public <T> T execute(AbstractKinveyCachedClientRequest<T> cachedRequest) throws IOException{
             T ret = cachedRequest.fromCache();
