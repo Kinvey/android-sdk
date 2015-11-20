@@ -5,6 +5,28 @@ This library is a standalone library designed for all java evnironments.
 The library acts as a client for the Kinvey REST api and can be used for
 building Android apps and Java6 server applications.
 
+##Documentation
+Refer http://devcenter.kinvey.com/android for complete documentation of the library APIs and usage.
+
+##Overview of the Library -
+
+The codebase is made of the following key projects at the top level (under java-library): 
+
+###java-api-core 
+The core of the library. Most of the library logic is written here. This project contains most of the underlying networking, user management, caching logic. Things that are platform specific (android-specific or standalone-java-specific) are represented as interfaces / abstract classes, and implemented in the other libraries described below.
+
+###android-lib
+The wrapper library for android, built on top of java-api-core. All the android specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
+
+###java-lib
+The wrapper library for java, built on top of java-api-core. All the standalone-java specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
+
+###android-secure
+Encryption module built on top of android-lib. Rarely used; not compiled into the standard build process. This may be requested by certain customers who need encryption in their app.
+
+###samples 
+Samples built on top of the libraries. This is a submodule, the full source for samples is under https://github.com/KinveyApps
+
 ## Build
 Pre-requisites:
 
