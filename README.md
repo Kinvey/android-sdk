@@ -5,6 +5,8 @@ This library is a standalone library designed for all java evnironments.
 The library acts as a client for the Kinvey REST api and can be used for
 building Android apps and Java6 server applications.
 
+It is recommended you use either IntelliJ or Android Studio. Eclipse is NOT recommended.
+
 ##Documentation
 Refer http://devcenter.kinvey.com/android for complete documentation of the library APIs and usage.
 
