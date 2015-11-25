@@ -250,7 +250,7 @@ public class GCMPush extends AbstractPush {
         pref.remove(pref_regid);
         pref.commit();    
     	
-        if (regid != ""){
+        if (regid.isEmpty()){
     		registerWithKinvey(regid, false);
     	}
     	
