@@ -90,7 +90,7 @@ public class OfflineTable<T extends GenericJson> {
     }
 
     public void onCreate(DatabaseHandler handler) {
-        if (this.TABLE_NAME == null || this.TABLE_NAME == ""){
+        if (this.TABLE_NAME == null || this.TABLE_NAME.isEmpty()){
         	Logger.ERROR("cannot create a table without a name!");
             return;
         }
