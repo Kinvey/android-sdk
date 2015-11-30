@@ -24,13 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 
+import com.google.api.client.extensions.android.AndroidUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
@@ -544,6 +547,15 @@ public class Client extends AbstractClient {
         private String MICVersion;
         private String MICBaseURL;
 
+        /**
+         * creating new HttpTransport with fix for 401 error that rais an exception
+         * @return HttpTransport
+         */
+        private static HttpTransport newCompatibleTransport(){
+            return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 18 ?  //versions affected by no auth challenge exception
+                    new ApacheHttpTransport() :
+                    AndroidHttp.newCompatibleTransport();
+        }
 
         /**
          * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
@@ -558,7 +570,7 @@ public class Client extends AbstractClient {
          * @param context Your Android Application Context
          */
         public Builder(String appKey, String appSecret, Context context) {
-            super(AndroidHttp.newCompatibleTransport(), null
+            super(newCompatibleTransport(), null
                     , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
             this.setJsonFactory(factory);
             this.context = context.getApplicationContext();
@@ -594,7 +606,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            super(AndroidHttp.newCompatibleTransport(), null);
+            super(newCompatibleTransport(), null);
 
             try {
                 final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
