@@ -150,6 +150,21 @@ public class File {
     	this.customRequestProperties = new GenericJson();
     }
 
+    /**
+     * Calculate and set metadata for file upload request according FileMetadata
+     * @param metaData
+     * @param request
+     */
+    private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<FileMetaData> request){
+        String meta = metaData.getMimetype();
+        if (meta == null && mimeTypeFinder != null)
+            mimeTypeFinder.getMimeType(metaData);
+
+        if (meta == null)
+            meta = "application/octet-stream";
+
+        request.getRequestHeaders().put("x-Kinvey-content-type", meta);
+    }
 
 
     /**
@@ -203,7 +218,9 @@ public class File {
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
 
         client.initializeRequest(upload);
-        upload.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+
+        setUploadHeader(fileMetaData, upload);
+
         return upload;
     }
     
@@ -228,7 +245,9 @@ public class File {
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
 
         client.initializeRequest(upload);
-        upload.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+
+        setUploadHeader(fileMetaData, upload);
+
         return upload;
     }
 
@@ -278,7 +297,7 @@ public class File {
     public DownloadMetadataAndFile prepDownloadBlocking(FileMetaData metaData) throws IOException {
         DownloadMetadataAndFile download = new DownloadMetadataAndFile(metaData, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
+        download.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
         return download;
     }
     
