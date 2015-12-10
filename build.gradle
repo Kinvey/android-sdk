@@ -2,7 +2,7 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '2.10.1'
+  version = '2.10.4'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
@@ -31,9 +31,13 @@ subprojects {
 
 task makeAndroidJar(type: Copy)  {
     from 'android-lib/build/intermediates/bundles/release'
+    from 'android-lib/build/outputs/aar'
     into 'android-lib/build/libs'
     include('classes.jar')
-    rename ('classes.jar', 'android-lib-' + version +'.jar')
+    include('android-lib-release.aar')
+    rename('classes.jar', 'kinvey-android-lib-' + version + '.jar')
+    rename('android-lib-release.aar', 'kinvey-android-lib-' + version + '.aar')
+
 }
 
 task copyAndroid(type: Copy)  {
@@ -42,6 +46,8 @@ task copyAndroid(type: Copy)  {
   into 'release/build/android'
 }
 
+
+
 task copyJava(type: Copy)  {
   from 'java-lib/build/libs'
   from 'java-api-core/build/libs'
@@ -49,15 +55,42 @@ task copyJava(type: Copy)  {
 }
 
 task zipAndroid(type: Zip) {
-    from 'release/build/android'
-    from 'release/dependencies'
+    from('release/build/android'){
+      include "**/*.jar"
+      into "libJar"
+
+    }
+    from('release/build/android'){
+      include "*.aar"
+      include "*core*.jar"
+      into "/lib"
+
+    }
+
+    from('release/dependencies'){
+      include "*.jar"
+      into "/libJar"
+    }
+
+    from('release/dependencies'){
+      include "*.jar"
+      into "/lib"
+    }
+
+    from 'release/readme/android'
     baseName = 'kinvey-android'
     destinationDir = file('release/zipped')
 }
 
 task zipJava(type: Zip)  {
-    from 'release/build/java'
-    from 'release/dependencies'
+    from('release/build/nativejava'){
+      into '/lib'
+    }
+    from('release/dependencies'){
+      include "*.jar"
+      into '/lib'
+    }
+    from 'release/readme/java'
     baseName = 'kinvey-java'
     destinationDir = file('release/zipped')
     
