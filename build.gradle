@@ -10,16 +10,16 @@ subprojects {
   sourceCompatibility = 1.5
   targetCompatibility = 1.5
 
-  
+
   repositories {
     mavenLocal()
-    
-    maven { 
+
+    maven {
       credentials {
         username System.properties['mvn_username']
         password System.properties['mvn_password']
       }
-      url "https://build.kinvey.com/nexus/content/repositories/thirdparty" 
+      url "https://build.kinvey.com/nexus/content/repositories/thirdparty"
     }
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     maven { url "http://repo1.maven.org/maven2" }
@@ -30,13 +30,13 @@ subprojects {
 
 
 task makeAndroidJar(type: Copy)  {
-    from 'android-lib/build/intermediates/bundles/release'
-    from 'android-lib/build/outputs/aar'
-    into 'android-lib/build/libs'
-    include('classes.jar')
-    include('android-lib-release.aar')
-    rename('classes.jar', 'kinvey-android-lib-' + version + '.jar')
-    rename('android-lib-release.aar', 'kinvey-android-lib-' + version + '.aar')
+  from 'android-lib/build/intermediates/bundles/release'
+  from 'android-lib/build/outputs/aar'
+  into 'android-lib/build/libs'
+  include('classes.jar')
+  include('android-lib-release.aar')
+  rename('classes.jar', 'kinvey-android-' + version + '.jar')
+  rename('android-lib-release.aar', 'kinvey-android-' + version + '.aar')
 
 }
 
@@ -55,45 +55,45 @@ task copyJava(type: Copy)  {
 }
 
 task zipAndroid(type: Zip) {
-    from('release/build/android'){
-      include "**/*.jar"
-      into "libJar"
+  from('release/build/android'){
+    include "**/*.jar"
+    into "libJar"
 
-    }
-    from('release/build/android'){
-      include "*.aar"
-      include "*core*.jar"
-      into "/lib"
+  }
+  from('release/build/android'){
+    include "*.aar"
+    include "*core*.jar"
+    into "/lib"
 
-    }
+  }
 
-    from('release/dependencies'){
-      include "*.jar"
-      into "/libJar"
-    }
+  from('release/dependencies'){
+    include "*.jar"
+    into "/libJar"
+  }
 
-    from('release/dependencies'){
-      include "*.jar"
-      into "/lib"
-    }
+  from('release/dependencies'){
+    include "*.jar"
+    into "/lib"
+  }
 
-    from 'release/readme/android'
-    baseName = 'kinvey-android'
-    destinationDir = file('release/zipped')
+  from 'release/readme/android'
+  baseName = 'kinvey-android'
+  destinationDir = file('release/zipped')
 }
 
 task zipJava(type: Zip)  {
-    from('release/build/nativejava'){
-      into '/lib'
-    }
-    from('release/dependencies'){
-      include "*.jar"
-      into '/lib'
-    }
-    from 'release/readme/java'
-    baseName = 'kinvey-java'
-    destinationDir = file('release/zipped')
-    
+  from('release/build/nativejava'){
+    into '/libs'
+  }
+  from('release/dependencies'){
+    include "*.jar"
+    into '/libs'
+  }
+  from 'release/readme/nativejava'
+  baseName = 'kinvey-java'
+  destinationDir = file('release/zipped')
+
 }
 
 task prepCore{
@@ -129,7 +129,7 @@ task prepSecure{
 
 
 task release(dependsOn: ['prepCore', 'prepJava', 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
-    description 'Performs the complete release process (except for bumping version number!)'
+  description 'Performs the complete release process (except for bumping version number!)'
 }
 
 
