@@ -140,9 +140,9 @@ public class AppDataOperation {
             }
 
             if (resolves == null) {
-                ret = this.appData.new Get(this.query, this.myClass);
+                ret = this.appData.new DeltaGet(this.query, this.myClass);
             } else {
-                ret = this.appData.new Get(this.query, this.myClass, resolves, resolveDepth, retainReference);
+                ret = this.appData.new DeltaGet(this.query, this.myClass, resolves, resolveDepth, retainReference);
             }
 
             return super.build(ret);

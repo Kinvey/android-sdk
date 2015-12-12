@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
@@ -32,6 +33,8 @@ import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.deltaset.DeltaSetItem;
+import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
@@ -268,7 +271,7 @@ public class AppData<T> {
      */
     public Get getBlocking(Query query) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(myClass,0).getClass());
+        Get get = new DeltaGet(query, Array.newInstance(myClass,0).getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -283,7 +286,7 @@ public class AppData<T> {
      */
     public Get getBlocking(String queryString) throws IOException{
     	Preconditions.checkNotNull(queryString);
-        Get get = new Get(queryString, Array.newInstance(myClass,0).getClass());
+        Get get = new DeltaGet(queryString, Array.newInstance(myClass,0).getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -314,7 +317,7 @@ public class AppData<T> {
      * @throws java.io.IOException
      */
     public Get getBlocking(Query query, String[] resolves, int resolve_depth, boolean retain) throws IOException {
-        Get getEntity = new Get(query, Array.newInstance(myClass,0).getClass(), resolves, resolve_depth, retain);
+        Get getEntity = new DeltaGet(query, Array.newInstance(myClass,0).getClass(), resolves, resolve_depth, retain);
         client.initializeRequest(getEntity);
         return getEntity;
     }
@@ -528,7 +531,155 @@ public class AppData<T> {
     public AppDataOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
         return new AppDataOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
     }
-    
+
+
+    private class DeltaFetch extends AbstractKinveyCachedClientRequest<DeltaSetItem[]>{
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+                "{?query,fields,tls,sort,limit,skip,resolve,resolve_depth,retainReference}";
+        @Key
+        private String collectionName;
+        @Key("query")
+        private String queryFilter;
+        @Key("sort")
+        private String sortFilter;
+        @Key("limit")
+        private String limit;
+        @Key("skip")
+        private String skip;
+
+
+        @Key
+        private String fields = "_id,_kmd";
+        @Key
+        private boolean tls = true;
+
+        DeltaFetch(DeltaGet getRequest){
+            super(client, "GET", REST_PATH, null, DeltaSetItem[].class, AppData.this.collectionName);
+            this.queryFilter = getRequest.queryFilter;
+
+
+            collectionName = getRequest.collectionName;
+            sortFilter = getRequest.sortFilter;
+            limit = getRequest.limit;
+            skip = getRequest.skip;
+
+
+            this.collectionName = AppData.this.getCollectionName();
+            //prevent caching and offline store for that request
+            this.setCache(cache, CachePolicy.NOCACHE);
+            this.setStore(offlineStore, OfflinePolicy.ALWAYS_ONLINE);
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
+            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            }
+        }
+
+
+        public DeltaSetItem[] execute() throws IOException {
+            return super.execute();
+        }
+
+    }
+
+    /**
+     * Generic DeltaGet class.  Constructs the HTTP request object for Get
+     * requests with Delta set cache functionality.
+     *
+     */
+    public class DeltaGet extends Get {
+
+        private static final int IDS_PER_PAGE = 100;
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
+
+        DeltaGet(Query query, Class myClass) {
+            super(query, myClass);
+        }
+
+        DeltaGet(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain) {
+            super(query, myClass, resolves, resolve_depth, retain);
+        }
+
+        DeltaGet(String queryString, Class myClass) {
+            super(queryString, myClass);
+        }
+
+        @Override
+        public T[] execute() throws IOException {
+            T[] ret = null;
+            if (client.isUseDeltaCache()) {
+                if (policy == CachePolicy.CACHEFIRST || policy == CachePolicy.CACHEFIRST_NOREFRESH) {
+                    if (cache != null) {
+                        T[] result = CachePolicy.CACHEONLY.execute(this);
+                        if (result != null) {
+                            DeltaFetch deltaRequest = new DeltaFetch(this);
+                            client.initializeRequest(deltaRequest);
+                            DeltaSetItem[] items = deltaRequest.execute();
+
+
+                            //init empty array in case if there is no ids to update
+                            T[] updatedOnline = (T[]) Array.newInstance(getResponseClass().getComponentType(), 0);
+
+                            String[] ids = DeltaSetMerge.getIdsForUpdate(result, items, client.getObjectParser());
+                            if (ids.length > 0) {
+                                updatedOnline = fetchIdsWithPaging(ids);
+                            }
+
+                            ret = DeltaSetMerge.merge(items, result, updatedOnline, client.getObjectParser());
+                        }
+                    }
+                }
+            }
+            if (ret == null){
+                ret = super.execute();
+            }
+
+            return ret;
+        }
+
+        private T[] fetchIdsWithPaging(String[] ids) throws IOException {
+
+            T[] ret = (T[]) Array.newInstance(getResponseClass().getComponentType(), ids.length);
+            int pos = 0;
+            while (ids.length > 0){
+                int chunkSize = ids.length < IDS_PER_PAGE ? ids.length : IDS_PER_PAGE;
+                String[] chunkItems = new String[chunkSize];
+                System.arraycopy(ids,0,chunkItems,0,chunkSize);
+                String[] trimmedIds = new String[ids.length - chunkSize];
+                System.arraycopy(ids,chunkSize,trimmedIds,0,trimmedIds.length);
+                ids = trimmedIds;
+
+                Query query = query().in("_id", chunkItems);
+                Get pageGet = new Get(query,
+                        getResponseClass(),
+                        resolve != null ? resolve.split(",") : null,
+                        resolve_depth != null ? Integer.parseInt(resolve_depth) : null,
+                        retainReferences != null ? Boolean.parseBoolean(retainReferences): null);
+
+
+                client.initializeRequest(pageGet);
+                T[] pageGetResult = pageGet.execute();
+                System.arraycopy(pageGetResult, 0, ret, pos, pageGetResult.length);
+                pos += pageGetResult.length;
+
+            }
+
+
+            //trim ret
+            if (ret.length != pos){
+                T[] tmp = (T[]) Array.newInstance(getResponseClass(), ret.length);
+                System.arraycopy(ret, 0, tmp, 0, ret.length);
+                ret = tmp;
+            }
+
+            return ret;
+        }
+
+
+
+    }
+
 
     /**
      * Generic Get class.  Constructs the HTTP request object for Get
@@ -541,22 +692,22 @@ public class AppData<T> {
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
-        private String collectionName;
+        protected String collectionName;
         @Key("query")
-        private String queryFilter;
+        protected String queryFilter;
         @Key("sort")
-        private String sortFilter;
+        protected String sortFilter;
         @Key("limit")
-        private String limit;
+        protected String limit;
         @Key("skip")
-        private String skip;
+        protected String skip;
 
         @Key("resolve")
-        private String resolve;
+        protected String resolve;
         @Key("resolve_depth")
-        private String resolve_depth;
+        protected String resolve_depth;
         @Key("retainReferences")
-        private String retainReferences;
+        protected String retainReferences;
 
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
@@ -577,7 +728,7 @@ public class AppData<T> {
         }
 
 
-        Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
+        Get(Query query, Class myClass, String[] resolves, Integer resolve_depth, Boolean retain){
             super(client, "GET", REST_PATH, null, myClass, AppData.this.collectionName);
             super.setCache(cache, policy);
             super.setStore(offlineStore,  offlinePolicy);
@@ -590,9 +741,9 @@ public class AppData<T> {
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
 
-            this.resolve = Joiner.on(",").join(resolves);
-            this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
-            this.retainReferences = Boolean.toString(retain);
+            this.resolve = resolves != null ? Joiner.on(",").join(resolves) : null;
+            this.resolve_depth = resolve_depth != null && resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
+            this.retainReferences = retain != null ? Boolean.toString(retain) : null;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );

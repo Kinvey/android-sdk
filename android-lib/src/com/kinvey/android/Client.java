@@ -546,6 +546,7 @@ public class Client extends AbstractClient {
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
         private String MICVersion;
         private String MICBaseURL;
+        private boolean useDeltaCache = false;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -627,6 +628,10 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.PORT) != null){
                 this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.DELTA_SET_CACHE) != null){
+                this.useDeltaCache = Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE));
             }
 
             if (super.getString(Option.GCM_PUSH_ENABLED) != null){
@@ -716,6 +721,7 @@ public class Client extends AbstractClient {
             client.setContext(context);
             client.setUserClass(userClass);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
+            client.setUseDeltaCache(useDeltaCache);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
