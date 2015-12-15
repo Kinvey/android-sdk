@@ -542,11 +542,7 @@ public class AppData<T> {
         private String queryFilter;
         @Key("sort")
         private String sortFilter;
-        @Key("limit")
-        private String limit;
-        @Key("skip")
-        private String skip;
-
+        
 
         @Key
         private String fields = "_id,_kmd";
@@ -560,8 +556,6 @@ public class AppData<T> {
 
             collectionName = getRequest.collectionName;
             sortFilter = getRequest.sortFilter;
-            limit = getRequest.limit;
-            skip = getRequest.skip;
 
 
             this.collectionName = AppData.this.getCollectionName();
