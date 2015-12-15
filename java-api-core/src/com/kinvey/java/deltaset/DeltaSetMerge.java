@@ -17,8 +17,7 @@ public abstract class DeltaSetMerge {
 
     public static  <T> String[] getIdsForUpdate(T[] cache, DeltaSetItem[] items, JsonObjectParser parser) throws IOException {
 
-        DeltaSetMergeResponse response = new DeltaSetMergeResponse();
-
+        
         HashSet<String> idsToUpdate = new HashSet<String>();
 
         for (DeltaSetItem online : items){
