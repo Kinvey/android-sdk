@@ -26,13 +26,10 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
 import com.kinvey.java.cache.Cache;
 import com.kinvey.java.cache.CachePolicy;
-import com.kinvey.java.core.AbstractKinveyJsonClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
@@ -533,7 +530,7 @@ public class AppData<T> {
     }
 
 
-    private class DeltaFetch extends AbstractKinveyCachedClientRequest<DeltaSetItem[]>{
+    private class MetadataGet extends AbstractKinveyCachedClientRequest<DeltaSetItem[]>{
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,fields,tls,sort,limit,skip,resolve,resolve_depth,retainReference}";
         @Key
@@ -542,6 +539,11 @@ public class AppData<T> {
         private String queryFilter;
         @Key("sort")
         private String sortFilter;
+
+        @Key("limit")
+        protected String limit;
+        @Key("skip")
+        protected String skip;
         
 
         @Key
@@ -549,9 +551,13 @@ public class AppData<T> {
         @Key
         private boolean tls = true;
 
-        DeltaFetch(DeltaGet getRequest){
+        MetadataGet(DeltaGet getRequest){
             super(client, "GET", REST_PATH, null, DeltaSetItem[].class, AppData.this.collectionName);
             this.queryFilter = getRequest.queryFilter;
+
+
+            this.skip = getRequest.skip;
+            this.limit = getRequest.limit;
 
 
             collectionName = getRequest.collectionName;
@@ -607,7 +613,7 @@ public class AppData<T> {
                     if (cache != null) {
                         T[] result = CachePolicy.CACHEONLY.execute(this);
                         if (result != null) {
-                            DeltaFetch deltaRequest = new DeltaFetch(this);
+                            MetadataGet deltaRequest = new MetadataGet(this);
                             client.initializeRequest(deltaRequest);
                             DeltaSetItem[] items = deltaRequest.execute();
 
@@ -615,7 +621,7 @@ public class AppData<T> {
                             //init empty array in case if there is no ids to update
                             T[] updatedOnline = (T[]) Array.newInstance(getResponseClass().getComponentType(), 0);
 
-                            String[] ids = DeltaSetMerge.getIdsForUpdate(result, items, client.getObjectParser());
+                            String[] ids = DeltaSetMerge.getIdsForUpdate(result, items);
                             if (ids.length > 0) {
                                 updatedOnline = fetchIdsWithPaging(ids);
                             }
@@ -683,7 +689,7 @@ public class AppData<T> {
     public class Get extends AbstractKinveyCachedClientRequest<T[]> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
-                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
+                "{?query,sort,limit,fields,skip,resolve,resolve_depth,retainReference}";
 
         @Key
         protected String collectionName;
@@ -695,6 +701,9 @@ public class AppData<T> {
         protected String limit;
         @Key("skip")
         protected String skip;
+
+        @Key("fields")
+        protected String fields;
 
         @Key("resolve")
         protected String resolve;
@@ -756,6 +765,11 @@ public class AppData<T> {
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
             }
+        }
+
+        public void setFields(String[] fields){
+            Preconditions.checkNotNull(fields);
+            this.fields = Joiner.on(",").join(fields);
         }
 
         @Override

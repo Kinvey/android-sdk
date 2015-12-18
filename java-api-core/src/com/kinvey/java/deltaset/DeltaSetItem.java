@@ -30,6 +30,11 @@ public class DeltaSetItem extends GenericJson {
         public String getLmt(){
             return lmt;
         }
+
+        public KMD(){};
+        public KMD(String lmt){
+            this.lmt = lmt;
+        }
     }
 
 }

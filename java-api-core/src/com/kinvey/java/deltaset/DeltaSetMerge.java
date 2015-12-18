@@ -1,10 +1,12 @@
 package com.kinvey.java.deltaset;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonGenerator;
 import com.google.api.client.json.JsonObjectParser;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,29 +17,35 @@ import java.util.Map;
  */
 public abstract class DeltaSetMerge {
 
-    public static  <T> String[] getIdsForUpdate(T[] cache, DeltaSetItem[] items, JsonObjectParser parser) throws IOException {
+    public static  <T> String[] getIdsForUpdate(T[] cache, DeltaSetItem[] items) throws IOException {
 
         
         HashSet<String> idsToUpdate = new HashSet<String>();
 
-        for (DeltaSetItem online : items){
-            idsToUpdate.add(online.getId());
-        }
 
-        for (T cached : cache){
-            if (cached instanceof GenericJson){
-                DeltaSetItem cachedLmt = parser.parseAndClose(
-                        new StringReader(((GenericJson) cached).toPrettyString()),
-                        DeltaSetItem.class);
-                for (DeltaSetItem online: items){
-                    if (cachedLmt.getId().equals(online.getId())){
-                        if (cachedLmt.getKmd().getLmt().equals(online.getKmd().getLmt())){
-                            idsToUpdate.remove(cachedLmt.getId());
-                            break;
-                        }
+        Map<String, T> cachedMap = arrayToMap(cache);
+        Map<String, DeltaSetItem> onlineMap = arrayToMap(items);
+
+
+        //assume all data have to be updated
+        idsToUpdate.addAll(onlineMap.keySet());
+
+        for (String cachedId : cachedMap.keySet()){
+            if (onlineMap.containsKey(cachedId)){
+                DeltaSetItem onlineItem = onlineMap.get(cachedId);
+                T cachedItem = cachedMap.get(cachedId);
+                DeltaSetItem.KMD cachedKMD = null;
+                if (cachedItem instanceof GenericJson && ((GenericJson) cachedItem).containsKey("_kmd")){
+                    Object kmd = ((GenericJson) cachedItem).get("_kmd");
+                    if (kmd instanceof Map){
+                        cachedKMD = new DeltaSetItem.KMD(((Map)kmd).get("lmt").toString());
                     }
                 }
+                if (cachedKMD == null || cachedKMD.getLmt().equals(onlineItem.getKmd().getLmt())){
+                    idsToUpdate.remove(cachedId);
+                }
             }
+
         }
 
         String[] ret = new String[idsToUpdate.size()];
@@ -50,22 +58,20 @@ public abstract class DeltaSetMerge {
 
     }
 
-    private static <T> Map<String, T> arrayToMap(T[] arr, JsonObjectParser parser) throws IOException {
+    private static <T> Map<String, T> arrayToMap(T[] arr) throws IOException {
         HashMap<String, T> ret = new HashMap<String, T>();
+
         for (T i: arr){
-            if (i instanceof GenericJson) {
-                DeltaSetItem item = parser.parseAndClose(
-                        new StringReader(((GenericJson) i).toPrettyString()),
-                        DeltaSetItem.class);
-                ret.put(item.getId(), i);
+            if (i instanceof GenericJson && ((GenericJson) i).containsKey("_id")){
+                ret.put(((GenericJson) i).get("_id").toString(), i);
             }
         }
         return ret;
     }
 
     public static <T> T[] merge(DeltaSetItem[] order, T[] cache, T[] online, JsonObjectParser parser) throws IOException {
-        Map<String, T> cacheMap = arrayToMap(cache, parser),
-                onlineMap = arrayToMap(online, parser);
+        Map<String, T> cacheMap = arrayToMap(cache),
+                onlineMap = arrayToMap(online);
 
         ArrayList<T> orderedResult = new ArrayList<T>(order.length);
 
