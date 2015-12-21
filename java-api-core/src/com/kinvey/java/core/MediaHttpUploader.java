@@ -330,12 +330,11 @@ public class MediaHttpUploader {
         
         currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
         currentRequest.setSuppressUserAgentSuffix(true);
-        setContentAndHeadersOnCurrentRequest(bytesUploaded);
+        setContentAndHeadersOnCurrentRequest(meta.getMimetype(), bytesUploaded);
 
         currentRequest.setThrowExceptionOnExecuteError(false);
         currentRequest.setRetryOnExecuteIOException(true);
-        currentRequest.getHeaders().setContentType(meta.getMimetype());
-		// if there are custom headers, add them
+        // if there are custom headers, add them
 		if (headers != null) {
 			for (String header : headers.keySet()) {
 
@@ -356,7 +355,9 @@ public class MediaHttpUploader {
 			contentInputStream.close();
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
-		}
+		} else {
+            throw  new KinveyException("Uploading File Failed");
+        }
 		return meta;
 		
     }
@@ -412,10 +413,10 @@ public class MediaHttpUploader {
      *
      * @param bytesWritten The number of bytes that have been successfully uploaded on the server
      */
-    private void setContentAndHeadersOnCurrentRequest(long bytesWritten) throws IOException {
+    private void setContentAndHeadersOnCurrentRequest(String mimeType, long bytesWritten) throws IOException {
 
         AbstractInputStreamContent contentChunk;
-            contentChunk = new InputStreamContent(mediaContent.getType(), contentInputStream)
+            contentChunk = new InputStreamContent(mimeType, contentInputStream)
                     .setRetrySupported(true)
                     .setCloseInputStream(false);
 
