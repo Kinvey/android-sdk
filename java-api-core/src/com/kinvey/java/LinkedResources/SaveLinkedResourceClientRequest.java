@@ -116,7 +116,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             }
 
                             @Override
-                            public void onSuccess(Void result) {
+                            public void onSuccess(FileMetaData result) {
                                 if (upload != null) {
                                     upload.onSuccess(result);
                                 }

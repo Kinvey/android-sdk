@@ -52,7 +52,7 @@ import java.io.IOException;
  * </pre>
  *
  */
-public interface UploaderProgressListener extends KinveyClientCallback<Void> {
+public interface UploaderProgressListener extends KinveyClientCallback<FileMetaData> {
 
     /**
      * Called to notify that progress has been changed.

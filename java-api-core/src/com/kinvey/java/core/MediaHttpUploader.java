@@ -284,21 +284,21 @@ public class MediaHttpUploader {
      * @return HTTP response
      * @throws IOException
      */
-    public HttpResponse upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
+    public FileMetaData upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
         Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
         updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
-
+        FileMetaData meta = null;
         // Make initial request to get the unique upload URL.
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
             // If the initiation request is not successful return it immediately.
-            return initialResponse;
+            throw  new KinveyException("Uploading Metadata Failed");
         }
         GenericUrl uploadUrl;
         Map<String, String> headers = null;
         try {
             JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
-            FileMetaData meta = parse(jsonObjectParser, initialResponse);
+            meta = parse(jsonObjectParser, initialResponse);
 
             if (meta.containsKey("_requiredHeaders")){
                 //then there are special headers to use in the request to google
@@ -334,6 +334,7 @@ public class MediaHttpUploader {
 
         currentRequest.setThrowExceptionOnExecuteError(false);
         currentRequest.setRetryOnExecuteIOException(true);
+        currentRequest.getHeaders().setContentType(meta.getMimetype());
 		// if there are custom headers, add them
 		if (headers != null) {
 			for (String header : headers.keySet()) {
@@ -356,7 +357,7 @@ public class MediaHttpUploader {
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
 		}
-		return response;
+		return meta;
 		
     }
 
