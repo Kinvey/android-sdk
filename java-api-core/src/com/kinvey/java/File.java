@@ -158,16 +158,20 @@ public class File {
      * @param request
      */
     private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<?> request){
-        String meta = metaData.getMimetype();
-        if (meta == null){
-            if (mimeTypeFinder != null){
-                mimeTypeFinder.getMimeType(metaData);
-                request.getRequestHeaders().put("x-Kinvey-content-type", metaData.getMimetype());
-            } else {
-                request.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
+        if (metaData != null) {
+            if (metaData.getMimetype() == null) {
+                if (mimeTypeFinder != null) {
+                    mimeTypeFinder.getMimeType(metaData);
+                }
             }
-        } else {
-            request.getRequestHeaders().put("x-Kinvey-content-type",  metaData.getMimetype());
+            if (metaData.getMimetype() == null){
+                metaData.setMimetype("application/octet-stream");
+            }
+
+            request.getRequestHeaders().put("x-Kinvey-content-type", metaData.getMimetype());
+
+        }else {
+            request.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
         }
     }
 
