@@ -2,7 +2,7 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '2.10.1'
+  version = '2.10.4'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
@@ -10,16 +10,16 @@ subprojects {
   sourceCompatibility = 1.5
   targetCompatibility = 1.5
 
-  
+
   repositories {
     mavenLocal()
-    
-    maven { 
+
+    maven {
       credentials {
         username System.properties['mvn_username']
         password System.properties['mvn_password']
       }
-      url "https://build.kinvey.com/nexus/content/repositories/thirdparty" 
+      url "https://build.kinvey.com/nexus/content/repositories/thirdparty"
     }
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     maven { url "http://repo1.maven.org/maven2" }
@@ -60,7 +60,7 @@ task zipJava(type: Zip)  {
     from 'release/dependencies'
     baseName = 'kinvey-java'
     destinationDir = file('release/zipped')
-    
+
 }
 
 task prepCore{
