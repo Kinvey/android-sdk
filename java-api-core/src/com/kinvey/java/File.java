@@ -622,7 +622,6 @@ public class File {
             if (verb.equals(AppData.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
-            this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
