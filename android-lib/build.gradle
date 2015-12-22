@@ -40,6 +40,7 @@ android {
 configurations {
     jaxDoclet
     classpaths
+    compile.exclude module: 'guava-jdk5'
 }
 
 
@@ -55,12 +56,13 @@ buildscript {
 dependencies {
     jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
     compile project(':java-api-core')
-    compile('com.google.http-client:google-http-client:1.19.0') {
+    /*compile('com.google.http-client:google-http-client:1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'httpclient')
         exclude(module: 'junit')
         exclude(module: 'android')
-    }
+        exclude(module: 'guava-jdk5')
+    }*/
     compile('com.google.api-client:google-api-client:1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'android')
@@ -69,7 +71,13 @@ dependencies {
         exclude(module: 'google-play-services')
         exclude(module: 'xpp3')
     }
-    compile 'com.google.http-client:google-http-client-android:1.19.0'
+    compile('com.google.http-client:google-http-client-android:1.19.0'){
+        exclude(module: 'xpp3')
+        exclude(module: 'httpclient')
+        exclude(module: 'junit')
+        exclude(module: 'android')
+        exclude(module: 'guava-jdk5')
+    }
     compile('com.google.http-client:google-http-client-gson:1.19.0') {
         exclude(module: 'xpp3')
     }
@@ -77,11 +85,10 @@ dependencies {
     compile('com.google.http-client:google-http-client-jackson:1.19.0') {
         exclude(module: 'xpp3')
     }
-    compile 'com.google.guava:guava:18.0'
+    //compile 'com.google.guava:guava:18.0'
     compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
     compile 'com.google.android.gms:play-services:7.5.0'
     testCompile 'junit:junit:4.10'
-    testCompile 'com.google.android:support-v4:r19'
     testCompile('org.robolectric:robolectric:2.2') {
         exclude(module: 'support-v4')
     }

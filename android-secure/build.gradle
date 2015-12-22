@@ -16,14 +16,12 @@ dependencies {
         exclude(module: 'xpp3')
     }
     compile 'com.google.code.gson:gson:2.1'
-    compile 'com.google.gcm:gcm-client:3'
     compile('com.google.http-client:google-http-client-jackson:1.19.0') {
         exclude(module: 'xpp3')
     }
     compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
     compile project(':java-api-core')
     compile project(':android-lib')
-    compile 'com.sqlcipher:sqlcipher:3.0.0'
     testCompile 'junit:junit:4.10'
     testCompile 'org.robolectric:robolectric:2.1.1'
     compile('com.google.android:android:4.0.1.2') {
