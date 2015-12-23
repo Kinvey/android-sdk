@@ -18,6 +18,7 @@ package com.kinvey.java;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
@@ -34,6 +35,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyHeaders;
+import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -155,15 +157,22 @@ public class File {
      * @param metaData
      * @param request
      */
-    private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<FileMetaData> request){
-        String meta = metaData.getMimetype();
-        if (meta == null && mimeTypeFinder != null)
-            mimeTypeFinder.getMimeType(metaData);
+    private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<?> request){
+        if (metaData != null) {
+            if (metaData.getMimetype() == null) {
+                if (mimeTypeFinder != null) {
+                    mimeTypeFinder.getMimeType(metaData);
+                }
+            }
+            if (metaData.getMimetype() == null){
+                metaData.setMimetype("application/octet-stream");
+            }
 
-        if (meta == null)
-            meta = "application/octet-stream";
+            request.getRequestHeaders().put("x-Kinvey-content-type", metaData.getMimetype());
 
-        request.getRequestHeaders().put("x-Kinvey-content-type", meta);
+        }else {
+            request.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
+        }
     }
 
 
@@ -219,8 +228,6 @@ public class File {
 
         client.initializeRequest(upload);
 
-        setUploadHeader(fileMetaData, upload);
-
         return upload;
     }
     
@@ -245,8 +252,6 @@ public class File {
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
 
         client.initializeRequest(upload);
-
-        setUploadHeader(fileMetaData, upload);
 
         return upload;
     }
@@ -297,7 +302,6 @@ public class File {
     public DownloadMetadataAndFile prepDownloadBlocking(FileMetaData metaData) throws IOException {
         DownloadMetadataAndFile download = new DownloadMetadataAndFile(metaData, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
         return download;
     }
     
@@ -313,7 +317,6 @@ public class File {
     public DownloadMetadataAndFile downloadBlocking(FileMetaData metaData) throws IOException {
         DownloadMetadataAndFile download = new DownloadMetadataAndFile(metaData, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
     }
 
@@ -327,7 +330,6 @@ public class File {
     public DownloadMetadataAndFileQuery prepDownloadBlocking(Query q) throws IOException {
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
@@ -343,7 +345,6 @@ public class File {
     public DownloadMetadataAndFileQuery downloadBlocking(Query q) throws IOException {
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
@@ -375,7 +376,6 @@ public class File {
 
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(id, q, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
@@ -408,7 +408,6 @@ public class File {
 
         DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(id, q, downloaderProgressListener);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
@@ -615,17 +614,49 @@ public class File {
         @Key
         private String id;
 
+        private MediaHttpUploader uploader;
+
         private UploadMetadataAndFile(FileMetaData meta, AppData.SaveMode verb, AbstractInputStreamContent mediaContent, UploaderProgressListener progressListener) {
             super(client, verb.toString(), REST_URL, meta, FileMetaData.class);
             initializeMediaHttpUploader(mediaContent, progressListener);
             if (verb.equals(AppData.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
-            this.getRequestHeaders().set("x-Kinvey-content-type", "application/octet-stream");
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
+
+            setUploadHeader(meta, this);
+        }
+
+        @Override
+        public FileMetaData execute() throws IOException {
+            return uploader.upload(this);
+        }
+
+        /**
+         * Sets up this request object to be used for uploading media.
+         *
+         * @param content data to be uploaded
+         * @param progressListener an object to be notified of the different state changes as the upload progresses.
+         *                         Optional {@code null} can be passed in.
+         */
+        protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
+            HttpRequestFactory requestFactory = client.getRequestFactory();
+            uploader = createMediaHttpUploader(content, requestFactory);
+            uploader.setDirectUploadEnabled(true);
+            uploader.setProgressListener(progressListener);
+        }
+        /**
+         * Factory to instantiate a new http uploader object during the {@link #initializeMediaHttpUploader(com.google.api.client.http.AbstractInputStreamContent, UploaderProgressListener)}
+         *
+         * @param content data to be uploaded
+         * @param requestFactory request factory to be used
+         * @return a valid http uploader with default settings
+         */
+        protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
+            return new MediaHttpUploader(content, requestFactory.getTransport(), requestFactory.getInitializer());
         }
     }
 
@@ -649,6 +680,7 @@ public class File {
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
+            setUploadHeader(meta, this);
         }
     }
 
@@ -694,6 +726,7 @@ public class File {
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
+            setUploadHeader(meta, this);
         }
 
     }
@@ -734,6 +767,7 @@ public class File {
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
+            getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         }
     }
 
@@ -755,6 +789,7 @@ public class File {
             if (File.this.customRequestProperties != null && !File.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(File.this.customRequestProperties) );
             }
+            setUploadHeader(metaData, this);
         }
 
         //TODO edwardf re-add delete by query support once it is supported in kcs

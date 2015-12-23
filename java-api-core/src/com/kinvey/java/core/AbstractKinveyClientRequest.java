@@ -82,11 +82,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     private final Class<T> responseClass;
 
     /**
-     * File uploader or {@code null} if none is set *
-     */
-    private MediaHttpUploader uploader;
-
-    /**
      * File downloader or {@code null} if none is set *
      */
     private MediaHttpDownloader downloader;
@@ -240,44 +235,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         return requestBackoffPolicy;
     }
 
-    /**
-     * Identical to calling {@code AbstractKinveyClientRequest.initializeMediaHttpUploader(content, null)}
-     */
-    protected void initializeMediaHttpUploader(AbstractInputStreamContent content) {
-        initializeMediaHttpUploader(content, null);
-    }
-
-    /**
-     * Sets up this request object to be used for uploading media.
-     *
-     * @param content data to be uploaded
-     * @param progressListener an object to be notified of the different state changes as the upload progresses.
-     *                         Optional {@code null} can be passed in.
-     */
-    protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
-        HttpRequestFactory requestFactory = client.getRequestFactory();
-        uploader = createMediaHttpUploader(content, requestFactory);
-        uploader.setDirectUploadEnabled(true);
-        uploader.setProgressListener(progressListener);
-    }
-
-    /**
-     * Factory to instantiate a new http uploader object during the {@link #initializeMediaHttpUploader(com.google.api.client.http.AbstractInputStreamContent, UploaderProgressListener)}
-     *
-     * @param content data to be uploaded
-     * @param requestFactory request factory to be used
-     * @return a valid http uploader with default settings
-     */
-    protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
-        return new MediaHttpUploader(content, requestFactory.getTransport(), requestFactory.getInitializer());
-    }
-
-    /**
-     * @return the uploader
-     */
-    public final MediaHttpUploader getUploader() {
-        return uploader;
-    }
 
     protected final void initializeMediaHttpDownloader(DownloaderProgressListener progressListener) {
         HttpRequestFactory requestFactory = client.getRequestFactory();
@@ -341,7 +298,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     }
 
     public HttpResponse executeUnparsed() throws IOException {
-        return executeUnparsed(uploader != null);
+        return executeUnparsed(false);
     }
 
     /**
@@ -371,67 +328,64 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     HttpResponse executeUnparsed(boolean upload) throws IOException {
         HttpResponse response;
         boolean throwExceptionOnError;
-        if (!upload) {
-            // normal request
-            HttpRequest request = buildHttpRequest();
-            throwExceptionOnError = request.getThrowExceptionOnExecuteError();
-            request.setThrowExceptionOnExecuteError(false);
-            request.setParser(getAbstractKinveyClient().getObjectParser());
 
-            if (overrideRedirect){
-            	request.setFollowRedirects(false);
-            }
-            
-            response = request.execute();
+        // normal request
+        HttpRequest request = buildHttpRequest();
+        throwExceptionOnError = request.getThrowExceptionOnExecuteError();
+        request.setThrowExceptionOnExecuteError(false);
+        request.setParser(getAbstractKinveyClient().getObjectParser());
 
-            lastResponseCode = response.getStatusCode();
-            lastResponseMessage = response.getStatusMessage();
-            lastResponseHeaders = response.getHeaders();
-
-            if (lastResponseMessage != null && lastResponseMessage.equals(LOCKED_DOWN)){
-                this.client.performLockDown();
-            }
-            
-            //process refresh token needed
-            if (response.getStatusCode() == 401 && !hasRetryed){
-            	
-
-            	//get the refresh token
-            	Credential cred = client.getStore().load(client.user().getId());
-            	String refreshToken = null;
-            	if (cred != null){
-            		refreshToken = cred.getRefreshToken();
-            	}
-            	
-            	if (refreshToken != null ){
-            		//logout the current user
-            		
-            		client.user().logout().execute();
-            		
-            		//use the refresh token for a new access token
-            		GenericJson result = client.user().useRefreshToken(refreshToken).execute();
-
-    				//login with the access token
-    				client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
-    				
-            		//store the new refresh token
-            		Credential currentCred = client.getStore().load(client.user().getId());
-    				currentCred.setRefreshToken(result.get("refresh_token").toString());
-    				client.getStore().store(client.user().getId(), currentCred);
-    				hasRetryed = true;
-    				return executeUnparsed();
-            	}
-            	
-            }
-            
-            // process any other errors
-            if (throwExceptionOnError && !response.isSuccessStatusCode() &&  response.getStatusCode() != 302) {
-            	throw newExceptionOnError(response);
-            }
-        } else {
-            // execute upload procedure
-            response = uploader.upload(this);
+        if (overrideRedirect){
+            request.setFollowRedirects(false);
         }
+
+        response = request.execute();
+
+        lastResponseCode = response.getStatusCode();
+        lastResponseMessage = response.getStatusMessage();
+        lastResponseHeaders = response.getHeaders();
+
+        if (lastResponseMessage != null && lastResponseMessage.equals(LOCKED_DOWN)){
+            this.client.performLockDown();
+        }
+
+        //process refresh token needed
+        if (response.getStatusCode() == 401 && !hasRetryed){
+
+
+            //get the refresh token
+            Credential cred = client.getStore().load(client.user().getId());
+            String refreshToken = null;
+            if (cred != null){
+                refreshToken = cred.getRefreshToken();
+            }
+
+            if (refreshToken != null ){
+                //logout the current user
+
+                client.user().logout().execute();
+
+                //use the refresh token for a new access token
+                GenericJson result = client.user().useRefreshToken(refreshToken).execute();
+
+                //login with the access token
+                client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+
+                //store the new refresh token
+                Credential currentCred = client.getStore().load(client.user().getId());
+                currentCred.setRefreshToken(result.get("refresh_token").toString());
+                client.getStore().store(client.user().getId(), currentCred);
+                hasRetryed = true;
+                return executeUnparsed();
+            }
+
+        }
+
+        // process any other errors
+        if (throwExceptionOnError && !response.isSuccessStatusCode() &&  response.getStatusCode() != 302) {
+            throw newExceptionOnError(response);
+        }
+
         return response;
     }
 

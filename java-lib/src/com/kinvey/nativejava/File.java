@@ -76,18 +76,18 @@ public class File extends com.kinvey.java.File{
      * @param file the file itself
      * @param listener listener for callbacks about upload progress
      */
-    public void uploadBlocking(FileMetaData meta, java.io.File file, UploaderProgressListener listener) throws IOException{
+    public FileMetaData uploadBlocking(FileMetaData meta, java.io.File file, UploaderProgressListener listener) throws IOException{
         this.setUploadProgressListener(listener);
         this.mimeTypeFinder.getMimeType(meta, file);
 
         InputStreamContent mediaContent = null;
-        String mimetype = "application/octet-stream";
+        String mimetype = meta.getMimetype() != null ? meta.getMimetype() : "application/octet-stream";
         mediaContent = new InputStreamContent(mimetype, new FileInputStream(file));
         mediaContent.setLength(file.length());
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        this.prepUploadBlocking(meta, mediaContent).execute();        }
+        return this.prepUploadBlocking(meta, mediaContent).execute();        }
 
     /**
      * Uploads the contents of the stream to the Kinvey file service endpoint.
