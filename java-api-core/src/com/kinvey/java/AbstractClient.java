@@ -75,6 +75,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+    private boolean useDeltaCache;
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -269,6 +270,22 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     /**
+     * Check if delta cache is enabled
+     * @return
+     */
+    public boolean isUseDeltaCache() {
+        return useDeltaCache;
+    }
+
+    /**
+     * enable or disable delta cahe functionality
+     * @param useDeltaCache
+     */
+    public void setUseDeltaCache(boolean useDeltaCache) {
+        this.useDeltaCache = useDeltaCache;
+    }
+
+    /**
      * Builder class for AppdataKinveyClient.
      *
      * This Builder is not thread safe.
@@ -449,7 +466,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**MIC Base URL**/
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
-            MIC_VERSION("mic.version");
+            MIC_VERSION("mic.version"),
+            /**DeltaSet cache enabled **/
+            DELTA_SET_CACHE("app.deltaset"),;
 
 
             private final String value;
