@@ -284,21 +284,21 @@ public class MediaHttpUploader {
      * @return HTTP response
      * @throws IOException
      */
-    public HttpResponse upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
+    public FileMetaData upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
         Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
         updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
-
+        FileMetaData meta = null;
         // Make initial request to get the unique upload URL.
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
             // If the initiation request is not successful return it immediately.
-            return initialResponse;
+            throw  new KinveyException("Uploading Metadata Failed");
         }
         GenericUrl uploadUrl;
         Map<String, String> headers = null;
         try {
             JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
-            FileMetaData meta = parse(jsonObjectParser, initialResponse);
+            meta = parse(jsonObjectParser, initialResponse);
 
             if (meta.containsKey("_requiredHeaders")){
                 //then there are special headers to use in the request to google
@@ -330,11 +330,11 @@ public class MediaHttpUploader {
         
         currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
         currentRequest.setSuppressUserAgentSuffix(true);
-        setContentAndHeadersOnCurrentRequest(bytesUploaded);
+        setContentAndHeadersOnCurrentRequest(meta.getMimetype(), bytesUploaded);
 
         currentRequest.setThrowExceptionOnExecuteError(false);
         currentRequest.setRetryOnExecuteIOException(true);
-		// if there are custom headers, add them
+        // if there are custom headers, add them
 		if (headers != null) {
 			for (String header : headers.keySet()) {
 
@@ -355,8 +355,10 @@ public class MediaHttpUploader {
 			contentInputStream.close();
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
-		}
-		return response;
+		} else {
+            throw  new KinveyException("Uploading File Failed");
+        }
+		return meta;
 		
     }
 
@@ -411,10 +413,10 @@ public class MediaHttpUploader {
      *
      * @param bytesWritten The number of bytes that have been successfully uploaded on the server
      */
-    private void setContentAndHeadersOnCurrentRequest(long bytesWritten) throws IOException {
+    private void setContentAndHeadersOnCurrentRequest(String mimeType, long bytesWritten) throws IOException {
 
         AbstractInputStreamContent contentChunk;
-            contentChunk = new InputStreamContent(mediaContent.getType(), contentInputStream)
+            contentChunk = new InputStreamContent(mimeType, contentInputStream)
                     .setRetrySupported(true)
                     .setCloseInputStream(false);
 
