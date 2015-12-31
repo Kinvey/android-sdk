@@ -65,7 +65,7 @@ public class MediaHttpUploaderTest extends TestCase {
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(FileMetaData result) {
             }
 
             @Override
