@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'findbugs'
 
 
 apply plugin: "jacoco"
@@ -73,3 +74,11 @@ cleanTest.mustRunAfter clean
 cleanDocgen.mustRunAfter cleanTest
 build.mustRunAfter cleanDocgen
 docgen.mustRunAfter build
+
+findbugs {
+    sourceSets = [sourceSets.main]
+    reportsDir = file("$project.buildDir/findbugsReports")
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = file("../tools/findbugs/exclude.xml")
+}
