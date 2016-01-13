@@ -75,10 +75,29 @@ cleanDocgen.mustRunAfter cleanTest
 build.mustRunAfter cleanDocgen
 docgen.mustRunAfter build
 
-findbugs {
-    sourceSets = [sourceSets.main]
-    reportsDir = file("$project.buildDir/findbugsReports")
+findbugs{
+    reportsDir = file("$rootProject.rootDir/reports/findbugsReports/${project.name}/")
+    ignoreFailures = true
     effort = "max"
     reportLevel = "high"
-    excludeFilter = file("../tools/findbugs/exclude.xml")
+    excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
+
+}
+
+
+task customFindbugs(type: FindBugs, dependsOn: assemble) {
+    ignoreFailures = true
+    
+    source = fileTree('src')
+    classpath = files()
+
+    classes = files("$project.buildDir/classes/main")
+
+    reports {
+        xml.enabled = true
+        xml.withMessages = true
+        html.enabled = !xml.isEnabled()
+        xml.destination = "$rootProject.rootDir/reports/findbugsReports/${project.name}/main.xml"
+        html.destination = "$rootProject.rootDir/reports/findbugsReports/${project.name}/main.html"
+    }
 }
