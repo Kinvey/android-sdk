@@ -5,6 +5,10 @@
         <Bug pattern="LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
     </Match>
     <Match>
+        <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" />
+    </Match>
+
+    <Match>
         <Class name="~.*R\$.*"/>
     </Match>
     <Match>
