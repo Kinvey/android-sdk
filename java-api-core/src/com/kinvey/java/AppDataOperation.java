@@ -73,7 +73,6 @@ public class AppDataOperation {
 
 
         //Required for all AppData operations.
-        protected String collection;
         protected Class myClass;
         protected AppData appData;
 
@@ -83,7 +82,6 @@ public class AppDataOperation {
          * @param myClass a {@code GenericJson} representing the object model
          */
         public AppDataRequestBuilder(AbstractClient client, String collectionName, Class myClass) {
-            this.collection = collectionName;
             this.myClass = myClass;
             this.appData = client.appData(collectionName, myClass);
         }
@@ -149,7 +147,7 @@ public class AppDataOperation {
         }
 
         public AppDataRequestBuilder setResolves(String[] resolves) {
-            this.resolves = resolves;
+            this.resolves = resolves.clone();
             return this;
         }
 

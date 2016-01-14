@@ -141,7 +141,9 @@ public class KinveyAuthRequest extends GenericJson {
             this.requestPayload.putAll(user);
         }
         this.create = create;
-        this.type = requestPayload == null ? LoginType.IMPLICIT : LoginType.KINVEY;
+        //TODO: review that line, requestPayload always not null
+        //this.type = requestPayload == null ? LoginType.IMPLICIT : LoginType.KINVEY;
+        this.type = LoginType.KINVEY;
         this.policy = new ExponentialBackOffPolicy(); // TODO:  No current access to the client, so should add to the Constructor at some point.  For now, set to Expontential Backoff Policy.
     }
 

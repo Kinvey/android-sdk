@@ -7,6 +7,22 @@
     <Match>
         <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" />
     </Match>
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE_SHADOWS_FIELD" />
+    </Match>
+
+    <Match>
+        <Class name="com.kinvey.java.UserGroup$GroupUser"/>
+        <Or>
+            <Field name="collection"/>
+            <Field name="type"/>
+        </Or>
+        <Bug pattern="SS_SHOULD_BE_STATIC" />
+    </Match>
+
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD" />
+    </Match>
 
     <Match>
         <Class name="~.*R\$.*"/>

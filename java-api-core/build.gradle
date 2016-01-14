@@ -86,7 +86,7 @@ task findbugs(type: FindBugs, dependsOn: assemble) {
     classpath = files()
     ignoreFailures = true
     effort = "max"
-    reportLevel = "high"
+    reportLevel = "medium"
     excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
 
     classes = files("$project.buildDir/classes/main")

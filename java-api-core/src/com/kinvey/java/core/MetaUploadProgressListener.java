@@ -36,8 +36,8 @@ public abstract class MetaUploadProgressListener implements UploaderProgressList
     public void metaDataRetrieved(FileMetaData meta){
 //        this.metadata = meta;
         this.metadata = new FileMetaData();
-        this.metadata.setFileName(new String(meta.getFileName()));
-        this.metadata.setId(new String(meta.getId()));
+        this.metadata.setFileName(meta.getFileName());
+        this.metadata.setId(meta.getId());
         Logger.INFO("cache meta: " + this.metadata.getFileName() + " and id: " + this.metadata.getId());
     }
 
