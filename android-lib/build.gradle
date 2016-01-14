@@ -130,18 +130,17 @@ task superJar(type: Jar){
   destinationDir = new File("build/outputs/superjar")
 }
 
-findbugs{
-    reportsDir = file("$rootProject.rootDir/reports/findbugsReports/${project.name}/")
-    ignoreFailures = true
-    effort = "max"
-    reportLevel = "high"
-    excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
-
+findbugs {
+    sourceSets = []
 }
 
 task customFindbugs(type: FindBugs, dependsOn: assembleDebug) {
     ignoreFailures = true
     classes = files("$project.buildDir/intermediates/classes/debug")
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
 
     source = fileTree('src')
     classpath = files()
