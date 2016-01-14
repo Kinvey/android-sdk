@@ -134,12 +134,12 @@ findbugs {
     sourceSets = []
 }
 
-task customFindbugs(type: FindBugs, dependsOn: assembleDebug) {
+task findbugs(type: FindBugs, dependsOn: assembleDebug) {
     ignoreFailures = true
     classes = files("$project.buildDir/intermediates/classes/debug")
     ignoreFailures = true
     effort = "max"
-    reportLevel = "high"
+    reportLevel = "medium"
     excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
 
     source = fileTree('src')

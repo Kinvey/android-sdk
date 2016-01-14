@@ -119,9 +119,11 @@ class AndroidCredentialStore implements CredentialStore {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            FileOutputStream fStream = null;
+            ObjectOutputStream oStream = null;
             try {
-                FileOutputStream fStream = appContext.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE);
-                ObjectOutputStream oStream = new ObjectOutputStream(fStream);
+                fStream = appContext.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE);
+                oStream = new ObjectOutputStream(fStream);
 
                 oStream.writeObject(credentials);
                 oStream.flush();
@@ -129,8 +131,28 @@ class AndroidCredentialStore implements CredentialStore {
                 oStream.close();
 
                 Logger.INFO("Serialization success");
-            } catch (Exception e) {
+            } catch (IOException e) {
             	Logger.ERROR("Error on persisting credential store");
+            } finally {
+                try {
+                    if (oStream != null) {
+                        oStream.flush();
+                    }
+                    if (fStream != null){
+                        fStream.getFD().sync();
+                    }
+                } catch (IOException e ){
+
+                } finally {
+                    try {
+                        if (oStream != null){
+                            oStream.close();
+                        }
+                    } catch (IOException e) {
+
+                    }
+                }
+
             }
             return null;
         }
