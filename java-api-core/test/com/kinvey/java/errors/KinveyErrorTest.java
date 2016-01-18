@@ -1,7 +1,7 @@
 package com.kinvey.java.errors;
 
 import com.google.api.client.json.gson.GsonFactory;
-import com.kinvey.java.core.KinveyErrorCodes;
+import com.kinvey.java.core.KinveyErrorCode;
 import com.kinvey.java.core.KinveyJsonError;
 import com.kinvey.java.core.KinveyMockUnitTest;
 
@@ -15,7 +15,7 @@ public class KinveyErrorTest extends KinveyMockUnitTest {
     public void testSerializeError() throws IOException {
         KinveyJsonError test = new KinveyJsonError();
         test.setDebug("test");
-        test.setError(KinveyErrorCodes.AppNotFound);
+        test.setErrorCode(KinveyErrorCode.AppNotFound);
         test.setDescription("testDescription");
 
         GsonFactory factory = GsonFactory.getDefaultInstance();
@@ -32,7 +32,7 @@ public class KinveyErrorTest extends KinveyMockUnitTest {
 
         KinveyJsonError error = (KinveyJsonError)factory.createJsonParser(value).parse(KinveyJsonError.class,true);
 
-        assertTrue("error message parse failed", error.getError() == KinveyErrorCodes.AppNotFound);
+        assertTrue("error message parse failed", error.getErrorCode() == KinveyErrorCode.AppNotFound);
     }
 
     public void testParseUnknownError() throws IOException {
@@ -42,6 +42,6 @@ public class KinveyErrorTest extends KinveyMockUnitTest {
 
         KinveyJsonError error = (KinveyJsonError)factory.createJsonParser(value).parse(KinveyJsonError.class,true);
 
-        assertTrue("error message parse failed", error.getError() == KinveyErrorCodes.Unknown);
+        assertTrue("error message parse failed", error.getErrorCode() == KinveyErrorCode.Unknown);
     }
 }

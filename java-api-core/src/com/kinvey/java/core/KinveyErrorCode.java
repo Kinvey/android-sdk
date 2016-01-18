@@ -2,9 +2,8 @@ package com.kinvey.java.core;
 
 
 import com.google.api.client.util.Value;
-import com.google.gson.annotations.SerializedName;
 
-public enum KinveyErrorCodes {
+public enum KinveyErrorCode {
 
     @Value("ParameterValueOutOfRange")
     ParameterValueOutOfRange("The value specified for one of the request parameters is out of range"),
@@ -114,8 +113,21 @@ public enum KinveyErrorCodes {
      */
     private String message;
 
-    KinveyErrorCodes(String message){
+    KinveyErrorCode(String message){
         this.message = message;
+    }
+
+    public static KinveyErrorCode fromErrorValue(String value){
+        KinveyErrorCode ret = KinveyErrorCode.Unknown;
+        if (value != null){
+            for (KinveyErrorCode c : KinveyErrorCode.values()){
+                if (c.toString().equalsIgnoreCase(value)){
+                    ret = c;
+                    break;
+                }
+            }
+        }
+        return ret;
     }
 
     /**

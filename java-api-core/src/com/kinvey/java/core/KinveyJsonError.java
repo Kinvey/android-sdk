@@ -31,7 +31,7 @@ public class KinveyJsonError extends GenericData {
   
   /** **/
   @Key
-  private KinveyErrorCodes error;
+  private String error;
   
   /** **/
   @Key
@@ -51,21 +51,41 @@ public class KinveyJsonError extends GenericData {
    */
   public static KinveyJsonError parse(JsonFactory jsonFactory, HttpResponse response) throws IOException {
     return new JsonObjectParser(jsonFactory).parseAndClose(response.getContent(),
-        response.getContentCharset(), KinveyJsonError.class);
+            response.getContentCharset(), KinveyJsonError.class);
   }
 
   /**
+   * @see  #getErrorCode()
    * @return the error
    */
-  public final KinveyErrorCodes getError() {
+  @Deprecated
+  public final String getError() {
     return error;
   }
 
   /**
+   * @see #setErrorCode(KinveyErrorCode)
    * @param error the error to set
    */
-  public final void setError(KinveyErrorCodes error) {
+  @Deprecated
+  public final void setError(String error) {
     this.error = error;
+  }
+
+  /**
+   *
+   * @return the error code
+   */
+  public KinveyErrorCode getErrorCode(){
+    return KinveyErrorCode.fromErrorValue(this.error);
+  }
+
+  /**
+   * set the error code of Kinvey Server Error
+   * @param error the error code
+   */
+  public void setErrorCode(KinveyErrorCode error){
+    this.error = error.toString();
   }
 
   /**
