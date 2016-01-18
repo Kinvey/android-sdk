@@ -31,7 +31,7 @@ public class KinveyJsonError extends GenericData {
   
   /** **/
   @Key
-  private String error;
+  private KinveyErrorCodes error;
   
   /** **/
   @Key
@@ -57,14 +57,14 @@ public class KinveyJsonError extends GenericData {
   /**
    * @return the error
    */
-  public final String getError() {
+  public final KinveyErrorCodes getError() {
     return error;
   }
 
   /**
    * @param error the error to set
    */
-  public final void setError(String error) {
+  public final void setError(KinveyErrorCodes error) {
     this.error = error;
   }
 
