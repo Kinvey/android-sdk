@@ -103,7 +103,10 @@ public enum KinveyErrorCodes {
     BLViolationError("The Business Logic script violated a constraint. See debug message for details"),
 
     @Value("BLInternalError")
-    BLInternalError("The Business Logic script did not complete. See debug message for details");
+    BLInternalError("The Business Logic script did not complete. See debug message for details"),
+
+    @Value()
+    Unknown("Unknown server error");
 
 
     /**

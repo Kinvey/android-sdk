@@ -34,4 +34,14 @@ public class KinveyErrorTest extends KinveyMockUnitTest {
 
         assertTrue("error message parse failed", error.getError() == KinveyErrorCodes.AppNotFound);
     }
+
+    public void testParseUnknownError() throws IOException {
+        String value = "{\"debug\":\"test\",\"description\":\"testDescription\",\"error\":\"Unknown\"}";
+
+        GsonFactory factory = GsonFactory.getDefaultInstance();
+
+        KinveyJsonError error = (KinveyJsonError)factory.createJsonParser(value).parse(KinveyJsonError.class,true);
+
+        assertTrue("error message parse failed", error.getError() == KinveyErrorCodes.Unknown);
+    }
 }
