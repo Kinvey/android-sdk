@@ -55,7 +55,7 @@ public class KinveyJsonError extends GenericData {
   }
 
   /**
-   * @see  #getErrorCode()
+   * @deprecated: use {@link #getErrorCode} instead
    * @return the error
    */
   @Deprecated
@@ -64,7 +64,7 @@ public class KinveyJsonError extends GenericData {
   }
 
   /**
-   * @see #setErrorCode(KinveyErrorCode)
+   * @deprecated: use {@link #setErrorCode(KinveyErrorCode)} instead
    * @param error the error to set
    */
   @Deprecated
