@@ -52,6 +52,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * Media HTTP Uploader, with support for both direct and resumable media uploads. Documentation is
@@ -310,7 +311,7 @@ public class MediaHttpUploader {
             if(meta.getUploadUrl() != null){
                 uploadUrl = new GenericUrl(meta.getUploadUrl());
             }else{
-                throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for File!","The library cannot upload a file without this url");
+                throw new KinveyException(KinveyClientErrorCode.UploadUrlMissing);
             }
             uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {

@@ -29,6 +29,7 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * @author m0rganic
@@ -431,7 +432,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             
         }catch(IllegalArgumentException e){
             Logger.ERROR("unable to parse response -> " + e.toString());
-            throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
+            throw new KinveyException(KinveyClientErrorCode.CantParseJson, e);
 
         }catch (NullPointerException ex){
             return null;
