@@ -16,6 +16,8 @@
 package com.kinvey.java.core;
 
 import java.io.*;
+import java.net.UnknownHostException;
+
 import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Charsets;
@@ -30,6 +32,8 @@ import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
 import com.kinvey.java.query.KinveyClientErrorCode;
+
+import org.apache.http.conn.ConnectTimeoutException;
 
 /**
  * @author m0rganic
@@ -406,7 +410,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @throws IOException
      */
     public T execute() throws IOException {
-        HttpResponse response = executeUnparsed();
+        HttpResponse response;
+        try {
+            response = executeUnparsed();
+        } catch (Exception e){
+            throw new KinveyException(KinveyClientErrorCode.RequestError, e);
+        }
        
         if (overrideRedirect){
         	return onRedirect(response.getHeaders().getLocation());
