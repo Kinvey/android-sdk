@@ -50,6 +50,18 @@ public class KinveyJsonResponseException extends HttpResponseException {
     this.details = details;
     this.message = message;
   }
+
+  /**
+   *
+   * @param responseExceptionBuilder builder for HttpResponseException
+   * @param details detail message give by the response
+   * @param message general message
+   */
+  private KinveyJsonResponseException(HttpResponseException.Builder responseExceptionBuilder, KinveyJsonError details, String message) {
+    super(responseExceptionBuilder);
+    this.details = details;
+    this.message = message;
+  }
   
 
 
@@ -87,7 +99,9 @@ public class KinveyJsonResponseException extends HttpResponseException {
         (details == null ? "unknown" : String.format("%s%n%s", details.getError(),
             details.getDescription()));
     
-    return new KinveyJsonResponseException(response, details, detailMessage);
+    return new KinveyJsonResponseException(
+            new Builder(response.getStatusCode(), response.getStatusMessage(), response.getHeaders()),
+            details, detailMessage);
   }
 
   /**

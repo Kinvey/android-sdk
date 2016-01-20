@@ -45,8 +45,8 @@ public enum  KinveyClientErrorCode {
      * No active user.
      */
     NoActiveUser("No user is currently logged in.",
-            "call myClient.User().login(...) first to login",
-            "Registering for Push Notifications needs a logged in user"),
+            "calling myClient.user().login( ... ) before retrying this request.",
+            ""),
     /**
      * No Google play services on Device
      */
