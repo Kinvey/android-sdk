@@ -169,7 +169,7 @@ public class User<T extends User> extends GenericJson   {
      */
     public void setMICHostName(String newHostName){
     	if (!newHostName.toLowerCase().startsWith("https")){
-    		throw new KinveyException("MIC Hostname must use the https protocol, trying to set: " + newHostName);
+    		throw new KinveyException(KinveyClientErrorCode.MICError, "MIC Hostname must use the https protocol, trying to set: " + newHostName);
     	}
     	if (!newHostName.endsWith("/")){
     		newHostName += "/";
@@ -1090,7 +1090,7 @@ public class User<T extends User> extends GenericJson   {
 
     		int codeIndex = newLocation.indexOf("code=");
     		if (codeIndex == -1){
-    			throw new KinveyException("Redirect does not contain `code=`, was: " + newLocation);
+    			throw new KinveyException(KinveyClientErrorCode.ResponseMalformed, "Redirect does not contain `code=`, was: " + newLocation);
     		}
     		
     		String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());

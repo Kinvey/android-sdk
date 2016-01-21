@@ -60,6 +60,13 @@ public class KinveyException extends RuntimeException{
     	this.explanation = "";
     }
 
+    public KinveyException(KinveyClientErrorCode errorCode, String reason){
+        super(formatMessage(reason));
+        this.errorCode = errorCode;
+        this.reason = reason;
+        this.errorCode = errorCode;
+    }
+
 
     public String getReason() {
         return reason;

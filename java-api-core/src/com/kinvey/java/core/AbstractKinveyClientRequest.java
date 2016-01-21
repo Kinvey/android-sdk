@@ -296,7 +296,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         if (httpRequest.getHeaders().containsKey("x-kinvey-custom-request-properties")){
         	String customHeaders = (String) httpRequest.getHeaders().get("X-Kinvey-Custom-Request-Properties");
         	if (customHeaders.getBytes("UTF-8").length > 2000){
-        		throw new KinveyException("Cannot attach more than 2000 bytes of Custom Request Properties");
+        		throw new KinveyException(KinveyClientErrorCode.RequestError, "Cannot attach more than 2000 bytes of Custom Request Properties");
         	}
         }
         return httpRequest;

@@ -65,6 +65,10 @@ public enum  KinveyClientErrorCode {
      */
     RequestError("The request failed.","", ""),
     /**
+     * Response does not contain required data.
+     */
+    ResponseMalformed("The response does not contain required data failed.","", ""),
+    /**
      * Request timeout error.
      */
     RequestTimeoutError("The request timed out.","", ""),

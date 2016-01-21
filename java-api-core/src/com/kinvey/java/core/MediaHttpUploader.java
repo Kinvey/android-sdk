@@ -293,7 +293,7 @@ public class MediaHttpUploader {
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
             // If the initiation request is not successful return it immediately.
-            throw  new KinveyException("Uploading Metadata Failed");
+            throw  new KinveyException(KinveyClientErrorCode.RequestError, "Uploading Metadata Failed");
         }
         GenericUrl uploadUrl;
         Map<String, String> headers = null;
@@ -357,7 +357,7 @@ public class MediaHttpUploader {
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
 		} else {
-            throw  new KinveyException("Uploading File Failed");
+            throw  new KinveyException(KinveyClientErrorCode.RequestError, "Uploading File Failed");
         }
 		return meta;
 		
