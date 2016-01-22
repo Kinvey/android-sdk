@@ -13,6 +13,7 @@
  */
 package com.kinvey.java.offline;
 
+import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.MediaHttpDownloader;
@@ -41,7 +42,7 @@ public enum FilePolicy {
             MediaOfflineDownloader downloader = getDownloader(initiationClientRequest);
             if (downloader != null){
                 downloader.fromCache((AbstractClient) initiationClientRequest.getAbstractKinveyClient(), initiationClientRequest, out);
-                if (out == null){
+                if (downloader.getDownloadState() != MediaHttpDownloader.DownloadState.DOWNLOAD_COMPLETE){
                     downloader.fromService(initiationClientRequest, out);
                 }
             }

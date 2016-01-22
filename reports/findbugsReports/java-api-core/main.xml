@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BugCollection version="3.0.0" sequence="0" timestamp="1452730782533" analysisTimestamp="1452730782661" release="">
+  <Project projectName="">
+    <Jar>/Users/Prots/Documents/Development/java-library/java-api-core/build/classes/main</Jar>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/AbstractClient.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/AppData.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/AppDataOperation.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/ClientExtension.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/CustomEndpoints.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/File.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/KinveyException.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedData.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/Logger.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/Metrics.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/MimeTypeFinder.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/Query.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/User.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/UserDiscovery.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/UserGroup.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/Util.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/ClientUsers.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/Credential.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/CredentialManager.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/CredentialStore.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/InMemoryClientUsers.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/InMemoryCredentialStore.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/KinveyAuthRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/KinveyAuthResponse.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/auth/ThirdPartyIdentity.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/cache/AbstractKinveyCachedClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/cache/Cache.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/cache/CachePolicy.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/cache/InMemoryLRUCache.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/cache/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/AbstractKinveyClient.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/AbstractKinveyClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/AbstractKinveyJsonClient.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/AbstractKinveyJsonClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/AsyncExecutor.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/DownloaderProgressListener.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyAggregateCallback.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyCancellableCallback.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyClientCallback.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyClientRequestInitializer.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyHeaders.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyJsonError.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyJsonResponseException.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/KinveyRequestInitializer.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/MediaHttpDownloader.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/MediaHttpUploader.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/MetaDownloadProgressListener.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/MetaUploadProgressListener.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/RawJsonFactory.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/core/UploaderProgressListener.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedResources/GetLinkedResourceClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedResources/LinkedFile.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedResources/LinkedGenericJson.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedResources/LinkedResourceOperation.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/LinkedResources/SaveLinkedResourceClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/AggregateEntity.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/Aggregation.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/FileMetaData.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/KinveyDeleteResponse.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/KinveyFile.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/KinveyMetaData.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/KinveyReference.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/model/UserLookup.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/AbstractKinveyOfflineClientRequest.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/FileCache.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/FilePolicy.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/MediaOfflineDownloader.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/OfflinePolicy.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/offline/OfflineStore.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/query/AbstractQuery.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/query/MongoQueryFilter.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/query/package-info.java</SrcDir>
+    <SrcDir>/Users/Prots/Documents/Development/java-library/java-api-core/src/com/kinvey/java/query/QueryFilter.java</SrcDir>
+  </Project>
+  <Errors errors="0" missingClasses="29">
+    <MissingClass>com.google.api.client.http.AbstractInputStreamContent</MissingClass>
+    <MissingClass>com.google.api.client.http.BasicAuthentication</MissingClass>
+    <MissingClass>com.google.api.client.http.EmptyContent</MissingClass>
+    <MissingClass>com.google.api.client.http.ExponentialBackOffPolicy</MissingClass>
+    <MissingClass>com.google.api.client.http.GenericUrl</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpHeaders</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpMediaType</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpRequest</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpRequestFactory</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpResponse</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpResponseException</MissingClass>
+    <MissingClass>com.google.api.client.http.HttpTransport</MissingClass>
+    <MissingClass>com.google.api.client.http.InputStreamContent</MissingClass>
+    <MissingClass>com.google.api.client.http.UriTemplate</MissingClass>
+    <MissingClass>com.google.api.client.http.UrlEncodedContent</MissingClass>
+    <MissingClass>com.google.api.client.http.json.JsonHttpContent</MissingClass>
+    <MissingClass>com.google.api.client.json.GenericJson</MissingClass>
+    <MissingClass>com.google.api.client.json.JsonFactory</MissingClass>
+    <MissingClass>com.google.api.client.json.JsonGenerator</MissingClass>
+    <MissingClass>com.google.api.client.json.JsonObjectParser</MissingClass>
+    <MissingClass>com.google.api.client.json.JsonParser</MissingClass>
+    <MissingClass>com.google.api.client.util.ByteStreams</MissingClass>
+    <MissingClass>com.google.api.client.util.Charsets</MissingClass>
+    <MissingClass>com.google.api.client.util.GenericData</MissingClass>
+    <MissingClass>com.google.api.client.util.IOUtils</MissingClass>
+    <MissingClass>com.google.api.client.util.ObjectParser</MissingClass>
+    <MissingClass>com.google.common.base.Joiner</MissingClass>
+    <MissingClass>com.google.common.base.Preconditions</MissingClass>
+    <MissingClass>com.google.gson.Gson</MissingClass>
+  </Errors>
+  <FindBugsSummary timestamp="Thu, 14 Jan 2016 03:19:42 +0300" total_classes="171" referenced_classes="276" total_bugs="0" total_size="4974" num_packages="8" java_version="1.7.0_79" vm_version="24.79-b02" cpu_seconds="44.24" clock_seconds="23.53" peak_mbytes="304.20" alloc_mbytes="3641.00" gc_seconds="0.23">
+    <FileStats path="com/kinvey/java/AbstractClient.java" bugCount="0" size="198"/>
+    <FileStats path="com/kinvey/java/AppData.java" bugCount="0" size="367"/>
+    <FileStats path="com/kinvey/java/AppDataOperation.java" bugCount="0" size="97"/>
+    <FileStats path="com/kinvey/java/ClientExtension.java" bugCount="0" size="2"/>
+    <FileStats path="com/kinvey/java/CustomEndpoints.java" bugCount="0" size="77"/>
+    <FileStats path="com/kinvey/java/File.java" bugCount="0" size="300"/>
+    <FileStats path="com/kinvey/java/KinveyException.java" bugCount="0" size="35"/>
+    <FileStats path="com/kinvey/java/LinkedData.java" bugCount="0" size="155"/>
+    <FileStats path="com/kinvey/java/LinkedResources/GetLinkedResourceClientRequest.java" bugCount="0" size="47"/>
+    <FileStats path="com/kinvey/java/LinkedResources/LinkedFile.java" bugCount="0" size="61"/>
+    <FileStats path="com/kinvey/java/LinkedResources/LinkedGenericJson.java" bugCount="0" size="16"/>
+    <FileStats path="com/kinvey/java/LinkedResources/LinkedResourceOperation.java" bugCount="0" size="3"/>
+    <FileStats path="com/kinvey/java/LinkedResources/SaveLinkedResourceClientRequest.java" bugCount="0" size="70"/>
+    <FileStats path="com/kinvey/java/Logger.java" bugCount="0" size="101"/>
+    <FileStats path="com/kinvey/java/Metrics.java" bugCount="0" size="51"/>
+    <FileStats path="com/kinvey/java/MimeTypeFinder.java" bugCount="0" size="4"/>
+    <FileStats path="com/kinvey/java/Query.java" bugCount="0" size="173"/>
+    <FileStats path="com/kinvey/java/User.java" bugCount="0" size="562"/>
+    <FileStats path="com/kinvey/java/UserDiscovery.java" bugCount="0" size="43"/>
+    <FileStats path="com/kinvey/java/UserGroup.java" bugCount="0" size="256"/>
+    <FileStats path="com/kinvey/java/Util.java" bugCount="0" size="23"/>
+    <FileStats path="com/kinvey/java/auth/ClientUsers.java" bugCount="0" size="7"/>
+    <FileStats path="com/kinvey/java/auth/Credential.java" bugCount="0" size="37"/>
+    <FileStats path="com/kinvey/java/auth/CredentialManager.java" bugCount="0" size="29"/>
+    <FileStats path="com/kinvey/java/auth/CredentialStore.java" bugCount="0" size="4"/>
+    <FileStats path="com/kinvey/java/auth/InMemoryClientUsers.java" bugCount="0" size="36"/>
+    <FileStats path="com/kinvey/java/auth/InMemoryCredentialStore.java" bugCount="0" size="17"/>
+    <FileStats path="com/kinvey/java/auth/KinveyAuthRequest.java" bugCount="0" size="170"/>
+    <FileStats path="com/kinvey/java/auth/KinveyAuthResponse.java" bugCount="0" size="20"/>
+    <FileStats path="com/kinvey/java/auth/ThirdPartyIdentity.java" bugCount="0" size="152"/>
+    <FileStats path="com/kinvey/java/cache/AbstractKinveyCachedClientRequest.java" bugCount="0" size="52"/>
+    <FileStats path="com/kinvey/java/cache/Cache.java" bugCount="0" size="3"/>
+    <FileStats path="com/kinvey/java/cache/CachePolicy.java" bugCount="0" size="66"/>
+    <FileStats path="com/kinvey/java/cache/InMemoryLRUCache.java" bugCount="0" size="39"/>
+    <FileStats path="com/kinvey/java/core/AbstractKinveyClient.java" bugCount="0" size="107"/>
+    <FileStats path="com/kinvey/java/core/AbstractKinveyClientRequest.java" bugCount="0" size="188"/>
+    <FileStats path="com/kinvey/java/core/AbstractKinveyJsonClient.java" bugCount="0" size="37"/>
+    <FileStats path="com/kinvey/java/core/AbstractKinveyJsonClientRequest.java" bugCount="0" size="17"/>
+    <FileStats path="com/kinvey/java/core/AsyncExecutor.java" bugCount="0" size="2"/>
+    <FileStats path="com/kinvey/java/core/DownloaderProgressListener.java" bugCount="0" size="2"/>
+    <FileStats path="com/kinvey/java/core/KinveyAggregateCallback.java" bugCount="0" size="10"/>
+    <FileStats path="com/kinvey/java/core/KinveyCancellableCallback.java" bugCount="0" size="3"/>
+    <FileStats path="com/kinvey/java/core/KinveyClientCallback.java" bugCount="0" size="3"/>
+    <FileStats path="com/kinvey/java/core/KinveyClientRequestInitializer.java" bugCount="0" size="36"/>
+    <FileStats path="com/kinvey/java/core/KinveyHeaders.java" bugCount="0" size="10"/>
+    <FileStats path="com/kinvey/java/core/KinveyJsonError.java" bugCount="0" size="23"/>
+    <FileStats path="com/kinvey/java/core/KinveyJsonResponseException.java" bugCount="0" size="29"/>
+    <FileStats path="com/kinvey/java/core/KinveyRequestInitializer.java" bugCount="0" size="2"/>
+    <FileStats path="com/kinvey/java/core/MediaHttpDownloader.java" bugCount="0" size="155"/>
+    <FileStats path="com/kinvey/java/core/MediaHttpUploader.java" bugCount="0" size="183"/>
+    <FileStats path="com/kinvey/java/core/MetaDownloadProgressListener.java" bugCount="0" size="9"/>
+    <FileStats path="com/kinvey/java/core/MetaUploadProgressListener.java" bugCount="0" size="12"/>
+    <FileStats path="com/kinvey/java/core/RawJsonFactory.java" bugCount="0" size="15"/>
+    <FileStats path="com/kinvey/java/core/UploaderProgressListener.java" bugCount="0" size="2"/>
+    <FileStats path="com/kinvey/java/model/AggregateEntity.java" bugCount="0" size="61"/>
+    <FileStats path="com/kinvey/java/model/Aggregation.java" bugCount="0" size="19"/>
+    <FileStats path="com/kinvey/java/model/FileMetaData.java" bugCount="0" size="57"/>
+    <FileStats path="com/kinvey/java/model/KinveyDeleteResponse.java" bugCount="0" size="9"/>
+    <FileStats path="com/kinvey/java/model/KinveyFile.java" bugCount="0" size="15"/>
+    <FileStats path="com/kinvey/java/model/KinveyMetaData.java" bugCount="0" size="65"/>
+    <FileStats path="com/kinvey/java/model/KinveyReference.java" bugCount="0" size="47"/>
+    <FileStats path="com/kinvey/java/model/UserLookup.java" bugCount="0" size="39"/>
+    <FileStats path="com/kinvey/java/offline/AbstractKinveyOfflineClientRequest.java" bugCount="0" size="104"/>
+    <FileStats path="com/kinvey/java/offline/FileCache.java" bugCount="0" size="4"/>
+    <FileStats path="com/kinvey/java/offline/FilePolicy.java" bugCount="0" size="50"/>
+    <FileStats path="com/kinvey/java/offline/MediaOfflineDownloader.java" bugCount="0" size="24"/>
+    <FileStats path="com/kinvey/java/offline/OfflinePolicy.java" bugCount="0" size="43"/>
+    <FileStats path="com/kinvey/java/offline/OfflineStore.java" bugCount="0" size="7"/>
+    <FileStats path="com/kinvey/java/query/AbstractQuery.java" bugCount="0" size="65"/>
+    <FileStats path="com/kinvey/java/query/MongoQueryFilter.java" bugCount="0" size="181"/>
+    <FileStats path="com/kinvey/java/query/QueryFilter.java" bugCount="0" size="66"/>
+    <PackageStats package="com.kinvey.java" total_bugs="0" total_types="69" total_size="2444">
+      <ClassStats class="com.kinvey.java.AbstractClient" sourceFile="AbstractClient.java" interface="false" size="100" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AbstractClient$Builder" sourceFile="AbstractClient.java" interface="false" size="48" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AbstractClient$Builder$Option" sourceFile="AbstractClient.java" interface="false" size="50" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData" sourceFile="AppData.java" interface="false" size="163" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$1" sourceFile="AppData.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$2" sourceFile="AppData.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$Aggregate" sourceFile="AppData.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$Delete" sourceFile="AppData.java" interface="false" size="35" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$Get" sourceFile="AppData.java" interface="false" size="64" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$GetEntity" sourceFile="AppData.java" interface="false" size="36" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$Save" sourceFile="AppData.java" interface="false" size="19" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppData$SaveMode" sourceFile="AppData.java" interface="false" size="11" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppDataOperation" sourceFile="AppDataOperation.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppDataOperation$AppDataRequestBuilder" sourceFile="AppDataOperation.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppDataOperation$BlockingDeleteBuilder" sourceFile="AppDataOperation.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppDataOperation$BlockingGetBuilder" sourceFile="AppDataOperation.java" interface="false" size="37" bugs="0"/>
+      <ClassStats class="com.kinvey.java.AppDataOperation$BlockingSaveBuilder" sourceFile="AppDataOperation.java" interface="false" size="20" bugs="0"/>
+      <ClassStats class="com.kinvey.java.ClientExtension" sourceFile="ClientExtension.java" interface="true" size="2" bugs="0"/>
+      <ClassStats class="com.kinvey.java.CustomEndpoints" sourceFile="CustomEndpoints.java" interface="false" size="53" bugs="0"/>
+      <ClassStats class="com.kinvey.java.CustomEndpoints$CustomCommand" sourceFile="CustomEndpoints.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="com.kinvey.java.CustomEndpoints$CustomCommandArray" sourceFile="CustomEndpoints.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File" sourceFile="File.java" interface="false" size="167" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$1" sourceFile="File.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$DeleteFile" sourceFile="File.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$DownloadMetadata" sourceFile="File.java" interface="false" size="14" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$DownloadMetadataAndFile" sourceFile="File.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$DownloadMetadataAndFileQuery" sourceFile="File.java" interface="false" size="27" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$UploadMetadata" sourceFile="File.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.File$UploadMetadataAndFile" sourceFile="File.java" interface="false" size="29" bugs="0"/>
+      <ClassStats class="com.kinvey.java.KinveyException" sourceFile="KinveyException.java" interface="false" size="35" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedData" sourceFile="LinkedData.java" interface="false" size="63" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedData$Get" sourceFile="LinkedData.java" interface="false" size="44" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedData$GetEntity" sourceFile="LinkedData.java" interface="false" size="32" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedData$Save" sourceFile="LinkedData.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Logger" sourceFile="Logger.java" interface="false" size="95" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Logger$KinveyLogger" sourceFile="Logger.java" interface="true" size="6" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Metrics" sourceFile="Metrics.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Metrics$Metric" sourceFile="Metrics.java" interface="false" size="30" bugs="0"/>
+      <ClassStats class="com.kinvey.java.MimeTypeFinder" sourceFile="MimeTypeFinder.java" interface="true" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Query" sourceFile="Query.java" interface="false" size="173" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User" sourceFile="User.java" interface="false" size="250" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$1" sourceFile="User.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$Delete" sourceFile="User.java" interface="false" size="22" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$EmailVerification" sourceFile="User.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$GetMICAccessToken" sourceFile="User.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$GetMICTempURL" sourceFile="User.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$LockDownUser" sourceFile="User.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$LoginRequest" sourceFile="User.java" interface="false" size="53" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$LoginToTempURL" sourceFile="User.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$LoginType" sourceFile="User.java" interface="false" size="29" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$LogoutRequest" sourceFile="User.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$ResetPassword" sourceFile="User.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$Retrieve" sourceFile="User.java" interface="false" size="59" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$RetrieveUsers" sourceFile="User.java" interface="false" size="40" bugs="0"/>
+      <ClassStats class="com.kinvey.java.User$Update" sourceFile="User.java" interface="false" size="34" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserDiscovery" sourceFile="UserDiscovery.java" interface="false" size="36" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserDiscovery$Lookup" sourceFile="UserDiscovery.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup" sourceFile="UserGroup.java" interface="false" size="128" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$Create" sourceFile="UserGroup.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$Delete" sourceFile="UserGroup.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$Group" sourceFile="UserGroup.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$GroupUser" sourceFile="UserGroup.java" interface="false" size="17" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$Retrieve" sourceFile="UserGroup.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$Update" sourceFile="UserGroup.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$UserGroupRequest" sourceFile="UserGroup.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$UserGroupResponse" sourceFile="UserGroup.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.UserGroup$UserSet" sourceFile="UserGroup.java" interface="false" size="20" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Util" sourceFile="Util.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.Util$Ping" sourceFile="Util.java" interface="false" size="7" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.LinkedResources" total_bugs="0" total_types="7" total_size="197">
+      <ClassStats class="com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest" sourceFile="GetLinkedResourceClientRequest.java" interface="false" size="47" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.LinkedFile" sourceFile="LinkedFile.java" interface="false" size="61" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.LinkedGenericJson" sourceFile="LinkedGenericJson.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.LinkedResourceOperation" sourceFile="LinkedResourceOperation.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest" sourceFile="SaveLinkedResourceClientRequest.java" interface="false" size="44" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest$1" sourceFile="SaveLinkedResourceClientRequest.java" interface="false" size="24" bugs="0"/>
+      <ClassStats class="com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest$MetaUploadListener" sourceFile="SaveLinkedResourceClientRequest.java" interface="true" size="2" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.auth" total_bugs="0" total_types="26" total_size="472">
+      <ClassStats class="com.kinvey.java.auth.ClientUsers" sourceFile="ClientUsers.java" interface="true" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.Credential" sourceFile="Credential.java" interface="false" size="37" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.CredentialManager" sourceFile="CredentialManager.java" interface="false" size="29" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.CredentialStore" sourceFile="CredentialStore.java" interface="true" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.InMemoryClientUsers" sourceFile="InMemoryClientUsers.java" interface="false" size="36" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.InMemoryCredentialStore" sourceFile="InMemoryCredentialStore.java" interface="false" size="17" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthRequest" sourceFile="KinveyAuthRequest.java" interface="false" size="70" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthRequest$AuthRequestPayload" sourceFile="KinveyAuthRequest.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthRequest$Builder" sourceFile="KinveyAuthRequest.java" interface="false" size="79" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthRequest$LoginType" sourceFile="KinveyAuthRequest.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthResponse" sourceFile="KinveyAuthResponse.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.KinveyAuthResponse$KinveyUserMetadata" sourceFile="KinveyAuthResponse.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity" sourceFile="ThirdPartyIdentity.java" interface="false" size="32" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$1" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$AccessToken" sourceFile="ThirdPartyIdentity.java" interface="false" size="7" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$AuthLinkCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$FacebookCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$GoogleCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$LinkedInCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$MobileIdentityCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$OAuth1" sourceFile="ThirdPartyIdentity.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$OAuth2" sourceFile="ThirdPartyIdentity.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$Provider" sourceFile="ThirdPartyIdentity.java" interface="false" size="24" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$SalesForceCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="18" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$TwitterCredential" sourceFile="ThirdPartyIdentity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.auth.ThirdPartyIdentity$Type" sourceFile="ThirdPartyIdentity.java" interface="false" size="21" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.cache" total_bugs="0" total_types="12" total_size="160">
+      <ClassStats class="com.kinvey.java.cache.AbstractKinveyCachedClientRequest" sourceFile="AbstractKinveyCachedClientRequest.java" interface="false" size="42" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.AbstractKinveyCachedClientRequest$1" sourceFile="AbstractKinveyCachedClientRequest.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.Cache" sourceFile="Cache.java" interface="true" size="3" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy" sourceFile="CachePolicy.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$1" sourceFile="CachePolicy.java" interface="false" size="5" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$2" sourceFile="CachePolicy.java" interface="false" size="5" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$3" sourceFile="CachePolicy.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$4" sourceFile="CachePolicy.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$5" sourceFile="CachePolicy.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.CachePolicy$6" sourceFile="CachePolicy.java" interface="false" size="11" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.InMemoryLRUCache" sourceFile="InMemoryLRUCache.java" interface="false" size="33" bugs="0"/>
+      <ClassStats class="com.kinvey.java.cache.InMemoryLRUCache$1" sourceFile="InMemoryLRUCache.java" interface="false" size="6" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.core" total_bugs="0" total_types="24" total_size="845">
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyClient" sourceFile="AbstractKinveyClient.java" interface="false" size="53" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyClient$Builder" sourceFile="AbstractKinveyClient.java" interface="false" size="54" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyClientRequest" sourceFile="AbstractKinveyClientRequest.java" interface="false" size="188" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyJsonClient" sourceFile="AbstractKinveyJsonClient.java" interface="false" size="13" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyJsonClient$Builder" sourceFile="AbstractKinveyJsonClient.java" interface="false" size="24" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AbstractKinveyJsonClientRequest" sourceFile="AbstractKinveyJsonClientRequest.java" interface="false" size="17" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.AsyncExecutor" sourceFile="AsyncExecutor.java" interface="true" size="2" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.DownloaderProgressListener" sourceFile="DownloaderProgressListener.java" interface="true" size="2" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyAggregateCallback" sourceFile="KinveyAggregateCallback.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyCancellableCallback" sourceFile="KinveyCancellableCallback.java" interface="true" size="3" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyClientCallback" sourceFile="KinveyClientCallback.java" interface="true" size="3" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyClientRequestInitializer" sourceFile="KinveyClientRequestInitializer.java" interface="false" size="36" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyHeaders" sourceFile="KinveyHeaders.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyJsonError" sourceFile="KinveyJsonError.java" interface="false" size="23" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyJsonResponseException" sourceFile="KinveyJsonResponseException.java" interface="false" size="29" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.KinveyRequestInitializer" sourceFile="KinveyRequestInitializer.java" interface="true" size="2" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MediaHttpDownloader" sourceFile="MediaHttpDownloader.java" interface="false" size="136" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MediaHttpDownloader$DownloadState" sourceFile="MediaHttpDownloader.java" interface="false" size="19" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MediaHttpUploader" sourceFile="MediaHttpUploader.java" interface="false" size="166" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MediaHttpUploader$UploadState" sourceFile="MediaHttpUploader.java" interface="false" size="17" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MetaDownloadProgressListener" sourceFile="MetaDownloadProgressListener.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.MetaUploadProgressListener" sourceFile="MetaUploadProgressListener.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.RawJsonFactory" sourceFile="RawJsonFactory.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.core.UploaderProgressListener" sourceFile="UploaderProgressListener.java" interface="true" size="2" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.model" total_bugs="0" total_types="13" total_size="312">
+      <ClassStats class="com.kinvey.java.model.AggregateEntity" sourceFile="AggregateEntity.java" interface="false" size="40" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.AggregateEntity$1" sourceFile="AggregateEntity.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.AggregateEntity$AggregateType" sourceFile="AggregateEntity.java" interface="false" size="17" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.Aggregation" sourceFile="Aggregation.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.Aggregation$Result" sourceFile="Aggregation.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.FileMetaData" sourceFile="FileMetaData.java" interface="false" size="57" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyDeleteResponse" sourceFile="KinveyDeleteResponse.java" interface="false" size="9" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyFile" sourceFile="KinveyFile.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyMetaData" sourceFile="KinveyMetaData.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyMetaData$AccessControlList" sourceFile="KinveyMetaData.java" interface="false" size="40" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyMetaData$AccessControlList$AclGroups" sourceFile="KinveyMetaData.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.KinveyReference" sourceFile="KinveyReference.java" interface="false" size="47" bugs="0"/>
+      <ClassStats class="com.kinvey.java.model.UserLookup" sourceFile="UserLookup.java" interface="false" size="39" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.offline" total_bugs="0" total_types="12" total_size="232">
+      <ClassStats class="com.kinvey.java.offline.AbstractKinveyOfflineClientRequest" sourceFile="AbstractKinveyOfflineClientRequest.java" interface="false" size="104" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.FileCache" sourceFile="FileCache.java" interface="true" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.FilePolicy" sourceFile="FilePolicy.java" interface="false" size="21" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.FilePolicy$1" sourceFile="FilePolicy.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.FilePolicy$2" sourceFile="FilePolicy.java" interface="false" size="10" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.FilePolicy$3" sourceFile="FilePolicy.java" interface="false" size="11" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.MediaOfflineDownloader" sourceFile="MediaOfflineDownloader.java" interface="false" size="24" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.OfflinePolicy" sourceFile="OfflinePolicy.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.OfflinePolicy$1" sourceFile="OfflinePolicy.java" interface="false" size="5" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.OfflinePolicy$2" sourceFile="OfflinePolicy.java" interface="false" size="15" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.OfflinePolicy$3" sourceFile="OfflinePolicy.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.offline.OfflineStore" sourceFile="OfflineStore.java" interface="true" size="7" bugs="0"/>
+    </PackageStats>
+    <PackageStats package="com.kinvey.java.query" total_bugs="0" total_types="8" total_size="312">
+      <ClassStats class="com.kinvey.java.query.AbstractQuery" sourceFile="AbstractQuery.java" interface="false" size="54" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.AbstractQuery$SortOrder" sourceFile="AbstractQuery.java" interface="false" size="11" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.MongoQueryFilter" sourceFile="MongoQueryFilter.java" interface="false" size="52" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.MongoQueryFilter$1" sourceFile="MongoQueryFilter.java" interface="false" size="4" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.MongoQueryFilter$MongoQueryFilterBuilder" sourceFile="MongoQueryFilter.java" interface="false" size="125" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.QueryFilter" sourceFile="QueryFilter.java" interface="true" size="8" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.QueryFilter$QueryFilterBuilder" sourceFile="QueryFilter.java" interface="true" size="11" bugs="0"/>
+      <ClassStats class="com.kinvey.java.query.QueryFilter$QueryFilterBuilder$Operators" sourceFile="QueryFilter.java" interface="false" size="47" bugs="0"/>
+    </PackageStats>
+    <FindBugsProfile>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.ClassInfoAnalysisEngine" totalMilliseconds="2194" invocations="841" avgMicrosecondsPerInvocation="2609" maxMicrosecondsPerInvocation="62268" standardDeviationMircosecondsPerInvocation="6617"/>
+      <ClassProfile name="edu.umd.cs.findbugs.ba.npe.NullDerefAndRedundantComparisonFinder" totalMilliseconds="1330" invocations="935" avgMicrosecondsPerInvocation="1422" maxMicrosecondsPerInvocation="74380" standardDeviationMircosecondsPerInvocation="4655"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.IsNullValueDataflowFactory" totalMilliseconds="1223" invocations="986" avgMicrosecondsPerInvocation="1241" maxMicrosecondsPerInvocation="111190" standardDeviationMircosecondsPerInvocation="5062"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.ValueNumberDataflowFactory" totalMilliseconds="1139" invocations="992" avgMicrosecondsPerInvocation="1149" maxMicrosecondsPerInvocation="137727" standardDeviationMircosecondsPerInvocation="6065"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.UnconditionalValueDerefDataflowFactory" totalMilliseconds="901" invocations="976" avgMicrosecondsPerInvocation="923" maxMicrosecondsPerInvocation="53415" standardDeviationMircosecondsPerInvocation="3274"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.TypeDataflowFactory" totalMilliseconds="884" invocations="990" avgMicrosecondsPerInvocation="893" maxMicrosecondsPerInvocation="41470" standardDeviationMircosecondsPerInvocation="2967"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FieldItemSummary" totalMilliseconds="872" invocations="276" avgMicrosecondsPerInvocation="3161" maxMicrosecondsPerInvocation="50780" standardDeviationMircosecondsPerInvocation="6755"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindRefComparison$SpecialTypeAnalysis" totalMilliseconds="827" invocations="659" avgMicrosecondsPerInvocation="1255" maxMicrosecondsPerInvocation="92703" standardDeviationMircosecondsPerInvocation="6063"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.MethodGenFactory" totalMilliseconds="676" invocations="1076" avgMicrosecondsPerInvocation="628" maxMicrosecondsPerInvocation="421390" standardDeviationMircosecondsPerInvocation="13085"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.CFGFactory" totalMilliseconds="581" invocations="986" avgMicrosecondsPerInvocation="589" maxMicrosecondsPerInvocation="28802" standardDeviationMircosecondsPerInvocation="1674"/>
+      <ClassProfile name="edu.umd.cs.findbugs.OpcodeStack$JumpInfoFactory" totalMilliseconds="581" invocations="1274" avgMicrosecondsPerInvocation="456" maxMicrosecondsPerInvocation="11088" standardDeviationMircosecondsPerInvocation="1094"/>
+      <ClassProfile name="edu.umd.cs.findbugs.util.TopologicalSort" totalMilliseconds="369" invocations="747" avgMicrosecondsPerInvocation="494" maxMicrosecondsPerInvocation="29807" standardDeviationMircosecondsPerInvocation="2121"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.LoadOfKnownNullValue" totalMilliseconds="343" invocations="170" avgMicrosecondsPerInvocation="2019" maxMicrosecondsPerInvocation="61137" standardDeviationMircosecondsPerInvocation="6205"/>
+      <ClassProfile name="edu.umd.cs.findbugs.ba.npe.TypeQualifierNullnessAnnotationDatabase" totalMilliseconds="328" invocations="12325" avgMicrosecondsPerInvocation="26" maxMicrosecondsPerInvocation="51462" standardDeviationMircosecondsPerInvocation="617"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.ClassDataAnalysisEngine" totalMilliseconds="289" invocations="844" avgMicrosecondsPerInvocation="343" maxMicrosecondsPerInvocation="11442" standardDeviationMircosecondsPerInvocation="869"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.BuildObligationPolicyDatabase" totalMilliseconds="283" invocations="276" avgMicrosecondsPerInvocation="1027" maxMicrosecondsPerInvocation="15638" standardDeviationMircosecondsPerInvocation="1771"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.ConstantDataflowFactory" totalMilliseconds="255" invocations="986" avgMicrosecondsPerInvocation="259" maxMicrosecondsPerInvocation="27107" standardDeviationMircosecondsPerInvocation="1068"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.NoteDirectlyRelevantTypeQualifiers" totalMilliseconds="251" invocations="276" avgMicrosecondsPerInvocation="910" maxMicrosecondsPerInvocation="14398" standardDeviationMircosecondsPerInvocation="1874"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.URLProblems" totalMilliseconds="224" invocations="171" avgMicrosecondsPerInvocation="1314" maxMicrosecondsPerInvocation="89851" standardDeviationMircosecondsPerInvocation="6987"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FunctionsThatMightBeMistakenForProcedures" totalMilliseconds="219" invocations="276" avgMicrosecondsPerInvocation="794" maxMicrosecondsPerInvocation="14542" standardDeviationMircosecondsPerInvocation="1731"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.LiveLocalStoreDataflowFactory" totalMilliseconds="203" invocations="894" avgMicrosecondsPerInvocation="227" maxMicrosecondsPerInvocation="35605" standardDeviationMircosecondsPerInvocation="1432"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindDeadLocalStores" totalMilliseconds="198" invocations="171" avgMicrosecondsPerInvocation="1162" maxMicrosecondsPerInvocation="101268" standardDeviationMircosecondsPerInvocation="7754"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.JavaClassAnalysisEngine" totalMilliseconds="189" invocations="335" avgMicrosecondsPerInvocation="565" maxMicrosecondsPerInvocation="37108" standardDeviationMircosecondsPerInvocation="2710"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.OverridingEqualsNotSymmetrical" totalMilliseconds="184" invocations="276" avgMicrosecondsPerInvocation="668" maxMicrosecondsPerInvocation="9881" standardDeviationMircosecondsPerInvocation="1287"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.CalledMethods" totalMilliseconds="174" invocations="276" avgMicrosecondsPerInvocation="631" maxMicrosecondsPerInvocation="13012" standardDeviationMircosecondsPerInvocation="1528"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindOpenStream" totalMilliseconds="165" invocations="171" avgMicrosecondsPerInvocation="967" maxMicrosecondsPerInvocation="84564" standardDeviationMircosecondsPerInvocation="7034"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.ConstantPoolGenFactory" totalMilliseconds="157" invocations="171" avgMicrosecondsPerInvocation="919" maxMicrosecondsPerInvocation="121909" standardDeviationMircosecondsPerInvocation="9303"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindInconsistentSync2" totalMilliseconds="156" invocations="171" avgMicrosecondsPerInvocation="917" maxMicrosecondsPerInvocation="37335" standardDeviationMircosecondsPerInvocation="3027"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.MethodReturnCheck" totalMilliseconds="154" invocations="171" avgMicrosecondsPerInvocation="905" maxMicrosecondsPerInvocation="44311" standardDeviationMircosecondsPerInvocation="4006"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.EqualsOperandShouldHaveClassCompatibleWithThis" totalMilliseconds="147" invocations="276" avgMicrosecondsPerInvocation="533" maxMicrosecondsPerInvocation="8737" standardDeviationMircosecondsPerInvocation="999"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.UnreadFields" totalMilliseconds="144" invocations="171" avgMicrosecondsPerInvocation="847" maxMicrosecondsPerInvocation="12910" standardDeviationMircosecondsPerInvocation="1647"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindUncalledPrivateMethods" totalMilliseconds="137" invocations="171" avgMicrosecondsPerInvocation="801" maxMicrosecondsPerInvocation="104615" standardDeviationMircosecondsPerInvocation="7980"/>
+    </FindBugsProfile>
+  </FindBugsSummary>
+  <ClassFeatures></ClassFeatures>
+  <History></History>
+</BugCollection>
