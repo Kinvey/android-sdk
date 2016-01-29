@@ -37,6 +37,7 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
@@ -464,6 +465,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         }
     }
 
-
+    public abstract ICacheManager getCacheManager();
 
 }

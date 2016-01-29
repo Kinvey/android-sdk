@@ -107,11 +107,11 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
         String mimetype;
         String fileExt = "";
 
-        if (meta.getFileName() != null && meta.getFileName().length() > 0 && meta.getFileName().lastIndexOf(".") > 0) {
+        if (meta.getFileName() != null && meta.getFileName().length() > 0 && meta.getFileName().lastIndexOf("") > 0) {
             fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), meta.getFileName().length());
         }
 
-        if (file.getName() != null && file.getName().lastIndexOf(".") > 0) {
+        if (file.getName() != null && file.getName().lastIndexOf("") > 0) {
             if (fileExt.length() == 0) {
                 fileExt = file.getName().substring(file.getName().lastIndexOf('.'), file.getName().length());
             }
@@ -142,7 +142,7 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
         String mimetype = null;
 
         if (metaData.getFileName() != null) {
-            int dotIndex = metaData.getFileName().lastIndexOf(".");
+            int dotIndex = metaData.getFileName().lastIndexOf("");
 
             if (dotIndex > 0 && dotIndex + 1 < metaData.getFileName().length()) {
                 mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(metaData.getFileName().substring(dotIndex + 1, metaData.getFileName().length()));

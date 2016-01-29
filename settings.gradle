@@ -1,20 +1,20 @@
 rootProject.name = 'parent'
-include ':java-api-core', ':TestDrive', ':StatusShare', ':ContentBox-Android'
+include ':java-api-core'//, ':TestDrive', ':StatusShare', ':ContentBox-Android'
 include ':android-lib'
 include ':android-secure'
 include ':java-lib'
-include ':android-samples'
-include ':samples-java'
-include ':HelloWorld'
+//include ':android-samples'
+//include ':samples-java'
+//include ':HelloWorld'
 
 project(':java-api-core').projectDir = "$rootDir/java-api-core" as File
 project(':android-lib').projectDir = "$rootDir/android-lib" as File
 project(':android-secure').projectDir = "$rootDir/android-secure" as File
 project(':java-lib').projectDir = "$rootDir/java-lib" as File
-project(':android-samples').projectDir = "$rootDir/samples" as File
-project(':samples-java').projectDir = "$rootDir/samples-java" as File
-project(':TestDrive').projectDir = "samples/TestDrive-Android" as File
-project(':StatusShare').projectDir = "samples/StatusShare-Android" as File
-project(':HelloWorld').projectDir = "samples-java/HelloWorld" as File
+//project(':android-samples').projectDir = "$rootDir/samples" as File
+//project(':samples-java').projectDir = "$rootDir/samples-java" as File
+//project(':TestDrive').projectDir = "samples/TestDrive-Android" as File
+//project(':StatusShare').projectDir = "samples/StatusShare-Android" as File
+//project(':HelloWorld').projectDir = "samples-java/HelloWorld" as File
 
 

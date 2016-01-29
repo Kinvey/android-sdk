@@ -13,13 +13,9 @@ subprojects {
 
   repositories {
     mavenLocal()
-
+    jcenter()
     maven {
-      credentials {
-        username System.properties['mvn_username']
-        password System.properties['mvn_password']
-      }
-      url "https://build.kinvey.com/nexus/content/repositories/thirdparty"
+      url  "http://dl.bintray.com/realm/maven"
     }
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     maven { url "http://repo1.maven.org/maven2" }

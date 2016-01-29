@@ -38,6 +38,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
+import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -54,6 +55,7 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 
 /**
@@ -315,6 +317,11 @@ public class Client extends AbstractClient {
         synchronized (lock) {
             return new AsyncCustomEndpoints(myClass, this);
         }
+    }
+
+    @Override
+    public ICacheManager getCacheManager() {
+        return RealmCacheManager.getInstance(getContext().getApplicationContext());
     }
 
     /**
@@ -947,5 +954,9 @@ public class Client extends AbstractClient {
             }
         }
     }
+
+
+
+
 }
 
