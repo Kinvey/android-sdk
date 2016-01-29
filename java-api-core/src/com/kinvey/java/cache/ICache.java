@@ -78,5 +78,10 @@ public interface ICache<T extends GenericJson> {
      */
     void delete(Iterable<String> ids);
 
+    /**
+     * Delete all object from cache
+     */
+    void clear();
+
 
 }

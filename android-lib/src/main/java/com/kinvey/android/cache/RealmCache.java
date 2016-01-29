@@ -152,6 +152,17 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return mRealm;
     }
 
+    public void clear(){
+        mRealm.beginTransaction();
+        try {
+            mRealm.where(mCollection)
+                    .findAll()
+                    .clear();
+        } finally {
+            mRealm.commitTransaction();
+        }
+    }
+
     public Class<T> getCollectionItemClass() {
         return mCollectionItemClass;
     }
