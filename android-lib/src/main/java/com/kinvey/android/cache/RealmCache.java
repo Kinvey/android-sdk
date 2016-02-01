@@ -33,8 +33,19 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     @Override
     public List<T> get(Query query) {
+        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+        QueryHelper.prepareRealmQuery(realmQuery, query);
 
-        return null;
+        RealmResults<DynamicRealmObject> objects = realmQuery.findAll();
+
+        List<T> ret = new ArrayList<T>();
+
+        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
+            DynamicRealmObject obj = iterator.next();
+            ret.add(realmToObject(obj));
+        }
+
+        return ret;
     }
 
     @Override

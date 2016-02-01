@@ -55,8 +55,17 @@ public class RealmCacheManager implements ICacheManager {
                     try {
                         //remove existing table if any
                         if (mRealm.getSchema().contains(collection)) {
+                            //must be defined as soon as primary key stays even if we remove a table
+                            mRealm.getSchema().get(collection).removePrimaryKey();
                             mRealm.getSchema().remove(collection);
                         }
+                    } finally {
+                        mRealm.commitTransaction();
+                    }
+
+                    //split table remove and ceate
+                    mRealm.beginTransaction();
+                    try{
                         //create table scheme
                         cache.createRealmTable(mRealm.getSchema());
                         //store table hash for futher usage
@@ -116,9 +125,12 @@ public class RealmCacheManager implements ICacheManager {
         DynamicRealmObject obj = mRealm.where(TABLE_HASH_NAME)
                 .equalTo("collection", collection).findFirst();
         if (obj == null){
-            obj = mRealm.createObject(TABLE_HASH_NAME);
+            obj = mRealm.createObject(TABLE_HASH_NAME,collection);
         }
-        obj.set("collection", collection);
         obj.set("hash", hash);
+    }
+
+    public void destroy(){
+
     }
 }
