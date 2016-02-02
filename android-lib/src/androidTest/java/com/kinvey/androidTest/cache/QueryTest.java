@@ -64,7 +64,7 @@ public class QueryTest {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.in("_id", new String[]{"1", "2"});
 
-        QueryHelper.prepareRealmQuery(query, q);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
 
         verify(query, times(1)).beginGroup();
         verify(query, times(2)).equalTo(eq("_id"), anyString());
@@ -80,7 +80,7 @@ public class QueryTest {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.notIn("_id", new String[]{"1", "2"});
 
-        QueryHelper.prepareRealmQuery(query, q);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
 
         verify(query, times(2)).beginGroup();
         verify(query, times(2)).equalTo(eq("_id"), anyString());

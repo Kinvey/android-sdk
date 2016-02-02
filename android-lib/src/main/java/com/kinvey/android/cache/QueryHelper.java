@@ -3,6 +3,7 @@ package com.kinvey.android.cache;
 
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.QueryFilter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,13 +18,35 @@ import io.realm.RealmQuery;
  */
 public abstract class QueryHelper {
 
-    public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Query kinveyQuery){
-
-        Map<String, Object> queryMap = kinveyQuery.getQueryFilterMap();
+    public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Map<String, Object> queryMap){
         for (Map.Entry<String, Object> entity : queryMap.entrySet()){
             String field = entity.getKey();
             Object params = entity.getValue();
-            if (params instanceof Map){
+
+
+            if (field.equalsIgnoreCase("$and")){
+
+            } else if (field.equalsIgnoreCase("$or")){
+                realmQuery.beginGroup();
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components != null && components.length > 0) {
+                        realmQuery.beginGroup();
+                        prepareRealmQuery(realmQuery, components[0]);
+                        realmQuery.endGroup();
+                        for (int i = 1 ; i < components.length; i++) {
+                            realmQuery.or();
+                            realmQuery.beginGroup();
+                            prepareRealmQuery(realmQuery, components[i]);
+                            realmQuery.endGroup();
+                        }
+                    }
+                }
+                realmQuery.endGroup();
+
+            } else if (field.equalsIgnoreCase("$not")){
+
+            } else if (params instanceof Map){
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()){
                     String operation = paramMap.getKey();
                     if (operation.equalsIgnoreCase("$in")){
@@ -42,17 +65,13 @@ public abstract class QueryHelper {
                         lte(realmQuery, field, paramMap.getValue());
                     } else if (operation.equalsIgnoreCase("$ne")){
                         notEqualTo(realmQuery, field, paramMap.getValue());
-                    } else if (operation.equalsIgnoreCase("$and")){
-
-                    } else if (operation.equalsIgnoreCase("$or")){
-
-                    } else if (operation.equalsIgnoreCase("$not")){
-
                     } else {
                         throw new UnsupportedOperationException("this query is not supported by cache");
                     }
 
                 }
+            } else {
+                equalTo(realmQuery, field, params);
             }
         }
         return realmQuery;

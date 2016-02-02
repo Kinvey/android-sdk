@@ -31,10 +31,24 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         this.mCollectionItemClass = collectionItemClass;
     }
 
+    public List<T> test(){
+        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+        RealmResults<DynamicRealmObject> objects = realmQuery.lessThan("test", 2).or().equalTo("_id","1").findAll();
+
+        List<T> ret = new ArrayList<T>();
+
+        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
+            DynamicRealmObject obj = iterator.next();
+            ret.add(realmToObject(obj));
+        }
+
+        return ret;
+    }
+
     @Override
     public List<T> get(Query query) {
         RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
-        QueryHelper.prepareRealmQuery(realmQuery, query);
+        QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
         RealmResults<DynamicRealmObject> objects = realmQuery.findAll();
 

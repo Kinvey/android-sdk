@@ -9,6 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.cache.RealmCache;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -89,6 +90,38 @@ public class QueryResultTest {
         assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThanEqualTo("test", 2)).size());
         assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThanEqualTo("test", 2)).size());
         assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).notEqual("test", 2)).size());
+    }
+
+    @Test
+    public void testAnd(){
+        cache.save(new SampleGsonObject2("1", "test1",1));
+        cache.save(new SampleGsonObject2("2", "test2",2));
+        cache.save(new SampleGsonObject2("3", "test2",3));
+
+        assertEquals(1, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 2)).size());
+        assertEquals(1, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThan("test", 2)).size());
+        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThanEqualTo("test", 2)).size());
+        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThanEqualTo("test", 2)).size());
+        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).notEqual("test", 2)).size());
+    }
+
+    @Test
+    public void testOr(){
+
+        cache.save(new SampleGsonObject2("1", "test1",1));
+        cache.save(new SampleGsonObject2("2", "test2",2));
+        cache.save(new SampleGsonObject2("3", "test2",3));
+
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 2);
+        Query q2 = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThan("test", 2);
+
+
+        Query q3 = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 0).greaterThan("test", 5);
+        Query q4 = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("test", 1);
+
+        assertEquals(2, cache.get(q.or(q2)).size());
+        assertEquals(1, cache.get(q3.or(q4)).size());
+
     }
 
 
