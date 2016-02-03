@@ -24,9 +24,7 @@ public abstract class QueryHelper {
             Object params = entity.getValue();
 
 
-            if (field.equalsIgnoreCase("$and")){
-
-            } else if (field.equalsIgnoreCase("$or")){
+            if (field.equalsIgnoreCase("$or")){
                 realmQuery.beginGroup();
                 if (params.getClass().isArray()){
                     Map<String, Object>[] components = (Map<String, Object>[])params;
@@ -43,8 +41,6 @@ public abstract class QueryHelper {
                     }
                 }
                 realmQuery.endGroup();
-
-            } else if (field.equalsIgnoreCase("$not")){
 
             } else if (params instanceof Map){
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()){

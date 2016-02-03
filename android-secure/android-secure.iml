@@ -90,6 +90,7 @@
     <orderEntry type="library" exported="" scope="TEST" name="xercesMinimal-1.9.6.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="nekohtml-1.9.6.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="httpclient-4.0.3" level="project" />
+    <orderEntry type="library" exported="" name="android-secure.android-secure-2.10.4" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 
@@ -119,6 +120,10 @@ public abstract class AbstractQuery implements Serializable{
         }
         sort.put(field,order);
         return this;
+    }
+
+    public Map<String, SortOrder> getSort(){
+        return sort;
     }
 
     // Abstract Methods

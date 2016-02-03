@@ -14,6 +14,8 @@ public class SampleGsonObject2 extends GenericJson {
     @Key("test")
     public Integer test;
 
+    public SampleGsonObject2(){};
+
     public SampleGsonObject2(String _id, String title, Integer test) {
         this._id = _id;
         this.title = title;

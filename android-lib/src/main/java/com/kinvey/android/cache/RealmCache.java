@@ -3,10 +3,12 @@ package com.kinvey.android.cache;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import io.realm.DynamicRealm;
@@ -16,6 +18,7 @@ import io.realm.RealmObjectSchema;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.RealmSchema;
+import io.realm.Sort;
 
 /**
  * Created by Prots on 1/26/16.
@@ -50,7 +53,30 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
         QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
-        RealmResults<DynamicRealmObject> objects = realmQuery.findAll();
+        RealmResults<DynamicRealmObject> objects = null;
+
+        Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
+        if (sortingOrders != null && sortingOrders.size() > 0) {
+            String[] fields = new String[sortingOrders.size()];
+            Sort[] sort = new Sort[sortingOrders.size()];
+            int i = 0;
+            for (Map.Entry<String, AbstractQuery.SortOrder> sorting : sortingOrders.entrySet()){
+                fields[i] = sorting.getKey();
+                switch (sorting.getValue()){
+                    case ASC:
+                        sort[i] = Sort.ASCENDING;
+                        break;
+
+                    case DESC:
+                        sort[i] = Sort.DESCENDING;
+                        break;
+                }
+                i++;
+            }
+            objects = realmQuery.findAllSorted(fields, sort);
+        } else {
+            objects = realmQuery.findAll();
+        }
 
         List<T> ret = new ArrayList<T>();
 
@@ -234,7 +260,28 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             ret = mCollectionItemClass.newInstance();
             Map<String, Class> fields = ClassHash.getAllowedFields(mCollectionItemClass);
             for (Map.Entry<String, Class> entry : fields.entrySet()){
-                ret.put(entry.getKey(), dynamic.get(entry.getKey()));
+                Object o = dynamic.get(entry.getKey());
+
+                if (Number.class.isAssignableFrom(entry.getValue())){
+                    Number n = (Number)dynamic.get(entry.getKey());
+                    if (Long.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.longValue());
+                    } else if (Byte.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.byteValue());
+                    } else if (Integer.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.intValue());
+                    } else if (Short.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.shortValue());
+                    } if (Float.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.floatValue());
+                    } if (Double.class.isAssignableFrom(entry.getValue())){
+                        ret.put(entry.getKey(), n.doubleValue());
+                    }
+
+                } else {
+                    ret.put(entry.getKey(), o);
+                }
+
             }
 
         } catch (InstantiationException e) {

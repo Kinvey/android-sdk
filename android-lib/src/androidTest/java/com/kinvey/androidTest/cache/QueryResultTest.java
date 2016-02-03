@@ -13,6 +13,7 @@ import com.kinvey.android.cache.RealmCache;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import org.junit.After;
@@ -94,9 +95,9 @@ public class QueryResultTest {
 
     @Test
     public void testNot(){
-        cache.save(new SampleGsonObject2("1", "test1",1));
-        cache.save(new SampleGsonObject2("2", "test2",2));
-        cache.save(new SampleGsonObject2("3", "test2",3));
+        cache.save(new SampleGsonObject2("1", "test1", 1));
+        cache.save(new SampleGsonObject2("2", "test2", 2));
+        cache.save(new SampleGsonObject2("3", "test2", 3));
 
         assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 2).not()).size());
         assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("test", 2).not()).size());
@@ -118,6 +119,25 @@ public class QueryResultTest {
 
         assertEquals(2, cache.get(q.or(q2)).size());
         assertEquals(1, cache.get(q3.or(q4)).size());
+
+    }
+
+    @Test
+    public void testSort(){
+
+        cache.save(new SampleGsonObject2("1", "test1",1));
+        cache.save(new SampleGsonObject2("2", "test2", 2));
+        cache.save(new SampleGsonObject2("3", "test2", 3));
+
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThanEqualTo("test", 1).addSort("test", AbstractQuery.SortOrder.DESC);
+
+
+        List<SampleGsonObject2> objects = cache.get(q);
+
+        assertEquals(objects.size(), 3);
+        for (int i = 0 ; i < 3; i++){
+            assertTrue(objects.get(i).test == (int)(3-i));
+        }
 
     }
 
