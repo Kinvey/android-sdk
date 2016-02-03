@@ -170,7 +170,10 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     @Override
     public void delete(Query query) {
+        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+        QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
+        realmQuery.findAll().clear();
     }
 
     @Override
