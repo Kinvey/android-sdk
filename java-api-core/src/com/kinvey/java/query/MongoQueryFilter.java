@@ -194,23 +194,23 @@ public class MongoQueryFilter implements QueryFilter, Serializable {
                     }
                 }
 
-                if (op == null && obj.getClass().equals(String.class) && !processParent) {
+                if (op == null && !(obj instanceof Map)  && !processParent) {
                     LinkedHashMap<String,Object> newNotEqualMap = new LinkedHashMap();
                     newNotEqualMap.put(getOperator(Operators.NOTEQUAL), obj);
                     map.put(key,newNotEqualMap);
                 } else if (op != null) {
                     switch(op) {
                         case GREATERTHAN:
-                            newMap.put("$lt", obj);
-                            break;
-                        case LESSTHAN :
-                            newMap.put("$gt", obj);
-                            break;
-                        case GREATERTHANEQUAL:
                             newMap.put("$lte", obj);
                             break;
-                        case LESSTHANEQUAL:
+                        case LESSTHAN :
                             newMap.put("$gte", obj);
+                            break;
+                        case GREATERTHANEQUAL:
+                            newMap.put("$lt", obj);
+                            break;
+                        case LESSTHANEQUAL:
+                            newMap.put("$gt", obj);
                             break;
                         case IN :
                             newMap.put("$nin", obj);

@@ -93,16 +93,13 @@ public class QueryResultTest {
     }
 
     @Test
-    public void testAnd(){
+    public void testNot(){
         cache.save(new SampleGsonObject2("1", "test1",1));
         cache.save(new SampleGsonObject2("2", "test2",2));
         cache.save(new SampleGsonObject2("3", "test2",3));
 
-        assertEquals(1, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 2)).size());
-        assertEquals(1, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThan("test", 2)).size());
-        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThanEqualTo("test", 2)).size());
-        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).greaterThanEqualTo("test", 2)).size());
-        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).notEqual("test", 2)).size());
+        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).lessThan("test", 2).not()).size());
+        assertEquals(2, cache.get(new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("test", 2).not()).size());
     }
 
     @Test
