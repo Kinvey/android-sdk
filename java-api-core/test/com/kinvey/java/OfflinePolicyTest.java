@@ -5,7 +5,6 @@ import com.kinvey.java.network.AppData;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.MockOfflineStore;
-import com.kinvey.java.offline.OfflinePolicy;
 
 /**
  * Created by edward on 8/3/15.

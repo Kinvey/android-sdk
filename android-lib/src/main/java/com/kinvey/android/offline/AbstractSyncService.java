@@ -36,9 +36,10 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
+import com.kinvey.java.core.AbstractKinveyJsonClient;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 /**
  * This class provides functionality for background execution when in offline mode.
@@ -188,7 +189,7 @@ public abstract class AbstractSyncService extends IntentService{
         	//grab entity's id
         	final String curEntityID = entity.get("_id").toString(); 
         	//if it's a temp id, remove it before saving
-        	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
+        	if (curEntityID.startsWith(AbstractKinveyJsonClientRequest.TEMPID)){
         		entity.remove("_id");
         	}
         	
@@ -198,7 +199,7 @@ public abstract class AbstractSyncService extends IntentService{
                     @Override
                     public void onSuccess(GenericJson result) {
                     	//if it was successful, and the entity had a temp id, remove the old entity
-                    	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
+                    	if (curEntityID.startsWith(AbstractKinveyJsonClientRequest.TEMPID)){
                     		dbHelper.getTable(collectionName).removeEntity(dbHelper, curEntityID);
                     	}
                     	//save the updated entity

@@ -8,6 +8,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
@@ -87,6 +88,20 @@ public class RealmCacheManager implements ICacheManager {
         }
     }
 
+    @Override
+    public void clear() {
+        synchronized (LOCK) {
+            Set<RealmObjectSchema> schemas = mRealm.getSchema().getAll();
+            mRealm.beginTransaction();
+            for (RealmObjectSchema schema : schemas) {
+                schema.removePrimaryKey();
+                mRealm.getSchema().remove(schema.getClassName());
+            }
+            mRealm.commitTransaction();
+            _instance = null;
+        }
+    }
+
     private void init(){
         RealmSchema schema = mRealm.getSchema();
         RealmObjectSchema tableHashScheme = schema.get(TABLE_HASH_NAME);
@@ -130,7 +145,4 @@ public class RealmCacheManager implements ICacheManager {
         obj.set("hash", hash);
     }
 
-    public void destroy(){
-
-    }
 }

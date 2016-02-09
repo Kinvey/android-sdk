@@ -21,6 +21,8 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.Json;
 import com.kinvey.java.AbstractClient;
 
+import java.util.UUID;
+
 /**
  * @author m0rganic
  *
@@ -30,6 +32,8 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
   /** raw json data **/
   private final Object jsonContent;
   private AsyncExecutor executor;
+
+  public static final String TEMPID = "tempOfflineID_";
 
   /**
    * @param abstractKinveyJsonClient kinvey credential JSON client
@@ -78,5 +82,13 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
   public void setExecutor(AsyncExecutor executor) {
     this.executor = executor;
   }
+
+  public static String getUUID(){
+    String id = UUID.randomUUID().toString();
+    String ret = id.replace("-", "");
+    return ret;
+
+  }
+
 
 }

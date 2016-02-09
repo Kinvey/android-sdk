@@ -19,6 +19,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -32,8 +33,8 @@ import com.kinvey.android.Client;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 
 /**
  * This class manages the necessary tables for offline to function associated with one specific {@link com.kinvey.android.AsyncAppData} collection.
@@ -162,7 +163,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param offlineEntity
      * @return
      */
-    public T insertEntity(DatabaseHandler helper, AbstractClient client, GenericJson offlineEntity, AbstractKinveyOfflineClientRequest<T> req){
+    public T insertEntity(DatabaseHandler helper, AbstractClient client, GenericJson offlineEntity, AbstractKinveyJsonClientRequest<T> req){
 
 //        SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -213,7 +214,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param responseClass
      * @return
      */
-    public T getEntity(DatabaseHandler handler, AbstractClient client, String id, Class<T> responseClass, AbstractKinveyOfflineClientRequest<T> req){
+    public T getEntity(DatabaseHandler handler, AbstractClient client, String id, Class<T> responseClass, AbstractKinveyJsonClientRequest<T> req){
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},COLUMN_ID + "='" + id + "'",
                null, null, null, null, null);
 
@@ -246,7 +247,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param clazz
      * @return
      */
-    public T[] getQuery(DatabaseHandler handler, AbstractClient client, String q, Class clazz, AbstractKinveyOfflineClientRequest<T> req){
+    public T[] getQuery(DatabaseHandler handler, AbstractClient client, String q, Class clazz, AbstractKinveyJsonClientRequest<T> req){
 
         //SQLiteDatabase db = helper.getReadableDatabase();
 
@@ -275,7 +276,7 @@ public class OfflineTable<T extends GenericJson> {
 
     }
 
-    public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass, AbstractKinveyOfflineClientRequest<T> req){
+    public T[] getAll(DatabaseHandler handler, AbstractClient client, Class<T> responseClass, AbstractKinveyJsonClientRequest<T> req){
     	Logger.ERROR("it's a get all");
         Cursor cursor = handler.query(TABLE_NAME, new String[] {COLUMN_JSON},null ,
                 null, null, null, null, null);
@@ -349,7 +350,7 @@ public class OfflineTable<T extends GenericJson> {
      * @param id
      * @return
      */
-    public KinveyDeleteResponse delete(DatabaseHandler handler, AbstractClient client, String id, AbstractKinveyOfflineClientRequest<T> req){
+    public KinveyDeleteResponse delete(DatabaseHandler handler, AbstractClient client, String id, AbstractKinveyJsonClientRequest<T> req){
         //SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -384,14 +385,14 @@ public class OfflineTable<T extends GenericJson> {
      * @param verb
      * @param id
      */
-    public void enqueueRequest(DatabaseHandler handler, String verb, OfflineMetaData id, AbstractKinveyOfflineClientRequest<T> req){
+    public void enqueueRequest(DatabaseHandler handler, String verb, OfflineMetaData id, AbstractKinveyJsonClientRequest<T> req){
 
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION},  COLUMN_ID+"='" + id+"' AND "+COLUMN_ACTION+"='" + verb + "'", null, null, null, null, null);
 
         if (c.getCount() == 0){
         	Logger.INFO("offline queueing -> " + id);
             ContentValues values = new ContentValues();
-            values.put(COLUMN_UNIQUE_KEY, AbstractKinveyOfflineClientRequest.getUUID());
+            values.put(COLUMN_UNIQUE_KEY, UUID.randomUUID().toString());
             
             //OfflineRequestInfo.SuperID idInfo = new SuperID(id, req);
             values.put(COLUMN_ID, new Gson().toJson(id));

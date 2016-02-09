@@ -31,15 +31,12 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.network.AppData;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.offline.OfflinePolicy;
-import com.kinvey.java.offline.OfflineStore;
 
 /**
  * Wraps the {@link com.kinvey.java.network.AppData} public methods in asynchronous functionality using native Android AsyncTask.
@@ -558,28 +555,6 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
-
-
-    /**
-     * Set an {@link OfflinePolicy} on AppData, allowing requests to be executed locally
-     *
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     AsyncAppData<EventEntity> offline = kinveyClient.appData("events", EventEntity.class);
-     *     offline.setOffline(OfflinePolicy.ALWAYS_ONLINE, new SqlLiteOfflineStore(getContext()));
-     * </pre>
-     * </p>
-     *
-     *
-     * @param policy the policy defining behavior of offline sync
-     * @param store the type of store to be used, commonly {@link com.kinvey.android.offline.SqlLiteOfflineStore}
-     */
-    public void setOffline(OfflinePolicy policy, OfflineStore store){
-        super.setOffline(policy, store);
-
     }
 
 

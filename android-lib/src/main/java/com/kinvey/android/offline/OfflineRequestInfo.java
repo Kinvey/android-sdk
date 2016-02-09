@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 /**
  * This class is an abstraction of a REST request.
@@ -97,7 +97,7 @@ public class OfflineRequestInfo implements Serializable {
     		this.customheader = customHeader;
     	}
     	
-    	public OfflineMetaData(String id, AbstractKinveyOfflineClientRequest req){
+    	public OfflineMetaData(String id, AbstractKinveyJsonClientRequest req){
     		this.id = id;
     		if (req != null){
     			this.customerVersion = req.getCustomerAppVersion();
@@ -105,7 +105,7 @@ public class OfflineRequestInfo implements Serializable {
     		}
     		
     	}
-    	public OfflineMetaData(GenericJson entity, AbstractKinveyOfflineClientRequest req){
+    	public OfflineMetaData(GenericJson entity, AbstractKinveyJsonClientRequest req){
     		this.id = (String) entity.get("_id");
     		if (req != null){
     			this.customerVersion = req.getCustomerAppVersion();

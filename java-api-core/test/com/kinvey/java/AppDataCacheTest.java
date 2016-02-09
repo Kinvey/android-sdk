@@ -22,7 +22,6 @@ import junit.framework.Assert;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
-import com.kinvey.java.cache.InMemoryLRUCache;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.testing.HttpTesting;

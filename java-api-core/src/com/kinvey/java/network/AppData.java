@@ -28,13 +28,9 @@ import java.util.ArrayList;
 
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
-import com.kinvey.java.cache.Cache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
-import com.kinvey.java.offline.OfflinePolicy;
-import com.kinvey.java.offline.OfflineStore;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -60,50 +56,7 @@ public class AppData<T> {
      */
     public static final String GEOLOC_FIELD_NAME = "_geoloc";
 
-    private Object cacheLock = new Object();
-    private Cache<String , T> cache = new Cache<String, T>() {
-        @Override
-        public void put(String key, T value) {
-            //Do nothing by default!
-        }
 
-        @Override
-        public T get(String key) {
-            return null;
-        }
-    };
-
-    private OfflinePolicy offlinePolicy = OfflinePolicy.ALWAYS_ONLINE;
-    private OfflineStore<T> offlineStore = new OfflineStore<T>(){
-
-
-        @Override
-        public T executeGet(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
-            return null;
-        }
-
-        @Override
-        public KinveyDeleteResponse executeDelete(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
-            return null;
-        }
-
-        @Override
-        public T executeSave(AbstractClient client, AppData<T> appData, AbstractKinveyOfflineClientRequest<T> request) {
-            return null;
-        }
-
-        @Override
-        public void clearStorage(String userid){}
-
-        @Override
-        public void kickOffSync() {}
-
-		@Override
-		public void insertEntity(AbstractClient client, AppData<T> appData, T entity, AbstractKinveyOfflineClientRequest<T> request) {
-			
-		}
-    };
-    
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
@@ -184,19 +137,6 @@ public class AppData<T> {
     }
 
 
-
-    /**
-     * Define the policy for Offline sync to use when performing operations in the background
-     *
-     * @param policy the policy defining behavior of offline sync
-     */
-    public void setOffline(OfflinePolicy policy, OfflineStore store){
-        synchronized (cacheLock){
-            this.offlinePolicy = policy;
-            this.offlineStore = store;
-        }
-    }
-    
 
 
     /**
@@ -664,7 +604,7 @@ public class AppData<T> {
      * Create / Update requests.
      *
      */
-    public class Save extends AbstractKinveyOfflineClientRequest<T> {
+    public class Save extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}";
         @Key
         private String collectionName;
@@ -672,8 +612,7 @@ public class AppData<T> {
         private String entityID;
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
-            super(client, update.toString(), REST_PATH, entity, myClass, AppData.this.collectionName);
-            super.setStore(offlineStore, offlinePolicy);
+            super(client, update.toString(), REST_PATH, entity, myClass);
             this.collectionName = AppData.this.collectionName;
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
@@ -694,7 +633,7 @@ public class AppData<T> {
      * for Delete requests.
      *
      */
-    public class Delete extends AbstractKinveyOfflineClientRequest<KinveyDeleteResponse> {
+    public class Delete extends AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/{entityID}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
@@ -712,8 +651,7 @@ public class AppData<T> {
         private String skip;
 
         Delete(String entityID) {
-            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class,  AppData.this.collectionName);
-            super.setStore(offlineStore, offlinePolicy);
+            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
             this.entityID = entityID;
             this.collectionName = AppData.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
@@ -723,8 +661,7 @@ public class AppData<T> {
         }
 
         Delete(Query query) {
-            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class, AppData.this.collectionName);
-            super.setStore(offlineStore, offlinePolicy);
+            super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
             this.collectionName= AppData.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -746,14 +683,13 @@ public class AppData<T> {
      * Aggregate requests.
      *
      */
-    public class Aggregate extends AbstractKinveyOfflineClientRequest<T> {
+    public class Aggregate extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_group";
         @Key
         private String collectionName;
 
         Aggregate(AggregateEntity entity, Class<T> myClass) {
-            super(client, "POST", REST_PATH, entity, myClass, AppData.this.collectionName);
-            super.setStore(offlineStore, offlinePolicy);
+            super(client, "POST", REST_PATH, entity, myClass);
             this.collectionName = AppData.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
             if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){

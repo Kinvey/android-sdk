@@ -32,4 +32,9 @@ public interface ICacheManager {
      * @return Cache object instance that could be queried
      */
     <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl);
+
+    /**
+     * clear all cached data
+     */
+    void clear();
 }

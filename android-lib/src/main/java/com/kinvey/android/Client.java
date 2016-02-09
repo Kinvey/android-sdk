@@ -40,7 +40,6 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.java.AbstractClient;
@@ -259,7 +258,9 @@ public class Client extends AbstractClient {
 
     @Override
     public void performLockDown() {
-        new SqlLiteOfflineStore<GenericJson>(getContext()).clearStorage(user().getId());
+        if(getCacheManager() != null){
+            getCacheManager().clear();
+        }
         this.file().clearFileStorage(getContext().getApplicationContext());
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
