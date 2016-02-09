@@ -51,7 +51,14 @@ public class DataStore<T extends GenericJson> {
 
     public List<T> find (Query query) {
         // perform request based on policy
-        return new ListReadRequest<T>(cache, query, this.storeType.readPolicy, Long.MAX_VALUE).execute();
+        List<T> ret = null;
+        try {
+            ret = new ReadRequest<T>(client, collection, storeItemType,
+                    cache, query, this.storeType.readPolicy, Long.MAX_VALUE).execute();
+        } catch (IOException e){
+
+        }
+        return ret;
     }
 
     public void save (Iterable<T> objects) {

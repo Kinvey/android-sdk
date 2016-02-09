@@ -29,6 +29,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
 
   /** raw json data **/
   private final Object jsonContent;
+  private AsyncExecutor executor;
 
   /**
    * @param abstractKinveyJsonClient kinvey credential JSON client
@@ -69,4 +70,13 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
   protected KinveyJsonResponseException newExceptionOnError(HttpResponse response) {
     return KinveyJsonResponseException.from(getAbstractKinveyClient().getJsonFactory(), response);
   }
+
+  public AsyncExecutor getExecutor() {
+    return executor;
+  }
+
+  public void setExecutor(AsyncExecutor executor) {
+    this.executor = executor;
+  }
+
 }
