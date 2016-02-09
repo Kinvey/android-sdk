@@ -32,7 +32,7 @@ import java.io.OutputStream;
  *
  * @author edwardf
  * */
-public class File extends com.kinvey.java.File{
+public class File extends com.kinvey.java.network.File {
 
 
     /**

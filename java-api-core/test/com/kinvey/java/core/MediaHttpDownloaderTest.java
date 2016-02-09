@@ -18,7 +18,6 @@ package com.kinvey.java.core;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
-import com.kinvey.java.File;
 import com.kinvey.java.model.FileMetaData;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Stack;
 
-import com.kinvey.java.testing.HttpTesting;
 import com.kinvey.java.testing.MockKinveyClientRequest;
 
 import static org.mockito.Matchers.any;

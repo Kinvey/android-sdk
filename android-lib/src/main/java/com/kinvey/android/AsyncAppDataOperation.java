@@ -16,7 +16,7 @@
 package com.kinvey.android;
 
 
-import com.kinvey.java.AppDataOperation;
+import com.kinvey.java.network.AppDataOperation;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 

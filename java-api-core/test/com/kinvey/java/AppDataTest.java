@@ -100,7 +100,7 @@ public class AppDataTest extends KinveyMockUnitTest {
 
     // String collectionName, Class<T> myClass, AbstractClient client,KinveyClientRequestInitializer initializer
     public void testAppdataInitialization() {
-        AppData<Entity> appData = new AppData<Entity>("testCollection",Entity.class,
+        com.kinvey.java.network.AppData<Entity> appData = new com.kinvey.java.network.AppData<Entity>("testCollection",Entity.class,
         		getClient());
         assertEquals("testCollection",appData.getCollectionName());
         assertEquals(Entity.class, appData.getCurrentClass());
@@ -108,20 +108,20 @@ public class AppDataTest extends KinveyMockUnitTest {
 
     public void testNullCollectionInitialization() {
         try {
-            AppData<Entity> appData = new AppData<Entity>(null, Entity.class, getClient());
+            com.kinvey.java.network.AppData<Entity> appData = new com.kinvey.java.network.AppData<Entity>(null, Entity.class, getClient());
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
 
     public void testNullClassInitialization() {
-        AppData<Entity> appData = new AppData<Entity>("myCollection", null, getClient());
+        com.kinvey.java.network.AppData<Entity> appData = new com.kinvey.java.network.AppData<Entity>("myCollection", null, getClient());
         // Null class types are allowed, should not throw an exception.
         assertNull(appData.getCurrentClass());
     }
 
     public void testNullClientInitialization() {
         try {
-            AppData<Entity> appData = new AppData<Entity>("myCollection", Entity.class, null);
+            com.kinvey.java.network.AppData<Entity> appData = new com.kinvey.java.network.AppData<Entity>("myCollection", Entity.class, null);
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
@@ -134,14 +134,14 @@ public class AppDataTest extends KinveyMockUnitTest {
 //    }
 
     public void testChangeCollectionName() {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         assertEquals("myCollection",appData.getCollectionName());
         appData.setCollectionName("myNewCollection");
         assertEquals("myNewCollection", appData.getCollectionName());
     }
 
     public void testChangeCollectionNameToNull() {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         assertEquals("myCollection", appData.getCollectionName());
         try {
             appData.setCollectionName(null);
@@ -150,9 +150,9 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testGet() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        AppData.GetEntity myGet = appData.getEntityBlocking(entityID);
+        com.kinvey.java.network.AppData.GetEntity myGet = appData.getEntityBlocking(entityID);
         assertNotNull(myGet);
         assertEquals("myEntity", myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -160,8 +160,8 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testGetWithNoEntityID() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
-        AppData.Get myGet = appData.getBlocking();
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection", myGet.get("collectionName"));
@@ -170,8 +170,8 @@ public class AppDataTest extends KinveyMockUnitTest {
 
     public void testGetWithArrayType() throws IOException {
         Entity[] entityList = new Entity[]{};
-        AppData<Entity[]> appData = getGenericAppData(entityList.getClass());
-        AppData.Get myGet = appData.getBlocking();
+        com.kinvey.java.network.AppData<Entity[]> appData = getGenericAppData(entityList.getClass());
+        com.kinvey.java.network.AppData.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -179,9 +179,9 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testSave() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
-        AppData<Entity>.Save mySave = appData.saveBlocking(entity);
+        com.kinvey.java.network.AppData<Entity>.Save mySave = appData.saveBlocking(entity);
         assertNotNull(mySave);
         assertEquals("myEntity", ((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name", ((GenericJson) mySave.getJsonContent()).get("Name"));
@@ -189,28 +189,28 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testSaveNullEntity() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = null;
         try {
-            AppData<Entity>.Save mySave = appData.saveBlocking(entity);
+            com.kinvey.java.network.AppData<Entity>.Save mySave = appData.saveBlocking(entity);
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
 
     public void testSaveNoID() throws IOException {
-        AppData<EntityNoID> appData = getGenericAppData(EntityNoID.class);
+        com.kinvey.java.network.AppData<EntityNoID> appData = getGenericAppData(EntityNoID.class);
         EntityNoID entity = new EntityNoID("My Name");
 
-        AppData<EntityNoID>.Save mySave= appData.saveBlocking(entity);
+        com.kinvey.java.network.AppData<EntityNoID>.Save mySave= appData.saveBlocking(entity);
         assertNull(((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name",((GenericJson) mySave.getJsonContent()).get("Name"));
         assertEquals("POST",mySave.getRequestMethod());
     }
 
     public void testDelete() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        AppData.Delete myDelete = appData.deleteBlocking(entityID);
+        com.kinvey.java.network.AppData.Delete myDelete = appData.deleteBlocking(entityID);
         assertNotNull(myDelete);
         assertEquals("myEntity", myDelete.get("entityID"));
         assertEquals("myCollection",myDelete.get("collectionName"));
@@ -228,11 +228,11 @@ public class AppDataTest extends KinveyMockUnitTest {
 //    }
 
     public void testAggregateCountNoCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -249,13 +249,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateCountCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -276,11 +276,11 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateSumNoCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -297,13 +297,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateSumCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -324,11 +324,11 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMaxNoCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -345,13 +345,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMaxCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -372,11 +372,11 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMinNoCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -393,13 +393,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMinCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -420,11 +420,11 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateAverageNoCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -443,13 +443,13 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateAverageCondition() throws IOException {
-        AppData<Entity> appData = getGenericAppData(Entity.class);
+        com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
+        com.kinvey.java.network.AppData<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -472,62 +472,62 @@ public class AppDataTest extends KinveyMockUnitTest {
     }
 
     public void testAppDataCustomVersion() throws IOException {
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
     	appData.setClientAppVersion("1.2.3");
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
     
     public void testAppDataCustomHeader() throws IOException {
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
     	appData.setCustomRequestProperties(custom);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
     	
     }
     
     public void testAppDataCustomVersionNull() throws IOException {
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
     	appData.setClientAppVersion(null);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
     
     public void testAppDataCustomHeaderNull() throws IOException {
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
     	appData.setCustomRequestProperties(null);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	
     }
     
     public void testClientVersion() throws IOException {
     	getClient().setClientAppVersion("123");
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("123", (String) header); 
     }
     
     public void testClientCustomHeader() throws IOException{
     	getClient().setCustomRequestProperty("hello", "hey");
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"hello\":\"hey\"}", (String) header);    	
     }
     
     public void testClientAppendCustomHeader() throws IOException{
     	getClient().setCustomRequestProperty("hello", "hey");
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
     	appData.setCustomRequestProperty("bye", "bye");
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"hello\":\"hey\",\"bye\":\"bye\"}", (String) header);    	
     }
@@ -539,8 +539,8 @@ public class AppDataTest extends KinveyMockUnitTest {
     		getClient().setCustomRequestProperty("hello" + i, "this needs to be rather large");
     	}
     	
-    	AppData<Entity> appData = getGenericAppData(Entity.class);
-    	AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	com.kinvey.java.network.AppData<Entity> appData = getGenericAppData(Entity.class);
+    	com.kinvey.java.network.AppData<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	//assertEquals("{\"hello\":\"hey\"}", (String) header); 
     	
@@ -553,8 +553,8 @@ public class AppDataTest extends KinveyMockUnitTest {
     	
     }
     
-    private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
-        AppData appData = new AppData("myCollection", myClass, getClient());
+    private <T> com.kinvey.java.network.AppData<T> getGenericAppData(Class<? extends Object> myClass) {
+        com.kinvey.java.network.AppData appData = new com.kinvey.java.network.AppData("myCollection", myClass, getClient());
         return appData;
     }
     

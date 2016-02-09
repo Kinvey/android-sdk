@@ -44,7 +44,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
     }
 
     public void testInMemoryCacheMaxSize(){
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         int cachesize = 5;
         //create cache of size 5
@@ -64,7 +64,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheOnlyWithEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -91,7 +91,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheOnlyWithoutEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
 
@@ -110,7 +110,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheFirstNoRefreshWithEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -137,7 +137,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheFirstNoRefreshNoEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
 
@@ -157,7 +157,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheFirstWithEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -184,7 +184,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheFirstNoEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
 
@@ -203,7 +203,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testCacheNoCache(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -226,7 +226,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testNetworkFirstWithEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -255,7 +255,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testNetworkFirstNoEntity(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
 
@@ -274,7 +274,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testBothWithEntityNoCallback(){
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -297,7 +297,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testBothWithEntity() {
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
         CachedEntity ent = new CachedEntity();
@@ -311,7 +311,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ret = null;
         try {
 
-            AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking(ent.getTitle());
+            com.kinvey.java.network.AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking(ent.getTitle());
             get.setCallback(new KinveyClientCallback<CachedEntity>() {
 
                 boolean fired = false;
@@ -341,7 +341,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
 
     public void testBothNoEntity() {
 
-        AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
+        com.kinvey.java.network.AppData<CachedEntity> appData = getGenericAppData(CachedEntity.class);
 
         cache = new TestCache<String, CachedEntity>();
 
@@ -350,7 +350,7 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
         CachedEntity ret = null;
         try {
 
-            AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking("Title");
+            com.kinvey.java.network.AppData<CachedEntity>.GetEntity get = appData.getEntityBlocking("Title");
             get.setCallback(new KinveyClientCallback<CachedEntity>() {
 
                 boolean fired = false;
@@ -426,8 +426,8 @@ public class AppDataCacheTest extends KinveyMockUnitTest{
     }
 
 
-    private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
-        AppData appData = new AppData("myCollection", myClass, getClient());
+    private <T> com.kinvey.java.network.AppData<T> getGenericAppData(Class<? extends Object> myClass) {
+        com.kinvey.java.network.AppData appData = new com.kinvey.java.network.AppData("myCollection", myClass, getClient());
         return appData;
     }
 

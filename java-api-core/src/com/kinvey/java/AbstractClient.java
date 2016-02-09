@@ -20,12 +20,10 @@ import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.GenericData;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -41,7 +39,7 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.network.File;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -135,7 +133,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      *
      * @return a new instance of the AppData class
      */
-    public abstract <T> AppData<T> appData(String collectionName, Class<T> myClass);
+    public abstract <T> com.kinvey.java.network.AppData<T> appData(String collectionName, Class<T> myClass);
 
 
     /**

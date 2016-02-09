@@ -8,7 +8,6 @@ import com.kinvey.java.query.AbstractQuery;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import io.realm.DynamicRealm;
@@ -190,6 +189,20 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 }
 
             }
+            query.endGroup();
+
+            query.findAll().clear();
+        } finally {
+            mRealm.commitTransaction();
+        }
+    }
+
+    @Override
+    public void delete(String id) {
+        mRealm.beginTransaction();
+        try{
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+                    .equalTo("_id", id);
             query.endGroup();
 
             query.findAll().clear();

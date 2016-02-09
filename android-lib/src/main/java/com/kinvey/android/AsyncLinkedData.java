@@ -37,7 +37,7 @@ import com.kinvey.java.core.UploaderProgressListener;
  * The methods provided in this class take two (optional) callbacks, a {@code KinveyClientCallback} for the AppData request as well as a {@code UploaderProgressListener} or {@code DownloaderProgressListener} for updates on the File status
  * </p>
  * <p>
- * The functionality of this class is provided by both the {@code com.kinvey.java.AppData} API as well as the {@code com.kinvey.java.File} API.
+ * The functionality of this class is provided by both the {@code com.kinvey.java.network.AppData} API as well as the {@code com.kinvey.java.network.File} API.
  * </p>
  *
  *

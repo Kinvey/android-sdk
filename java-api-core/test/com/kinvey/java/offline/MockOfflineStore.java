@@ -2,9 +2,8 @@ package com.kinvey.java.offline;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+import com.kinvey.java.network.AppData;
 import com.kinvey.java.model.KinveyDeleteResponse;
-import sun.net.www.content.text.Generic;
 
 /**
  * Created by edward on 8/3/15.

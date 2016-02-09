@@ -46,6 +46,7 @@ dependencies {
         exclude(module: 'android')
         exclude(module: 'guava-jdk5')
     }
+    compile 'com.google.dexmaker:dexmaker:1.2'
 }
 
 task docgen(type: Javadoc) {

@@ -20,7 +20,7 @@ import com.kinvey.java.AbstractClient;
  *
  * @author edwardf
  * */
-public class AppData<T> extends com.kinvey.java.AppData<T> {
+public class AppData<T> extends com.kinvey.java.network.AppData<T> {
 
     /**
      * Constructor to instantiate the AppData class.

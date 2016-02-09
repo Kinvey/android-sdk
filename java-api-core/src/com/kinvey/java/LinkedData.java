@@ -37,7 +37,7 @@ import java.lang.reflect.Array;
  *
  * @author edwardf
  */
-public class LinkedData<T extends LinkedGenericJson> extends AppData<T> {
+public class LinkedData<T extends LinkedGenericJson> extends com.kinvey.java.network.AppData<T> {
 
     //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
     //TODO edwardf delete support?

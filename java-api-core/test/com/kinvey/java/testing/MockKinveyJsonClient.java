@@ -22,16 +22,15 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+import com.kinvey.java.network.AppData;
 import com.kinvey.java.CustomEndpoints;
-import com.kinvey.java.File;
+import com.kinvey.java.network.File;
 import com.kinvey.java.UserDiscovery;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.core.KinveyRequestInitializer;
 
 /**
 * @author m0rganic

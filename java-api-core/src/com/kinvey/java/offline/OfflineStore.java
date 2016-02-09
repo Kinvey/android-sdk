@@ -16,7 +16,7 @@
 package com.kinvey.java.offline;
 
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+import com.kinvey.java.network.AppData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**

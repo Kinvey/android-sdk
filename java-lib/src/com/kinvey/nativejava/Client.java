@@ -70,9 +70,9 @@ public class Client extends AbstractClient {
     /**
      * AppData factory method
      * <p>
-     * Returns an instance of {@link com.kinvey.java.AppData} for the supplied collection.  A new instance is created for each collection, but
+     * Returns an instance of {@link com.kinvey.java.network.AppData} for the supplied collection.  A new instance is created for each collection, but
      * only one instance of {@link AppData} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.AppData}.
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.network.AppData}.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -90,7 +90,7 @@ public class Client extends AbstractClient {
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link com.kinvey.java.AppData} for the defined collection
+     * @return Instance of {@link com.kinvey.java.network.AppData} for the defined collection
      */
     public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
@@ -112,7 +112,7 @@ public class Client extends AbstractClient {
     /**
      * File factory method
      * <p>
-     * Returns an instance of {@link com.kinvey.java.File} for uploading and downloading of files.  Only one instance is created for each
+     * Returns an instance of {@link com.kinvey.java.network.File} for uploading and downloading of files.  Only one instance is created for each
      * instance of the Kinvey client.
      * </p>
      * <p>
@@ -127,7 +127,7 @@ public class Client extends AbstractClient {
      * </pre>
      * </p>
      *
-     * @return Instance of {@link com.kinvey.java.File} for the defined collection
+     * @return Instance of {@link com.kinvey.java.network.File} for the defined collection
      */
     @Override
     public File file() {

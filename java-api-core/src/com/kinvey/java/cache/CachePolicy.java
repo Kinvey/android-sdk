@@ -15,6 +15,8 @@
  */
 package com.kinvey.java.cache;
 
+import com.kinvey.java.network.AppData;
+
 import java.io.IOException;
 
 /**
@@ -22,7 +24,7 @@ import java.io.IOException;
  *
  * @author edwardf
  * @since 2.0
- * @see {@link com.kinvey.java.AppData#setCache(Cache, CachePolicy)} for more details.
+ * @see {@link AppData#setCache(Cache, CachePolicy)} for more details.
  */
 public enum CachePolicy{
     /**

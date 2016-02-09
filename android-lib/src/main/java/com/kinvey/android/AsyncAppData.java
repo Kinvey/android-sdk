@@ -31,7 +31,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+import com.kinvey.java.network.AppData;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.AbstractKinveyCachedClientRequest;
@@ -41,7 +41,7 @@ import com.kinvey.java.offline.OfflinePolicy;
 import com.kinvey.java.offline.OfflineStore;
 
 /**
- * Wraps the {@link com.kinvey.java.AppData} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link com.kinvey.java.network.AppData} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#appData} convenience method.  AppData

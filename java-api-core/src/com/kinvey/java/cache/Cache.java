@@ -15,8 +15,10 @@
  */
 package com.kinvey.java.cache;
 
+import com.kinvey.java.network.AppData;
+
 /**
- * Interface defining a Cache, which can be used by {@link com.kinvey.java.AppData} to store responses of GET requests
+ * Interface defining a Cache, which can be used by {@link AppData} to store responses of GET requests
  * locally in memory.
  * <p/>
  * @author edwardf

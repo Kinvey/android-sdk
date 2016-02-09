@@ -25,7 +25,7 @@ import android.content.Context;
 import com.google.api.client.http.InputStreamContent;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.File;
+import com.kinvey.java.network.File;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -34,7 +34,7 @@ import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
- * Wraps the {@link com.kinvey.java.File} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link File} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#file()} convenience method.

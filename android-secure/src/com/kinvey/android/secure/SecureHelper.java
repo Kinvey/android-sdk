@@ -29,7 +29,7 @@ import com.kinvey.android.offline.DatabaseHandler;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.android.offline.OfflineTable;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.AppData;
+import com.kinvey.java.network.AppData;
 
 /**
  * @author edwardf

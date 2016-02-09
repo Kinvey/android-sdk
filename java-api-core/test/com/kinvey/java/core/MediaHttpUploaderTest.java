@@ -19,7 +19,6 @@ import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
-import com.kinvey.java.File;
 import com.kinvey.java.model.FileMetaData;
 import junit.framework.TestCase;
 import org.junit.Test;

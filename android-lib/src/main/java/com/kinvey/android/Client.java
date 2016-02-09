@@ -24,9 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
 
-import com.google.api.client.extensions.android.AndroidUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
@@ -57,6 +55,8 @@ import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.File;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -148,9 +148,9 @@ public class Client extends AbstractClient {
     /**
      * AppData factory method
      * <p>
-     * Returns an instance of {@link com.kinvey.java.AppData} for the supplied collection.  A new instance is created for each collection, but
+     * Returns an instance of {@link AppData} for the supplied collection.  A new instance is created for each collection, but
      * only one instance of {@link AsyncAppData} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.AppData}.
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link AppData}.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -168,7 +168,7 @@ public class Client extends AbstractClient {
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link com.kinvey.java.AppData} for the defined collection
+     * @return Instance of {@link AppData} for the defined collection
      */
     public <T> AsyncAppData<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
@@ -230,7 +230,7 @@ public class Client extends AbstractClient {
     /**
      * File factory method
      * <p>
-     * Returns an instance of {@link com.kinvey.java.File} for uploading and downloading of files.  Only one instance is created for each
+     * Returns an instance of {@link File} for uploading and downloading of files.  Only one instance is created for each
      * instance of the Kinvey client.
      * </p>
      * <p>
@@ -245,7 +245,7 @@ public class Client extends AbstractClient {
      * </pre>
      * </p>
      *
-     * @return Instance of {@link com.kinvey.java.File} for the defined collection
+     * @return Instance of {@link File} for the defined collection
      */
     @Override
     public AsyncFile file() {

@@ -24,7 +24,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
-import com.kinvey.java.File;
+import com.kinvey.java.network.File;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 

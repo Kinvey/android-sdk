@@ -28,8 +28,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-import com.kinvey.java.AppDataTest.Entity;
 import com.kinvey.java.core.KinveyMockUnitTest;
+import com.kinvey.java.network.File;
 import com.kinvey.java.testing.HttpTesting;
 
 import static org.mockito.Mockito.*;

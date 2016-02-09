@@ -17,7 +17,6 @@ package com.kinvey.java.core;
 
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
@@ -32,6 +31,7 @@ import junit.framework.TestCase;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.kinvey.java.network.File;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -62,7 +62,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
     protected static class MockTestClient extends AbstractClient {
 
-        private ConcurrentHashMap<String, AppData> appDataInstanceCache;
+        private ConcurrentHashMap<String, com.kinvey.java.network.AppData> appDataInstanceCache;
 
 
         MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
@@ -72,11 +72,11 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
+        public <T> com.kinvey.java.network.AppData<T> appData(String collectionName, Class<T> myClass) {
             synchronized (lock) {
                 Preconditions.checkNotNull(collectionName, "collectionName must not be null");
                 if (appDataInstanceCache == null) {
-                    appDataInstanceCache = new ConcurrentHashMap<String, AppData>();
+                    appDataInstanceCache = new ConcurrentHashMap<String, com.kinvey.java.network.AppData>();
                 }
                 if (!appDataInstanceCache.containsKey(collectionName)) {
                     appDataInstanceCache.put(collectionName, new MockAppData(collectionName, myClass, this));
@@ -227,7 +227,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
     }
 
-    public static class MockAppData extends AppData{
+    public static class MockAppData extends com.kinvey.java.network.AppData {
         /**
          * Constructor to instantiate the AppData class.
          *
