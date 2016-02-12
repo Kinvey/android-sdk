@@ -420,7 +420,7 @@ public class OfflineTable<T extends GenericJson> {
         Cursor c = handler.query(QUEUE_NAME, new String[]{COLUMN_ID, COLUMN_ACTION, COLUMN_UNIQUE_KEY}, null, null, null, null, null, null);
             if (c.moveToFirst()){
             	String idValue = c.getString(0);
-            	OfflineMetaData idInfo = new OfflineMetaData();
+            	OfflineMetaData idInfo;
             	try{
             		idInfo = new Gson().fromJson(idValue, OfflineMetaData.class);
             	}catch(Exception e){

@@ -313,7 +313,6 @@ public class MediaHttpUploader {
             }else{
                 throw new KinveyException(KinveyClientErrorCode.UploadUrlMissing);
             }
-            uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
             initialResponse.disconnect();
         }
@@ -337,10 +336,10 @@ public class MediaHttpUploader {
         currentRequest.setRetryOnExecuteIOException(true);
         // if there are custom headers, add them
 		if (headers != null) {
-			for (String header : headers.keySet()) {
-
-				String curHeader = headers.get(header);
-				// then it's a list
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String header = entry.getKey();
+				String curHeader = entry.getValue();
+                // then it's a list
 				if (curHeader.contains(", ")) {
 					String[] listheaders = curHeader.split(", ");
 					currentRequest.getHeaders().put(header,

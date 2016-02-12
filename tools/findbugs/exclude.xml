@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Class name="com.kinvey.java.AbstractClient" />
+        <Bug pattern="LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
+    </Match>
+    <Match>
+        <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" />
+    </Match>
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE_SHADOWS_FIELD" />
+    </Match>
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE" />
+    </Match>
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Bug pattern="DE_MIGHT_IGNORE" />
+    </Match>
+
+    <Match>
+        <Class name="com.kinvey.java.UserGroup$GroupUser"/>
+        <Or>
+            <Field name="collection"/>
+            <Field name="type"/>
+        </Or>
+        <Bug pattern="SS_SHOULD_BE_STATIC" />
+    </Match>
+
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD" />
+    </Match>
+
+    <Match>
+        <Class name="~.*R\$.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*Manifest\$.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*_\$.*"/>
+    </Match>
+</FindBugsFilter>

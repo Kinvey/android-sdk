@@ -239,7 +239,7 @@ public class MediaHttpDownloader {
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
-        while (true && !cancelled) {
+        while (!cancelled) {
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
             currentRequest.setSuppressUserAgentSuffix(true);
             long currentRequestLastBytePos = bytesDownloaded + chunkSize - 1;

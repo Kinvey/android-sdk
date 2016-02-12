@@ -215,7 +215,6 @@ public class UserGroup {
 
 
     private AbstractClient client;
-    private KinveyClientRequestInitializer requestInitializer;
 
 
     /**
@@ -229,7 +228,6 @@ public class UserGroup {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(initializer, "initializer must not be null.");
         this.client = client;
-        this.requestInitializer = initializer;
     }
 
 
