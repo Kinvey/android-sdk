@@ -25,6 +25,7 @@ import java.lang.reflect.Array;
 
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.model.UserLookup;
 
 /**

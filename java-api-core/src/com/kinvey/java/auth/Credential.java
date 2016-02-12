@@ -15,9 +15,9 @@
  */
 package com.kinvey.java.auth;
 
-import com.kinvey.java.User;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyRequestInitializer;
+import com.kinvey.java.dto.User;
 
 import java.io.IOException;
 

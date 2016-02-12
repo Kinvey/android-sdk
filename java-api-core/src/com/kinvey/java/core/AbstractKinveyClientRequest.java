@@ -26,6 +26,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
@@ -354,7 +355,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
 
             //get the refresh token
-            Credential cred = client.getStore().load(client.user().getId());
+            Credential cred = client.getStore().load(client.userStore().getCurrentUser().getId());
             String refreshToken = null;
             if (cred != null){
                 refreshToken = cred.getRefreshToken();
@@ -363,18 +364,18 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             if (refreshToken != null ){
                 //logout the current user
 
-                client.user().logout().execute();
+                client.userStore().logout().execute();
 
                 //use the refresh token for a new access token
-                GenericJson result = client.user().useRefreshToken(refreshToken).execute();
+                GenericJson result = client.userStore().useRefreshToken(refreshToken).execute();
 
                 //login with the access token
-                client.user().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+                client.userStore().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
                 //store the new refresh token
-                Credential currentCred = client.getStore().load(client.user().getId());
+                Credential currentCred = client.getStore().load(client.userStore().getCurrentUser().getId());
                 currentCred.setRefreshToken(result.get("refresh_token").toString());
-                client.getStore().store(client.user().getId(), currentCred);
+                client.getStore().store(client.userStore().getCurrentUser().getId(), currentCred);
                 hasRetryed = true;
                 return executeUnparsed();
             }

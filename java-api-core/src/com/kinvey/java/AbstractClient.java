@@ -39,8 +39,10 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.network.File;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.store.UserStore;
 
 /**
  * The core Kinvey client used to access Kinvey's BaaS.
@@ -59,7 +61,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public static final String DEFAULT_SERVICE_PATH = "";
     
-    private User currentUser;
+    private UserStore userStore;
     private CredentialStore store;
 
     /** used to synchronized access to the local api wrappers **/
@@ -151,15 +153,17 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     //public abstract <T extends User> T user();
 
-    public <T extends User> User<T> user(){
+    public <T extends User> UserStore<T> userStore(){
         synchronized (lock) {
-            if (currentUser == null) {
+            if (userStore == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                this.currentUser = new User(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+
+                userStore = new UserStore<T>(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
-            return (T) currentUser;
+
+            return userStore;
         }
     }
 
@@ -173,7 +177,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         this.userModelClass = userClass;
     }
 
-    protected abstract ClientUsers getClientUsers();
+    public abstract ClientUsers getClientUsers();
 
 
     public abstract  <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
@@ -191,14 +195,15 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     protected void setCurrentUser(User user) {
+
         synchronized (lock) {
-            currentUser = user;
+            userStore().setCurrentUser(user);
         }
     }
 
     protected User getCurrentUser() {
         synchronized (lock) {
-            return currentUser;
+            return userStore.getCurrentUser();
         }
     }
 
