@@ -40,7 +40,7 @@ public class Metrics {
 
 	
 	
-	private class Metric{
+	private static class Metric{
 		
 		private long start = -1l;
 		private long end = -1l;

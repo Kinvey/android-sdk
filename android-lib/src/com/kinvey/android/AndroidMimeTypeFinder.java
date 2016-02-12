@@ -20,6 +20,7 @@ import java.net.URLConnection;
 
 import android.webkit.MimeTypeMap;
 
+import com.google.common.base.Preconditions;
 import com.kinvey.java.Logger;
 import com.kinvey.java.MimeTypeFinder;
 import com.kinvey.java.model.FileMetaData;
@@ -89,7 +90,8 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
      */
     @Override
     public void getMimeType(FileMetaData meta, File file) {
-        if (file == null || file.getName() == null || meta == null) {
+        Preconditions.checkNotNull(meta);
+        if (file == null) {
         	Logger.WARNING("cannot calculate mimetype without a file or filename!");
             meta.setMimetype("application/octet-stream");
             return;
@@ -111,7 +113,7 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
             fileExt = meta.getFileName().substring(meta.getFileName().lastIndexOf('.'), meta.getFileName().length());
         }
 
-        if (file.getName() != null && file.getName().lastIndexOf(".") > 0) {
+        if (file.getName().lastIndexOf(".") > 0) {
             if (fileExt.length() == 0) {
                 fileExt = file.getName().substring(file.getName().lastIndexOf('.'), file.getName().length());
             }

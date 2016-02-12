@@ -58,9 +58,6 @@ class AndroidClientUsers implements ClientUsers {
             userList = new HashMap<String, String>();
         }
         activeUser = userPreferences.getString("activeUser","");
-        if (activeUser == null) {
-            activeUser = "";
-        }
     }
 
     private void persistData(PersistData type) {
@@ -94,7 +91,7 @@ class AndroidClientUsers implements ClientUsers {
         }
     }
 
-    static AndroidClientUsers getClientUsers(Context context) {
+    synchronized static AndroidClientUsers getClientUsers(Context context) {
         if (_instance == null) {
             _instance = new AndroidClientUsers(context);
         }
@@ -193,14 +190,21 @@ class AndroidClientUsers implements ClientUsers {
             } catch (IOException e) {
             	Logger.ERROR(e.getMessage());
             } finally{
+
                 try {
-                    oStream.flush();
-                    fStream.getFD().sync();
+                    if (oStream != null) {
+                        oStream.flush();
+                    }
+                    if (fStream != null) {
+                        fStream.getFD().sync();
+                    }
                 } catch (IOException e) {
 //                    e.printStackTrace();
                 } finally {
                     try {
-                        oStream.close();
+                        if (oStream != null) {
+                            oStream.close();
+                        }
                     } catch (IOException e) {
 //                        e.printStackTrace();  
                     }

@@ -16,16 +16,20 @@
 package com.kinvey.android;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Pair;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -114,7 +118,7 @@ public class AsyncAppData<T> extends AppData<T> {
 
     private static Map<String, Method> methodMap;
 
-
+    private static final int IDS_PER_REQUEST = 100;
 
 
 
@@ -205,11 +209,46 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void get(String[] ids, KinveyListCallback<T> callback){
+    public void get(String[] ids, final KinveyListCallback<T> callback){
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        Query q = new Query();
-        q.in("_id", ids);
-        this.get(q, callback);
+        List<Query> queries = new ArrayList<>(ids.length/IDS_PER_REQUEST+1);
+        int currentChunk = 0;
+        for (int i = 0 ; i*IDS_PER_REQUEST < ids.length; i++){
+            int currentOffset = i * IDS_PER_REQUEST;
+            int currentChunkLen = (ids.length - currentOffset) > IDS_PER_REQUEST ? IDS_PER_REQUEST : (ids.length - currentOffset);
+            String[] chunk = new String[currentChunkLen];
+            System.arraycopy(ids, currentOffset, chunk, 0, currentChunkLen);
+            Query q = new Query();
+            q.in("_id", chunk);
+            queries.add(q);
+        }
+
+        new MultipleAppDataRequest(methodMap.get(KEY_GET_BY_QUERY), queries, new KinveyClientCallback<List<T[]>>() {
+            @Override
+            public void onSuccess(List<T[]> result) {
+                if (result != null) {
+                    int size = 0;
+                    for (T[] page : result) {
+                        size += page != null ? page.length : 0;
+                    }
+                    T[] ret = (T[]) Array.newInstance(result.getClass().getComponentType().getComponentType(), size);
+                    int offset = 0;
+                    for (T[] page : result) {
+                        if (page != null) {
+                            System.arraycopy(page, 0, ret, offset, page.length);
+                            offset += page.length;
+                        }
+                    }
+                    callback.onSuccess(ret);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                callback.onFailure(error);
+            }
+
+        }).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -608,6 +647,36 @@ public class AsyncAppData<T> extends AppData<T> {
                 ((AbstractKinveyCachedClientRequest) request).setExecutor(this);
             }
             return request.execute();
+
+        }
+    }
+
+
+    //TODO: check how to return the data
+    private class MultipleAppDataRequest extends AsyncClientRequest<List<T>>{
+        Method method;
+        List<Query> partialQueries;
+
+        public MultipleAppDataRequest(Method method, List<Query> partialQueries, KinveyClientCallback callback){
+            super(callback);
+            this.method = method;
+            this.partialQueries = partialQueries;
+
+        }
+
+        @Override
+        public List<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+            ArrayList<T> ret = new ArrayList<T>();
+            for(Query singleCall: partialQueries){
+                AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) method.invoke(AsyncAppData.this, new Object[]{singleCall});
+                request.setCallback(getCallback());
+                if (request instanceof AbstractKinveyCachedClientRequest){
+                    ((AbstractKinveyCachedClientRequest) request).setExecutor(this);
+                }
+                ret.add(request.execute());
+            }
+
+            return ret;
 
         }
     }
