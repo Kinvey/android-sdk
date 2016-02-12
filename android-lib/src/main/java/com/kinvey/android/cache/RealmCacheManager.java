@@ -48,8 +48,9 @@ public class RealmCacheManager implements ICacheManager {
     public <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl) {
         synchronized (LOCK){
             RealmCache<T> cache = (RealmCache<T>)mCacheMap.get(collection);
+
             if (cache == null){
-                cache = new RealmCache<T>(collection, mRealm, collectionItemClass);
+                cache = new RealmCache<T>(collection, mRealm, collectionItemClass, ttl);
                 if (!cache.getHash().equals(getTableHash(collection))){
                     //Recreate table
                     mRealm.beginTransaction();
@@ -84,6 +85,7 @@ public class RealmCacheManager implements ICacheManager {
                             "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
                 }
             }
+            cache.setTtl(ttl);
             return cache;
         }
     }

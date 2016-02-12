@@ -17,6 +17,8 @@ import java.util.UUID;
  */
 public abstract class ClassHash {
 
+    public static String TTL_FIELD = "__ttl__";
+
     private static final Class[] ALLOWED = new Class[]{
             boolean.class,
             byte.class,
@@ -93,6 +95,7 @@ public abstract class ClassHash {
         if (!ret.containsKey("_id")){
             ret.put("_id", String.class);
         }
+        ret.put(TTL_FIELD, Long.class);
         return ret;
     }
 

@@ -6,6 +6,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,30 +27,20 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     private String mCollection;
     private DynamicRealm mRealm;
     private Class<T> mCollectionItemClass;
+    private long ttl;
 
-    public RealmCache(String collection, DynamicRealm realm, Class<T> collectionItemClass) {
+
+    public RealmCache(String collection, DynamicRealm realm, Class<T> collectionItemClass, long ttl) {
         this.mCollection = collection;
         this.mRealm = realm;
         this.mCollectionItemClass = collectionItemClass;
-    }
-
-    public List<T> test(){
-        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
-        RealmResults<DynamicRealmObject> objects = realmQuery.lessThan("test", 2).or().equalTo("_id","1").findAll();
-
-        List<T> ret = new ArrayList<T>();
-
-        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
-            DynamicRealmObject obj = iterator.next();
-            ret.add(realmToObject(obj));
-        }
-
-        return ret;
+        this.ttl = ttl;
     }
 
     @Override
     public List<T> get(Query query) {
-        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
+                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
         QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
         RealmResults<DynamicRealmObject> objects = null;
@@ -90,6 +81,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     @Override
     public List<T> get(List<String> ids) {
         RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                 .beginGroup();
         if (ids.size() > 0){
             query.equalTo("_id", ids.get(0));
@@ -99,6 +91,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         }
         query.endGroup();
+
         RealmResults<DynamicRealmObject> objects = query.findAll();
 
         List<T> ret = new ArrayList<T>();
@@ -114,6 +107,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public T get(String id) {
         DynamicRealmObject obj = mRealm.where(mCollection)
                 .equalTo("_id", id)
+                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                 .findFirst();
 
         return obj == null ? null : realmToObject(obj);
@@ -122,9 +116,11 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     @Override
     public List<T> get() {
-        RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+        RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
 
-        RealmResults<DynamicRealmObject> objects = query.findAll();
+        RealmResults<DynamicRealmObject> objects = query
+                .findAll();
 
         List<T> ret = new ArrayList<T>();
 
@@ -267,6 +263,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         for (Map.Entry<String, Object> entry: data.entrySet()){
             obj.set(entry.getKey(), entry.getValue());
         }
+        long calculated = Calendar.getInstance().getTimeInMillis() + ttl;
+
+        obj.set(ClassHash.TTL_FIELD, calculated < 0 ? Long.MAX_VALUE : calculated);
         return obj.get("_id").toString();
     }
 
@@ -306,5 +305,13 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             e.printStackTrace();
         }
         return ret;
+    }
+
+    public long getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(long ttl) {
+        this.ttl = ttl;
     }
 }
