@@ -41,6 +41,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -158,6 +159,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             if (currentUser == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+                if (appKey == null || appSecret == null){
+                    throw new KinveyException(KinveyClientErrorCode.MissingAppCredentials);
+                }
                 this.currentUser = new User(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
