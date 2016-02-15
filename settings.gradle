@@ -1,5 +1,5 @@
 rootProject.name = 'parent'
-include ':java-api-core'//, ':TestDrive', ':StatusShare', ':ContentBox-Android'
+include ':java-api-core', ':TestDrive-Android'//, ':TestDrive', ':StatusShare', ':ContentBox-Android'
 include ':android-lib'
 include ':android-secure'
 include ':java-lib'
@@ -18,3 +18,4 @@ project(':java-lib').projectDir = "$rootDir/java-lib" as File
 //project(':HelloWorld').projectDir = "samples-java/HelloWorld" as File
 
 
+project(':TestDrive-Android').projectDir = new File('samples/TestDrive-Android')

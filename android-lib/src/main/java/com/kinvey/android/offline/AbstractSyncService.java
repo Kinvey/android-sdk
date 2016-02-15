@@ -221,7 +221,7 @@ public abstract class AbstractSyncService extends IntentService{
         } else if (cur.getHttpVerb().equals("GET")){
         	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
         	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
-        	client.appData(collectionName, GenericJson.class).getEntity(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
+        	client.appData(collectionName, GenericJson.class).find(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);

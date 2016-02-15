@@ -19,6 +19,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
@@ -91,7 +92,7 @@ import java.util.Map;
  * @since 2.0
  * @version $Id: $
  */
-public class AsyncDataStore<T> extends AppData<T> {
+public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
 
 
@@ -634,7 +635,7 @@ public class AsyncDataStore<T> extends AppData<T> {
 
         @Override
         protected T executeAsync() throws IOException {
-            return (AsyncDataStore.super.saveBlocking(entity)).execute();
+            return (AsyncDataStore.super.save(entity));
         }
     }
 
@@ -647,7 +648,7 @@ public class AsyncDataStore<T> extends AppData<T> {
     @Override
     public boolean isOnline() {
         ConnectivityManager cm =
-                (ConnectivityManager)((Client)getClient()).getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager)((Client)()).getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnectedOrConnecting()) {
         	Logger.INFO("Device is online");

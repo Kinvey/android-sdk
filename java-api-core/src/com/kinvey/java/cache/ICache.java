@@ -57,7 +57,7 @@ public interface ICache<T extends GenericJson> {
      * @param items
      * @return ids of saved items
      */
-    List<String> save (Iterable<T> items);
+    List<T> save (Iterable<T> items);
     /**
      * Saving given item
      * if item does not have an _id field application will assign it to the object
@@ -65,7 +65,7 @@ public interface ICache<T extends GenericJson> {
      * @param item
      * @return id of saved items
      */
-    String save (T item);   //store objects in cache
+    T save (T item);   //store objects in cache
     /**
      * Delete all object that matches query
      * @param query

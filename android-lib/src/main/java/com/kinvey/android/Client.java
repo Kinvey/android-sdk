@@ -172,7 +172,7 @@ public class Client extends AbstractClient {
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
      * @return Instance of {@link AppData} for the defined collection
      */
-    public <T> AsyncDataStore<T> appData(String collectionName, Class<T> myClass) {
+    public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {

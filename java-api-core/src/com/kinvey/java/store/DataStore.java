@@ -4,19 +4,20 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.store.requests.data.DeleteRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.ReadRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
-import com.kinvey.java.store.requests.data.SaveRequest;
+import com.kinvey.java.store.requests.data.save.SaveListRequest;
+import com.kinvey.java.store.requests.data.save.SaveRequest;
 import com.kinvey.java.store.requests.data.read.ReadAllRequest;
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class DataStore<T extends GenericJson> {
 
-    private final AbstractClient client;
+    protected final AbstractClient client;
     private final String collection;
     private StoreType storeType;
     private Class<T> storeItemType;
@@ -87,8 +88,12 @@ public class DataStore<T extends GenericJson> {
         return ret;
     }
 
-    public void save (Iterable<T> objects) {
-        new SaveRequest<T>(client, collection, storeItemType, cache, objects, this.storeType.writePolicy).execute();
+    public List<T> save (Iterable<T> objects) {
+        return new SaveListRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, objects).execute();
+    }
+
+    public T save (T object) {
+        return new SaveRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, object).execute();
     }
 
     public void delete (String id){
@@ -136,4 +141,7 @@ public class DataStore<T extends GenericJson> {
     }
 
 
+    public void setStoreType(StoreType storeType) {
+        this.storeType = storeType;
+    }
 }

@@ -134,33 +134,34 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
 
     @Override
-    public List<String> save(Iterable<T> items) {
+    public List<T> save(Iterable<T> items) {
         mRealm.beginTransaction();
-        List<String> ids = new ArrayList<String>();
+        List<T> ret = new ArrayList<T>();
         try{
             for (T item : items){
-                ids.add(insertOrUpdate(item));
+                item.put("_id", insertOrUpdate(item));
+                ret.add(item);
             }
         } finally {
             mRealm.commitTransaction();
         }
-        return ids;
+        return ret;
     }
 
 
 
     @Override
-    public String save(T item) {
+    public T save(T item) {
         String ret = null;
         mRealm.beginTransaction();
         try{
-            ret = insertOrUpdate(item);
+            item.put("_id", insertOrUpdate(item));
+
         } finally {
             mRealm.commitTransaction();
-
         }
 
-        return ret;
+        return item;
     }
 
     @Override

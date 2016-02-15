@@ -135,7 +135,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      *
      * @return a new instance of the AppData class
      */
-    public abstract <T> com.kinvey.java.network.AppData<T> appData(String collectionName, Class<T> myClass);
+    public abstract <T extends GenericJson> com.kinvey.java.store.DataStore<T> networkStore(String collectionName, Class<T> myClass);
 
 
     /**
