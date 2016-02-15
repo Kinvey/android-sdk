@@ -22,7 +22,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.network.File;
 import com.kinvey.java.UserDiscovery;
@@ -72,7 +72,7 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
     }
 
 	@Override
-	public <T> AppData<T> appData(String collectionName, Class<T> myClass) {
+	public <T> NetworkStore<T> appData(String collectionName, Class<T> myClass) {
 		// TODO Auto-generated method stub
 		return null;
 	}

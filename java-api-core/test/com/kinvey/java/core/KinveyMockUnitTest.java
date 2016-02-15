@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.kinvey.java.network.File;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -62,7 +63,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
     protected static class MockTestClient extends AbstractClient {
 
-        private ConcurrentHashMap<String, com.kinvey.java.network.AppData> appDataInstanceCache;
+        private ConcurrentHashMap<String, NetworkStore> appDataInstanceCache;
 
 
         MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
@@ -72,17 +73,17 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <T> com.kinvey.java.network.AppData<T> appData(String collectionName, Class<T> myClass) {
+        public <T> NetworkStore<T> appData(String collectionName, Class<T> myClass) {
             synchronized (lock) {
                 Preconditions.checkNotNull(collectionName, "collectionName must not be null");
                 if (appDataInstanceCache == null) {
-                    appDataInstanceCache = new ConcurrentHashMap<String, com.kinvey.java.network.AppData>();
+                    appDataInstanceCache = new ConcurrentHashMap<String, NetworkStore>();
                 }
                 if (!appDataInstanceCache.containsKey(collectionName)) {
-                    appDataInstanceCache.put(collectionName, new MockAppData(collectionName, myClass, this));
+                    appDataInstanceCache.put(collectionName, new MockNetworkStore(collectionName, myClass, this));
                 }
                 if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-                    appDataInstanceCache.put(collectionName, new MockAppData(collectionName, myClass, this));
+                    appDataInstanceCache.put(collectionName, new MockNetworkStore(collectionName, myClass, this));
                 }
 
                 return appDataInstanceCache.get(collectionName);
@@ -227,15 +228,15 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
     }
 
-    public static class MockAppData extends com.kinvey.java.network.AppData {
+    public static class MockNetworkStore extends NetworkStore {
         /**
-         * Constructor to instantiate the AppData class.
+         * Constructor to instantiate the NetworkStore class.
          *
          * @param collectionName Name of the appData collection
          * @param myClass        Class Type to marshall data between.
          * @param client
          */
-        protected MockAppData(String collectionName, Class myClass, AbstractClient client) {
+        protected MockNetworkStore(String collectionName, Class myClass, AbstractClient client) {
             super(collectionName, myClass, client);
         }
     }

@@ -25,14 +25,14 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 
 /**
- * This class allows extensible use of various features provided by the AppData() API and variations
+ * This class allows extensible use of various features provided by the NetworkStore() API and variations
  * <p>
  *   There are various `set*()` methods, which can be chained together to create a builder.  Once the builder has been configured,
  * a call to `myBuilder.build()` will return a blocking synchronous request.  By calling `myBuilder.build().execute()` the
  * the request will be constructed and executed.
  * </p>
  * <p>
- * This class supports CRUD operations on any AppData collection.
+ * This class supports CRUD operations on any NetworkStore collection.
  * </p>
  * <p>
  * The code below will build and execute a blocking get entity request resolving two kinvey references up to a depth of 2..
@@ -40,7 +40,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
  * </p>
  * <p>
  *
- *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, AppData.this)
+ *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkStore.this)
  *                             .setEntityID(myEntity.getId());
  *                             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
  *                             .setResolveDepth(2)
@@ -52,7 +52,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
  * @author edwardf
  * @since 2.3.0
  */
-public class AppDataOperation {
+public class NetworkOperation {
 
 
     /**
@@ -61,10 +61,10 @@ public class AppDataOperation {
     protected static abstract class AppDataRequestBuilder {
 
 
-        //Required for all AppData operations.
+        //Required for all NetworkStore operations.
         protected String collection;
         protected Class myClass;
-        protected com.kinvey.java.network.AppData appData;
+        protected NetworkStore appData;
 
         /**
          * @param client an active Kinvey client
@@ -74,7 +74,7 @@ public class AppDataOperation {
         public AppDataRequestBuilder(AbstractClient client, String collectionName, Class myClass) {
             this.collection = collectionName;
             this.myClass = myClass;
-            this.appData = client.appData(collectionName, myClass);
+            this.appData = client.networkStore(collectionName, myClass);
         }
 
 
@@ -118,7 +118,7 @@ public class AppDataOperation {
         }
 
         public AppDataRequestBuilder setID(String id){
-            this.query = new Query().equals(com.kinvey.java.network.AppData.ID_FIELD_NAME, id);
+            this.query = new Query().equals(NetworkStore.ID_FIELD_NAME, id);
             return this;
         }
 
@@ -178,12 +178,12 @@ public class AppDataOperation {
 
 
             GenericJson jsonEntity = (GenericJson) this.myEntity;
-            String sourceID = (String) jsonEntity.get(com.kinvey.java.network.AppData.ID_FIELD_NAME);
+            String sourceID = (String) jsonEntity.get(NetworkStore.ID_FIELD_NAME);
 
             if (sourceID != null) {
-                ret = this.appData.new Save(this.myEntity, myClass, sourceID, com.kinvey.java.network.AppData.SaveMode.PUT);
+                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkStore.SaveMode.PUT);
             } else {
-                ret = this.appData.new Save(this.myEntity, myClass, com.kinvey.java.network.AppData.SaveMode.POST);
+                ret = this.appData.new Save(this.myEntity, myClass, NetworkStore.SaveMode.POST);
             }
             return super.build(ret);
 
@@ -204,7 +204,7 @@ public class AppDataOperation {
 
 
         public AppDataRequestBuilder setEntityID(String entityID) {
-            this.query = new Query().equals(com.kinvey.java.network.AppData.ID_FIELD_NAME, entityID);
+            this.query = new Query().equals(NetworkStore.ID_FIELD_NAME, entityID);
             return this;
         }
 

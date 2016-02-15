@@ -3,10 +3,8 @@ package com.kinvey.java.store.requests.data.delete;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.AppData;
-import com.kinvey.java.store.ReadPolicy;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.store.WritePolicy;
-import com.kinvey.java.store.requests.data.AbstractKinveyDataListRequest;
 import com.kinvey.java.store.requests.data.AbstractKinveyExecuteRequest;
 
 import java.io.IOException;
@@ -34,7 +32,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> extends Abstr
 
     @Override
     public Void execute() throws IOException {
-        AppData<T> appData = client.appData(collectionName, clazz);
+        NetworkStore<T> networkStore = client.networkStore(collectionName, clazz);
         switch (writePolicy){
             case FORCE_LOCAL:
                 deleteCached();
@@ -65,8 +63,8 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> extends Abstr
         return null;
     }
 
-    protected AppData<T> getNetworkData(){
-        return client.appData(collectionName, clazz);
+    protected NetworkStore<T> getNetworkData(){
+        return client.networkStore(collectionName, clazz);
     }
 
     @Override

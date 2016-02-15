@@ -125,7 +125,7 @@ public class UserStore<T extends User> {
      * @return true if user is logged in, false if not
      */
     public boolean isUserLoggedIn() {
-        return (currentUser != null && currentUser.getId() != null || currentUser.getAuthToken() != null);
+        return (currentUser != null && (currentUser.getId() != null || currentUser.getAuthToken() != null));
     }
 
     /**

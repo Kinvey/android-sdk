@@ -30,9 +30,11 @@ public class DataStore<T extends GenericJson> {
     private StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
+    private String clientAppVersion;
+    private GenericJson customRequestProperties;
 
 
-    private DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
+    public DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
 
         this.storeType = storeType;
         this.client = client;
@@ -143,5 +145,21 @@ public class DataStore<T extends GenericJson> {
 
     public void setStoreType(StoreType storeType) {
         this.storeType = storeType;
+    }
+
+    public AbstractClient getClient() {
+        return client;
+    }
+
+    public Object getCurrentClass() {
+        return storeItemType;
+    }
+
+    public void setClientAppVersion(String clientAppVersion) {
+        this.clientAppVersion = clientAppVersion;
+    }
+
+    public void setCustomRequestProperties(GenericJson customRequestProperties) {
+        this.customRequestProperties = customRequestProperties;
     }
 }

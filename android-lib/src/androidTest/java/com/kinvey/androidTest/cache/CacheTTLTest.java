@@ -48,7 +48,7 @@ public class CacheTTLTest {
         String id = UUID.randomUUID().toString();
         obj._id = id;
         obj.title = "test";
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj)._id, id);
 
         SampleGsonObject1 ret = cache.get(id);
         //test the same
@@ -63,7 +63,7 @@ public class CacheTTLTest {
         String id = UUID.randomUUID().toString();
         obj._id = id;
         obj.title = "test";
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj).get("_id"), id);
 
         SampleGsonObject1 ret = cache.get(id);
         //test the same
@@ -80,7 +80,7 @@ public class CacheTTLTest {
         String id = UUID.randomUUID().toString();
         obj._id = id;
         obj.title = "test";
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj)._id, id);
         Thread.sleep(TTL_MINUTE);
         SampleGsonObject1 ret = cache.get(id);
         //test the same

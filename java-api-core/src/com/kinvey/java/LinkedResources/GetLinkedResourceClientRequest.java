@@ -26,7 +26,7 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 
 /**
- * Implementation of a Client Request, which can download linked resources through the File API as well as the AppData API in one request.
+ * Implementation of a Client Request, which can download linked resources through the File API as well as the NetworkStore API in one request.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned

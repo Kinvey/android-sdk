@@ -4,7 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.store.WritePolicy;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
 
     @Override
     public T execute() {
-        AppData<T> appData = client.appData(collectionName, clazz);
+        NetworkStore<T> appData = client.networkStore(collectionName, clazz);
         switch (writePolicy){
             case FORCE_LOCAL:
                 cache.delete(query);

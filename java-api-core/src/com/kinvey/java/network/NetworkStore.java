@@ -41,7 +41,7 @@ import com.kinvey.java.query.MongoQueryFilter;
  * @author edwardf
  * @since 2.0.2
  */
-public class AppData<T> {
+public class NetworkStore<T> {
 
     private String collectionName;
     private Class<T> myClass;
@@ -88,12 +88,12 @@ public class AppData<T> {
 
 
     /**
-     * Constructor to instantiate the AppData class.
+     * Constructor to instantiate the NetworkStore class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass Class Type to marshall data between.
      */
-    protected AppData(String collectionName, Class<T> myClass, AbstractClient client) {
+    public NetworkStore(String collectionName, Class<T> myClass, AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName must not be null.");
         Preconditions.checkNotNull(client, "client must not be null.");
         this.collectionName = collectionName;
@@ -121,7 +121,7 @@ public class AppData<T> {
     }
 
     /**
-     * Gets current class that this AppData instance references.
+     * Gets current class that this NetworkStore instance references.
      * @return Current appData class for marshalling data
      */
     public Class<T> getCurrentClass() {
@@ -129,7 +129,7 @@ public class AppData<T> {
     }
 
     /**
-     * Gets current client for this AppData
+     * Gets current client for this NetworkStore
      * @return current client instance
      */
     protected AbstractClient getClient(){
@@ -428,30 +428,30 @@ public class AppData<T> {
 
 
     /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkStore.
      *
      * @return a new request builder for a blocking GET operation
      */
-    public AppDataOperation.BlockingGetBuilder blockingGetBuilder(){
-        return new AppDataOperation.BlockingGetBuilder(getClient(), this.collectionName, this.myClass);
+    public NetworkOperation.BlockingGetBuilder blockingGetBuilder(){
+        return new NetworkOperation.BlockingGetBuilder(getClient(), this.collectionName, this.myClass);
     }
 
     /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkStore.
      *
      * @return a new request builder for a blocking SAVE (put or post) operation
      */
-    public AppDataOperation.BlockingSaveBuilder  blockingSaveBuilder(){
-        return new AppDataOperation.BlockingSaveBuilder(getClient(), this.collectionName, this.myClass);
+    public NetworkOperation.BlockingSaveBuilder  blockingSaveBuilder(){
+        return new NetworkOperation.BlockingSaveBuilder(getClient(), this.collectionName, this.myClass);
     }
 
     /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of AppData.
+     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkStore.
      *
      * @return a new request builder for a blocking DELETE operation
      */
-    public AppDataOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
-        return new AppDataOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
+    public NetworkOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
+        return new NetworkOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
     }
     
 
@@ -485,7 +485,7 @@ public class AppData<T> {
 
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
-            this.collectionName= AppData.this.collectionName;
+            this.collectionName= NetworkStore.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
@@ -493,16 +493,16 @@ public class AppData<T> {
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
 
         Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
             super(client, "GET", REST_PATH, null, myClass);
-            this.collectionName= AppData.this.collectionName;
+            this.collectionName= NetworkStore.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
@@ -514,21 +514,21 @@ public class AppData<T> {
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
             
         }
         
         Get(String queryString, Class myClass){
         	super(client, "GET", REST_PATH, null, myClass);
-        	this.collectionName= AppData.this.collectionName;
+        	this.collectionName= NetworkStore.this.collectionName;
         	this.queryFilter = queryString;
         	this.setTemplateExpand(false);
-        	this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+        	this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
@@ -563,25 +563,25 @@ public class AppData<T> {
 
         GetEntity(String entityID, Class<T> myClass) {
             super(client, "GET", REST_PATH, null, myClass);
-            this.collectionName= AppData.this.collectionName;
+            this.collectionName= NetworkStore.this.collectionName;
             this.entityID = entityID;
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
         GetEntity(String entityID, Class<T> myClass, String[] resolves, int resolve_depth, boolean retain){
             super (client, "GET", REST_PATH, null, myClass);
-            this.collectionName= AppData.this.collectionName;
+            this.collectionName= NetworkStore.this.collectionName;
             this.entityID = entityID;
 
             this.resolve = Joiner.on(",").join(resolves);
             this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
             this.retainReferences = Boolean.toString(retain);
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
@@ -613,13 +613,13 @@ public class AppData<T> {
 
         Save(T entity, Class<T> myClass, String entityID, SaveMode update) {
             super(client, update.toString(), REST_PATH, entity, myClass);
-            this.collectionName = AppData.this.collectionName;
+            this.collectionName = NetworkStore.this.collectionName;
             if (update.equals(SaveMode.PUT)) {
                 this.entityID = entityID;
             }
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
@@ -653,16 +653,16 @@ public class AppData<T> {
         Delete(String entityID) {
             super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
             this.entityID = entityID;
-            this.collectionName = AppData.this.collectionName;
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.collectionName = NetworkStore.this.collectionName;
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
 
         Delete(Query query) {
             super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
-            this.collectionName= AppData.this.collectionName;
+            this.collectionName= NetworkStore.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
@@ -670,9 +670,9 @@ public class AppData<T> {
             this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
             String sortString = query.getSortString();
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
 
         }
@@ -690,10 +690,10 @@ public class AppData<T> {
 
         Aggregate(AggregateEntity entity, Class<T> myClass) {
             super(client, "POST", REST_PATH, entity, myClass);
-            this.collectionName = AppData.this.collectionName;
-            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", AppData.this.clientAppVersion);
-            if (AppData.this.customRequestProperties != null && !AppData.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(AppData.this.customRequestProperties) );
+            this.collectionName = NetworkStore.this.collectionName;
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkStore.this.clientAppVersion);
+            if (NetworkStore.this.customRequestProperties != null && !NetworkStore.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkStore.this.customRequestProperties) );
             }
         }
     }

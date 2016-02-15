@@ -212,11 +212,11 @@ public class File {
      */
     public UploadMetadataAndFile prepUploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
-        com.kinvey.java.network.AppData.SaveMode mode;
-        if (fileMetaData.containsKey(com.kinvey.java.network.AppData.ID_FIELD_NAME)){
-            mode = com.kinvey.java.network.AppData.SaveMode.PUT;
+        NetworkStore.SaveMode mode;
+        if (fileMetaData.containsKey(NetworkStore.ID_FIELD_NAME)){
+            mode = NetworkStore.SaveMode.PUT;
         }else{
-            mode = com.kinvey.java.network.AppData.SaveMode.POST;
+            mode = NetworkStore.SaveMode.POST;
         }
 
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
@@ -237,11 +237,11 @@ public class File {
      */
     public UploadMetadataAndFile uploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
-        com.kinvey.java.network.AppData.SaveMode mode;
-        if (fileMetaData.containsKey(com.kinvey.java.network.AppData.ID_FIELD_NAME)){
-            mode = com.kinvey.java.network.AppData.SaveMode.PUT;
+        NetworkStore.SaveMode mode;
+        if (fileMetaData.containsKey(NetworkStore.ID_FIELD_NAME)){
+            mode = NetworkStore.SaveMode.PUT;
         }else{
-            mode = com.kinvey.java.network.AppData.SaveMode.POST;
+            mode = NetworkStore.SaveMode.POST;
         }
 
         UploadMetadataAndFile upload = new UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener);
@@ -548,11 +548,11 @@ public class File {
      * @throws IOException
      */
     public UploadMetadata uploadMetaDataBlocking(FileMetaData metaData) throws IOException{
-        com.kinvey.java.network.AppData.SaveMode mode;
-        if (metaData.containsKey(com.kinvey.java.network.AppData.ID_FIELD_NAME)){
-            mode = com.kinvey.java.network.AppData.SaveMode.PUT;
+        NetworkStore.SaveMode mode;
+        if (metaData.containsKey(NetworkStore.ID_FIELD_NAME)){
+            mode = NetworkStore.SaveMode.PUT;
         }else{
-            mode = com.kinvey.java.network.AppData.SaveMode.POST;
+            mode = NetworkStore.SaveMode.POST;
         }
         UploadMetadata upload = new UploadMetadata(metaData, mode);
         client.initializeRequest(upload);
@@ -611,10 +611,10 @@ public class File {
 
         private MediaHttpUploader uploader;
 
-        private UploadMetadataAndFile(FileMetaData meta, com.kinvey.java.network.AppData.SaveMode verb, AbstractInputStreamContent mediaContent, UploaderProgressListener progressListener) {
+        private UploadMetadataAndFile(FileMetaData meta, NetworkStore.SaveMode verb, AbstractInputStreamContent mediaContent, UploaderProgressListener progressListener) {
             super(client, verb.toString(), REST_URL, meta, FileMetaData.class);
             initializeMediaHttpUploader(mediaContent, progressListener);
-            if (verb.equals(com.kinvey.java.network.AppData.SaveMode.PUT)){
+            if (verb.equals(NetworkStore.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);
@@ -666,9 +666,9 @@ public class File {
         @Key
         private String id;
 
-        private UploadMetadata(FileMetaData meta, com.kinvey.java.network.AppData.SaveMode verb) {
+        private UploadMetadata(FileMetaData meta, NetworkStore.SaveMode verb) {
             super(client, verb.toString(), REST_URL, meta, FileMetaData.class);
-            if (verb.equals(com.kinvey.java.network.AppData.SaveMode.PUT)){
+            if (verb.equals(NetworkStore.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", File.this.clientAppVersion);

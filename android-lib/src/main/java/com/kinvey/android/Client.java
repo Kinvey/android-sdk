@@ -40,9 +40,9 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.network.AndroidNetworkStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.store.AsyncAppData;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.AbstractClient;
@@ -57,7 +57,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.network.File;
 
 /**
@@ -131,7 +131,7 @@ public class Client extends AbstractClient {
         Logger.init(new AndroidLogger());
         _sharedInstance = this;
     }
-    
+
     public static Client sharedInstance(){
     	return _sharedInstance;
     }
@@ -148,11 +148,11 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * AppData factory method
+     * DataStore factory method
      * <p>
-     * Returns an instance of {@link AppData} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of {@link AsyncAppData} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link AppData}.
+     * Returns an instance of {@link AsyncDataStore} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of {@link AndroidNetworkStore} is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.store.DataStore}.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -161,7 +161,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-        AppData<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
+        DataStore<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
      }
      * </pre>
      * </p>
@@ -170,7 +170,7 @@ public class Client extends AbstractClient {
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link AppData} for the defined collection
+     * @return Instance of {@link com.kinvey.java.store.DataStore} for the defined collection
      */
     public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass) {
         synchronized (lock) {
@@ -179,11 +179,11 @@ public class Client extends AbstractClient {
                 appDataInstanceCache = new ConcurrentHashMap<String, AsyncDataStore>();
             }
             if (!appDataInstanceCache.containsKey(collectionName)) {            	
-            	Logger.INFO("adding new instance of AppData, new collection name");
+            	Logger.INFO("adding new instance of AsyncDataStore, new collection name");
                 appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
             }
             if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-            	Logger.INFO("adding new instance of AppData, class doesn't match");
+            	Logger.INFO("adding new instance of AsyncDataStore, class doesn't match");
                 appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
             }
 
@@ -427,7 +427,7 @@ public class Client extends AbstractClient {
     @Override
     public <T extends User> AsyncUserStore<T> userStore(){
         synchronized (lock) {
-            if (getCurrentUser() == null) {
+            if (userStore == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
                 userStore = new AsyncUserStore<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
@@ -959,8 +959,9 @@ public class Client extends AbstractClient {
         }
     }
 
-
-
-
+    @Override
+    public <T extends GenericJson> NetworkStore<T> networkStore(String collectionName, Class<T> myClass) {
+        return new AndroidNetworkStore<T>(collectionName, myClass, this);
+    }
 }
 

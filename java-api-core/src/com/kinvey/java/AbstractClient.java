@@ -41,7 +41,10 @@ import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.File;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.UserStore;
 
 /**
@@ -133,9 +136,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     /**
      *
      *
-     * @return a new instance of the AppData class
+     * @return a new instance of the NetworkStore class
      */
-    public abstract <T extends GenericJson> com.kinvey.java.store.DataStore<T> networkStore(String collectionName, Class<T> myClass);
+    public <T extends GenericJson> com.kinvey.java.network.NetworkStore<T> networkStore(String collectionName, Class<T> myClass){
+        return new NetworkStore<T>(collectionName, myClass, this);
+    };
 
 
     /**
@@ -469,5 +474,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public abstract ICacheManager getCacheManager();
+
+    public <T extends GenericJson> DataStore<T> getDataStore(String collection,
+                                                                      Class<T> clazz){
+        return new DataStore<T>(this, collection, clazz, StoreType.CACHE);
+    }
 
 }

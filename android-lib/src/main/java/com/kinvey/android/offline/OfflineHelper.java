@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.Logger;
 
 /**
@@ -114,7 +114,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
     /**
      * Add a collection to the metadata table if it doesn't already exist
      *
-     * @param collectionName - the name of the AppData collection
+     * @param collectionName - the name of the NetworkStore collection
      */
     private void addCollection(String collectionName){
 
@@ -160,7 +160,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @return the entity with the appdata collection and provided id
      */
 
-    public GenericJson getEntity(AbstractClient client, AppData appData, OfflineMetaData id) {
+    public GenericJson getEntity(AbstractClient client, NetworkStore appData, OfflineMetaData id) {
         GenericJson ret;
 
         ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);

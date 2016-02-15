@@ -31,8 +31,9 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -43,10 +44,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wraps the {@link AppData} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link NetworkStore} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link Client#appData} convenience method.  AppData
+ * This functionality can be accessed through the {@link Client#appData} convenience method.  NetworkStore
  * gets and saves entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -77,7 +78,7 @@ import java.util.Map;
  * Entity Set sample:
  * <pre>
  * {@code
- *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
+ *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
  *     myAppData.get(appData().query, new KinveyListCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
  *         public void onSuccess(EventEntity[] entities) { ... }
@@ -96,8 +97,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
 
 
-    //Every AbstractClient Request wrapper provided by the core AppData gets a KEY here.
-    //The below declared methodMap will map this key to a an appropriate method wrapper in the core AppData.
+    //Every AbstractClient Request wrapper provided by the core NetworkStore gets a KEY here.
+    //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkStore.
     //This makes it very easy to add new wrappers, and allows for a single implementation of an async client request.
     private static final String KEY_GET_BY_ID = "KEY_GET_BY_ID";
     private static final String KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY";
@@ -130,13 +131,13 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
 
 
-    /** Constructor to instantiate the AppData class.
+    /** Constructor to instantiate the NetworkStore class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
     public AsyncDataStore(String collectionName, Class myClass, AbstractClient client) {
-        super(collectionName, myClass, client);
+        super(client, collectionName, myClass, StoreType.CACHE);
         loadMethodMap();
     }
 
@@ -148,18 +149,18 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             tempMap.put(KEY_GET_ALL, DataStore.class.getMethod("find"));
             tempMap.put(KEY_GET_BY_IDS, DataStore.class.getMethod("find", Iterable.class));
 
-            tempMap.put(KEY_DELETE_BY_ID, AppData.class.getMethod("delete", String.class));
-            tempMap.put(KEY_DELETE_BY_QUERY, AppData.class.getMethod("delete", Query.class));
-            tempMap.put(KEY_DELETE_BY_IDS, AppData.class.getMethod("delete", Iterable.class));
+            tempMap.put(KEY_DELETE_BY_ID, NetworkStore.class.getMethod("delete", String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, NetworkStore.class.getMethod("delete", Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, NetworkStore.class.getMethod("delete", Iterable.class));
 
-            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
-            tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
-            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class} ));
-            tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));
+            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkStore.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkStore.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
+            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER, NetworkStore.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class} ));
+            tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, NetworkStore.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));
 
 
         }catch (NoSuchMethodException e){
-        	Logger.ERROR("CHECK METHOD MAP, no such method is declared in AppData!");
+        	Logger.ERROR("CHECK METHOD MAP, no such method is declared in NetworkStore!");
 //            e.printStackTrace();
         }
 
@@ -176,7 +177,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
      *             new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity entity) { ... }
@@ -202,7 +203,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new String[]{"189472023", "10193583"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -232,7 +233,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
@@ -261,7 +262,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -286,7 +287,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * <pre>
      * {@code
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(myEntityID, new String[]{"ReferencedField"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -312,7 +313,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * {@code
      *     Query q = new Query();
      *     q.equals("displayName", "myDisplayName");
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(q, new String[]{"myReferencedField"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -340,7 +341,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -369,7 +370,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -396,7 +397,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     List<String> ids = ...
      *     myAppData.delete(ids, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
@@ -423,7 +424,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
@@ -453,7 +454,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
+     *     NetworkStore<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.count(fields, null, new KinveyClientCallback<EventEntity>() {
@@ -483,7 +484,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     NetworkStore<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.sumBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -514,7 +515,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     NetworkStore<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -544,7 +545,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
+     *     NetworkStore<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -574,7 +575,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AppData<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
+     *     NetworkStore<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
      *     ArrayList<String> fields = new ArrayList<String>();
      *     fields.add("userName");
      *     aggregate.average(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
@@ -593,6 +594,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+
+
 
 
     /**
@@ -640,25 +643,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     }
 
 
-    /**
-     * Method to check if the current runtime environment has an active connection to the internet, this implementation is tightly coupled with the Android Operating System
-     *
-     * @return true if the device is connected or connecting
-     */
-    @Override
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager)((Client)()).getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-        	Logger.INFO("Device is online");
-            return true;
-        }
-        Logger.INFO("Device is offline");
 
-        return false;
-
-    }
 
 
 }

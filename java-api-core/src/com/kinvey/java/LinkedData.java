@@ -24,12 +24,13 @@ import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.network.NetworkStore;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 
 /**
- * Subset of the AppData API, offering support for downloading and uploading associated files with an entity.
+ * Subset of the NetworkStore API, offering support for downloading and uploading associated files with an entity.
  * <p>
  * Files are automatically downloaded and uploaded when the entity is saved or retrieved.  To enable this functionality
  * ensure your Entity extends {@code LinkedGenericJson} instead of the usual {@code GenericJson}
@@ -37,7 +38,7 @@ import java.lang.reflect.Array;
  *
  * @author edwardf
  */
-public class LinkedData<T extends LinkedGenericJson> extends com.kinvey.java.network.AppData<T> {
+public class LinkedData<T extends LinkedGenericJson> extends NetworkStore<T> {
 
     //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
     //TODO edwardf delete support?

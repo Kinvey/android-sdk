@@ -16,7 +16,7 @@
 package com.kinvey.android;
 
 
-import com.kinvey.java.network.AppDataOperation;
+import com.kinvey.java.network.NetworkOperation;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 
@@ -40,7 +40,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <p>
  * <pre>
  * {@code
- *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, AppData.this)
+ *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkStore.this)
  *             .setEntityID(myEntity.getId());
  *             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
  *             .setResolveDepth(2)
@@ -62,7 +62,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.2.0
  *
  */
-public class AsyncAppDataOperation extends AppDataOperation {
+public class AsyncNetworkOperation extends NetworkOperation {
 
     private abstract class AsyncAppDataRequestBuilder extends AppDataRequestBuilder {
 
@@ -102,7 +102,7 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //        protected int resolveDepth = 1;
 //        protected boolean retainReference = true;
 //
-//        public AsyncKRAppDataRequestBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+//        public AsyncKRAppDataRequestBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -131,7 +131,7 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //    public static class GetBuilder extends AsyncKRAppDataRequestBuilder {
 //        protected Query query = null;
 //
-//        public GetBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+//        public GetBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -168,7 +168,7 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //    public static class GetEntityBuilder extends AsyncKRAppDataRequestBuilder {
 //        protected String entityID = null;
 //
-//        public GetEntityBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+//        public GetEntityBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -205,7 +205,7 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //    public static class SaveBuilder extends AsyncAppDataRequestBuilder {
 //        protected Object myEntity = null;
 //
-//        public SaveBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+//        public SaveBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -222,12 +222,12 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //
 //
 //            GenericJson jsonEntity = (GenericJson) this.myEntity;
-//            String sourceID = (String) jsonEntity.get(AppData.ID_FIELD_NAME);
+//            String sourceID = (String) jsonEntity.get(NetworkStore.ID_FIELD_NAME);
 //
 //            if (sourceID != null) {
-//                ret = this.appData.new Save(this.myEntity, myClass, sourceID, AppData.SaveMode.PUT);
+//                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkStore.SaveMode.PUT);
 //            } else {
-//                ret = this.appData.new Save(this.myEntity, myClass, AppData.SaveMode.POST);
+//                ret = this.appData.new Save(this.myEntity, myClass, NetworkStore.SaveMode.POST);
 //            }
 //            return super.build(ret);
 //
@@ -243,7 +243,7 @@ public class AsyncAppDataOperation extends AppDataOperation {
 //        protected String entityID = null;
 //        protected Query query = null;
 //
-//        public DeleteBuilder(String collectionName, Class myClass, AsyncAppData appData) {
+//        public DeleteBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //

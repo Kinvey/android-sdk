@@ -1,7 +1,7 @@
 package com.kinvey.java;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.MockOfflineStore;
@@ -18,7 +18,7 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
     public void testPostLocalFirst() throws Exception{
         init();
         OfflinePolicy p = OfflinePolicy.LOCAL_FIRST;
-        AppData.Save request = getGenericAppData(GenericJson.class).saveBlocking(new GenericJson());
+        NetworkStore.Save request = getGenericAppData(GenericJson.class).saveBlocking(new GenericJson());
 
         request.setStore(mos, p);
 
@@ -33,7 +33,7 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
         OfflinePolicy p = OfflinePolicy.LOCAL_FIRST;
         GenericJson s = new GenericJson();
         s.put("_id", "id");
-        AppData.Save request = getGenericAppData(GenericJson.class).saveBlocking(s);
+        NetworkStore.Save request = getGenericAppData(GenericJson.class).saveBlocking(s);
 
         request.setStore(mos, p);
 
@@ -47,7 +47,7 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
     public void testGetLocalFirst() throws Exception{
         init();
         OfflinePolicy p = OfflinePolicy.LOCAL_FIRST;
-        AppData.GetEntity request = getGenericAppData(GenericJson.class).getEntityBlocking("123");
+        NetworkStore.GetEntity request = getGenericAppData(GenericJson.class).getEntityBlocking("123");
         request.setStore(mos, p);
 
         GenericJson ret = (GenericJson) p.execute(request);
@@ -58,7 +58,7 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
     public void testGetLocalFirstNull() throws Exception{
         init();
         OfflinePolicy p = OfflinePolicy.LOCAL_FIRST;
-        AppData.GetEntity request = getGenericAppData(GenericJson.class).getEntityBlocking("123");
+        NetworkStore.GetEntity request = getGenericAppData(GenericJson.class).getEntityBlocking("123");
         request.setStore(new MockOfflineStore.NullStore(), p);
 
         GenericJson ret = (GenericJson) p.execute(request);
@@ -71,7 +71,7 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
     public void testDeleteLocalFirst() throws Exception{
         init();
         OfflinePolicy p = OfflinePolicy.LOCAL_FIRST;
-        AppData.Delete request = getGenericAppData(GenericJson.class).deleteBlocking("123");
+        NetworkStore.Delete request = getGenericAppData(GenericJson.class).deleteBlocking("123");
 
         request.setStore(mos, p);
 
@@ -82,8 +82,8 @@ public class OfflinePolicyTest extends KinveyMockUnitTest {
 
 
 
-    private <T> AppData<T> getGenericAppData(Class<? extends Object> myClass) {
-        AppData appData = new AppData("myCollection", myClass, getClient());
+    private <T> NetworkStore<T> getGenericAppData(Class<? extends Object> myClass) {
+        NetworkStore appData = new NetworkStore("myCollection", myClass, getClient());
         return appData;
     }
 

@@ -15,7 +15,7 @@
  */
 package com.kinvey.java.LinkedResources;
 
-import com.kinvey.java.network.AppDataOperation;
+import com.kinvey.java.network.NetworkOperation;
 
 /**
  * Builder for advanced App Data requests
@@ -23,7 +23,7 @@ import com.kinvey.java.network.AppDataOperation;
  * @author edwardf
  * @since 2.0.2
  */
-public class LinkedResourceOperation extends AppDataOperation{
+public class LinkedResourceOperation extends NetworkOperation {
 
 
 

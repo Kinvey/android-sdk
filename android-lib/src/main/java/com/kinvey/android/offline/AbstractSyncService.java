@@ -45,7 +45,7 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  * This class provides functionality for background execution when in offline mode.
  *
  * <p>
- * This class pops the queue stored in the database, reconstructs requests, and delegates them through AppData.
+ * This class pops the queue stored in the database, reconstructs requests, and delegates them through NetworkStore.
  * </p>
  *
  * @author edwardf
@@ -184,9 +184,9 @@ public abstract class AbstractSyncService extends IntentService{
      */
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
-        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));           
-        	final GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
+        	client.networkStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.networkStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	final GenericJson entity = dbHelper.getEntity(client, client.networkStore(collectionName, GenericJson.class), cur.getEntityID());
         	//grab entity's id
         	final String curEntityID = entity.get("_id").toString(); 
         	//if it's a temp id, remove it before saving
@@ -196,7 +196,7 @@ public abstract class AbstractSyncService extends IntentService{
         	
             if (entity != null){
 
-                client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
+                client.dataStore(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
                     @Override
                     public void onSuccess(GenericJson result) {
                     	//if it was successful, and the entity had a temp id, remove the old entity
@@ -219,9 +219,9 @@ public abstract class AbstractSyncService extends IntentService{
                 AbstractSyncService.this.storeCompletedRequestInfo(collectionName, false, cur, new NullPointerException());
             }
         } else if (cur.getHttpVerb().equals("GET")){
-        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
-        	client.appData(collectionName, GenericJson.class).find(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
+        	client.dataStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.dataStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	client.dataStore(collectionName, GenericJson.class).find(cur.getEntityID().id, new KinveyClientCallback<GenericJson>() {
                 @Override
                 public void onSuccess(GenericJson result) {
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -235,15 +235,15 @@ public abstract class AbstractSyncService extends IntentService{
                 }
             });
         } else if (cur.getHttpVerb().equals("DELETE")){
-        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	client.dataStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.dataStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
         	
         	String curID = cur.getEntityID().id;
         	
         	if (curID.startsWith("{") && curID.endsWith("}")){
         		//it's a query
         		Query q = new Query().setQueryString(curID);
-            	client.appData(collectionName, GenericJson.class).delete(q, new KinveyDeleteCallback() {
+            	client.dataStore(collectionName, GenericJson.class).delete(q, new KinveyDeleteCallback() {
                     @Override
                     public void onSuccess(KinveyDeleteResponse result) {
 //                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -257,7 +257,7 @@ public abstract class AbstractSyncService extends IntentService{
         		
         	}else{
         		//it's a single ID
-            	client.appData(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
+            	client.dataStore(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
                     @Override
                     public void onSuccess(KinveyDeleteResponse result) {
 //                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
@@ -274,15 +274,15 @@ public abstract class AbstractSyncService extends IntentService{
 
         }else if (cur.getHttpVerb().equals("QUERY")){  
         	
-        	client.appData(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));        	
+        	client.dataStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.dataStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
         	String queryString = cur.getEntityID().id;    
         	
         	Query q = new Query();            
             q.setQueryString(queryString);
 
             try{
-            	GenericJson[] result = client.appData(collectionName, GenericJson.class).getBlocking(queryString).execute();
+            	List<GenericJson> result = client.dataStore(collectionName, GenericJson.class).find(q);
             	List<String> resultIds = new ArrayList<String>();
                 for (GenericJson res : result){
 //                    KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, res);

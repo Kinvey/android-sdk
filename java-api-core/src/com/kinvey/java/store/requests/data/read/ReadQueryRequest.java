@@ -4,11 +4,9 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.AppData;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 

@@ -87,7 +87,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         if (iterator.hasNext()){
             query.equalTo("_id", iterator.next());
             while (iterator.hasNext()){
-                query.or().equalTo("_id", iterator.next());
+                String id = iterator.next();
+                query.or().equalTo("_id", id);
             }
         }
         query.endGroup();
@@ -96,7 +97,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         List<T> ret = new ArrayList<T>();
 
-        for (Iterator<DynamicRealmObject> objIter = objects.iterator(); iterator.hasNext(); ){
+        for (Iterator<DynamicRealmObject> objIter = objects.iterator(); objIter.hasNext(); ){
             DynamicRealmObject obj = objIter.next();
             ret.add(realmToObject(obj));
         }

@@ -4,7 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.AppData;
+import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.store.ReadPolicy;
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
 
     @Override
     public List<T> execute() throws IOException {
-        AppData<T> appData = client.appData(collectionName, clazz);
+        NetworkStore<T> networkStore = client.networkStore(collectionName, clazz);
         query.setLimit((int) maxValue);
         List<T> ret = null;
         switch (readPolicy){
@@ -45,17 +45,17 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
                 ret = cache.get(query);
                 break;
             case FORCE_NETWORK:
-                ret = Arrays.asList(appData.getBlocking(query).execute());
+                ret = Arrays.asList(networkStore.getBlocking(query).execute());
                 break;
             case PREFER_LOCAL:
                 ret = cache.get(query);
                 if (ret == null || ret.size() == 0){
-                    ret = Arrays.asList(appData.getBlocking(query).execute());
+                    ret = Arrays.asList(networkStore.getBlocking(query).execute());
                 }
                 break;
             case PREFER_NETWORK:
                 try {
-                    ret = Arrays.asList(appData.getBlocking(query).execute());
+                    ret = Arrays.asList(networkStore.getBlocking(query).execute());
                 } catch (IOException e){
                     ret = cache.get(query);
                 }

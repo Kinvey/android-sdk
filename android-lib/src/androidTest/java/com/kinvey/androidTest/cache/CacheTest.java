@@ -43,7 +43,7 @@ public class CacheTest {
         String id = UUID.randomUUID().toString();
         obj._id = id;
         obj.title = "test";
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj)._id, id);
 
         SampleGsonObject1 ret = cache.get(id);
         //test the same
@@ -61,10 +61,10 @@ public class CacheTest {
         obj.put("_id", id);
         obj.put("title", "testTile");
 
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj)._id, id);
 
         obj.put("title", "testTitle2");
-        assertEquals(cache.save(obj), id);
+        assertEquals(cache.save(obj)._id, id);
 
         SampleGsonObject1 ret = cache.get(id);
 
@@ -84,16 +84,21 @@ public class CacheTest {
             items.add(new SampleGsonObject1(String.valueOf(i), "multipleInsert"+i));
         }
 
-        List<String> ids = cache.save(items);
+        List<SampleGsonObject1> saved = cache.save(items);
 
-        assertNotNull(ids);
+        assertNotNull(saved);
 
-        assertEquals(100, ids.size());
+        assertEquals(100, saved.size());
         boolean idsOk = true;
         for (int i = 0 ; i < 100; i++){
-            idsOk &= String.valueOf(i).equalsIgnoreCase(ids.get(i));
+            idsOk &= String.valueOf(i).equalsIgnoreCase(saved.get(i).get("_id").toString());
         }
         assertTrue("all ids are right and in right order", idsOk);
+
+        List<String> ids = new ArrayList<String>();
+        for (SampleGsonObject1 obj : saved){
+            ids.add(obj._id.toString());
+        }
 
         List<SampleGsonObject1> cachedObjects = cache.get(ids);
 
@@ -108,13 +113,16 @@ public class CacheTest {
 
         List<SampleGsonObject1> items = new ArrayList<SampleGsonObject1>();
 
+        List<String> ids = new ArrayList<String>();
+
         for (int i = 0 ; i < 100; i++){
             items.add(new SampleGsonObject1(String.valueOf(i), "deleteTest"+i));
+            ids.add(String.valueOf(i));
         }
 
-        List<String> ids = cache.save(items);
+        List<SampleGsonObject1> saved = cache.save(items);
 
-        assertNotNull(ids);
+        assertNotNull(saved);
 
         cache.delete(ids);
 

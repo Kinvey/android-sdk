@@ -3,12 +3,10 @@ package com.kinvey.java.store.requests.data.save;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.AppData;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import java.util.List;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
