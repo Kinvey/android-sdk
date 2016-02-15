@@ -13,14 +13,15 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.android;
+package com.kinvey.android.store;
 
+import com.kinvey.android.store.AbstractAsyncUserStore;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.User;
 import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.dto.User;
 
 /**
- * Wraps the {@link com.kinvey.java.User} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link com.kinvey.java.store.UserStore} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#user()} convenience method.
@@ -77,7 +78,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
  * @author mjsalinger
  * @since 2.0
  */
-public class AsyncUser<T extends User> extends AbstractAsyncUser<T> {
+public class AsyncUserStore<T extends User> extends AbstractAsyncUserStore<T> {
 
 
     /**
@@ -90,9 +91,11 @@ public class AsyncUser<T extends User> extends AbstractAsyncUser<T> {
      * @param client instance of current client
      * @throws NullPointerException if the client parameter and KinveyAuthRequest.Builder is non-null
      */
-    public AsyncUser(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
+    public AsyncUserStore(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
 
-    public AsyncUser(){}
+    public void setMICHostName(String MICHostName) {
+        this.MICHostName = MICHostName;
+    }
 }

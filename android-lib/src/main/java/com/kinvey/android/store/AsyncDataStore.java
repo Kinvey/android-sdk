@@ -13,7 +13,25 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android;
+package com.kinvey.android.store;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
+import com.google.common.base.Preconditions;
+import com.kinvey.android.AsyncClientRequest;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Logger;
+import com.kinvey.java.Query;
+import com.kinvey.java.core.AbstractKinveyClientRequest;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.network.AppData;
+import com.kinvey.java.store.DataStore;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -23,26 +41,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-
-import com.google.common.base.Preconditions;
-import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.network.AppData;
-import com.kinvey.java.Logger;
-import com.kinvey.java.Query;
-import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.core.KinveyClientCallback;
-
 /**
- * Wraps the {@link com.kinvey.java.network.AppData} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link AppData} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#appData} convenience method.  AppData
+ * This functionality can be accessed through the {@link Client#appData} convenience method.  AppData
  * gets and saves entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -64,9 +67,9 @@ import com.kinvey.java.core.KinveyClientCallback;
  * </pre>
  * </p>
  * <p>
- * Methods in this API use either {@link com.kinvey.android.callback.KinveyListCallback} for retrieving entity sets,
- * {@link com.kinvey.android.callback.KinveyDeleteCallback} for deleting appData, or  the general-purpose
- * {@link com.kinvey.java.core.KinveyClientCallback} used for retrieving single entites or saving Entities.
+ * Methods in this API use either {@link KinveyListCallback} for retrieving entity sets,
+ * {@link KinveyDeleteCallback} for deleting appData, or  the general-purpose
+ * {@link KinveyClientCallback} used for retrieving single entites or saving Entities.
  * </p>
  * <p/>
  * <p>
@@ -88,7 +91,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public class AsyncAppData<T> extends AppData<T> {
+public class AsyncDataStore<T> extends AppData<T> {
 
 
 
@@ -98,12 +101,20 @@ public class AsyncAppData<T> extends AppData<T> {
     private static final String KEY_GET_BY_ID = "KEY_GET_BY_ID";
     private static final String KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY";
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
+    private static final String KEY_GET_BY_IDS = "KEY_GET_BY_IDS";
+
+    private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
+    private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
+    private static final String KEY_DELETE_BY_IDS ="KEY_DELETE_BY_ID";
+
+
+
     private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
     private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";
-    private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
-    private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
+    
+
     private static final String KEY_COUNT = "KEY_COUNT";
     private static final String KEY_SUM = "KEY_SUM";
     private static final String KEY_MAX = "KEY_MAX";
@@ -123,7 +134,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    AsyncAppData(String collectionName, Class myClass, AbstractClient client) {
+    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client) {
         super(collectionName, myClass, client);
         loadMethodMap();
     }
@@ -131,16 +142,15 @@ public class AsyncAppData<T> extends AppData<T> {
     private void loadMethodMap(){
         Map<String, Method> tempMap = new HashMap<String, Method>();
         try{
-            tempMap.put(KEY_GET_BY_ID, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class}));
-            tempMap.put(KEY_GET_BY_QUERY, AppData.class.getMethod("getBlocking", new Class[]{Query.class}));
-            tempMap.put(KEY_GET_ALL, AppData.class.getMethod("getBlocking", new Class[]{}));
-            tempMap.put(KEY_DELETE_BY_ID, AppData.class.getMethod("deleteBlocking", new Class[]{String.class}));
-            tempMap.put(KEY_DELETE_BY_QUERY, AppData.class.getMethod("deleteBlocking", new Class[]{Query.class}));
-            tempMap.put(KEY_COUNT, AppData.class.getMethod("countBlocking", new Class[]{ArrayList.class, Query.class}));
-            tempMap.put(KEY_SUM, AppData.class.getMethod("sumBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
-            tempMap.put(KEY_MAX, AppData.class.getMethod("maxBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
-            tempMap.put(KEY_MIN, AppData.class.getMethod("minBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
-            tempMap.put(KEY_AVERAGE, AppData.class.getMethod("averageBlocking", new Class[]{ArrayList.class, String.class, Query.class}));
+            tempMap.put(KEY_GET_BY_ID, DataStore.class.getMethod("find", String.class));
+            tempMap.put(KEY_GET_BY_QUERY, DataStore.class.getMethod("find", Query.class));
+            tempMap.put(KEY_GET_ALL, DataStore.class.getMethod("find"));
+            tempMap.put(KEY_GET_BY_IDS, DataStore.class.getMethod("find", Iterable.class));
+
+            tempMap.put(KEY_DELETE_BY_ID, AppData.class.getMethod("delete", String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, AppData.class.getMethod("delete", Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, AppData.class.getMethod("delete", Iterable.class));
+
             tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, AppData.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER, AppData.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class} ));
@@ -177,7 +187,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param entityID entityID to fetch
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void getEntity(String entityID, KinveyClientCallback<T> callback)  {
+    public void find(String entityID, KinveyClientCallback<T> callback)  {
         new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -185,7 +195,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to fetch an array of Entities using an array of _ids.
      * <p>
      * Constructs an asynchronous request to fetch an Array of Entities, filtering by the provided list of _ids.  Uses
-     * KinveyListCallback<T> to return an Array of type T.  This method uses a Query {@link com.kinvey.java.Query}.
+     * KinveyListCallback<T> to return an Array of type T.  This method uses a Query {@link Query}.
      * </p>
      * <p>
      * Sample Usage:
@@ -203,11 +213,9 @@ public class AsyncAppData<T> extends AppData<T> {
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void get(String[] ids, KinveyListCallback<T> callback){
+    public void find(Iterable<String> ids, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        Query q = new Query();
-        q.in("_id", ids);
-        this.get(q, callback);
+        new AppDataRequest(methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -216,7 +224,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to fetch an array of Entities using a Query object.
      * <p>
      * Constructs an asynchronous request to fetch an Array of Entities, filtering by a Query object.  Uses
-     * KinveyListCallback<T> to return an Array of type T.  Queries can be constructed with {@link com.kinvey.java.Query}.
+     * KinveyListCallback<T> to return an Array of type T.  Queries can be constructed with {@link Query}.
      * An empty Query object will return all items in the collection.
      * </p>
      * <p>
@@ -234,10 +242,10 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link com.kinvey.java.Query} to filter the results.
+     * @param query {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void get(Query query, KinveyListCallback<T> callback){
+    public void find(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
         new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -263,7 +271,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void get(KinveyListCallback<T> callback) {
+    public void find(KinveyListCallback<T> callback) {
         new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
@@ -312,7 +320,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param q - the {@link com.kinvey.java.Query} to execute determining which entities to retrieve.
+     * @param q - the {@link Query} to execute determining which entities to retrieve.
      * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
      * @param callback - results of execution, either success or failure
      */
@@ -353,7 +361,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to delete an entity to a collection.
      * <p>
      * Creates an asynchronous request to delete a group of entities from a collection based on a Query object.  Uses KinveyDeleteCallback to return a
-     * {@link com.kinvey.java.model.KinveyDeleteResponse}.  Queries can be constructed with {@link com.kinvey.java.Query}.
+     * {@link com.kinvey.java.model.KinveyDeleteResponse}.  Queries can be constructed with {@link Query}.
      * An empty Query object will delete all items in the collection.
      * </p>
      * <p>
@@ -374,6 +382,34 @@ public class AsyncAppData<T> extends AppData<T> {
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
         new AppDataRequest(methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+
+    /**
+     * Asynchronous request to delete an entities from a collection.
+     * <p>
+     * Creates an asynchronous request to delete a group of entities from a collection based on a passed entities ids.  Uses KinveyDeleteCallback to return a
+     * {@link com.kinvey.java.model.KinveyDeleteResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     AppData<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     List<String> ids = ...
+     *     myAppData.delete(ids, new KinveyDeleteCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param entityIDs the ID to delete
+     * @param callback KinveyDeleteCallback
+     */
+    public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
+        new AppDataRequest(methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -397,7 +433,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link com.kinvey.java.Query} to filter the results.
+     * @param query {@link Query} to filter the results.
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
@@ -410,7 +446,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *
      * <p>
      * Generates an asynchronous request to group a collection and provide a count of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
+     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
      * </p>
      * <p>
      * Sample Usage:
@@ -440,7 +476,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to retrieveBlocking a group by SUM on a collection or filtered collection
      * <p>
      * Generates an asynchronous request to group a collection and provide a sumBlocking of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
+     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
      * </p>
      * <p>
      * Sample Usage:
@@ -471,7 +507,7 @@ public class AsyncAppData<T> extends AppData<T> {
      *
      * <p>
      * Generates an asynchronous request to group a collection and provide the max value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
+     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
      * </p>
      * <p>
      * Sample Usage:
@@ -501,7 +537,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to retrieve a group by MIN on a collection or filtered collection
      * <p>
      * Generates an asynchronous request to group a collection and provide the min value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
+     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
      * </p>
      * <p>
      * Sample Usage:
@@ -531,7 +567,7 @@ public class AsyncAppData<T> extends AppData<T> {
      * Asynchronous request to retrieve a group by AVERAGE on a collection or filtered collection
      * <p>
      * Generates an asynchronous request to group a collection and provide the average value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link com.kinvey.java.Query}
+     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
      * </p>
      * <p>
      * Sample Usage:
@@ -578,7 +614,7 @@ public class AsyncAppData<T> extends AppData<T> {
 
         @Override
         public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-            AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncAppData.this, args);
+            AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncDataStore.this, args);
             request.setCallback(getCallback());
             if (request instanceof AbstractKinveyJsonClientRequest){
                 ((AbstractKinveyJsonClientRequest) request).setExecutor(this);
@@ -598,7 +634,7 @@ public class AsyncAppData<T> extends AppData<T> {
 
         @Override
         protected T executeAsync() throws IOException {
-            return (AsyncAppData.super.saveBlocking(entity)).execute();
+            return (AsyncDataStore.super.saveBlocking(entity)).execute();
         }
     }
 

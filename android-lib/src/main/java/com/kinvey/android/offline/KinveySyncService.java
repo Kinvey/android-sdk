@@ -19,11 +19,12 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.kinvey.android.store.AsyncAppData;
 import com.kinvey.java.Logger;
 
 /**
  *
- * This Android Service listens for intents and uses the {@link com.kinvey.android.AsyncAppData} API to execute requests
+ * This Android Service listens for intents and uses the {@link AsyncAppData} API to execute requests
  *
  * @author edwardf
  * @since 2.0

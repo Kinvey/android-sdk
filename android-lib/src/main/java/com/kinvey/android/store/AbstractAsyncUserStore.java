@@ -11,18 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.kinvey.android;
+package com.kinvey.android.store;
 
 import java.io.IOException;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.android.AsyncClientRequest;
+import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -31,19 +29,20 @@ import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
-import com.kinvey.java.User;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
+import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.requests.user.LogoutRequest;
 
 /**
  * Maintains definitions of all asyncronous user operation methods, this class is meant to be extended.
  * <p/>
  *
- * Wraps the {@link com.kinvey.java.User} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link com.kinvey.java.store.UserStore} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#user()} convenience method.
@@ -97,7 +96,7 @@ public void onSuccess(User u) { ... }
  * <p>This class is not thread-safe.</p>
  * @author edwardf
  */
-public abstract class AbstractAsyncUser<T extends User> extends User<T> {
+public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T> {
 
     /**
      * Flag indicating if a logout operation should clear all local storage
@@ -120,15 +119,10 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param client instance of current client
      * @throws NullPointerException if the client parameter and KinveyAuthRequest.Builder is non-null
      */
-    public AbstractAsyncUser(AbstractClient client, Class<T> userClass,  KinveyAuthRequest.Builder builder) {
+    public AbstractAsyncUserStore(AbstractClient client, Class<T> userClass,  KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
 
-    /**
-     * The JSON parser require a public empty constructor -- do not use this, access the class through the Client.
-     */
-    @Deprecated
-    public AbstractAsyncUser(){}
 
     /**
      * Asynchronous implicit user login.
@@ -443,7 +437,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @return
      */
     @Override
-    protected Client getClient() {
+    public Client getClient() {
         return (Client) super.getClient();
     }
 
@@ -728,7 +722,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
     public void update(KinveyClientCallback<T> callback) {
-        new Update(AbstractAsyncUser.this, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Update(AbstractAsyncUserStore.this, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -758,7 +752,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
-    public void update(User user, KinveyClientCallback<T> callback){
+    public void update(UserStore<T> user, KinveyClientCallback<T> callback){
         new Update(user, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -815,22 +809,22 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected User executeAsync() throws IOException {
-            return AbstractAsyncUser.this.retrieveMetadataBlocking();
+            return AbstractAsyncUserStore.this.retrieveMetadataBlocking();
         }
     }
 
     private class Update extends AsyncClientRequest<User> {
 
-        User user = null;
+        UserStore user = null;
 
-        private Update(User user, KinveyClientCallback callback){
+        private Update(UserStore user, KinveyClientCallback callback){
             super(callback);
             this.user = user;
         }
 
         @Override
         protected User executeAsync() throws IOException {
-            return AbstractAsyncUser.this.updateBlocking(user).execute();
+            return AbstractAsyncUserStore.this.updateBlocking(user.getCurrentUser()).execute();
         }
     }
 
@@ -847,7 +841,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AbstractAsyncUser.this.resetPasswordBlocking(this.username).execute();
+            AbstractAsyncUserStore.this.resetPasswordBlocking(this.username).execute();
             return null;
         }
     }
@@ -861,7 +855,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AbstractAsyncUser.this.sendEmailVerificationBlocking().execute();
+            AbstractAsyncUserStore.this.sendEmailVerificationBlocking().execute();
             return null;
         }
     }
@@ -880,7 +874,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected User executeAsync() throws IOException {
-            return AbstractAsyncUser.this.loginKinveyAuthTokenBlocking(userID,  authToken).execute();
+            return AbstractAsyncUserStore.this.loginKinveyAuthTokenBlocking(userID,  authToken).execute();
 
         }
     }
@@ -957,25 +951,25 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         protected User executeAsync() throws IOException {
             switch(this.type) {
                 case IMPLICIT:
-                    return AbstractAsyncUser.this.loginBlocking().execute();
+                    return AbstractAsyncUserStore.this.loginBlocking().execute();
                 case KINVEY:
-                    return AbstractAsyncUser.this.loginBlocking(username, password).execute();
+                    return AbstractAsyncUserStore.this.loginBlocking(username, password).execute();
                 case FACEBOOK:
-                    return AbstractAsyncUser.this.loginFacebookBlocking(accessToken).execute();
+                    return AbstractAsyncUserStore.this.loginFacebookBlocking(accessToken).execute();
                 case GOOGLE:
-                    return AbstractAsyncUser.this.loginGoogleBlocking(accessToken).execute();
+                    return AbstractAsyncUserStore.this.loginGoogleBlocking(accessToken).execute();
                 case TWITTER:
-                    return AbstractAsyncUser.this.loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                    return AbstractAsyncUserStore.this.loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case LINKED_IN:
-                    return AbstractAsyncUser.this.loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                    return AbstractAsyncUserStore.this.loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
                 case AUTH_LINK:
-                    return AbstractAsyncUser.this.loginAuthLinkBlocking(accessToken, refreshToken).execute();
+                    return AbstractAsyncUserStore.this.loginAuthLinkBlocking(accessToken, refreshToken).execute();
                 case SALESFORCE:
-                    return AbstractAsyncUser.this.loginSalesForceBlocking(accessToken, client_id, refreshToken, id).execute();
+                    return AbstractAsyncUserStore.this.loginSalesForceBlocking(accessToken, client_id, refreshToken, id).execute();
                 case MOBILE_IDENTITY:
-                    return AbstractAsyncUser.this.loginMobileIdentityBlocking(accessToken).execute();
+                    return AbstractAsyncUserStore.this.loginMobileIdentityBlocking(accessToken).execute();
                 case CREDENTIALSTORE:
-                    return AbstractAsyncUser.this.login(credential).execute();
+                    return AbstractAsyncUserStore.this.login(credential).execute();
             }
             return null;
         }
@@ -994,7 +988,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected User executeAsync() throws IOException {
-            return AbstractAsyncUser.this.createBlocking(username, password).execute();
+            return AbstractAsyncUserStore.this.createBlocking(username, password).execute();
         }
     }
 
@@ -1008,7 +1002,7 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AbstractAsyncUser.this.deleteBlocking(hardDelete).execute();
+            AbstractAsyncUserStore.this.deleteBlocking(hardDelete).execute();
             return null;
         }
     }
@@ -1024,13 +1018,13 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 
 		@Override
 		protected T executeAsync() throws IOException {
-			GenericJson result = AbstractAsyncUser.this.getMICToken(token).execute();
+			GenericJson result = AbstractAsyncUserStore.this.getMICToken(token).execute();
 			
-			T ret =  AbstractAsyncUser.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+			T ret =  AbstractAsyncUserStore.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 			
-			Credential currentCred = AbstractAsyncUser.this.getClient().getStore().load(AbstractAsyncUser.this.getId());
+			Credential currentCred = AbstractAsyncUserStore.this.getClient().getStore().load(AbstractAsyncUserStore.this.getCurrentUser().getId());
 			currentCred.setRefreshToken(result.get("refresh_token").toString());
-			AbstractAsyncUser.this.getClient().getStore().store(AbstractAsyncUser.this.getId(), currentCred);
+			AbstractAsyncUserStore.this.getClient().getStore().store(AbstractAsyncUserStore.this.getCurrentUser().getId(), currentCred);
 			
 			return ret;
 		}
@@ -1052,17 +1046,17 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
 		@Override
 		protected T executeAsync() throws IOException {
 			
-			GenericJson tempResult = AbstractAsyncUser.this.getMICTempURL().execute();
+			GenericJson tempResult = getMICTempURL().execute();
 			String tempURL = tempResult.get("temp_login_uri").toString();
-			GenericJson accessResult = AbstractAsyncUser.this.MICLoginToTempURL(username, password, tempURL).execute();
+			GenericJson accessResult = AbstractAsyncUserStore.this.MICLoginToTempURL(username, password, tempURL).execute();
 		
 //			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
-			User user = AbstractAsyncUser.this.loginMobileIdentityBlocking(accessResult.get("access_token").toString()).execute();
+			User user = AbstractAsyncUserStore.this.loginMobileIdentityBlocking(accessResult.get("access_token").toString()).execute();
 			
 			
-			Credential currentCred = AbstractAsyncUser.this.getClient().getStore().load(AbstractAsyncUser.this.getId());
+			Credential currentCred = AbstractAsyncUserStore.this.getClient().getStore().load(AbstractAsyncUserStore.this.getCurrentUser().getId());
 			currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
-			AbstractAsyncUser.this.getClient().getStore().store(AbstractAsyncUser.this.getId(), currentCred);
+			AbstractAsyncUserStore.this.getClient().getStore().store(AbstractAsyncUserStore.this.getCurrentUser().getId(), currentCred);
 			
 			return (T) user;  
 		}
@@ -1099,15 +1093,15 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
         public T executeAsync() throws IOException {
             if (query == null){
                 if (resolves == null){
-                    return (T) AbstractAsyncUser.this.retrieveBlocking().execute();
+                    return (T) AbstractAsyncUserStore.this.retrieveBlocking().execute();
                 }else{
-                    return (T) AbstractAsyncUser.this.retrieveBlocking(resolves).execute();
+                    return (T) AbstractAsyncUserStore.this.retrieveBlocking(resolves).execute();
                 }
             }else{
                 if (resolves == null){
-                    return (T) AbstractAsyncUser.this.retrieveBlocking(query).execute();
+                    return (T) AbstractAsyncUserStore.this.retrieveBlocking(query).execute();
                 }else{
-                    return (T) AbstractAsyncUser.this.retrieveBlocking(query, resolves).execute();
+                    return (T) AbstractAsyncUserStore.this.retrieveBlocking(query, resolves).execute();
                 }
 
             }

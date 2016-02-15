@@ -79,16 +79,16 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public List<T> get(List<String> ids) {
+    public List<T> get(Iterable<String> ids) {
         RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
                 .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                 .beginGroup();
-        if (ids.size() > 0){
-            query.equalTo("_id", ids.get(0));
-            for (int i = 0 ; i < ids.size(); i++){
-                query.or().equalTo("_id", ids.get(i));
+        Iterator<String> iterator = ids.iterator();
+        if (iterator.hasNext()){
+            query.equalTo("_id", iterator.next());
+            while (iterator.hasNext()){
+                query.or().equalTo("_id", iterator.next());
             }
-
         }
         query.endGroup();
 
@@ -96,8 +96,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         List<T> ret = new ArrayList<T>();
 
-        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
-            DynamicRealmObject obj = iterator.next();
+        for (Iterator<DynamicRealmObject> objIter = objects.iterator(); iterator.hasNext(); ){
+            DynamicRealmObject obj = objIter.next();
             ret.add(realmToObject(obj));
         }
         return ret;

@@ -36,7 +36,7 @@ public interface ICache<T extends GenericJson> {
      * @param ids
      * @return
      */
-    List<T> get (List<String> ids);    //get
+    List<T> get (Iterable<String> ids);    //get
 
     /**
      * Get Single object from cache with given id

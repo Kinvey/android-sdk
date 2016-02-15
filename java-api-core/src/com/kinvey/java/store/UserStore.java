@@ -571,7 +571,7 @@ public class UserStore<T extends User> {
 
     }
 
-    public GetMICTempURL getMICTempURL() throws IOException{
+    public GetMICTempURL<T> getMICTempURL() throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -583,7 +583,7 @@ public class UserStore<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICTempURL getTemp = new GetMICTempURL(this, content);
+        GetMICTempURL getTemp = new GetMICTempURL<T>(this, content);
         getTemp.setRequireAppCredentials(true);
         client.initializeRequest(getTemp);
         return getTemp;
@@ -591,7 +591,7 @@ public class UserStore<T extends User> {
     }
 
 
-    public LoginToTempURL MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
+    public LoginToTempURL<T> MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -608,7 +608,7 @@ public class UserStore<T extends User> {
         data.put("password", password);
 
         HttpContent content = new UrlEncodedContent(data) ;
-        LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, content);
+        LoginToTempURL<T> loginTemp = new LoginToTempURL<T>(this, tempURL, content);
         loginTemp.setRequireAppCredentials(true);
         client.initializeRequest(loginTemp);
         return loginTemp;

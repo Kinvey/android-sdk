@@ -61,7 +61,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public static final String DEFAULT_SERVICE_PATH = "";
     
-    private UserStore userStore;
+    protected UserStore userStore;
     private CredentialStore store;
 
     /** used to synchronized access to the local api wrappers **/
@@ -159,7 +159,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
 
-                userStore = new UserStore<T>(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                userStore = new UserStore<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
 
@@ -169,7 +169,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
 
 
-    public Class getUserClass(){
+    public <T extends User> Class<T> getUserClass(){
         return this.userModelClass;
     }
 

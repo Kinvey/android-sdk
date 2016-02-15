@@ -35,10 +35,10 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
-import com.kinvey.java.User;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
@@ -100,12 +100,13 @@ public abstract class AbstractSyncService extends IntentService{
      */
     private void initClientAndKickOffSync() {
 
-        if (client == null || !client.user().isUserLoggedIn()) {
+        if (client == null || !client.userStore().isUserLoggedIn()) {
         	Logger.INFO("building new Client");
             client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
                 @Override
                 public void onSuccess(User result) {
-                	Logger.INFO("offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                	Logger.INFO("offline Logged in as -> " + client.userStore().getCurrentUser().getUsername() +
+                            " (" + client.userStore().getCurrentUser().getId() +")");
                 	Logger.INFO("offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
                     getFromStoreAndExecute();
                 }
@@ -117,7 +118,7 @@ public abstract class AbstractSyncService extends IntentService{
                 }
             }).build();
 
-            if (!client.user().isUserLoggedIn()){
+            if (!client.userStore().isUserLoggedIn()){
             	Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> don't call logout! need an active current user!");
             }
 
@@ -139,7 +140,7 @@ public abstract class AbstractSyncService extends IntentService{
 
             @Override
             protected Void doInBackground(Void... voids) {
-                DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
+                DatabaseHandler dbHelper = getDatabaseHandler(client.userStore().getCurrentUser().getId());
                 List<String> collectionNames = dbHelper.getCollectionTables();
 
                 boolean done = false;
@@ -317,7 +318,7 @@ public abstract class AbstractSyncService extends IntentService{
                 //if request failed on client side, re-queue it
                 if (!success && error != null && !(error instanceof HttpResponseException)){
                 	Logger.INFO("requeing request");
-                    DatabaseHandler dbHelper = getDatabaseHandler(client.user().getId());
+                    DatabaseHandler dbHelper = getDatabaseHandler(client.userStore().getCurrentUser().getId());
                     dbHelper.getTable(collectionName).enqueueRequest(dbHelper, info.getHttpVerb(), info.getEntityID(), null);
                     registerFailure();
                 }else{

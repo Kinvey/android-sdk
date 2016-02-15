@@ -1,4 +1,4 @@
-package com.kinvey.java.store.requests;
+package com.kinvey.java.store.requests.data;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
@@ -7,7 +7,7 @@ import com.kinvey.java.network.NetworkManager;
 /**
  * Created by Prots on 2/8/16.
  */
-public abstract class AbstractKinveyDataRequest<T extends GenericJson> implements IRequest<T> {
+public abstract class AbstractKinveyExecuteRequest<T extends GenericJson> implements IRequest<Void> {
     public static class RequestConfig{
 
     }

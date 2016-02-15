@@ -35,9 +35,8 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
-
+import com.kinvey.java.dto.User;
 
 
 /**
@@ -84,7 +83,7 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(final Application currentApp) {
-        if (!getClient().user().isUserLoggedIn()){
+        if (!getClient().userStore().isUserLoggedIn()){
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
@@ -128,7 +127,7 @@ public class GCMPush extends AbstractPush {
             return;
         }
 
-        if (!client.user().isUserLoggedIn()) {
+        if (!client.userStore().isUserLoggedIn()) {
         	Logger.ERROR("Need to login a current user before registering for push!");
             return;
         }
@@ -138,11 +137,11 @@ public class GCMPush extends AbstractPush {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	client.user().retrieve(new KinveyUserCallback() {
+                	client.userStore().retrieve(new KinveyUserCallback() {
 						
 						@Override
 						public void onSuccess(User result) {
-							client.user().put("_messaging", result.get("_messaging"));
+							client.userStore().getCurrentUser().put("_messaging", result.get("_messaging"));
 							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
@@ -215,8 +214,8 @@ public class GCMPush extends AbstractPush {
         if (gcmID == null || gcmID.equals("")){
         	return false;
         }
-        if (getClient().user().containsKey("_messaging")){
-            AbstractMap<String, Object> pushField = (AbstractMap<String, Object>) getClient().user().get("_messaging");
+        if (getClient().userStore().getCurrentUser().containsKey("_messaging")){
+            AbstractMap<String, Object> pushField = (AbstractMap<String, Object>) getClient().userStore().getCurrentUser().get("_messaging");
             if (pushField.containsKey("pushTokens")){
                 ArrayList<AbstractMap<String, Object>> gcmField = (ArrayList<AbstractMap<String, Object>>) pushField.get("pushTokens");
                 for(AbstractMap<String, Object> gcm : gcmField){

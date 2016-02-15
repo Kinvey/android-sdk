@@ -31,13 +31,14 @@ import com.google.api.client.json.JsonGenerator;
 import com.google.gson.Gson;
 import com.kinvey.android.Client;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
+import com.kinvey.android.store.AsyncAppData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
- * This class manages the necessary tables for offline to function associated with one specific {@link com.kinvey.android.AsyncAppData} collection.
+ * This class manages the necessary tables for offline to function associated with one specific {@link AsyncAppData} collection.
  * <p/>
  * Schema-less entities are stored in an `offline_MyCollection` table, which has two columns-- one for the _id of the entity and one for the json representation of the entity.
  * `queue_MyCollection` maintains an ordered list of queued requests, so that they be retrieved and executed when a connection is restored.  The queue associates an HTTP Verb with an _id of the entity to perform it on.
@@ -185,7 +186,7 @@ public class OfflineTable<T extends GenericJson> {
 
         values.put(COLUMN_JSON, jsonResult);
         values.put(COLUMN_DELETED, 0);
-        values.put(COLUMN_USER, client.user().getId());
+        values.put(COLUMN_USER, client.userStore().getCurrentUser().getId());
 
         Logger.INFO("insert entity -> " + offlineEntity.get("_id").toString());
 

@@ -46,7 +46,7 @@ public class MICLoginActivity extends Activity {
     public void onNewIntent(Intent intent){
 
         super.onNewIntent(intent);
-        Client.sharedInstance().user().onOAuthCallbackRecieved(intent);
+        Client.sharedInstance().userStore().onOAuthCallbackRecieved(intent);
         this.finish();
     }
 }

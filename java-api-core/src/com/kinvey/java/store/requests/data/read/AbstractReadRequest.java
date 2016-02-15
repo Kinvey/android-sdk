@@ -1,4 +1,4 @@
-package com.kinvey.java.store.requests;
+package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
@@ -6,63 +6,71 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.AppData;
 import com.kinvey.java.store.ReadPolicy;
+import com.kinvey.java.store.requests.data.AbstractKinveyDataListRequest;
+
+import java.util.List;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Prots on 2/8/16.
  */
-public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyDataRequest<T> {
+public abstract class AbstractReadRequest<T extends GenericJson> extends AbstractKinveyDataListRequest<T> {
     private AbstractClient client;
     private final String collectionName;
     private final Class<T> clazz;
-    private final ICache<T> cache;
-    private String id;
+    protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
 
-    public ReadSingleRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                             ICache<T> cache, String id, ReadPolicy readPolicy) {
+    public AbstractReadRequest(AbstractClient client, String collectionName, Class<T> clazz,
+                               ICache<T> cache, ReadPolicy readPolicy) {
         this.client = client;
         this.collectionName = collectionName;
         this.clazz = clazz;
 
         this.cache = cache;
-        this.id = id;
         this.readPolicy = readPolicy;
     }
 
     @Override
-    public T execute() throws IOException {
+    public List<T> execute() throws IOException {
         AppData<T> appData = client.appData(collectionName, clazz);
-        T ret = null;
+        List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-                ret = cache.get(id);
+                ret = getCached();
                 break;
             case FORCE_NETWORK:
-                ret = appData.getEntityBlocking(id).execute();
+                ret = getNetwork();
                 break;
             case PREFER_LOCAL:
-                ret = cache.get(id);
+                ret = getCached();
                 if (ret == null || ret.size() == 0){
-                    ret = appData.getEntityBlocking(id).execute();
+                    ret = getNetwork();
                 }
                 break;
             case PREFER_NETWORK:
                 try {
-                    ret = appData.getEntityBlocking(id).execute();
+                    ret = getNetwork();
                 } catch (IOException e){
-                    ret = cache.get(id);
+                    ret = getCached();
                 }
 
         }
         return ret;
     }
 
+    protected AppData<T> getNetworkData(){
+        return client.appData(collectionName, clazz);
+    }
+
     @Override
     public void cancel() {
 
     }
+
+    abstract protected List<T> getCached();
+    abstract protected List<T> getNetwork() throws IOException;
+
 }

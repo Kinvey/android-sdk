@@ -1,4 +1,4 @@
-package com.kinvey.java.store.requests;
+package com.kinvey.java.store.requests.data;
 
 import java.io.IOException;
 

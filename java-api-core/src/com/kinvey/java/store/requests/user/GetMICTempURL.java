@@ -14,7 +14,7 @@ public final class GetMICTempURL<T extends User> extends AbstractKinveyClientReq
 
     private UserStore<T> userStore;
 
-    public GetMICTempURL(UserStore userStore, HttpContent content) {
+    public GetMICTempURL(UserStore<T> userStore, HttpContent content) {
         super(userStore.getClient(), userStore.MICHostName, "POST", REST_PATH, content, GenericJson.class);
         this.userStore = userStore;
         if (userStore.MICApiVersion != null && userStore.MICApiVersion.length() > 0) {

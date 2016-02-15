@@ -1,10 +1,9 @@
-package com.kinvey.java.store.requests;
+package com.kinvey.java.store.requests.data;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.core.AbstractKinveyClient;
 import com.kinvey.java.network.AppData;
 import com.kinvey.java.store.ReadPolicy;
 import java.util.List;

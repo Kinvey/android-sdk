@@ -42,10 +42,12 @@ import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.store.AsyncAppData;
+import com.kinvey.android.store.AsyncDataStore;
+import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
-import com.kinvey.java.User;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.Credential;
@@ -54,6 +56,7 @@ import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.network.AppData;
 import com.kinvey.java.network.File;
 
@@ -89,7 +92,7 @@ public class Client extends AbstractClient {
 
     private Context context = null;
 
-    private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
+    private ConcurrentHashMap<String, AsyncDataStore> appDataInstanceCache;
     private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
     private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
     private AsyncCustomEndpoints customEndpoints;
@@ -169,19 +172,19 @@ public class Client extends AbstractClient {
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
      * @return Instance of {@link AppData} for the defined collection
      */
-    public <T> AsyncAppData<T> appData(String collectionName, Class<T> myClass) {
+    public <T> AsyncDataStore<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {
-                appDataInstanceCache = new ConcurrentHashMap<String, AsyncAppData>();
+                appDataInstanceCache = new ConcurrentHashMap<String, AsyncDataStore>();
             }
             if (!appDataInstanceCache.containsKey(collectionName)) {            	
             	Logger.INFO("adding new instance of AppData, new collection name");
-                appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));
+                appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
             }
             if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
             	Logger.INFO("adding new instance of AppData, class doesn't match");
-                appDataInstanceCache.put(collectionName, new AsyncAppData(collectionName, myClass, this));   
+                appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
             }
 
             return appDataInstanceCache.get(collectionName);
@@ -264,7 +267,7 @@ public class Client extends AbstractClient {
         this.file().clearFileStorage(getContext().getApplicationContext());
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
-            e.performLockdown(user().getId());
+            e.performLockdown(userStore().getCurrentUser().getId());
         }
     }
 
@@ -390,7 +393,7 @@ public class Client extends AbstractClient {
 
     /** {@inheritDoc} */
     @Override
-    protected ClientUsers getClientUsers() {
+    public ClientUsers getClientUsers() {
         synchronized (lock) {
             if (this.clientUsers == null) {
                 this.clientUsers = AndroidClientUsers.getClientUsers(this.context);
@@ -404,8 +407,8 @@ public class Client extends AbstractClient {
     /**
      * User factory method
      * <p>
-     * Returns the instance of {@link com.kinvey.java.User} that contains the current active user.  If no active user context
-     * has been established, the {@link com.kinvey.java.User} object returned will be instantiated and empty.
+     * Returns the instance of {@link com.kinvey.java.store.UserStore} that contains the current active user.  If no active user context
+     * has been established, the {@link com.kinvey.java.store.UserStore} object returned will be instantiated and empty.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -418,19 +421,19 @@ public class Client extends AbstractClient {
      }
      * </pre>
      * </p>
-     * @param <T> the type of the custom `User` class, which must extend {@link com.kinvey.java.User}
-     * @return Instance of {@link com.kinvey.java.User}
+     * @param <T> the type of the custom `User` class, which must extend {@link com.kinvey.java.store.UserStore}
+     * @return Instance of {@link com.kinvey.java.store.UserStore}
      */
     @Override
-    public <T extends User> AsyncUser<T> user(){
+    public <T extends User> AsyncUserStore<T> userStore(){
         synchronized (lock) {
             if (getCurrentUser() == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                setCurrentUser(new AsyncUser(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
-                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null)));
+                userStore = new AsyncUserStore<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
-            return (AsyncUser) getCurrentUser();
+            return (AsyncUserStore<T>)userStore;
         }
     }
 
@@ -548,7 +551,7 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
-        private Class userClass = AsyncUser.class;
+        private Class userClass = User.class;
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
@@ -751,10 +754,10 @@ public class Client extends AbstractClient {
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
             if (this.MICVersion != null){
-                client.user().setMICApiVersion(this.MICVersion);
+                client.userStore().setMICApiVersion(this.MICVersion);
             }
             if(this.MICBaseURL != null){
-                client.user().setMICHostName(this.MICBaseURL);
+                client.userStore().setMICHostName(this.MICBaseURL);
             }
 
             return client;
@@ -875,7 +878,7 @@ public class Client extends AbstractClient {
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws AndroidCredentialStoreException, IOException {
             Credential credential = null;
-            if (!client.user().isUserLoggedIn()) {
+            if (!client.userStore().isUserLoggedIn()) {
                 String userID = client.getClientUsers().getCurrentUser();
                 if (userID != null && !userID.equals("")) {
                     CredentialStore store = getCredentialStore();
@@ -893,7 +896,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                client.user().login(credential).execute();
+                client.userStore().login(credential).execute();
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
@@ -904,12 +907,12 @@ public class Client extends AbstractClient {
                 protected User doInBackground(Void... voids) {
                     User result = null;
                     try{
-                        result = client.user().retrieveMetadataBlocking();
+                        result = client.userStore().retrieveMetadataBlocking();
                         client.setCurrentUser(result);
                     }catch (Exception error){
                         this.error = error;
                         if ((error instanceof HttpResponseException)) {
-                            client.user().logout().execute();
+                            client.userStore().logout().execute();
                         }
                     }
                     return result;

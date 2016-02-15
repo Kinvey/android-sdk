@@ -4,12 +4,20 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.store.requests.ReadRequest;
-import com.kinvey.java.store.requests.SaveRequest;
+import com.kinvey.java.store.requests.data.DeleteRequest;
+import com.kinvey.java.store.requests.data.PushRequest;
+import com.kinvey.java.store.requests.data.ReadRequest;
+import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
+import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
+import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
+import com.kinvey.java.store.requests.data.SaveRequest;
+import com.kinvey.java.store.requests.data.read.ReadAllRequest;
+import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
+import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 
 import java.io.IOException;
 import java.util.List;
-import com.kinvey.java.store.requests.*;
 
 /**
  * Created by Prots on 2/4/16.
@@ -33,7 +41,7 @@ public class DataStore<T extends GenericJson> {
     }
 
 
-    public T findById (String id){
+    public T find (String id){
         T ret = null;
         try {
             ret = new ReadSingleRequest<T>(client, collection, storeItemType,
@@ -44,17 +52,35 @@ public class DataStore<T extends GenericJson> {
         return ret;
     }
 
-    public T findById (Iterable<String> ids){
-        //find single entity
-        return null;
+    public List<T> find (Iterable<String> ids){
+        List<T> ret = null;
+        try {
+            ret = new ReadIdsRequest<T>(client, collection, storeItemType,
+                    cache, this.storeType.readPolicy, ids).execute();
+        } catch (IOException e){
+
+        }
+        return ret;
     }
 
     public List<T> find (Query query) {
         // perform request based on policy
         List<T> ret = null;
         try {
-            ret = new ReadRequest<T>(client, collection, storeItemType,
-                    cache, query, this.storeType.readPolicy, Long.MAX_VALUE).execute();
+            ret = new ReadQueryRequest<T>(client, collection, storeItemType,
+                    cache, this.storeType.readPolicy, query).execute();
+        } catch (IOException e){
+
+        }
+        return ret;
+    }
+
+    public List<T> find () {
+        // perform request based on policy
+        List<T> ret = null;
+        try {
+            ret = new ReadAllRequest<T>(client, collection, storeItemType,
+                    cache, this.storeType.readPolicy).execute();
         } catch (IOException e){
 
         }
@@ -65,13 +91,29 @@ public class DataStore<T extends GenericJson> {
         new SaveRequest<T>(client, collection, storeItemType, cache, objects, this.storeType.writePolicy).execute();
     }
 
-    public void removeById (String id){
-        new DeleteRequest<T>(client, collection, storeItemType, cache, id, this.storeType.writePolicy).execute();
+    public void delete (String id){
+        try {
+            new DeleteSingleRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, id).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void remove (Query query){
-        new DeleteRequest<T>(client, collection, storeItemType, cache, query, this.storeType.writePolicy).execute();
-        //...
+    public void delete (Query query){
+        try {
+            new DeleteQueryRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, query).execute();
+        } catch (IOException e) {
+
+
+        }
+    }
+
+    public void delete (Iterable<String> ids){
+        try {
+            new DeleteIdsRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, ids).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Push will commit local data for this collection
