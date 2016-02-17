@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 /**
  * Created by edward on 7/31/15.
  */
-public class KinveyFileTest extends TestCase {
+public class KinveyNetworkFileManagerTest extends TestCase {
 
     public KinveyFile kf;
 

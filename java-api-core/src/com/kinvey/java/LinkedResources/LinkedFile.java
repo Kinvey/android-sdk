@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.HashMap;
 
 /**
- * This class maintains metadata and java specific file access to a File associated with an Entity through the {@code com.kinvey.java.LinkedData} API.
+ * This class maintains metadata and java specific file access to a NetworkFileManager associated with an Entity through the {@code com.kinvey.java.LinkedData} API.
  *
  * There are references to a `ByteArrayInputStream as well as a `ByteArrayOutputStream`, which can be used to stream to/from the file.
  *
@@ -71,7 +71,7 @@ public class LinkedFile {
     }
 
     /**
-     * Get the id of a Linked File
+     * Get the id of a Linked NetworkFileManager
      *
      * @return  the id
      */
@@ -117,7 +117,7 @@ public class LinkedFile {
 
 
     /**
-     * Add an extra property to this KinveyFile.  When the File is uploaded through LinkedData, any extra properties here
+     * Add an extra property to this KinveyFile.  When the NetworkFileManager is uploaded through LinkedData, any extra properties here
      * will be added to the {@link com.kinvey.java.model.FileMetaData} object created during the file upload.
      *
      * @param key the key to use for the extra associated with the {@link com.kinvey.java.model.FileMetaData}

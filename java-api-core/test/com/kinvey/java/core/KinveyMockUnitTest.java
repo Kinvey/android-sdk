@@ -31,8 +31,8 @@ import junit.framework.TestCase;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.kinvey.java.network.File;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -63,7 +63,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
     protected static class MockTestClient extends AbstractClient {
 
-        private ConcurrentHashMap<String, NetworkStore> appDataInstanceCache;
+        private ConcurrentHashMap<String, NetworkManager> appDataInstanceCache;
 
 
         MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
@@ -73,41 +73,41 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <T> NetworkStore<T> appData(String collectionName, Class<T> myClass) {
+        public <T> NetworkManager<T> appData(String collectionName, Class<T> myClass) {
             synchronized (lock) {
                 Preconditions.checkNotNull(collectionName, "collectionName must not be null");
                 if (appDataInstanceCache == null) {
-                    appDataInstanceCache = new ConcurrentHashMap<String, NetworkStore>();
+                    appDataInstanceCache = new ConcurrentHashMap<String, NetworkManager>();
                 }
                 if (!appDataInstanceCache.containsKey(collectionName)) {
-                    appDataInstanceCache.put(collectionName, new MockNetworkStore(collectionName, myClass, this));
+                    appDataInstanceCache.put(collectionName, new MockNetworkManager(collectionName, myClass, this));
                 }
                 if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-                    appDataInstanceCache.put(collectionName, new MockNetworkStore(collectionName, myClass, this));
+                    appDataInstanceCache.put(collectionName, new MockNetworkManager(collectionName, myClass, this));
                 }
 
                 return appDataInstanceCache.get(collectionName);
             }        }
 
         @Override
-        public File file() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        public NetworkFileManager file() {
+            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
         @Override
         public void performLockDown() {
-            //To change body of implemented methods use File | Settings | File Templates.
+            //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
 
         @Override
         public UserDiscovery userDiscovery() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
         @Override
         public UserGroup userGroup() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
         @Override
@@ -154,7 +154,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
 
         @Override
         public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
         public static final class Builder extends AbstractClient.Builder {
@@ -228,15 +228,15 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
     }
 
-    public static class MockNetworkStore extends NetworkStore {
+    public static class MockNetworkManager extends NetworkManager {
         /**
-         * Constructor to instantiate the NetworkStore class.
+         * Constructor to instantiate the NetworkManager class.
          *
          * @param collectionName Name of the appData collection
          * @param myClass        Class Type to marshall data between.
          * @param client
          */
-        protected MockNetworkStore(String collectionName, Class myClass, AbstractClient client) {
+        protected MockNetworkManager(String collectionName, Class myClass, AbstractClient client) {
             super(collectionName, myClass, client);
         }
     }

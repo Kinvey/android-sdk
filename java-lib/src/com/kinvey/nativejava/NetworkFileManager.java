@@ -32,7 +32,7 @@ import java.io.OutputStream;
  *
  * @author edwardf
  * */
-public class File extends com.kinvey.java.network.File {
+public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManager {
 
 
     /**
@@ -45,7 +45,7 @@ public class File extends com.kinvey.java.network.File {
      * @param client required instance
      * @throws NullPointerException if the client parameter is non-null
      */
-    protected File(AbstractClient client) {
+    protected NetworkFileManager(AbstractClient client) {
         super(client);
         setMimeTypeManager(new JavaMimeTypeFinder());
     }
@@ -69,7 +69,7 @@ public class File extends com.kinvey.java.network.File {
     }
 
     /**
-     * Upload a java.io.File with it's associated metadata
+     * Upload a java.io.NetworkFileManager with it's associated metadata
      *
      *
      * @param meta the metadata of the file to upload

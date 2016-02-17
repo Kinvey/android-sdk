@@ -26,7 +26,7 @@ import com.kinvey.java.Logger;
  * To use this class within an Entities' GenericJson implementation, just define a field's type as a KinveyReference.
  * </p>
  * <p>
- * Then, when, making a GET call through the NetworkStore API various parameters can be used to specify how the backend should
+ * Then, when, making a GET call through the NetworkManager API various parameters can be used to specify how the backend should
  * handle these mappings.
  * </p>
  * <p>
@@ -35,7 +35,7 @@ import com.kinvey.java.Logger;
  *  but the relational mapping can be followed by accessing the returnObject field declared below.
  * </p>
  * <p>
- *  'resolve_depth' is an int argument for GET requests through the NetworkStore API, and will resolve all KinveyReferences up to N levels.
+ *  'resolve_depth' is an int argument for GET requests through the NetworkManager API, and will resolve all KinveyReferences up to N levels.
  *  Keep in mind a KinveyReference.returnObject can contain other embedded KinveyReferences, and so on, allowing for multiple mappings
  *  without explicitly declaring all fields.
  *  </p>

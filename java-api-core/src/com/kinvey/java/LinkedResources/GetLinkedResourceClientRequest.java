@@ -26,7 +26,7 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 
 /**
- * Implementation of a Client Request, which can download linked resources through the File API as well as the NetworkStore API in one request.
+ * Implementation of a Client Request, which can download linked resources through the NetworkFileManager API as well as the NetworkManager API in one request.
  * <p>
  * On the call to execute, if a file is a LinkedGenericJson, then first it gets the entity.  Then it iterates through all the attachments and downloads them.
  * Once all files have been downloaded, the entity is returned
@@ -97,7 +97,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 if (entity.getFile(key) == null) {
                     if (((Map)entity.get(key)).containsKey("_id")){
                         entity.putFile(key, new LinkedFile(((Map) entity.get(key)).get("_id").toString()));
-                    }else if (((Map)entity.get(key)).containsKey("_loc")){     //TODO backwards compt for v2 of File API, this condition can be removed when it's done
+                    }else if (((Map)entity.get(key)).containsKey("_loc")){     //TODO backwards compt for v2 of NetworkFileManager API, this condition can be removed when it's done
                         LinkedFile lf = new LinkedFile();
                         lf.setFileName(((Map) entity.get(key)).get("_loc").toString());
                         entity.putFile(key, lf);
@@ -113,11 +113,13 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 FileMetaData meta = new FileMetaData();
                 if (((Map) entity.get(key)).containsKey("_id")){
                     meta.setId(((Map) entity.get(key)).get("_id").toString());
-                    getAbstractKinveyClient().file().prepDownloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
+                    //TODO: download linked resources
+                    //getAbstractKinveyClient().file().prepDownloadBlocking(meta).executeAndDownloadTo(entity.getFile(key).getOutput());
 
                 }else if(((Map) entity.get(key)).containsKey("_loc")){
                     meta.setFileName(((Map) entity.get(key)).get("_loc").toString());
-                    getAbstractKinveyClient().file().prepDownloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
+                    //TODO: download Linked resources
+                    //getAbstractKinveyClient().file().prepDownloadBlocking(((Map) entity.get(key)).get("_loc").toString()).executeAndDownloadTo(entity.getFile(key).getOutput());
                 }
 
 

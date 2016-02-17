@@ -205,34 +205,28 @@ public class MediaHttpDownloader {
      * instantiated before download called be called again.
      * </p>
      *
-     * @param initiationClientRequest request object used to request unique uri from kinvey
+     * @param metaData metadata taken feom kinvey backend that contains download url and other info required for file download
      * @param out output stream to dump bytes as they stream off the wire
      * @throws IOException
      */
-    public void download(AbstractKinveyClientRequest initiationClientRequest, OutputStream out) throws IOException {
+    public void download(FileMetaData metaData, OutputStream out) throws IOException {
         Preconditions.checkArgument(downloadState == DownloadState.NOT_STARTED);
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
 
         // Make initial request to get the unique upload URL.
-        FileMetaData initialResponse = executeDownloadInitiation(initiationClientRequest);
-        
-        if (initialResponse == null){
+
+        if (metaData == null){
             if (progressListener != null) {
                 progressListener.onFailure(new KinveyException("BlobNotFound", "This blob not found for this app backend", "The file being downloaded does not exist."));
             }
         	return;
         }
-        
-        
-        if (progressListener != null && (progressListener instanceof MetaDownloadProgressListener)) {
-            ((MetaDownloadProgressListener)progressListener).metaDataRetrieved(initialResponse);
-        }
 
         GenericUrl downloadUrl;
-        if(initialResponse.getDownloadURL() != null){
-            downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
+        if(metaData.getDownloadURL() != null){
+            downloadUrl = new GenericUrl(metaData.getDownloadURL());
         }else{
-            throw new KinveyException("_downloadURL is null!","do not remove _downloadURL in collection hooks for File!","The library cannot download a file without this url");
+            throw new KinveyException("_downloadURL is null!","do not remove _downloadURL in collection hooks for NetworkFileManager!","The library cannot download a file without this url");
         }
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
@@ -272,20 +266,6 @@ public class MediaHttpDownloader {
             bytesDownloaded = nextByteIndex;
             updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
         }
-    }
-
-
-    /**
-     *
-     * @param initiationRequest
-     * @return
-     * @throws IOException
-     */
-    private FileMetaData executeDownloadInitiation(AbstractKinveyClientRequest initiationRequest) throws IOException {
-        updateStateAndNotifyListener(DownloadState.INITIATION_STARTED);
-        HttpResponse response = initiationRequest.executeUnparsed();
-        JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationRequest.getAbstractKinveyClient().getObjectParser();
-        return parse(jsonObjectParser, response);
     }
 
 

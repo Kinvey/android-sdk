@@ -310,7 +310,7 @@ public class MediaHttpUploader {
             if(meta.getUploadUrl() != null){
                 uploadUrl = new GenericUrl(meta.getUploadUrl());
             }else{
-                throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for File!","The library cannot upload a file without this url");
+                throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for NetworkFileManager!","The library cannot upload a file without this url");
             }
             uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
@@ -356,7 +356,7 @@ public class MediaHttpUploader {
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
 		} else {
-            throw  new KinveyException("Uploading File Failed");
+            throw  new KinveyException("Uploading NetworkFileManager Failed");
         }
 		return meta;
 		

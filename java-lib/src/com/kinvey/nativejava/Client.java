@@ -35,7 +35,8 @@ import com.kinvey.java.auth.InMemoryClientUsers;
 import com.kinvey.java.auth.InMemoryCredentialStore;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 
 /** {@inheritDoc}
  *
@@ -44,10 +45,10 @@ import com.kinvey.java.network.NetworkStore;
 public class Client extends AbstractClient {
 
 
-    private ConcurrentHashMap<String, com.kinvey.nativejava.NetworkStore> appDataInstanceCache;
+    private ConcurrentHashMap<String, com.kinvey.nativejava.NetworkManager> appDataInstanceCache;
 
     private UserDiscovery userDiscovery;
-    private File file;
+    private com.kinvey.nativejava.NetworkFileManager file;
     private UserGroup userGroup;
     private ClientUsers clientUsers;
 
@@ -69,11 +70,11 @@ public class Client extends AbstractClient {
 
     }
     /**
-     * NetworkStore factory method
+     * NetworkManager factory method
      * <p>
-     * Returns an instance of {@link NetworkStore} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of {@link com.kinvey.nativejava.NetworkStore} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link NetworkStore}.
+     * Returns an instance of {@link NetworkManager} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of {@link com.kinvey.nativejava.NetworkManager} is created per collection.  The method is Generic and takes an instance of a
+     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link NetworkManager}.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -82,7 +83,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-    NetworkStore<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
+    NetworkManager<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
     }
      * </pre>
      * </p>
@@ -91,19 +92,19 @@ public class Client extends AbstractClient {
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link NetworkStore} for the defined collection
+     * @return Instance of {@link NetworkManager} for the defined collection
      */
-    public <T> com.kinvey.nativejava.NetworkStore<T> appData(String collectionName, Class<T> myClass) {
+    public <T> com.kinvey.nativejava.NetworkManager<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {
-                appDataInstanceCache = new ConcurrentHashMap<String, com.kinvey.nativejava.NetworkStore>();
+                appDataInstanceCache = new ConcurrentHashMap<String, com.kinvey.nativejava.NetworkManager>();
             }
             if (!appDataInstanceCache.containsKey(collectionName)) {
-                appDataInstanceCache.put(collectionName, new com.kinvey.nativejava.NetworkStore(collectionName, myClass, this));
+                appDataInstanceCache.put(collectionName, new com.kinvey.nativejava.NetworkManager(collectionName, myClass, this));
             }
             if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-                appDataInstanceCache.put(collectionName, new com.kinvey.nativejava.NetworkStore(collectionName, myClass, this));
+                appDataInstanceCache.put(collectionName, new com.kinvey.nativejava.NetworkManager(collectionName, myClass, this));
             }
 
             return appDataInstanceCache.get(collectionName);
@@ -111,9 +112,9 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * File factory method
+     * NetworkFileManager factory method
      * <p>
-     * Returns an instance of {@link com.kinvey.java.network.File} for uploading and downloading of files.  Only one instance is created for each
+     * Returns an instance of {@link NetworkFileManager} for uploading and downloading of files.  Only one instance is created for each
      * instance of the Kinvey client.
      * </p>
      * <p>
@@ -123,18 +124,18 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-    File myFile = kinveyClient.file();
+    NetworkFileManager myFile = kinveyClient.file();
     }
      * </pre>
      * </p>
      *
-     * @return Instance of {@link com.kinvey.java.network.File} for the defined collection
+     * @return Instance of {@link NetworkFileManager} for the defined collection
      */
     @Override
-    public File file() {
+    public com.kinvey.nativejava.NetworkFileManager file() {
         synchronized (lock) {
             if (file == null) {
-                file = new File(this);
+                file = new com.kinvey.nativejava.NetworkFileManager(this);
             }
             return file;
         }

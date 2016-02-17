@@ -40,7 +40,7 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.network.AndroidNetworkStore;
+import com.kinvey.android.network.AndroidNetworkManager;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
@@ -57,8 +57,8 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.network.NetworkStore;
-import com.kinvey.java.network.File;
+import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.network.NetworkFileManager;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -98,7 +98,7 @@ public class Client extends AbstractClient {
     private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
-    private AsyncFile file;
+    private AsyncNetworkFileManager file;
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
 //    private AsyncUser currentUser;
@@ -145,7 +145,7 @@ public class Client extends AbstractClient {
      * DataStore factory method
      * <p>
      * Returns an instance of {@link AsyncDataStore} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of {@link AndroidNetworkStore} is created per collection.  The method is Generic and takes an instance of a
+     * only one instance of {@link AndroidNetworkManager} is created per collection.  The method is Generic and takes an instance of a
      * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.store.DataStore}.
      * </p>
      * <p>
@@ -224,9 +224,9 @@ public class Client extends AbstractClient {
 
 
     /**
-     * File factory method
+     * NetworkFileManager factory method
      * <p>
-     * Returns an instance of {@link File} for uploading and downloading of files.  Only one instance is created for each
+     * Returns an instance of {@link NetworkFileManager} for uploading and downloading of files.  Only one instance is created for each
      * instance of the Kinvey client.
      * </p>
      * <p>
@@ -236,18 +236,18 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-     File myFile = kinveyClient.file();
+     NetworkFileManager myFile = kinveyClient.file();
      }
      * </pre>
      * </p>
      *
-     * @return Instance of {@link File} for the defined collection
+     * @return Instance of {@link NetworkFileManager} for the defined collection
      */
     @Override
-    public AsyncFile file() {
+    public AsyncNetworkFileManager file() {
         synchronized (lock) {
             if (file == null) {
-                file = new AsyncFile(this);
+                file = new AsyncNetworkFileManager(this);
             }
             return file;
         }
@@ -953,8 +953,8 @@ public class Client extends AbstractClient {
     }
 
     @Override
-    public <T extends GenericJson> NetworkStore<T> networkStore(String collectionName, Class<T> myClass) {
-        return new AndroidNetworkStore<T>(collectionName, myClass, this);
+    public <T extends GenericJson> NetworkManager<T> networkStore(String collectionName, Class<T> myClass) {
+        return new AndroidNetworkManager<T>(collectionName, myClass, this);
     }
 }
 

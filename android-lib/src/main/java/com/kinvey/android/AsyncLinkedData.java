@@ -34,10 +34,10 @@ import com.kinvey.java.core.UploaderProgressListener;
  * The first String parameter is the name of the Collection, and the Class is the expected Response Class.
  * </p>
  * <p>
- * The methods provided in this class take two (optional) callbacks, a {@code KinveyClientCallback} for the NetworkStore request as well as a {@code UploaderProgressListener} or {@code DownloaderProgressListener} for updates on the File status
+ * The methods provided in this class take two (optional) callbacks, a {@code KinveyClientCallback} for the NetworkManager request as well as a {@code UploaderProgressListener} or {@code DownloaderProgressListener} for updates on the NetworkFileManager status
  * </p>
  * <p>
- * The functionality of this class is provided by both the {@code com.kinvey.java.network.NetworkStore} API as well as the {@code com.kinvey.java.network.File} API.
+ * The functionality of this class is provided by both the {@code com.kinvey.java.network.NetworkManager} API as well as the {@code com.kinvey.java.network.NetworkFileManager} API.
  * </p>
  *
  *
@@ -46,7 +46,7 @@ import com.kinvey.java.core.UploaderProgressListener;
  */
 public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> {
     /**
-     * Constructor to instantiate the NetworkStore class.
+     * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
@@ -61,7 +61,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * Method to get an entity or entities and download a subset of associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieve callback information about the NetworkFileManager downloads.
      * </p>
      * <p>
      * This method will only download Linked Resources for the fields declared in the resources array.
@@ -83,7 +83,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * Method to get an entity or entities and download ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieve callback information about the NetworkFileManager downloads.
      * </p>
      * <p>
      * This method will only download Linked Resources for the fields declared in the resources array.
@@ -103,7 +103,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * Method to get an entity or entities and download ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieve callback information about the NetworkFileManager downloads.
      * </p>
      * <p>
      * This method will only download Linked Resources for the fields declared in the resources array.
@@ -125,7 +125,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
      * Method to get an entity or entities and download ALL associated Linked Resources.
      * <p>
      * Pass null to entityID to return all entities in a collection.  Use the {@code DownloaderProgressListener}
-     * to retrieve callback information about the File downloads.
+     * to retrieve callback information about the NetworkFileManager downloads.
      * </p>
      * <p>
      * This method will only download Linked Resources for the fields declared in the resources array.

@@ -29,7 +29,7 @@ import com.kinvey.android.offline.DatabaseHandler;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.android.offline.OfflineTable;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 
 /**
  * @author edwardf
@@ -107,7 +107,7 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
     /**
      * Add a collection to the metadata table if it doesn't already exist
      *
-     * @param collectionName - the name of the NetworkStore collection
+     * @param collectionName - the name of the NetworkManager collection
      */
     private void addCollection(String collectionName){
 
@@ -154,7 +154,7 @@ public class SecureHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @return the entity with the appdata collection and provided id
      */
 
-    public GenericJson getEntity(AbstractClient client, NetworkStore appData, OfflineMetaData id) {
+    public GenericJson getEntity(AbstractClient client, NetworkManager appData, OfflineMetaData id) {
         GenericJson ret;
 
         ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);

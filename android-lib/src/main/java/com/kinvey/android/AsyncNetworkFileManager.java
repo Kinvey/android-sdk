@@ -25,7 +25,7 @@ import android.content.Context;
 import com.google.api.client.http.InputStreamContent;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.File;
+import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -34,7 +34,7 @@ import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
- * Wraps the {@link File} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link NetworkFileManager} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#file()} convenience method.
@@ -85,7 +85,7 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  * @since 2.5
  * @version $Id: $
  */
-public class AsyncFile extends File {
+public class AsyncNetworkFileManager extends NetworkFileManager {
 
 
     /**
@@ -98,7 +98,7 @@ public class AsyncFile extends File {
      * @param client required instance
      * @throws NullPointerException if the client parameter is non-null
      */
-    AsyncFile(AbstractClient client) {
+    AsyncNetworkFileManager(AbstractClient client) {
         super(client);
         setMimeTypeManager(new AndroidMimeTypeFinder());
     }
@@ -155,7 +155,7 @@ public class AsyncFile extends File {
     }
 
     /**
-     * Upload a java.io.File with it's associated metadata
+     * Upload a java.io.NetworkFileManager with it's associated metadata
      *
      *
      * @param meta the metadata of the file to upload
@@ -365,7 +365,7 @@ public class AsyncFile extends File {
             }
             mediaContent.setCloseInputStream(false);
             mediaContent.setRetrySupported(false);
-            return AsyncFile.this.prepUploadBlocking(meta, mediaContent).execute();
+            return AsyncNetworkFileManager.this.prepUploadBlocking(meta, mediaContent).execute();
         }
     }
 
@@ -383,7 +383,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.prepDownloadBlocking(meta).executeAndDownloadTo(out);
+            //AsyncNetworkFileManager.this.prepDownloadBlocking(meta).executeAndDownloadTo(out);
             return null;
         }
 
@@ -402,7 +402,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.prepDownloadBlocking(query).executeAndDownloadTo(out);
+            //AsyncNetworkFileManager.this.prepDownloadBlocking(query).executeAndDownloadTo(out);
             return null;
         }
 
@@ -423,7 +423,7 @@ public class AsyncFile extends File {
 
         @Override
         protected Void executeAsync() throws IOException {
-            AsyncFile.this.prepDownloadWithTTLBlocking(this.id, this.ttl).executeAndDownloadTo(out);
+            //AsyncNetworkFileManager.this.prepDownloadWithTTLBlocking(this.id, this.ttl).executeAndDownloadTo(out);
             return null;
         }
 
@@ -450,9 +450,9 @@ public class AsyncFile extends File {
         @Override
         protected KinveyDeleteResponse executeAsync() throws IOException {
 //            if (id != null){
-                return AsyncFile.this.deleteBlockingById(id).execute();
+                return AsyncNetworkFileManager.this.deleteBlockingById(id).execute();
 //            }else{
-//                return AsyncFile.this.deleteBlocking(q).execute();
+//                return AsyncNetworkFileManager.this.deleteBlocking(q).execute();
 //            }
         }
     }
@@ -469,7 +469,7 @@ public class AsyncFile extends File {
 
         @Override
         protected FileMetaData executeAsync() throws IOException {
-            return AsyncFile.this.uploadMetaDataBlocking(meta).execute();
+            return AsyncNetworkFileManager.this.uploadMetaDataBlocking(meta).execute();
         }
 
     }
@@ -484,7 +484,7 @@ public class AsyncFile extends File {
 
         @Override
         protected FileMetaData executeAsync() throws IOException {
-            return AsyncFile.this.downloadMetaDataBlocking(id).execute();
+            return AsyncNetworkFileManager.this.downloadMetaDataBlocking(id).execute();
         }
 
     }

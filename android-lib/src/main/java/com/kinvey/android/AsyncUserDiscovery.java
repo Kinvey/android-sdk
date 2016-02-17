@@ -62,7 +62,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
 
     @Override
     public UserLookup userLookup() {
-        return super.userLookup();    //To change body of overridden methods use File | Settings | File Templates.
+        return super.userLookup();    //To change body of overridden methods use NetworkFileManager | Settings | NetworkFileManager Templates.
     }
 
     /**

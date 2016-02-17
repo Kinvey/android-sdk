@@ -24,7 +24,7 @@ import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 import java.io.Serializable;
 
 /**
- * Query API for creating query requests to NetworkStore store.
+ * Query API for creating query requests to NetworkManager store.
  *
  * @author mjsalinger
  * @since 2.0

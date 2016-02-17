@@ -21,7 +21,7 @@ import android.database.Cursor;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 
 /**
  * This class provides declarations for "methods you would perform on a database".  This abstraction allows for various implementations of the actual database itself.
@@ -52,7 +52,7 @@ public interface DatabaseHandler {
 
     public List<String> getCollectionTables();
 
-    public GenericJson getEntity(AbstractClient client, NetworkStore appData, OfflineMetaData id);
+    public GenericJson getEntity(AbstractClient client, NetworkManager appData, OfflineMetaData id);
 
     public int getDBSchemaVersion ();
 

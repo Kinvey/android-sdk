@@ -2,7 +2,7 @@ package com.kinvey.java.store.requests.data;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 
 /**
  * Created by Prots on 2/8/16.
@@ -23,7 +23,7 @@ public abstract class AbstractKinveyExecuteRequest<T extends GenericJson> implem
     protected ICache<T> cache;
 
     //Network manager
-    protected NetworkStore networkMgr;
+    protected NetworkManager networkMgr;
 
 
 }

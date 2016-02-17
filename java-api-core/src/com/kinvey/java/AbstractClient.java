@@ -40,10 +40,12 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.network.File;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.FileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.UserStore;
 
@@ -136,17 +138,17 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     /**
      *
      *
-     * @return a new instance of the NetworkStore class
+     * @return a new instance of the NetworkManager class
      */
-    public <T extends GenericJson> com.kinvey.java.network.NetworkStore<T> networkStore(String collectionName, Class<T> myClass){
-        return new NetworkStore<T>(collectionName, myClass, this);
+    public <T extends GenericJson> NetworkManager<T> networkStore(String collectionName, Class<T> myClass){
+        return new NetworkManager<T>(collectionName, myClass, this);
     };
 
 
     /**
-     * @return a new instance of File api wrapper
+     * @return a new instance of NetworkFileManager api wrapper
      */
-    public abstract File file();
+    public abstract NetworkFileManager file();
 
     public Query query() {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
@@ -478,6 +480,13 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public <T extends GenericJson> DataStore<T> getDataStore(String collection,
                                                                       Class<T> clazz){
         return new DataStore<T>(this, collection, clazz, StoreType.CACHE);
+    }
+
+    public <T extends GenericJson> FileStore getFileStore(String collection,
+                                                             Class<T> clazz){
+        return new FileStore(new NetworkFileManager(this),
+                getCacheManager().getCache("KinveyFiles", FileMetaData.class, Long.MAX_VALUE),
+                StoreType.CACHE);
     }
 
 }

@@ -16,6 +16,7 @@ package com.kinvey.android.offline;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Calendar;
 
 import android.content.Context;
@@ -26,10 +27,10 @@ import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.offline.FileCache;
+import com.kinvey.java.store.FileCache;
 
 /**
- * File Caching allows your application to store files locally in an arbitrary location, and maintains metadata about the contents of the cache in sqlite table.
+ * NetworkFileManager Caching allows your application to store files locally in an arbitrary location, and maintains metadata about the contents of the cache in sqlite table.
  * <p/>
  * When saving a new file into the directory, an AsyncTask will be kicked off which will delete the oldest files until the cache size is under the threshold.
  *
@@ -67,8 +68,8 @@ public class SQLiteFileCache implements FileCache {
         if (location.isDirectory()){
             cacheDir = location;
         }else{
-        	Logger.ERROR("File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
-            throw new NullPointerException("File Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
+        	Logger.ERROR("NetworkFileManager Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
+            throw new NullPointerException("NetworkFileManager Cache needs a directory! This isn't one -> " + location.getAbsolutePath());
         }
     }
 
@@ -151,7 +152,7 @@ public class SQLiteFileCache implements FileCache {
      * @param meta the filemetadata associated with the file
      * @param data the data of the file to write to disk
      */
-    public synchronized void save(AbstractClient client, FileMetaData meta, byte[] data){
+    public synchronized void save(AbstractClient client, FileMetaData meta, InputStream data){
         Preconditions.checkNotNull(meta, "FileMetaData meta cannot be null!");
         Preconditions.checkNotNull(meta.getId(), "FileMetaData meta.getId() cannot be null!");
         Preconditions.checkNotNull(meta.getFileName(), "FileMetaData meta.getFileName() cannot be null!");
@@ -163,7 +164,7 @@ public class SQLiteFileCache implements FileCache {
 
         Preconditions.checkNotNull(context, "Context cannot be null!");
 
-        Logger.INFO("cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ") -> " + data.length );
+        Logger.INFO("cache saving -> (" + meta.getId() + ", " + meta.getFileName() + ")" );
 
         //insert into database table
         getHelper(context).insertRecord((Client)client, meta);
@@ -175,7 +176,11 @@ public class SQLiteFileCache implements FileCache {
         FileOutputStream os = null;
         try {
             os = new FileOutputStream(file);
-            os.write(data);
+            byte[] chunk = new byte[4096];
+            int read = 0;
+            while((read = data.read(chunk)) > 0) {
+                os.write(chunk, 0, read);
+            }
 
         }catch (Exception e){
         	Logger.ERROR("couldn't write file to cache -> " + e.getMessage());

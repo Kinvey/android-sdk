@@ -3,7 +3,7 @@ package com.kinvey.java.store.requests.data.read;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyDataListRequest;
 
@@ -33,7 +33,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
 
     @Override
     public List<T> execute() throws IOException {
-        NetworkStore<T> appData = client.networkStore(collectionName, clazz);
+        NetworkManager<T> appData = client.networkStore(collectionName, clazz);
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
@@ -59,7 +59,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
         return ret;
     }
 
-    protected NetworkStore<T> getNetworkData(){
+    protected NetworkManager<T> getNetworkData(){
         return client.networkStore(collectionName, clazz);
     }
 

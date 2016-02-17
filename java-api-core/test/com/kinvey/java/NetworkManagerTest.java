@@ -18,7 +18,7 @@ package com.kinvey.java;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.kinvey.java.core.KinveyMockUnitTest;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.LinkedHashMap;
  * @author mjsalinger
  * @since 2.0
  */
-public class NetworkStoreTest extends KinveyMockUnitTest {
+public class NetworkManagerTest extends KinveyMockUnitTest {
 
     public class Entity extends GenericJson {
 
@@ -101,7 +101,7 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
 
     // String collectionName, Class<T> myClass, AbstractClient client,KinveyClientRequestInitializer initializer
     public void testAppdataInitialization() {
-        NetworkStore<Entity> appData = new NetworkStore<Entity>("testCollection",Entity.class,
+        NetworkManager<Entity> appData = new NetworkManager<Entity>("testCollection",Entity.class,
         		getClient());
         assertEquals("testCollection",appData.getCollectionName());
         assertEquals(Entity.class, appData.getCurrentClass());
@@ -109,40 +109,40 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
 
     public void testNullCollectionInitialization() {
         try {
-            NetworkStore<Entity> appData = new NetworkStore<Entity>(null, Entity.class, getClient());
+            NetworkManager<Entity> appData = new NetworkManager<Entity>(null, Entity.class, getClient());
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
 
     public void testNullClassInitialization() {
-        NetworkStore<Entity> appData = new NetworkStore<Entity>("myCollection", null, getClient());
+        NetworkManager<Entity> appData = new NetworkManager<Entity>("myCollection", null, getClient());
         // Null class types are allowed, should not throw an exception.
         assertNull(appData.getCurrentClass());
     }
 
     public void testNullClientInitialization() {
         try {
-            NetworkStore<Entity> appData = new NetworkStore<Entity>("myCollection", Entity.class, null);
+            NetworkManager<Entity> appData = new NetworkManager<Entity>("myCollection", Entity.class, null);
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
 
 //    public void testNullRequestInitializerInitialization() {
 //        try {
-//            NetworkStore<Entity> appData = new NetworkStore<Entity>("myCollection", Entity.class, mockClient);
+//            NetworkManager<Entity> appData = new NetworkManager<Entity>("myCollection", Entity.class, mockClient);
 //            fail("NullPointerException should be thrown.");
 //        } catch (NullPointerException ex) {}
 //    }
 
     public void testChangeCollectionName() {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         assertEquals("myCollection",appData.getCollectionName());
         appData.setCollectionName("myNewCollection");
         assertEquals("myNewCollection", appData.getCollectionName());
     }
 
     public void testChangeCollectionNameToNull() {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         assertEquals("myCollection", appData.getCollectionName());
         try {
             appData.setCollectionName(null);
@@ -151,9 +151,9 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testGet() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        NetworkStore.GetEntity myGet = appData.getEntityBlocking(entityID);
+        NetworkManager.GetEntity myGet = appData.getEntityBlocking(entityID);
         assertNotNull(myGet);
         assertEquals("myEntity", myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -161,8 +161,8 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testGetWithNoEntityID() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
-        NetworkStore.Get myGet = appData.getBlocking();
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection", myGet.get("collectionName"));
@@ -171,8 +171,8 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
 
     public void testGetWithArrayType() throws IOException {
         Entity[] entityList = new Entity[]{};
-        NetworkStore<Entity[]> appData = getGenericAppData(entityList.getClass());
-        NetworkStore.Get myGet = appData.getBlocking();
+        NetworkManager<Entity[]> appData = getGenericAppData(entityList.getClass());
+        NetworkManager.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
         assertEquals("myCollection",myGet.get("collectionName"));
@@ -180,9 +180,9 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testSave() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
-        NetworkStore<Entity>.Save mySave = appData.saveBlocking(entity);
+        NetworkManager<Entity>.Save mySave = appData.saveBlocking(entity);
         assertNotNull(mySave);
         assertEquals("myEntity", ((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name", ((GenericJson) mySave.getJsonContent()).get("Name"));
@@ -190,28 +190,28 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testSaveNullEntity() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = null;
         try {
-            NetworkStore<Entity>.Save mySave = appData.saveBlocking(entity);
+            NetworkManager<Entity>.Save mySave = appData.saveBlocking(entity);
             fail("NullPointerException should be thrown.");
         } catch (NullPointerException ex) {}
     }
 
     public void testSaveNoID() throws IOException {
-        NetworkStore<EntityNoID> appData = getGenericAppData(EntityNoID.class);
+        NetworkManager<EntityNoID> appData = getGenericAppData(EntityNoID.class);
         EntityNoID entity = new EntityNoID("My Name");
 
-        NetworkStore<EntityNoID>.Save mySave= appData.saveBlocking(entity);
+        NetworkManager<EntityNoID>.Save mySave= appData.saveBlocking(entity);
         assertNull(((GenericJson) mySave.getJsonContent()).get("_id"));
         assertEquals("My Name",((GenericJson) mySave.getJsonContent()).get("Name"));
         assertEquals("POST",mySave.getRequestMethod());
     }
 
     public void testDelete() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         String entityID = "myEntity";
-        NetworkStore.Delete myDelete = appData.deleteBlocking(entityID);
+        NetworkManager.Delete myDelete = appData.deleteBlocking(entityID);
         assertNotNull(myDelete);
         assertEquals("myEntity", myDelete.get("entityID"));
         assertEquals("myCollection",myDelete.get("collectionName"));
@@ -219,21 +219,21 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
 //    public void testDeleteNullEntityID() throws IOException {
-//        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+//        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
 //        String entityID = "myEntity";
 //        try {
-//            NetworkStore<Entity>.Delete<Entity> myDelete = appData.delete(null);   TODO now ambigious because of query support...
+//            NetworkManager<Entity>.Delete<Entity> myDelete = appData.delete(null);   TODO now ambigious because of query support...
 //            fail("NullPointerException should be thrown.");
 //        } catch (NullPointerException ex) {}
 //
 //    }
 
     public void testAggregateCountNoCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkStore<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -250,13 +250,13 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateCountCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkStore<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -277,11 +277,11 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateSumNoCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkStore<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -298,13 +298,13 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateSumCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkStore<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -325,11 +325,11 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMaxNoCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkStore<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -346,13 +346,13 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMaxCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkStore<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -373,11 +373,11 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMinNoCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkStore<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -394,13 +394,13 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateMinCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkStore<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -421,11 +421,11 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateAverageNoCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkStore<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -444,13 +444,13 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAggregateAverageCondition() throws IOException {
-        NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkStore<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -473,62 +473,62 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     }
 
     public void testAppDataCustomVersion() throws IOException {
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
     	appData.setClientAppVersion("1.2.3");
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
     
     public void testAppDataCustomHeader() throws IOException {
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
     	appData.setCustomRequestProperties(custom);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
     	
     }
     
     public void testAppDataCustomVersionNull() throws IOException {
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
     	appData.setClientAppVersion(null);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals(null, header);    	
     }
     
     public void testAppDataCustomHeaderNull() throws IOException {
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
     	appData.setCustomRequestProperties(null);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals(null, header);      	
     }
     
     public void testClientVersion() throws IOException {
     	getClient().setClientAppVersion("123");
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("123", (String) header); 
     }
     
     public void testClientCustomHeader() throws IOException{
     	getClient().setCustomRequestProperty("hello", "hey");
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"hello\":\"hey\"}", (String) header);    	
     }
     
     public void testClientAppendCustomHeader() throws IOException{
     	getClient().setCustomRequestProperty("hello", "hey");
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
     	appData.setCustomRequestProperty("bye", "bye");
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	assertEquals("{\"hello\":\"hey\",\"bye\":\"bye\"}", (String) header);    	
     }
@@ -540,8 +540,8 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     		getClient().setCustomRequestProperty("hello" + i, "this needs to be rather large");
     	}
     	
-    	NetworkStore<Entity> appData = getGenericAppData(Entity.class);
-    	NetworkStore<Entity>.GetEntity request = appData.getEntityBlocking("OK");
+    	NetworkManager<Entity> appData = getGenericAppData(Entity.class);
+    	NetworkManager<Entity>.GetEntity request = appData.getEntityBlocking("OK");
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
     	//assertEquals("{\"hello\":\"hey\"}", (String) header); 
     	
@@ -554,8 +554,8 @@ public class NetworkStoreTest extends KinveyMockUnitTest {
     	
     }
     
-    private <T> NetworkStore<T> getGenericAppData(Class<? extends Object> myClass) {
-        NetworkStore appData = new NetworkStore("myCollection", myClass, getClient());
+    private <T> NetworkManager<T> getGenericAppData(Class<? extends Object> myClass) {
+        NetworkManager appData = new NetworkManager("myCollection", myClass, getClient());
         return appData;
     }
     

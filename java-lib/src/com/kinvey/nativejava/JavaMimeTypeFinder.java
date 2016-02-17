@@ -26,16 +26,16 @@ import java.io.File;
 public class JavaMimeTypeFinder implements MimeTypeFinder {
     @Override
     public void getMimeType(FileMetaData meta, InputStream stream) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
     }
 
     @Override
     public void getMimeType(FileMetaData meta, File file) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
     }
 
     @Override
     public void getMimeType(FileMetaData metaData) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
     }
 }

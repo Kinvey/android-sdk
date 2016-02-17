@@ -26,10 +26,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
-import com.kinvey.java.dto.User;
-import com.kinvey.java.offline.FileCache;
-import com.kinvey.java.offline.FilePolicy;
-import com.kinvey.java.offline.MediaOfflineDownloader;
+import com.kinvey.java.store.FileCache;
 
 /**
  * @author m0rganic
@@ -83,7 +80,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     private final Class<T> responseClass;
 
     /**
-     * File downloader or {@code null} if none is set *
+     * NetworkFileManager downloader or {@code null} if none is set *
      */
     private MediaHttpDownloader downloader;
 
@@ -236,20 +233,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         return requestBackoffPolicy;
     }
 
-
-    protected final void initializeMediaHttpDownloader(DownloaderProgressListener progressListener) {
-        HttpRequestFactory requestFactory = client.getRequestFactory();
-        downloader = new MediaHttpDownloader(requestFactory.getTransport(), requestFactory.getInitializer());
-        downloader.setDirectDownloadEnabled(true);
-        downloader.setProgressListener(progressListener);
-    }
-
-    protected final void initializeMediaOfflineDownloader(DownloaderProgressListener progressListener, FilePolicy policy, FileCache cache) {
-        HttpRequestFactory requestFactory = client.getRequestFactory();
-        downloader = new MediaOfflineDownloader(requestFactory.getTransport(), requestFactory.getInitializer(), policy, cache);
-        downloader.setDirectDownloadEnabled(true);
-        downloader.setProgressListener(progressListener);
-    }
     /**
      * @return the downloader
      */
@@ -465,30 +448,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     public InputStream executeAsInputStream() throws IOException {
         return executeUnparsed().getContent();
     }
-
-
-    /**
-     * Sends the metadata request to the server and writes the metadata content input stream of
-     * {@link HttpResponse} into the given destination output stream.
-     * <p/>
-     * <p>
-     * This method closes the content of the HTTP response from {@link HttpResponse#getContent()}.
-     * </p>
-     * <p/>
-     * <p>
-     * Subclasses may override by calling the super implementation.
-     * </p>
-     *
-     * @param out destination output stream
-     */
-    public void executeAndDownloadTo(OutputStream out) throws IOException {
-        if (downloader == null) {
-            executeUnparsed().download(out);
-        } else {
-            downloader.download(this, out);
-        }
-    }
-
 
     public AbstractKinveyClientRequest<T> setAppKey(String appKey) {
         this.appKey = appKey;

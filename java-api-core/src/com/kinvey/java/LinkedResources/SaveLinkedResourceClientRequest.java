@@ -171,10 +171,10 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
          * <p/>
          * <p>
          * This method is called once, before the file upload actually begins but after the metadata has been set in the
-         * blob collection.  This metadata is used by the File API to determine the upload URL, and contains the id of the file.
+         * blob collection.  This metadata is used by the NetworkFileManager API to determine the upload URL, and contains the id of the file.
          * </p>
          *
-         * @param metaData - The File MetaData associated with the upload about to occur.
+         * @param metaData - The NetworkFileManager MetaData associated with the upload about to occur.
          */
         public void metaDataUploaded(FileMetaData metaData);
     }

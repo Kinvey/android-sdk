@@ -5,7 +5,7 @@ import com.kinvey.java.core.KinveyMockUnitTest;
 /**
  * Created by edward on 7/31/15.
  */
-public class FileMetaDataTest extends KinveyMockUnitTest {
+public class NetworkFileManagerMetaDataTest extends KinveyMockUnitTest {
 
     public FileMetaData fdm;
 

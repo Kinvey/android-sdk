@@ -3,7 +3,7 @@ package com.kinvey.java.store.requests.data.save;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 
@@ -33,7 +33,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
     @Override
     public T execute() {
-        NetworkStore<T> appData = client.networkStore(collectionName, clazz);
+        NetworkManager<T> appData = client.networkStore(collectionName, clazz);
         T ret = null;
         switch (writePolicy){
             case FORCE_LOCAL:
@@ -44,7 +44,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
 
                 try {
-                    NetworkStore<T>.Save save = appData.saveBlocking(object);
+                    NetworkManager<T>.Save save = appData.saveBlocking(object);
                     ret = save.execute();
                 } catch (IOException e){
                     //TODO: put to sync on error
@@ -56,7 +56,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                 //write to local and network, push to sync if network fails
                 ret = cache.save(object);
                 try {
-                    NetworkStore<T>.Save save = appData.saveBlocking(object);
+                    NetworkManager<T>.Save save = appData.saveBlocking(object);
                     save.execute();
                 } catch (IOException e){
                     //TODO: put to sync on error

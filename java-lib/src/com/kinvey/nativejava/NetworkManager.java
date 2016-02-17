@@ -20,15 +20,15 @@ import com.kinvey.java.AbstractClient;
  *
  * @author edwardf
  * */
-public class NetworkStore<T> extends com.kinvey.java.network.NetworkStore<T> {
+public class NetworkManager<T> extends com.kinvey.java.network.NetworkManager<T> {
 
     /**
-     * Constructor to instantiate the NetworkStore class.
+     * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    protected NetworkStore(String collectionName, Class<T> myClass, AbstractClient client) {
+    protected NetworkManager(String collectionName, Class<T> myClass, AbstractClient client) {
         super(collectionName, myClass, client);
     }
 }

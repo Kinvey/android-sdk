@@ -45,9 +45,9 @@ public class AndroidMimeTypeFinder implements MimeTypeFinder {
         String mimetype = null;
         try {
             mimetype = URLConnection.guessContentTypeFromStream(stream);
-            Logger.INFO("Kinvey - Client - File | mimetype from stream found as: " + mimetype);
+            Logger.INFO("Kinvey - Client - NetworkFileManager | mimetype from stream found as: " + mimetype);
         } catch (Exception e) {
-        	Logger.WARNING("Kinvey - Client - File | content stream mimetype is unreadable, defaulting");
+        	Logger.WARNING("Kinvey - Client - NetworkFileManager | content stream mimetype is unreadable, defaulting");
         }
 
         if (mimetype == null) {

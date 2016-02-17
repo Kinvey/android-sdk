@@ -25,14 +25,14 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 
 /**
- * This class allows extensible use of various features provided by the NetworkStore() API and variations
+ * This class allows extensible use of various features provided by the NetworkManager() API and variations
  * <p>
  *   There are various `set*()` methods, which can be chained together to create a builder.  Once the builder has been configured,
  * a call to `myBuilder.build()` will return a blocking synchronous request.  By calling `myBuilder.build().execute()` the
  * the request will be constructed and executed.
  * </p>
  * <p>
- * This class supports CRUD operations on any NetworkStore collection.
+ * This class supports CRUD operations on any NetworkManager collection.
  * </p>
  * <p>
  * The code below will build and execute a blocking get entity request resolving two kinvey references up to a depth of 2..
@@ -40,7 +40,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
  * </p>
  * <p>
  *
- *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkStore.this)
+ *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkManager.this)
  *                             .setEntityID(myEntity.getId());
  *                             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
  *                             .setResolveDepth(2)
@@ -61,10 +61,10 @@ public class NetworkOperation {
     protected static abstract class AppDataRequestBuilder {
 
 
-        //Required for all NetworkStore operations.
+        //Required for all NetworkManager operations.
         protected String collection;
         protected Class myClass;
-        protected NetworkStore appData;
+        protected NetworkManager appData;
 
         /**
          * @param client an active Kinvey client
@@ -118,7 +118,7 @@ public class NetworkOperation {
         }
 
         public AppDataRequestBuilder setID(String id){
-            this.query = new Query().equals(NetworkStore.ID_FIELD_NAME, id);
+            this.query = new Query().equals(NetworkManager.ID_FIELD_NAME, id);
             return this;
         }
 
@@ -178,12 +178,12 @@ public class NetworkOperation {
 
 
             GenericJson jsonEntity = (GenericJson) this.myEntity;
-            String sourceID = (String) jsonEntity.get(NetworkStore.ID_FIELD_NAME);
+            String sourceID = (String) jsonEntity.get(NetworkManager.ID_FIELD_NAME);
 
             if (sourceID != null) {
-                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkStore.SaveMode.PUT);
+                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkManager.SaveMode.PUT);
             } else {
-                ret = this.appData.new Save(this.myEntity, myClass, NetworkStore.SaveMode.POST);
+                ret = this.appData.new Save(this.myEntity, myClass, NetworkManager.SaveMode.POST);
             }
             return super.build(ret);
 
@@ -204,7 +204,7 @@ public class NetworkOperation {
 
 
         public AppDataRequestBuilder setEntityID(String entityID) {
-            this.query = new Query().equals(NetworkStore.ID_FIELD_NAME, entityID);
+            this.query = new Query().equals(NetworkManager.ID_FIELD_NAME, entityID);
             return this;
         }
 

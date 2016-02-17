@@ -80,7 +80,7 @@ public class RealmCacheManager implements ICacheManager {
 
                 if (!cache.getHash().equals(ClassHash.getClassHash(collectionItemClass))){
                     throw new KinveyException("Class implementation for collection have been changed during runtime",
-                            "Please review the AndroidNetworkStore usage, parameter should remain the same for same collection",
+                            "Please review the AndroidNetworkManager usage, parameter should remain the same for same collection",
                             "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
                 }
             }

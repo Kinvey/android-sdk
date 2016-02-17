@@ -22,9 +22,9 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.CustomEndpoints;
-import com.kinvey.java.network.File;
 import com.kinvey.java.UserDiscovery;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.ClientUsers;
@@ -49,13 +49,13 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
        requestPolicy);
 }
     @Override
-    public File file() {
+    public NetworkFileManager file() {
         return null;
     }
 
     @Override
     public void performLockDown() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
     }
 
     public static class Builder extends AbstractKinveyJsonClient.Builder {
@@ -72,7 +72,7 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
     }
 
 	@Override
-	public <T> NetworkStore<T> appData(String collectionName, Class<T> myClass) {
+	public <T> NetworkManager<T> appData(String collectionName, Class<T> myClass) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -40,7 +40,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * <p>
  * <pre>
  * {@code
- *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkStore.this)
+ *     MyEntity myEntity = new BlockingGetEntityBuilder("myCollection", MyEntity.class, NetworkManager.this)
  *             .setEntityID(myEntity.getId());
  *             .setResolves(new String[]{"myOtherCollectionReference1", myOtherCollectionReference2})
  *             .setResolveDepth(2)
@@ -102,7 +102,7 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //        protected int resolveDepth = 1;
 //        protected boolean retainReference = true;
 //
-//        public AsyncKRAppDataRequestBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
+//        public AsyncKRAppDataRequestBuilder(String collectionName, Class myClass, AndroidNetworkManager appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -131,7 +131,7 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //    public static class GetBuilder extends AsyncKRAppDataRequestBuilder {
 //        protected Query query = null;
 //
-//        public GetBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
+//        public GetBuilder(String collectionName, Class myClass, AndroidNetworkManager appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -168,7 +168,7 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //    public static class GetEntityBuilder extends AsyncKRAppDataRequestBuilder {
 //        protected String entityID = null;
 //
-//        public GetEntityBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
+//        public GetEntityBuilder(String collectionName, Class myClass, AndroidNetworkManager appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -205,7 +205,7 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //    public static class SaveBuilder extends AsyncAppDataRequestBuilder {
 //        protected Object myEntity = null;
 //
-//        public SaveBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
+//        public SaveBuilder(String collectionName, Class myClass, AndroidNetworkManager appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //
@@ -222,12 +222,12 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //
 //
 //            GenericJson jsonEntity = (GenericJson) this.myEntity;
-//            String sourceID = (String) jsonEntity.get(NetworkStore.ID_FIELD_NAME);
+//            String sourceID = (String) jsonEntity.get(NetworkManager.ID_FIELD_NAME);
 //
 //            if (sourceID != null) {
-//                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkStore.SaveMode.PUT);
+//                ret = this.appData.new Save(this.myEntity, myClass, sourceID, NetworkManager.SaveMode.PUT);
 //            } else {
-//                ret = this.appData.new Save(this.myEntity, myClass, NetworkStore.SaveMode.POST);
+//                ret = this.appData.new Save(this.myEntity, myClass, NetworkManager.SaveMode.POST);
 //            }
 //            return super.build(ret);
 //
@@ -243,7 +243,7 @@ public class AsyncNetworkOperation extends NetworkOperation {
 //        protected String entityID = null;
 //        protected Query query = null;
 //
-//        public DeleteBuilder(String collectionName, Class myClass, AndroidNetworkStore appData) {
+//        public DeleteBuilder(String collectionName, Class myClass, AndroidNetworkManager appData) {
 //            super(collectionName, myClass, appData);
 //        }
 //

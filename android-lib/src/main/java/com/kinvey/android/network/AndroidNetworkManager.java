@@ -15,36 +15,20 @@
  */
 package com.kinvey.android.network;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.google.common.base.Preconditions;
-import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.network.NetworkStore;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.Logger;
-import com.kinvey.java.Query;
-import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.core.KinveyClientCallback;
 
 /**
- * Wraps the {@link NetworkStore} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#appData} convenience method.  NetworkStore
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#appData} convenience method.  NetworkManager
  * gets and saves entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -75,7 +59,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * Entity Set sample:
  * <pre>
  * {@code
- *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
+ *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
  *     myAppData.get(appData().query, new KinveyListCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
  *         public void onSuccess(EventEntity[] entities) { ... }
@@ -90,17 +74,17 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public class AndroidNetworkStore<T> extends NetworkStore<T> {
+public class AndroidNetworkManager<T> extends NetworkManager<T> {
 
 
     /**
-     * Constructor to instantiate the NetworkStore class.
+     * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      * @param client
      */
-    public AndroidNetworkStore(String collectionName, Class<T> myClass, AbstractClient client) {
+    public AndroidNetworkManager(String collectionName, Class<T> myClass, AbstractClient client) {
         super(collectionName, myClass, client);
     }
 
