@@ -6,8 +6,10 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.ICacheManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CacheTTLTest {
-    RealmCacheManager cacheManager;
+    ICacheManager cacheManager;
 
     private static final long TTL_MINUTE = 60 * 1000;
     private static final long TTL_ZERO = 0;
@@ -37,7 +39,7 @@ public class CacheTTLTest {
     @Before
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        cacheManager = RealmCacheManager.getInstance(mMockContext);
+        cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
     }
 
     @Test

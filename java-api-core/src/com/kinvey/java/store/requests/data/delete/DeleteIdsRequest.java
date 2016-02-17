@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.WritePolicy;
@@ -26,16 +27,15 @@ public class DeleteIdsRequest<T extends GenericJson> extends AbstractDeleteReque
     }
 
     @Override
-    protected List<T> deleteCached() {
-        cache.delete(ids);
-        return null;
+    protected Integer deleteCached() {
+        return cache.delete(ids);
     }
 
     @Override
-    protected List<T> deleteNetwork() throws IOException {
+    protected Integer deleteNetwork() throws IOException {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.in("_id", Iterables.toArray(ids, String.class));
-        getNetworkData().deleteBlocking(q);
-        return null;
+        KinveyDeleteResponse response = getNetworkData().deleteBlocking(q).execute();
+        return response.getCount();
     }
 }

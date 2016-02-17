@@ -10,6 +10,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.ICacheManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,11 +29,11 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CacheTest {
-    RealmCacheManager cacheManager;
+    ICacheManager cacheManager;
     @Before
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        cacheManager = RealmCacheManager.getInstance(mMockContext);
+        cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
     }
 
     @Test

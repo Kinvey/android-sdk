@@ -13,6 +13,7 @@ import com.kinvey.android.cache.RealmCache;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -35,7 +36,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class QueryResultTest {
-    RealmCacheManager cacheManager;
+    ICacheManager cacheManager;
 
     private static final String TEST_TABLE = "queryResultTest3";
     private ICache<SampleGsonObject2> cache;
@@ -45,7 +46,7 @@ public class QueryResultTest {
     @Before
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        cacheManager = RealmCacheManager.getInstance(mMockContext);
+        cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
 
         cache = cacheManager.getCache(TEST_TABLE, SampleGsonObject2.class, Long.MAX_VALUE);
         cache.clear();

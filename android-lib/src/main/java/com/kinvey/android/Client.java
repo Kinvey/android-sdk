@@ -105,6 +105,7 @@ public class Client extends AbstractClient {
     private long syncRate;
     private long batchRate;
     private int batchSize;
+    private RealmCacheManager cacheManager;
     
     
     private static Client _sharedInstance;
@@ -121,31 +122,24 @@ public class Client extends AbstractClient {
      * @param kinveyRequestInitializer a {@link com.kinvey.java.core.KinveyClientRequestInitializer} object.
      * @param store a {@link com.kinvey.java.auth.CredentialStore} object.
      * @param requestPolicy a {@link BackOffPolicy} for retrying HTTP Requests
+     * @param context a {@link Context} android application context
      */
     protected Client(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl,
                      String servicePath, JsonObjectParser objectParser,
                      KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
-                     BackOffPolicy requestPolicy) {
+                     BackOffPolicy requestPolicy, Context context) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
         Logger.init(new AndroidLogger());
         _sharedInstance = this;
+        cacheManager = new RealmCacheManager(this, context);
     }
 
     public static Client sharedInstance(){
     	return _sharedInstance;
     }
 
-    /**
-     * <p>Setter for the field <code>context</code>.</p>
-     *
-     * @param context a {@link android.content.Context} object.
-     */
-    public void setContext(Context context) {
-        if (context != null) {
-            this.context = context.getApplicationContext();
-        }
-    }
+
 
     /**
      * DataStore factory method
@@ -325,7 +319,7 @@ public class Client extends AbstractClient {
 
     @Override
     public ICacheManager getCacheManager() {
-        return RealmCacheManager.getInstance(getContext().getApplicationContext());
+        return cacheManager;
     }
 
     /**
@@ -723,8 +717,7 @@ public class Client extends AbstractClient {
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
-                    getRequestBackoffPolicy());
-            client.setContext(context);
+                    getRequestBackoffPolicy(), context);
             client.setUserClass(userClass);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
             try {

@@ -70,19 +70,19 @@ public interface ICache<T extends GenericJson> {
      * Delete all object that matches query
      * @param query
      */
-    void delete(Query query);
+    int delete(Query query);
 
     /**
      * Delete all object with given ids
      * @param ids
      */
-    void delete(Iterable<String> ids);
+    int delete(Iterable<String> ids);
 
     /**
      * Delete all object with given ids
-     * @param ids
+     * @param id
      */
-    void delete(String id);
+    int delete(String id);
 
     /**
      * Delete all object from cache

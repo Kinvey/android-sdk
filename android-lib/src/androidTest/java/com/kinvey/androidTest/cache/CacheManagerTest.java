@@ -32,7 +32,8 @@ public class CacheManagerTest {
     @Before
     public void setUp() {
         mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        manager = RealmCacheManager.getInstance(mMockContext);
+        Client.Builder builder = new Client.Builder(mMockContext);
+        manager = builder.build().getCacheManager();
     }
 
     @Test

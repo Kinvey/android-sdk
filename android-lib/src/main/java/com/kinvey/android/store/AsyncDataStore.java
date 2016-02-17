@@ -42,12 +42,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Wraps the {@link NetworkStore} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link Client#appData} convenience method.  NetworkStore
+ * This functionality can be accessed through the {@link Client#dataStore convenience method.  NetworkStore
  * gets and saves entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -107,7 +108,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
     private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
-    private static final String KEY_DELETE_BY_IDS ="KEY_DELETE_BY_ID";
+    private static final String KEY_DELETE_BY_IDS ="KEY_DELETE_BY_IDS";
+
 
 
 
@@ -149,9 +151,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             tempMap.put(KEY_GET_ALL, DataStore.class.getMethod("find"));
             tempMap.put(KEY_GET_BY_IDS, DataStore.class.getMethod("find", Iterable.class));
 
-            tempMap.put(KEY_DELETE_BY_ID, NetworkStore.class.getMethod("delete", String.class));
-            tempMap.put(KEY_DELETE_BY_QUERY, NetworkStore.class.getMethod("delete", Query.class));
-            tempMap.put(KEY_DELETE_BY_IDS, NetworkStore.class.getMethod("delete", Iterable.class));
+            tempMap.put(KEY_DELETE_BY_ID, DataStore.class.getMethod("delete", String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, DataStore.class.getMethod("delete", Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, DataStore.class.getMethod("delete", Iterable.class));
 
             tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkStore.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkStore.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
@@ -190,7 +192,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(String entityID, KinveyClientCallback<T> callback)  {
-        new AppDataRequest(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<List<T>>(methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -217,7 +219,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      */
     public void find(Iterable<String> ids, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AppDataRequest(methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<List<T>>(methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -249,7 +251,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      */
     public void find(Query query, KinveyListCallback<T> callback){
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<List<T>>(methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -274,7 +276,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(KinveyListCallback<T> callback) {
-        new AppDataRequest(methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<List<T>>(methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -301,33 +303,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback - results of execution, either success or failure
      */
     public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
-        new AppDataRequest(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
-
-    /**
-     * Asynchronous request to execute a query and resolve KinveyReferences.  The Query will be used to determine which entities to retrieve,
-     * and the resolves array defines which json keys are KinveyReferences that should be resolved.
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     Query q = new Query();
-     *     q.equals("displayName", "myDisplayName");
-     *     NetworkStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     myAppData.get(q, new String[]{"myReferencedField"}, new KinveyListCallback<EventEntity> {
-     *         public void onFailure(Throwable t) { ... }
-     *         public void onSuccess(EventEntity[] entities) { ... }
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param q - the {@link Query} to execute determining which entities to retrieve.
-     * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
-     * @param callback - results of execution, either success or failure
-     */
-    public void get(Query q, String[] resolves, KinveyListCallback<T> callback){
-        new AppDataRequest(methodMap.get(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER),callback, q, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<T>(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -383,7 +359,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<Integer>(methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -411,7 +387,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<Integer>(methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -439,7 +415,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
-        new AppDataRequest(methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AppDataRequest<Integer>(methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
     }
 
@@ -604,7 +580,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      *  It provides the ability to execute a given method with a given arguments using reflection.
      *
      */
-    private class AppDataRequest extends AsyncClientRequest<T> {
+    private class AppDataRequest<T> extends AsyncClientRequest<T> {
 
         Method mMethod;
         Object[] args;
@@ -618,13 +594,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
         @Override
         public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-            AbstractKinveyClientRequest<T> request = (AbstractKinveyClientRequest<T>) mMethod.invoke(AsyncDataStore.this, args);
-            request.setCallback(getCallback());
-            if (request instanceof AbstractKinveyJsonClientRequest){
-                ((AbstractKinveyJsonClientRequest) request).setExecutor(this);
-            }
-            return request.execute();
-
+            T ret = (T)mMethod.invoke(AsyncDataStore.this, args);
+            return ret;
         }
     }
 

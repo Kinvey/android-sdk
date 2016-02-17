@@ -24,14 +24,12 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
     }
 
     @Override
-    protected List<T> deleteCached() {
-        cache.delete(id);
-        return null;
+    protected Integer deleteCached() {
+        return cache.delete(id);
     }
 
     @Override
-    protected List<T> deleteNetwork() throws IOException {
-        getNetworkData().deleteBlocking(id);
-        return null;
+    protected Integer deleteNetwork() throws IOException {
+        return getNetworkData().deleteBlocking(id).execute().getCount();
     }
 }

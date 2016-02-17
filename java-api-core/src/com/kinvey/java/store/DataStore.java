@@ -98,29 +98,16 @@ public class DataStore<T extends GenericJson> {
         return new SaveRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, object).execute();
     }
 
-    public void delete (String id){
-        try {
-            new DeleteSingleRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, id).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Integer delete (String id){
+        return new DeleteSingleRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, id).execute();
     }
 
-    public void delete (Query query){
-        try {
-            new DeleteQueryRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, query).execute();
-        } catch (IOException e) {
-
-
-        }
+    public Integer delete (Query query){
+        return new DeleteQueryRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, query).execute();
     }
 
-    public void delete (Iterable<String> ids){
-        try {
-            new DeleteIdsRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, ids).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Integer delete (Iterable<String> ids){
+        return new DeleteIdsRequest<T>(client, collection, storeItemType, cache, this.storeType.writePolicy, ids).execute();
     }
 
     // Push will commit local data for this collection

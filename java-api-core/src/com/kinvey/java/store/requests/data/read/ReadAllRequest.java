@@ -24,8 +24,7 @@ public class ReadAllRequest<T extends GenericJson> extends AbstractReadRequest<T
 
     @Override
     protected List<T> getNetwork() throws IOException {
-        return Arrays.asList(
-                getNetworkData().getBlocking().execute()
-            );
+        T[] ret = getNetworkData().getBlocking().execute();
+        return Arrays.asList(ret);
     }
 }

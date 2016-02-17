@@ -23,10 +23,10 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyDeleteCallback extends KinveyClientCallback<KinveyDeleteResponse> {
+public interface KinveyDeleteCallback extends KinveyClientCallback<Integer> {
 
-    public void onSuccess(KinveyDeleteResponse result);
+    void onSuccess(Integer result);
 
 
-    public void onFailure(Throwable error);
+    void onFailure(Throwable error);
 }

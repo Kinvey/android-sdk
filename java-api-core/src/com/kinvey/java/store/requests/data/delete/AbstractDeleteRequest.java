@@ -6,6 +6,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkStore;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyExecuteRequest;
+import com.kinvey.java.store.requests.data.IRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Created by Prots on 2/8/16.
  */
-public abstract class AbstractDeleteRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
+public abstract class AbstractDeleteRequest<T extends GenericJson> implements IRequest<Integer> {
     private AbstractClient client;
     private final String collectionName;
     private final Class<T> clazz;
@@ -31,17 +32,18 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> extends Abstr
     }
 
     @Override
-    public Void execute() throws IOException {
+    public Integer execute() {
+        Integer ret = 0;
         NetworkStore<T> networkStore = client.networkStore(collectionName, clazz);
         switch (writePolicy){
             case FORCE_LOCAL:
-                deleteCached();
+                ret = deleteCached();
                 //TODO: write to sync
                 break;
             case FORCE_NETWORK:
 
                 try {
-                    deleteNetwork();
+                    ret = deleteNetwork();
                 } catch (IOException e) {
                     //TODO: add to sync
                     e.printStackTrace();
@@ -51,16 +53,16 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> extends Abstr
                 break;
             case LOCAL_THEN_NETWORK:
                 //write to local and network, push to sync if network fails
-                deleteCached();
+                ret = deleteCached();
                 try {
-                    deleteNetwork();
+                    ret = deleteNetwork();
                 } catch (IOException e) {
                     //TODO: add to sync
                     e.printStackTrace();
                 }
                 break;
         }
-        return null;
+        return ret;
     }
 
     protected NetworkStore<T> getNetworkData(){
@@ -72,7 +74,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> extends Abstr
 
     }
 
-    abstract protected List<T> deleteCached();
-    abstract protected List<T> deleteNetwork() throws IOException;
+    abstract protected Integer deleteCached();
+    abstract protected Integer deleteNetwork() throws IOException;
 
 }

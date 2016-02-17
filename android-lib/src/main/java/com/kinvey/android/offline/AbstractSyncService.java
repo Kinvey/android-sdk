@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.IInterface;
 
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
@@ -245,7 +246,7 @@ public abstract class AbstractSyncService extends IntentService{
         		Query q = new Query().setQueryString(curID);
             	client.dataStore(collectionName, GenericJson.class).delete(q, new KinveyDeleteCallback() {
                     @Override
-                    public void onSuccess(KinveyDeleteResponse result) {
+                    public void onSuccess(Integer result) {
 //                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     }
 
@@ -259,7 +260,7 @@ public abstract class AbstractSyncService extends IntentService{
         		//it's a single ID
             	client.dataStore(collectionName, GenericJson.class).delete(cur.getEntityID().id, new KinveyDeleteCallback() {
                     @Override
-                    public void onSuccess(KinveyDeleteResponse result) {
+                    public void onSuccess(Integer result) {
 //                        KinveySyncService.this.storeCompletedRequestInfo(collectionName, true, cur, result);
                     }
 

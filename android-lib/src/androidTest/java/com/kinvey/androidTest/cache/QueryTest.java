@@ -39,11 +39,11 @@ public class QueryTest {
 
     RealmQuery<DynamicRealmObject> query;
 
-    RealmCacheManager cacheManager;
+    ICacheManager cacheManager;
     @Before
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        cacheManager = RealmCacheManager.getInstance(mMockContext);
+        cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
 
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder(mMockContext).build());
 

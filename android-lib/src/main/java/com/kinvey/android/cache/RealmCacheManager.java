@@ -1,12 +1,15 @@
 package com.kinvey.android.cache;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -23,35 +26,30 @@ import io.realm.RealmSchema;
 public class RealmCacheManager implements ICacheManager {
 
     private static final String TABLE_HASH_NAME = "__KinveyTables__";
+    private final AbstractClient client;
+    private final Context context;
 
-    private static RealmCacheManager _instance;
-
-    private DynamicRealm mRealm;
 
     private HashMap<String, RealmCache> mCacheMap = new HashMap<String, RealmCache>();
     private static final Object LOCK = new Object();
 
-    public synchronized static RealmCacheManager getInstance(Context context){
 
-        synchronized (LOCK) {
-            if (_instance == null) {
-
-                _instance = new RealmCacheManager();
-                _instance.mRealm = DynamicRealm.getInstance(new RealmConfiguration.Builder(context).build());
-                _instance.init();
-            }
-            return _instance;
-        }
+    public RealmCacheManager(AbstractClient client, Context context){
+        this.client = client;
+        this.context = context;
     }
+
 
     @Override
     public <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl) {
         synchronized (LOCK){
-            RealmCache<T> cache = (RealmCache<T>)mCacheMap.get(collection);
+            DynamicRealm mRealm = getDynamicRealm();
+            String cacheKey = getClientHash()+ File.separator + collection;
+            RealmCache<T> cache = (RealmCache<T>)mCacheMap.get(cacheKey);
 
             if (cache == null){
-                cache = new RealmCache<T>(collection, mRealm, collectionItemClass, ttl);
-                if (!cache.getHash().equals(getTableHash(collection))){
+                cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
+                if (!cache.getHash().equals(getTableHash(collection, mRealm))){
                     //Recreate table
                     mRealm.beginTransaction();
                     try {
@@ -71,14 +69,15 @@ public class RealmCacheManager implements ICacheManager {
                         //create table scheme
                         cache.createRealmTable(mRealm.getSchema());
                         //store table hash for futher usage
-                        setTableHash(collection, cache.getHash());
+                        setTableHash(collection, cache.getHash(), mRealm);
                     } finally {
                         mRealm.commitTransaction();
                     }
 
                 }
-                mCacheMap.put(collection, cache);
+                mCacheMap.put(cacheKey, cache);
             } else {
+
                 if (!cache.getHash().equals(ClassHash.getClassHash(collectionItemClass))){
                     throw new KinveyException("Class implementation for collection have been changed during runtime",
                             "Please review the AndroidNetworkStore usage, parameter should remain the same for same collection",
@@ -86,13 +85,18 @@ public class RealmCacheManager implements ICacheManager {
                 }
             }
             cache.setTtl(ttl);
+            mRealm.close();
             return cache;
         }
     }
 
+
+
+
     @Override
     public void clear() {
         synchronized (LOCK) {
+            DynamicRealm mRealm = getDynamicRealm();
             Set<RealmObjectSchema> schemas = mRealm.getSchema().getAll();
             mRealm.beginTransaction();
             for (RealmObjectSchema schema : schemas) {
@@ -100,11 +104,11 @@ public class RealmCacheManager implements ICacheManager {
                 mRealm.getSchema().remove(schema.getClassName());
             }
             mRealm.commitTransaction();
-            _instance = null;
+            mRealm.close();
         }
     }
 
-    private void init(){
+    private void init(DynamicRealm mRealm){
         RealmSchema schema = mRealm.getSchema();
         RealmObjectSchema tableHashScheme = schema.get(TABLE_HASH_NAME);
         if (tableHashScheme == null){
@@ -122,7 +126,7 @@ public class RealmCacheManager implements ICacheManager {
         tableHashScheme.addField("hash", String.class, FieldAttribute.REQUIRED);
     }
 
-    private String getTableHash(String collection){
+    private String getTableHash(String collection, DynamicRealm mRealm){
 
         DynamicRealm realm = DynamicRealm.getInstance(mRealm.getConfiguration());
         DynamicRealmObject res = realm.where(TABLE_HASH_NAME)
@@ -138,13 +142,34 @@ public class RealmCacheManager implements ICacheManager {
      * @param collection Collection name
      * @param hash Computed hash of the table
      */
-    private void setTableHash(String collection, String hash){
+    private void setTableHash(String collection, String hash, DynamicRealm mRealm){
         DynamicRealmObject obj = mRealm.where(TABLE_HASH_NAME)
                 .equalTo("collection", collection).findFirst();
         if (obj == null){
             obj = mRealm.createObject(TABLE_HASH_NAME,collection);
         }
         obj.set("hash", hash);
+    }
+
+
+    private String getClientHash(){
+        Uri server = Uri.parse(client.getBaseUrl());
+        return server.getHost()+"_"+server.getPort();
+    }
+
+    /**
+     * get Prepared DynamicRealm since realm object can not be shared between threads
+     */
+
+    DynamicRealm getDynamicRealm(){
+        synchronized (LOCK){
+            Uri server = Uri.parse(client.getBaseUrl());
+            RealmConfiguration rc = new RealmConfiguration.Builder(context)
+                    .name(getClientHash()).build();
+            DynamicRealm realm = DynamicRealm.getInstance(rc);
+            init(realm);
+            return realm;
+        }
     }
 
 }
