@@ -482,10 +482,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         return new DataStore<T>(this, collection, clazz, StoreType.CACHE);
     }
 
-    public <T extends GenericJson> FileStore getFileStore(String collection,
-                                                             Class<T> clazz){
+    public <T extends GenericJson> FileStore getFileStore(){
         return new FileStore(new NetworkFileManager(this),
-                getCacheManager().getCache("KinveyFiles", FileMetaData.class, Long.MAX_VALUE),
+                getCacheManager(), 60*1000*1000L,
                 StoreType.CACHE);
     }
 

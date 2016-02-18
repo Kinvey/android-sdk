@@ -310,8 +310,8 @@ public class NetworkFileManager {
      * @return a valid request to be executed
      * @throws IOException
      */
-    public DownloadMetadataAndFileQuery prepDownloadBlocking(Query q) throws IOException {
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+    public DownloadMetadataQuery prepDownloadBlocking(Query q) throws IOException {
+        DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
         return download;
 
@@ -325,8 +325,8 @@ public class NetworkFileManager {
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataAndFileQuery downloadBlocking(Query q) throws IOException {
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+    public DownloadMetadataQuery downloadBlocking(Query q) throws IOException {
+        DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
         return download;
 
@@ -355,9 +355,9 @@ public class NetworkFileManager {
      * @return a valid download request ready to be executed
      * @throws IOException
      */
-    public DownloadMetadataAndFileQuery prepDownloadBlocking(String id, Query q) throws IOException {
+    public DownloadMetadataQuery prepDownloadBlocking(String id, Query q) throws IOException {
 
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(id, q, downloaderProgressListener);
+        DownloadMetadataQuery download = new DownloadMetadataQuery(id, q);
         client.initializeRequest(download);
         return download;
 
@@ -387,9 +387,9 @@ public class NetworkFileManager {
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataAndFileQuery downloadBlocking(String id, Query q) throws IOException {
+    public DownloadMetadataQuery downloadBlocking(String id, Query q) throws IOException {
 
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(id, q, downloaderProgressListener);
+        DownloadMetadataQuery download = new DownloadMetadataQuery(id, q);
         client.initializeRequest(download);
         return download;
 
@@ -411,10 +411,10 @@ public class NetworkFileManager {
      *
      * @param id - the unique _id of the file to download
      * @param ttl - a custom TTL, in milliseconds
-     * @return a {@link DownloadMetadataAndFileQuery} request ready to be executed.
+     * @return a {@link DownloadMetadataQuery} request ready to be executed.
      * @throws IOException
      */
-    public DownloadMetadataAndFileQuery prepDownloadWithTTLBlocking(String id, int ttl) throws IOException{
+    public DownloadMetadataQuery prepDownloadWithTTLBlocking(String id, int ttl) throws IOException{
         Query q = new Query();
         q.equals("ttl_in_seconds", ttl);
         return prepDownloadBlocking(id, q);
@@ -436,11 +436,11 @@ public class NetworkFileManager {
      *
      * @param id - the unique _id of the file to download
      * @param ttl - a custom TTL, in milliseconds
-     * @return a {@link DownloadMetadataAndFileQuery} request ready to be executed.
+     * @return a {@link DownloadMetadataQuery} request ready to be executed.
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataAndFileQuery downloadWithTTLBlocking(String id, int ttl) throws IOException{
+    public DownloadMetadataQuery downloadWithTTLBlocking(String id, int ttl) throws IOException{
         Query q = new Query();
         q.equals("ttl_in_seconds", ttl);
         return prepDownloadBlocking(id, q);
@@ -456,11 +456,11 @@ public class NetworkFileManager {
      * @return
      * @throws IOException
      */
-    public DownloadMetadataAndFileQuery prepDownloadBlocking(String filename) throws IOException{
+    public DownloadMetadataQuery prepDownloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+        DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
         download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
@@ -477,11 +477,11 @@ public class NetworkFileManager {
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataAndFileQuery downloadBlocking(String filename) throws IOException{
+    public DownloadMetadataQuery downloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
-        DownloadMetadataAndFileQuery download = new DownloadMetadataAndFileQuery(null, q, downloaderProgressListener);
+        DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
         download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
@@ -711,7 +711,7 @@ public class NetworkFileManager {
     /**
      * This class gets a {@link FileMetaData} object from Kinvey, and then downloads the associated NetworkFileManager
      */
-    public class DownloadMetadataAndFileQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
+    public class DownloadMetadataQuery extends AbstractKinveyJsonClientRequest<FileMetaData[]> {
 
         //private final static String REST_URL = "blob/{appKey}/{id}" + "?query={query}";
         private final static String REST_URL = "blob/{appKey}/{id}" + "{?query,sort,limit,skip}";
@@ -729,7 +729,7 @@ public class NetworkFileManager {
         private String skip;
 
 
-        private DownloadMetadataAndFileQuery(String id, Query query, DownloaderProgressListener progressListener){
+        private DownloadMetadataQuery(String id, Query query){
             super(client, "GET", REST_URL, null, FileMetaData[].class);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();

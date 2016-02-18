@@ -133,6 +133,7 @@ public class Client extends AbstractClient {
         Logger.init(new AndroidLogger());
         _sharedInstance = this;
         cacheManager = new RealmCacheManager(this, context);
+        this.context = context;
     }
 
     public static Client sharedInstance(){
@@ -717,9 +718,9 @@ public class Client extends AbstractClient {
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
-                    getRequestBackoffPolicy(), context);
+                    getRequestBackoffPolicy(), this.context);
             client.setUserClass(userClass);
-            client.clientUsers = AndroidClientUsers.getClientUsers(context);
+            client.clientUsers = AndroidClientUsers.getClientUsers(this.context);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
