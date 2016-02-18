@@ -7,5 +7,5 @@ public enum ReadPolicy {
     FORCE_LOCAL,
     FORCE_NETWORK,
     PREFER_LOCAL,
-    readPolicy, PREFER_NETWORK
+    PREFER_NETWORK
 }
