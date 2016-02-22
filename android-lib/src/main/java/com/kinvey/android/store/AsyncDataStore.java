@@ -108,7 +108,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
 
 
-    private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
+    /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
     private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";
@@ -118,7 +118,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     private static final String KEY_SUM = "KEY_SUM";
     private static final String KEY_MAX = "KEY_MAX";
     private static final String KEY_MIN = "KEY_MIN";
-    private static final String KEY_AVERAGE = "KEY_AVERAGE";
+    private static final String KEY_AVERAGE = "KEY_AVERAGE";*/
 
     private static Map<String, Method> methodMap;
 
@@ -150,10 +150,10 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             tempMap.put(KEY_DELETE_BY_QUERY, DataStore.class.getMethod("delete", Query.class));
             tempMap.put(KEY_DELETE_BY_IDS, DataStore.class.getMethod("delete", Iterable.class));
 
-            tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
+            /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class} ));
-            tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));
+            tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));*/
 
 
         }catch (NoSuchMethodException e){
@@ -297,9 +297,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
      * @param callback - results of execution, either success or failure
      */
-    public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
+    /*public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
         new AppDataRequest<T>(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
 
     /**
@@ -440,10 +440,10 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
-    public void count(ArrayList<String> fields, Query query, KinveyClientCallback callback) {
+    /*public void count(ArrayList<String> fields, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_COUNT), callback, fields, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
-    }
+    }*/
 
     /**
      * Asynchronous request to retrieveBlocking a group by SUM on a collection or filtered collection
@@ -471,9 +471,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
-    public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback callback) {
+    /*public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback callback) {
         new  AppDataRequest(methodMap.get(KEY_SUM), callback, fields, sumField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
     /**
      * Asynchronous request to retrieve a group by MAX on a collection or filtered collection
@@ -502,9 +502,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
-    public void max(ArrayList<String> fields, String maxField, Query query, KinveyClientCallback callback)  {
+    /*public void max(ArrayList<String> fields, String maxField, Query query, KinveyClientCallback callback)  {
         new AppDataRequest(methodMap.get(KEY_MAX), callback, fields, maxField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
     /**
      * Asynchronous request to retrieve a group by MIN on a collection or filtered collection
@@ -532,9 +532,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
-    public void min(ArrayList<String> fields, String minField, Query query, KinveyClientCallback callback) {
+    /*public void min(ArrayList<String> fields, String minField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_MIN), callback, fields, minField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
     /**
      * Asynchronous request to retrieve a group by AVERAGE on a collection or filtered collection
@@ -562,9 +562,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
      * @param callback KinveyClientCallback
      */
-    public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
+    /*public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
         new AppDataRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
 
 
