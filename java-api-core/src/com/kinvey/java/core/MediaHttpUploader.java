@@ -48,6 +48,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
@@ -356,7 +357,7 @@ public class MediaHttpUploader {
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
 		} else {
-            throw  new KinveyException("Uploading NetworkFileManager Failed");
+            throw  new KinveyException("Uploading NetworkFileManager Failed", response.parseAsString(), "");
         }
 		return meta;
 		

@@ -953,9 +953,16 @@ public class Client extends AbstractClient {
         }
     }
 
+
+
     @Override
     public <T extends GenericJson> NetworkManager<T> networkStore(String collectionName, Class<T> myClass) {
         return new AndroidNetworkManager<T>(collectionName, myClass, this);
+    }
+
+    @Override
+    public String getFileCacheFolder() {
+        return context.getExternalFilesDir("KinveyFiles").getAbsolutePath();
     }
 }
 

@@ -34,12 +34,18 @@ public class FileStore {
     private static final String CACHE_FILE_PATH = "KinveyCachePath";
 
     private final NetworkFileManager networkFileManager;
+    private final ICacheManager cacheManager;
+    private final Long ttl;
+    private final String cacheFolder;
     private final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
-    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType){
+    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
 
         this.networkFileManager = networkFileManager;
+        this.cacheManager = cacheManager;
+        this.ttl = ttl;
+        this.cacheFolder = cacheFolder;
         this.cache = cacheManager.getCache("__KinveyFile__", FileMetadataWithPath.class, ttl);
         this.storeType = storeType;
     }
@@ -63,9 +69,12 @@ public class FileStore {
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }
 
+
+
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
                 saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
+                metadata = fileMetadataWithPath;
                 break;
             case FORCE_NETWORK:
                 metadata = upload.execute();
@@ -75,8 +84,9 @@ public class FileStore {
                 try {
                     upload.execute();
                 } catch (Exception e){
-
+                    e.printStackTrace();
                 }
+                metadata = fileMetadataWithPath;
         }
 
         return metadata;
@@ -164,7 +174,7 @@ public class FileStore {
                     try {
                         metaData = download.execute();
                     } catch (IOException e){
-
+                        e.printStackTrace();
                     }
                 }
                 break;
@@ -172,7 +182,7 @@ public class FileStore {
                 try {
                     metaData = download.execute();
                 } catch (IOException e){
-
+                    e.printStackTrace();
                 }
 
                 if (metaData == null){
@@ -361,7 +371,12 @@ public class FileStore {
         if (!f.exists()){
             f.createNewFile();
         }
-        FileUtils.copyStreams(is, new FileOutputStream(new File(metadata.getPath())));
+
+        metadata.setPath(f.getAbsolutePath());
+
+        FileUtils.copyStreams(is, new FileOutputStream(f));
+
+        cache.save(metadata);
 
     }
 
@@ -369,7 +384,11 @@ public class FileStore {
         this.storeType = storeType;
     }
 
-    private static class FileMetadataWithPath extends FileMetaData{
+    protected String getCacheFolder(){
+        return cacheFolder;
+    };
+
+    public static class FileMetadataWithPath extends FileMetaData{
         @Key(CACHE_FILE_PATH)
         private String path;
 
@@ -381,9 +400,5 @@ public class FileStore {
             this.path = path;
         }
     }
-
-    protected String getCacheFolder(){
-        return null;
-    };
 
 }
