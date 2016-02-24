@@ -13,18 +13,13 @@ import java.io.IOException;
  * Created by Prots on 2/5/16.
  */
 public class SaveRequest<T extends GenericJson> implements IRequest<T> {
-    private AbstractClient client;
-    private final String collectionName;
-    private final Class<T> clazz;
     private final ICache<T> cache;
     private final T object;
     private final WritePolicy writePolicy;
+    private NetworkManager<T> networkManager;
 
-    public SaveRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                       ICache<T> cache, WritePolicy writePolicy, T object) {
-        this.client = client;
-        this.collectionName = collectionName;
-        this.clazz = clazz;
+    public SaveRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy, T object) {
+        this.networkManager = networkManager;
 
         this.cache = cache;
         this.object = object;
@@ -33,7 +28,6 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
     @Override
     public T execute() {
-        NetworkManager<T> appData = client.networkStore(collectionName, clazz);
         T ret = null;
         switch (writePolicy){
             case FORCE_LOCAL:
@@ -44,7 +38,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
 
                 try {
-                    NetworkManager<T>.Save save = appData.saveBlocking(object);
+                    NetworkManager<T>.Save save = networkManager.saveBlocking(object);
                     ret = save.execute();
                 } catch (IOException e){
                     //TODO: put to sync on error
@@ -56,7 +50,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                 //write to local and network, push to sync if network fails
                 ret = cache.save(object);
                 try {
-                    NetworkManager<T>.Save save = appData.saveBlocking(object);
+                    NetworkManager<T>.Save save = networkManager.saveBlocking(object);
                     save.execute();
                 } catch (IOException e){
                     //TODO: put to sync on error

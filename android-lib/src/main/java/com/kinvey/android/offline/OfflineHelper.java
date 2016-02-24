@@ -29,6 +29,7 @@ import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.Logger;
+import com.kinvey.java.store.DataStore;
 
 /**
  * This class manages a set of {@link OfflineTable}s.  Tables are not maintained in memory, and are created on demand.
@@ -160,7 +161,7 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * @return the entity with the appdata collection and provided id
      */
 
-    public GenericJson getEntity(AbstractClient client, NetworkManager appData, OfflineMetaData id) {
+    public GenericJson getEntity(AbstractClient client, DataStore appData, OfflineMetaData id) {
         GenericJson ret;
 
         ret = getTable(appData.getCollectionName()).getEntity(this, client, id.id, appData.getCurrentClass(), null);

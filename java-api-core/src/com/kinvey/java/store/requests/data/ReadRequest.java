@@ -15,29 +15,23 @@ import java.util.Arrays;
  * Created by Prots on 2/8/16.
  */
 public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRequest<T> {
-    private AbstractClient client;
-    private final String collectionName;
-    private final Class<T> clazz;
     private final ICache<T> cache;
     private final Query query;
     private final ReadPolicy readPolicy;
     private final long maxValue;
+    private NetworkManager<T> networkManager;
 
-    public ReadRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                       ICache<T> cache, Query query, ReadPolicy readPolicy, long maxValue) {
-        this.client = client;
-        this.collectionName = collectionName;
-        this.clazz = clazz;
-
+    public ReadRequest(ICache<T> cache, Query query, ReadPolicy readPolicy, long maxValue,
+                       NetworkManager<T> networkManager) {
         this.cache = cache;
         this.query = query;
         this.readPolicy = readPolicy;
         this.maxValue = maxValue;
+        this.networkManager = networkManager;
     }
 
     @Override
     public List<T> execute() throws IOException {
-        NetworkManager<T> networkManager = client.networkStore(collectionName, clazz);
         query.setLimit((int) maxValue);
         List<T> ret = null;
         switch (readPolicy){

@@ -185,9 +185,9 @@ public abstract class AbstractSyncService extends IntentService{
      */
     private void executeRequest(final DatabaseHandler dbHelper, final OfflineRequestInfo cur, final String collectionName) {
         if (cur.getHttpVerb().equals("PUT") || cur.getHttpVerb().equals(("POST"))) {
-        	client.networkStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
-        	client.networkStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
-        	final GenericJson entity = dbHelper.getEntity(client, client.networkStore(collectionName, GenericJson.class), cur.getEntityID());
+        	client.dataStore(collectionName, GenericJson.class).setClientAppVersion(cur.getEntityID().customerVersion);
+        	client.dataStore(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));
+        	final GenericJson entity = dbHelper.getEntity(client, client.dataStore(collectionName, GenericJson.class), cur.getEntityID());
         	//grab entity's id
         	final String curEntityID = entity.get("_id").toString(); 
         	//if it's a temp id, remove it before saving

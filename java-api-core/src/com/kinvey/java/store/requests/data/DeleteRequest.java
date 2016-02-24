@@ -17,15 +17,10 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
     private final Query query;
     private final String id;
     private final WritePolicy writePolicy;
-    private final AbstractClient client;
-    private final Class<T> clazz;
-    private String collectionName;
+    private NetworkManager<T> networkManager;
 
-    public DeleteRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                         ICache<T> cache, String id, WritePolicy writePolicy) {
-        this.client = client;
-        this.clazz = clazz;
-        this.collectionName = collectionName;
+    public DeleteRequest(ICache<T> cache, String id, WritePolicy writePolicy, NetworkManager<T> networkManager) {
+        this.networkManager = networkManager;
         query = null;
         this.cache = cache;
         this.id = id;
@@ -34,9 +29,6 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
 
     public DeleteRequest(AbstractClient client, String collectionName, Class<T> clazz,
                          ICache<T> cache, Query query, WritePolicy writePolicy) {
-        this.client = client;
-        this.collectionName = collectionName;
-        this.clazz = clazz;
         id = null;
         this.cache = cache;
         this.query = query;
@@ -45,7 +37,6 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
 
     @Override
     public T execute() {
-        NetworkManager<T> appData = client.networkStore(collectionName, clazz);
         switch (writePolicy){
             case FORCE_LOCAL:
                 cache.delete(query);
@@ -54,7 +45,7 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
             case FORCE_NETWORK:
 
                 try {
-                    appData.deleteBlocking(query);
+                    networkManager.deleteBlocking(query);
                 } catch (IOException e) {
                     //TODO: add to sync
                     e.printStackTrace();
@@ -66,7 +57,7 @@ public class DeleteRequest<T extends GenericJson> extends AbstractKinveyDataRequ
                 //write to local and network, push to sync if network fails
                 cache.delete(query);
                 try {
-                    appData.deleteBlocking(query);
+                    networkManager.deleteBlocking(query);
                 } catch (IOException e) {
                     //TODO: add to sync
                     e.printStackTrace();

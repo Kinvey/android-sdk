@@ -6,6 +6,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.WritePolicy;
@@ -20,9 +21,9 @@ import java.util.List;
 public class DeleteIdsRequest<T extends GenericJson> extends AbstractDeleteRequest<T> {
     private Iterable<String> ids;
 
-    public DeleteIdsRequest(AbstractClient client, String collectionName, Class<T> clazz, ICache<T> cache, WritePolicy writePolicy,
+    public DeleteIdsRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy,
                             Iterable<String> ids) {
-        super(client, collectionName, clazz, cache, writePolicy);
+        super(cache, writePolicy, networkManager);
         this.ids = ids;
     }
 
@@ -35,7 +36,7 @@ public class DeleteIdsRequest<T extends GenericJson> extends AbstractDeleteReque
     protected Integer deleteNetwork() throws IOException {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.in("_id", Iterables.toArray(ids, String.class));
-        KinveyDeleteResponse response = getNetworkData().deleteBlocking(q).execute();
+        KinveyDeleteResponse response = networkManager.deleteBlocking(q).execute();
         return response.getCount();
     }
 }

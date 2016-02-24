@@ -44,6 +44,7 @@ import com.kinvey.android.network.AndroidNetworkManager;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
+import com.kinvey.android.store.AsyncFileStore;
 import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
@@ -57,8 +58,11 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.StoreType;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -98,7 +102,6 @@ public class Client extends AbstractClient {
     private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
-    private AsyncNetworkFileManager file;
     private AsyncUserGroup userGroup;
     private ClientUsers clientUsers;
 //    private AsyncUser currentUser;
@@ -224,42 +227,13 @@ public class Client extends AbstractClient {
     }
 
 
-    /**
-     * NetworkFileManager factory method
-     * <p>
-     * Returns an instance of {@link NetworkFileManager} for uploading and downloading of files.  Only one instance is created for each
-     * instance of the Kinvey client.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-     NetworkFileManager myFile = kinveyClient.file();
-     }
-     * </pre>
-     * </p>
-     *
-     * @return Instance of {@link NetworkFileManager} for the defined collection
-     */
-    @Override
-    public AsyncNetworkFileManager file() {
-        synchronized (lock) {
-            if (file == null) {
-                file = new AsyncNetworkFileManager(this);
-            }
-            return file;
-        }
-    }
-
     @Override
     public void performLockDown() {
         if(getCacheManager() != null){
             getCacheManager().clear();
         }
-        this.file().clearFileStorage(getContext().getApplicationContext());
+
+        this.getFileStore().clear();
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
             e.performLockdown(userStore().getCurrentUser().getId());
@@ -953,16 +927,16 @@ public class Client extends AbstractClient {
         }
     }
 
-
-
-    @Override
-    public <T extends GenericJson> NetworkManager<T> networkStore(String collectionName, Class<T> myClass) {
-        return new AndroidNetworkManager<T>(collectionName, myClass, this);
-    }
-
     @Override
     public String getFileCacheFolder() {
         return context.getExternalFilesDir("KinveyFiles").getAbsolutePath();
+    }
+
+    @Override
+    public AsyncFileStore getFileStore() {
+        return new AsyncFileStore(new NetworkFileManager(this),
+                    getCacheManager(), 60*60*1000L, StoreType.CACHE, getFileCacheFolder()
+                );
     }
 }
 

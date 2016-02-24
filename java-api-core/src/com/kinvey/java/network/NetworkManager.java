@@ -428,34 +428,6 @@ public class NetworkManager<T> {
 
 
     /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkManager.
-     *
-     * @return a new request builder for a blocking GET operation
-     */
-    public NetworkOperation.BlockingGetBuilder blockingGetBuilder(){
-        return new NetworkOperation.BlockingGetBuilder(getClient(), this.collectionName, this.myClass);
-    }
-
-    /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkManager.
-     *
-     * @return a new request builder for a blocking SAVE (put or post) operation
-     */
-    public NetworkOperation.BlockingSaveBuilder  blockingSaveBuilder(){
-        return new NetworkOperation.BlockingSaveBuilder(getClient(), this.collectionName, this.myClass);
-    }
-
-    /**
-     * Create and return a new synchronous App Data Request Builder associated with *this* instance of NetworkManager.
-     *
-     * @return a new request builder for a blocking DELETE operation
-     */
-    public NetworkOperation.BlockingDeleteBuilder  blockingDeleteBuilder(){
-        return new NetworkOperation.BlockingDeleteBuilder(getClient(), this.collectionName, this.myClass);
-    }
-    
-
-    /**
      * Generic Get class.  Constructs the HTTP request object for Get
      * requests.
      *

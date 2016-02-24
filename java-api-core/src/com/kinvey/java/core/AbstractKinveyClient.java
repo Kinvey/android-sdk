@@ -24,9 +24,9 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
-import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
+import com.kinvey.java.store.FileStore;
 
 /**
  * @author m0rganic
@@ -91,9 +91,9 @@ public abstract class AbstractKinveyClient {
 
 
     /**
-     * Access to the NetworkFileManager service where files of all sizes including images and videos can be uploaded and downloaded.
+     * Access to the FileStore service where files of all sizes including images and videos can be uploaded and downloaded.
      */
-    public abstract NetworkFileManager file();
+    public abstract FileStore getFileStore();
 
 
     /**

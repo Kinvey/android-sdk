@@ -135,16 +135,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         this.store = store;
     }
 
-    /**
-     *
-     *
-     * @return a new instance of the NetworkManager class
-     */
-    public <T extends GenericJson> NetworkManager<T> networkStore(String collectionName, Class<T> myClass){
-        return new NetworkManager<T>(collectionName, myClass, this);
-    };
-
-
 
     public Query query() {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
@@ -480,7 +470,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract String getFileCacheFolder();
 
-    public <T extends GenericJson> FileStore getFileStore(){
+    public FileStore getFileStore(){
         return new FileStore(new NetworkFileManager(this),
                 getCacheManager(), 60*1000*1000L,
                 StoreType.CACHE, getFileCacheFolder());

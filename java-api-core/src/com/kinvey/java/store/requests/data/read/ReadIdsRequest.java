@@ -4,6 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
@@ -16,9 +17,9 @@ import java.util.List;
 public class ReadIdsRequest<T extends GenericJson> extends AbstractReadRequest<T> {
     private Iterable<String> ids;
 
-    public ReadIdsRequest(AbstractClient client, String collectionName, Class<T> clazz, ICache<T> cache, ReadPolicy readPolicy,
+    public ReadIdsRequest(ICache<T> cache, NetworkManager<T> networkManager, ReadPolicy readPolicy,
                           Iterable<String> ids) {
-        super(client, collectionName, clazz, cache, readPolicy);
+        super( cache, readPolicy, networkManager);
         this.ids = ids;
     }
 

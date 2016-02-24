@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.WritePolicy;
 
@@ -17,9 +18,9 @@ import java.util.List;
 public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRequest<T> {
     private String id;
 
-    public DeleteSingleRequest(AbstractClient client, String collectionName, Class<T> clazz, ICache<T> cache, WritePolicy writePolicy,
+    public DeleteSingleRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy,
                                String id) {
-        super(client, collectionName, clazz, cache, writePolicy);
+        super(cache, writePolicy, networkManager);
         this.id = id;
     }
 
@@ -30,6 +31,6 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
 
     @Override
     protected Integer deleteNetwork() throws IOException {
-        return getNetworkData().deleteBlocking(id).execute().getCount();
+        return networkManager.deleteBlocking(id).execute().getCount();
     }
 }

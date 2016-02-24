@@ -4,6 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.WritePolicy;
 
@@ -18,9 +19,9 @@ public class DeleteQueryRequest<T extends GenericJson> extends AbstractDeleteReq
 
     private final Query query;
 
-    public DeleteQueryRequest(AbstractClient client, String collectionName, Class<T> clazz, ICache<T> cache, WritePolicy writePolicy,
+    public DeleteQueryRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy,
                               Query query) {
-        super(client, collectionName, clazz, cache, writePolicy);
+        super(cache, writePolicy, networkManager);
         this.query = query;
     }
 
@@ -31,6 +32,6 @@ public class DeleteQueryRequest<T extends GenericJson> extends AbstractDeleteReq
 
     @Override
     protected Integer deleteNetwork() throws IOException {
-        return getNetworkData().deleteBlocking(query).execute().getCount();
+        return networkManager.deleteBlocking(query).execute().getCount();
     }
 }

@@ -15,25 +15,18 @@ import java.io.IOException;
  * Created by Prots on 2/8/16.
  */
 public abstract class AbstractReadRequest<T extends GenericJson> extends AbstractKinveyDataListRequest<T> {
-    private AbstractClient client;
-    private final String collectionName;
-    private final Class<T> clazz;
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
+    private NetworkManager<T> networkManager;
 
-    public AbstractReadRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                               ICache<T> cache, ReadPolicy readPolicy) {
-        this.client = client;
-        this.collectionName = collectionName;
-        this.clazz = clazz;
-
+    public AbstractReadRequest(ICache<T> cache, ReadPolicy readPolicy, NetworkManager<T> networkManager) {
         this.cache = cache;
         this.readPolicy = readPolicy;
+        this.networkManager = networkManager;
     }
 
     @Override
     public List<T> execute() throws IOException {
-        NetworkManager<T> appData = client.networkStore(collectionName, clazz);
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
@@ -60,7 +53,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
     }
 
     protected NetworkManager<T> getNetworkData(){
-        return client.networkStore(collectionName, clazz);
+        return networkManager;
     }
 
     @Override

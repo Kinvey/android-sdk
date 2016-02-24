@@ -4,6 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
@@ -17,9 +18,9 @@ public class ReadQueryRequest<T extends GenericJson> extends AbstractReadRequest
 
     private final Query query;
 
-    public ReadQueryRequest(AbstractClient client, String collectionName, Class<T> clazz, ICache<T> cache, ReadPolicy readPolicy,
+    public ReadQueryRequest(ICache<T> cache, NetworkManager<T> networkManager, ReadPolicy readPolicy,
                             Query query) {
-        super(client, collectionName, clazz, cache, readPolicy);
+        super(cache, readPolicy, networkManager);
         this.query = query;
     }
 

@@ -198,7 +198,8 @@ public class NetworkFileManager {
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
-    public UploadMetadataAndFile prepUploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
+    public UploadMetadataAndFile prepUploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content,
+                                                    UploaderProgressListener uploadProgressListener) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
         NetworkManager.SaveMode mode;
         if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)){
@@ -223,7 +224,8 @@ public class NetworkFileManager {
      * @throws IOException if initializing the request fails
      * @deprecated use upload methods which take an `InputStream` or a `NetworkFileManager`
      */
-    public UploadMetadataAndFile uploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content) throws IOException {
+    public UploadMetadataAndFile uploadBlocking(FileMetaData fileMetaData, AbstractInputStreamContent content,
+                                                UploaderProgressListener uploadProgressListener) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
         NetworkManager.SaveMode mode;
         if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)){
@@ -249,12 +251,13 @@ public class NetworkFileManager {
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
-    public UploadMetadataAndFile prepUploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
+    public UploadMetadataAndFile prepUploadBlocking(String fileName, AbstractInputStreamContent content,
+                                                    UploaderProgressListener uploadProgressListener) throws IOException {
         FileMetaData meta = new FileMetaData();
         if (fileName != null){
             meta.setFileName(fileName);
         }
-        return this.prepUploadBlocking(meta, content);
+        return this.prepUploadBlocking(meta, content, uploadProgressListener);
     }
     
     /**
@@ -266,12 +269,13 @@ public class NetworkFileManager {
      * @throws IOException if initializing the request fails
      * @deprecated use upload methods which take an `InputStream` or a `NetworkFileManager`
      */
-    public UploadMetadataAndFile uploadBlocking(String fileName, AbstractInputStreamContent content) throws IOException {
+    public UploadMetadataAndFile uploadBlocking(String fileName, AbstractInputStreamContent content,
+                                                UploaderProgressListener uploadProgressListener) throws IOException {
         FileMetaData meta = new FileMetaData();
         if (fileName != null){
             meta.setFileName(fileName);
         }
-        return this.prepUploadBlocking(meta, content);
+        return this.prepUploadBlocking(meta, content, uploadProgressListener);
     }
 
     /**

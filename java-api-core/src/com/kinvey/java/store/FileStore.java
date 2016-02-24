@@ -12,6 +12,7 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -50,17 +51,19 @@ public class FileStore {
         this.storeType = storeType;
     }
 
-    public FileMetaData upload(File file) throws IOException {
+    public FileMetaData upload(File file, UploaderProgressListener listener) throws IOException {
         FileMetaData fm = new FileMetaData();
         fm.setFileName(file.getName());
-        return upload(file, fm);
+        return upload(file, fm, listener);
     };
 
 
 
 
-    public FileMetaData upload(File file, FileMetaData metadata) throws IOException {
-        NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(metadata, new FileContent(null, file));
+    public FileMetaData upload(File file, FileMetaData metadata,
+                               UploaderProgressListener listener) throws IOException {
+        NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(metadata,
+                new FileContent(null, file), listener);
 
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
@@ -92,18 +95,18 @@ public class FileStore {
         return metadata;
     };
 
-    public FileMetaData upload(InputStream is, FileMetaData metadata) throws IOException {
+    public FileMetaData upload(InputStream is, FileMetaData metadata, UploaderProgressListener listener) throws IOException {
         NetworkFileManager.UploadMetadataAndFile upload =
-                networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is));
+                networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is), listener);
 
         return upload.execute();
     };
 
-    public FileMetaData upload(String filename, InputStream is) throws IOException {
+    public FileMetaData upload(String filename, InputStream is, UploaderProgressListener listener) throws IOException {
         FileMetaData fm = new FileMetaData();
         fm.setFileName(filename);
         NetworkFileManager.UploadMetadataAndFile upload =
-                networkFileManager.prepUploadBlocking(fm, new InputStreamContent(null, is));
+                networkFileManager.prepUploadBlocking(fm, new InputStreamContent(null, is), listener);
         return upload.execute();
     };
 
@@ -225,12 +228,27 @@ public class FileStore {
 
     };
 
+    public void download(Query q, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
+        FileMetaData[] resultMetadata = getFileMetadata(q);
+
+        if (resultMetadata == null || resultMetadata.length == 0){
+            progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
+        } else {
+            getFile(resultMetadata[0], dst, progressListener);
+        }
+
+    };
+
     public void download(String filename, String dst, DownloaderProgressListener progressListener) throws IOException {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.equals("_filename", filename);
-
         download(q, dst, progressListener);
+    };
 
+    public void download(String filename, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals("_filename", filename);
+        download(q, dst, progressListener);
     };
 
     private File cacheStorage(){

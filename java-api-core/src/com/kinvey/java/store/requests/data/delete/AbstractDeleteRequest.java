@@ -13,26 +13,20 @@ import java.io.IOException;
  * Created by Prots on 2/8/16.
  */
 public abstract class AbstractDeleteRequest<T extends GenericJson> implements IRequest<Integer> {
-    private AbstractClient client;
-    private final String collectionName;
-    private final Class<T> clazz;
     protected final ICache<T> cache;
     private final WritePolicy writePolicy;
+    protected NetworkManager<T> networkManager;
 
-    public AbstractDeleteRequest(AbstractClient client, String collectionName, Class<T> clazz,
-                                 ICache<T> cache, WritePolicy writePolicy) {
-        this.client = client;
-        this.collectionName = collectionName;
-        this.clazz = clazz;
+    public AbstractDeleteRequest(ICache<T> cache, WritePolicy writePolicy, NetworkManager<T> networkManager) {
 
         this.cache = cache;
         this.writePolicy = writePolicy;
+        this.networkManager = networkManager;
     }
 
     @Override
     public Integer execute() {
         Integer ret = 0;
-        NetworkManager<T> networkManager = client.networkStore(collectionName, clazz);
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = deleteCached();
@@ -61,10 +55,6 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
                 break;
         }
         return ret;
-    }
-
-    protected NetworkManager<T> getNetworkData(){
-        return client.networkStore(collectionName, clazz);
     }
 
     @Override

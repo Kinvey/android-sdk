@@ -28,6 +28,7 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.store.FileStore;
 
 /**
  * Implementation of a Client Request, which can upload linked resources.
@@ -95,24 +96,47 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                         }
 
 
-                        getAbstractKinveyClient().file().setUploadProgressListener(new MetaUploadListener() {
+                        MetaUploadListener metaUploadListener = new MetaUploadListener() {
+                            @Override
+                            public void metaDataUploaded(FileMetaData metaData) {
+
+                            }
+
+                            @Override
+                            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+                            }
+
+                            @Override
+                            public void onSuccess(FileMetaData result) {
+
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+
+                            }
+                        };
+
+                        FileStore fileStore = getAbstractKinveyClient().getFileStore();
+
+                        LinkedFile lf = ((LinkedGenericJson) getJsonContent()).getFile(key);
+                        FileMetaData meta = new FileMetaData(lf.getId());
+                        meta.setFileName(lf.getFileName());
+
+                        if (lf.hasExtras()){
+                            for (String k : lf.getExtras().keySet()){
+                                meta.put(k, lf.getExtra(k));
+                            }
+                        }
+                        mimeTypeFinder.getMimeType(meta, in);
+
+                        FileMetaData file = fileStore.upload(mediaContent.getInputStream(), meta, new UploaderProgressListener() {
                             @Override
                             public void progressChanged(MediaHttpUploader uploader) throws IOException {
                                 if (upload != null) {
                                     upload.progressChanged(uploader);
                                 }
-                            }
-
-                            @Override
-                            public void metaDataUploaded(FileMetaData metaData) {
-
-                                HashMap<String, String> resourceMap = new HashMap<String, String>();
-                                resourceMap.put("_id", metaData.getId());
-                                resourceMap.put("_type", "KinveyFile");
-
-
-                                ((GenericJson) getJsonContent()).put(key, resourceMap);
-
                             }
 
                             @Override
@@ -129,20 +153,6 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                                 }
                             }
                         });
-
-
-                        LinkedFile lf = ((LinkedGenericJson) getJsonContent()).getFile(key);
-                        FileMetaData meta = new FileMetaData(lf.getId());
-                        meta.setFileName(lf.getFileName());
-
-                        if (lf.hasExtras()){
-                            for (String k : lf.getExtras().keySet()){
-                                meta.put(k, lf.getExtra(k));
-                            }
-                        }
-                        mimeTypeFinder.getMimeType(meta, in);
-
-                        FileMetaData file = getAbstractKinveyClient().file().prepUploadBlocking(meta, mediaContent).execute();
 
                     }
                 }

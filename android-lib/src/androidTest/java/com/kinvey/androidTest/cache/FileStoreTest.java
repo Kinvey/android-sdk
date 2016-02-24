@@ -5,8 +5,12 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
+import com.kinvey.android.store.AsyncFileStore;
 import com.kinvey.java.core.DownloaderProgressListener;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.FileStore;
@@ -19,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -56,7 +61,22 @@ public class FileStoreTest {
         FileOutputStream fos = new FileOutputStream(test);
         fos.write("this is a sample file to test".getBytes());
 
-        fileStore.upload(test);
+        fileStore.upload(test, new UploaderProgressListener() {
+            @Override
+            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+            }
+
+            @Override
+            public void onSuccess(FileMetaData result) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+            }
+        });
 
     }
 
@@ -76,7 +96,22 @@ public class FileStoreTest {
             FileOutputStream fos = new FileOutputStream(test);
             fos.write("this is a sample file to test".getBytes());
 
-            FileMetaData metadata = fileStore.upload(test);
+            FileMetaData metadata = fileStore.upload(test, new UploaderProgressListener() {
+                @Override
+                public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+                }
+
+                @Override
+                public void onSuccess(FileMetaData result) {
+
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+
+                }
+            });
 
             File destination = new File(client.getContext().getFilesDir(), "testDownload"+storeType.toString()+".xml");
             if (!destination.exists()){
@@ -110,6 +145,58 @@ public class FileStoreTest {
             assertTrue("Should pass", success);
         }
 
+
+
+    }
+
+    @Test
+    public void asyncCallsShouldNotFail() throws IOException {
+        AsyncFileStore fileStore = client.getFileStore();
+
+        File test = new File(client.getContext().getFilesDir(), "test.xml");
+        if (!test.exists()){
+            test.createNewFile();
+        }
+
+        FileOutputStream fos = new FileOutputStream(test);
+        fos.write("this is a sample file to test".getBytes());
+
+        UploaderProgressListener progress = new UploaderProgressListener() {
+            @Override
+            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+            }
+
+            @Override
+            public void onSuccess(FileMetaData result) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+            }
+        };
+
+        KinveyClientCallback<FileMetaData> metaCallback = new KinveyClientCallback<FileMetaData>() {
+            @Override
+            public void onSuccess(FileMetaData result) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+            }
+        };
+
+        FileMetaData meta = new FileMetaData();
+        meta.setFileName("test.xml");
+
+        fileStore.upload(test, metaCallback, progress);
+        fileStore.upload(test, meta, metaCallback, progress);
+        fileStore.upload(new FileInputStream(test), meta, metaCallback, progress);
+        fileStore.upload("test.xml", new FileInputStream(test), metaCallback, progress);
 
 
     }

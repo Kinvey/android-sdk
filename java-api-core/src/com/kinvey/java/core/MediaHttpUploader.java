@@ -350,6 +350,7 @@ public class MediaHttpUploader {
 				}
 			}
 		}
+
 		response = currentRequest.execute();
 		if (response.isSuccessStatusCode()) {
 			bytesUploaded = getMediaContentLength();
