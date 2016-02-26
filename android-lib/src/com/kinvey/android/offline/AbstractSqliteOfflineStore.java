@@ -31,6 +31,7 @@ import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
 import com.kinvey.java.offline.OfflineStore;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * This class is an implementation of an {@link OfflineStore}
@@ -221,7 +222,7 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
 
         
         if (((GenericData) ret).get("_id") == null){
-        	throw new KinveyException("Cannot save an offline entity without an _id");
+        	throw new KinveyException(KinveyClientErrorCode.DatabaseError, "Cannot save an offline entity without an _id");
         }
         
         handler.getTable(appData.getCollectionName()).enqueueRequest(handler, "PUT",new OfflineMetaData(((GenericData)ret).get("_id").toString(), request), request);

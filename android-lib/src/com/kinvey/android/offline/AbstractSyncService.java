@@ -50,7 +50,7 @@ import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
  * @author edwardf
  */
 public abstract class AbstractSyncService extends IntentService{
-    protected final String TAG = "Kinvey - SyncService";
+    protected static final String TAG = "Kinvey - SyncService";
     public static final String ACTION_OFFLINE_SYNC = "com.kinvey.android.ACTION_OFFLINE_SYNC";
     private static final String shared_pref = "Kinvey_Offline_Sync";
     private static final String pref_last_failure_at = "last_failure";
@@ -186,14 +186,14 @@ public abstract class AbstractSyncService extends IntentService{
         	client.appData(collectionName, GenericJson.class).setCustomRequestProperties(new Gson().fromJson(cur.getEntityID().customheader, GenericJson.class));           
         	final GenericJson entity = dbHelper.getEntity(client, client.appData(collectionName, GenericJson.class), cur.getEntityID());
         	//grab entity's id
-        	final String curEntityID = entity.get("_id").toString(); 
-        	//if it's a temp id, remove it before saving
-        	if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
-        		entity.remove("_id");
-        	}
+
         	
             if (entity != null){
-
+                final String curEntityID = entity.get("_id").toString();
+                //if it's a temp id, remove it before saving
+                if (curEntityID.startsWith(AbstractKinveyOfflineClientRequest.TEMPID)){
+                    entity.remove("_id");
+                }
                 client.appData(collectionName, GenericJson.class).save(entity, new KinveyClientCallback<GenericJson>() {
                     @Override
                     public void onSuccess(GenericJson result) {

@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'findbugs'
 description = 'JavaLib'
 
 sourceSets {
@@ -27,11 +28,6 @@ dependencies {
         exclude(module: 'xpp3')
         exclude(module: 'android')
     }
-    compile('com.google.api-client:google-api-client-android:1.19.0') {
-        exclude(module: 'google-play-services')
-        exclude(module: 'xpp3')
-    }
-    compile 'com.google.http-client:google-http-client-android:1.19.0'
     compile('com.google.http-client:google-http-client-gson:1.19.0') {
         exclude(module: 'xpp3')
     }
@@ -42,12 +38,7 @@ dependencies {
     compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
     compile project(':java-api-core')
     testCompile 'junit:junit:4.10'
-    testCompile 'org.robolectric:robolectric:2.1.1'
-    compile('com.google.android:android:4.0.1.2') {
-        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
-        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
-        Please review and delete this closure when resolved. */
-    }
+
 }
 
 task docgen(type: Javadoc) {
@@ -70,6 +61,31 @@ task docgen(type: Javadoc) {
     options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
     options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
     options.addStringOption("d", "../../../devcenter/content/reference/java/api")
+}
+
+findbugs {
+    sourceSets = []
+}
+
+task findbugs(type: FindBugs, dependsOn: assemble) {
+    ignoreFailures = true
+
+    source = fileTree('src')
+    classpath = files()
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = file("$rootProject.rootDir/tools/findbugs/exclude.xml")
+
+    classes = files("$project.buildDir/classes/main")
+
+    reports {
+        xml.enabled = true
+        xml.withMessages = true
+        html.enabled = !xml.isEnabled()
+        xml.destination = "$rootProject.rootDir/reports/findbugsReports/${project.name}/main.xml"
+        html.destination = "$rootProject.rootDir/reports/findbugsReports/${project.name}/main.html"
+    }
 }
 
 cleanTest.mustRunAfter clean

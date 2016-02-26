@@ -19,6 +19,7 @@ package com.kinvey.android;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,10 +89,10 @@ public class Client extends AbstractClient {
 
     private Context context = null;
 
-    private ConcurrentHashMap<String, AsyncAppData> appDataInstanceCache;
-    private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
-    private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
-    private AsyncCustomEndpoints customEndpoints;
+    private HashMap<String, AsyncAppData> appDataInstanceCache;
+    private HashMap<String, AsyncLinkedData> linkedDataInstanceCache;
+    //private HashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
+    //private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncFile file;
@@ -172,7 +173,7 @@ public class Client extends AbstractClient {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {
-                appDataInstanceCache = new ConcurrentHashMap<String, AsyncAppData>();
+                appDataInstanceCache = new HashMap<String, AsyncAppData>();
             }
             if (!appDataInstanceCache.containsKey(collectionName)) {            	
             	Logger.INFO("adding new instance of AppData, new collection name");
@@ -215,7 +216,7 @@ public class Client extends AbstractClient {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (linkedDataInstanceCache == null) {
-                linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedData>();
+                linkedDataInstanceCache = new HashMap<String, AsyncLinkedData>();
             }
             if (!linkedDataInstanceCache.containsKey(collectionName)) {
                 linkedDataInstanceCache.put(collectionName, new AsyncLinkedData(collectionName, myClass, this));
@@ -546,6 +547,7 @@ public class Client extends AbstractClient {
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
         private String MICVersion;
         private String MICBaseURL;
+        private boolean useDeltaCache = false;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -627,6 +629,10 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.PORT) != null){
                 this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.DELTA_SET_CACHE) != null){
+                this.useDeltaCache = Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE));
             }
 
             if (super.getString(Option.GCM_PUSH_ENABLED) != null){
@@ -716,6 +722,7 @@ public class Client extends AbstractClient {
             client.setContext(context);
             client.setUserClass(userClass);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
+            client.setUseDeltaCache(useDeltaCache);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

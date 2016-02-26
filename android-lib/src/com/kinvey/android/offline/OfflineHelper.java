@@ -216,7 +216,6 @@ public class OfflineHelper extends SQLiteOpenHelper implements DatabaseHandler {
      * This method creates a table for managing the names of all collections, if it doesn't already exist.
      */
     private void createCollectionTable(){
-        SQLiteDatabase db = getWritableDatabase();
 
         String createCommand = "CREATE TABLE IF NOT EXISTS "
                 + COLLECTION_TABLE

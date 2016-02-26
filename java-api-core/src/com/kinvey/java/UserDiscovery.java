@@ -38,7 +38,6 @@ import com.kinvey.java.model.UserLookup;
 public class UserDiscovery {
 
     private AbstractClient client;
-    private KinveyClientRequestInitializer requestInitializer;
 
     /**
      * Factory method to return a new UserLookup object
@@ -60,7 +59,6 @@ public class UserDiscovery {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(initializer, "initializer must not be null.");
         this.client = client;
-        this.requestInitializer = initializer;
     }
 
     //some convenience wrappers

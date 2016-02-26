@@ -41,6 +41,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -75,6 +76,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+    private boolean useDeltaCache;
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -157,6 +159,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             if (currentUser == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+                if (appKey == null || appSecret == null){
+                    throw new KinveyException(KinveyClientErrorCode.MissingAppCredentials);
+                }
                 this.currentUser = new User(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
@@ -266,6 +271,22 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public void disableDebugLogging() {
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
+    }
+
+    /**
+     * Check if delta cache is enabled
+     * @return
+     */
+    public boolean isUseDeltaCache() {
+        return useDeltaCache;
+    }
+
+    /**
+     * enable or disable delta cahe functionality
+     * @param useDeltaCache
+     */
+    public void setUseDeltaCache(boolean useDeltaCache) {
+        this.useDeltaCache = useDeltaCache;
     }
 
     /**
@@ -449,7 +470,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**MIC Base URL**/
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
-            MIC_VERSION("mic.version");
+            MIC_VERSION("mic.version"),
+            /**DeltaSet cache enabled **/
+            DELTA_SET_CACHE("app.deltaset"),;
 
 
             private final String value;

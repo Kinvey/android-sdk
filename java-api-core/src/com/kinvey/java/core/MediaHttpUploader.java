@@ -52,6 +52,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * Media HTTP Uploader, with support for both direct and resumable media uploads. Documentation is
@@ -292,7 +293,7 @@ public class MediaHttpUploader {
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
             // If the initiation request is not successful return it immediately.
-            throw  new KinveyException("Uploading Metadata Failed");
+            throw  new KinveyException(KinveyClientErrorCode.RequestError, "Uploading Metadata Failed");
         }
         GenericUrl uploadUrl;
         Map<String, String> headers = null;
@@ -310,9 +311,8 @@ public class MediaHttpUploader {
             if(meta.getUploadUrl() != null){
                 uploadUrl = new GenericUrl(meta.getUploadUrl());
             }else{
-                throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for File!","The library cannot upload a file without this url");
+                throw new KinveyException(KinveyClientErrorCode.UploadUrlMissing);
             }
-            uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
             initialResponse.disconnect();
         }
@@ -336,10 +336,10 @@ public class MediaHttpUploader {
         currentRequest.setRetryOnExecuteIOException(true);
         // if there are custom headers, add them
 		if (headers != null) {
-			for (String header : headers.keySet()) {
-
-				String curHeader = headers.get(header);
-				// then it's a list
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String header = entry.getKey();
+				String curHeader = entry.getValue();
+                // then it's a list
 				if (curHeader.contains(", ")) {
 					String[] listheaders = curHeader.split(", ");
 					currentRequest.getHeaders().put(header,
@@ -356,7 +356,7 @@ public class MediaHttpUploader {
 			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
 			
 		} else {
-            throw  new KinveyException("Uploading File Failed");
+            throw  new KinveyException(KinveyClientErrorCode.RequestError, "Uploading File Failed");
         }
 		return meta;
 		

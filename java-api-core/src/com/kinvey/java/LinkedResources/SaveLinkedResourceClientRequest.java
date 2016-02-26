@@ -92,6 +92,10 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             mediaContent = new InputStreamContent(mimetype, in);
                             mediaContent.setCloseInputStream(false);
                             mediaContent.setRetrySupported(false);
+                        } else {
+                            //TODO: Throw error on file missing?
+                            //Silence problem for now
+                            continue;
                         }
 
 
@@ -141,7 +145,6 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             }
                         }
                         mimeTypeFinder.getMimeType(meta, in);
-
                         FileMetaData file = getAbstractKinveyClient().file().prepUploadBlocking(meta, mediaContent).execute();
 
                     }
