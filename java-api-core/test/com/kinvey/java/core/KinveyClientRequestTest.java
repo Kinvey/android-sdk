@@ -46,20 +46,4 @@ public class KinveyClientRequestTest extends TestCase {
         }
     }
 
-    @Test
-    public void uploaderShouldBeCalled() {
-        MockKinveyClientRequest<Void> mockClientRequest = new MockKinveyClientRequest<Void>("GET", "https://www.google.com", null, Void.class);
-
-        try {
-            mockClientRequest.initializeMediaHttpUploader(mock(AbstractInputStreamContent.class));
-            mockClientRequest.executeUnparsed();
-
-            MediaHttpUploader mockMediaUploader = mockClientRequest.getMockMediaUploader();
-            verify(mockMediaUploader, times(1)).upload(any(AbstractKinveyClientRequest.class));
-            verify(mockMediaUploader, times(1)).setDirectUploadEnabled(true);
-        } catch (IOException e) {
-            fail("KinveyClientRequest should not throw an exception on execute");
-        }
-    }
-
 }

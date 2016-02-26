@@ -2,7 +2,7 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '2.10.4'
+  version = '2.10.5'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
@@ -13,6 +13,7 @@ subprojects {
 
   repositories {
     mavenLocal()
+    jcenter()
 
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     maven { url "http://repo1.maven.org/maven2" }
@@ -23,10 +24,14 @@ subprojects {
 
 
 task makeAndroidJar(type: Copy)  {
-    from 'android-lib/build/intermediates/bundles/release'
-    into 'android-lib/build/libs'
-    include('classes.jar')
-    rename ('classes.jar', 'android-lib-' + version +'.jar')
+  from 'android-lib/build/intermediates/bundles/release'
+  from 'android-lib/build/outputs/aar'
+  into 'android-lib/build/libs'
+  include('classes.jar')
+  include('android-lib-release.aar')
+  rename('classes.jar', 'kinvey-android-' + version + '.jar')
+  rename('android-lib-release.aar', 'kinvey-android-' + version + '.aar')
+
 }
 
 task copyAndroid(type: Copy)  {
@@ -35,6 +40,8 @@ task copyAndroid(type: Copy)  {
   into 'release/build/android'
 }
 
+
+
 task copyJava(type: Copy)  {
   from 'java-lib/build/libs'
   from 'java-api-core/build/libs'
@@ -42,20 +49,46 @@ task copyJava(type: Copy)  {
 }
 
 task zipAndroid(type: Zip) {
-    from 'release/build/android'
-    from 'release/dependencies'
-    baseName = 'kinvey-android'
-    destinationDir = file('release/zipped')
+  from('release/build/android'){
+    include "**/*.jar"
+    into "libJar"
+
+  }
+  from('release/build/android'){
+    include "*.aar"
+    include "*core*.jar"
+    into "/lib"
+
+  }
+
+  from('release/dependencies'){
+    include "*.jar"
+    into "/libJar"
+  }
+
+  from('release/dependencies'){
+    include "*.jar"
+    into "/lib"
+  }
+
+  from 'release/readme/android'
+  baseName = 'kinvey-android'
+  destinationDir = file('release/zipped')
 }
 
 task zipJava(type: Zip)  {
-    from 'release/build/java'
-    from 'release/dependencies'
-    baseName = 'kinvey-java'
-    destinationDir = file('release/zipped')
+  from('release/build/nativejava'){
+    into '/libs'
+  }
+  from('release/dependencies'){
+    include "*.jar"
+    into '/libs'
+  }
+  from 'release/readme/nativejava'
+  baseName = 'kinvey-java'
+  destinationDir = file('release/zipped')
 
 }
-
 task prepCore{
   prepCore.dependsOn(":java-api-core:clean")
   prepCore.dependsOn(":java-api-core:cleanTest")

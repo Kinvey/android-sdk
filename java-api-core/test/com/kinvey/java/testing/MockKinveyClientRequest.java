@@ -31,17 +31,5 @@ import static org.mockito.Mockito.mock;
 public class MockKinveyClientRequest<T> extends AbstractKinveyClientRequest<T> {
     public MockKinveyClientRequest(String requestMethod, String uriTemplate, HttpContent httpContent, Class<T> responseClass) {
         super(new MockKinveyJsonClient.Builder().build(), requestMethod, uriTemplate, httpContent, responseClass);
-    }
-
-    private MediaHttpUploader mockUploader;
-
-    @Override
-    protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
-        mockUploader = mock(MediaHttpUploader.class);
-        return mockUploader;
-    }
-
-    public MediaHttpUploader getMockMediaUploader() {
-        return mockUploader;
-    }
+    }   
 }
