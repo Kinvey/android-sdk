@@ -135,8 +135,8 @@ public class Client extends AbstractClient {
                 requestPolicy);
         Logger.init(new AndroidLogger());
         _sharedInstance = this;
-        cacheManager = new RealmCacheManager(this, context);
         this.context = context;
+        cacheManager = new RealmCacheManager(this);
     }
 
     public static Client sharedInstance(){

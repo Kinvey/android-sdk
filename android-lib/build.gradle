@@ -111,7 +111,7 @@ dependencies {
   compile 'com.google.code.gson:gson:2.4'
   compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
   compile 'com.google.android.gms:play-services:8.4.0'
-  compile 'io.realm:realm-android:0.87.3'
+  compile 'io.realm:realm-android:0.87.5'
   compile 'com.google.android.gms:play-services-ads:8.4.0'
   compile 'com.google.android.gms:play-services-identity:8.4.0'
   compile 'com.google.android.gms:play-services-gcm:8.4.0'

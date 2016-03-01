@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
@@ -28,15 +29,21 @@ public class RealmCacheManager implements ICacheManager {
     private static final String TABLE_HASH_NAME = "__KinveyTables__";
     private final AbstractClient client;
     private final Context context;
+    private String prefix = "";
 
 
     private HashMap<String, RealmCache> mCacheMap = new HashMap<String, RealmCache>();
     private static final Object LOCK = new Object();
 
 
-    public RealmCacheManager(AbstractClient client, Context context){
+    public RealmCacheManager(Client client){
         this.client = client;
-        this.context = context;
+        this.context = client.getContext();
+    }
+
+    public RealmCacheManager(String prefix, Client client){
+        this.client = client;
+        this.context = client.getContext();
     }
 
 
@@ -54,10 +61,15 @@ public class RealmCacheManager implements ICacheManager {
                     mRealm.beginTransaction();
                     try {
                         //remove existing table if any
-                        if (mRealm.getSchema().contains(collection)) {
-                            //must be defined as soon as primary key stays even if we remove a table
-                            mRealm.getSchema().get(collection).removePrimaryKey();
-                            mRealm.getSchema().remove(collection);
+                        RealmSchema currentSceme = mRealm.getSchema();
+                        for (RealmObjectSchema schema : currentSceme.getAll()){
+                            if (schema.getClassName().equals(collection) || schema.getClassName().startsWith(collection + "_")){
+                                String className = schema.getClassName();
+                                if (mRealm.getSchema().get(className).hasPrimaryKey()) {
+                                    mRealm.getSchema().get(className).removePrimaryKey();
+                                }
+                                currentSceme.remove(className);
+                            }
                         }
                     } finally {
                         mRealm.commitTransaction();
@@ -67,7 +79,7 @@ public class RealmCacheManager implements ICacheManager {
                     mRealm.beginTransaction();
                     try{
                         //create table scheme
-                        cache.createRealmTable(mRealm.getSchema());
+                        cache.createRealmTable(mRealm);
                         //store table hash for futher usage
                         setTableHash(collection, cache.getHash(), mRealm);
                     } finally {
@@ -165,7 +177,8 @@ public class RealmCacheManager implements ICacheManager {
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
             RealmConfiguration rc = new RealmConfiguration.Builder(context)
-                    .name(getClientHash()).build();
+                    .name(prefix + File.pathSeparator + getClientHash())
+                    .build();
             DynamicRealm realm = DynamicRealm.getInstance(rc);
             init(realm);
             return realm;

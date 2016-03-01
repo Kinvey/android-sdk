@@ -131,4 +131,64 @@ public class CacheTest {
 
         assertEquals(0, cachedObjects.size());
     }
+
+    @Test
+    public void testSaveWithInner(){
+        ICache<SampleGsonWithInner> cache = cacheManager.getCache("testInner2", SampleGsonWithInner.class, Long.MAX_VALUE);
+
+        List<SampleGsonWithInner> items = new ArrayList<SampleGsonWithInner>();
+
+        List<String> ids = new ArrayList<String>();
+
+        for (int i = 0 ; i < 100; i++){
+            items.add(new SampleGsonWithInner(String.valueOf(i), new SampleGsonObject1(String.valueOf(i), "test"+i)));
+            ids.add(String.valueOf(i));
+        }
+
+        List<SampleGsonWithInner> saved = cache.save(items);
+
+        assertNotNull(saved);
+
+
+        List<SampleGsonWithInner> cachedObjects = cache.get(ids);
+
+        assertEquals(100, cachedObjects.size());
+
+        for (int i = 0 ; i < cachedObjects.size() ; i ++){
+            SampleGsonWithInner res = cachedObjects.get(i);
+            assertEquals(res.getDetails()._id, String.valueOf(i));
+        }
+
+    }
+
+    @Test
+    public void testSaveWithInnerList(){
+        ICache<SampleGsonWithInnerList> cache = cacheManager.getCache("testInnerWithList3", SampleGsonWithInnerList.class, Long.MAX_VALUE);
+
+        List<SampleGsonWithInnerList> items = new ArrayList<SampleGsonWithInnerList>();
+
+        List<String> ids = new ArrayList<String>();
+
+        for (int i = 0 ; i < 100; i++){
+            List<SampleGsonObject1> details = new ArrayList<SampleGsonObject1>();
+            details.add(new SampleGsonObject1(String.valueOf(i), "test"+i));
+            items.add(new SampleGsonWithInnerList(String.valueOf(i), details));
+            ids.add(String.valueOf(i));
+        }
+
+        List<SampleGsonWithInnerList> saved = cache.save(items);
+
+        assertNotNull(saved);
+
+
+        List<SampleGsonWithInnerList> cachedObjects = cache.get(ids);
+
+        assertEquals(100, cachedObjects.size());
+
+        for (int i = 0 ; i < cachedObjects.size() ; i ++){
+            SampleGsonWithInnerList res = cachedObjects.get(i);
+            assertEquals(res.getDetails().get(0)._id, String.valueOf(i));
+        }
+
+    }
 }

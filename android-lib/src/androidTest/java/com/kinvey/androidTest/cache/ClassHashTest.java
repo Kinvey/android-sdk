@@ -2,20 +2,40 @@ package com.kinvey.androidTest.cache;
 
 
 import android.content.Context;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.android.Client;
 import com.kinvey.android.cache.ClassHash;
+import com.kinvey.android.cache.RealmCache;
+import com.kinvey.android.cache.RealmCacheManager;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+
+import io.realm.DynamicRealm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmSchema;
+
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ClassHashTest {
+
+    Context context;
+
+    @Before
+    public void setup(){
+        context = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+    }
 
     @Test
     public void testHashNotFail(){
@@ -90,56 +110,26 @@ public class ClassHashTest {
     }
 
     @Test
-    public void testAllowedFieldsCorrect(){
-        Class<? extends GenericJson> c = new GenericJson() {
-            @Key("_id")
-            private String _id;
-        }.getClass();
-        assertTrue(
-                ClassHash.getAllowedFields(c).containsKey("_id")
-        );
-        assertEquals(ClassHash.getAllowedFields(c).get("_id"), String.class);
+    public void testInnerObjects(){
+        RealmConfiguration rc = new RealmConfiguration.Builder(context)
+                .name("test_inner")
+                .build();
+        DynamicRealm realm = DynamicRealm.getInstance(rc);
 
+        realm.beginTransaction();
+        try {
+            ClassHash.createScheme("sample", realm, SampleGsonWithInner.class);
+        } catch (Exception e){
+            realm.commitTransaction();
+        }
 
-        c = new GenericJson() {
-            private Object test;
-        }.getClass();
-        assertTrue(
-                ClassHash.getAllowedFields(c).containsKey("_id")
-        );
+        RealmSchema schema = realm.getSchema();
 
-        //id should be auto generated
-        c = new GenericJson() {
-            private Byte[] _id;
-        }.getClass();
-        assertTrue(
-                ClassHash.getAllowedFields(c).containsKey("_id")
-        );
-        assertEquals(ClassHash.getAllowedFields(c).get("_id"), String.class);
-
-        //id should be auto generated
-        c = new GenericJson() {
-            @Key("_id")
-            private String _id;
-            @Key("test")
-            private String different;
-        }.getClass();
-        assertTrue(
-                ClassHash.getAllowedFields(c).containsKey("test")
-        );
-        assertEquals(ClassHash.getAllowedFields(c).get("test"), String.class);
-
-        //id should be auto generated
-        c = new GenericJson() {
-            @Key("_id")
-            private String _id;
-            private String different;
-        }.getClass();
-        assertTrue(
-                !ClassHash.getAllowedFields(c).containsKey("test")
-        );
+        assertTrue(schema.contains("sample"));
+        assertTrue(schema.contains("sample_details"));
 
     }
+
 
 
 

@@ -34,7 +34,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         this.mCollection = collection;
         this.mCacheManager = cacheManager;
         this.mCollectionItemClass = collectionItemClass;
-        this.ttl = ttl;
+        this.ttl = ttl > 0 ? ttl : 0;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
             DynamicRealmObject obj = iterator.next();
-            ret.add(realmToObject(obj));
+            ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
         }
         mRealm.close();
         return ret;
@@ -102,7 +102,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         for (Iterator<DynamicRealmObject> objIter = objects.iterator(); objIter.hasNext(); ){
             DynamicRealmObject obj = objIter.next();
-            ret.add(realmToObject(obj));
+            ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
         }
         mRealm.close();
         return ret;
@@ -116,7 +116,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 .equalTo("_id", id)
                 .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                 .findFirst();
-        T ret = obj == null ? null : realmToObject(obj);
+        T ret = obj == null ? null : ClassHash.realmToObject(obj, mCollectionItemClass);
         mRealm.close();
         return ret;
     }
@@ -136,7 +136,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
             DynamicRealmObject obj = iterator.next();
-            ret.add(realmToObject(obj));
+            ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
         }
         mRealm.close();
         return ret;
@@ -276,84 +276,29 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ClassHash.getClassHash(getCollectionItemClass());
     }
 
-    public void createRealmTable(RealmSchema schema){
-
-        Map<String, Class> declaredFields = ClassHash.getAllowedFields(mCollectionItemClass);
-        RealmObjectSchema table = schema.create(this.mCollection);
-        for (Map.Entry<String, Class> entry : declaredFields.entrySet()){
-            if (entry.getKey().equals("_id")) {
-                table.addField(entry.getKey(), entry.getValue(), FieldAttribute.PRIMARY_KEY);
-            } else {
-                table.addField(entry.getKey(), entry.getValue());
-            }
-        }
-
+    public void createRealmTable(DynamicRealm realm){
+        ClassHash.createScheme(mCollection, realm, mCollectionItemClass);
     }
 
     private String insertOrUpdate(T item, DynamicRealm mRealm){
-        Map<String, Object> data = ClassHash.getData(mCollectionItemClass, item);
-        DynamicRealmObject obj = mRealm.where(mCollection)
-                .equalTo("_id", (String)data.get("_id"))
-                .findFirst();
+        item.put(ClassHash.TTL_FIELD, getItemExpireTime());
+        ClassHash.saveData(mCollection, mRealm, mCollectionItemClass, item);
 
-        if (obj == null){
-            obj = mRealm.createObject(mCollection, data.get("_id"));
-        } else {
-            data.remove("_id");
-        }
-
-        for (Map.Entry<String, Object> entry: data.entrySet()){
-            obj.set(entry.getKey(), entry.getValue());
-        }
-        long calculated = Calendar.getInstance().getTimeInMillis() + ttl;
-
-        obj.set(ClassHash.TTL_FIELD, calculated < 0 ? Long.MAX_VALUE : calculated);
-        return obj.get("_id").toString();
+        return item.get("_id").toString();
     }
 
-    private T realmToObject(DynamicRealmObject dynamic){
-        T ret = null;
-        try {
-            ret = mCollectionItemClass.newInstance();
-            Map<String, Class> fields = ClassHash.getAllowedFields(mCollectionItemClass);
-            for (Map.Entry<String, Class> entry : fields.entrySet()){
-                Object o = dynamic.get(entry.getKey());
 
-                if (Number.class.isAssignableFrom(entry.getValue())){
-                    Number n = (Number)dynamic.get(entry.getKey());
-                    if (Long.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.longValue());
-                    } else if (Byte.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.byteValue());
-                    } else if (Integer.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.intValue());
-                    } else if (Short.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.shortValue());
-                    } if (Float.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.floatValue());
-                    } if (Double.class.isAssignableFrom(entry.getValue())){
-                        ret.put(entry.getKey(), n.doubleValue());
-                    }
-
-                } else {
-                    ret.put(entry.getKey(), o);
-                }
-
-            }
-
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return ret;
-    }
 
     public long getTtl() {
         return ttl;
     }
 
     public void setTtl(long ttl) {
-        this.ttl = ttl;
+        this.ttl = ttl > 0 ? ttl : 0;
+    }
+
+    private long getItemExpireTime(){
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+        return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
 }
