@@ -34,7 +34,7 @@ import java.lang.reflect.Array;
  * @author edwardf
  * @since 2.0.2
  */
-public class CustomEndpoints<I, O> {
+public class CustomEndpoints<I extends GenericJson, O> {
 
     private AbstractClient client;
     private Class<O> currentResponseClass;

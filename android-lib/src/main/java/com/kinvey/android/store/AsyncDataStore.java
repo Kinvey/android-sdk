@@ -19,10 +19,15 @@ package com.kinvey.android.store;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
+import com.kinvey.android.AsyncPullRequest;
 import com.kinvey.android.Client;
+import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.android.sync.KinveyPushCallback;
+import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
@@ -30,6 +35,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -42,8 +48,8 @@ import java.util.List;
  * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link Client#dataStore convenience method.  NetworkManager
- * gets and saves entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
+ * This functionality can be accessed through the {@link Client#dataStore convenience method.  DataStore
+ * gets and saves and sync entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
  * </p>
@@ -173,7 +179,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
      *             new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity entity) { ... }
@@ -199,7 +205,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new String[]{"189472023", "10193583"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -229,7 +235,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
@@ -258,7 +264,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -275,30 +281,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     }
 
 
-    /**
-     * Asynchronous request to fetch a single entity by _id and resolve KinveyReferences.  The resolves array defines which json keys
-     * are KinveyReferences that should be resolved.
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     myAppData.get(myEntityID, new String[]{"ReferencedField"}, new KinveyListCallback<EventEntity> {
-     *         public void onFailure(Throwable t) { ... }
-     *         public void onSuccess(EventEntity[] entities) { ... }
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param id - the _id of the entity to retrieve
-     * @param resolves - an array of json keys maintaining KinveyReferences to be resolved
-     * @param callback - results of execution, either success or failure
-     */
-    /*public void getEntity(String id, String[] resolves, KinveyClientCallback<T> callback){
-        new AsyncRequest<T>(methodMap.get(KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER), callback, id, resolves).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }*/
+
 
 
     /**
@@ -311,7 +294,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -340,7 +323,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -367,7 +350,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     List<String> ids = ...
      *     myAppData.delete(ids, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
@@ -394,7 +377,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
@@ -413,158 +396,80 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
     }
 
+
+    public void push(KinveyPushCallback callback){
+        SyncManager syncManager = client.getSycManager();
+        new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void pull(Query query, KinveyPullCallback callback){
+        SyncManager syncManager = client.getSycManager();
+        new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+
     /**
-     * Asynchronous request to retrieve a group by COUNT on a collection or filtered collection.
-     *
+     * Asynchronous request to sync a collection of entites from a network collection by Query.
      * <p>
-     * Generates an asynchronous request to group a collection and provide a count of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
+     * Creates an asynchronous request to sync local entities and network entries matched query from
+     * a given collection by Query.  Uses KinveySyncCallback to return a
+     * {@link com.kinvey.android.sync.KinveySyncCallback}.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *     NetworkManager<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
-     *     ArrayList<String> fields = new ArrayList<String>();
-     *     fields.add("userName");
-     *     aggregate.count(fields, null, new KinveyClientCallback<EventEntity>() {
-     *         public void onSuccess(EventEntity event) { ... }
-     *         public void onFailure(Throwable T) {...}
+     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     myAppData.sync(myQuery, new KinveySyncCallback {
+     *         void onSuccess(){...};
+     *         void onPullStarted(){...};
+     *         void onPushStarted(){...};
+     *         void onPullSuccess(){...};
+     *         void onPushSuccess(){...};
+     *         void onFailure(Throwable t){...};
+     *
      *     });
      * }
      * </pre>
      * </p>
      *
-     * @param fields ArrayList of fields to aggregate on
-     * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
-     * @param callback KinveyClientCallback
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyDeleteCallback
      */
-    /*public void count(ArrayList<String> fields, Query query, KinveyClientCallback callback) {
-        new AsyncRequest(methodMap.get(KEY_COUNT), callback, fields, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void sync(final Query query, final KinveySyncCallback callback){
+        callback.onPushStarted();
+        push(new KinveyPushCallback() {
+            @Override
+            public void onSuccess(Integer result) {
+                callback.onPushSuccess();
+                callback.onPullStarted();
+                AsyncDataStore.this.pull(query, new KinveyPullCallback() {
+                    @Override
+                    public void onSuccess(Integer result) {
+                        callback.onPullSuccess();
+                        callback.onSuccess();
+                    }
 
-    }*/
+                    @Override
+                    public void onFailure(Throwable error) {
+                        callback.onFailure(error);
+                    }
+                });
+            }
 
-    /**
-     * Asynchronous request to retrieveBlocking a group by SUM on a collection or filtered collection
-     * <p>
-     * Generates an asynchronous request to group a collection and provide a sumBlocking of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
-     * </p>
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     NetworkManager<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *     ArrayList<String> fields = new ArrayList<String>();
-     *     fields.add("userName");
-     *     aggregate.sumBlocking(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *         public void onSuccess(EventEntity event) { ... }
-     *         public void onFailure(Throwable T) {...}
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param fields ArrayList of fields to aggregate on
-     * @param sumField Field to sumBlocking
-     * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
-     * @param callback KinveyClientCallback
-     */
-    /*public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback callback) {
-        new  AsyncRequest(methodMap.get(KEY_SUM), callback, fields, sumField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }*/
+            @Override
+            public void onFailure(Throwable error) {
+                callback.onFailure(error);
+            }
 
-    /**
-     * Asynchronous request to retrieve a group by MAX on a collection or filtered collection
-     *
-     * <p>
-     * Generates an asynchronous request to group a collection and provide the max value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
-     * </p>
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     NetworkManager<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *     ArrayList<String> fields = new ArrayList<String>();
-     *     fields.add("userName");
-     *     aggregate.max(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *         public void onSuccess(EventEntity event) { ... }
-     *         public void onFailure(Throwable T) {...}
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param fields ArrayList of fields to aggregate on
-     * @param maxField Field to get the max value from
-     * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
-     * @param callback KinveyClientCallback
-     */
-    /*public void max(ArrayList<String> fields, String maxField, Query query, KinveyClientCallback callback)  {
-        new AsyncRequest(methodMap.get(KEY_MAX), callback, fields, maxField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }*/
+            @Override
+            public void onProgress(long current, long all) {
 
-    /**
-     * Asynchronous request to retrieve a group by MIN on a collection or filtered collection
-     * <p>
-     * Generates an asynchronous request to group a collection and provide the min value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
-     * </p>
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     NetworkManager<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class");
-     *     ArrayList<String> fields = new ArrayList<String>();
-     *     fields.add("userName");
-     *     aggregate.min(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *         public void onSuccess(EventEntity event) { ... }
-     *         public void onFailure(Throwable T) {...}
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param fields ArrayList of fields to aggregate on
-     * @param minField Field to get the min value from
-     * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
-     * @param callback KinveyClientCallback
-     */
-    /*public void min(ArrayList<String> fields, String minField, Query query, KinveyClientCallback callback) {
-        new AsyncRequest(methodMap.get(KEY_MIN), callback, fields, minField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }*/
-
-    /**
-     * Asynchronous request to retrieve a group by AVERAGE on a collection or filtered collection
-     * <p>
-     * Generates an asynchronous request to group a collection and provide the average value of records based on a field or
-     * groups of fields.  The aggregate will reduce an entire collection, or a collection filtered by a {@link Query}
-     * </p>
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     NetworkManager<GenericJson> aggregate = kinveyClient.appData("events", EventEntity.class);
-     *     ArrayList<String> fields = new ArrayList<String>();
-     *     fields.add("userName");
-     *     aggregate.average(fields, "orderTotal", null, new KinveyClientCallback<EventEntity>() {
-     *         public void onSuccess(EventEntity event) { ... }
-     *         public void onFailure(Throwable T) {...}
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param fields ArrayList of fields to aggregate on
-     * @param averageField Field to get the maxBlocking value from
-     * @param query Optional query object for filtering results to aggregate on.  Set to null for entire collection.
-     * @param callback KinveyClientCallback
-     */
-    /*public void average(ArrayList<String> fields, String averageField, Query query, KinveyClientCallback callback) {
-        new AsyncRequest(methodMap.get(KEY_AVERAGE), callback, fields, averageField, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }*/
-
+            }
+        });
+    }
 
     private class SaveRequest extends AsyncClientRequest<T> {
         T entity;
@@ -579,6 +484,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             return (AsyncDataStore.super.save(entity));
         }
     }
+
 
 
 

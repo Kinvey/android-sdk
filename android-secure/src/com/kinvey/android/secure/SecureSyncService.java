@@ -13,9 +13,8 @@
  */
 package com.kinvey.android.secure;
 
-import android.content.Intent;
-import com.kinvey.android.offline.AbstractSyncService;
-import com.kinvey.android.offline.DatabaseHandler;
+import com.kinvey.android.sync.AbstractSyncService;
+import com.kinvey.android.sync.DatabaseHandler;
 
 /**
  * @author edwardf

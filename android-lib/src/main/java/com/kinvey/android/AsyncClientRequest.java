@@ -37,7 +37,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> implements AsyncExecutor<T> {
+public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> implements AsyncExecutor<T> {
 
     public enum ExecutorType {
         KINVEYSERIAL,
@@ -101,7 +101,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, Void, T> i
     protected abstract T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
 
 
-    public AsyncTask<Object, Void, T> execute(ExecutorType type, Object... params) {
+    public AsyncTask<Object, T, T> execute(ExecutorType type, Object... params) {
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             switch(type) {

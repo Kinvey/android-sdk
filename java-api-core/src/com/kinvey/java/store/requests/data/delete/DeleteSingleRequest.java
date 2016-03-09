@@ -8,6 +8,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.WritePolicy;
+import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,8 +20,8 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
     private String id;
 
     public DeleteSingleRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy,
-                               String id) {
-        super(cache, writePolicy, networkManager);
+                               String id, SyncManager syncManager) {
+        super(cache, writePolicy, networkManager, syncManager);
         this.id = id;
     }
 
@@ -30,7 +31,7 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
     }
 
     @Override
-    protected Integer deleteNetwork() throws IOException {
-        return networkManager.deleteBlocking(id).execute().getCount();
+    protected NetworkManager.Delete deleteNetwork() throws IOException {
+        return networkManager.deleteBlocking(id);
     }
 }

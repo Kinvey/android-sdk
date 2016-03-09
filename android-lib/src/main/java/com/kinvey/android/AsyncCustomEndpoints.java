@@ -17,6 +17,7 @@ package com.kinvey.android;
 
 import java.io.IOException;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
@@ -48,7 +49,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @author edwardf
  * @since 2.0.2
  */
-public class AsyncCustomEndpoints<I, O> extends CustomEndpoints<I, O> {
+public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoints<I, O> {
 
     /**
      * Constructor for this Asyncronous Custom Endpoint class

@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
@@ -53,7 +54,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected GetLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+    protected GetLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, "GET", uriTemplate, jsonContent, responseClass);
     }
 

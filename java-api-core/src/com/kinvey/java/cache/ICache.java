@@ -90,4 +90,9 @@ public interface ICache<T extends GenericJson> {
     void clear();
 
 
+    T getFirst();
+
+    T getFirst(Query q);
+
+    long count(Query q);
 }

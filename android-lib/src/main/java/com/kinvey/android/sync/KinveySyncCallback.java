@@ -13,14 +13,11 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.android.offline;
+package com.kinvey.android.sync;
 
 
 /**
- * This class provides callbacks from requests executed by the Offline API.
- * <p>
- * See the {@class com.kinvey.android.offline.OfflineResponseInfo} class for details about how offline requests are managed internally.
- * </p>
+ * This class provides callbacks from requests executed by the Sync API.
  *
  * @author edwardf
  */
@@ -28,13 +25,32 @@ public interface KinveySyncCallback {
 
     /**
      * Used to indicate successful execution of a request by the background service.
-     * @param responseInfo - Information about the request
      */
-    public void onSuccess(OfflineResponseInfo responseInfo);
+    void onSuccess();
+
+    /**
+     * Used to indicate start of pull request by background service
+     */
+    void onPullStarted();
+
+    /**
+     * Used to indicate start of push request by background service
+     */
+    void onPushStarted();
+
+    /**
+     * Used to indicate successfull execution of pull request by background service
+     */
+    void onPullSuccess();
+
+    /**
+     * Used to indicate successfull execution of push request by background service
+     */
+    void onPushSuccess();
+
 
     /**
      * Used to indicate the failed execution of a request by the background service.
-     * @param responseInfo - Information about the request and failure.
      */
-    public void onFailure(OfflineResponseInfo responseInfo);
+    void onFailure(Throwable t);
 }

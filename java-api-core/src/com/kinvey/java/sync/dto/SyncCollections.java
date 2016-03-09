@@ -1,8 +1,7 @@
-package com.kinvey.android.sync.dto;
+package com.kinvey.java.sync.dto;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.kinvey.android.sync.SyncManager;
 
 /**
  * Created by Prots on 2/25/16.

@@ -59,12 +59,12 @@ dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   compile project(':java-api-core')
   /*compile('com.google.http-client:google-http-client:1.19.0') {
-        exclude(module: 'xpp3')
-        exclude(module: 'httpclient')
-        exclude(module: 'junit')
-        exclude(module: 'android')
-        exclude(module: 'guava-jdk5')
-    }*/
+          exclude(module: 'xpp3')
+          exclude(module: 'httpclient')
+          exclude(module: 'junit')
+          exclude(module: 'android')
+          exclude(module: 'guava-jdk5')
+      }*/
   compile('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
@@ -87,11 +87,8 @@ dependencies {
     exclude(module: 'xpp3')
   }
   //compile 'com.google.guava:guava:18.0'
-
-
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
   classpaths files('build/classes/release')
-
   //testing
   androidTestCompile 'com.android.support:multidex-instrumentation:1.0.1'
   // Required -- JUnit 4 framework
@@ -100,14 +97,11 @@ dependencies {
   androidTestCompile 'org.mockito:mockito-core:1.10.19'
   androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
   androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
-
-
   androidTestCompile 'com.android.support:support-annotations:23.1.1'
   androidTestCompile 'com.android.support.test:runner:0.4.1'
   androidTestCompile 'com.android.support.test:rules:0.4.1'
   // Optional -- Hamcrest library
   androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-
   compile 'com.google.code.gson:gson:2.4'
   compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
   compile 'com.google.android.gms:play-services:8.4.0'

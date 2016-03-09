@@ -19,6 +19,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
@@ -74,7 +75,7 @@ import com.kinvey.java.Logger;
  * @since 2.0
  * @version $Id: $
  */
-public class AndroidNetworkManager<T> extends NetworkManager<T> {
+public class AndroidNetworkManager<T extends GenericJson> extends NetworkManager<T> {
 
 
     /**

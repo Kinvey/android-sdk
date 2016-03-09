@@ -48,6 +48,7 @@ import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.FileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.UserStore;
+import com.kinvey.java.sync.SyncManager;
 
 /**
  * The core Kinvey client used to access Kinvey's BaaS.
@@ -173,7 +174,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public abstract ClientUsers getClientUsers();
 
 
-    public abstract  <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
+    public abstract  <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
 
     /**
      * Pings the Kinvey backend service with a logged in user.
@@ -474,6 +475,12 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         return new FileStore(new NetworkFileManager(this),
                 getCacheManager(), 60*1000*1000L,
                 StoreType.CACHE, getFileCacheFolder());
+    }
+
+    protected abstract ICacheManager getSyncCacheManager();
+
+    public SyncManager getSycManager(){
+        return new SyncManager(getSyncCacheManager());
     }
 
 }

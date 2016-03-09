@@ -3,9 +3,12 @@ package com.kinvey.java.store.requests.data.delete;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 
@@ -16,42 +19,39 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
     protected final ICache<T> cache;
     private final WritePolicy writePolicy;
     protected NetworkManager<T> networkManager;
+    private SyncManager syncManager;
 
-    public AbstractDeleteRequest(ICache<T> cache, WritePolicy writePolicy, NetworkManager<T> networkManager) {
+    public AbstractDeleteRequest(ICache<T> cache, WritePolicy writePolicy, NetworkManager<T> networkManager,
+                                 SyncManager syncManager) {
 
         this.cache = cache;
         this.writePolicy = writePolicy;
         this.networkManager = networkManager;
+        this.syncManager = syncManager;
     }
 
     @Override
-    public Integer execute() {
+    public Integer execute() throws IOException {
         Integer ret = 0;
+        AbstractKinveyJsonClientRequest<KinveyDeleteResponse> request = null;
+        try {
+            request = deleteNetwork();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = deleteCached();
-                //TODO: write to sync
                 break;
             case FORCE_NETWORK:
-
-                try {
-                    ret = deleteNetwork();
-                } catch (IOException e) {
-                    //TODO: add to sync
-                    e.printStackTrace();
-                }
-
-                //write to network, fallback to sync
+                KinveyDeleteResponse response = request.execute();
+                ret = response.getCount();
                 break;
             case LOCAL_THEN_NETWORK:
-                //write to local and network, push to sync if network fails
+                //write to local, and push to sync network request
                 ret = deleteCached();
-                try {
-                    ret = deleteNetwork();
-                } catch (IOException e) {
-                    //TODO: add to sync
-                    e.printStackTrace();
-                }
+                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
                 break;
         }
         return ret;
@@ -63,6 +63,6 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
     }
 
     abstract protected Integer deleteCached();
-    abstract protected Integer deleteNetwork() throws IOException;
+    abstract protected AbstractKinveyJsonClientRequest<KinveyDeleteResponse> deleteNetwork() throws IOException;
 
 }

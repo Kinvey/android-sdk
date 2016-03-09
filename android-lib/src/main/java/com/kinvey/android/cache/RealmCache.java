@@ -268,6 +268,63 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         mRealm.close();
     }
 
+    @Override
+    public T getFirst() {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();;
+
+        T ret = null;
+
+        mRealm.beginTransaction();
+        try{
+            DynamicRealmObject obj = mRealm.where(mCollection).findFirst();
+            if (obj != null){
+                ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+            }
+        } finally {
+            mRealm.commitTransaction();
+        }
+
+        return ret;
+    }
+
+    @Override
+    public T getFirst(Query q) {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+
+        T ret = null;
+
+        mRealm.beginTransaction();
+        try{
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+            DynamicRealmObject obj = query.findFirst();
+            if (obj != null){
+                ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+            }
+        } finally {
+            mRealm.commitTransaction();
+        }
+
+        return ret;
+    }
+
+    @Override
+    public long count(Query q) {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+        long ret = 0;
+
+        mRealm.beginTransaction();
+        try{
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+            ret = query.count();
+
+        } finally {
+            mRealm.commitTransaction();
+        }
+        return ret;
+    }
+
     public Class<T> getCollectionItemClass() {
         return mCollectionItemClass;
     }

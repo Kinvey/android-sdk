@@ -93,6 +93,7 @@ public class Client extends AbstractClient {
 
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
+    private final RealmCacheManager syncCacheManager;
 
     private Context context = null;
 
@@ -137,6 +138,7 @@ public class Client extends AbstractClient {
         _sharedInstance = this;
         this.context = context;
         cacheManager = new RealmCacheManager(this);
+        syncCacheManager = new RealmCacheManager("sync_", this);
     }
 
     public static Client sharedInstance(){
@@ -286,7 +288,7 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    public <I, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+    public <I extends GenericJson, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
         synchronized (lock) {
             return new AsyncCustomEndpoints(myClass, this);
         }
@@ -937,6 +939,11 @@ public class Client extends AbstractClient {
         return new AsyncFileStore(new NetworkFileManager(this),
                     getCacheManager(), 60*60*1000L, StoreType.CACHE, getFileCacheFolder()
                 );
+    }
+
+    @Override
+    protected ICacheManager getSyncCacheManager() {
+        return syncCacheManager;
     }
 }
 

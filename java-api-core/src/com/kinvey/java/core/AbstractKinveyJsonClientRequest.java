@@ -18,6 +18,7 @@ package com.kinvey.java.core;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.UriTemplate;
 import com.google.api.client.http.json.JsonHttpContent;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.Json;
 import com.kinvey.java.AbstractClient;
 
@@ -30,7 +31,7 @@ import java.util.UUID;
 public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyClientRequest<T> {
 
   /** raw json data **/
-  private final Object jsonContent;
+  private final GenericJson jsonContent;
   private AsyncExecutor executor;
 
   public static final String TEMPID = "tempOfflineID_";
@@ -46,7 +47,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
    * @param responseClass response class to parse into
    */
   protected AbstractKinveyJsonClientRequest(AbstractClient abstractKinveyJsonClient,
-      String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+      String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
     super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent == null
         ? null : new JsonHttpContent(abstractKinveyJsonClient.getJsonFactory(), jsonContent),
         responseClass);
@@ -60,7 +61,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
   /**
    * @return the jsonContent
    */
-  public Object getJsonContent() {
+  public GenericJson getJsonContent() {
     return jsonContent;
   }
   

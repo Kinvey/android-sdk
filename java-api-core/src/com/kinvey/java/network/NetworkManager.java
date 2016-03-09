@@ -41,7 +41,7 @@ import com.kinvey.java.query.MongoQueryFilter;
  * @author edwardf
  * @since 2.0.2
  */
-public class NetworkManager<T> {
+public class NetworkManager<T extends GenericJson> {
 
     private String collectionName;
     private Class<T> myClass;
@@ -202,7 +202,7 @@ public class NetworkManager<T> {
     /**
      * Method to resolve a raw query string
      *
-     * @param query Query to get
+     * @param queryString Query to get
      * @return Get object
      * @throws java.io.IOException
      */

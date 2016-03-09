@@ -13,29 +13,14 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.android.offline;
 
-import java.io.Serializable;
-
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 /**
- * This class is an abstraction of a REST request.
- * <p/>
- * An instance of this class stores the relationship between an Http Verb and and an associated entity's ID.
- * <p/>
- * myRequest.getHttpVerb() represents the HTTP verb as a String ("GET", "PUT", "DELETE", "POST");
- * <p/>
- * myRequest.getEntityID() represents the id of the entity, which might be stored in the local store.
- *
- * @author edwardf
+ * Maintains classes specific to Offline functionality, including SQLlite 3 access, an Android Service, and various helpers
  */
-public class OfflineRequestInfo implements Serializable {
-
-    private static final long serialVersionUID = -444939394072970523L;
 
 
+package com.kinvey.android.sync;
 
-}
+
+

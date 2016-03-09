@@ -6,6 +6,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 
@@ -16,45 +17,36 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
     private final ICache<T> cache;
     private final T object;
     private final WritePolicy writePolicy;
+    private SyncManager syncManager;
     private NetworkManager<T> networkManager;
 
-    public SaveRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy, T object) {
+    public SaveRequest(ICache<T> cache, NetworkManager<T> networkManager,
+                       WritePolicy writePolicy, T object,
+                       SyncManager syncManager) {
         this.networkManager = networkManager;
-
         this.cache = cache;
         this.object = object;
         this.writePolicy = writePolicy;
+        this.syncManager = syncManager;
     }
 
     @Override
-    public T execute() {
+    public T execute() throws IOException {
         T ret = null;
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = cache.save(object);
-                //TODO: write to sync
                 break;
             case FORCE_NETWORK:
-
-
-                try {
-                    NetworkManager<T>.Save save = networkManager.saveBlocking(object);
-                    ret = save.execute();
-                } catch (IOException e){
-                    //TODO: put to sync on error
-                }
-
-                //write to network, fallback to sync
+                NetworkManager<T>.Save save = networkManager.saveBlocking(object);
+                ret = save.execute();
                 break;
             case LOCAL_THEN_NETWORK:
-                //write to local and network, push to sync if network fails
+                //write to local and push to sync
                 ret = cache.save(object);
-                try {
-                    NetworkManager<T>.Save save = networkManager.saveBlocking(object);
-                    save.execute();
-                } catch (IOException e){
-                    //TODO: put to sync on error
-                }
+                syncManager.enqueueRequest(networkManager.getCollectionName(),
+                        networkManager.saveBlocking(object));
+
                 break;
         }
         return ret;
@@ -62,6 +54,5 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
     @Override
     public void cancel() {
-        //TODO: put async and track cancel
     }
 }

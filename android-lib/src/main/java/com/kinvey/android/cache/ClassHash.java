@@ -70,6 +70,7 @@ public abstract class ClassHash {
             if (fieldInfo == null){
                 continue;
             }
+
             if (isArrayOrCollection(fieldInfo.getType())){
                 Class underlying = getUnderlying(f);
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){

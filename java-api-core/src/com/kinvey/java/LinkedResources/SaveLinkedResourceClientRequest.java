@@ -61,7 +61,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected SaveLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, Object jsonContent, Class<T> responseClass) {
+    protected SaveLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
     }
 

@@ -25,9 +25,9 @@ import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
-import com.kinvey.android.offline.DatabaseHandler;
-import com.kinvey.android.offline.OfflineRequestInfo.OfflineMetaData;
-import com.kinvey.android.offline.OfflineTable;
+import com.kinvey.android.sync.DatabaseHandler;
+import com.kinvey.android.sync.OfflineRequestInfo.OfflineMetaData;
+import com.kinvey.android.sync.OfflineTable;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
 

@@ -15,10 +15,10 @@ package com.kinvey.android.secure;
 
 import android.content.Context;
 import android.content.Intent;
-import com.kinvey.android.offline.AbstractSqliteOfflineStore;
-import com.kinvey.android.offline.AbstractSyncService;
-import com.kinvey.android.offline.DatabaseHandler;
-import com.kinvey.android.offline.KinveySyncService;
+import com.kinvey.android.sync.AbstractSqliteOfflineStore;
+import com.kinvey.android.sync.AbstractSyncService;
+import com.kinvey.android.sync.DatabaseHandler;
+import com.kinvey.android.sync.KinveySyncService;
 
 /**
  * This class is an implementation of an {@link AbstractSqliteOfflineStore}, which provides a sqlcipher encrypted sqlite3 database
