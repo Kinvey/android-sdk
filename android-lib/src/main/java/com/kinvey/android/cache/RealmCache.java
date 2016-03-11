@@ -108,14 +108,15 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                             } else {
                                 currentRhsPathObject = null;
                             }
+                            pathStep++;
                         }
 
 
                         Object l = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
-                        Object r = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
+                        Object r = currentRhsPathObject != null ? currentRhsPathObject.get(path[path.length - 1]) : null;
 
                         if (Comparable.class.isAssignableFrom(l.getClass())){
-                            sortRet = (sortOrderEntry.getValue().equals(Sort.ASCENDING) ? 1 : -1) * ((Comparable)l).compareTo(r);
+                            sortRet = (sortOrderEntry.getValue().equals(Sort.DESCENDING) ? 1 : -1) * ((Comparable)l).compareTo(r);
                         }
 
                         if (sortRet != 0){
