@@ -171,7 +171,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
 
     public void testGetWithArrayType() throws IOException {
         Entity[] entityList = new Entity[]{};
-        NetworkManager<Entity[]> appData = getGenericAppData(entityList.getClass());
+        NetworkManager<Entity> appData = getGenericAppData(entityList.getClass());
         NetworkManager.Get myGet = appData.getBlocking();
         assertNotNull(myGet);
         assertNull(myGet.get("entityID"));
@@ -554,7 +554,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
     	
     }
     
-    private <T> NetworkManager<T> getGenericAppData(Class<? extends Object> myClass) {
+    private <T extends GenericJson> NetworkManager<T> getGenericAppData(Class<? extends Object> myClass) {
         NetworkManager appData = new NetworkManager("myCollection", myClass, getClient());
         return appData;
     }

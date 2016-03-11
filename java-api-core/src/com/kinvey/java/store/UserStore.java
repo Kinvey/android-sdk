@@ -44,6 +44,7 @@ public class UserStore<T extends User> {
         return builder;
     }
 
+
     public enum LoginType {
         IMPLICIT,
         KINVEY,
@@ -88,12 +89,21 @@ public class UserStore<T extends User> {
         MICApiVersion = version;
     }
 
+    public void setMICHostName(String MICHostName) throws IllegalArgumentException {
+        if (!MICHostName.startsWith("https://")){
+            throw new IllegalArgumentException("MIC url should be sercure url");
+        }
+
+        this.MICHostName = MICHostName.endsWith("/") ? MICHostName : MICHostName + "/";
+    }
+
+
     public GenericData getCustomRequestProperties() {
-        return customRequestProperties;
+        return client.getCustomRequestProperties();
     }
 
     public String getClientAppVersion() {
-        return clientAppVersion;
+        return client.getClientAppVersion();
     }
 
     public AbstractClient getClient() {
@@ -105,6 +115,7 @@ public class UserStore<T extends User> {
     }
 
     public User getCurrentUser() {
+        if (currentUser == null) currentUser = new User();
         return currentUser;
     }
 
@@ -210,7 +221,7 @@ public class UserStore<T extends User> {
      * @return LoginRequest object
      * @throws IOException
      */
-    LoginRequest login(ThirdPartyIdentity.Type thirdPartyType, String ... args) throws IOException {
+    public LoginRequest login(ThirdPartyIdentity.Type thirdPartyType, String... args) throws IOException {
         Preconditions.checkNotNull((args));
         ThirdPartyIdentity identity = ThirdPartyIdentity.createThirdPartyIdentity(thirdPartyType, args);
         return new LoginRequest(this, identity).buildAuthRequest();

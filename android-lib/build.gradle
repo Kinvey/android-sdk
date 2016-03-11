@@ -43,6 +43,7 @@ buildscript {
   repositories {
     mavenCentral()
     jcenter()
+    maven { url "https://jitpack.io" }
     maven {
       url "http://jcenter.bintray.com"
     }
@@ -52,7 +53,9 @@ buildscript {
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:1.5.0'
+    classpath "io.realm:realm-gradle-plugin:0.88.0"
   }
+
 }
 
 dependencies {
@@ -97,7 +100,7 @@ dependencies {
   androidTestCompile 'org.mockito:mockito-core:1.10.19'
   androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
   androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
-  androidTestCompile 'com.android.support:support-annotations:23.1.1'
+  androidTestCompile 'com.android.support:support-annotations:23.2.0'
   androidTestCompile 'com.android.support.test:runner:0.4.1'
   androidTestCompile 'com.android.support.test:rules:0.4.1'
   // Optional -- Hamcrest library
@@ -105,7 +108,6 @@ dependencies {
   compile 'com.google.code.gson:gson:2.4'
   compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
   compile 'com.google.android.gms:play-services:8.4.0'
-  compile 'io.realm:realm-android:0.87.5'
   compile 'com.google.android.gms:play-services-ads:8.4.0'
   compile 'com.google.android.gms:play-services-identity:8.4.0'
   compile 'com.google.android.gms:play-services-gcm:8.4.0'
@@ -145,4 +147,4 @@ cleanDocgen.mustRunAfter clean
 build.mustRunAfter cleanDocgen
 docgen.mustRunAfter build
 
-
+apply plugin: 'realm-android'

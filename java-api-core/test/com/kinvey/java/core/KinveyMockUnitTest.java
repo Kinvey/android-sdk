@@ -17,6 +17,7 @@ package com.kinvey.java.core;
 
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
@@ -31,6 +32,7 @@ import junit.framework.TestCase;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -72,27 +74,6 @@ public abstract class KinveyMockUnitTest extends TestCase {
             super(transport, null, "https://baas.kinvey.com/", "" , objectParser, kinveyRequestInitializer,null,null);
         }
 
-        @Override
-        public <T> NetworkManager<T> appData(String collectionName, Class<T> myClass) {
-            synchronized (lock) {
-                Preconditions.checkNotNull(collectionName, "collectionName must not be null");
-                if (appDataInstanceCache == null) {
-                    appDataInstanceCache = new ConcurrentHashMap<String, NetworkManager>();
-                }
-                if (!appDataInstanceCache.containsKey(collectionName)) {
-                    appDataInstanceCache.put(collectionName, new MockNetworkManager(collectionName, myClass, this));
-                }
-                if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-                    appDataInstanceCache.put(collectionName, new MockNetworkManager(collectionName, myClass, this));
-                }
-
-                return appDataInstanceCache.get(collectionName);
-            }        }
-
-        @Override
-        public NetworkFileManager file() {
-            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
-        }
 
         @Override
         public void performLockDown() {
@@ -153,9 +134,25 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
+        public <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+            return null;
         }
+
+        @Override
+        public ICacheManager getCacheManager() {
+            return null;
+        }
+
+        @Override
+        public String getFileCacheFolder() {
+            return null;
+        }
+
+        @Override
+        protected ICacheManager getSyncCacheManager() {
+            return null;
+        }
+
 
         public static final class Builder extends AbstractClient.Builder {
 

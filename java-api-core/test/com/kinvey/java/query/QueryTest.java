@@ -283,8 +283,8 @@ public class QueryTest extends TestCase {
         LinkedHashMap<String,Object> age = new LinkedHashMap<String,Object>();
 
         city.put("$ne","Boston");
-        age.put("$lt",21);
-        age.put("$gt",65);
+        age.put("$lte",21);
+        age.put("$gte",65);
 
         expected.put("City",city);
         expected.put("Age", age);

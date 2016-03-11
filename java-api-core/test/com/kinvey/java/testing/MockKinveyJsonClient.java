@@ -18,10 +18,12 @@ package com.kinvey.java.testing;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.CustomEndpoints;
@@ -48,10 +50,7 @@ public class MockKinveyJsonClient extends AbstractClient {
 super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
        requestPolicy);
 }
-    @Override
-    public NetworkFileManager file() {
-        return null;
-    }
+
 
     @Override
     public void performLockDown() {
@@ -71,11 +70,6 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
         }
     }
 
-	@Override
-	public <T> NetworkManager<T> appData(String collectionName, Class<T> myClass) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public UserDiscovery userDiscovery() {
@@ -90,14 +84,28 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
 	}
 
 	@Override
-	protected ClientUsers getClientUsers() {
+	public ClientUsers getClientUsers() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        return null;
+    }
+
+    @Override
+    public ICacheManager getCacheManager() {
+        return null;
+    }
+
+    @Override
+    public String getFileCacheFolder() {
+        return null;
+    }
+
+    @Override
+    protected ICacheManager getSyncCacheManager() {
+        return null;
+    }
 }

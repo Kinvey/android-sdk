@@ -35,11 +35,6 @@ public class MockKinveyClientRequest<T> extends AbstractKinveyClientRequest<T> {
 
     private MediaHttpUploader mockUploader;
 
-    @Override
-    protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
-        mockUploader = mock(MediaHttpUploader.class);
-        return mockUploader;
-    }
 
     public MediaHttpUploader getMockMediaUploader() {
         return mockUploader;

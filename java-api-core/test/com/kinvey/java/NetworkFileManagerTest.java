@@ -18,6 +18,8 @@ package com.kinvey.java;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 
 import org.junit.Before;
@@ -56,7 +58,23 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     public void uploadUrlEndpointMatches() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
         FileMetaData meta = new FileMetaData("testfilename.txt");
-        NetworkFileManager.UploadMetadataAndFile upload = networkFileManagerApi.prepUploadBlocking(meta, mockContent);
+        NetworkFileManager.UploadMetadataAndFile upload = networkFileManagerApi.prepUploadBlocking(meta
+                , mockContent, new UploaderProgressListener() {
+            @Override
+            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+            }
+
+            @Override
+            public void onSuccess(FileMetaData result) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+            }
+        });
         HttpRequest request = upload.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
@@ -77,7 +95,23 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     public void testFileUploadInitializer() {
         networkFileManagerApiUnderTest = new MockNetworkFileManager(super.getClient());
         try {
-            networkFileManagerApiUnderTest.prepUploadBlocking(new FileMetaData("testfilename.txt"), mockContent);
+            networkFileManagerApiUnderTest.prepUploadBlocking(new FileMetaData("testfilename.txt"),
+                    mockContent, new UploaderProgressListener() {
+                        @Override
+                        public void progressChanged(MediaHttpUploader uploader) throws IOException {
+
+                        }
+
+                        @Override
+                        public void onSuccess(FileMetaData result) {
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+
+                        }
+                    });
 
         } catch (IOException e) {
             fail("file api should not be throw exception on upload");
@@ -87,7 +121,8 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     @Test
     public void testFileDownloadWithTTL() throws  IOException{
         networkFileManagerApiUnderTest = new MockNetworkFileManager(super.getClient());
-        NetworkFileManager.DownloadMetadataAndFileQuery download =  networkFileManagerApiUnderTest.prepDownloadWithTTLBlocking("testfilename.txt", 120);
+        NetworkFileManager.DownloadMetadataQuery download =
+                networkFileManagerApiUnderTest.prepDownloadWithTTLBlocking("testfilename.txt", 120);
         HttpRequest req = download.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?query";
         assertEquals(expectedPath, req.getUrl().toString());

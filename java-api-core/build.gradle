@@ -47,6 +47,7 @@ dependencies {
         exclude(module: 'guava-jdk5')
     }
     compile 'com.google.dexmaker:dexmaker:1.2'
+    compile 'org.apache.ant:ant:1.8.0'
 }
 
 task docgen(type: Javadoc) {
