@@ -33,6 +33,7 @@ import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
@@ -140,6 +141,16 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      */
     public AsyncDataStore(String collectionName, Class myClass, AbstractClient client) {
         super(client, collectionName, myClass, StoreType.CACHE);
+        loadMethodMap();
+    }
+
+    /** Constructor to instantiate the NetworkManager class.
+     *
+     * @param collectionName Name of the appData collection
+     * @param myClass        Class Type to marshall data between.
+     */
+    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, NetworkManager<T> networkManager) {
+        super(client, collectionName, myClass, StoreType.CACHE, networkManager);
         loadMethodMap();
     }
 
@@ -469,6 +480,10 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
             }
         });
+    }
+
+    public Query query() {
+        return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {

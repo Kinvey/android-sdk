@@ -38,6 +38,8 @@ import java.util.Map;
 public class UserStore<T extends User> {
 
 
+    public static final String USER_COLLECTION_NAME = "user";
+
     public KinveyAuthRequest.Builder getBuilder() {
         return builder;
     }

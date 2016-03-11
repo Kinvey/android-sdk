@@ -75,7 +75,7 @@ public class SyncManager {
         entityID.data = os.toString("UTF-8");
 
         SyncRequest request = new SyncRequest(
-                SyncRequest.HttpVerb.valueOf(clientRequest.getRequestMethod().toLowerCase()),
+                SyncRequest.HttpVerb.valueOf(clientRequest.getRequestMethod().toUpperCase()),
                 entityID, httpRequest.getUrl(),
                 collectionName
         );
@@ -115,8 +115,9 @@ public class SyncManager {
      */
     public void executeRequest(final AbstractClient client, SyncRequest request)  {
 
-        client.getDataStore(request.getCollectionName(), GenericJson.class).setClientAppVersion(request.getEntityID().customerVersion);
-        client.getDataStore(request.getCollectionName(), GenericJson.class).setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
+        client.setClientAppVersion(request.getEntityID().customerVersion);
+        client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
+
         GenericJson entity = null;
         try {
             if (request.getEntityID().data != null) {

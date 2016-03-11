@@ -41,10 +41,12 @@ import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.network.AndroidNetworkManager;
+import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncFileStore;
+import com.kinvey.android.store.AsyncLinkedDataStore;
 import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
@@ -58,10 +60,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.store.FileStore;
 import com.kinvey.java.store.StoreType;
 
 /**
@@ -98,7 +97,7 @@ public class Client extends AbstractClient {
     private Context context = null;
 
     private ConcurrentHashMap<String, AsyncDataStore> appDataInstanceCache;
-    private ConcurrentHashMap<String, AsyncLinkedData> linkedDataInstanceCache;
+    private ConcurrentHashMap<String, AsyncLinkedDataStore> linkedDataInstanceCache;
     private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
     private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
@@ -192,11 +191,11 @@ public class Client extends AbstractClient {
     }
 
     /**
-     * LinkedData factory method
+     * LinkedDataStore factory method
      * <p>
-     * Returns an instance of {@link AsyncLinkedData} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of LinkedData is created per collection.  The method is Generic and takes an instance of a
-     * {@link LinkedGenericJson} entity type that is used for fetching/saving of {@link AsyncLinkedData}.
+     * Returns an instance of {@link AsyncLinkedNetworkManager} for the supplied collection.  A new instance is created for each collection, but
+     * only one instance of LinkedNetworkManager is created per collection.  The method is Generic and takes an instance of a
+     * {@link LinkedGenericJson} entity type that is used for fetching/saving of {@link AsyncLinkedNetworkManager}.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -205,7 +204,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      * {@code
-     LinkedData<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
+    LinkedDataStore<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
     }
      * </pre>
      * </p>
@@ -213,16 +212,17 @@ public class Client extends AbstractClient {
      * @param collectionName The name of the collection
      * @param myClass The class that defines the entity of type {@link LinkedGenericJson} used for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link AsyncLinkedData} for the defined collection
+     * @return Instance of {@link AsyncLinkedNetworkManager} for the defined collection
      */
-    public <T extends LinkedGenericJson> AsyncLinkedData<T> linkedData(String collectionName, Class<T> myClass) {
+    public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (linkedDataInstanceCache == null) {
-                linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedData>();
+                linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedDataStore>();
             }
             if (!linkedDataInstanceCache.containsKey(collectionName)) {
-                linkedDataInstanceCache.put(collectionName, new AsyncLinkedData(collectionName, myClass, this));
+                linkedDataInstanceCache.put(collectionName, new AsyncLinkedDataStore(this, collectionName, myClass,
+                        StoreType.SYNC));
             }
             return linkedDataInstanceCache.get(collectionName);
         }

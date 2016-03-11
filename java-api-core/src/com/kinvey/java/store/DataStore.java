@@ -41,15 +41,18 @@ import java.util.List;
 
 public class DataStore<T extends GenericJson> {
 
+    private static final long HOUR = 1* 60 * 60 * 1000l;
+
     protected final AbstractClient client;
     private final String collection;
     private StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
-    private String clientAppVersion;
-    private GenericJson customRequestProperties;
     NetworkManager<T> networkManager;
     private String collectionName;
+
+
+
 
     /**
      * Constructor for creating DataStore for given collection that will be mapped to itemType class
@@ -60,13 +63,20 @@ public class DataStore<T extends GenericJson> {
      */
     public DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
 
+        this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
+
+
+
+    }
+
+    protected  DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
+                         NetworkManager<T> networkManager){
         this.storeType = storeType;
         this.client = client;
         this.collection = collection;
         this.storeItemType = itemType;
-        cache = client.getCacheManager().getCache(collection, itemType, 0L);
-        networkManager = new NetworkManager<T>(collection, itemType, client);
-
+        cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
+        this.networkManager = networkManager;
     }
 
     /**
@@ -233,14 +243,6 @@ public class DataStore<T extends GenericJson> {
 
     public Class<T> getCurrentClass() {
         return storeItemType;
-    }
-
-    public void setClientAppVersion(String clientAppVersion) {
-        this.clientAppVersion = clientAppVersion;
-    }
-
-    public void setCustomRequestProperties(GenericJson customRequestProperties) {
-        this.customRequestProperties = customRequestProperties;
     }
 
     public String getCollectionName() {

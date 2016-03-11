@@ -7,6 +7,8 @@ import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +48,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         RealmResults<DynamicRealmObject> objects = null;
 
-        Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
-        if (sortingOrders != null && sortingOrders.size() > 0) {
+        final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
+        //Realm currently doesn't support sorting on inner objects
+        /*if (sortingOrders != null && sortingOrders.size() > 0) {
             String[] fields = new String[sortingOrders.size()];
             Sort[] sort = new Sort[sortingOrders.size()];
             int i = 0;
@@ -65,9 +68,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 i++;
             }
             objects = realmQuery.findAllSorted(fields, sort);
-        } else {
-            objects = realmQuery.findAll();
-        }
+        } else {*/
+        objects = realmQuery.findAll();
+        //}
 
         List<T> ret = new ArrayList<T>();
 
@@ -75,6 +78,58 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             DynamicRealmObject obj = iterator.next();
             ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
         }
+
+        //own sorting implementation
+        if (sortingOrders != null && sortingOrders.size() > 0) {
+            Collections.sort(ret, new Comparator<T>() {
+                @Override
+                public int compare(T lhs, T rhs) {
+                    int sortRet = 0;
+
+                    for (Map.Entry<String, AbstractQuery.SortOrder> sortOrderEntry : sortingOrders.entrySet()){
+                        String fieldName = sortOrderEntry.getKey();
+                        String[] path = fieldName.split("\\.");
+                        int pathStep = 0;
+                        Map currentLhsPathObject = lhs;
+                        Map currentRhsPathObject = rhs;
+                        while (pathStep < path.length - 1){
+                            if (currentLhsPathObject != null &&
+                                    currentLhsPathObject.containsKey(path[pathStep]) &&
+                                    Map.class.isAssignableFrom(currentLhsPathObject.get(path[pathStep]).getClass())){
+                                currentLhsPathObject = (Map)currentLhsPathObject.get(path[pathStep]);
+                            } else {
+                                currentLhsPathObject = null;
+                            }
+
+                            if (currentRhsPathObject != null &&
+                                    currentRhsPathObject.containsKey(path[pathStep]) &&
+                                    Map.class.isAssignableFrom(currentRhsPathObject.get(path[pathStep]).getClass())){
+                                currentRhsPathObject = (Map)currentRhsPathObject.get(path[pathStep]);
+                            } else {
+                                currentRhsPathObject = null;
+                            }
+                        }
+
+
+                        Object l = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
+                        Object r = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
+
+                        if (Comparable.class.isAssignableFrom(l.getClass())){
+                            sortRet = (sortOrderEntry.getValue().equals(Sort.ASCENDING) ? 1 : -1) * ((Comparable)l).compareTo(r);
+                        }
+
+                        if (sortRet != 0){
+                            break;
+                        }
+
+                    }
+
+                    return sortRet;
+                }
+            });
+        }
+
+
         mRealm.close();
         return ret;
     }

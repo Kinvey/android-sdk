@@ -13,15 +13,18 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.java;
+package com.kinvey.java.network;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
+import com.kinvey.java.MimeTypeFinder;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.network.NetworkManager;
@@ -38,22 +41,18 @@ import java.lang.reflect.Array;
  *
  * @author edwardf
  */
-public class LinkedData<T extends LinkedGenericJson> extends NetworkManager<T> {
-
-    //TODO edwardf add caching support, note calls to super.setCache are commented out in below client request declarations.
-    //TODO edwardf delete support?
-
+public class LinkedNetworkManager<T extends LinkedGenericJson> extends NetworkManager<T> {
 
     MimeTypeFinder mimetypeFinder;
 
     /**
-     * Constructor to instantiate the LinkedData class.
+     * Constructor to instantiate the LinkedNetworkManager class.
      *
-     * @param collectionName Name of the LinkedData collection
+     * @param collectionName Name of the LinkedNetworkManager collection
      * @param myClass        Class Type to marshall data between.
      * @param client        Instance of a Client which manages this API
      */
-    protected LinkedData(String collectionName, Class<T> myClass, AbstractClient client) {
+    public LinkedNetworkManager(String collectionName, Class<T> myClass, AbstractClient client) {
         super(collectionName, myClass, client);
     }
 

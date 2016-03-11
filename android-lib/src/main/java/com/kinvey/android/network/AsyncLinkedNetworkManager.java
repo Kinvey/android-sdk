@@ -13,13 +13,15 @@
  * contents is a violation of applicable laws.
  * 
  */
-package com.kinvey.android;
+package com.kinvey.android.network;
 
 import java.io.IOException;
 
+import com.kinvey.android.AndroidMimeTypeFinder;
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.LinkedData;
+import com.kinvey.java.network.LinkedNetworkManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.core.DownloaderProgressListener;
@@ -27,7 +29,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
 
 /**
- * Wraps the {@link com.kinvey.java.LinkedData} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link LinkedNetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
  * This functionality can be accessed through the {@link com.kinvey.android.Client#linkedData(String, Class)} convenience method.
@@ -44,14 +46,14 @@ import com.kinvey.java.core.UploaderProgressListener;
  * @auther edwardf
  *
  */
-public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> {
+public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends LinkedNetworkManager<T> {
     /**
      * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    protected AsyncLinkedData(String collectionName, Class<T> myClass, AbstractClient client) {
+    public AsyncLinkedNetworkManager(String collectionName, Class<T> myClass, AbstractClient client) {
         super(collectionName, myClass, client);
         super.setMimeTypeManager(new AndroidMimeTypeFinder());
     }
@@ -182,7 +184,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T[] executeAsync() throws IOException {
-            return AsyncLinkedData.this.getBlocking(this.query, this.progress, this.attachments, this.resolves, this.resolve_depth, this.retain).execute();
+            return AsyncLinkedNetworkManager.this.getBlocking(this.query, this.progress, this.attachments, this.resolves, this.resolve_depth, this.retain).execute();
         }
     }
     private class GetEntity extends AsyncClientRequest<T> {
@@ -200,7 +202,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T executeAsync() throws IOException {
-            return AsyncLinkedData.this.getEntityBlocking(this.entityID, this.progress, this.attachments).execute();
+            return AsyncLinkedNetworkManager.this.getEntityBlocking(this.entityID, this.progress, this.attachments).execute();
         }
     }
     private class Save extends AsyncClientRequest<T> {
@@ -218,7 +220,7 @@ public class AsyncLinkedData<T extends LinkedGenericJson> extends LinkedData<T> 
 
         @Override
         protected T executeAsync() throws IOException {
-            return AsyncLinkedData.this.saveBlocking(this.entity, this.progress, this.attachments).execute();
+            return AsyncLinkedNetworkManager.this.saveBlocking(this.entity, this.progress, this.attachments).execute();
         }
     }
 

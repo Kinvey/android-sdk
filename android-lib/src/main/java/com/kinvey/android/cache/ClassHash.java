@@ -4,6 +4,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
 import com.google.api.client.util.FieldInfo;
+import com.kinvey.java.model.KinveyMetaData;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -11,12 +12,14 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import io.realm.DynamicRealm;
@@ -156,6 +159,11 @@ public abstract class ClassHash {
         if (!schema.hasField("_id")){
             schema.addField("_id", String.class, FieldAttribute.PRIMARY_KEY);
         }
+        if (!schema.hasField("_kmd") && !name.endsWith("__kmd")){
+            RealmObjectSchema innerScheme = createScheme(name + "__kmd" , realm, KinveyMetaData.class);
+            schema.addRealmObjectField("_kmd", innerScheme);
+        }
+
         if (!schema.hasField(TTL_FIELD)){
             schema.addField(TTL_FIELD, Long.class);
         }
@@ -181,6 +189,19 @@ public abstract class ClassHash {
         if (object == null){
             object = realm.createObject(name, obj.get("_id"));
         }
+
+        if (obj.containsKey("_kmd")){
+            Map kmd = (Map)obj.get("_kmd");
+            if (kmd != null) {
+                kmd.put("lmt", String.format("%tFT%<tTZ",
+                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                if (!kmd.containsKey("ect") || kmd.get("ect") == null) {
+                    kmd.put("ect", String.format("%tFT%<tTZ",
+                            Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                }
+            }
+        }
+
 
         for (Field f : fields){
             FieldInfo fieldInfo = FieldInfo.of(f);
@@ -237,11 +258,28 @@ public abstract class ClassHash {
             object.set("_id", obj.get("_id"));
         }
 
+        if (!obj.containsKey("_kmd") && !name.endsWith("__kmd")){
+            KinveyMetaData metadata = new KinveyMetaData();
+            metadata.set("lmt", String.format("%tFT%<tTZ",
+                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+            metadata.set("ect", String.format("%tFT%<tTZ",
+                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+
+            DynamicRealmObject innerObject = saveData(name + "__kmd",
+                    realm,
+                    KinveyMetaData.class,
+                    metadata);
+            object.setObject("_kmd", innerObject);
+        }
+
         return object;
     }
 
 
     public static <T extends GenericJson> T realmToObject(DynamicRealmObject dynamic, Class<T> objectClass){
+        if (dynamic == null){
+            return null;
+        }
         T ret = null;
         try {
             ret = objectClass.newInstance();
@@ -249,6 +287,9 @@ public abstract class ClassHash {
             ClassInfo classInfo = ClassInfo.of(objectClass);
 
             for (FieldInfo info : classInfo.getFieldInfos()){
+                if (!dynamic.hasField(info.getName())){
+                    continue;
+                }
                 Object o = dynamic.get(info.getName());
 
                 if (Number.class.isAssignableFrom(info.getType())){
@@ -292,7 +333,9 @@ public abstract class ClassHash {
                 }
 
             }
-
+            if (!ret.containsKey("_kmd") && dynamic.hasField("_kmd")){
+                ret.put("_kmd", realmToObject(dynamic.getObject("_kmd"), KinveyMetaData.class));
+            }
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

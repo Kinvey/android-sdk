@@ -20,12 +20,12 @@ import com.google.api.client.json.GenericJson;
 import java.util.HashMap;
 
 /**
- * Use this class as a base Entity instead of {@code com.google.api.client.json.GenericJson} when using the LinkedData API.
+ * Use this class as a base Entity instead of {@code com.google.api.client.json.GenericJson} when using the LinkedNetworkManager API.
  * <p>
  * This class maintains a Map of linked files, using the JSONKey of the field as the key and a {@code com.kinvey.java.LinkedResources.LinkedFile} as the value.
  * </p>
  * <p>
- * The LinkedData API uses this map to determine if there are any attachments to download.
+ * The LinkedNetworkManager API uses this map to determine if there are any attachments to download.
  * </p>
  *
  * @author mjsalinger

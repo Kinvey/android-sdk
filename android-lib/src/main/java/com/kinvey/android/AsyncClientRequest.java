@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.AsyncExecutor;
@@ -73,6 +74,8 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
         }catch(Throwable e){
 //            e.printStackTrace();
             error = e;
+            Log.d("TEST","test", e);
+
         }
         return result;
     }
