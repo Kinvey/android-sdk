@@ -172,22 +172,8 @@ public class Client extends AbstractClient {
      * @return Instance of {@link com.kinvey.java.store.DataStore} for the defined collection
      */
     public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass) {
-        synchronized (lock) {
-            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
-            if (appDataInstanceCache == null) {
-                appDataInstanceCache = new ConcurrentHashMap<String, AsyncDataStore>();
-            }
-            if (!appDataInstanceCache.containsKey(collectionName)) {            	
-            	Logger.INFO("adding new instance of AsyncDataStore, new collection name");
-                appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
-            }
-            if(appDataInstanceCache.containsKey(collectionName) && !appDataInstanceCache.get(collectionName).getCurrentClass().equals(myClass)){
-            	Logger.INFO("adding new instance of AsyncDataStore, class doesn't match");
-                appDataInstanceCache.put(collectionName, new AsyncDataStore(collectionName, myClass, this));
-            }
+        return new AsyncDataStore(collectionName, myClass, this, getStoreType());
 
-            return appDataInstanceCache.get(collectionName);
-        }
     }
 
     /**
@@ -215,17 +201,8 @@ public class Client extends AbstractClient {
      * @return Instance of {@link AsyncLinkedNetworkManager} for the defined collection
      */
     public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass) {
-        synchronized (lock) {
-            Preconditions.checkNotNull(collectionName, "collectionName must not be null");
-            if (linkedDataInstanceCache == null) {
-                linkedDataInstanceCache = new ConcurrentHashMap<String, AsyncLinkedDataStore>();
-            }
-            if (!linkedDataInstanceCache.containsKey(collectionName)) {
-                linkedDataInstanceCache.put(collectionName, new AsyncLinkedDataStore(this, collectionName, myClass,
-                        StoreType.SYNC));
-            }
-            return linkedDataInstanceCache.get(collectionName);
-        }
+        return new AsyncLinkedDataStore(this, collectionName, myClass,
+                getStoreType());
     }
 
 
@@ -937,7 +914,7 @@ public class Client extends AbstractClient {
     @Override
     public AsyncFileStore getFileStore() {
         return new AsyncFileStore(new NetworkFileManager(this),
-                    getCacheManager(), 60*60*1000L, StoreType.CACHE, getFileCacheFolder()
+                    getCacheManager(), 60*60*1000L, getStoreType(), getFileCacheFolder()
                 );
     }
 

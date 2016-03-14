@@ -139,8 +139,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client) {
-        super(client, collectionName, myClass, StoreType.CACHE);
+    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType) {
+        super(client, collectionName, myClass, storeType);
         loadMethodMap();
     }
 
@@ -149,8 +149,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, NetworkManager<T> networkManager) {
-        super(client, collectionName, myClass, StoreType.CACHE, networkManager);
+    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
+        super(client, collectionName, myClass, storeType, networkManager);
         loadMethodMap();
     }
 

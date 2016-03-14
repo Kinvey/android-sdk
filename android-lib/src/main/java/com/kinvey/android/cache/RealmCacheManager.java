@@ -177,7 +177,7 @@ public class RealmCacheManager implements ICacheManager {
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
             RealmConfiguration rc = new RealmConfiguration.Builder(context)
-                    .name(prefix + File.pathSeparator + getClientHash())
+                    .name(prefix + "_" + getClientHash())
                     .build();
             DynamicRealm realm = DynamicRealm.getInstance(rc);
             init(realm);

@@ -19,7 +19,7 @@ public class AsyncLinkedDataStore<T extends LinkedGenericJson> extends AsyncData
      * @param storeType  type of storage that client want to use
      */
     public AsyncLinkedDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType) {
-        super(collection, itemType, client,
+        super(collection, itemType, client, storeType,
                 new LinkedNetworkManager<T>(collection, itemType, client));
     }
 }

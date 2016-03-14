@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface KinveyReference {
+    String fieldName();
     String collection();
     Class<? extends GenericJson> itemClass();
 }

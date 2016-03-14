@@ -24,6 +24,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.MimeTypeFinder;
+import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
@@ -62,7 +63,9 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
      * @param responseClass            response class to parse into
      */
     protected SaveLinkedResourceClientRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
+
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
+
     }
 
     public void setMimeTypeFinder(MimeTypeFinder finder){
@@ -157,6 +160,8 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                     }
                 }
             }
+
+
 
             Logger.INFO("Kinvey - LR, " + "saving the entity!");
             return super.execute();

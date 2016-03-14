@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 description = 'AndroidLib'
+apply plugin: 'realm-android'
 
 android {
   compileSdkVersion 23
@@ -43,18 +44,19 @@ buildscript {
   repositories {
     mavenCentral()
     jcenter()
-    maven { url "https://jitpack.io" }
     maven {
       url "http://jcenter.bintray.com"
     }
     maven {
       url "http://dl.bintray.com/realm/maven"
     }
+    maven {
+      url "https://jitpack.io"
+    }
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:1.5.0'
     classpath "io.realm:realm-gradle-plugin:0.88.0"
-    classpath 'com.github.KeepSafe:ReLinker:1.1'
   }
 
 }
@@ -62,6 +64,8 @@ buildscript {
 dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   compile project(':java-api-core')
+  compile 'com.github.KeepSafe:ReLinker:1.1'
+
   /*compile('com.google.http-client:google-http-client:1.19.0') {
           exclude(module: 'xpp3')
           exclude(module: 'httpclient')
@@ -112,6 +116,8 @@ dependencies {
   compile 'com.google.android.gms:play-services-ads:8.4.0'
   compile 'com.google.android.gms:play-services-identity:8.4.0'
   compile 'com.google.android.gms:play-services-gcm:8.4.0'
+
+  compile 'io.reactivex:rxjava:1.1.0'
 }
 
 task docgen(type: Javadoc) {
@@ -148,4 +154,4 @@ cleanDocgen.mustRunAfter clean
 build.mustRunAfter cleanDocgen
 docgen.mustRunAfter build
 
-apply plugin: 'realm-android'
+

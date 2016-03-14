@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
+import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -298,6 +299,32 @@ public class NetworkManager<T extends GenericJson> {
 
         GenericJson jsonEntity = (GenericJson) entity;
         sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
+
+        //prepare entity relation data saving
+        try {
+            ReferenceHelper.processReferences(entity, new ReferenceHelper.ReferenceListener() {
+                @Override
+                public String onUnsavedReferenceFound(String collection, GenericJson object) {
+                    if (object.containsKey("_id")){
+                        return object.get("_id").toString();
+                    }
+
+                    NetworkManager<GenericJson> manager = new NetworkManager<GenericJson>(collection, GenericJson.class, client);
+                    try {
+                        GenericJson saved = manager.saveBlocking(object).execute();
+                        return saved.get(ID_FIELD_NAME).toString();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    return null;
+                }
+            });
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
 
         if (sourceID != null) {
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
