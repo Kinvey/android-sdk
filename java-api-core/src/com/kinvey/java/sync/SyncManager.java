@@ -54,7 +54,7 @@ public class SyncManager {
                 .equals("collection", collectionName);
         SyncRequest request = requestCache.getFirst(q);
         if (request != null) {
-            requestCache.delete(request.getEntityID().id);
+            requestCache.delete(request.get("_id").toString());
         }
         return request;
     }
@@ -128,7 +128,7 @@ public class SyncManager {
         }
 
 
-        DataStore networkDataStore = client.getDataStore(request.getCollectionName(), GenericJson.class);
+        DataStore networkDataStore = client.dataStore(request.getCollectionName(), GenericJson.class);
         networkDataStore.setStoreType(StoreType.NETWORK);
 
 
@@ -169,4 +169,11 @@ public class SyncManager {
         }
     }
 
+    public int clear(String collectionName) {
+        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
+                .equals("collection", collectionName);
+
+        return requestCache.delete(q);
+    }
 }

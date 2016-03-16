@@ -111,6 +111,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
     private static final String KEY_DELETE_BY_IDS ="KEY_DELETE_BY_IDS";
 
+    private static final String KEY_PURGE ="KEY_PURGE";
+
+
 
 
 
@@ -165,6 +168,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             tempMap.put(KEY_DELETE_BY_ID, DataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, DataStore.class.getMethod("delete", Query.class));
             tempMap.put(KEY_DELETE_BY_IDS, DataStore.class.getMethod("delete", Iterable.class));
+
+            tempMap.put(KEY_PURGE, DataStore.class.getMethod("purge"));
+
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
@@ -416,6 +422,11 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     public void pull(Query query, KinveyPullCallback callback){
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void purge(KinveyPurgeCallback callback){
+        SyncManager syncManager = client.getSycManager();
+        new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE) , callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 

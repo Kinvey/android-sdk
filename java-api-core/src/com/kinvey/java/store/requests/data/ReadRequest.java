@@ -5,6 +5,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.ReadPolicy;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
     public ReadRequest(ICache<T> cache, Query query, ReadPolicy readPolicy, long maxValue,
                        NetworkManager<T> networkManager) {
         this.cache = cache;
-        this.query = query;
+        this.query = query == null ? new Query(new MongoQueryFilter.MongoQueryFilterBuilder()) : query;
         this.readPolicy = readPolicy;
         this.maxValue = maxValue;
         this.networkManager = networkManager;

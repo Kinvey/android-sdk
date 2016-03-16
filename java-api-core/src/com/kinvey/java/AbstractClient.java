@@ -83,7 +83,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     
     private GenericData customRequestProperties = new GenericData();
 
-    private StoreType storeType = StoreType.CACHE;
+    private StoreType storeType = StoreType.SYNC;
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -379,7 +379,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             try {
                 final URL res = AbstractClient.class.getResource(propFilename);
                 props.load(res.openStream());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Could not find " + propFilename + " properties file");
             }
 
@@ -466,8 +466,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract ICacheManager getCacheManager();
 
-    public <T extends GenericJson> DataStore<T> getDataStore(String collection,
-                                                                      Class<T> clazz){
+    public <T extends GenericJson> DataStore<T> dataStore(String collection,
+                                                          Class<T> clazz){
         return new DataStore<T>(this, collection, clazz, storeType);
     }
 

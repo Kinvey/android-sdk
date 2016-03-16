@@ -6,6 +6,8 @@ import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
+import org.apache.tools.ant.taskdefs.condition.Http;
+
 import java.io.Serializable;
 
 /**
@@ -17,22 +19,33 @@ public class SyncRequest extends GenericJson implements Serializable {
 
 
     public enum HttpVerb {
-        @Value("GET")
-        GET,
-        @Value("PUT")
-        PUT,
-        @Value("POST")
-        POST,
-        @Value("DELETE")
-        DELETE,
-        @Value("QUERY")
-        QUERY
+        GET("GET"),
+        PUT("PUT"),
+        POST("POST"),
+        DELETE("DELETE"),
+        QUERY("QUERY");
+
+        private String query;
+
+        HttpVerb(String query) {
+
+            this.query = query;
+        }
+
+        public static HttpVerb fromString(String verb){
+            for (HttpVerb v : HttpVerb.values()){
+                if (v.query.equals(verb)){
+                    return v;
+                }
+            }
+            return null;
+        }
     }
 
 
     //The Http verb of the client request ("GET", "PUT", "DELETE", "POST", "QUERY");
     @Key("verb")
-    private HttpVerb verb;
+    private String verb;
 
     //The id of the entity, or the query string
     @Key("meta")
@@ -45,8 +58,10 @@ public class SyncRequest extends GenericJson implements Serializable {
     private String url;
 
 
+    public SyncRequest(){};
+
     public SyncRequest(HttpVerb httpVerb, SyncMetaData entityID, GenericUrl url, String collectionName) {
-        this.verb = httpVerb;
+        this.verb = httpVerb.name();
         this.id = entityID;
         this.collectionName = collectionName;
         this.url = url.toString();
@@ -58,7 +73,7 @@ public class SyncRequest extends GenericJson implements Serializable {
                        String customProperties,
                        GenericUrl url,
                        String collectionName){
-        this.verb = httpVerb;
+        this.verb = httpVerb.query;
         this.collectionName = collectionName;
         this.url = url.toString();
         this.id = new SyncMetaData(entityID, clientAppVersion, customProperties);
@@ -69,7 +84,7 @@ public class SyncRequest extends GenericJson implements Serializable {
      * @return the HTTP Verb used by this request
      */
     public HttpVerb getHttpVerb() {
-        return this.verb;
+        return HttpVerb.fromString(this.verb);
     }
 
     /**

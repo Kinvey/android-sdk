@@ -49,28 +49,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         RealmResults<DynamicRealmObject> objects = null;
 
         final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
-        //Realm currently doesn't support sorting on inner objects
-        /*if (sortingOrders != null && sortingOrders.size() > 0) {
-            String[] fields = new String[sortingOrders.size()];
-            Sort[] sort = new Sort[sortingOrders.size()];
-            int i = 0;
-            for (Map.Entry<String, AbstractQuery.SortOrder> sorting : sortingOrders.entrySet()){
-                fields[i] = sorting.getKey();
-                switch (sorting.getValue()){
-                    case ASC:
-                        sort[i] = Sort.ASCENDING;
-                        break;
 
-                    case DESC:
-                        sort[i] = Sort.DESCENDING;
-                        break;
-                }
-                i++;
-            }
-            objects = realmQuery.findAllSorted(fields, sort);
-        } else {*/
         objects = realmQuery.findAll();
-        //}
 
         List<T> ret = new ArrayList<T>();
 

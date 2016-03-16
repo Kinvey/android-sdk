@@ -41,8 +41,6 @@ import java.util.List;
 
 public class DataStore<T extends GenericJson> {
 
-    private static final long HOUR = 1* 60 * 60 * 1000l;
-
     protected final AbstractClient client;
     private final String collection;
     private StoreType storeType;
@@ -77,6 +75,7 @@ public class DataStore<T extends GenericJson> {
         this.storeItemType = itemType;
         cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
         this.networkManager = networkManager;
+        this.collectionName = collection;
     }
 
     /**
@@ -99,7 +98,7 @@ public class DataStore<T extends GenericJson> {
      * @param ids collection of strings that identify a set of ids we have to look for
      * @return List of object found for given ids
      */
-    public List<T> find (Iterable<String> ids){
+    public List<T> find(Iterable<String> ids){
         List<T> ret = null;
         try {
             ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
@@ -131,7 +130,7 @@ public class DataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
-    public List<T> find () {
+    public List<T> find() {
         // perform request based on policy
         List<T> ret = null;
         try {
@@ -208,7 +207,9 @@ public class DataStore<T extends GenericJson> {
      */
     public void pullBlocking(Query query) {
         try {
-            new ReadRequest<T>(cache, query, ReadPolicy.FORCE_NETWORK, Long.MAX_VALUE, networkManager).execute();
+            List<T> networkData = new ReadRequest<T>(cache, query, ReadPolicy.FORCE_NETWORK, Long.MAX_VALUE, networkManager).execute();
+            cache.clear();
+            cache.save(networkData);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -222,6 +223,11 @@ public class DataStore<T extends GenericJson> {
     public void syncBlocking(Query query) {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    public void purge(){
+        client.getSycManager().clear(collectionName);
+        pullBlocking(null);
     }
 
 

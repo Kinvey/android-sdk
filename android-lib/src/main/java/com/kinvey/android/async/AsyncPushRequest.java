@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
-public class AsyncPushRequest extends AsyncClientRequest<Long> {
+public class AsyncPushRequest extends AsyncClientRequest<Integer> {
     private final String collection;
     private final SyncManager manager;
     private final AbstractClient client;
@@ -38,9 +38,9 @@ public class AsyncPushRequest extends AsyncClientRequest<Long> {
 
 
     @Override
-    protected Long executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected Integer executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         SyncRequest syncRequest = null;
-        long progress = 0;
+        int progress = 0;
         while ((syncRequest = manager.popSingleQueue(collection)) != null){
             manager.executeRequest(client, syncRequest);
             publishProgress(++progress);
@@ -49,7 +49,7 @@ public class AsyncPushRequest extends AsyncClientRequest<Long> {
     }
 
     @Override
-    protected void onProgressUpdate(Long... values) {
+    protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
         callback.onProgress(values[0], manager.getCount(this.collection));
     }

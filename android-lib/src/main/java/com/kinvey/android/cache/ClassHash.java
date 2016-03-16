@@ -86,7 +86,7 @@ public abstract class ClassHash {
             }else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
                 String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType());
                 sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
-            } else {
+            }  else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
                         if (!fieldInfo.getName().equals("_id") && !fieldInfo.getName().equals(TTL_FIELD)){
@@ -286,11 +286,20 @@ public abstract class ClassHash {
 
             ClassInfo classInfo = ClassInfo.of(objectClass);
 
-            for (FieldInfo info : classInfo.getFieldInfos()){
-                if (!dynamic.hasField(info.getName())){
+            for (String field : dynamic.getFieldNames()){
+
+                FieldInfo info = classInfo.getFieldInfo(field);
+
+                Object o = dynamic.get(field);
+
+                if (info == null){
+                    if (o instanceof DynamicRealmObject){
+                        ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class));
+                    } else {
+                        ret.put(field, o);
+                    }
                     continue;
                 }
-                Object o = dynamic.get(info.getName());
 
                 if (Number.class.isAssignableFrom(info.getType())){
                     Number n = (Number)dynamic.get(info.getName());
