@@ -223,11 +223,17 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
         QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
-        int ret = 0;
-        RealmResults result = realmQuery.findAll();
+        mRealm.beginTransaction();
 
-        ret = result.size();
-        result.clear();
+        int ret = 0;
+        try {
+            RealmResults result = realmQuery.findAll();
+
+            ret = result.size();
+            result.clear();
+        } finally {
+            mRealm.commitTransaction();
+        }
         mRealm.close();
 
         return ret;
