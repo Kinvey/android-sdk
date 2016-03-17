@@ -65,14 +65,22 @@ public class SyncManager {
     public void enqueueRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
 
         HttpRequest httpRequest = clientRequest.buildHttpRequest();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        httpRequest.getContent().writeTo(os);
-
         SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
-        entityID.id = clientRequest.getJsonContent().get("_id").toString();
+
+        if (httpRequest.getContent() != null) {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            httpRequest.getContent().writeTo(os);
+            entityID.data = os.toString("UTF-8");
+        }
+
+        if (clientRequest.getJsonContent() != null) {
+            entityID.id = clientRequest.getJsonContent().get("_id").toString();
+        }
+        if (clientRequest.containsKey("entityID")){
+            entityID.id = clientRequest.get("entityID").toString();
+        }
         entityID.customerVersion = clientRequest.getCustomerAppVersion();
         entityID.customheader = clientRequest.getCustomRequestProperties();
-        entityID.data = os.toString("UTF-8");
 
         SyncRequest request = new SyncRequest(
                 SyncRequest.HttpVerb.valueOf(clientRequest.getRequestMethod().toUpperCase()),
@@ -122,6 +130,7 @@ public class SyncManager {
         try {
             if (request.getEntityID().data != null) {
                 entity = client.getJsonFactory().createJsonParser(request.getEntityID().data).parse(GenericJson.class);
+
             }
         } catch (IOException e) {
             e.printStackTrace();

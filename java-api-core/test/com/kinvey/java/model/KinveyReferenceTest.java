@@ -5,7 +5,6 @@ import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import junit.framework.Test;
-import sun.net.www.content.text.Generic;
 
 /**
  * Created by edward on 7/31/15.

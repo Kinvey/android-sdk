@@ -18,10 +18,9 @@ public class AnnotationProcessingTest extends TestCase {
 
 
     @Test
-    public void testInlineObjects(){
+    public void testInlineObjects() throws InstantiationException, IllegalAccessException {
         GenericJson genericJson = ReferenceHelper.processReferences(new GenericJson() {
-            @Key("test")
-            @KinveyReference(collection = "test", itemClass = SampleGson.class)
+            @KinveyReference(fieldName = "test", collection = "test", itemClass = SampleGson.class)
             GenericJson innerObject = new SampleGson("test");
         }, new ReferenceHelper.ReferenceListener() {
             @Override
@@ -41,7 +40,7 @@ public class AnnotationProcessingTest extends TestCase {
 
 
     @Test
-    public void testInlineCollection(){
+    public void testInlineCollection() throws InstantiationException, IllegalAccessException {
 
         final List<SampleGson> inner = new ArrayList<SampleGson>();
         for (int i = 0 ; i < 10; i++){
@@ -49,8 +48,7 @@ public class AnnotationProcessingTest extends TestCase {
         }
 
         GenericJson genericJson = ReferenceHelper.processReferences(new GenericJson() {
-            @Key("test")
-            @KinveyReference(collection = "test", itemClass = SampleGson.class)
+            @KinveyReference(fieldName = "test", collection = "test", itemClass = SampleGson.class)
             List<SampleGson> innerObject = inner;
         }, new ReferenceHelper.ReferenceListener() {
             @Override
