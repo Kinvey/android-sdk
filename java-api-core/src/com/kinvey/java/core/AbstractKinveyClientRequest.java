@@ -337,6 +337,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         // normal request
         HttpRequest request = buildHttpRequest();
         throwExceptionOnError = request.getThrowExceptionOnExecuteError();
+
+        request.setReadTimeout(client.getRequestTimeout());
+
         request.setThrowExceptionOnExecuteError(false);
         request.setParser(getAbstractKinveyClient().getObjectParser());
 
