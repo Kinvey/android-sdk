@@ -39,6 +39,7 @@ import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  *
@@ -168,7 +169,7 @@ public class User<T extends User> extends GenericJson   {
      */
     public void setMICHostName(String newHostName){
     	if (!newHostName.toLowerCase().startsWith("https")){
-    		throw new KinveyException("MIC Hostname must use the https protocol, trying to set: " + newHostName);
+    		throw new KinveyException(KinveyClientErrorCode.MICError, "MIC Hostname must use the https protocol, trying to set: " + newHostName);
     	}
     	if (!newHostName.endsWith("/")){
     		newHostName += "/";
@@ -736,9 +737,8 @@ public class User<T extends User> extends GenericJson   {
 
         public T execute() throws IOException {
             if (isUserLoggedIn()){
-                throw new KinveyException("Attempting to login when a user is already logged in",
-                        "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
-                        "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
+                throw new KinveyException(KinveyClientErrorCode.AlreadyLoggedIn);
+
             }
             String userType = "";
             T ret;
@@ -1090,7 +1090,7 @@ public class User<T extends User> extends GenericJson   {
 
     		int codeIndex = newLocation.indexOf("code=");
     		if (codeIndex == -1){
-    			throw new KinveyException("Redirect does not contain `code=`, was: " + newLocation);
+    			throw new KinveyException(KinveyClientErrorCode.ResponseMalformed, "Redirect does not contain `code=`, was: " + newLocation);
     		}
     		
     		String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());

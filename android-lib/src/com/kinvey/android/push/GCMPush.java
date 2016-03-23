@@ -37,7 +37,7 @@ import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
-
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 
 /**
@@ -85,11 +85,11 @@ public class GCMPush extends AbstractPush {
     @Override
     public GCMPush initialize(final Application currentApp) {
         if (!getClient().user().isUserLoggedIn()){
-            throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
+            throw  new KinveyException(KinveyClientErrorCode.NoActiveUser);
         }
         
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
-        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");  
+        	throw new KinveyException(KinveyClientErrorCode.NoGooglePlay);
         }
         
         

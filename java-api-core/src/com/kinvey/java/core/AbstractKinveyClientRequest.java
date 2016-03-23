@@ -16,6 +16,8 @@
 package com.kinvey.java.core;
 
 import java.io.*;
+import java.net.UnknownHostException;
+
 import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Charsets;
@@ -29,6 +31,9 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.offline.FileCache;
 import com.kinvey.java.offline.FilePolicy;
 import com.kinvey.java.offline.MediaOfflineDownloader;
+import com.kinvey.java.query.KinveyClientErrorCode;
+
+import org.apache.http.conn.ConnectTimeoutException;
 
 /**
  * @author m0rganic
@@ -291,7 +296,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         if (httpRequest.getHeaders().containsKey("x-kinvey-custom-request-properties")){
         	String customHeaders = (String) httpRequest.getHeaders().get("X-Kinvey-Custom-Request-Properties");
         	if (customHeaders.getBytes("UTF-8").length > 2000){
-        		throw new KinveyException("Cannot attach more than 2000 bytes of Custom Request Properties");
+        		throw new KinveyException(KinveyClientErrorCode.RequestError, "Cannot attach more than 2000 bytes of Custom Request Properties");
         	}
         }
         return httpRequest;
@@ -332,6 +337,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         // normal request
         HttpRequest request = buildHttpRequest();
         throwExceptionOnError = request.getThrowExceptionOnExecuteError();
+
+        request.setReadTimeout(client.getRequestTimeout());
+
         request.setThrowExceptionOnExecuteError(false);
         request.setParser(getAbstractKinveyClient().getObjectParser());
 
@@ -405,7 +413,12 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @throws IOException
      */
     public T execute() throws IOException {
-        HttpResponse response = executeUnparsed();
+        HttpResponse response;
+        try {
+            response = executeUnparsed();
+        } catch (Exception e){
+            throw new KinveyException(KinveyClientErrorCode.RequestError, e);
+        }
        
         if (overrideRedirect){
         	return onRedirect(response.getHeaders().getLocation());
@@ -431,7 +444,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             
         }catch(IllegalArgumentException e){
             Logger.ERROR("unable to parse response -> " + e.toString());
-            throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
+            throw new KinveyException(KinveyClientErrorCode.CantParseJson, e);
 
         }catch (NullPointerException ex){
             return null;
