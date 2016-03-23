@@ -27,6 +27,7 @@ import com.google.api.client.util.ObjectParser;
 import com.kinvey.java.File;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * @author m0rganic
@@ -253,7 +254,7 @@ public abstract class AbstractKinveyClient {
         	
             this.baseUrl = normalizeRootUrl(baseUrl);
             if (!this.baseUrl.toUpperCase().startsWith("HTTPS")){
-            	throw new KinveyException("Kinvey requires `https` as the protocol when setting a base URL, instead found: " + this.baseUrl.substring(0, this.baseUrl.indexOf(":/")) + " in baseURL: " + this.baseUrl);
+            	throw new KinveyException(KinveyClientErrorCode.RequestError, "Kinvey requires `https` as the protocol when setting a base URL, instead found: " + this.baseUrl.substring(0, this.baseUrl.indexOf(":/")) + " in baseURL: " + this.baseUrl);
             }
             return this;
         }

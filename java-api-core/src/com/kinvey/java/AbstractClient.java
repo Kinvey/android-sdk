@@ -41,6 +41,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 import com.kinvey.java.query.MongoQueryFilter;
 
 /**
@@ -76,6 +77,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     
     private GenericData customRequestProperties = new GenericData();
     private boolean useDeltaCache;
+    private int requestTimeout;
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -158,6 +160,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             if (currentUser == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+                if (appKey == null || appSecret == null){
+                    throw new KinveyException(KinveyClientErrorCode.MissingAppCredentials);
+                }
                 this.currentUser = new User(this, getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
@@ -285,6 +290,14 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         this.useDeltaCache = useDeltaCache;
     }
 
+    public int getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    public void setRequestTimeout(int requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
+
     /**
      * Builder class for AppdataKinveyClient.
      *
@@ -293,6 +306,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public static abstract class Builder extends AbstractKinveyJsonClient.Builder {
         private CredentialStore store;
         private Properties props = new Properties();
+        protected int requestTimeout;
 
         /**
          * @param transport              HttpTransport
@@ -423,6 +437,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             return getProps().getProperty(opt.value, defaultValue);
         }
 
+        public Builder setRequestTimeout(int requestTimeout) {
+            this.requestTimeout = requestTimeout;
+            return this;
+        }
+
 
         /**
          * Standard set of kinvey property names that are set in the {@code kinvey.properties}
@@ -468,7 +487,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**MIC Version**/
             MIC_VERSION("mic.version"),
             /**DeltaSet cache enabled **/
-            DELTA_SET_CACHE("app.deltaset"),;
+            DELTA_SET_CACHE("app.deltaset"),
+            /** Request Timeout**/
+            REQUEST_TIMEOUT("request.timeout")
+            ;
 
 
             private final String value;

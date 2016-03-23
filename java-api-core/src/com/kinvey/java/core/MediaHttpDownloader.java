@@ -48,6 +48,7 @@ import java.io.OutputStream;
 
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * Media HTTP Downloader, with support for both direct and resumable media downloads. Documentation
@@ -218,7 +219,8 @@ public class MediaHttpDownloader {
         
         if (initialResponse == null){
             if (progressListener != null) {
-                progressListener.onFailure(new KinveyException("BlobNotFound", "This blob not found for this app backend", "The file being downloaded does not exist."));
+
+                progressListener.onFailure(new KinveyException(KinveyClientErrorCode.BlobNotFound));
             }
         	return;
         }
@@ -232,7 +234,7 @@ public class MediaHttpDownloader {
         if(initialResponse.getDownloadURL() != null){
             downloadUrl = new GenericUrl(initialResponse.getDownloadURL());
         }else{
-            throw new KinveyException("_downloadURL is null!","do not remove _downloadURL in collection hooks for File!","The library cannot download a file without this url");
+            throw new KinveyException(KinveyClientErrorCode.DownloadUrlMissing);
         }
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
