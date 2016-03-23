@@ -22,6 +22,7 @@ import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 import java.io.IOException;
 
@@ -49,6 +50,18 @@ public class KinveyJsonResponseException extends HttpResponseException {
     this.details = details;
     this.message = message;
   }
+
+  /**
+   *
+   * @param responseExceptionBuilder builder for HttpResponseException
+   * @param details detail message give by the response
+   * @param message general message
+   */
+  private KinveyJsonResponseException(HttpResponseException.Builder responseExceptionBuilder, KinveyJsonError details, String message) {
+    super(responseExceptionBuilder);
+    this.details = details;
+    this.message = message;
+  }
   
 
 
@@ -68,9 +81,7 @@ public class KinveyJsonResponseException extends HttpResponseException {
           parser = jsonFactory.createJsonParser(response.getContent());
           details = KinveyJsonError.parse(jsonFactory, response);
         } catch (Exception e) {
-        	throw new KinveyException("Unable to parse the JSON in the response", 
-        			"examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)",
-        			e.toString());
+          throw new KinveyException(KinveyClientErrorCode.CantParseJson, e);
         } finally {
           if (parser == null) {
             response.ignore();
@@ -88,7 +99,9 @@ public class KinveyJsonResponseException extends HttpResponseException {
         (details == null ? "unknown" : String.format("%s%n%s", details.getError(),
             details.getDescription()));
     
-    return new KinveyJsonResponseException(response, details, detailMessage);
+    return new KinveyJsonResponseException(
+            new Builder(response.getStatusCode(), response.getStatusMessage(), response.getHeaders()),
+            details, detailMessage);
   }
 
   /**

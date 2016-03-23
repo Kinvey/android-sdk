@@ -557,6 +557,7 @@ public class Client extends AbstractClient {
             return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 18 ?  //versions affected by no auth challenge exception
                     new ApacheHttpTransport() :
                     AndroidHttp.newCompatibleTransport();
+
         }
 
         /**
@@ -625,6 +626,14 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.BASE_URL) != null) {
                 this.setBaseUrl(super.getString(Option.BASE_URL));
+            }
+
+            if (super.getString(Option.REQUEST_TIMEOUT) != null){
+                try {
+                    this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)));
+                } catch (Exception e){
+                    Logger.WARNING(Option.REQUEST_TIMEOUT.name() + " should have an integer value");
+                }
             }
 
             if (super.getString(Option.PORT) != null){
@@ -723,6 +732,7 @@ public class Client extends AbstractClient {
             client.setUserClass(userClass);
             client.clientUsers = AndroidClientUsers.getClientUsers(context);
             client.setUseDeltaCache(useDeltaCache);
+            client.setRequestTimeout(requestTimeout);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

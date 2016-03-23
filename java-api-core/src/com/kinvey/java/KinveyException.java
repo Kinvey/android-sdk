@@ -13,6 +13,8 @@
  */
 package com.kinvey.java;
 
+import com.kinvey.java.query.KinveyClientErrorCode;
+
 /**
  * @author edwardf
  */
@@ -21,21 +23,48 @@ public class KinveyException extends RuntimeException{
     private String reason;
     private String fix;
     private String explanation;
+    private KinveyClientErrorCode errorCode;
 
 
 
+    public KinveyException(KinveyClientErrorCode errorCode){
+        super(formatMessage(errorCode.getReason(), errorCode.getExplain(), errorCode.getFix()));
+
+        this.errorCode = errorCode;
+        this.reason = errorCode.getReason();
+        this.explanation = errorCode.getExplain();
+        this.fix = errorCode.getFix();
+    }
+
+    public KinveyException(KinveyClientErrorCode errorCode, Exception cause){
+        super(formatMessage(errorCode.getReason(), errorCode.getExplain(), cause.toString()));
+        this.errorCode = errorCode;
+        this.reason = errorCode.getReason();
+        this.explanation = errorCode.getExplain();
+        this.fix = errorCode.getFix();
+
+    }
+
+    @Deprecated
     public KinveyException(String reason, String fix, String explanation){
         super(formatMessage(reason, fix, explanation));
         this.reason = reason;
         this.fix = fix;
         this.explanation = explanation;
     }
-    
+    @Deprecated
     public KinveyException(String reason){
     	super(formatMessage(reason));
     	this.reason = reason;
     	this.fix = "";
     	this.explanation = "";
+    }
+
+    public KinveyException(KinveyClientErrorCode errorCode, String reason){
+        super(formatMessage(reason));
+        this.errorCode = errorCode;
+        this.reason = reason;
+        this.errorCode = errorCode;
     }
 
 
@@ -72,4 +101,7 @@ public class KinveyException extends RuntimeException{
     		
     }
 
+    public KinveyClientErrorCode getErrorCode() {
+        return errorCode;
+    }
 }
