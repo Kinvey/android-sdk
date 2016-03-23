@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
+/*
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -60,11 +60,7 @@ public class DataStore<T extends GenericJson> {
      * @param storeType type of storage that client want to use
      */
     public DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
-
         this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
-
-
-
     }
 
     protected  DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
@@ -207,9 +203,11 @@ public class DataStore<T extends GenericJson> {
      */
     public void pullBlocking(Query query) {
         try {
-            List<T> networkData = new ReadRequest<T>(cache, query, ReadPolicy.FORCE_NETWORK, Long.MAX_VALUE, networkManager).execute();
-            cache.clear();
+            query = query == null ? client.query() : query;
+            List<T> networkData = networkManager.getBlocking(query, cache.get(query)).execute();
+            cache.delete(query);
             cache.save(networkData);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

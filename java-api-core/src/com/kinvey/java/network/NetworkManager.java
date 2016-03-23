@@ -1,5 +1,5 @@
-/** 
- * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
+/*
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -11,8 +11,9 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
+
 package com.kinvey.java.network;
 
 import com.google.api.client.json.GenericJson;
@@ -30,9 +31,14 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.deltaset.DeltaSetItem;
+import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class for managing appData access to the Kinvey backend.
@@ -194,7 +200,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Get getBlocking(Query query) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, Array.newInstance(myClass,0).getClass());
+        Get get = new Get(query, new ArrayList<T>().getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -209,7 +215,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Get getBlocking(String queryString) throws IOException{
     	Preconditions.checkNotNull(queryString);
-        Get get = new Get(queryString, Array.newInstance(myClass,0).getClass());
+        Get get = new Get(queryString, new ArrayList<T>().getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -240,7 +246,7 @@ public class NetworkManager<T extends GenericJson> {
      * @throws java.io.IOException
      */
     public Get getBlocking(Query query, String[] resolves, int resolve_depth, boolean retain) throws IOException {
-        Get getEntity = new Get(query, Array.newInstance(myClass,0).getClass(), resolves, resolve_depth, retain);
+        Get getEntity = new Get(query, new ArrayList<T>().getClass(), resolves, resolve_depth, retain);
         client.initializeRequest(getEntity);
         return getEntity;
     }
@@ -283,6 +289,22 @@ public class NetworkManager<T extends GenericJson> {
 
     public Get getBlocking() throws IOException {
         return getBlocking(new Query());
+    }
+
+
+    /**
+     * Method to get a query of entities that are changed on server side agains given ones.  Pass
+     * an empty query and empty items to compare with to return all entities in a collection.
+     *
+     * @param query Query to get
+     * @return Get object
+     * @throws java.io.IOException
+     */
+    public Get getBlocking(Query query, List<T> cachedItems) throws IOException {
+        Preconditions.checkNotNull(query);
+        Get get = new DeltaGet(query, new ArrayList<T>().getClass(), cachedItems);
+        client.initializeRequest(get);
+        return get;
     }
 
     /**
@@ -452,6 +474,133 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(aggregate);
         return aggregate;
     }
+    
+    
+    private class MetadataGet extends AbstractKinveyJsonClientRequest<DeltaSetItem[]>{
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+                "{?query,fields,tls,sort,limit,skip,resolve,resolve_depth,retainReference}";
+        @Key
+        private String collectionName;
+        @Key("query")
+        private String queryFilter;
+        @Key("sort")
+        private String sortFilter;
+
+        @Key("limit")
+        protected String limit;
+        @Key("skip")
+        protected String skip;
+        
+
+        @Key
+        private String fields = "_id,_kmd";
+        @Key
+        private boolean tls = true;
+
+        MetadataGet(DeltaGet getRequest){
+            super(client, "GET", REST_PATH, null, DeltaSetItem[].class);
+            this.queryFilter = getRequest.queryFilter;
+
+
+            this.skip = getRequest.skip;
+            this.limit = getRequest.limit;
+
+
+            collectionName = getRequest.collectionName;
+            sortFilter = getRequest.sortFilter;
+
+
+            this.collectionName = NetworkManager.this.getCollectionName();
+            //prevent caching and offline store for that request
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", client.getClientAppVersion());
+            if (client.getCustomRequestProperties() != null && !client.getCustomRequestProperties().isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(client.getCustomRequestProperties()) );
+            }
+        }
+
+
+        public DeltaSetItem[] execute() throws IOException {
+            return super.execute();
+        }
+
+    }
+
+    /**
+     * Generic DeltaGet class.  Constructs the HTTP request object for Get
+     * requests with Delta set cache functionality.
+     *
+     */
+    public class DeltaGet extends Get {
+
+        private static final int IDS_PER_PAGE = 100;
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
+        private List<T> currentItems;
+
+        DeltaGet(Query query, Class myClass, List<T> currentItems) {
+            super(query, myClass);
+            this.currentItems = currentItems;
+        }
+
+
+        @Override
+        public List<T> execute() throws IOException {
+            List<T> ret = new ArrayList<T>();
+            if (currentItems != null && !currentItems.isEmpty()) {
+                MetadataGet deltaRequest = new MetadataGet(this);
+                client.initializeRequest(deltaRequest);
+                DeltaSetItem[] itemsArray = deltaRequest.execute();
+
+                //init empty array in case if there is no ids to update
+                List<T> updatedOnline = new ArrayList<T>();
+
+                List<DeltaSetItem> items = new ArrayList<DeltaSetItem>();
+                Collections.addAll(items, itemsArray);
+
+                List<String> ids = DeltaSetMerge.getIdsForUpdate(currentItems, items);
+                if (ids.size() > 0) {
+                    updatedOnline = fetchIdsWithPaging(ids);
+                }
+
+                ret = DeltaSetMerge.merge(items, currentItems, updatedOnline, client.getObjectParser());
+            }
+            if (ret == null){
+                ret = super.execute();
+            }
+
+            return ret;
+        }
+
+        private List<T> fetchIdsWithPaging(List<String> ids) throws IOException {
+
+            List<T> ret = new ArrayList<T>();
+            int pos = 0;
+            while (ids.size() > 0){
+                int chunkSize = ids.size() < IDS_PER_PAGE ? ids.size() : IDS_PER_PAGE;
+
+                List<String> chunkItems = ids.subList(0, chunkSize);
+                ids = ids.subList(chunkSize, ids.size());
+
+                Query query = query().in("_id", chunkItems.toArray((String[])Array.newInstance(String.class, chunkSize)));
+                Get pageGet = new Get(query,
+                        getResponseClass(),
+                        resolve != null ? resolve.split(",") : new String[]{},
+                        resolve_depth != null ? Integer.parseInt(resolve_depth) : 0,
+                        retainReferences != null && Boolean.parseBoolean(retainReferences));
+
+                client.initializeRequest(pageGet);
+                List<T> pageGetResult = pageGet.execute();
+                ret.addAll(pageGetResult);
+
+            }
+
+            return ret;
+        }
+
+
+
+    }
 
 
     /**
@@ -459,28 +608,28 @@ public class NetworkManager<T extends GenericJson> {
      * requests.
      *
      */
-    public class Get extends AbstractKinveyJsonClientRequest<T[]> {
+    public class Get extends AbstractKinveyJsonClientRequest<List<T>> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
-        private String collectionName;
+        protected String collectionName;
         @Key("query")
-        private String queryFilter;
+        protected String queryFilter;
         @Key("sort")
-        private String sortFilter;
+        protected String sortFilter;
         @Key("limit")
-        private String limit;
+        protected String limit;
         @Key("skip")
-        private String skip;
+        protected String skip;
 
         @Key("resolve")
-        private String resolve;
+        protected String resolve;
         @Key("resolve_depth")
-        private String resolve_depth;
+        protected String resolve_depth;
         @Key("retainReferences")
-        private String retainReferences;
+        protected String retainReferences;
 
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
@@ -532,7 +681,7 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
-        public T[] execute() throws IOException {
+        public List<T> execute() throws IOException {
             return super.execute();
         }
     }

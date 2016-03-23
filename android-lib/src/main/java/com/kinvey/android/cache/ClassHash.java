@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *
+ * This software is licensed to you under the Kinvey terms of service located at
+ * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
+ * software, you hereby accept such terms of service  (and any agreement referenced
+ * therein) and agree that you have read, understand and agree to be bound by such
+ * terms of service and are of legal age to agree to such terms with Kinvey.
+ *
+ * This software contains valuable confidential and proprietary information of
+ * KINVEY, INC and is subject to applicable licensing agreements.
+ * Unauthorized reproduction, transmission or distribution of this file and its
+ * contents is a violation of applicable laws.
+ *
+ */
+
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
@@ -17,8 +33,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -34,6 +52,11 @@ import io.realm.RealmObjectSchema;
 public abstract class ClassHash {
 
     public static String TTL_FIELD = "__ttl__";
+    private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
+        {
+            add(TTL_FIELD);
+        }
+    };
 
     private static final Class[] ALLOWED = new Class[]{
             boolean.class,
@@ -293,10 +316,13 @@ public abstract class ClassHash {
                 Object o = dynamic.get(field);
 
                 if (info == null){
-                    if (o instanceof DynamicRealmObject){
-                        ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class));
-                    } else {
-                        ret.put(field, o);
+                    //prevent private fields like "__ttl__" to be published
+                    if (!PRIVATE_FIELDS.contains(field)){
+                        if (o instanceof DynamicRealmObject){
+                            ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class));
+                        } else {
+                            ret.put(field, o);
+                        }
                     }
                     continue;
                 }

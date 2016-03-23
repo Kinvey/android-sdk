@@ -1,5 +1,5 @@
-/** 
- * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
+/*
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -11,8 +11,9 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
+
 package com.kinvey.java.core;
 
 import java.io.*;

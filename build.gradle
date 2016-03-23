@@ -2,7 +2,7 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '2.10.4'
+  version = '3.0.0'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
 }
 
@@ -31,9 +31,13 @@ subprojects {
 
 task makeAndroidJar(type: Copy)  {
     from 'android-lib/build/intermediates/bundles/release'
+    from 'android-lib/build/outputs/aar'
     into 'android-lib/build/libs'
     include('classes.jar')
-    rename ('classes.jar', 'android-lib-' + version +'.jar')
+    include('android-lib-release.aar')
+    rename('classes.jar', 'kinvey-android-' + version + '.jar')
+    rename('android-lib-release.aar', 'kinvey-android-' + version + '.aar')
+
 }
 
 task copyAndroid(type: Copy)  {
@@ -49,15 +53,44 @@ task copyJava(type: Copy)  {
 }
 
 task zipAndroid(type: Zip) {
-    from 'release/build/android'
-    from 'release/dependencies'
+  from('release/build/android'){
+    include "**/*.jar"
+    into "libJar"
+
+  }
+  from('release/build/android'){
+    include "*.aar"
+    include "*core*.jar"
+    into "/lib"
+
+  }
+
+  from('release/dependencies'){
+    include "*.jar"
+    include "*.aar"
+    into "/libJar"
+  }
+
+  from('release/dependencies'){
+    include "*.jar"
+    include "*.aar"
+    into "/lib"
+  }
+
+  from 'release/readme/android'
     baseName = 'kinvey-android'
     destinationDir = file('release/zipped')
 }
 
 task zipJava(type: Zip)  {
-    from 'release/build/java'
-    from 'release/dependencies'
+  from('release/build/nativejava'){
+    into '/libs'
+  }
+  from('release/dependencies'){
+    include "*.jar"
+    into '/libs'
+  }
+  from 'release/readme/nativejava'
     baseName = 'kinvey-java'
     destinationDir = file('release/zipped')
 
@@ -95,17 +128,21 @@ task prepSecure{
 
 
 
-task release(dependsOn: ['prepCore', 'prepJava', 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
+task release(dependsOn: ['prepCore', /*'prepJava',*/ 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', /*'copyJava',*/ 'zipAndroid', /*'zipJava'*/]){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 
 
 prepAndroid.mustRunAfter prepCore
-prepJava.mustRunAfter prepAndroid
-prepSecure.mustRunAfter prepJava
+//prepJava.mustRunAfter prepAndroid
+//prepSecure.mustRunAfter prepJava
+prepSecure.mustRunAfter prepAndroid
 makeAndroidJar.mustRunAfter prepSecure
 copyAndroid.mustRunAfter makeAndroidJar
-copyJava.mustRunAfter copyAndroid
-zipAndroid.mustRunAfter copyJava
-zipJava.mustRunAfter zipAndroid
-release.mustRunAfter zipJava
+//copyJava.mustRunAfter copyAndroid
+//zipAndroid.mustRunAfter copyJava
+zipAndroid.mustRunAfter copyAndroid
+
+//zipJava.mustRunAfter zipAndroid
+//release.mustRunAfter zipJava
+release.mustRunAfter zipAndroid
