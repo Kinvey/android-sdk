@@ -139,10 +139,14 @@ public class AbstractKinveyOfflineClientRequest<T> extends AbstractKinveyJsonCli
            
                 ret = super.execute();
                 if (ret != null){
-                    if (ret.getClass().isArray()){
-                        this.offlineFromStore();
-                    }else{
-                        this.store.insertEntity((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), ret, this);
+                    if (getRequestMethod().equals("DELETE")){
+                        this.store.executeDelete((AbstractClient)getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), this);
+                    } else {
+                        if (ret.getClass().isArray()) {
+                            this.offlineFromStore();
+                        } else {
+                            this.store.insertEntity((AbstractClient) getAbstractKinveyClient(), ((AbstractClient) getAbstractKinveyClient()).appData(this.collectionName, this.getResponseClass()), ret, this);
+                        }
                     }
 
                 }
