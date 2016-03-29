@@ -47,6 +47,6 @@ public class ReadQueryRequest<T extends GenericJson> extends AbstractReadRequest
 
     @Override
     protected List<T> getNetwork() throws IOException {
-        return getNetworkData().getBlocking(query).execute();
+        return Arrays.asList(getNetworkData().getBlocking(query).execute());
     }
 }

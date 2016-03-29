@@ -53,24 +53,13 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
+            case PREFER_LOCAL:
                 ret = cache.get(query);
                 break;
             case FORCE_NETWORK:
-                ret = networkManager.getBlocking(query).execute();
-                break;
-            case PREFER_LOCAL:
-                ret = cache.get(query);
-                if (ret == null || ret.size() == 0){
-                    ret = networkManager.getBlocking(query).execute();
-                }
-                break;
             case PREFER_NETWORK:
-                try {
-                    ret = networkManager.getBlocking(query).execute();
-                } catch (IOException e){
-                    ret = cache.get(query);
-                }
-
+                ret = Arrays.asList(networkManager.getBlocking(query).execute());
+                break;
         }
         return ret;
     }

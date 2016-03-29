@@ -50,8 +50,7 @@ public class FileStoreTest {
     @Test
     public void testUpload() throws IOException {
 
-        FileStore fileStore = client.getFileStore();
-        fileStore.setStoreType(StoreType.CACHE);
+        FileStore fileStore = client.getFileStore(StoreType.CACHE);
 
         File test = new File(client.getContext().getFilesDir(), "test.xml");
         if (!test.exists()){
@@ -85,7 +84,7 @@ public class FileStoreTest {
     public void testUploadAndGet() throws IOException {
 
         for (StoreType storeType : StoreType.values()){
-            FileStore fileStore = client.getFileStore();
+            FileStore fileStore = client.getFileStore(storeType);
             fileStore.setStoreType(storeType);
 
             File test = new File(client.getContext().getFilesDir(), "test"+storeType.toString()+".xml");
@@ -122,7 +121,7 @@ public class FileStoreTest {
             success = false;
 
 
-            client.getFileStore().download(metadata,
+            client.getFileStore(storeType).download(metadata,
                     new FileOutputStream(destination),
                     new DownloaderProgressListener() {
                         @Override
@@ -151,7 +150,7 @@ public class FileStoreTest {
 
     @Test
     public void asyncCallsShouldNotFail() throws IOException {
-        AsyncFileStore fileStore = client.getFileStore();
+        AsyncFileStore fileStore = client.getFileStore(StoreType.SYNC);
 
         File test = new File(client.getContext().getFilesDir(), "test.xml");
         if (!test.exists()){

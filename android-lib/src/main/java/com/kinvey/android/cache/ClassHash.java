@@ -355,11 +355,14 @@ public abstract class ClassHash {
                             for (int i = 0 ; i < list.size(); i++){
                                 array[i] = realmToObject(list.get(i), underlying);
                             }
+                            ret.put(info.getName(), array);
                         } else {
                             Collection<Object> c = Data.newCollectionInstance(info.getType());
                             for (int i = 0 ; i < list.size(); i++){
                                 c.add(realmToObject(list.get(i), underlying));
                             }
+                            ret.put(info.getName(), c);
+
                         }
 
                     }

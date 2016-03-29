@@ -37,6 +37,7 @@ import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -200,7 +201,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Get getBlocking(Query query) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new Get(query, new ArrayList<T>().getClass());
+        Get get = new Get(query, Array.newInstance(myClass,0).getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -215,7 +216,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Get getBlocking(String queryString) throws IOException{
     	Preconditions.checkNotNull(queryString);
-        Get get = new Get(queryString, new ArrayList<T>().getClass());
+        Get get = new Get(queryString, Array.newInstance(myClass,0).getClass());
         client.initializeRequest(get);
         return get;
     }
@@ -246,7 +247,7 @@ public class NetworkManager<T extends GenericJson> {
      * @throws java.io.IOException
      */
     public Get getBlocking(Query query, String[] resolves, int resolve_depth, boolean retain) throws IOException {
-        Get getEntity = new Get(query, new ArrayList<T>().getClass(), resolves, resolve_depth, retain);
+        Get getEntity = new Get(query, Array.newInstance(myClass,0).getClass(), resolves, resolve_depth, retain);
         client.initializeRequest(getEntity);
         return getEntity;
     }
@@ -302,7 +303,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Get getBlocking(Query query, List<T> cachedItems) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new DeltaGet(query, new ArrayList<T>().getClass(), cachedItems);
+        Get get = new DeltaGet(query, Array.newInstance(myClass,0).getClass(), cachedItems);
         client.initializeRequest(get);
         return get;
     }
@@ -545,8 +546,8 @@ public class NetworkManager<T extends GenericJson> {
 
 
         @Override
-        public List<T> execute() throws IOException {
-            List<T> ret = new ArrayList<T>();
+        public T[] execute() throws IOException {
+            T[] ret = null;
             if (currentItems != null && !currentItems.isEmpty()) {
                 MetadataGet deltaRequest = new MetadataGet(this);
                 client.initializeRequest(deltaRequest);
@@ -563,7 +564,7 @@ public class NetworkManager<T extends GenericJson> {
                     updatedOnline = fetchIdsWithPaging(ids);
                 }
 
-                ret = DeltaSetMerge.merge(items, currentItems, updatedOnline, client.getObjectParser());
+                ret = DeltaSetMerge.merge(items, currentItems, updatedOnline, client.getObjectParser(), myClass);
             }
             if (ret == null){
                 ret = super.execute();
@@ -590,8 +591,8 @@ public class NetworkManager<T extends GenericJson> {
                         retainReferences != null && Boolean.parseBoolean(retainReferences));
 
                 client.initializeRequest(pageGet);
-                List<T> pageGetResult = pageGet.execute();
-                ret.addAll(pageGetResult);
+                T[] pageGetResult = pageGet.execute();
+                ret.addAll(Arrays.asList(pageGetResult));
 
             }
 
@@ -608,7 +609,7 @@ public class NetworkManager<T extends GenericJson> {
      * requests.
      *
      */
-    public class Get extends AbstractKinveyJsonClientRequest<List<T>> {
+    public class Get extends AbstractKinveyJsonClientRequest<T[]> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -681,7 +682,7 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
-        public List<T> execute() throws IOException {
+        public T[] execute() throws IOException {
             return super.execute();
         }
     }

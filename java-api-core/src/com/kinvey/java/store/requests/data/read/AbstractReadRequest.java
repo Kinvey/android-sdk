@@ -46,24 +46,13 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
+            case PREFER_LOCAL:
                 ret = getCached();
                 break;
             case FORCE_NETWORK:
+            case PREFER_NETWORK:
                 ret = getNetwork();
                 break;
-            case PREFER_LOCAL:
-                ret = getCached();
-                if (ret == null || ret.size() == 0){
-                    ret = getNetwork();
-                }
-                break;
-            case PREFER_NETWORK:
-                try {
-                    ret = getNetwork();
-                } catch (IOException e){
-                    ret = getCached();
-                }
-
         }
         return ret;
     }

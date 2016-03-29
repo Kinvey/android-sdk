@@ -48,24 +48,13 @@ public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyData
         T ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
+            case PREFER_LOCAL:
                 ret = cache.get(id);
                 break;
             case FORCE_NETWORK:
+            case PREFER_NETWORK:
                 ret = networkManager.getEntityBlocking(id).execute();
                 break;
-            case PREFER_LOCAL:
-                ret = cache.get(id);
-                if (ret == null || ret.size() == 0){
-                    ret = networkManager.getEntityBlocking(id).execute();
-                }
-                break;
-            case PREFER_NETWORK:
-                try {
-                    ret = networkManager.getEntityBlocking(id).execute();
-                } catch (IOException e){
-                    ret = cache.get(id);
-                }
-
         }
         return ret;
     }

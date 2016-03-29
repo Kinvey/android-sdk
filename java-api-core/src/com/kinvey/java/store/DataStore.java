@@ -36,6 +36,7 @@ import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -204,7 +205,7 @@ public class DataStore<T extends GenericJson> {
     public void pullBlocking(Query query) {
         try {
             query = query == null ? client.query() : query;
-            List<T> networkData = networkManager.getBlocking(query, cache.get(query)).execute();
+            List<T> networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
             cache.delete(query);
             cache.save(networkData);
 

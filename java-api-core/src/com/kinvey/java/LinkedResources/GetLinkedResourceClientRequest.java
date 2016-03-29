@@ -27,6 +27,7 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.StoreType;
 
 /**
  * Implementation of a Client Request, which can download linked resources through the NetworkFileManager API as well as the NetworkManager API in one request.
@@ -111,7 +112,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
                 entity.getFile(key).setOutput(new ByteArrayOutputStream());
 
-                FileStore store = getAbstractKinveyClient().getFileStore();
+                FileStore store = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
 
                 FileMetaData meta = new FileMetaData();
                 if (((Map) entity.get(key)).containsKey("_id")){

@@ -79,7 +79,7 @@ public class AsyncFileStore extends FileStore {
             //DELETE METHODS
 
             asyncMethods.put(FileMethods.DELETE_ID,
-                    FileStore.class.getDeclaredMethod("download", String.class));
+                    FileStore.class.getDeclaredMethod("delete", String.class));
 
             //DOWNLOAD METHODS
             asyncMethods.put(FileMethods.DOWNLOAD_FILENAME,

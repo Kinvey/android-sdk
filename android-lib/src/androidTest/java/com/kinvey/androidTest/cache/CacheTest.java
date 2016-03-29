@@ -176,7 +176,7 @@ public class CacheTest {
             ids.add(String.valueOf(i));
         }
 
-        List<SampleGsonWithInnerList> saved = cache.save(items);
+            List<SampleGsonWithInnerList> saved = cache.save(items);
 
         assertNotNull(saved);
 

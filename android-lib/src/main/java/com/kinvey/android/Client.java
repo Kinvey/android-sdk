@@ -169,10 +169,10 @@ public class Client extends AbstractClient {
      * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
      *                for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link com.kinvey.java.store.DataStore} for the defined collection
+     * @return Instance of {@link com.kinvey.java.store.DataStore} for getStoreTypethe defined collection
      */
-    public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass) {
-        return new AsyncDataStore(collectionName, myClass, this, getStoreType());
+    public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass, StoreType storeType) {
+        return new AsyncDataStore(collectionName, myClass, this, storeType);
 
     }
 
@@ -198,11 +198,12 @@ public class Client extends AbstractClient {
      * @param collectionName The name of the collection
      * @param myClass The class that defines the entity of type {@link LinkedGenericJson} used for saving and fetching of data
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
+     * @param storeType indicate what kind of store will we use
      * @return Instance of {@link AsyncLinkedNetworkManager} for the defined collection
      */
-    public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass) {
+    public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass, StoreType storeType) {
         return new AsyncLinkedDataStore(this, collectionName, myClass,
-                getStoreType());
+                storeType);
     }
 
 
@@ -212,7 +213,7 @@ public class Client extends AbstractClient {
             getCacheManager().clear();
         }
 
-        this.getFileStore().clear();
+        this.getFileStore(StoreType.SYNC).clear();
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
             e.performLockdown(userStore().getCurrentUser().getId());
@@ -912,9 +913,9 @@ public class Client extends AbstractClient {
     }
 
     @Override
-    public AsyncFileStore getFileStore() {
+    public AsyncFileStore getFileStore(StoreType storeType) {
         return new AsyncFileStore(new NetworkFileManager(this),
-                    getCacheManager(), 60*60*1000L, getStoreType(), getFileCacheFolder()
+                    getCacheManager(), 60*60*1000L, storeType, getFileCacheFolder()
                 );
     }
 

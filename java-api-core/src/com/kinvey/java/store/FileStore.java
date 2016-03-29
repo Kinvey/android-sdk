@@ -136,40 +136,16 @@ public class FileStore {
         FileMetaData[] metaData = null;
         switch (storeType.readPolicy){
             case FORCE_LOCAL:
+            case PREFER_LOCAL:
                 List<FileMetadataWithPath> list = cache.get(q);
                 metaData = new FileMetaData[list.size()];
                 list.toArray(metaData);
                 break;
             case FORCE_NETWORK:
+            case PREFER_NETWORK:
                 metaData = download.execute();
                 break;
-            case PREFER_LOCAL:
-                List<FileMetadataWithPath> cached = cache.get(q);
 
-                if (metaData == null){
-                    try {
-                        metaData = download.execute();
-                    } catch (IOException e){
-
-                    }
-                } else {
-                    metaData = new FileMetaData[cached.size()];
-                    cached.toArray(metaData);
-                }
-                break;
-            case PREFER_NETWORK:
-                try {
-                    metaData = download.execute();
-                } catch (IOException e){
-
-                }
-
-                if (metaData == null){
-                    List<FileMetadataWithPath> c = cache.get(q);
-                    metaData = new FileMetaData[c.size()];
-                    c.toArray(metaData);
-                }
-                break;
         }
 
         return metaData;
@@ -182,31 +158,12 @@ public class FileStore {
         FileMetaData metaData = null;
         switch (storeType.readPolicy){
             case FORCE_LOCAL:
+            case PREFER_LOCAL:
                 metaData = cache.get(id);
                 break;
             case FORCE_NETWORK:
-                metaData = download.execute();
-                break;
-            case PREFER_LOCAL:
-                metaData = cache.get(id);
-                if (metaData == null){
-                    try {
-                        metaData = download.execute();
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-                break;
             case PREFER_NETWORK:
-                try {
-                    metaData = download.execute();
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-
-                if (metaData == null){
-                    metaData = cache.get(id);
-                }
+                metaData = download.execute();
                 break;
         }
 

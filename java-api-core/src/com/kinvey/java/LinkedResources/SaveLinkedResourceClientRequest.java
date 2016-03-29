@@ -31,6 +31,7 @@ import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.StoreType;
 
 /**
  * Implementation of a Client Request, which can upload linked resources.
@@ -122,7 +123,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             }
                         };
 
-                        FileStore fileStore = getAbstractKinveyClient().getFileStore();
+                        FileStore fileStore = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
 
                         LinkedFile lf = ((LinkedGenericJson) getJsonContent()).getFile(key);
                         FileMetaData meta = new FileMetaData(lf.getId());

@@ -91,9 +91,33 @@ public interface ICache<T extends GenericJson> {
     void clear();
 
 
+    /**
+     * gets the first item from the cache
+     * @return first item
+     */
     T getFirst();
 
+    /**
+     * gets the first item from the cache matched query
+     * @return first item
+     */
     T getFirst(Query q);
 
+    /**
+     * gets the count of matching elements from the cache
+     * @return first the count of matching elements from the cache
+     */
     long count(Query q);
+
+    /**
+     * get current ttl value
+     * @return current ttl value
+     */
+    long getTtl();
+
+    /**
+     * sets current ttl value
+     * @param ttl ttl value to be set in milliseconds
+     */
+    void setTtl(long ttl);
 }

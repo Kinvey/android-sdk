@@ -23,6 +23,7 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,6 +44,6 @@ public class ReadAllRequest<T extends GenericJson> extends AbstractReadRequest<T
 
     @Override
     protected List<T> getNetwork() throws IOException {
-        return getNetworkData().getBlocking().execute();
+        return Arrays.asList(getNetworkData().getBlocking().execute());
     }
 }

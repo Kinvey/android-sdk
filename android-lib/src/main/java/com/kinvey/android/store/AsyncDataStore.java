@@ -425,6 +425,11 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
+    public void pull(KinveyPullCallback callback){
+        SyncManager syncManager = client.getSycManager();
+        new AsyncPullRequest(this, null, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
     public void purge(KinveyPurgeCallback callback){
         SyncManager syncManager = client.getSycManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE) , callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -458,7 +463,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link Query} to filter the results.
+     * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
     public void sync(final Query query, final KinveySyncCallback callback){
@@ -492,6 +497,14 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
             }
         });
+    }
+
+    /**
+     * Alias for {@link #sync(Query, KinveySyncCallback)} where query equals null
+     * @param callback callback to notify working thread on operation status update
+     */
+    public void sync(final KinveySyncCallback callback){
+        sync(null, callback);
     }
 
     public Query query() {

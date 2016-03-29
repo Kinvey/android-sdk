@@ -83,8 +83,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     
     private GenericData customRequestProperties = new GenericData();
 
-    private StoreType storeType = StoreType.SYNC;
-
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
     }
@@ -467,16 +465,16 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public abstract ICacheManager getCacheManager();
 
     public <T extends GenericJson> DataStore<T> dataStore(String collection,
-                                                          Class<T> clazz){
+                                                          Class<T> clazz, StoreType storeType){
         return new DataStore<T>(this, collection, clazz, storeType);
     }
 
     public abstract String getFileCacheFolder();
 
-    public FileStore getFileStore(){
+    public FileStore getFileStore(StoreType storeType){
         return new FileStore(new NetworkFileManager(this),
                 getCacheManager(), 60*1000*1000L,
-                StoreType.CACHE, getFileCacheFolder());
+                storeType, getFileCacheFolder());
     }
 
     protected abstract ICacheManager getSyncCacheManager();
@@ -485,11 +483,4 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         return new SyncManager(getSyncCacheManager());
     }
 
-    public StoreType getStoreType() {
-        return storeType;
-    }
-
-    public void setStoreType(StoreType storeType) {
-        this.storeType = storeType;
-    }
 }

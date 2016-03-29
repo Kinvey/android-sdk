@@ -153,9 +153,7 @@ public class SyncManager {
         }
 
 
-        DataStore networkDataStore = client.dataStore(request.getCollectionName(), GenericJson.class);
-        networkDataStore.setStoreType(StoreType.NETWORK);
-
+        DataStore networkDataStore = client.dataStore(request.getCollectionName(), GenericJson.class, StoreType.NETWORK);
 
         if (request.getHttpVerb().equals(SyncRequest.HttpVerb.PUT) || request.getHttpVerb().equals((SyncRequest.HttpVerb.POST))) {
 
@@ -184,7 +182,8 @@ public class SyncManager {
                 try {
                     networkDataStore.delete(request.getEntityID().id);
                 } catch(Exception e) {
-                    enqueueRequest(request);
+                    //TODO: need to check the errors
+                    //enqueueRequest(request);
                 }
 
             }

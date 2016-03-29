@@ -18,6 +18,9 @@ package com.kinvey.java.deltaset;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
 import java.io.IOException;
@@ -80,7 +83,7 @@ public abstract class DeltaSetMerge {
         return ret;
     }
 
-    public static <T> List<T> merge(List<DeltaSetItem> order, List<T> cache, List<T> online, JsonObjectParser parser) throws IOException {
+    public static <T> T[] merge(List<DeltaSetItem> order, List<T> cache, List<T> online, JsonObjectParser parser, Class<T> arrayItem) throws IOException {
         Map<String, T> cacheMap = listToMap(cache),
                 onlineMap = listToMap(online);
 
@@ -95,7 +98,7 @@ public abstract class DeltaSetMerge {
             }
         }
 
-        return orderedResult;
+        return orderedResult.toArray((T[])Array.newInstance(arrayItem, 1));
 
 
     };
