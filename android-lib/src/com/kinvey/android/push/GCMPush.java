@@ -292,7 +292,9 @@ public class GCMPush extends AbstractPush {
     @Override
     public void disablePush(KinveyClientCallback callback) {
      	if (getClient() == null || getClient().getContext() == null){
-            callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestAbortError));
+            if (callback != null){
+                callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestAbortError););
+            }
     		return;
     	}
     	String regid = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
@@ -304,7 +306,9 @@ public class GCMPush extends AbstractPush {
         if (!regid.isEmpty()){
     		registerWithKinvey(regid, false, callback);
     	} else {
-            callback.onSuccess(null);
+            if (callback != null) {
+                callback.onSuccess(null);
+            }
         }
     	
    
