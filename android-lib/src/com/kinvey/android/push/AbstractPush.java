@@ -51,13 +51,19 @@ public abstract class AbstractPush {
         return client;
     }
 
+    @Deprecated
     public abstract AbstractPush initialize(Application currentApp);
+
+    public abstract AbstractPush initialize(Application currentApp, KinveyClientCallback callback);
 
     public abstract String getPushId();
 
     public abstract boolean isPushEnabled();
 
+    @Deprecated
     public abstract void disablePush();
+
+    public abstract void disablePush(KinveyClientCallback callback);
 
     public abstract boolean isInProduction();
 

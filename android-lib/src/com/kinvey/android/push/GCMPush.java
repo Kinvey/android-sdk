@@ -39,6 +39,8 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.query.KinveyClientErrorCode;
 
+import javax.annotation.Nullable;
+
 
 /**
  *
@@ -72,6 +74,20 @@ public class GCMPush extends AbstractPush {
         this.inProduction = inProduction;
     }
 
+    /**
+     */
+
+    /**
+     * Initialize GCM by registering the current user with both GCM as well as your backend at Kinvey.
+     * @deprecated use {@link #initialize(Application, KinveyClientCallback)} }
+     * current method added for backward capctibility and may be removed in new releases
+     * @return an instance of GCM push, initialized for the current user.
+     */
+    @Override
+    @Deprecated
+    public GCMPush initialize(final Application currentApp) {
+        return initialize(currentApp, null);
+    }
 
     /**
      * Initialize GCM by registering the current user with both GCM as well as your backend at Kinvey.
@@ -80,10 +96,11 @@ public class GCMPush extends AbstractPush {
      * are delegated to your custom `KinveyGCMService` which will handle any responses.
      *
      * @param currentApp - The current valid application context.
+     * @param callback callback to be notified when registration have been completed
      * @return an instance of GCM push, initialized for the current user.
      */
     @Override
-    public GCMPush initialize(final Application currentApp) {
+    public GCMPush initialize(final Application currentApp, final KinveyClientCallback callback) {
         if (!getClient().user().isUserLoggedIn()){
             throw  new KinveyException(KinveyClientErrorCode.NoActiveUser);
         }
@@ -107,7 +124,7 @@ public class GCMPush extends AbstractPush {
                     pref.putString(pref_regid, regid);
                     pref.commit();
 
-                    registerWithKinvey(regid, true);
+                    registerWithKinvey(regid, true, callback);
 
                 } catch (IOException ex) {
                 	Logger.ERROR("unable to register with GCM: " + ex.getMessage());
@@ -120,7 +137,13 @@ public class GCMPush extends AbstractPush {
         return this;
     }
 
-    public void registerWithKinvey(final String gcmRegID, boolean register) {
+    /**
+     *
+     * @param gcmRegID GCM registration id
+     * @param register boolean indicates if we need register or unregister
+     * @param callback callback th be notified when user operation have been completer
+     */
+    public void registerWithKinvey(final String gcmRegID, boolean register, @Nullable final KinveyClientCallback callback) {
         //registered on GCM but not on Kinvey?
     	Logger.INFO("about to register with Kinvey");
         if (client == null) {
@@ -142,7 +165,10 @@ public class GCMPush extends AbstractPush {
 						
 						@Override
 						public void onSuccess(User result) {
-							client.user().put("_messaging", result.get("_messaging"));
+                            if (callback != null){
+                                callback.onSuccess(result);
+                            }
+                            client.user().put("_messaging", result.get("_messaging"));
 							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
@@ -151,6 +177,10 @@ public class GCMPush extends AbstractPush {
 						
 						@Override
 						public void onFailure(Throwable error) {
+                            if (callback != null){
+                                callback.onFailure(error);
+                            }
+
 							Logger.ERROR("GCM - user update error: " + error);
 							
 						}
@@ -159,6 +189,9 @@ public class GCMPush extends AbstractPush {
 
                 @Override
                 public void onFailure(Throwable error) {
+                    if (callback != null){
+                        callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestError));
+                    }
                 	Logger.ERROR("GCM - user update error: " + error);
                 }
             }, gcmRegID);
@@ -167,7 +200,10 @@ public class GCMPush extends AbstractPush {
             client.push().disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+                    if (callback != null){
+                        callback.onSuccess(result);
+                    }
+                    Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
                 	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
                 	client.getContext().startService(reg);      
@@ -175,7 +211,10 @@ public class GCMPush extends AbstractPush {
 
                 @Override
                 public void onFailure(Throwable error) {
-                	Logger.ERROR("GCM - user update error: " + error);
+                    if (callback != null){
+                        callback.onFailure(error);
+                    }
+                    Logger.ERROR("GCM - user update error: " + error);
                 }
             }, gcmRegID);
 
@@ -234,14 +273,28 @@ public class GCMPush extends AbstractPush {
     }
 
     /**
+     * @deprecated use {@link #disablePush(KinveyClientCallback)}
+     * current method added for backward capctibility and may be removed in new releases
+     */
+    @Override
+    @Deprecated
+    public void disablePush() {
+        disablePush(null);
+    }
+
+    /**
      * Unregisters the current user with GCM
      *
      * Unregistration is asynchronous, so use the `KinveyGCMService` to receive notification when unregistration has completed.
+     * @param callback callback to be invoked when unregister is done
      *
      */
     @Override
-    public void disablePush() {
+    public void disablePush(KinveyClientCallback callback) {
      	if (getClient() == null || getClient().getContext() == null){
+            if (callback != null){
+                callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestAbortError););
+            }
     		return;
     	}
     	String regid = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).getString(pref_regid, "");
@@ -251,8 +304,12 @@ public class GCMPush extends AbstractPush {
         pref.commit();    
     	
         if (!regid.isEmpty()){
-    		registerWithKinvey(regid, false);
-    	}
+    		registerWithKinvey(regid, false, callback);
+    	} else {
+            if (callback != null) {
+                callback.onSuccess(null);
+            }
+        }
     	
    
     	final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
