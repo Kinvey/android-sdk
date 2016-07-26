@@ -562,7 +562,7 @@ public class UserStore<T extends User> {
     public GetMICAccessToken getMICToken(String code) throws IOException{
 
 //        grant_type: "authorization_code" - this is always set to this value
-//        code: use the ‘code’ returned in the callback
+//        code: use the 'code' returned in the callback
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
 //        client_id:  The appKey (kid) of the app
 
