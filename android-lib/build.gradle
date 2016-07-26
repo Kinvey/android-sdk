@@ -55,8 +55,8 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.5.0'
-    classpath "io.realm:realm-gradle-plugin:0.88.0"
+    classpath 'com.android.tools.build:gradle:1.1.1'
+    classpath "io.realm:realm-gradle-plugin:1.1.0"
   }
 
 }
@@ -64,7 +64,7 @@ buildscript {
 dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   compile project(':java-api-core')
-  compile 'com.github.KeepSafe:ReLinker:1.1'
+  // compile 'com.github.KeepSafe:ReLinker:1.1'
 
   /*compile('com.google.http-client:google-http-client:1.19.0') {
           exclude(module: 'xpp3')

@@ -246,7 +246,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             RealmResults result = realmQuery.findAll();
 
             ret = result.size();
-            result.clear();
+            result.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
         }
@@ -278,8 +278,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
             RealmResults result = query.findAll();
             ret = result.size();
-
-            result.clear();
+            result.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
         }
@@ -300,7 +299,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     .equalTo("_id", id);
             RealmResults realmResults = query.findAll();
             ret = realmResults.size();
-            realmResults.clear();
+            realmResults.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
         }
@@ -319,7 +318,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             mRealm.where(mCollection)
                     .findAll()
-                    .clear();
+                    .deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
         }
