@@ -21,7 +21,13 @@ package com.kinvey.android.sync;
  *
  * @author edwardf
  */
-public interface KinveySyncCallback {
+public interface KinveySyncCallback<T> {
+
+    /**
+     * Used to indicate successful execution of a request by the background service.
+     */
+
+    void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<T> tKinveyPullResponse);
 
     /**
      * Used to indicate successful execution of a request by the background service.

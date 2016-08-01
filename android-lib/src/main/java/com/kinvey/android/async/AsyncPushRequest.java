@@ -18,17 +18,23 @@ package com.kinvey.android.async;
 
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
+import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
-public class AsyncPushRequest extends AsyncClientRequest<Integer> {
+public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
+
     private final String collection;
     private final SyncManager manager;
     private final AbstractClient client;
@@ -36,15 +42,16 @@ public class AsyncPushRequest extends AsyncClientRequest<Integer> {
 
     /**
      * Async push request constructor
+     *
      * @param collection Collection name that we want to push
-     * @param manager sync manager that is used
-     * @param client Kinvey client instance to be used to execute network requests
-     * @param callback async callbacks to be invoked when job is done
+     * @param manager    sync manager that is used
+     * @param client     Kinvey client instance to be used to execute network requests
+     * @param callback   async callbacks to be invoked when job is done
      */
     public AsyncPushRequest(String collection,
                             SyncManager manager,
                             AbstractClient client,
-                            KinveyPushCallback callback){
+                            KinveyPushCallback callback) {
         super(callback);
         this.collection = collection;
         this.manager = manager;
@@ -52,21 +59,35 @@ public class AsyncPushRequest extends AsyncClientRequest<Integer> {
         this.callback = callback;
     }
 
-
     @Override
-    protected Integer executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected KinveyPushResponse executeAsync() throws IOException, InvocationTargetException {
         SyncRequest syncRequest = null;
+        KinveyPushResponse pushResponse = new KinveyPushResponse();
+        List<String> errors = new ArrayList<>();
         int progress = 0;
-        while ((syncRequest = manager.popSingleQueue(collection)) != null){
-            manager.executeRequest(client, syncRequest);
-            publishProgress(++progress);
+
+        while ((syncRequest = manager.popSingleQueue(collection)) != null) {
+            try {
+                manager.executeRequest(client, syncRequest);
+            } catch (AccessControlException e) { //TODO check Exception
+                errors.add(e.getMessage());
+            }
+            pushResponse.setSuccessSyncCount(++progress);
+            publishProgress(pushResponse);
         }
-        return progress;
+
+        pushResponse.setListOfExceptions(errors);
+        return pushResponse;
     }
 
     @Override
-    protected void onProgressUpdate(Integer... values) {
+    protected void onPostExecute(KinveyPushResponse response) {
+        callback.onSuccess(response);
+    }
+
+    @Override
+    protected void onProgressUpdate(KinveyPushResponse... values) {
         super.onProgressUpdate(values);
-        callback.onProgress(values[0], manager.getCount(this.collection));
+        callback.onProgress(values[0].getSuccessSyncCount(), manager.getCount(this.collection));
     }
 }

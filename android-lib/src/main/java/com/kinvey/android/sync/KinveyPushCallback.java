@@ -23,12 +23,12 @@ import com.kinvey.java.core.KinveyClientCallback;
  *
  * @author mvakulich
  */
-public interface KinveyPushCallback extends KinveyClientCallback<Integer> {
+public interface KinveyPushCallback extends KinveyClientCallback<KinveyPushResponse> {
 
     /**
      * Used to indicate successful execution of a request by the background service.
      */
-    void onSuccess(Integer result);
+    void onSuccess(KinveyPushResponse result);
 
     /**
      * Used to indicate the failed execution of a request by the background service.
