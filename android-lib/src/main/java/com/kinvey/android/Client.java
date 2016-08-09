@@ -673,7 +673,6 @@ public class Client extends AbstractClient {
 
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
-            kinveyHandlerThread.prepareHandler();
 
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),

@@ -45,7 +45,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
 
     private Throwable error;
     private KinveyClientCallback callback;
-
+    private KinveyCallbackHandler kinveyCallbackHandler;
 //    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
 
     /**
@@ -55,6 +55,8 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
      */
     public AsyncClientRequest(KinveyClientCallback callback) {
         this.callback = callback;
+        //todo
+        kinveyCallbackHandler = new KinveyCallbackHandler();
     }
 
     public void execute() {
@@ -80,7 +82,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
             error = e;
             Log.d("TEST","test", e);
         }
-        KinveyCallbackHandler kinveyCallbackHandler = new KinveyCallbackHandler();
+//        KinveyCallbackHandler kinveyCallbackHandler = new KinveyCallbackHandler();
         if (hasCancelled()){
             kinveyCallbackHandler.onCancel(((KinveyCancellableCallback) callback));
         }else if(error != null){

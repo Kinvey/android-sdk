@@ -1,10 +1,11 @@
 package com.kinvey.android;
 
+import android.os.Handler;
 import android.os.HandlerThread;
 
 public class KinveyHandlerThread extends HandlerThread {
 
-    private KinveyCallbackHandler mCallbackHandler;
+    private Handler mWorkerHandler;
 
     public KinveyHandlerThread(String name, int priority) {
         super(name, priority);
@@ -15,10 +16,12 @@ public class KinveyHandlerThread extends HandlerThread {
     }
 
     public void postTask(Runnable task){
-        mCallbackHandler.post(task);
+        mWorkerHandler.post(task);
     }
 
-    public void prepareHandler(){
-        mCallbackHandler = new KinveyCallbackHandler(getLooper());
+    @Override
+    protected void onLooperPrepared() {
+        mWorkerHandler = new Handler(getLooper());
     }
+
 }
