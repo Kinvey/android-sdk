@@ -38,7 +38,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> implements AsyncExecutor<T> {
+public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T> {
 
     public enum ExecutorType {
         KINVEYSERIAL,
@@ -50,7 +50,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
 
     private KinveyClientCallback callback;
 
-    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
+//    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
 
     /**
      * <p>Constructor for AsyncClientRequest.</p>
@@ -61,9 +61,44 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
         this.callback = callback;
     }
 
+    public void execute() {
+        Client.sharedInstance().getKinveyWorkerThread().postTask(this);
+    }
+
+    public void execute(ExecutorType executorType) {
+        Client.sharedInstance().getKinveyWorkerThread().postTask(this);
+    }
+
+    @Override
+    public void run() {
+        T result = null;
+        if(callback == null){
+            return;
+        }
+        try{
+            if (!hasCancelled()){
+                result = executeAsync();
+            }
+        }catch(Throwable e){
+//            e.printStackTrace();
+            error = e;
+
+            Log.d("TEST","test", e);
+
+        }
+
+/*        if (hasCancelled()){
+            ((KinveyCancellableCallback) callback).onCancelled();
+        }else*/ if(error != null){
+            Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
+        }else{
+            Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onResult(result, callback);
+        }
+
+    }
 
     /** {@inheritDoc} */
-    @Override
+    /*@Override
     protected T doInBackground(Object ... params) {
         T result = null;
 
@@ -78,10 +113,11 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
 
         }
         return result;
-    }
+    }*/
 
     /** {@inheritDoc} */
-    @Override
+
+/*    @Override
     protected void onPostExecute(T response) {
         if(callback == null){
             return;
@@ -93,7 +129,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
         }else{
             callback.onSuccess(response);
         }
-    }
+    }*/
 
     /**
      * This method will be executed Asynchronously.
@@ -101,10 +137,12 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
      * @return a T object.
      * @throws java.io.IOException if any.
      */
+
+
     protected abstract T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
 
 
-    public AsyncTask<Object, T, T> execute(ExecutorType type, Object... params) {
+/*    public AsyncTask<Object, T, T> execute(ExecutorType type, Object... params) {
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             switch(type) {
@@ -120,7 +158,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
         } else {
             return super.execute(params);
         }
-    }
+    }*/
 
     /**
      * Get the callback for this request
@@ -137,7 +175,9 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
      * the concurrency benefits of only having a single AsyncTask thread.  AndroidClientRequest will run in
      * its own thread pool of one.
      */
-    private static class KinveySerialExecutor implements Executor {
+
+
+/*    private static class KinveySerialExecutor implements Executor {
         final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
         Runnable mActive;
 
@@ -161,7 +201,7 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
                 THREAD_POOL_EXECUTOR.execute(mActive);
             }
         }
-    }
+    }*/
 
     @Override
     public void notify(final T object){
@@ -180,9 +220,6 @@ public abstract class AsyncClientRequest<T> extends AsyncTask<Object, T, T> impl
             }
         };
         mainHandler.post(myRunnable);
-
-
-
     }
 
 

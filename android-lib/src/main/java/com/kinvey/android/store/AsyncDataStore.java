@@ -43,8 +43,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
@@ -93,11 +93,10 @@ import java.util.List;
  *
  * @author mjsalinger
  * @author edwardf
- * @since 2.0
  * @version $Id: $
+ * @since 2.0
  */
 public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
-
 
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
@@ -108,11 +107,11 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
     private static final String KEY_GET_BY_IDS = "KEY_GET_BY_IDS";
 
-    private static final String KEY_DELETE_BY_ID ="KEY_DELETE_BY_ID";
+    private static final String KEY_DELETE_BY_ID = "KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
-    private static final String KEY_DELETE_BY_IDS ="KEY_DELETE_BY_IDS";
+    private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
 
-    private static final String KEY_PURGE ="KEY_PURGE";
+    private static final String KEY_PURGE = "KEY_PURGE";
 
 
 
@@ -133,12 +132,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     private static Map<String, Method> methodMap;
 
 
-
-
-
-
-
-    /** Constructor to instantiate the NetworkManager class.
+    /**
+     * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
@@ -148,7 +143,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         loadMethodMap();
     }
 
-    /** Constructor to instantiate the NetworkManager class.
+    /**
+     * Constructor to instantiate the NetworkManager class.
      *
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
@@ -158,9 +154,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         loadMethodMap();
     }
 
-    private void loadMethodMap(){
+    private void loadMethodMap() {
         Map<String, Method> tempMap = new HashMap<String, Method>();
-        try{
+        try {
             tempMap.put(KEY_GET_BY_ID, DataStore.class.getMethod("find", String.class));
             tempMap.put(KEY_GET_BY_QUERY, DataStore.class.getMethod("find", Query.class));
             tempMap.put(KEY_GET_ALL, DataStore.class.getMethod("find"));
@@ -179,8 +175,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             tempMap.put(KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class}));*/
 
 
-        }catch (NoSuchMethodException e){
-        	Logger.ERROR("CHECK METHOD MAP, no such method is declared in NetworkManager!");
+        } catch (NoSuchMethodException e) {
+            Logger.ERROR("CHECK METHOD MAP, no such method is declared in NetworkManager!");
 //            e.printStackTrace();
         }
 
@@ -209,7 +205,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param entityID entityID to fetch
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(String entityID, KinveyClientCallback<T> callback)  {
+    public void find(String entityID, KinveyClientCallback<T> callback) {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -232,14 +228,13 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param ids A list of _ids to query by.
+     * @param ids      A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Iterable<String> ids, KinveyListCallback<T> callback){
+    public void find(Iterable<String> ids, KinveyListCallback<T> callback) {
         Preconditions.checkNotNull(ids, "ids must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
-
 
 
     /**
@@ -264,12 +259,12 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link Query} to filter the results.
+     * @param query    {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Query query, KinveyListCallback<T> callback){
+    public void find(Query query, KinveyListCallback<T> callback) {
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query);/*.execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);*/
     }
 
     /**
@@ -299,9 +294,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     }
 
 
-
-
-
     /**
      * Asynchronous request to save or update an entity to a collection.
      * <p>
@@ -321,10 +313,10 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param entity The entity to save
+     * @param entity   The entity to save
      * @param callback KinveyClientCallback<T>
      */
-    public void save(T entity, KinveyClientCallback<T> callback)  {
+    public void save(T entity, KinveyClientCallback<T> callback) {
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
         new SaveRequest(entity, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
 
@@ -379,9 +371,13 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </p>
      *
      * @param entityIDs the ID to delete
-     * @param callback KinveyDeleteCallback
+     * @param callback  KinveyDeleteCallback
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
+
+//        Client.sharedInstance().getKinveyWorkerThread().postTask(
+//                new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs));
+
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -406,7 +402,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link Query} to filter the results.
+     * @param query    {@link Query} to filter the results.
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
@@ -414,25 +410,24 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
     }
 
-
-    public void push(KinveyPushCallback callback){
+    public void push(KinveyPushCallback callback) {
         SyncManager syncManager = client.getSycManager();
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    public void pull(Query query, KinveyPullCallback callback){
+    public void pull(Query query, KinveyPullCallback callback) {
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    public void pull(KinveyPullCallback callback){
+    public void pull(KinveyPullCallback callback) {
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, null, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    public void purge(KinveyPurgeCallback callback){
+    public void purge(KinveyPurgeCallback callback) {
         SyncManager syncManager = client.getSycManager();
-        new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE) , callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -451,6 +446,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
+     *     public void onSuccess(KinveyPushResponse kinveyPushResponse,
+     *         KinveyPullResponse<T> kinveyPullResponse) {...}
      *         void onSuccess(){...};
      *         void onPullStarted(){...};
      *         void onPushStarted(){...};
@@ -463,33 +460,32 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link Query} to filter the results or null if you don't want to query.
+     * @param query    {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final KinveySyncCallback callback){
-        callback.onPushStarted();
+    public void sync(final Query query, final KinveySyncCallback<T> callback) {
+//        callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
             public void onSuccess(Integer result) {
-                callback.onPushSuccess();
-                callback.onPullStarted();
                 AsyncDataStore.this.pull(query, new KinveyPullCallback() {
+
                     @Override
                     public void onSuccess(Integer result) {
-                        callback.onPullSuccess();
-                        callback.onSuccess();
+                        Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onResult(result, callback);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        callback.onFailure(error);
+                        Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable error) {
-                callback.onFailure(error);
+                Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
+//                callback.onFailure(error);
             }
 
             @Override
@@ -501,9 +497,10 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
     /**
      * Alias for {@link #sync(Query, KinveySyncCallback)} where query equals null
+     *
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final KinveySyncCallback callback){
+    public void sync(final KinveySyncCallback<T> callback) {
         sync(null, callback);
     }
 
@@ -524,10 +521,4 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             return (AsyncDataStore.super.save(entity));
         }
     }
-
-
-
-
-
-
 }
