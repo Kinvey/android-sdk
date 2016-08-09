@@ -375,7 +375,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
 
-//        Client.sharedInstance().getKinveyWorkerThread().postTask(
+//        Client.sharedInstance().getKinveyHandlerThread().postTask(
 //                new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs));
 
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
@@ -472,20 +472,22 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
                     @Override
                     public void onSuccess(Integer result) {
-                        Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onResult(result, callback);
+                        callback.onSuccess(result);
+//                        Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onResult(result, callback);
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
-                        Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
+                        callback.onFailure(error);
+//                        Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onFailure(error, callback);
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
-//                callback.onFailure(error);
+//                Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onFailure(error, callback);
+                callback.onFailure(error);
             }
 
             @Override

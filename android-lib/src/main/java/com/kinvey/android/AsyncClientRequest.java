@@ -17,12 +17,9 @@ package com.kinvey.android;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayDeque;
-import java.util.concurrent.Executor;
 
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
@@ -47,7 +44,6 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
     }
 
     private Throwable error;
-
     private KinveyClientCallback callback;
 
 //    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
@@ -62,11 +58,11 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
     }
 
     public void execute() {
-        Client.sharedInstance().getKinveyWorkerThread().postTask(this);
+        Client.sharedInstance().getKinveyHandlerThread().postTask(this);
     }
 
     public void execute(ExecutorType executorType) {
-        Client.sharedInstance().getKinveyWorkerThread().postTask(this);
+        Client.sharedInstance().getKinveyHandlerThread().postTask(this);
     }
 
     @Override
@@ -82,54 +78,17 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
         }catch(Throwable e){
 //            e.printStackTrace();
             error = e;
-
             Log.d("TEST","test", e);
-
         }
-
-/*        if (hasCancelled()){
-            ((KinveyCancellableCallback) callback).onCancelled();
-        }else*/ if(error != null){
-            Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onFailure(error, callback);
-        }else{
-            Client.sharedInstance().getKinveyWorkerThread().getWorkerHandler().onResult(result, callback);
-        }
-
-    }
-
-    /** {@inheritDoc} */
-    /*@Override
-    protected T doInBackground(Object ... params) {
-        T result = null;
-
-        try{
-            if (!hasCancelled()){
-                result = executeAsync();
-            }
-        }catch(Throwable e){
-//            e.printStackTrace();
-            error = e;
-            Log.d("TEST","test", e);
-
-        }
-        return result;
-    }*/
-
-    /** {@inheritDoc} */
-
-/*    @Override
-    protected void onPostExecute(T response) {
-        if(callback == null){
-            return;
-        }
+        KinveyCallbackHandler kinveyCallbackHandler = new KinveyCallbackHandler();
         if (hasCancelled()){
-            ((KinveyCancellableCallback) callback).onCancelled();
+            kinveyCallbackHandler.onCancel(((KinveyCancellableCallback) callback));
         }else if(error != null){
-            callback.onFailure(error);
+            kinveyCallbackHandler.onFailure(error, callback);
         }else{
-            callback.onSuccess(response);
+            kinveyCallbackHandler.onResult(result, callback);
         }
-    }*/
+    }
 
     /**
      * This method will be executed Asynchronously.
@@ -138,27 +97,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
      * @throws java.io.IOException if any.
      */
 
-
     protected abstract T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
-
-
-/*    public AsyncTask<Object, T, T> execute(ExecutorType type, Object... params) {
-
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            switch(type) {
-                case KINVEYSERIAL:
-                    return super.executeOnExecutor(KINVEY_SERIAL_EXECUTOR, params);
-                case ANDROIDSERIAL:
-                    return super.executeOnExecutor(SERIAL_EXECUTOR, params);
-                case ANDROIDTHREADPOOL:
-                    return super.executeOnExecutor(THREAD_POOL_EXECUTOR, params);
-                default:
-                    throw new RuntimeException("Invalid Executor defined");
-            }
-        } else {
-            return super.execute(params);
-        }
-    }*/
 
     /**
      * Get the callback for this request
@@ -168,40 +107,6 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
     public KinveyClientCallback getCallback(){
         return callback;
     }
-
-    /**
-     * This class is a copy of the native SerialExecutor from AOSP.  It is duplicated here to allow
-     * AsyncClientRequest to run in their own Thread Pool seperate from the main application's AsyncTasks, but keep
-     * the concurrency benefits of only having a single AsyncTask thread.  AndroidClientRequest will run in
-     * its own thread pool of one.
-     */
-
-
-/*    private static class KinveySerialExecutor implements Executor {
-        final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
-        Runnable mActive;
-
-        public synchronized void execute(final Runnable r) {
-            mTasks.offer(new Runnable() {
-                public void run() {
-                    try {
-                        r.run();
-                    } finally {
-                        scheduleNext();
-                    }
-                }
-            });
-            if (mActive == null) {
-                scheduleNext();
-            }
-        }
-
-        protected synchronized void scheduleNext() {
-            if ((mActive = mTasks.poll()) != null) {
-                THREAD_POOL_EXECUTOR.execute(mActive);
-            }
-        }
-    }*/
 
     @Override
     public void notify(final T object){
