@@ -35,7 +35,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @since 2.0
  * @version $Id: $
  */
-public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T> {
+public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecutor<Result> {
 
     public enum ExecutorType {
         KINVEYSERIAL,
@@ -45,7 +45,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
 
     private Throwable error;
     private KinveyClientCallback callback;
-    private KinveyCallbackHandler kinveyCallbackHandler;
+    protected KinveyCallbackHandler kinveyCallbackHandler;
 //    private static final Executor KINVEY_SERIAL_EXECUTOR = new KinveySerialExecutor();
 
     /**
@@ -69,7 +69,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
 
     @Override
     public void run() {
-        T result = null;
+        Result result = null;
         if(callback == null){
             return;
         }
@@ -99,7 +99,7 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
      * @throws java.io.IOException if any.
      */
 
-    protected abstract T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
+    protected abstract Result executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
 
     /**
      * Get the callback for this request
@@ -111,22 +111,20 @@ public abstract class AsyncClientRequest<T> implements Runnable, AsyncExecutor<T
     }
 
     @Override
-    public void notify(final T object){
+    public void notify(final Result object){
     	Logger.INFO("notifying async client request");
-        Handler mainHandler = new Handler(Looper.getMainLooper());
 
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
                 if (getCallback() != null) {
                 	Logger.INFO("notifying callback");
-
                     getCallback().onSuccess(object);
                 }
 
             }
         };
-        mainHandler.post(myRunnable);
+        kinveyCallbackHandler.post(myRunnable);
     }
 
 

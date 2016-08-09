@@ -8,7 +8,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 
 public class KinveyCallbackHandler<T> extends Handler {
 
-    public void onResult(final T t, final KinveyClientCallback callback) {
+    public void onResult(final T t, final KinveyClientCallback<T> callback) {
 
         this.post(new Runnable() {
             @Override
@@ -18,7 +18,7 @@ public class KinveyCallbackHandler<T> extends Handler {
         });
     }
 
-    public void onFailure(final Throwable error, final KinveyClientCallback callback) {
+    public void onFailure(final Throwable error, final KinveyClientCallback<T> callback) {
         this.post(new Runnable() {
             @Override
             public void run() {
@@ -27,17 +27,13 @@ public class KinveyCallbackHandler<T> extends Handler {
         });
     }
 
-    public void onCancel(final KinveyCancellableCallback callback) {
+    public void onCancel(final KinveyCancellableCallback<T> callback) {
         this.post(new Runnable() {
             @Override
             public void run() {
                 callback.onCancelled();
             }
         });
-    }
-
-    public void onProgress() {
-
     }
 
 }

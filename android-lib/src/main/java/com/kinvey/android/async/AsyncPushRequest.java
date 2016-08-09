@@ -59,14 +59,18 @@ public class AsyncPushRequest extends AsyncClientRequest<Integer> {
         int progress = 0;
         while ((syncRequest = manager.popSingleQueue(collection)) != null){
             manager.executeRequest(client, syncRequest);
-//            publishProgress(++progress);
+            publishProgress(++progress);
         }
         return progress;
     }
 
-/*    @Override
-    protected void onProgressUpdate(Integer... values) {
-        super.onProgressUpdate(values);
-        callback.onProgress(values[0], manager.getCount(this.collection));
-    }*/
+    private void publishProgress(final Integer progress) {
+        kinveyCallbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onProgress(progress, manager.getCount(AsyncPushRequest.this.collection));
+            }
+        });
+    }
+
 }
