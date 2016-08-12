@@ -211,6 +211,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(String entityID, KinveyClientCallback<T> callback)  {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -238,6 +240,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(Iterable<String> ids, KinveyListCallback<T> callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -268,6 +272,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(Query query, KinveyListCallback<T> callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -294,6 +300,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(KinveyListCallback<T> callback) {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -320,6 +328,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyClientCallback<T>
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
         new SaveRequest(entity, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -348,6 +358,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -376,6 +388,8 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityIDs, "entityIDs cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -405,26 +419,36 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void push(KinveyPushCallback callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void pull(Query query, KinveyPullCallback callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void pull(KinveyPullCallback callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, null, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     public void purge(KinveyPurgeCallback callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE) , callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
