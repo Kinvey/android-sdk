@@ -212,7 +212,6 @@ public class DataStore<T extends GenericJson> {
      * should be user with {@link StoreType#SYNC}
      */
     public void pullBlocking(Query query) {
-        Preconditions.checkNotNull(query, "query must not be null.");
         try {
             query = query == null ? client.query() : query;
             List<T> networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());

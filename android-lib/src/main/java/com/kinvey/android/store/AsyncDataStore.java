@@ -415,7 +415,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     }
 
     public void pull(Query query, KinveyPullCallback callback){
-        Preconditions.checkNotNull(query, "query cannot be null.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
