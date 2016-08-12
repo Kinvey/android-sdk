@@ -37,6 +37,7 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.UserStore;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -210,6 +211,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(String entityID, KinveyClientCallback<T> callback)  {
+        Preconditions.checkNotNull(entityID, "entityID must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -239,8 +241,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkNotNull(ids, "ids must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
-
-
 
     /**
      * Asynchronous request to fetch an array of Entities using a Query object.
@@ -295,12 +295,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      */
     public void find(KinveyListCallback<T> callback) {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-
     }
-
-
-
-
 
     /**
      * Asynchronous request to save or update an entity to a collection.
@@ -327,7 +322,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     public void save(T entity, KinveyClientCallback<T> callback)  {
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
         new SaveRequest(entity, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-
     }
 
     /**
@@ -354,9 +348,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(entityID, "entityID cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
-
 
     /**
      * Asynchronous request to delete an entities from a collection.
@@ -382,6 +376,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(entityIDs, "entityIDs cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -410,10 +405,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
+        Preconditions.checkNotNull(query, "query cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-
     }
-
 
     public void push(KinveyPushCallback callback){
         SyncManager syncManager = client.getSycManager();
@@ -421,6 +415,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     }
 
     public void pull(Query query, KinveyPullCallback callback){
+        Preconditions.checkNotNull(query, "query cannot be null.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest(this, query, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
@@ -434,7 +429,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         SyncManager syncManager = client.getSycManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE) , callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
-
 
     /**
      * Asynchronous request to sync a collection of entites from a network collection by Query.
@@ -524,10 +518,4 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
             return (AsyncDataStore.super.save(entity));
         }
     }
-
-
-
-
-
-
 }

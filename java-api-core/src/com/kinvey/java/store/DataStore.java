@@ -17,6 +17,7 @@
 package com.kinvey.java.store;
 
 import com.google.api.client.json.GenericJson;
+import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -81,6 +82,7 @@ public class DataStore<T extends GenericJson> {
      * @return null or object that matched given id
      */
     public T find (String id){
+        Preconditions.checkNotNull(id, "id must not be null.");
         T ret = null;
         try {
             ret = new ReadSingleRequest<T>(cache, id, this.storeType.readPolicy, networkManager).execute();
@@ -96,6 +98,7 @@ public class DataStore<T extends GenericJson> {
      * @return List of object found for given ids
      */
     public List<T> find(Iterable<String> ids){
+        Preconditions.checkNotNull(ids, "ids must not be null.");
         List<T> ret = null;
         try {
             ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
@@ -112,6 +115,7 @@ public class DataStore<T extends GenericJson> {
      * @return list of objects that are found
      */
     public List<T> find (Query query) {
+        Preconditions.checkNotNull(query, "query must not be null.");
         // perform request based on policy
         List<T> ret = null;
         try {
@@ -146,6 +150,7 @@ public class DataStore<T extends GenericJson> {
      * @throws IOException
      */
     public List<T> save (Iterable<T> objects) throws IOException {
+        Preconditions.checkNotNull(objects, "objects must not be null.");
         return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSycManager()).execute();
     }
 
@@ -157,6 +162,7 @@ public class DataStore<T extends GenericJson> {
      * @throws IOException
      */
     public T save (T object) throws IOException {
+        Preconditions.checkNotNull(object, "object must not be null.");
         return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSycManager()).execute();
     }
 
@@ -167,6 +173,7 @@ public class DataStore<T extends GenericJson> {
      * @throws IOException
      */
     public Integer delete (String id) throws IOException {
+        Preconditions.checkNotNull(id, "id must not be null.");
         return new DeleteSingleRequest<T>(cache, networkManager, this.storeType.writePolicy, id, client.getSycManager()).execute();
     }
 
@@ -177,6 +184,7 @@ public class DataStore<T extends GenericJson> {
      * @throws IOException
      */
     public Integer delete (Query query) throws IOException {
+        Preconditions.checkNotNull(query, "query must not be null.");
         return new DeleteQueryRequest<T>(cache, networkManager, this.storeType.writePolicy, query, client.getSycManager()).execute();
     }
 
@@ -187,6 +195,7 @@ public class DataStore<T extends GenericJson> {
      * @throws IOException
      */
     public Integer delete (Iterable<String> ids) throws IOException {
+        Preconditions.checkNotNull(ids, "ids must not be null.");
         return new DeleteIdsRequest<T>(cache, networkManager, this.storeType.writePolicy, ids, client.getSycManager()).execute();
     }
 
@@ -203,6 +212,7 @@ public class DataStore<T extends GenericJson> {
      * should be user with {@link StoreType#SYNC}
      */
     public void pullBlocking(Query query) {
+        Preconditions.checkNotNull(query, "query must not be null.");
         try {
             query = query == null ? client.query() : query;
             List<T> networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
@@ -235,6 +245,7 @@ public class DataStore<T extends GenericJson> {
      * @param storeType
      */
     public void setStoreType(StoreType storeType) {
+        Preconditions.checkNotNull(storeType, "storeType must not be null.");
         this.storeType = storeType;
     }
 

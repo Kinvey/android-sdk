@@ -165,7 +165,7 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public T initUser(KinveyAuthResponse response, String userType, T userObject) throws IOException {
-
+        Preconditions.checkNotNull(userType, "UserType cannot be null.");
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
@@ -188,6 +188,8 @@ public class UserStore<T extends User> {
     }
 
     private T initUser(Credential credential, T userObject) {
+        Preconditions.checkNotNull(credential.getUserId(), "UserId cannot be null.");
+        Preconditions.checkNotNull(credential.getAuthToken(), "Token cannot be null.");
         currentUser = new User();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
@@ -197,6 +199,7 @@ public class UserStore<T extends User> {
     }
 
     public void removeFromStore(String userID) {
+        Preconditions.checkNotNull(userID, "UserId cannot be null.");
         CredentialManager credentialManager = new CredentialManager(client.getStore());
         credentialManager.removeCredential(userID);
     }
@@ -337,6 +340,7 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
+        Preconditions.checkNotNull(userId, "UserId cannot be null.");
         currentUser = new User();
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
@@ -397,6 +401,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest createBlocking(String userid, String password) throws IOException {
+        Preconditions.checkNotNull(userid, "UserId cannot be null.");
+        Preconditions.checkNotNull(password, "Password cannot be null.");
         return new LoginRequest(this, userid, password, true).buildAuthRequest();
     }
 
@@ -440,6 +446,7 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public RetrieveUsers retrieveBlocking(Query query) throws IOException{
+        Preconditions.checkNotNull(query, "query must not be null");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         RetrieveUsers retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
@@ -560,7 +567,7 @@ public class UserStore<T extends User> {
     }
 
     public GetMICAccessToken getMICToken(String code) throws IOException{
-
+        Preconditions.checkNotNull(code, "code must not be null");
 //        grant_type: "authorization_code" - this is always set to this value
 //        code: use the 'code' returned in the callback
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
@@ -580,6 +587,7 @@ public class UserStore<T extends User> {
     }
 
     public GetMICAccessToken useRefreshToken(String refreshToken) throws IOException{
+        Preconditions.checkNotNull(refreshToken, "refreshToken must not be null");
 //        grant_type: "refresh_token" - this is always set to this value  - note the difference
 //        refresh_token: use the refresh token
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
@@ -621,7 +629,9 @@ public class UserStore<T extends User> {
 
 
     public LoginToTempURL<T> MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
-
+        Preconditions.checkNotNull(username, "username must not be null");
+        Preconditions.checkNotNull(password, "password must not be null");
+        Preconditions.checkNotNull(tempURL, "tempURL must not be null");
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
 //    	response_type:  this is always set to “code”

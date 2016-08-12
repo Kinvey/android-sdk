@@ -172,8 +172,9 @@ public class Client extends AbstractClient {
      * @return Instance of {@link com.kinvey.java.store.DataStore} for getStoreTypethe defined collection
      */
     public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass, StoreType storeType) {
+        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
+        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         return new AsyncDataStore(collectionName, myClass, this, storeType);
-
     }
 
     /**
@@ -202,6 +203,8 @@ public class Client extends AbstractClient {
      * @return Instance of {@link AsyncLinkedNetworkManager} for the defined collection
      */
     public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass, StoreType storeType) {
+        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
+        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         return new AsyncLinkedDataStore(this, collectionName, myClass,
                 storeType);
     }
