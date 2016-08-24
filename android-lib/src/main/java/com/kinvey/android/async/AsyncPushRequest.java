@@ -21,6 +21,7 @@ import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.core.KinveyJsonError;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
@@ -37,6 +38,7 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
 
     private final String collection;
     private final SyncManager manager;
+    private List<SyncRequest> requests = null;
     private final AbstractClient client;
     private KinveyPushCallback callback;
 
@@ -61,18 +63,19 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
 
     @Override
     protected KinveyPushResponse executeAsync() throws IOException, InvocationTargetException {
-        SyncRequest syncRequest = null;
         KinveyPushResponse pushResponse = new KinveyPushResponse();
-        List<String> errors = new ArrayList<>();
+        List<Exception> errors = new ArrayList<>();
+        requests = manager.popSingleQueue(collection);
         int progress = 0;
 
-        while ((syncRequest = manager.popSingleQueue(collection)) != null) {
+        for(SyncRequest syncRequest: requests){
+
             try {
                 manager.executeRequest(client, syncRequest);
-            } catch (AccessControlException e) { //TODO check Exception
-                errors.add(e.getMessage());
+                pushResponse.setSuccessCount(++progress);
+            } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                errors.add(e);
             }
-            pushResponse.setSuccessSyncCount(++progress);
             publishProgress(pushResponse);
         }
 
@@ -88,6 +91,6 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
     @Override
     protected void onProgressUpdate(KinveyPushResponse... values) {
         super.onProgressUpdate(values);
-        callback.onProgress(values[0].getSuccessSyncCount(), manager.getCount(this.collection));
+        callback.onProgress(values[0].getSuccessCount(), requests.size());
     }
 }

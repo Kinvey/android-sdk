@@ -4,22 +4,22 @@ import java.util.List;
 
 public class KinveyPushResponse {
 
-    private int successSyncCount;
-    private List<String> listOfExceptions;
+    private int successCount;
+    private List<Exception> listOfExceptions;
 
-    public int getSuccessSyncCount() {
-        return successSyncCount;
+    public int getSuccessCount() {
+        return successCount;
     }
 
-    public void setSuccessSyncCount(int successSyncCount) {
-        this.successSyncCount = successSyncCount;
+    public void setSuccessCount(int successSyncCount) {
+        this.successCount = successSyncCount;
     }
 
-    public List<String> getListOfExceptions() {
+    public List<Exception> getListOfExceptions() {
         return listOfExceptions;
     }
 
-    public void setListOfExceptions(List<String> listOfExceptions) {
+    public void setListOfExceptions(List<Exception> listOfExceptions) {
         this.listOfExceptions = listOfExceptions;
     }
 }

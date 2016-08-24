@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
+import java.util.List;
 
 /**
  * Created by Prots on 2/8/16.
@@ -39,8 +40,8 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
 
     @Override
     public Void execute() {
-        SyncRequest syncRequest = null;
-        while ((syncRequest = syncManager.popSingleQueue(collectionName)) != null){
+        List<SyncRequest> requestList = syncManager.popSingleQueue(collectionName);
+        for (SyncRequest syncRequest: requestList) {
             syncManager.executeRequest(client, syncRequest);
         }
         return null;
