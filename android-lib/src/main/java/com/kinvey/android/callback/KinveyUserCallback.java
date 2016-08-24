@@ -17,9 +17,10 @@ package com.kinvey.android.callback;
 
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
- * This callback is typed for a {@link com.kinvey.java.store.UserStore} object, use it for operations on Users.
+ * This callback is typed for a {@link UserStoreRequestManager} object, use it for operations on Users.
  *
  * @author edwardf
  * @since 2.0

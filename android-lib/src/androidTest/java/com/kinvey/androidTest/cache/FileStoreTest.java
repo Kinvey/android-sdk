@@ -15,7 +15,7 @@ import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.FileStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class FileStoreTest {
     public void setUp() throws IOException {
         Client.Builder builder = new Client.Builder(InstrumentationRegistry.getContext());
         client = builder.build();
-        UserStore<User> user = client.userStore();
+        UserStoreRequestManager<User> user = client.userStore();
         if (!user.isUserLoggedIn()) {
             user.loginBlocking().execute();
         }

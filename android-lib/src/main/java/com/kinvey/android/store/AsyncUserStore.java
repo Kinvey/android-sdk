@@ -1,101 +1,120 @@
-/*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
- *
- * This software is licensed to you under the Kinvey terms of service located at
- * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
- * software, you hereby accept such terms of service  (and any agreement referenced
- * therein) and agree that you have read, understand and agree to be bound by such
- * terms of service and are of legal age to agree to such terms with Kinvey.
- *
- * This software contains valuable confidential and proprietary information of
- * KINVEY, INC and is subject to applicable licensing agreements.
- * Unauthorized reproduction, transmission or distribution of this file and its
- * contents is a violation of applicable laws.
- *
- */
 package com.kinvey.android.store;
 
-import com.kinvey.android.store.AbstractAsyncUserStore;
+
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.store.UserStore;
 
-/**
- * Wraps the {@link com.kinvey.java.store.UserStore} public methods in asynchronous functionality using native Android AsyncTask.
- *
- * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#user()} convenience method.
- * </p>
- *
- * <p>
- * Methods in this API use either {@link com.kinvey.android.callback.KinveyUserCallback} for authentication, login, and
- * user creation, or the general-purpose {@link com.kinvey.java.core.KinveyClientCallback} used for User data retrieval,
- * updating, and management.
- * </p>
- *
- * <p>
- * Login sample:
- * <pre>
- * {@code
-       public void submit(View view) {
-       kinveyClient.user().login(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
-               new KinveyUserCallback() {
-           public void onFailure(Throwable t) {
-               CharSequence text = "Wrong username or password.";
-               Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-           }
-           public void onSuccess(User u) {
-               CharSequence text = "Welcome back," + u.getUsername() + ".";
-               Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-               LoginActivity.this.startActivity(new Intent(LoginActivity.this,
-                       SessionsActivity.class));
-               LoginActivity.this.finish();
-           }
-       });
-   }
- * </pre>
- *
- * </p>
- * <p>
- * Saving user data sample:
- * <pre>
- * {@code
-       User user = kinveyClient.user();
-        user.put("fav_food", "bacon");
-        user.update(new KinveyClientCallback<User.Update>() {
+import java.io.IOException;
 
-            public void onFailure(Throwable e) { ... }
+public class AsyncUserStore<T> extends UserStore{
 
-            public void onSuccess(User u) { ... }
-       });
-   }
- * </pre>
- * </p>
- *
- * <p>This class is not thread-safe.</p>
- *
- * @author edwardf
- * @author mjsalinger
- * @since 2.0
- */
-public class AsyncUserStore<T extends User> extends AbstractAsyncUserStore<T> {
-
-
-    /**
-     * Base constructor requires the client instance and a {@link com.kinvey.java.auth.KinveyAuthRequest.Builder} to be passed in.
-     * <p>
-     * {@link com.kinvey.java.core.AbstractKinveyClient#initializeRequest(com.kinvey.java.core.AbstractKinveyClientRequest)} is used to initialize all
-     * requests constructed by this api.
-     * </p>
-     *
-     * @param client instance of current client
-     * @throws NullPointerException if the client parameter and KinveyAuthRequest.Builder is non-null
-     */
     public AsyncUserStore(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
         super(client, userClass, builder);
     }
 
-    public void setMICHostName(String MICHostName) {
-        this.MICHostName = MICHostName;
+    public static<T> void login(String userId, String password, AbstractClient client, KinveyClientCallback<T> callback) throws IOException {
+        new Login(userId, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
+
+    private static class Login extends AsyncClientRequest<User> {
+
+        String username;
+        String password;
+        String accessToken;
+        String refreshToken;
+        String accessSecret;
+        String consumerKey;
+        String consumerSecret;
+        Credential credential;
+        LoginType type;
+
+        //Salesforce...
+        String id;
+        String client_id;
+
+        private Login(KinveyClientCallback callback) {
+            super(callback);
+            this.type = LoginType.IMPLICIT;
+        }
+
+        private Login(String username, String password, KinveyClientCallback callback) {
+            super(callback);
+            this.username = username;
+            this.password = password;
+            this.type = LoginType.KINVEY;
+        }
+
+        private Login(String accessToken, LoginType type, KinveyClientCallback callback) {
+            super(callback);
+            this.accessToken = accessToken;
+            this.type = type;
+        }
+
+        private Login(String accessToken, String refreshToken, LoginType type, KinveyClientCallback callback) {
+            super(callback);
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            this.type = type;
+        }
+
+        private Login(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
+                      LoginType type, KinveyClientCallback callback) {
+            super(callback);
+            this.accessToken = accessToken;
+            this.accessSecret = accessSecret;
+            this.consumerKey = consumerKey;
+            this.consumerSecret = consumerSecret;
+            this.type=type;
+        }
+
+
+        //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
+        private Login(String accessToken, String clientID, String refresh, String id, KinveyClientCallback<T> callback){
+            super(callback);
+            this.accessToken = accessToken;
+            this.refreshToken = refresh;
+            this.client_id = clientID;
+            this.id = id;
+            this.type = LoginType.SALESFORCE;
+        }
+
+        private Login(Credential credential, KinveyClientCallback callback) {
+            super(callback);
+            this.credential = credential;
+            this.type = LoginType.CREDENTIALSTORE;
+        }
+
+        @Override
+        protected User executeAsync() throws IOException {
+            switch(this.type) {
+                case IMPLICIT:
+                    return loginBlocking().execute();
+                case KINVEY:
+                    return loginBlocking(username, password).execute();
+                case FACEBOOK:
+                    return loginFacebookBlocking(accessToken).execute();
+                case GOOGLE:
+                    return loginGoogleBlocking(accessToken).execute();
+                case TWITTER:
+                    return loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                case LINKED_IN:
+                    return loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
+                case AUTH_LINK:
+                    return loginAuthLinkBlocking(accessToken, refreshToken).execute();
+                case SALESFORCE:
+                    return loginSalesForceBlocking(accessToken, client_id, refreshToken, id).execute();
+                case MOBILE_IDENTITY:
+                    return loginMobileIdentityBlocking(accessToken).execute();
+                case CREDENTIALSTORE:
+                    return login(credential).execute();
+            }
+            return null;
+        }
+    }
+
 }

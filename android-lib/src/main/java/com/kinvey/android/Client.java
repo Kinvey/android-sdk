@@ -47,7 +47,7 @@ import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncFileStore;
 import com.kinvey.android.store.AsyncLinkedDataStore;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.AsyncUserStoreRequestManager;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
@@ -62,6 +62,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -356,8 +357,8 @@ public class Client extends AbstractClient {
     /**
      * User factory method
      * <p>
-     * Returns the instance of {@link com.kinvey.java.store.UserStore} that contains the current active user.  If no active user context
-     * has been established, the {@link com.kinvey.java.store.UserStore} object returned will be instantiated and empty.
+     * Returns the instance of {@link UserStoreRequestManager} that contains the current active user.  If no active user context
+     * has been established, the {@link UserStoreRequestManager} object returned will be instantiated and empty.
      * </p>
      * <p>
      * This method is thread-safe.
@@ -370,19 +371,19 @@ public class Client extends AbstractClient {
      }
      * </pre>
      * </p>
-     * @param <T> the type of the custom `User` class, which must extend {@link com.kinvey.java.store.UserStore}
-     * @return Instance of {@link com.kinvey.java.store.UserStore}
+     * @param <T> the type of the custom `User` class, which must extend {@link UserStoreRequestManager}
+     * @return Instance of {@link UserStoreRequestManager}
      */
     @Override
-    public <T extends User> AsyncUserStore<T> userStore(){
+    public <T extends User> AsyncUserStoreRequestManager<T> userStore(){
         synchronized (lock) {
-            if (userStore == null) {
+            if (userStoreRequestManager == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                userStore = new AsyncUserStore<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                userStoreRequestManager = new AsyncUserStoreRequestManager<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
-            return (AsyncUserStore<T>)userStore;
+            return (AsyncUserStoreRequestManager<T>) userStoreRequestManager;
         }
     }
 
