@@ -726,7 +726,7 @@ public class Client extends AbstractClient {
          * @param buildCallback Instance of {@link: KinveyClientBuilderCallback}
          */
         public void build(KinveyClientBuilderCallback buildCallback) {
-            new Build(buildCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+            new Build(buildCallback).execute();
         }
 
 

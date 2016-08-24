@@ -37,12 +37,6 @@ import com.kinvey.java.core.KinveyClientCallback;
  */
 public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecutor<Result> {
 
-    public enum ExecutorType {
-        KINVEYSERIAL,
-        ANDROIDSERIAL,
-        ANDROIDTHREADPOOL
-    }
-
     private Throwable error;
     private KinveyClientCallback callback;
     protected KinveyCallbackHandler kinveyCallbackHandler;
@@ -53,17 +47,12 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
      *
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      */
-    public AsyncClientRequest(KinveyClientCallback callback) {
+    public AsyncClientRequest(KinveyClientCallback<Result> callback) {
         this.callback = callback;
-        //todo
         kinveyCallbackHandler = new KinveyCallbackHandler();
     }
 
     public void execute() {
-        Client.sharedInstance().getKinveyHandlerThread().postTask(this);
-    }
-
-    public void execute(ExecutorType executorType) {
         Client.sharedInstance().getKinveyHandlerThread().postTask(this);
     }
 

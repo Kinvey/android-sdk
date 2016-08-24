@@ -30,7 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Class represents internal implementation of Async pull request that is used to create pull
  */
-public class AsyncPullRequest extends AsyncClientRequest<Void> {
+public class AsyncPullRequest extends AsyncClientRequest<Integer> {
     private final DataStore store;
     private Query query;
 
@@ -50,8 +50,8 @@ public class AsyncPullRequest extends AsyncClientRequest<Void> {
 
 
     @Override
-    protected Void executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected Integer executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         store.pullBlocking(query);
-        return null;
+        return 0;
     }
 }

@@ -23,11 +23,11 @@ import java.util.List;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyListCallback<T> extends KinveyClientCallback<List<T>> {
+public interface KinveyListCallback<T> extends KinveyClientCallback<T[]> {
 
 
     @Override
-    public void onSuccess(List<T> result);
+    public void onSuccess(T[] result);
 
     @Override
     public void onFailure(Throwable error);
