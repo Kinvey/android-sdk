@@ -19,7 +19,7 @@ package com.kinvey.java.store.requests.user;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import java.io.IOException;
 
@@ -30,29 +30,29 @@ import java.io.IOException;
 public final class Delete extends AbstractKinveyJsonClientRequest<Void> {
     private static final String REST_PATH = "user/{appKey}/{userID}?hard={hard}";
 
-    private UserStore userStore;
+    private UserStoreRequestManager userStoreRequestManager;
     @Key
     private boolean hard = false;
 
     @Key
     private String userID;
 
-    public Delete(UserStore userStore, String userID, boolean hard) {
-        super(userStore.getClient(), "DELETE", REST_PATH, null, Void.class);
-        this.userStore = userStore;
+    public Delete(UserStoreRequestManager userStoreRequestManager, String userID, boolean hard) {
+        super(userStoreRequestManager.getClient(), "DELETE", REST_PATH, null, Void.class);
+        this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userID;
         this.hard = hard;
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
-            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStore.getCustomRequestProperties()) );
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
+            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
     }
 
     @Override
     public Void execute() throws IOException {
         super.execute();
-        userStore.removeFromStore(userID);
-        userStore.logout();
+        userStoreRequestManager.removeFromStore(userID);
+        userStoreRequestManager.logout();
 
         return null;
     }

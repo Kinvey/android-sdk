@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * Retrieve Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
@@ -31,7 +31,7 @@ import com.kinvey.java.store.UserStore;
 public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequest<T> {
     private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
-    private UserStore userStore;
+    private UserStoreRequestManager userStoreRequestManager;
     @Key
     private String userID;
     @Key("query")
@@ -50,51 +50,51 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
     @Key("retainReferences")
     private String retainReferences;
 
-    public Retrieve(UserStore userStore, String userID, Class<T> myClass) {
-        super(userStore.getClient(), "GET", REST_PATH, null, myClass);
-        this.userStore = userStore;
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID, Class<T> myClass) {
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userID;
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
-            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStore.getCustomRequestProperties()) );
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
+            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
     }
 
-    public Retrieve(UserStore userStore, Query query, Class<T> myClass){
-        super(userStore.getClient(), "GET", REST_PATH, null, myClass);
-        this.userStore = userStore;
-        this.queryFilter = query.getQueryFilterJson(userStore.getClient().getJsonFactory());
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query, Class<T> myClass){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
+        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();
         int querySkip = query.getSkip();
         this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
         this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
         this.sortFilter = query.getSortString();
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
             this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson()
-                    .toJson(userStore.getCustomRequestProperties()) );
+                    .toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
     }
 
-    public Retrieve(UserStore userStore, String userID, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
-        super(userStore.getClient(), "GET", REST_PATH, null, myClass);
-        this.userStore = userStore;
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userID;
 
         this.resolve = Joiner.on(",").join(resolve);
         this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
         this.retainReferences = Boolean.toString(retain);
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
             this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson()
-                    .toJson(userStore.getCustomRequestProperties()) );
+                    .toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
     }
 
-    public Retrieve(UserStore userStore, Query query, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
-        super(userStore.getClient(), "GET", REST_PATH, null, myClass);
-        this.userStore = userStore;
-        this.queryFilter = query.getQueryFilterJson(userStore.getClient().getJsonFactory());
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
+        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();
         int querySkip = query.getSkip();
         this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -104,10 +104,10 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
         this.resolve = Joiner.on(",").join(resolve);
         this.resolve_depth = resolve_depth > 0 ? Integer.toString(resolve_depth) : null;
         this.retainReferences = Boolean.toString(retain);
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
             this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson()
-                    .toJson(userStore.getCustomRequestProperties()) );
+                    .toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
 
     }

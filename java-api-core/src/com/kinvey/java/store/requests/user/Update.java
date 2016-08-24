@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import java.io.IOException;
 
@@ -33,17 +33,17 @@ import java.io.IOException;
 public final class Update<T extends User> extends AbstractKinveyJsonClientRequest<T> {
     private static final String REST_PATH = "user/{appKey}/{userID}";
 
-    private UserStore<T> userStore;
+    private UserStoreRequestManager<T> userStoreRequestManager;
     @Key
     private String userID;
 
-    public Update(UserStore<T> userStore, User user, Class<T> myClass) {
-        super(userStore.getClient(), "PUT", REST_PATH, user, myClass);
-        this.userStore = userStore;
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, Class<T> myClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, user, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
         this.userID = user.getId();
-        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStore.getClientAppVersion());
-        if (userStore.getCustomRequestProperties() != null && !userStore.getCustomRequestProperties().isEmpty()){
-            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStore.getCustomRequestProperties()) );
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
+            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
 
     }
@@ -56,7 +56,7 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
             return u;
         }
 
-        if (u.getId().equals(userStore.getCurrentUser().getId())){
+        if (u.getId().equals(userStoreRequestManager.getCurrentUser().getId())){
             KinveyAuthResponse auth = new KinveyAuthResponse();
             auth.put("_id", u.get("_id"));
             KinveyAuthResponse.KinveyUserMetadata kmd = new KinveyAuthResponse.KinveyUserMetadata();
@@ -70,8 +70,8 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
                     auth.put(key.toString(), u.get(key));
                 }
             }
-            String userType = userStore.getClient().getClientUsers().getCurrentUserType();
-            return userStore.initUser(auth, userType, u);
+            String userType = userStoreRequestManager.getClient().getClientUsers().getCurrentUserType();
+            return userStoreRequestManager.initUser(auth, userType, u);
         }else{
             return u;
         }

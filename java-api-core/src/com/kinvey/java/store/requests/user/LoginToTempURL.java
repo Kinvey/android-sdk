@@ -21,7 +21,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import java.io.IOException;
 
@@ -30,11 +30,11 @@ import java.io.IOException;
  */
 public final class LoginToTempURL<T extends User> extends AbstractKinveyClientRequest<GenericJson> {
 
-    private UserStore<T> userStore;
+    private UserStoreRequestManager<T> userStoreRequestManager;
 
-    public LoginToTempURL(UserStore<T> userStore, String tempURL, HttpContent content) {
-        super(userStore.getClient(), tempURL, "POST", "", content, GenericJson.class);
-        this.userStore = userStore;
+    public LoginToTempURL(UserStoreRequestManager<T> userStoreRequestManager, String tempURL, HttpContent content) {
+        super(userStoreRequestManager.getClient(), tempURL, "POST", "", content, GenericJson.class);
+        this.userStoreRequestManager = userStoreRequestManager;
         this.setOverrideRedirect(true);
     }
 
@@ -48,7 +48,7 @@ public final class LoginToTempURL<T extends User> extends AbstractKinveyClientRe
 
         String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());
 
-        return userStore.getMICToken(accesstoken).execute();
+        return userStoreRequestManager.getMICToken(accesstoken).execute();
 
 
     }

@@ -40,14 +40,12 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.FileStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.sync.SyncManager;
 
 /**
@@ -67,7 +65,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public static final String DEFAULT_SERVICE_PATH = "";
     
-    protected UserStore userStore;
+    protected UserStoreRequestManager userStoreRequestManager;
     private CredentialStore store;
 
     /** used to synchronized access to the local api wrappers **/
@@ -82,6 +80,27 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+
+    /**
+     * The hostname to use for MIC authentication
+     */
+    public String MICHostName = "https://auth.kinvey.com/";
+
+    public String MICApiVersion;
+
+    public void setMICApiVersion(String version){
+        if (!version.startsWith("v")){
+            version = "v" + version;
+        }
+        MICApiVersion = version;
+    }
+
+    public void setMICHostName(String MICHostName) throws IllegalArgumentException {
+        if (!MICHostName.startsWith("https://")){
+            throw new IllegalArgumentException("MIC url should be sercure url");
+        }
+        this.MICHostName = MICHostName.endsWith("/") ? MICHostName : MICHostName + "/";
+    }
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -147,17 +166,17 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     //public abstract <T extends User> T user();
 
-    public <T extends User> UserStore<T> userStore(){
+    public <T extends User> UserStoreRequestManager<T> userStore(){
         synchronized (lock) {
-            if (userStore == null) {
+            if (userStoreRequestManager == null) {
                 String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
 
-                userStore = new UserStore<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
+                userStoreRequestManager = new UserStoreRequestManager<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
                         this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
             }
 
-            return userStore;
+            return userStoreRequestManager;
         }
     }
 
@@ -197,7 +216,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     protected User getCurrentUser() {
         synchronized (lock) {
-            return userStore.getCurrentUser();
+            return userStoreRequestManager.getCurrentUser();
         }
     }
 
