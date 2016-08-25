@@ -27,7 +27,10 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.store.FileCache;
+import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * @author m0rganic
@@ -339,7 +342,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
 
             //get the refresh token
-            Credential cred = client.getStore().load(client.userStore().getCurrentUser().getId());
+            Credential cred = client.getStore().load(client.getUser().getId());
             String refreshToken = null;
             if (cred != null){
                 refreshToken = cred.getRefreshToken();
@@ -348,7 +351,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             if (refreshToken != null ){
                 //logout the current user
 
-                client.userStore().logout().execute();
+                UserStore.logout().execute();
 
                 //use the refresh token for a new access token
                 GenericJson result = client.userStore().useRefreshToken(refreshToken).execute();
@@ -357,9 +360,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 client.userStore().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
                 //store the new refresh token
-                Credential currentCred = client.getStore().load(client.userStore().getCurrentUser().getId());
+                Credential currentCred = client.getStore().load(client.getUser().getId());
                 currentCred.setRefreshToken(result.get("refresh_token").toString());
-                client.getStore().store(client.userStore().getCurrentUser().getId(), currentCred);
+                client.getStore().store(client.getUser().getId(), currentCred);
                 hasRetryed = true;
                 return executeUnparsed();
             }

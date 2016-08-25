@@ -30,14 +30,14 @@ import java.io.IOException;
  * Update Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
  * Update User requests.
  */
-public final class Update<T extends User> extends AbstractKinveyJsonClientRequest<T> {
+public final class Update<T extends User> extends AbstractKinveyJsonClientRequest<User> {
     private static final String REST_PATH = "user/{appKey}/{userID}";
 
     private UserStoreRequestManager<T> userStoreRequestManager;
     @Key
     private String userID;
 
-    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, Class<T> myClass) {
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, Class<User> myClass) {
         super(userStoreRequestManager.getClient(), "PUT", REST_PATH, user, myClass);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = user.getId();
@@ -48,15 +48,15 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
 
     }
 
-    public T execute() throws IOException {
+    public User execute() throws IOException {
 
-        T u = super.execute();
+        User u = super.execute();
 
         if (u.getId() == null || u.getId() == null){
             return u;
         }
 
-        if (u.getId().equals(userStoreRequestManager.getCurrentUser().getId())){
+        if (u.getId().equals(userID)){
             KinveyAuthResponse auth = new KinveyAuthResponse();
             auth.put("_id", u.get("_id"));
             KinveyAuthResponse.KinveyUserMetadata kmd = new KinveyAuthResponse.KinveyUserMetadata();
@@ -76,6 +76,4 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
             return u;
         }
     }
-
-
 }

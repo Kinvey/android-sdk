@@ -65,7 +65,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     public static final String DEFAULT_SERVICE_PATH = "";
     
-    protected UserStoreRequestManager userStoreRequestManager;
     private CredentialStore store;
 
     /** used to synchronized access to the local api wrappers **/
@@ -81,6 +80,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     
     private GenericData customRequestProperties = new GenericData();
 
+    private User user;
     /**
      * The hostname to use for MIC authentication
      */
@@ -124,7 +124,15 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     	}
     	this.customRequestProperties.put(key, value);
     }
-    
+
+    public boolean isUserLoggedIn() {
+        String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
+        String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+        return appKey != null & appSecret !=null;
+    }
+
+
+
     public void clearCustomRequestProperties(){
     	this.customRequestProperties = new GenericJson();
     }
@@ -166,21 +174,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     //public abstract <T extends User> T user();
 
-    public <T extends User> UserStoreRequestManager<T> userStore(){
-        synchronized (lock) {
-            if (userStoreRequestManager == null) {
-                String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
-                String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-
-                userStoreRequestManager = new UserStoreRequestManager<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
-                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
-            }
-
-            return userStoreRequestManager;
-        }
-    }
-
-
 
     public <T extends User> Class<T> getUserClass(){
         return this.userModelClass;
@@ -207,16 +200,15 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         return true;
     }
 
-    protected void setCurrentUser(User user) {
-
+    public void setUser(User user) {
         synchronized (lock) {
-            userStore().setCurrentUser(user);
+           this.user = user;
         }
     }
 
-    protected User getCurrentUser() {
+    public User getUser() {
         synchronized (lock) {
-            return userStoreRequestManager.getCurrentUser();
+            return user;
         }
     }
 

@@ -77,14 +77,10 @@ public class UserStoreRequestManager<T extends User> {
 
     private final AbstractClient client;
     private final KinveyAuthRequest.Builder builder;
-    private static final Class<T> myClazz;
+    private final Class<T> myClazz;
     private final String clientAppVersion;
     private final GenericData customRequestProperties;
     private String authToken;
-
-    private static User currentUser;
-
-
 
     /**
      * the redirect URI for MIC
@@ -104,36 +100,17 @@ public class UserStoreRequestManager<T extends User> {
         return client;
     }
 
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-    }
-
-    public User getCurrentUser() {
-        if (currentUser == null) currentUser = new User();
-        return currentUser;
-    }
-
-
     public UserStoreRequestManager(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
         this.builder = builder;
         this.myClazz = userClass;
-        builder.setUser(currentUser);
+        builder.setUser(client.getUser());
         this.clientAppVersion = client.getClientAppVersion();
         this.customRequestProperties = client.getCustomRequestProperties();
     }
 
-
-    /**
-     * Method to determine if the current user instnace represents a logged-in user
-     *
-     * @return true if user is logged in, false if not
-     */
-    public boolean isUserLoggedIn() {
-        return (currentUser != null && (currentUser.getId() != null || currentUser.getAuthToken() != null));
-    }
 
     /**
      * Method to initialize the User after login, create a credential,
@@ -142,12 +119,12 @@ public class UserStoreRequestManager<T extends User> {
      * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
      */
-    public static<T> T initUser(KinveyAuthResponse response, String userType, T userObject) throws IOException {
+    public User initUser(KinveyAuthResponse response, String userType, User userObject) throws IOException {
 
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
-        currentUser = new User();
+        User currentUser = new User();
         currentUser.setId(response.getUserId());
         currentUser.put("_kmd", response.getMetadata());
         currentUser.putAll(response.getUnknownKeys());
@@ -162,16 +139,18 @@ public class UserStoreRequestManager<T extends User> {
         client.getClientUsers().addUser(currentUser.getId(), userType);
         client.getClientUsers().setCurrentUser(currentUser.getId());
 
-        return userObject;
+        client.setUser(currentUser);
+        return currentUser;
     }
 
-    private static<T> T initUser(Credential credential, T userObject) {
-        currentUser = new User();
+    private User initUser(Credential credential, T userObject) {
+        User currentUser = new User();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
         userObject.setId(credential.getUserId());
         userObject.setAuthToken(credential.getAuthToken());
-        return userObject;
+        client.setUser(currentUser);
+        return currentUser;
     }
 
     public void removeFromStore(String userID) {
@@ -187,8 +166,8 @@ public class UserStoreRequestManager<T extends User> {
      * @return LoginRequest object
      * @throws IOException
      */
-    public static LoginRequest loginBlocking() throws IOException {
-        return new LoginRequest(this).buildAuthRequest();
+    public LoginRequest loginBlocking() throws IOException {
+        return new LoginRequest().buildAuthRequest();
     }
 
     /**
@@ -199,10 +178,10 @@ public class UserStoreRequestManager<T extends User> {
      * @return LoginRequest object
      * @throws IOException
      */
-    public static LoginRequest loginBlocking(String username, String password) throws IOException {
+    public LoginRequest loginBlocking(String username, String password) throws IOException {
         Preconditions.checkNotNull(username, "Username cannot be null.");
         Preconditions.checkNotNull(password, "Password cannot be null.");
-        return new LoginRequest(this, username, password, false).buildAuthRequest();
+        return new LoginRequest(username, password, false).buildAuthRequest();
     }
 
     /**
@@ -218,7 +197,7 @@ public class UserStoreRequestManager<T extends User> {
     public LoginRequest login(ThirdPartyIdentity.Type thirdPartyType, String... args) throws IOException {
         Preconditions.checkNotNull((args));
         ThirdPartyIdentity identity = ThirdPartyIdentity.createThirdPartyIdentity(thirdPartyType, args);
-        return new LoginRequest(this, identity).buildAuthRequest();
+        return new LoginRequest(identity).buildAuthRequest();
     }
 
     /**
@@ -229,7 +208,7 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public LoginRequest login(Credential credential) {
-        return new LoginRequest(this, credential);
+        return new LoginRequest(credential);
     }
 
     /**
@@ -240,14 +219,17 @@ public class UserStoreRequestManager<T extends User> {
      */
     public User retrieveMetadataBlocking() throws IOException {
         User ret = this.retrieveBlocking().execute();
-        if (this.currentUser == null){
-            this.currentUser = new User();
+        User currentUser = null;
+        if (client.getUser() == null){
+            currentUser = new User();
+        } else {
+            currentUser = client.getUser();
         }
         String authToken = this.authToken;
         currentUser.putAll(ret.getUnknownKeys());
         currentUser.setUsername(ret.getUsername());
 //        this.authToken = authToken;
-
+        client.setUser(currentUser);
         return currentUser;
     }
 
@@ -315,10 +297,11 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
-        currentUser = new User();
+        User currentUser = new User();
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);
+        client.setUser(currentUser);
         return login(c);
 
     }
@@ -375,10 +358,8 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public LoginRequest createBlocking(String userid, String password) throws IOException {
-        return new LoginRequest(this, userid, password, true).buildAuthRequest();
+        return new LoginRequest(userid, password, true).buildAuthRequest();
     }
-
-
 
 
     /**
@@ -390,9 +371,9 @@ public class UserStoreRequestManager<T extends User> {
      */
     public Delete deleteBlocking(boolean hardDelete) throws IOException {
 
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
-        Delete delete = new Delete(this, currentUser.getId(), hardDelete);
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        Delete delete = new Delete(this, client.getUser().getId(), hardDelete);
         client.initializeRequest(delete);
         return delete;
     }
@@ -404,9 +385,9 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public Retrieve<T> retrieveBlocking() throws IOException{
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
-        Retrieve<T> retrieve = new Retrieve<T>(this, currentUser.getId(), myClazz);
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        Retrieve<T> retrieve = new Retrieve<T>(this, client.getUser().getId(), myClazz);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -418,8 +399,6 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public RetrieveUsers retrieveBlocking(Query query) throws IOException{
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         RetrieveUsers retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
@@ -433,9 +412,9 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public Retrieve retrieveBlocking(String[] resolves) throws IOException{
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, currentUser.getId(), resolves, 1, true, myClazz);
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser(), "currentUser ID must not be null");
+        Retrieve retrieve = new Retrieve(this, client.getUser().getId(), resolves, 1, true, myClazz);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -462,9 +441,9 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public Update updateBlocking() throws IOException{
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
-        Update<T> update = new Update<T>(this, currentUser, myClazz);
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        Update<T> update = new Update<T>(this, client.getUser(), User.class);
         client.initializeRequest(update);
         return update;
     }
@@ -477,8 +456,8 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public Update updateBlocking(User user) throws IOException{
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
+        Preconditions.checkNotNull(user, "currentUser must not be null");
+        Preconditions.checkNotNull(user.getId(), "currentUser ID must not be null");
         Update update = new Update(this, user, myClazz);
         client.initializeRequest(update);
         return update;
@@ -505,9 +484,9 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
-        Preconditions.checkNotNull(currentUser, "currentUser must not be null");
-        Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
-        EmailVerification verify = new EmailVerification(this, currentUser.getId());
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        EmailVerification verify = new EmailVerification(this, client.getUser().getId());
         client.initializeRequest(verify);
         return verify;
     }
@@ -623,49 +602,43 @@ public class UserStoreRequestManager<T extends User> {
     }
 
 
-    public static class LoginRequest<T> {
-        protected UserStoreRequestManager userStoreRequestManager;
+    public class LoginRequest {
         Credential credential;
         UserStoreRequestManager.LoginType type;
         KinveyAuthRequest request;
 
-        public LoginRequest(UserStoreRequestManager userStoreRequestManager) {
-            this.userStoreRequestManager = userStoreRequestManager;
-            userStoreRequestManager.getBuilder().setCreate(true);
+        public LoginRequest() {
+            builder.setCreate(true);
             this.type = UserStoreRequestManager.LoginType.IMPLICIT;
         }
 
-        public LoginRequest(UserStoreRequestManager userStoreRequestManager, String username, String password, boolean setCreate) {
-            this.userStoreRequestManager = userStoreRequestManager;
-            userStoreRequestManager.builder.setUsernameAndPassword(username, password);
-            userStoreRequestManager.builder.setCreate(setCreate);
-            userStoreRequestManager.builder.setUser(userStoreRequestManager.currentUser);
+        public LoginRequest(String username, String password, boolean setCreate) {
+            builder.setUsernameAndPassword(username, password);
+            builder.setCreate(setCreate);
+            builder.setUser(client.getUser());
             this.type = UserStoreRequestManager.LoginType.KINVEY;
 
         }
 
-        public LoginRequest(UserStoreRequestManager userStoreRequestManager, ThirdPartyIdentity identity) {
-            this.userStoreRequestManager = userStoreRequestManager;
-            userStoreRequestManager.builder.setThirdPartyIdentity(identity);
-            userStoreRequestManager.builder.setUser(userStoreRequestManager.currentUser);
-            userStoreRequestManager.builder.setCreate(false);
+        public LoginRequest(ThirdPartyIdentity identity) {
+            builder.setThirdPartyIdentity(identity);
+            builder.setUser(client.getUser());
+            builder.setCreate(false);
             this.type = UserStoreRequestManager.LoginType.THIRDPARTY;
         }
 
-        public LoginRequest(UserStoreRequestManager userStoreRequestManager, Credential credential) {
-            this.userStoreRequestManager = userStoreRequestManager;
+        public LoginRequest(Credential credential) {
             this.credential = credential;
             this.type = UserStoreRequestManager.LoginType.CREDENTIALSTORE;
         }
 
         public LoginRequest buildAuthRequest() {
-            this.request = userStoreRequestManager.builder.build();
-            this.request.setKinveyHeaders(((KinveyClientRequestInitializer) userStoreRequestManager.client.getKinveyRequestInitializer()).getKinveyHeaders());
+            this.request.setKinveyHeaders(((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getKinveyHeaders());
             return this;
         }
 
-        public T execute() throws IOException {
-            if (userStoreRequestManager.isUserLoggedIn()) {
+        public User execute() throws IOException {
+            if (client.isUserLoggedIn()) {
                 throw new KinveyException("Attempting to login when a user is already logged in",
                         "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
@@ -679,7 +652,7 @@ public class UserStoreRequestManager<T extends User> {
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                return initUser(credential, ret);
+                initUser(credential, ret);
             } else {
                 switch (this.type) {
                     case IMPLICIT:
