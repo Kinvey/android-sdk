@@ -24,11 +24,11 @@ import com.kinvey.java.dto.User;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserCallback extends KinveyClientCallback<User> {
+public interface KinveyUserCallback<T extends User> extends KinveyClientCallback<T> {
 
 
     @Override
-    public void onSuccess(User result);
+    public void onSuccess(T result);
 
     @Override
     public void onFailure(Throwable error);

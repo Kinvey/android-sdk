@@ -82,8 +82,7 @@ public class UserStore<T extends User> {
     private final GenericData customRequestProperties;
     private String authToken;
 
-    private User currentUser;
-
+    private T currentUser;
 
 
     /**
@@ -114,6 +113,18 @@ public class UserStore<T extends User> {
     }
 
 
+    private T newInstance(){
+        T instance = null;
+        try {
+            instance = myClazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    };
+
     public GenericData getCustomRequestProperties() {
         return client.getCustomRequestProperties();
     }
@@ -126,12 +137,14 @@ public class UserStore<T extends User> {
         return client;
     }
 
-    public void setCurrentUser(User user) {
+    public void setCurrentUser(T user) {
         this.currentUser = user;
     }
 
     public User getCurrentUser() {
-        if (currentUser == null) currentUser = new User();
+        if (currentUser == null) {
+            currentUser = this.newInstance();
+        }
         return currentUser;
     }
 
@@ -169,7 +182,7 @@ public class UserStore<T extends User> {
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
-        currentUser = new User();
+        currentUser = this.newInstance();
         currentUser.setId(response.getUserId());
         currentUser.put("_kmd", response.getMetadata());
         currentUser.putAll(response.getUnknownKeys());
@@ -188,7 +201,7 @@ public class UserStore<T extends User> {
     }
 
     private T initUser(Credential credential, T userObject) {
-        currentUser = new User();
+        currentUser = this.newInstance();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
         userObject.setId(credential.getUserId());
@@ -260,10 +273,10 @@ public class UserStore<T extends User> {
      * @return Current user object with refreshed metadata
      * @throws IOException
      */
-    public User retrieveMetadataBlocking() throws IOException {
-        User ret = this.retrieveBlocking().execute();
+    public T retrieveMetadataBlocking() throws IOException {
+        T ret = this.retrieveBlocking().execute();
         if (this.currentUser == null){
-            this.currentUser = new User();
+            this.currentUser = this.newInstance();
         }
         String authToken = this.authToken;
         currentUser.putAll(ret.getUnknownKeys());
@@ -337,7 +350,7 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
-        currentUser = new User();
+        currentUser = this.newInstance();
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);
@@ -562,7 +575,7 @@ public class UserStore<T extends User> {
     public GetMICAccessToken getMICToken(String code) throws IOException{
 
 //        grant_type: "authorization_code" - this is always set to this value
-//        code: use the ‘code’ returned in the callback
+//        code: use the 'code' returned in the callback
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
 //        client_id:  The appKey (kid) of the app
 

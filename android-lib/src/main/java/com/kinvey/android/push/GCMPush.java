@@ -137,7 +137,7 @@ public class GCMPush extends AbstractPush {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	client.userStore().retrieve(new KinveyUserCallback() {
+                	client.userStore().retrieve(new KinveyUserCallback<User>() {
 						
 						@Override
 						public void onSuccess(User result) {
@@ -358,12 +358,12 @@ public class GCMPush extends AbstractPush {
 
     @Override
     public void enablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncEnablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncEnablePush(callback, deviceID).execute();
     }
 
     @Override
     public void disablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncDisablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncDisablePush(callback, deviceID).execute();
     }
 
 

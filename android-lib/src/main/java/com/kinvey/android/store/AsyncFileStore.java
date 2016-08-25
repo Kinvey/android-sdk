@@ -104,50 +104,50 @@ public class AsyncFileStore extends FileStore {
 
     public void upload(File file, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE), metaCallback, file, listener )
-                .execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                .execute();
     }
 
     public void upload(File file, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback,
                                UploaderProgressListener listener) throws IOException {
 
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE_METADATA), metaCallback,
-                file, metadata, listener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                file, metadata, listener ).execute();
     }
 
     public void upload(InputStream is, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_METADATA), metaCallback,
-                is, metadata, listener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                is, metadata, listener ).execute();
     }
 
     public void upload(String filename, InputStream is, KinveyClientCallback<FileMetaData> metaCallback,
                        UploaderProgressListener listener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_FILENAME), metaCallback,
-                filename, is, listener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                filename, is, listener ).execute();
     }
 
     public void delete(String id, KinveyDeleteCallback callback) throws IOException {
         new AsyncRequest<Integer>(this, asyncMethods.get(FileMethods.DELETE_ID), callback,
-                id ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                id ).execute();
     }
 
     public void download(FileMetaData metadata, OutputStream os, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), metaCallback,
-                metaCallback, os, progressListener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                metaCallback, os, progressListener ).execute();
     }
 
     public void download(Query q, String dst, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
 
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), metaCallback,
-                metaCallback, q, dst, progressListener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                metaCallback, q, dst, progressListener ).execute();
 
     }
 
     public void download(String filename, String dst, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
-                metaCallback, filename, dst, progressListener ).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+                metaCallback, filename, dst, progressListener ).execute();
     }
 
     public void clear() {

@@ -109,6 +109,7 @@ public class Client extends AbstractClient {
     private long batchRate;
     private int batchSize;
     private RealmCacheManager cacheManager;
+    private static KinveyHandlerThread kinveyHandlerThread;
     
     
     private static Client _sharedInstance;
@@ -669,6 +670,10 @@ public class Client extends AbstractClient {
          */
         @Override
         public Client build() {
+
+            kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
+            kinveyHandlerThread.start();
+
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
@@ -721,7 +726,7 @@ public class Client extends AbstractClient {
          * @param buildCallback Instance of {@link: KinveyClientBuilderCallback}
          */
         public void build(KinveyClientBuilderCallback buildCallback) {
-            new Build(buildCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+            new Build(buildCallback).execute();
         }
 
 
@@ -905,6 +910,10 @@ public class Client extends AbstractClient {
                 return Client.Builder.this.build();
             }
         }
+    }
+
+    public KinveyHandlerThread getKinveyHandlerThread() {
+        return kinveyHandlerThread;
     }
 
     @Override

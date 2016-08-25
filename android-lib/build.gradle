@@ -6,13 +6,18 @@ android {
   compileSdkVersion 23
   buildToolsVersion '23.0.2'
 
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+
   packagingOptions {
     exclude 'META-INF/NOTICE'
     exclude 'META-INF/LICENSE'
   }
 
   dexOptions {
-    javaMaxHeapSize "4g"
+    javaMaxHeapSize "6g"
   }
 
   defaultConfig {
@@ -55,8 +60,8 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.5.0'
-    classpath "io.realm:realm-gradle-plugin:0.88.0"
+    classpath 'com.android.tools.build:gradle:2.1.2'
+    classpath "io.realm:realm-gradle-plugin:1.1.0"
   }
 
 }
@@ -64,15 +69,14 @@ buildscript {
 dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   compile project(':java-api-core')
-  compile 'com.github.KeepSafe:ReLinker:1.1'
-
+  // compile 'com.github.KeepSafe:ReLinker:1.1'
   /*compile('com.google.http-client:google-http-client:1.19.0') {
-          exclude(module: 'xpp3')
-          exclude(module: 'httpclient')
-          exclude(module: 'junit')
-          exclude(module: 'android')
-          exclude(module: 'guava-jdk5')
-      }*/
+            exclude(module: 'xpp3')
+            exclude(module: 'httpclient')
+            exclude(module: 'junit')
+            exclude(module: 'android')
+            exclude(module: 'guava-jdk5')
+        }*/
   compile('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
@@ -116,7 +120,6 @@ dependencies {
   compile 'com.google.android.gms:play-services-ads:8.4.0'
   compile 'com.google.android.gms:play-services-identity:8.4.0'
   compile 'com.google.android.gms:play-services-gcm:8.4.0'
-
   compile 'io.reactivex:rxjava:1.1.0'
 }
 
