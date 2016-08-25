@@ -584,7 +584,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
      * @param callback
      */
     public void loginWithAuthorizationCodeLoginPage(String redirectURI, KinveyMICCallback callback){
-    	//return URL for login page
+    	//return URL for login pagef
     	//https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
     	String appkey = ((KinveyClientRequestInitializer) getClient().getKinveyRequestInitializer()).getAppKey();
     	String host = MICHostName;
@@ -842,7 +842,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             AbstractAsyncUserStoreRequestManager.this.resetPasswordBlocking(this.username).execute();
             return null;
         }
@@ -856,7 +856,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             AbstractAsyncUserStoreRequestManager.this.sendEmailVerificationBlocking().execute();
             return null;
         }
@@ -1003,7 +1003,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             AbstractAsyncUserStoreRequestManager.this.deleteBlocking(hardDelete).execute();
             return null;
         }
@@ -1019,7 +1019,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
 		}
 
 		@Override
-		protected T executeAsync() throws IOException {
+		protected User executeAsync() throws IOException {
 			GenericJson result = AbstractAsyncUserStoreRequestManager.this.getMICToken(token).execute();
 			
 			T ret =  AbstractAsyncUserStoreRequestManager.this.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
@@ -1046,7 +1046,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
 		}
 
 		@Override
-		protected T executeAsync() throws IOException {
+		protected User executeAsync() throws IOException {
 			
 			GenericJson tempResult = getMICTempURL().execute();
 			String tempURL = tempResult.get("temp_login_uri").toString();
@@ -1092,7 +1092,7 @@ public abstract class AbstractAsyncUserStoreRequestManager<T extends User> exten
         }
 
         @Override
-        public T executeAsync() throws IOException {
+        public User executeAsync() throws IOException {
             if (query == null){
                 if (resolves == null){
                     return (T) AbstractAsyncUserStoreRequestManager.this.retrieveBlocking().execute();

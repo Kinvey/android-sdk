@@ -22,6 +22,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
 
 /**
  * Wraps the {@link com.kinvey.java.UserGroup} public methods in asynchronous functionality using native Android AsyncTask.
@@ -345,7 +346,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected UserGroupResponse executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncUserGroup.this.create(request).execute();
         }
     }
@@ -359,7 +360,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected UserGroupResponse executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncUserGroup.this.retrieve(groupID).execute();
         }
     }
@@ -373,7 +374,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected UserGroupResponse executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncUserGroup.this.update(request).execute();
         }
     }
@@ -387,7 +388,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected UserGroupResponse executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncUserGroup.this.delete(groupID).execute();
         }
     }

@@ -17,8 +17,8 @@
 package com.kinvey.android.async;
 
 import com.kinvey.android.AsyncClientRequest;
-import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +45,7 @@ public class AsyncRequest<T> extends AsyncClientRequest<T> {
     }
 
     @Override
-    public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    public User executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         T ret = (T)mMethod.invoke(scope, args);
         return ret;
     }

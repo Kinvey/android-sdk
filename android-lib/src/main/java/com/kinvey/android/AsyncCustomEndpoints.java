@@ -22,6 +22,7 @@ import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 
 /**
  * Wraps the {@link com.kinvey.java.CustomEndpoints} public methods in asynchronous functionality using native Android AsyncTask.
@@ -111,7 +112,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         }
 
         @Override
-        protected O executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointBlocking(commandName, input).execute();
         }
 
@@ -129,7 +130,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         }
 
         @Override
-        protected O[] executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
         }
 

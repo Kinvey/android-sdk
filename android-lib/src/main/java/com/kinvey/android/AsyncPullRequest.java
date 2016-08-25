@@ -17,12 +17,9 @@
 package com.kinvey.android;
 
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPushCallback;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.store.DataStore;
-import com.kinvey.java.sync.SyncManager;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +47,7 @@ public class AsyncPullRequest extends AsyncClientRequest<Void> {
 
 
     @Override
-    protected Void executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected User executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         store.pullBlocking(query);
         return null;
     }

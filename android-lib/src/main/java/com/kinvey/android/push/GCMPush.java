@@ -377,7 +377,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
             RegisterPush p = new RegisterPush(ent);
@@ -400,7 +400,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
             UnregisterPush p = new UnregisterPush(ent);

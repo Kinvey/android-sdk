@@ -56,12 +56,12 @@ import com.kinvey.java.auth.ClientUsers;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
-import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.UserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
@@ -110,8 +110,7 @@ public class Client extends AbstractClient {
     private long batchRate;
     private int batchSize;
     private RealmCacheManager cacheManager;
-    
-    
+
     private static Client _sharedInstance;
     
     /**
@@ -217,7 +216,7 @@ public class Client extends AbstractClient {
         this.getFileStore(StoreType.SYNC).clear();
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
-            e.performLockdown(userStore().getCurrentUser().getId());
+            e.performLockdown(getUser().getId());
         }
     }
 
@@ -374,7 +373,7 @@ public class Client extends AbstractClient {
      * @param <T> the type of the custom `User` class, which must extend {@link UserStoreRequestManager}
      * @return Instance of {@link UserStoreRequestManager}
      */
-    @Override
+/*    @Override
     public <T extends User> AsyncUserStoreRequestManager<T> userStore(){
         synchronized (lock) {
             if (userStoreRequestManager == null) {
@@ -385,7 +384,7 @@ public class Client extends AbstractClient {
             }
             return (AsyncUserStoreRequestManager<T>) userStoreRequestManager;
         }
-    }
+    }*/
 
     /**
      * Push factory method
@@ -418,7 +417,7 @@ public class Client extends AbstractClient {
         }
     }
 
-    /**
+ /**
      * Asynchronous Ping service method
      * <p>
      * Performs an authenticated ping against the configured Kinvey backend.
@@ -684,10 +683,10 @@ public class Client extends AbstractClient {
 
             } catch (AndroidCredentialStoreException ex) {
             	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                client.setCurrentUser(null);
+                client.setUser(null);
             } catch (IOException ex) {
             	Logger.ERROR("Credential store failed to load");
-                client.setCurrentUser(null);
+                client.setUser(null);
             }
 
             //GCM explicitely enabled
@@ -703,10 +702,10 @@ public class Client extends AbstractClient {
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
             if (this.MICVersion != null){
-                client.userStore().setMICApiVersion(this.MICVersion);
+                client.setMICApiVersion(this.MICVersion);
             }
             if(this.MICBaseURL != null){
-                client.userStore().setMICHostName(this.MICBaseURL);
+               client.setMICHostName(this.MICBaseURL);
             }
 
             return client;
@@ -827,7 +826,7 @@ public class Client extends AbstractClient {
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws AndroidCredentialStoreException, IOException {
             Credential credential = null;
-            if (!client.userStore().isUserLoggedIn()) {
+            if (!client.isUserLoggedIn()) {
                 String userID = client.getClientUsers().getCurrentUser();
                 if (userID != null && !userID.equals("")) {
                     CredentialStore store = getCredentialStore();
@@ -845,7 +844,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                client.userStore().login(credential).execute();
+                UserStore.login(credential).execute();
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
@@ -856,12 +855,12 @@ public class Client extends AbstractClient {
                 protected User doInBackground(Void... voids) {
                     User result = null;
                     try{
-                        result = client.userStore().retrieveMetadataBlocking();
-                        client.setCurrentUser(result);
+                        result = UserStore.retrieveMetadataBlocking();
+                        client.setUser(result);
                     }catch (Exception error){
                         this.error = error;
                         if ((error instanceof HttpResponseException)) {
-                            client.userStore().logout().execute();
+                            UserStore.logout().execute();
                         }
                     }
                     return result;

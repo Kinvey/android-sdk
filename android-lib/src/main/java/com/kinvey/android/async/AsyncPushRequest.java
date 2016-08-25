@@ -19,6 +19,7 @@ package com.kinvey.android.async;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
@@ -54,7 +55,7 @@ public class AsyncPushRequest extends AsyncClientRequest<Integer> {
 
 
     @Override
-    protected Integer executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected User executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         SyncRequest syncRequest = null;
         int progress = 0;
         while ((syncRequest = manager.popSingleQueue(collection)) != null){

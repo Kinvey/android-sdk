@@ -4,21 +4,19 @@ package com.kinvey.android.store;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.Credential;
-import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import java.io.IOException;
 
-public class AsyncUserStore<T> extends UserStore{
+public class AsyncUserStore extends UserStore{
 
-    public AsyncUserStore(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder) {
-        super(client, userClass, builder);
-    }
 
-    public static<T> void login(String userId, String password, AbstractClient client, KinveyClientCallback<T> callback) throws IOException {
-        new Login(userId, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+    public static void login(String userId, String password, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(userId, password, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     private static class Login extends AsyncClientRequest<User> {
@@ -31,7 +29,10 @@ public class AsyncUserStore<T> extends UserStore{
         String consumerKey;
         String consumerSecret;
         Credential credential;
-        LoginType type;
+        UserStoreRequestManager.LoginType type;
+        private Class<User> userClass;
+        AbstractClient client;
+        
 
         //Salesforce...
         String id;
@@ -39,23 +40,25 @@ public class AsyncUserStore<T> extends UserStore{
 
         private Login(KinveyClientCallback callback) {
             super(callback);
-            this.type = LoginType.IMPLICIT;
+            this.type = UserStoreRequestManager.LoginType.IMPLICIT;
         }
 
-        private Login(String username, String password, KinveyClientCallback callback) {
+        private Login(String username, String password, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) {
             super(callback);
             this.username = username;
             this.password = password;
-            this.type = LoginType.KINVEY;
+            this.userClass = userClass;
+            this.client = client;
+            this.type = UserStoreRequestManager.LoginType.KINVEY;
         }
 
-        private Login(String accessToken, LoginType type, KinveyClientCallback callback) {
+        private Login(String accessToken, UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
             this.type = type;
         }
 
-        private Login(String accessToken, String refreshToken, LoginType type, KinveyClientCallback callback) {
+        private Login(String accessToken, String refreshToken, UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
@@ -63,7 +66,7 @@ public class AsyncUserStore<T> extends UserStore{
         }
 
         private Login(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
-                      LoginType type, KinveyClientCallback callback) {
+                      UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
             this.accessSecret = accessSecret;
@@ -80,13 +83,13 @@ public class AsyncUserStore<T> extends UserStore{
             this.refreshToken = refresh;
             this.client_id = clientID;
             this.id = id;
-            this.type = LoginType.SALESFORCE;
+            this.type = UserStoreRequestManager.LoginType.SALESFORCE;
         }
 
         private Login(Credential credential, KinveyClientCallback callback) {
             super(callback);
             this.credential = credential;
-            this.type = LoginType.CREDENTIALSTORE;
+            this.type = UserStoreRequestManager.LoginType.CREDENTIALSTORE;
         }
 
         @Override
@@ -95,7 +98,7 @@ public class AsyncUserStore<T> extends UserStore{
                 case IMPLICIT:
                     return loginBlocking().execute();
                 case KINVEY:
-                    return loginBlocking(username, password).execute();
+                    return UserStore.login(username, password, client, userClass);
                 case FACEBOOK:
                     return loginFacebookBlocking(accessToken).execute();
                 case GOOGLE:

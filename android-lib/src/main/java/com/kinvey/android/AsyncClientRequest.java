@@ -30,6 +30,7 @@ import com.kinvey.java.Logger;
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 
 /**
  * <p>Abstract AsyncClientRequest class - used for Kinvey Callbacks.</p>

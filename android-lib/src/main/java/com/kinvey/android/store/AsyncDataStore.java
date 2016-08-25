@@ -33,6 +33,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
@@ -520,7 +521,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         }
 
         @Override
-        protected T executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return (AsyncDataStore.super.save(entity));
         }
     }
