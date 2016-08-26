@@ -47,7 +47,6 @@ import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncFileStore;
 import com.kinvey.android.store.AsyncLinkedDataStore;
-import com.kinvey.android.store.AsyncUserStoreRequestManager;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
@@ -860,7 +859,11 @@ public class Client extends AbstractClient {
                     }catch (Exception error){
                         this.error = error;
                         if ((error instanceof HttpResponseException)) {
-                            UserStore.logout().execute();
+                            try {
+                                UserStore.logout(client, userClass);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                     return result;
