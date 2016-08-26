@@ -345,20 +345,20 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public LogoutRequest logout() {
-        return new LogoutRequest(this, this.client.getStore());
+        return new LogoutRequest(client);
     }
 
 
     /**
      * Creates an explicit Kinvey User.
      *
-     * @param userid userID of Kinvey user
+     * @param username userName of Kinvey user
      * @param password password of Kinvey user
      * @return LoginRequest Object
      * @throws IOException
      */
-    public LoginRequest createBlocking(String userid, String password) throws IOException {
-        return new LoginRequest(userid, password, true).buildAuthRequest();
+    public LoginRequest createBlocking(String username, String password) throws IOException {
+        return new LoginRequest(username, password, true).buildAuthRequest();
     }
 
 

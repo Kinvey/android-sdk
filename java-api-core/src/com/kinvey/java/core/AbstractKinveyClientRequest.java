@@ -27,6 +27,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
+import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.FileCache;
 import com.kinvey.java.store.UserStore;
@@ -350,14 +351,22 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
             if (refreshToken != null ){
                 //logout the current user
+                String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+                String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
 
-                UserStore.logout().execute();
+                KinveyAuthRequest.Builder builder = new KinveyAuthRequest.Builder(client.getRequestFactory().getTransport(),
+                        client.getJsonFactory(), client.getBaseUrl(), appKey, appSecret, null);
+
+                UserStoreRequestManager userStoreRequestManager = new UserStoreRequestManager(
+                        client, getResponseClass(), builder);
+
+                userStoreRequestManager.logout().execute();
 
                 //use the refresh token for a new access token
-                GenericJson result = client.userStore().useRefreshToken(refreshToken).execute();
+                GenericJson result = userStoreRequestManager.useRefreshToken(refreshToken).execute();
 
                 //login with the access token
-                client.userStore().loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+                userStoreRequestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
                 //store the new refresh token
                 Credential currentCred = client.getStore().load(client.getUser().getId());
