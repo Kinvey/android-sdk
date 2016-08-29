@@ -843,7 +843,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                UserStore.login(credential).execute();
+                UserStore.login(credential, client, userClass);
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
@@ -854,7 +854,7 @@ public class Client extends AbstractClient {
                 protected User doInBackground(Void... voids) {
                     User result = null;
                     try{
-                        result = UserStore.retrieveMetadataBlocking();
+                        result = UserStore.convenience(client, userClass);
                         client.setUser(result);
                     }catch (Exception error){
                         this.error = error;
