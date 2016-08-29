@@ -20,6 +20,8 @@ import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
 import com.kinvey.java.store.DataStore;
+import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

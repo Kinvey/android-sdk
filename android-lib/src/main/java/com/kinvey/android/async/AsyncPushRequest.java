@@ -83,11 +83,7 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
         return pushResponse;
     }
 
-    @Override
-    protected void onPostExecute(KinveyPushResponse response) {
-        callback.onSuccess(response);
-    }
-
+   
     @Override
     protected void onProgressUpdate(KinveyPushResponse... values) {
         super.onProgressUpdate(values);

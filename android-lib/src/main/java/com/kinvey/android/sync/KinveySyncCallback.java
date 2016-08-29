@@ -16,18 +16,18 @@
 package com.kinvey.android.sync;
 
 
+import com.kinvey.java.core.KinveyClientCallback;
+
 /**
  * This class provides callbacks from requests executed by the Sync API.
  *
  * @author edwardf
  */
-public interface KinveySyncCallback<T> {
+public interface KinveySyncCallback<T> extends KinveyClientCallback {
 
-    /**
-     * Used to indicate successful execution of a request by the background service.
-     */
 
-    void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<T> tKinveyPullResponse);
+    @Override
+    void onSuccess(Object result);
 
     /**
      * Used to indicate successful execution of a request by the background service.
@@ -58,5 +58,6 @@ public interface KinveySyncCallback<T> {
     /**
      * Used to indicate the failed execution of a request by the background service.
      */
+    @Override
     void onFailure(Throwable t);
 }
