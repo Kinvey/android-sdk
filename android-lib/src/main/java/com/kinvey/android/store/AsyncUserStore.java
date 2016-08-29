@@ -248,8 +248,8 @@ public class AsyncUserStore extends UserStore{
         String myURLToRender = host + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
         //keep a reference to the callback and redirect uri for later
 
-//        MICCallback = callback;
-//        MICRedirectURI = redirectURI;
+        MICCallback = callback;
+        MICRedirectURI = redirectURI;
 
         if (callback != null){
             callback.onReadyToRender(myURLToRender);
