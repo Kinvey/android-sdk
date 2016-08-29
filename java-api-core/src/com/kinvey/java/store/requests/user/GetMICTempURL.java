@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.user;
 
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
@@ -28,13 +29,12 @@ import com.kinvey.java.store.UserStoreRequestManager;
 public final class GetMICTempURL<T extends User> extends AbstractKinveyClientRequest<GenericJson> {
     private static final String REST_PATH = "oauth/auth";
 
-    private UserStoreRequestManager<T> userStoreRequestManager;
 
-    public GetMICTempURL(UserStoreRequestManager<T> userStoreRequestManager, HttpContent content) {
-        super(userStoreRequestManager.getClient(), userStoreRequestManager.MICHostName, "POST", REST_PATH, content, GenericJson.class);
-        this.userStoreRequestManager = userStoreRequestManager;
-        if (userStoreRequestManager.MICApiVersion != null && userStoreRequestManager.MICApiVersion.length() > 0) {
-            this.uriTemplate = userStoreRequestManager.MICApiVersion + "/" + this.uriTemplate;
+    public GetMICTempURL(AbstractClient client, HttpContent content) {
+        super(client, client.getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
+        String MICApiVersion = client.getMICApiVersion();
+        if (MICApiVersion != null && MICApiVersion.length() > 0) {
+            this.uriTemplate = MICApiVersion + "/" + this.uriTemplate;
         }
     }
 }

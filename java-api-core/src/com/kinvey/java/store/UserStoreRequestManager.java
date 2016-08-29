@@ -398,8 +398,8 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public RetrieveUsers retrieveBlocking(Query query) throws IOException{
-        RetrieveUsers retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
+    public RetrieveUsers<T> retrieveBlocking(Query query) throws IOException{
+        RetrieveUsers<T> retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -411,10 +411,10 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve retrieveBlocking(String[] resolves) throws IOException{
+    public Retrieve<T> retrieveBlocking(String[] resolves) throws IOException{
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, client.getUser().getId(), resolves, 1, true, myClazz);
+        Retrieve<T> retrieve = new Retrieve<T>(this, client.getUser().getId(), resolves, 1, true, myClazz);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -427,9 +427,9 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public RetrieveUsers retrieveBlocking(Query query, String[] resolves) throws IOException{
+    public RetrieveUsers<T> retrieveBlocking(Query query, String[] resolves) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        RetrieveUsers retrieve = new RetrieveUsers(this, query, resolves, 1, true,  Array.newInstance(myClazz,0).getClass());
+        RetrieveUsers<T> retrieve = new RetrieveUsers<T>(this, query, resolves, 1, true,  Array.newInstance(myClazz,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -553,8 +553,6 @@ public class UserStoreRequestManager<T extends User> {
         getToken.setRequireAppCredentials(true);
         client.initializeRequest(getToken);
         return getToken;
-
-
     }
 
     public GetMICTempURL<T> getMICTempURL() throws IOException{
@@ -569,7 +567,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICTempURL getTemp = new GetMICTempURL<T>(this, content);
+        GetMICTempURL getTemp = new GetMICTempURL<T>(client, content);
         getTemp.setRequireAppCredentials(true);
         client.initializeRequest(getTemp);
         return getTemp;

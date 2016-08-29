@@ -84,9 +84,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     /**
      * The hostname to use for MIC authentication
      */
-    public String MICHostName = "https://auth.kinvey.com/";
+    private String MICHostName = "https://auth.kinvey.com/";
 
-    public String MICApiVersion;
+    private String MICApiVersion;
 
     public void setMICApiVersion(String version){
         if (!version.startsWith("v")){
@@ -100,6 +100,14 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             throw new IllegalArgumentException("MIC url should be sercure url");
         }
         this.MICHostName = MICHostName.endsWith("/") ? MICHostName : MICHostName + "/";
+    }
+
+    public String getMICHostName() {
+        return MICHostName;
+    }
+
+    public String getMICApiVersion() {
+        return MICApiVersion;
     }
 
     public void setClientAppVersion(String appVersion){
@@ -126,9 +134,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public boolean isUserLoggedIn() {
-        String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
-        String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-        return appKey != null & appSecret !=null;
+
+//        String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
+//        String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+//        return appKey != null & appSecret !=null;
+        return getUser() != null;
     }
 
 
