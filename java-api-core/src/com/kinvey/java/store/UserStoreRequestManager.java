@@ -507,7 +507,7 @@ public class UserStoreRequestManager<T extends User> {
      */
     public ResetPassword resetPasswordBlocking(String usernameOrEmail) throws IOException {
         Preconditions.checkNotNull(usernameOrEmail, "username must not be null!");
-        ResetPassword reset = new ResetPassword(client, usernameOrEmail);
+        ResetPassword reset = new ResetPassword(this, usernameOrEmail);
         client.initializeRequest(reset);
         return reset;
     }
@@ -521,7 +521,7 @@ public class UserStoreRequestManager<T extends User> {
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        EmailVerification verify = new EmailVerification(client, client.getUser().getId());
+        EmailVerification verify = new EmailVerification(this, client.getUser().getId());
         client.initializeRequest(verify);
         return verify;
     }
@@ -544,7 +544,7 @@ public class UserStoreRequestManager<T extends User> {
         GenericJson lock = new GenericJson();
         lock.put("userId", userid);
         lock.put("setLockdownStateTo", setLockdownStateTo);
-        LockDownUser lockdown = new LockDownUser(client, lock);
+        LockDownUser lockdown = new LockDownUser(this, lock);
         client.initializeRequest(lockdown);
         return lockdown;
     }
@@ -572,7 +572,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICAccessToken getToken = new GetMICAccessToken(client, content);
+        GetMICAccessToken getToken = new GetMICAccessToken(this, content);
         getToken.setRequireAppCredentials(true);
         client.initializeRequest(getToken);
         return getToken;
@@ -591,7 +591,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICAccessToken getToken = new GetMICAccessToken(client, content);
+        GetMICAccessToken getToken = new GetMICAccessToken(this, content);
         getToken.setRequireAppCredentials(true);
         client.initializeRequest(getToken);
         return getToken;
