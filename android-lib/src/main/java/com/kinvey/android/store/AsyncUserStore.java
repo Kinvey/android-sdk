@@ -51,8 +51,8 @@ public class AsyncUserStore extends UserStore{
      * @return a LoginRequest ready to be executed
      * @throws IOException
      */
-    public void loginKinveyAuthToken(String userId, String authToken, AbstractClient client, Class<User> userClass, KinveyClientCallback<T> callback){
-        new LoginKinveyAuth(userId, authToken, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public void loginKinveyAuthToken(String userId, String authToken, AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback){
+        new LoginKinveyAuth(userId, authToken, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     private static void logout(AbstractClient client) {
@@ -79,13 +79,29 @@ public class AsyncUserStore extends UserStore{
         new EmailVerification(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    public static void resetPassword(String username, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new ResetPassword(username, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    public static void forgotUsername(AbstractClient client, Class<User> userClass, String email, KinveyUserManagementCallback callback) {
+        new ForgotUsername(client, userClass, email, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-//    public static void changePassword(String password, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-//        new Update(password, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-//    }
+    public static void resetPassword(String usernameOrEmail, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
+        new ResetPassword(usernameOrEmail, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void exists(String username, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
+        new ExistsUser(username, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void changePassword(String password, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
+        new ChangePassword(password, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void get(String userId, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
+        new GetUser(userId, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public void save(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
+        new Update(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
 
     /**
      * Asynchronous Retrieve Metadata
@@ -121,9 +137,9 @@ public class AsyncUserStore extends UserStore{
      *
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
-    public void update(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
+/*    public void update(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
         new Update(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
-    }
+    }*/
 
     /**
      * Asynchronous Call to Retrieve (refresh) the current user
@@ -618,19 +634,58 @@ public class AsyncUserStore extends UserStore{
 
         @Override
         protected User executeAsync() throws IOException {
-            return UserStore.update(client, userClass);
+            return UserStore.save(client, userClass);
+        }
+    }
+
+    private static class ChangePassword extends AsyncClientRequest<Void> {
+
+        private final String password;
+        AbstractClient client = null;
+        private final Class<User> userClass;
+
+        private ChangePassword(String password, AbstractClient client, Class<User> userClass, KinveyClientCallback callback){
+            super(callback);
+            this.password = password;
+            this.client = client;
+            this.userClass = userClass;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            UserStore.changePassword(password, client, userClass);
+            return null;
         }
     }
 
 
-
     private static class ResetPassword extends AsyncClientRequest<Void> {
+
+        String usernameOrEmail;
+        private final AbstractClient client;
+        private final Class<User> userClass;
+
+        private ResetPassword(String usernameOrEmail, AbstractClient client, Class<User> userClass, KinveyClientCallback callback) {
+            super(callback);
+            this.usernameOrEmail = usernameOrEmail;
+            this.client = client;
+            this.userClass = userClass;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            UserStore.resetPassword(usernameOrEmail, client, userClass);
+            return null;
+        }
+    }
+
+    private static class ExistsUser extends AsyncClientRequest<Void> {
 
         String username;
         private final AbstractClient client;
         private final Class<User> userClass;
 
-        private ResetPassword(String username, AbstractClient client, Class<User> userClass, KinveyClientCallback callback) {
+        private ExistsUser(String username, AbstractClient client, Class<User> userClass, KinveyClientCallback callback) {
             super(callback);
             this.username = username;
             this.client = client;
@@ -639,13 +694,32 @@ public class AsyncUserStore extends UserStore{
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.resetPassword(username, client, userClass);
+            UserStore.exists(username, client, userClass);
+            return null;
+        }
+    }
+
+    private static class GetUser extends AsyncClientRequest<User> {
+
+        String userId;
+        private final AbstractClient client;
+        private final Class<User> userClass;
+
+        private GetUser(String userId, AbstractClient client, Class<User> userClass, KinveyClientCallback callback) {
+            super(callback);
+            this.userId = userId;
+            this.client = client;
+            this.userClass = userClass;
+        }
+
+        @Override
+        protected User executeAsync() throws IOException {
+            UserStore.get(userId, client, userClass);
             return null;
         }
     }
 
     private static class EmailVerification extends AsyncClientRequest<Void> {
-
 
         private final AbstractClient client;
         private final Class<User> userClass;
@@ -659,6 +733,26 @@ public class AsyncUserStore extends UserStore{
         @Override
         protected Void executeAsync() throws IOException {
             UserStore.sendEmailConfirmation(client, userClass);
+            return null;
+        }
+    }
+
+    private static class ForgotUsername extends AsyncClientRequest<Void> {
+
+        private final AbstractClient client;
+        private final Class<User> userClass;
+        private final String email;
+
+        private ForgotUsername(AbstractClient client, Class<User> userClass, String email, KinveyClientCallback callback) {
+            super(callback);
+            this.client = client;
+            this.userClass = userClass;
+            this.email = email;
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            UserStore.forgotUsername(client, userClass, email);
             return null;
         }
     }
