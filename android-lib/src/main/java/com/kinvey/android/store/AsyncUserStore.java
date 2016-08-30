@@ -23,6 +23,8 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
+import com.kinvey.java.store.requests.user.GetMICTempURL;
+import com.kinvey.java.store.requests.user.LoginToTempURL;
 import com.kinvey.java.store.requests.user.LogoutRequest;
 
 import java.io.IOException;
@@ -216,7 +218,7 @@ public class AsyncUserStore extends UserStore{
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
      */
     public void retrieve(Query query, String[] resolves, AbstractClient client, Class<User> userClass, KinveyUserListCallback callback){
-        new Retrieve(query, resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveUserList(query, resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -240,7 +242,7 @@ public class AsyncUserStore extends UserStore{
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
      */
     public void retrieve(Query q, AbstractClient client, Class<User> userClass, KinveyListCallback<User> callback) {
-        new Retrieve(q, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveUserList(q, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
 
@@ -534,11 +536,14 @@ public class AsyncUserStore extends UserStore{
         protected User executeAsync() throws IOException {
 
             UserStoreRequestManager requestManager = new UserStoreRequestManager<User>(client, userClass, createBuilder(client));
-            GenericJson tempResult = requestManager.getMICTempURL().execute();
-            String tempURL = tempResult.get("temp_login_uri").toString();
-            GenericJson accessResult = requestManager.MICLoginToTempURL(username, password, tempURL).execute();
 
-//			AbstractAsyncUser.this.loginMobileIdentity(accessResult.get("access_token").toString(), MICCallback);
+            GetMICTempURL<User> micTempURL = requestManager.getMICTempURL();
+            GenericJson tempResult = micTempURL.execute();
+
+            String tempURL = tempResult.get("temp_login_uri").toString();
+            LoginToTempURL<User> loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
+            GenericJson accessResult = loginToTempURL.execute();
+
             User user = UserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client, userClass);
 
 
@@ -551,34 +556,50 @@ public class AsyncUserStore extends UserStore{
     }
 
 
-    private static class Retrieve<T extends User> extends AsyncClientRequest<T> {
+    private static class Retrieve extends AsyncClientRequest<User> {
 
-        private Query query = null;
         private String[] resolves = null;
         private final AbstractClient client;
-        private final Class<T> userClass;
+        private final Class<User> userClass;
 
-        private Retrieve(AbstractClient client, Class<T> userClass,KinveyClientCallback callback) {
+        private Retrieve(AbstractClient client, Class<User> userClass,KinveyClientCallback callback) {
             super(callback);
             this.client = client;
             this.userClass = userClass;
         }
 
-        private Retrieve(Query query, AbstractClient client, Class<T> userClass,KinveyClientCallback callback){
-            super(callback);
-            this.query = query;
-            this.client = client;
-            this.userClass = userClass;
-        }
-
-        private Retrieve(String[] resolves, AbstractClient client, Class<T> userClass, KinveyClientCallback callback){
+        private Retrieve(String[] resolves, AbstractClient client, Class<User> userClass, KinveyClientCallback callback){
             super(callback);
             this.resolves = resolves;
             this.client = client;
             this.userClass = userClass;
         }
 
-        private Retrieve(Query query, String[] resolves, AbstractClient client, Class<T> userClass, KinveyClientCallback callback){
+        @Override
+        public User executeAsync() throws IOException {
+            if (resolves == null){
+                return UserStore.retrieve(client, userClass);
+            }else{
+                return UserStore.retrieve(resolves, client, userClass);
+            }
+        }
+    }
+
+    private static class RetrieveUserList extends AsyncClientRequest<User[]> {
+
+        private Query query = null;
+        private String[] resolves = null;
+        private final AbstractClient client;
+        private final Class<User> userClass;
+
+        private RetrieveUserList(Query query, AbstractClient client, Class<User> userClass,KinveyClientCallback callback){
+            super(callback);
+            this.query = query;
+            this.client = client;
+            this.userClass = userClass;
+        }
+
+        private RetrieveUserList(Query query, String[] resolves, AbstractClient client, Class<User> userClass, KinveyClientCallback callback){
             super(callback);
             this.query = query;
             this.resolves = resolves;
@@ -587,19 +608,11 @@ public class AsyncUserStore extends UserStore{
         }
 
         @Override
-        public T executeAsync() throws IOException {
-            if (query == null){
-                if (resolves == null){
-                    return (T) UserStore.retrieve(client, userClass);
-                }else{
-                    return (T) UserStore.retrieve(resolves, client, userClass);
-                }
+        public User[] executeAsync() throws IOException {
+            if (resolves == null){
+                return UserStore.retrieve(query, client, userClass);
             }else{
-                if (resolves == null){
-                    return (T) UserStore.retrieve(query, client, userClass);
-                }else{
-                    return (T) UserStore.retrieve(query, resolves, client, userClass);
-                }
+                return UserStore.retrieve(query, resolves, client, userClass);
             }
         }
     }

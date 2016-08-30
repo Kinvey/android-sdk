@@ -113,7 +113,7 @@ public class UserStore<T> {
         return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).retrieveBlocking().execute();
     }
 
-    public static <T extends User> T retrieve(Query query, AbstractClient client, Class<T> userClass) throws IOException {
+    public static <T extends User> T[] retrieve(Query query, AbstractClient client, Class<T> userClass) throws IOException {
         return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).retrieveBlocking(query).execute();
     }
 
@@ -121,7 +121,7 @@ public class UserStore<T> {
         return  new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).retrieveBlocking(resolves).execute();
     }
 
-    public static <T extends User> T retrieve(Query query, String[] resolves, AbstractClient client, Class<T> userClass) throws IOException {
+    public static <T extends User> T[] retrieve(Query query, String[] resolves, AbstractClient client, Class<T> userClass) throws IOException {
         return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).retrieveBlocking(query, resolves).execute();
     }
 
