@@ -66,7 +66,7 @@ public final class RetrieveUsers<T extends User> extends AbstractKinveyJsonClien
         }
     }
 
-    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain, Class myClass){
+    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain, Class<T[]> myClass){
         super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
         this.userStoreRequestManager = userStoreRequestManager;
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());

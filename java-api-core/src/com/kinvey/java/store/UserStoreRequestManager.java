@@ -30,9 +30,13 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.Email;
+import com.kinvey.java.dto.PasswordRequest;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.Username;
 import com.kinvey.java.store.requests.user.Delete;
 import com.kinvey.java.store.requests.user.EmailVerification;
+import com.kinvey.java.store.requests.user.ForgotUsername;
 import com.kinvey.java.store.requests.user.GetMICAccessToken;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LockDownUser;
@@ -42,6 +46,7 @@ import com.kinvey.java.store.requests.user.ResetPassword;
 import com.kinvey.java.store.requests.user.Retrieve;
 import com.kinvey.java.store.requests.user.RetrieveUsers;
 import com.kinvey.java.store.requests.user.Update;
+import com.kinvey.java.store.requests.user.UserExists;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -429,7 +434,7 @@ public class UserStoreRequestManager<T extends User> {
      */
     public RetrieveUsers<T> retrieveBlocking(Query query, String[] resolves) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        RetrieveUsers<T> retrieve = new RetrieveUsers<T>(this, query, resolves, 1, true,  Array.newInstance(myClazz,0).getClass());
+        RetrieveUsers<T> retrieve = new RetrieveUsers(this, query, resolves, 1, true, Array.newInstance(myClazz,0).getClass());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -458,21 +463,51 @@ public class UserStoreRequestManager<T extends User> {
     public Update updateBlocking(User user) throws IOException{
         Preconditions.checkNotNull(user, "currentUser must not be null");
         Preconditions.checkNotNull(user.getId(), "currentUser ID must not be null");
-        Update update = new Update(this, user, myClazz);
+        Update update = new Update<T>(this, user, User.class);
         client.initializeRequest(update);
         return update;
+    }
+
+    public Update changePassword(String newPassword) throws IOException{
+        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        PasswordRequest passwordRequest = new PasswordRequest();
+        passwordRequest.setPassword(newPassword);
+        Update update = new Update<T>(this, client.getUser(), passwordRequest, User.class);
+        client.initializeRequest(update);
+        return update;
+    }
+
+    public UserExists exists(String username) throws IOException {
+        Preconditions.checkNotNull(username, "username must not be null");
+        Username name = new Username();
+        name.setUsername(username);
+        UserExists userExists = new UserExists(client, name);
+        client.initializeRequest(userExists);
+        return userExists;
+    }
+
+    public Update getUser(String userId) throws IOException {
+        Preconditions.checkNotNull(userId, "username must not be null");
+        Update update = new Update<T>(this, userId, User.class);
+        client.initializeRequest(update);
+        return update;
+    }
+
+    public Update save() throws IOException {
+        return updateBlocking();
     }
 
     /**
      * Initiates a password reset request for a provided username
      *
-     * @param username the username to request a password reset for
+     * @param usernameOrEmail the username to request a password reset for
      * @return ResetPassword request
      * @throws IOException
      */
-    public ResetPassword resetPasswordBlocking(String username) throws IOException {
-        Preconditions.checkNotNull(username, "username must not be null!");
-        ResetPassword reset = new ResetPassword(this, username);
+    public ResetPassword resetPasswordBlocking(String usernameOrEmail) throws IOException {
+        Preconditions.checkNotNull(usernameOrEmail, "username must not be null!");
+        ResetPassword reset = new ResetPassword(client, usernameOrEmail);
         client.initializeRequest(reset);
         return reset;
     }
@@ -486,12 +521,10 @@ public class UserStoreRequestManager<T extends User> {
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        EmailVerification verify = new EmailVerification(this, client.getUser().getId());
+        EmailVerification verify = new EmailVerification(client, client.getUser().getId());
         client.initializeRequest(verify);
         return verify;
     }
-
-
 
 
     /**
@@ -511,9 +544,18 @@ public class UserStoreRequestManager<T extends User> {
         GenericJson lock = new GenericJson();
         lock.put("userId", userid);
         lock.put("setLockdownStateTo", setLockdownStateTo);
-        LockDownUser lockdown = new LockDownUser(this, lock);
+        LockDownUser lockdown = new LockDownUser(client, lock);
         client.initializeRequest(lockdown);
         return lockdown;
+    }
+
+    public ForgotUsername forgotUsername(String email) throws IOException {
+        Preconditions.checkNotNull(email, "email must not be null");
+        Email userEmail = new Email();
+        userEmail.setEmail(email);
+        ForgotUsername forgotUsername = new ForgotUsername(client, userEmail);
+        client.initializeRequest(forgotUsername);
+        return forgotUsername;
     }
 
     public GetMICAccessToken getMICToken(String code) throws IOException{
@@ -530,7 +572,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICAccessToken getToken = new GetMICAccessToken(this, content);
+        GetMICAccessToken getToken = new GetMICAccessToken(client, content);
         getToken.setRequireAppCredentials(true);
         client.initializeRequest(getToken);
         return getToken;
@@ -549,7 +591,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICAccessToken getToken = new GetMICAccessToken(this, content);
+        GetMICAccessToken getToken = new GetMICAccessToken(client, content);
         getToken.setRequireAppCredentials(true);
         client.initializeRequest(getToken);
         return getToken;
@@ -567,7 +609,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICTempURL getTemp = new GetMICTempURL<T>(client, content);
+        GetMICTempURL<T> getTemp = new GetMICTempURL<T>(client, content);
         getTemp.setRequireAppCredentials(true);
         client.initializeRequest(getTemp);
         return getTemp;
@@ -671,6 +713,7 @@ public class UserStoreRequestManager<T extends User> {
             //if (response.)
             return initUser(response, userType, ret);
         }
-
     }
+
+
 }

@@ -14,23 +14,21 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.dto;
 
-import com.google.api.client.http.HttpContent;
+
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.store.UserStoreRequestManager;
+import com.google.api.client.util.Key;
 
-/**
- * Created by Prots on 2/12/16.
- */
-public final class GetMICAccessToken extends AbstractKinveyClientRequest<GenericJson> {
-    private static final String REST_PATH = "oauth/token";
+public class Email extends GenericJson {
+    @Key("email")
+    private String email;
 
-    private UserStoreRequestManager userStoreRequestManager;
+    public String getEmail() {
+        return email;
+    }
 
-    public GetMICAccessToken(UserStoreRequestManager userStoreRequestManager, HttpContent content) {
-        super(userStoreRequestManager.getClient(), userStoreRequestManager.getClient().getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
-        this.userStoreRequestManager = userStoreRequestManager;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

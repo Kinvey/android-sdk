@@ -16,27 +16,15 @@
 
 package com.kinvey.java.store.requests.user;
 
-import com.google.api.client.util.Key;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.store.UserStoreRequestManager;
+import com.kinvey.java.dto.Email;
 
-/**
- * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object
- * for ResetPassword User requests.
- */
-public final class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
-    private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate";
 
-    private UserStoreRequestManager userStoreRequestManager;
-    @Key
-    private String userID;
+public final class ForgotUsername extends AbstractKinveyJsonClientRequest<Void> {
+    private static final String REST_PATH = "rpc/{appKey}/user-forgot-username";
 
-    public ResetPassword(UserStoreRequestManager userStoreRequestManager, String usernameOrEmail) {
-        super(userStoreRequestManager.getClient(), "POST", REST_PATH, null,  Void.class);
-        this.userStoreRequestManager = userStoreRequestManager;
-        this.userID = usernameOrEmail;
-        this.setRequireAppCredentials(true);
-
+    public ForgotUsername(AbstractClient client, Email email) {
+        super(client, "POST", REST_PATH, email, Void.class);
     }
 }

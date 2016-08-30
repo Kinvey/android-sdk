@@ -93,16 +93,16 @@ public class UserStore<T> {
         new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).sendEmailVerificationBlocking().execute();
     }
 
-    public static <T extends User> void resetPassword(String username, AbstractClient client, Class<T> userClass) throws IOException {
-        new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).resetPasswordBlocking(username).execute();
+    public static <T extends User> void resetPassword(String usernameOrEmail, AbstractClient client, Class<T> userClass) throws IOException {
+        new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).resetPasswordBlocking(usernameOrEmail).execute();
     }
 
-    public static <T extends User> User update(AbstractClient client, Class<T> userClass) throws IOException {
+/*    public static <T extends User> User update(AbstractClient client, Class<T> userClass) throws IOException {
         return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).updateBlocking().execute();
-    }
+    }*/
 
     public static <T extends User> void changePassword(String password, AbstractClient client, Class<T> userClass) throws IOException {
-        new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).updateBlocking().execute();
+        new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).changePassword(password).execute();
     }
 
     public static <T extends User> User convenience(AbstractClient client, Class<T> userClass) throws IOException {
@@ -123,6 +123,22 @@ public class UserStore<T> {
 
     public static <T extends User> T retrieve(Query query, String[] resolves, AbstractClient client, Class<T> userClass) throws IOException {
         return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).retrieveBlocking(query, resolves).execute();
+    }
+
+    public static <T extends User> void forgotUsername(AbstractClient client, Class<T> userClass, String email) throws IOException {
+        new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).forgotUsername(email).execute();
+    }
+
+    public static <T extends User> boolean exists( String username, AbstractClient client, Class<T> userClass) throws IOException {
+        return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).exists(username).execute();
+    }
+
+    public static <T extends User> User get(String userId, AbstractClient client, Class<T> userClass) throws IOException {
+        return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).getUser(userId).execute();
+    }
+
+    public static <T extends User> User save(AbstractClient client, Class<T> userClass) throws IOException {
+        return new UserStoreRequestManager<T>(client, userClass, createBuilder(client)).save().execute();
     }
 
     private static KinveyAuthRequest.Builder createBuilder(AbstractClient client) {

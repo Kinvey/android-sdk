@@ -21,6 +21,7 @@ import com.google.api.client.util.Key;
 import com.google.gson.Gson;
 import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.dto.PasswordRequest;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
 
@@ -45,7 +46,26 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
         if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
             this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
         }
+    }
 
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, PasswordRequest passwordRequest, Class<User> myClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
+        this.userID = user.getId();
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
+            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
+        }
+    }
+
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, String userId, Class<User> myClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, myClass);
+        this.userStoreRequestManager = userStoreRequestManager;
+        this.userID = userId;
+        this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
+        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()){
+            this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(userStoreRequestManager.getCustomRequestProperties()) );
+        }
     }
 
     public User execute() throws IOException {
