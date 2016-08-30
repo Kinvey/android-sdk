@@ -473,20 +473,20 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
                     @Override
                     public void onSuccess(Integer result) {
                         callback.onSuccess(result);
-//                        Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onResult(result, callback);
+
                     }
 
                     @Override
                     public void onFailure(Throwable error) {
                         callback.onFailure(error);
-//                        Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onFailure(error, callback);
+
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable error) {
-//                Client.sharedInstance().getKinveyHandlerThread().getWorkerHandler().onFailure(error, callback);
+
                 callback.onFailure(error);
             }
 
