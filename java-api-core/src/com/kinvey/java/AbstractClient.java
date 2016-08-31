@@ -135,10 +135,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public boolean isUserLoggedIn() {
 
-//        String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
-//        String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
+        String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
+        String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
 //        return appKey != null & appSecret !=null;
-        return getUser() != null;
+        return getUser() != null && getUser().getId() !=null;
     }
 
 
@@ -219,7 +219,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public User getUser() {
         synchronized (lock) {
-            return user;
+            return this.user;
         }
     }
 

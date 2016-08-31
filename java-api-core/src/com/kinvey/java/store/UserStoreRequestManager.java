@@ -153,6 +153,7 @@ public class UserStoreRequestManager<T extends User> {
         client.getClientUsers().setCurrentUser(currentUser.getId());
 
         client.setUser(currentUser);
+        client.getUser();
         return currentUser;
     }
 

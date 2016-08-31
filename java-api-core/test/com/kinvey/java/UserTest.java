@@ -291,14 +291,14 @@ public class UserTest extends KinveyMockUnitTest {
     	GetMICAccessToken token = requestManager.getMICToken("MyToken");
     	GenericJson result =  (GenericJson) token.execute();
 
-        if (getClient().isUserLoggedIn()) {
+/*        if (getClient().isUserLoggedIn()) {
             requestManager.logout().execute();
-        }
+        }*/
         User ret = requestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
+        getClient().setUser(ret);
 
-    	assertEquals(true, getClient().isUserLoggedIn());
-
+        assertEquals(true, getClient().isUserLoggedIn());
     }
 
     public void testMICAPIVersionAppendsV() throws IOException{
