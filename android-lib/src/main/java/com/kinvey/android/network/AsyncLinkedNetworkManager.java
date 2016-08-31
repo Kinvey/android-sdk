@@ -184,7 +184,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T[] executeAsync() throws IOException {
             return AsyncLinkedNetworkManager.this.getBlocking(this.query, this.progress, this.attachments, this.resolves, this.resolve_depth, this.retain).execute();
         }
     }
@@ -202,7 +202,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return AsyncLinkedNetworkManager.this.getEntityBlocking(this.entityID, this.progress, this.attachments).execute();
         }
     }
@@ -220,7 +220,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return AsyncLinkedNetworkManager.this.saveBlocking(this.entity, this.progress, this.attachments).execute();
         }
     }

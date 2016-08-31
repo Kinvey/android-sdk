@@ -346,7 +346,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected UserGroupResponse executeAsync() throws IOException {
             return AsyncUserGroup.this.create(request).execute();
         }
     }
@@ -360,7 +360,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected UserGroupResponse executeAsync() throws IOException {
             return AsyncUserGroup.this.retrieve(groupID).execute();
         }
     }
@@ -374,7 +374,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected UserGroupResponse executeAsync() throws IOException {
             return AsyncUserGroup.this.update(request).execute();
         }
     }
@@ -388,7 +388,7 @@ public class AsyncUserGroup extends UserGroup {
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected UserGroupResponse executeAsync() throws IOException {
             return AsyncUserGroup.this.delete(groupID).execute();
         }
     }

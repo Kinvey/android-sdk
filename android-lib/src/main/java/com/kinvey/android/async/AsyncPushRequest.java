@@ -29,7 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
-public class AsyncPushRequest extends AsyncClientRequest<Integer> {
+public class AsyncPushRequest<T> extends AsyncClientRequest<Integer> {
     private final String collection;
     private final SyncManager manager;
     private final AbstractClient client;
@@ -55,7 +55,7 @@ public class AsyncPushRequest extends AsyncClientRequest<Integer> {
 
 
     @Override
-    protected User executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected Integer executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         SyncRequest syncRequest = null;
         int progress = 0;
         while ((syncRequest = manager.popSingleQueue(collection)) != null){

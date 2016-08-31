@@ -162,9 +162,8 @@ public class AsyncUserStore extends UserStore{
      * </pre>
      *
      * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
-     * @param <T>
      */
-    public<T> void retrieve(AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback) {
+    public static void retrieve(AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback) {
         new Retrieve(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -189,7 +188,7 @@ public class AsyncUserStore extends UserStore{
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
-    public void retrieve(String[] resolves, AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback){
+    public static void retrieve(String[] resolves, AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback){
         new Retrieve(resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -217,7 +216,7 @@ public class AsyncUserStore extends UserStore{
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
      */
-    public void retrieve(Query query, String[] resolves, AbstractClient client, Class<User> userClass, KinveyUserListCallback callback){
+    public static void retrieve(Query query, String[] resolves, AbstractClient client, Class<User> userClass, KinveyUserListCallback callback){
         new RetrieveUserList(query, resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -241,7 +240,7 @@ public class AsyncUserStore extends UserStore{
      *
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
      */
-    public void retrieve(Query q, AbstractClient client, Class<User> userClass, KinveyListCallback<User> callback) {
+    public static void retrieve(Query q, AbstractClient client, Class<User> userClass, KinveyListCallback<User> callback) {
         new RetrieveUserList(q, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -280,7 +279,7 @@ public class AsyncUserStore extends UserStore{
      *
      * @param intent The intent provided to the application from the redirect
      */
-    public void onOAuthCallbackRecieved(Intent intent, AbstractClient client, Class<User> userClass){
+    public static void onOAuthCallbackRecieved(Intent intent, AbstractClient client, Class<User> userClass){
         if (intent == null || intent.getData() == null){
             return;
         }
@@ -313,7 +312,7 @@ public class AsyncUserStore extends UserStore{
      *
      * @param token the access code returned from the MIC Auth service
      */
-    public void getMICAccessToken(String token, AbstractClient client, Class<User> userClass){
+    public static void getMICAccessToken(String token, AbstractClient client, Class<User> userClass){
         new PostForAccessToken(client, userClass, token, (KinveyClientCallback<User>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
@@ -489,7 +488,7 @@ public class AsyncUserStore extends UserStore{
         }
     }
 
-    private class PostForAccessToken extends AsyncClientRequest<User>{
+    private static class PostForAccessToken extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
         private final Class<User> userClass;

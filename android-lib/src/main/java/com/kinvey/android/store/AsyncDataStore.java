@@ -521,7 +521,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return (AsyncDataStore.super.save(entity));
         }
     }

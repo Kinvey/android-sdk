@@ -6,6 +6,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.store.AsyncFileStore;
+import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
@@ -42,9 +43,8 @@ public class FileStoreTest {
     public void setUp() throws IOException {
         Client.Builder builder = new Client.Builder(InstrumentationRegistry.getContext());
         client = builder.build();
-        UserStoreRequestManager<User> user = client.userStore();
-        if (!user.isUserLoggedIn()) {
-            user.loginBlocking().execute();
+        if (!client.isUserLoggedIn()) {
+            AsyncUserStore.login(client, User.class);
         }
     }
     @Test

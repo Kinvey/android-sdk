@@ -47,7 +47,7 @@ public class AsyncPullRequest extends AsyncClientRequest<Void> {
 
 
     @Override
-    protected User executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected Void executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         store.pullBlocking(query);
         return null;
     }

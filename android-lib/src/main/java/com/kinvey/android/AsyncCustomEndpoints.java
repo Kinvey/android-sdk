@@ -112,7 +112,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected O executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointBlocking(commandName, input).execute();
         }
 
@@ -130,7 +130,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected O[] executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
         }
 
