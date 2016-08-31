@@ -266,7 +266,7 @@ public class AsyncUserStore extends UserStore{
         //keep a reference to the callback and redirect uri for later
 
         MICCallback = callback;
-        MICRedirectURI = redirectURI;
+        /*MICRedirectURI = redirectURI;*/
 
         if (callback != null){
             callback.onReadyToRender(myURLToRender);
@@ -302,9 +302,8 @@ public class AsyncUserStore extends UserStore{
      */
     public static void loginWithAuthorizationCodeAPI(AbstractClient client, Class<User> userClass, String username, String password, String redirectURI, KinveyUserCallback callback){
         MICCallback = callback;
-        MICRedirectURI = redirectURI;
 
-        new PostForTempURL(client, userClass, username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new PostForTempURL(client, userClass, redirectURI, username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -322,7 +321,7 @@ public class AsyncUserStore extends UserStore{
      * @param redirectURI
      * @param callback
      */
-    public void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback callback){
+    public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback callback){
 
         loginWithAuthorizationCodeLoginPage(client, redirectURI, new KinveyMICCallback() {
             @Override
@@ -520,13 +519,15 @@ public class AsyncUserStore extends UserStore{
 
         private final AbstractClient client;
         private final Class<User> userClass;
+        private final String redirectURI;
         String username;
         String password;
 
-        public PostForTempURL(AbstractClient client, Class<User> userClass, String username, String password, KinveyUserCallback callback) {
+        public PostForTempURL(AbstractClient client, Class<User> userClass, String redirectURI, String username, String password, KinveyUserCallback callback) {
             super(callback);
             this.client = client;
             this.userClass = userClass;
+            this.redirectURI = redirectURI;
             this.username=username;
             this.password=password;
         }
@@ -535,7 +536,7 @@ public class AsyncUserStore extends UserStore{
         protected User executeAsync() throws IOException {
 
             UserStoreRequestManager requestManager = new UserStoreRequestManager<User>(client, userClass, createBuilder(client));
-
+            requestManager.setMICRedirectURI(redirectURI);
             GetMICTempURL<User> micTempURL = requestManager.getMICTempURL();
             GenericJson tempResult = micTempURL.execute();
 

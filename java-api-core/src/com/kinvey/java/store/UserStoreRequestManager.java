@@ -87,10 +87,18 @@ public class UserStoreRequestManager<T extends User> {
     private final GenericData customRequestProperties;
     private String authToken;
 
+    public String getMICRedirectURI() {
+        return MICRedirectURI;
+    }
+
+    public void setMICRedirectURI(String MICRedirectURI) {
+        this.MICRedirectURI = MICRedirectURI;
+    }
+
     /**
      * the redirect URI for MIC
      */
-    protected String MICRedirectURI;
+    private String MICRedirectURI;
 
 
     public GenericData getCustomRequestProperties() {
