@@ -111,7 +111,7 @@ public class UserStoreRequestManager<T extends User> {
         this.client = client;
         this.builder = builder;
         this.myClazz = userClass;
-        builder.setUser(client.getUser());
+        this.builder.setUser(client.getUser());
         this.clientAppVersion = client.getClientAppVersion();
         this.customRequestProperties = client.getCustomRequestProperties();
     }
@@ -673,6 +673,7 @@ public class UserStoreRequestManager<T extends User> {
         }
 
         public LoginRequest buildAuthRequest() {
+            this.request = builder.build();
             this.request.setKinveyHeaders(((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getKinveyHeaders());
             return this;
         }
