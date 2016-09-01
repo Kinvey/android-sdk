@@ -47,6 +47,7 @@ import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncFileStore;
 import com.kinvey.android.store.AsyncLinkedDataStore;
+import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
@@ -351,39 +352,6 @@ public class Client extends AbstractClient {
 
     }
 
-
-    /**
-     * User factory method
-     * <p>
-     * Returns the instance of {@link UserStoreRequestManager} that contains the current active user.  If no active user context
-     * has been established, the {@link UserStoreRequestManager} object returned will be instantiated and empty.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-     User currentUser = kinveyClient.user();
-     }
-     * </pre>
-     * </p>
-     * @param <T> the type of the custom `User` class, which must extend {@link UserStoreRequestManager}
-     * @return Instance of {@link UserStoreRequestManager}
-     */
-/*    @Override
-    public <T extends User> AsyncUserStoreRequestManager<T> userStore(){
-        synchronized (lock) {
-            if (userStoreRequestManager == null) {
-                String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
-                String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                userStoreRequestManager = new AsyncUserStoreRequestManager<T>(this, (Class<T>)getUserClass(), new KinveyAuthRequest.Builder(this.getRequestFactory().getTransport(),
-                        this.getJsonFactory(), this.getBaseUrl(), appKey, appSecret, null));
-            }
-            return (AsyncUserStoreRequestManager<T>) userStoreRequestManager;
-        }
-    }*/
 
     /**
      * Push factory method
@@ -843,7 +811,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                UserStore.login(credential, client, userClass);
+                AsyncUserStore.login(credential, userClass, client, null);
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }

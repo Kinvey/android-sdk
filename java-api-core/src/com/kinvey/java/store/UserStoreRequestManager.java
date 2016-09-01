@@ -222,7 +222,7 @@ public class UserStoreRequestManager<T extends User> {
      * @throws IOException
      */
     public LoginRequest login(Credential credential) {
-        return new LoginRequest(credential);
+        return new LoginRequest(credential).buildAuthRequest();
     }
 
     /**

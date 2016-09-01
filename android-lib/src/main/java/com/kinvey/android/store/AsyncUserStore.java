@@ -29,7 +29,7 @@ import com.kinvey.java.store.requests.user.LogoutRequest;
 
 import java.io.IOException;
 
-public class AsyncUserStore extends UserStore{
+public class AsyncUserStore {
 
     private static boolean clearStorage = true;
     private static KinveyUserCallback MICCallback;
@@ -41,6 +41,39 @@ public class AsyncUserStore extends UserStore{
 
     public static void login(String userId, String password, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
         new Login(userId, password, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginFacebook(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginGoogle(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.TWITTER, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.LINKED_IN, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginAuthLink(String accessToken, String refreshToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, refreshToken,UserStoreRequestManager.LoginType.AUTH_LINK,  userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+
+    public static void loginSalesForce(String accessToken, String client_id, String refreshToken, String id, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, client_id, refreshToken, id, userClass, client, UserStoreRequestManager.LoginType.SALESFORCE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void loginMobileIdentity(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(accessToken, UserStoreRequestManager.LoginType.MOBILE_IDENTITY, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    public static void login(Credential credential, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(credential, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
     /**
@@ -57,7 +90,7 @@ public class AsyncUserStore extends UserStore{
         new LoginKinveyAuth(userId, authToken, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
     }
 
-    private static void logout(AbstractClient client) {
+    public static void logout(AbstractClient client) {
         if(clearStorage) {
             client.performLockDown();
         }
@@ -367,8 +400,10 @@ public class AsyncUserStore extends UserStore{
         String id;
         String client_id;
 
-        private Login(KinveyClientCallback callback) {
+        private Login(Class<User> userClass, AbstractClient client, KinveyClientCallback callback) {
             super(callback);
+            this.userClass = userClass;
+            this.client = client;
             this.type = UserStoreRequestManager.LoginType.IMPLICIT;
         }
 
@@ -381,20 +416,25 @@ public class AsyncUserStore extends UserStore{
             this.type = UserStoreRequestManager.LoginType.KINVEY;
         }
 
-        private Login(String accessToken, UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
+        private Login(String accessToken, UserStoreRequestManager.LoginType type, Class<User> userClass, AbstractClient client, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
             this.type = type;
+            this.userClass = userClass;
+            this.client = client;
         }
 
-        private Login(String accessToken, String refreshToken, UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
+        private Login(String accessToken, String refreshToken, UserStoreRequestManager.LoginType type, Class<User> userClass, AbstractClient client, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.type = type;
+            this.userClass = userClass;
+            this.client = client;
         }
 
         private Login(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
+                      Class<User> userClass, AbstractClient client,
                       UserStoreRequestManager.LoginType type, KinveyClientCallback callback) {
             super(callback);
             this.accessToken = accessToken;
@@ -405,18 +445,22 @@ public class AsyncUserStore extends UserStore{
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
-        private Login(String accessToken, String clientID, String refresh, String id, KinveyClientCallback<User> callback){
+        private Login(String accessToken, String clientID, String refresh, String id, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback){
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refresh;
             this.client_id = clientID;
             this.id = id;
+            this.userClass = userClass;
+            this.client = client;
             this.type = UserStoreRequestManager.LoginType.SALESFORCE;
         }
 
-        private Login(Credential credential, KinveyClientCallback callback) {
+        private Login(Credential credential, Class<User> userClass, AbstractClient client, KinveyClientCallback callback) {
             super(callback);
             this.credential = credential;
+            this.userClass = userClass;
+            this.client = client;
             this.type = UserStoreRequestManager.LoginType.CREDENTIALSTORE;
         }
 
