@@ -40,40 +40,40 @@ public class AsyncUserStore {
     }
 
     public static void login(String userId, String password, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(userId, password, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(userId, password, userClass, client, callback).execute();
     }
 
     public static void loginFacebook(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute();
     }
 
     public static void loginGoogle(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, userClass, client, callback).execute();
     }
 
     public static void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.TWITTER, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.TWITTER, callback).execute();
     }
 
     public static void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.LINKED_IN, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, userClass, client, UserStoreRequestManager.LoginType.LINKED_IN, callback).execute();
     }
 
     public static void loginAuthLink(String accessToken, String refreshToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, refreshToken,UserStoreRequestManager.LoginType.AUTH_LINK,  userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, refreshToken,UserStoreRequestManager.LoginType.AUTH_LINK,  userClass, client, callback).execute();
     }
 
 
     public static void loginSalesForce(String accessToken, String client_id, String refreshToken, String id, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, client_id, refreshToken, id, userClass, client, UserStoreRequestManager.LoginType.SALESFORCE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, client_id, refreshToken, id, userClass, client, UserStoreRequestManager.LoginType.SALESFORCE, callback).execute();
     }
 
     public static void loginMobileIdentity(String accessToken, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(accessToken, UserStoreRequestManager.LoginType.MOBILE_IDENTITY, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, UserStoreRequestManager.LoginType.MOBILE_IDENTITY, userClass, client, callback).execute();
     }
 
     public static void login(Credential credential, Class<User> userClass, AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
-        new Login(credential, userClass, client, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(credential, userClass, client, callback).execute();
     }
 
     /**
@@ -87,7 +87,7 @@ public class AsyncUserStore {
      * @throws IOException
      */
     public void loginKinveyAuthToken(String userId, String authToken, AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback){
-        new LoginKinveyAuth(userId, authToken, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new LoginKinveyAuth(userId, authToken, client, userClass, callback).execute();
     }
 
     public static void logout(AbstractClient client) {
@@ -98,7 +98,7 @@ public class AsyncUserStore {
     }
 
     public static void destroy(boolean isHard, AbstractClient client, Class<User> userClass, KinveyUserDeleteCallback callback) {
-        new Delete(isHard, client, userClass,callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Delete(isHard, client, userClass,callback).execute();
     }
 
     /**
@@ -111,31 +111,31 @@ public class AsyncUserStore {
     }
 
     public static void sendEmailConfirmation(AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new EmailVerification(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new EmailVerification(client, userClass, callback).execute();
     }
 
     public static void forgotUsername(AbstractClient client, Class<User> userClass, String email, KinveyUserManagementCallback callback) {
-        new ForgotUsername(client, userClass, email, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new ForgotUsername(client, userClass, email, callback).execute();
     }
 
     public static void resetPassword(String usernameOrEmail, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new ResetPassword(usernameOrEmail, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new ResetPassword(usernameOrEmail, client, userClass, callback).execute();
     }
 
     public static void exists(String username, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new ExistsUser(username, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new ExistsUser(username, client, userClass, callback).execute();
     }
 
     public static void changePassword(String password, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new ChangePassword(password, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new ChangePassword(password, client, userClass, callback).execute();
     }
 
     public static void get(String userId, AbstractClient client, Class<User> userClass, KinveyUserManagementCallback callback) {
-        new GetUser(userId, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new GetUser(userId, client, userClass, callback).execute();
     }
 
     public void save(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
-        new Update(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Update(client, userClass, callback).execute();
     }
 
     /**
@@ -149,7 +149,7 @@ public class AsyncUserStore {
      * @param callback KinveyUserCallback
      */
     public static void convenience(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
-        new RetrieveMetaData(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveMetaData(client, userClass, callback).execute();
     }
 
     /**
@@ -173,7 +173,7 @@ public class AsyncUserStore {
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
 /*    public void update(AbstractClient client, Class<User> userClass,KinveyClientCallback<User> callback) {
-        new Update(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Update(client, userClass, callback).execute();
     }*/
 
     /**
@@ -197,7 +197,7 @@ public class AsyncUserStore {
      * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
      */
     public static void retrieve(AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback) {
-        new Retrieve(client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(client, userClass, callback).execute();
     }
 
     /**
@@ -222,7 +222,7 @@ public class AsyncUserStore {
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
     public static void retrieve(String[] resolves, AbstractClient client, Class<User> userClass, KinveyClientCallback<User> callback){
-        new Retrieve(resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(resolves, client, userClass, callback).execute();
     }
 
     /**
@@ -250,7 +250,7 @@ public class AsyncUserStore {
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
      */
     public static void retrieve(Query query, String[] resolves, AbstractClient client, Class<User> userClass, KinveyUserListCallback callback){
-        new RetrieveUserList(query, resolves, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveUserList(query, resolves, client, userClass, callback).execute();
     }
 
     /**
@@ -274,7 +274,7 @@ public class AsyncUserStore {
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
      */
     public static void retrieve(Query q, AbstractClient client, Class<User> userClass, KinveyListCallback<User> callback) {
-        new RetrieveUserList(q, client, userClass, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveUserList(q, client, userClass, callback).execute();
     }
 
 
@@ -336,7 +336,7 @@ public class AsyncUserStore {
     public static void loginWithAuthorizationCodeAPI(AbstractClient client, Class<User> userClass, String username, String password, String redirectURI, KinveyUserCallback callback){
         MICCallback = callback;
 
-        new PostForTempURL(client, userClass, redirectURI, username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new PostForTempURL(client, userClass, redirectURI, username, password, callback).execute();
     }
 
     /**
@@ -345,7 +345,7 @@ public class AsyncUserStore {
      * @param token the access code returned from the MIC Auth service
      */
     public static void getMICAccessToken(String token, AbstractClient client, Class<User> userClass){
-        new PostForAccessToken(client, userClass, token, (KinveyClientCallback<User>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new PostForAccessToken(client, userClass, token, (KinveyClientCallback<User>) MICCallback).execute();
     }
 
     /***
@@ -370,6 +370,11 @@ public class AsyncUserStore {
                 if(callback != null){
                     callback.onSuccess(result);
                 }
+            }
+
+            @Override
+            public void onSuccess(Object result) {
+//                callback.onSuccess(result);
             }
 
             @Override

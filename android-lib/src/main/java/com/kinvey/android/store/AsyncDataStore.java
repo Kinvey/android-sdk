@@ -27,7 +27,9 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
+import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
@@ -468,13 +470,17 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 //        callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
-            public void onSuccess(Integer result) {
+            public void onSuccess(KinveyPushResponse result) {
                 AsyncDataStore.this.pull(query, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(Integer result) {
+                    public void onSuccess(KinveyPullResponse result) {
                         callback.onSuccess(result);
+                    }
 
+                    @Override
+                    public void onSuccess(Object result) {
+                        callback.onSuccess(result);
                     }
 
                     @Override

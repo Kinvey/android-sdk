@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
     private final DataStore store;
     private Query query;
-    private KinveyPullCallback callback;
 
     /**
      * Async pull request constructor
@@ -41,18 +40,10 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
      */
     public AsyncPullRequest(DataStore store,
                             Query query,
-                            KinveyPullCallback callback){
+                            KinveyPullCallback<T> callback){
         super(callback);
         this.query = query;
         this.store = store;
-        this.callback = callback;
-    }
-
-    @Override
-    protected void onPostExecute(KinveyPullResponse<T> response) {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
-        kinveyPullResponse.setResult(response.getResult());
-        callback.onSuccess(kinveyPullResponse);
     }
 
     @Override
