@@ -86,7 +86,7 @@ public class GCMPush extends AbstractPush {
      */
     @Override
     public GCMPush initialize(final Application currentApp) {
-        if (!getClient().isUserLoggedIn()){
+        if (!getClient().isUserLoggedIn()) {
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
@@ -140,7 +140,7 @@ public class GCMPush extends AbstractPush {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	AsyncUserStore.retrieve(client, User.class,new KinveyUserCallback() {
+                	AsyncUserStore.retrieve(client, User.class, new KinveyUserCallback<User>() {
 						
 						@Override
 						public void onSuccess(User result) {
@@ -361,12 +361,12 @@ public class GCMPush extends AbstractPush {
 
     @Override
     public void enablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncEnablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncEnablePush(callback, deviceID).execute();
     }
 
     @Override
     public void disablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncDisablePush(callback, deviceID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncDisablePush(callback, deviceID).execute();
     }
 
 

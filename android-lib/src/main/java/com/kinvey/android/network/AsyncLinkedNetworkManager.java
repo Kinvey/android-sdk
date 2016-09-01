@@ -28,12 +28,15 @@ import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.store.StoreType;
+
+import java.util.List;
 
 /**
  * Wraps the {@link LinkedNetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#linkedData(String, Class)} convenience method.
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#linkedData(String, Class, StoreType)}} convenience method.
  * The first String parameter is the name of the Collection, and the Class is the expected Response Class.
  * </p>
  * <p>
@@ -77,7 +80,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void getEntity(String entityID, KinveyClientCallback<T> callback,  DownloaderProgressListener download){
-        new GetEntity(entityID, callback, download, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new GetEntity(entityID, callback, download, null).execute();
 
     }
 
@@ -99,7 +102,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(query, callback, download, null, null, 0 , false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(query, callback, download, null, null, 0 , false).execute();
     }
 
     /**
@@ -119,7 +122,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(Query query, KinveyListCallback<T> callback, DownloaderProgressListener download, String[] resolves, int resolve_depth, boolean retain) {
-        new Get(query, callback, download, null, resolves, resolve_depth , retain).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(query, callback, download, null, resolves, resolve_depth , retain).execute();
     }
 
 
@@ -140,7 +143,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void get(KinveyListCallback<T> callback, DownloaderProgressListener download) {
-        new Get(new Query(), callback, download, null, null, 0, false).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Get(new Query(), callback, download, null, null, 0, false).execute();
 
     }
 
@@ -158,7 +161,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload) {
-        new Save(entity, callback, upload, null).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Save(entity, callback, upload, null).execute();
     }
 
 

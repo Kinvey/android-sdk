@@ -202,17 +202,17 @@ public class DataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public void pullBlocking(Query query) {
+    public List<T> pullBlocking(Query query) {
+        List<T> networkData = null;
         try {
             query = query == null ? client.query() : query;
-            List<T> networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
+            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
             cache.delete(query);
             cache.save(networkData);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        return networkData;
     }
 
     /**

@@ -81,7 +81,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
      * @param callback - get results of the command as a single JSON object
      */
     public void callEndpoint(String commandName, I input, KinveyClientCallback callback){
-        new AsyncCommand(commandName, input, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncCommand(commandName, input, callback).execute();
     }
 
     /**
@@ -92,7 +92,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
      * @param callback - get results of the command as an array of JSON objects.
      */
     public void callEndpoint(String commandName, I input, KinveyListCallback callback){
-        new AsyncCommandArray(commandName, input, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncCommandArray(commandName, input, callback).execute();
     }
 
 
