@@ -151,6 +151,7 @@ public class UserStore<T extends User> {
 
     public UserStore(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder){
         Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
         this.builder = builder;
@@ -178,7 +179,9 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public T initUser(KinveyAuthResponse response, String userType, T userObject) throws IOException {
-
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(userType, "UserType cannot be null.");
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
@@ -201,6 +204,10 @@ public class UserStore<T extends User> {
     }
 
     private T initUser(Credential credential, T userObject) {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(credential.getUserId(), "UserId cannot be null.");
+        Preconditions.checkNotNull(credential.getAuthToken(), "Token cannot be null.");
         currentUser = this.newInstance();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
@@ -210,6 +217,10 @@ public class UserStore<T extends User> {
     }
 
     public void removeFromStore(String userID) {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(userID, "UserId cannot be null.");
+        Preconditions.checkNotNull(client, "UserId cannot be null.");
         CredentialManager credentialManager = new CredentialManager(client.getStore());
         credentialManager.removeCredential(userID);
     }
@@ -235,6 +246,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest loginBlocking(String username, String password) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(username, "Username cannot be null.");
         Preconditions.checkNotNull(password, "Password cannot be null.");
         return new LoginRequest(this, username, password, false).buildAuthRequest();
@@ -251,6 +264,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest login(ThirdPartyIdentity.Type thirdPartyType, String... args) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull((args));
         ThirdPartyIdentity identity = ThirdPartyIdentity.createThirdPartyIdentity(thirdPartyType, args);
         return new LoginRequest(this, identity).buildAuthRequest();
@@ -273,10 +288,12 @@ public class UserStore<T extends User> {
      * @return Current user object with refreshed metadata
      * @throws IOException
      */
-    public T retrieveMetadataBlocking() throws IOException {
-        T ret = this.retrieveBlocking().execute();
+    public User retrieveMetadataBlocking() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        User ret = this.retrieveBlocking().execute();
         if (this.currentUser == null){
-            this.currentUser = this.newInstance();
+            this.currentUser = new User();
         }
         String authToken = this.authToken;
         currentUser.putAll(ret.getUnknownKeys());
@@ -350,7 +367,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
-        currentUser = this.newInstance();
+        Preconditions.checkNotNull(userId, "UserId cannot be null.");
+        currentUser = new User();
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);
@@ -397,6 +415,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LogoutRequest logout() {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         return new LogoutRequest(this, this.client.getStore());
     }
 
@@ -410,6 +430,10 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LoginRequest createBlocking(String userid, String password) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(userid, "UserId cannot be null.");
+        Preconditions.checkNotNull(password, "Password cannot be null.");
         return new LoginRequest(this, userid, password, true).buildAuthRequest();
     }
 
@@ -424,7 +448,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public Delete deleteBlocking(boolean hardDelete) throws IOException {
-
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         Delete delete = new Delete(this, currentUser.getId(), hardDelete);
@@ -439,6 +464,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public Retrieve<T> retrieveBlocking() throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         Retrieve<T> retrieve = new Retrieve<T>(this, currentUser.getId(), myClazz);
@@ -453,6 +480,9 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public RetrieveUsers retrieveBlocking(Query query) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(query, "query must not be null");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         RetrieveUsers retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
@@ -468,6 +498,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public Retrieve retrieveBlocking(String[] resolves) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         Retrieve retrieve = new Retrieve(this, currentUser.getId(), resolves, 1, true, myClazz);
@@ -484,6 +516,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public RetrieveUsers retrieveBlocking(Query query, String[] resolves) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null");
         RetrieveUsers retrieve = new RetrieveUsers(this, query, resolves, 1, true,  Array.newInstance(myClazz,0).getClass());
         client.initializeRequest(retrieve);
@@ -497,6 +531,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public Update updateBlocking() throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         Update<T> update = new Update<T>(this, currentUser, myClazz);
@@ -512,6 +548,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public Update updateBlocking(User user) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         Update update = new Update(this, user, myClazz);
@@ -527,6 +565,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public ResetPassword resetPasswordBlocking(String username) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(username, "username must not be null!");
         ResetPassword reset = new ResetPassword(this, username);
         client.initializeRequest(reset);
@@ -540,6 +580,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(currentUser, "currentUser must not be null");
         Preconditions.checkNotNull(currentUser.getId(), "currentUser ID must not be null");
         EmailVerification verify = new EmailVerification(this, currentUser.getId());
@@ -563,6 +605,8 @@ public class UserStore<T extends User> {
      * @throws IOException
      */
     public LockDownUser lockDownUserBlocking(String userid, boolean setLockdownStateTo) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(userid, "userID must not be null");
         GenericJson lock = new GenericJson();
         lock.put("userId", userid);
@@ -573,7 +617,9 @@ public class UserStore<T extends User> {
     }
 
     public GetMICAccessToken getMICToken(String code) throws IOException{
-
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(code, "code must not be null");
 //        grant_type: "authorization_code" - this is always set to this value
 //        code: use the 'code' returned in the callback
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
@@ -593,6 +639,9 @@ public class UserStore<T extends User> {
     }
 
     public GetMICAccessToken useRefreshToken(String refreshToken) throws IOException{
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(refreshToken, "refreshToken must not be null");
 //        grant_type: "refresh_token" - this is always set to this value  - note the difference
 //        refresh_token: use the refresh token
 //        redirect_uri: The same redirect uri used when obtaining the auth grant.
@@ -614,7 +663,8 @@ public class UserStore<T extends User> {
     }
 
     public GetMICTempURL<T> getMICTempURL() throws IOException{
-
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
 //    	response_type:  this is always set to “code”
@@ -634,7 +684,11 @@ public class UserStore<T extends User> {
 
 
     public LoginToTempURL<T> MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
-
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(username, "username must not be null");
+        Preconditions.checkNotNull(password, "password must not be null");
+        Preconditions.checkNotNull(tempURL, "tempURL must not be null");
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
 //    	response_type:  this is always set to “code”

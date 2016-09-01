@@ -161,7 +161,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         }
     }
 
-
+    public boolean isInitialize() {
+        return (((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey() != null &&
+                ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret() != null);
+    }
 
     public <T extends User> Class<T> getUserClass(){
         return this.userModelClass;
