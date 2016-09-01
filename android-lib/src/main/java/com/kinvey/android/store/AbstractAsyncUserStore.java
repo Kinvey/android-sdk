@@ -47,7 +47,7 @@ import com.kinvey.java.store.requests.user.LogoutRequest;
  * Wraps the {@link com.kinvey.java.store.UserStore} public methods in asynchronous functionality using native Android AsyncTask.
  *
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#user()} convenience method.
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#userStore()} convenience method.
  * </p>
  *
  * <p>
@@ -109,7 +109,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
     /**
      * The callback for the MIC login, this is maintained because it used by the broadcast reciever after the redirect
      */
-    protected KinveyUserCallback MICCallback;
+    protected KinveyUserCallback<T> MICCallback;
         
     /**
      * Base constructor requires the client instance and a {@link com.kinvey.java.auth.KinveyAuthRequest.Builder} to be passed in.
@@ -150,7 +150,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(KinveyClientCallback<T> callback) {
-        new Login(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(callback).execute();
     }
 
     /**
@@ -187,7 +187,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void login(String userid, String password, KinveyClientCallback<T> callback) {
-        new Login(userid, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(userid, password, callback).execute();
     }
 
     /**
@@ -217,7 +217,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginFacebook(String accessToken, KinveyClientCallback<T> callback) {
-        new Login(accessToken, LoginType.FACEBOOK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, LoginType.FACEBOOK, callback).execute();
     }
 
     /**
@@ -251,7 +251,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} that contains a valid logged in user
      */
     public void loginGoogle(String accessToken, KinveyClientCallback<T> callback)  {
-        new Login(accessToken, LoginType.GOOGLE, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, LoginType.GOOGLE, callback).execute();
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback - {@link KinveyUserCallback} that contains a valid logged in user
      */
     public void loginSalesForce (String accessToken, String clientid, String refreshToken, String id, KinveyClientCallback<T> callback){
-        new Login(accessToken, clientid, refreshToken, id, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, clientid, refreshToken, id, callback).execute();
 
     }
 
@@ -276,7 +276,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback -
      */
     public void loginMobileIdentity(String accessToken, KinveyUserCallback callback){
-        new Login(accessToken, LoginType.MOBILE_IDENTITY, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, LoginType.MOBILE_IDENTITY, callback).execute();
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @throws IOException
      */
     public void loginKinveyAuthToken(String userId, String authToken, KinveyClientCallback<T> callback){
-        new LoginKinveyAuth(userId, authToken, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new LoginKinveyAuth(userId, authToken, callback).execute();
     }
 
 
@@ -328,7 +328,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      */
     public void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                              KinveyClientCallback<T> callback)  {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.TWITTER, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.TWITTER, callback).execute();
     }
 
     /**
@@ -364,7 +364,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      */
     public void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret,
                               KinveyClientCallback<T> callback) {
-        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, accessSecret, consumerKey, consumerSecret, LoginType.LINKED_IN, callback).execute();
     }
 
 
@@ -376,7 +376,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} that returns a valid user object
      */
     public void loginAuthLink(String accessToken, String refreshToken, KinveyClientCallback<T> callback) {
-        new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Login(accessToken, refreshToken, LoginType.AUTH_LINK, callback).execute();
     }
 
     /**
@@ -390,7 +390,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback KinveyUserCallback
      */
     public void retrieveMetadata(KinveyClientCallback<T> callback) {
-        new RetrieveMetaData(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new RetrieveMetaData(callback).execute();
 
     }
 
@@ -430,7 +430,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} containing a new User instance.
      */
     public void create(String username, String password, KinveyClientCallback<T> callback) {
-        new Create(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Create(username, password, callback).execute();
     }
 
     /**
@@ -466,7 +466,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserDeleteCallback}.
      */
     public void delete(Boolean hardDelete, KinveyUserDeleteCallback callback) {
-        new Delete(hardDelete, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Delete(hardDelete, callback).execute();
     }
 
     /**
@@ -491,7 +491,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param <T>
      */
     public<T> void retrieve(KinveyClientCallback<T> callback) {
-        new Retrieve(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(callback).execute();
     }
 
 
@@ -517,7 +517,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
     public void retrieve(String[] resolves, KinveyClientCallback<T> callback){
-        new Retrieve(resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(resolves, callback).execute();
     }
 
 
@@ -548,7 +548,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
      */
     public void retrieve(Query query, String[] resolves, KinveyUserListCallback callback){
-        new Retrieve(query, resolves, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(query, resolves, callback).execute();
     }
 
     /**
@@ -572,14 +572,14 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
      */
     public void retrieve(Query q, KinveyListCallback<T> callback) {
-        new Retrieve(q, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Retrieve(q, callback).execute();
     }
-    
-    
+
+
     /***
-     * 
+     *
      * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
-     * 
+     *
      * @param redirectURI
      * @param callback
      */
@@ -595,11 +595,11 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
     	//keep a reference to the callback and redirect uri for later
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
- 
+
     	if (callback != null){
     		callback.onReadyToRender(myURLToRender);
     	}
-    	
+
     }
 
     /**
@@ -618,11 +618,11 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
 		}
 		getMICAccessToken(accessToken);
     }
-    
+
     /***
-     * 
+     *
      * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
-     * 
+     *
      * @param username
      * @param password
      * @param redirectURI
@@ -631,8 +631,8 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
     public void loginWithAuthorizationCodeAPI(String username, String password, String redirectURI, KinveyUserCallback callback){
     	this.MICCallback = callback;
     	this.MICRedirectURI = redirectURI;
-    	
-    	new PostForTempURL(username, password, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+
+    	new PostForTempURL(username, password, callback).execute();
     }
 
     /**
@@ -641,7 +641,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param token the access code returned from the MIC Auth service
      */
     public void getMICAccessToken(String token){
-    	new PostForAccessToken(token, (KinveyClientCallback<T>) MICCallback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);	
+    	new PostForAccessToken(token, MICCallback).execute();
     }
 
     /***
@@ -650,9 +650,9 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param redirectURI
      * @param callback
      */
-    public void presentMICLoginActivity(String redirectURI, final KinveyUserCallback callback){
+    public void presentMICLoginActivity(String redirectURI, final KinveyUserCallback<T> callback){
 
-        loginWithAuthorizationCodeLoginPage(redirectURI, new KinveyMICCallback() {
+        loginWithAuthorizationCodeLoginPage(redirectURI, new KinveyMICCallback<T>() {
             @Override
             public void onReadyToRender(String myURLToRender) {
                 Intent i = new Intent(getClient().getContext(), MICLoginActivity.class);
@@ -662,7 +662,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
             }
 
             @Override
-            public void onSuccess(User result) {
+            public void onSuccess(T result) {
                 if(callback != null){
                     callback.onSuccess(result);
                 }
@@ -724,7 +724,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
     public void update(KinveyClientCallback<T> callback) {
-        new Update(AbstractAsyncUserStore.this, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Update(AbstractAsyncUserStore.this, callback).execute();
     }
 
     /**
@@ -755,7 +755,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
     public void update(UserStore<T> user, KinveyClientCallback<T> callback){
-        new Update(user, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new Update(user, callback).execute();
     }
 
     /**
@@ -777,7 +777,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link com.kinvey.android.callback.KinveyUserManagementCallback}
      */
     public void resetPassword(String username, KinveyUserManagementCallback callback) {
-        new ResetPassword(username, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new ResetPassword(username, callback).execute();
     }
 
     /**
@@ -798,19 +798,19 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
      * @param callback {@link com.kinvey.android.callback.KinveyUserManagementCallback}
      */
     public void sendEmailVerification(KinveyUserManagementCallback callback) {
-        new EmailVerification(callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new EmailVerification(callback).execute();
     }
 
 
 
-    private class RetrieveMetaData extends AsyncClientRequest<User> {
+    private class RetrieveMetaData extends AsyncClientRequest<T> {
 
         private RetrieveMetaData(KinveyClientCallback<T> callback) {
             super(callback);
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return AbstractAsyncUserStore.this.retrieveMetadataBlocking();
         }
     }
@@ -862,7 +862,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         }
     }
 
-    private class LoginKinveyAuth extends AsyncClientRequest<User> {
+    private class LoginKinveyAuth extends AsyncClientRequest<T> {
 
         private String authToken;
         private String userID;
@@ -875,13 +875,13 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
 
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return AbstractAsyncUserStore.this.loginKinveyAuthTokenBlocking(userID,  authToken).execute();
 
         }
     }
 
-    private class Login extends AsyncClientRequest<User> {
+    private class Login extends AsyncClientRequest<T> {
 
         String username;
         String password;
@@ -950,7 +950,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             switch(this.type) {
                 case IMPLICIT:
                     return AbstractAsyncUserStore.this.loginBlocking().execute();
@@ -977,7 +977,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         }
     }
 
-    private class Create extends AsyncClientRequest<User> {
+    private class Create extends AsyncClientRequest<T> {
         String username;
         String password;
 
@@ -989,7 +989,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         }
 
         @Override
-        protected User executeAsync() throws IOException {
+        protected T executeAsync() throws IOException {
             return AbstractAsyncUserStore.this.createBlocking(username, password).execute();
         }
     }
@@ -1039,7 +1039,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         String username;
         String password;
         
-		public PostForTempURL(String username, String password, KinveyUserCallback callback) {
+		public PostForTempURL(String username, String password, KinveyUserCallback<T> callback) {
 			super(callback);
             this.username=username;
             this.password=password;

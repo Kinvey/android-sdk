@@ -82,8 +82,7 @@ public class UserStore<T extends User> {
     private final GenericData customRequestProperties;
     private String authToken;
 
-    private User currentUser;
-
+    private T currentUser;
 
 
     /**
@@ -114,6 +113,18 @@ public class UserStore<T extends User> {
     }
 
 
+    private T newInstance(){
+        T instance = null;
+        try {
+            instance = myClazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    };
+
     public GenericData getCustomRequestProperties() {
         return client.getCustomRequestProperties();
     }
@@ -126,12 +137,14 @@ public class UserStore<T extends User> {
         return client;
     }
 
-    public void setCurrentUser(User user) {
+    public void setCurrentUser(T user) {
         this.currentUser = user;
     }
 
     public User getCurrentUser() {
-        if (currentUser == null) currentUser = new User();
+        if (currentUser == null) {
+            currentUser = this.newInstance();
+        }
         return currentUser;
     }
 
@@ -172,7 +185,7 @@ public class UserStore<T extends User> {
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
-        currentUser = new User();
+        currentUser = this.newInstance();
         currentUser.setId(response.getUserId());
         currentUser.put("_kmd", response.getMetadata());
         currentUser.putAll(response.getUnknownKeys());
@@ -195,7 +208,7 @@ public class UserStore<T extends User> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(credential.getUserId(), "UserId cannot be null.");
         Preconditions.checkNotNull(credential.getAuthToken(), "Token cannot be null.");
-        currentUser = new User();
+        currentUser = this.newInstance();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
         userObject.setId(credential.getUserId());

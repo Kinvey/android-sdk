@@ -64,15 +64,24 @@ public class SyncManager {
         return ret;
     }
 
-    public SyncRequest popSingleQueue(String collectionName) {
+    public List<SyncRequest> popSingleQueue(String collectionName) {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
                 .equals("collection", collectionName);
-        SyncRequest request = requestCache.getFirst(q);
-        if (request != null) {
-            requestCache.delete(request.get("_id").toString());
+        List<SyncRequest> requests = requestCache.get(q);
+
+        //delete request from the queue
+
+        if (requests.size() > 0) {
+            List<String> ids = new ArrayList<String>();
+            for (SyncRequest request: requests){
+                if(request != null){
+                    ids.add(request.get("_id").toString());
+                }
+            }
+            requestCache.delete(ids);
         }
-        return request;
+        return requests;
     }
 
 
