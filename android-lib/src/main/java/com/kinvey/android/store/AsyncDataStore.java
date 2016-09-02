@@ -418,14 +418,14 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute();
     }
 
-    public void pull(Query query, KinveyPullCallback callback) {
+    public void pull(Query query, KinveyPullCallback<T> callback) {
         SyncManager syncManager = client.getSycManager();
-        new AsyncPullRequest(this, query, callback).execute();
+        new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
-    public void pull(KinveyPullCallback callback) {
+    public void pull(KinveyPullCallback<T> callback) {
         SyncManager syncManager = client.getSycManager();
-        new AsyncPullRequest(this, null, callback).execute();
+        new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
     public void purge(KinveyPurgeCallback callback) {
@@ -467,20 +467,19 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void sync(final Query query, final KinveySyncCallback<T> callback) {
-//        callback.onPushStarted();
+        callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
-            public void onSuccess(KinveyPushResponse result) {
-                AsyncDataStore.this.pull(query, new KinveyPullCallback() {
+            public void onSuccess(final KinveyPushResponse pushResult) {
+                callback.onPushSuccess();
+                callback.onPullStarted();
+                AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse result) {
-                        callback.onSuccess(result);
-                    }
-
-                    @Override
-                    public void onSuccess(Object result) {
-                        callback.onSuccess(result);
+                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                        callback.onSuccess(pushResult, pullResult);
+                        callback.onSuccess(pullResult);
+                        callback.onSuccess();
                     }
 
                     @Override

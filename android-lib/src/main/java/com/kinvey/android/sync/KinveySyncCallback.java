@@ -26,8 +26,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 public interface KinveySyncCallback<T> extends KinveyClientCallback {
 
 
-    @Override
-    void onSuccess(Object result);
+    void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<T> tKinveyPullResponse);
 
     /**
      * Used to indicate successful execution of a request by the background service.
