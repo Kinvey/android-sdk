@@ -166,7 +166,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
         super(transport, httpRequestInitializer, rootUrl, servicePath,
                 objectParser, kinveyRequestInitializer, requestPolicy);
-        this.user = new User();
+        this.user = null;
         this.store = store;
     }
 

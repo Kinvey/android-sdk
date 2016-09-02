@@ -42,9 +42,12 @@ public class UserTest extends KinveyMockUnitTest {
 
     private UserStoreRequestManager requestManager;
 
-    private void initializeRequestManager() {
+    private void initializeRequestManager(boolean isNeedCreateUser) {
         requestManager = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
-                getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
+                getClient().getJsonFactory(), "mockAppKey","mockAppSecret", null));
+        if (isNeedCreateUser) {
+            requestManager.getClient().setUser(new User());
+        }
     }
 
     public void testInitializeUser() {
@@ -72,7 +75,7 @@ public class UserTest extends KinveyMockUnitTest {
 
 
     public void testLoginKinveyUserNullUsername() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             requestManager.loginBlocking(null, "myPassword").execute();
             fail("NullPointerException should be thrown");
@@ -80,7 +83,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testLoginKinveyUserNullPassword() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             requestManager.loginBlocking("myUserName", null).execute();
             fail("NullPointerException should be thrown");
@@ -89,7 +92,7 @@ public class UserTest extends KinveyMockUnitTest {
 
 
     public void testLoginFacebookUserNullArguments() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             requestManager.login(ThirdPartyIdentity.Type.FACEBOOK, null).execute();
             fail("NullPointerException should be thrown");
@@ -97,7 +100,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testLoginFacebookTooFewArguments() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             requestManager.login(ThirdPartyIdentity.Type.FACEBOOK, new String[] {}).execute();
             fail("IllegalArgumentException should be thrown");
@@ -105,7 +108,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testLoginFacebookTooManyArguments() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             requestManager.login(ThirdPartyIdentity.Type.FACEBOOK, new String[] {"arg1","arg2"}).execute();
             fail("IllegalArgumentException should be thrown");
@@ -115,7 +118,7 @@ public class UserTest extends KinveyMockUnitTest {
 
 
     public void testDeleteHardDeleteTrue() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         User user = requestManager.getClient().getUser();
         user.setId("testUser");
         Delete del = requestManager.deleteBlocking(true);
@@ -124,7 +127,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testDeleteHardDeleteFalse() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         Delete del = requestManager.deleteBlocking(false);
         assertEquals(requestManager.getClient().getUser().getId(),del.get("userID").toString());
@@ -133,7 +136,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testDeleteNullUser() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             Delete del = requestManager.deleteBlocking(true);
             fail("NullPointerException should be thrown.");
@@ -141,7 +144,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testRetrieve() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         Retrieve ret = requestManager.retrieveBlocking();
         assertEquals(requestManager.getClient().getUser().getId(),ret.get("userID").toString());
@@ -149,7 +152,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testRetrieveNullUser() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             Retrieve ret = requestManager.retrieveBlocking();
             fail("NullPointerException should be thrown.");
@@ -157,7 +160,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUpdate() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         Update update = requestManager.updateBlocking();
         assertEquals(requestManager.getClient().getUser().getId(),update.get("userID").toString());
@@ -165,7 +168,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUpdateNullUser() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             Update update = requestManager.updateBlocking();
             fail("NullPointerException should be thrown.");
@@ -173,8 +176,9 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testResetPassword() throws IOException {
-        initializeRequestManager();
-        requestManager.getClient().getUser().setId("testUser");
+        initializeRequestManager(true);
+        User user = requestManager.getClient().getUser();
+        user.setId("testUser");
         requestManager.getClient().getUser().setUsername("test");
         ResetPassword pwd = requestManager.resetPasswordBlocking(requestManager.getClient().getUser().getUsername());
         assertEquals(requestManager.getClient().getUser().getUsername(),pwd.get("userID").toString());
@@ -182,7 +186,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testResetPasswordNullUser() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             ResetPassword pwd = requestManager.resetPasswordBlocking(null);
             fail("NullPointerException should be thrown.");
@@ -190,7 +194,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testEmailVerification() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         EmailVerification email = requestManager.sendEmailVerificationBlocking();
         assertEquals(requestManager.getClient().getUser().getId(),email.get("userID").toString());
@@ -198,7 +202,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testEmailVerificationNullUser() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(false);
         try {
             EmailVerification email = requestManager.sendEmailVerificationBlocking();
             fail("NullPointerException should be thrown.");
@@ -206,7 +210,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomVersion() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion("1.2.3");
     	Retrieve request = requestManager.retrieveBlocking();
@@ -215,7 +219,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomVesionAsNumber() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         requestManager.getClient().setClientAppVersion(1, 2, 3);
         Retrieve request = requestManager.retrieveBlocking();
@@ -225,7 +229,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomHeader() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
@@ -238,7 +242,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomHeaderOverload() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
 
         requestManager.getClient().setCustomRequestProperty("First", 1);
@@ -251,7 +255,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomVersionNull() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion(null);
     	Retrieve request = requestManager.retrieveBlocking();
@@ -260,7 +264,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testUserCustomHeaderNull() throws IOException {
-        initializeRequestManager();
+        initializeRequestManager(true);
         requestManager.getClient().getUser().setId("testUser");
         requestManager.getClient().clearCustomRequestProperties();
     	Retrieve request = requestManager.retrieveBlocking();
@@ -269,7 +273,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testCustomMICBase() throws IOException{
-    	initializeRequestManager();
+    	initializeRequestManager(false);
     	getClient().setMICHostName("https://www.google.com");
 
     	try{
@@ -302,7 +306,7 @@ public class UserTest extends KinveyMockUnitTest {
     }
 
     public void testMICAPIVersionAppendsV() throws IOException{
-        initializeRequestManager();
+        initializeRequestManager(false);
         getClient().setMICApiVersion("2");
         assertEquals(getClient().getMICApiVersion(), "v2");
     }
