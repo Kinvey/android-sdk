@@ -63,8 +63,7 @@ public class MICLoginActivity extends Activity {
     public void onNewIntent(Intent intent){
 
         super.onNewIntent(intent);
-        //TODO User.class ?
-        AsyncUserStore.onOAuthCallbackRecieved(intent, Client.sharedInstance(), User.class);
+        AsyncUserStore.onOAuthCallbackRecieved(intent, Client.sharedInstance());
         this.finish();
     }
 }
