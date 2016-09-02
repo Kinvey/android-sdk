@@ -471,15 +471,14 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         push(new KinveyPushCallback() {
             @Override
             public void onSuccess(final KinveyPushResponse pushResult) {
-                callback.onPushSuccess();
+                callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
                 AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
 
                     @Override
                     public void onSuccess(KinveyPullResponse<T> pullResult) {
+                        callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
-                        callback.onSuccess(pullResult);
-                        callback.onSuccess();
                     }
 
                     @Override
