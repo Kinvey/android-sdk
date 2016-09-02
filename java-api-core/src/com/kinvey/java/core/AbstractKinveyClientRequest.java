@@ -357,8 +357,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 KinveyAuthRequest.Builder builder = new KinveyAuthRequest.Builder(client.getRequestFactory().getTransport(),
                         client.getJsonFactory(), client.getBaseUrl(), appKey, appSecret, null);
 
-                UserStoreRequestManager userStoreRequestManager = new UserStoreRequestManager(
-                        client, getResponseClass(), builder);
+                UserStoreRequestManager userStoreRequestManager = new UserStoreRequestManager(client, builder);
 
                 userStoreRequestManager.logout().execute();
 

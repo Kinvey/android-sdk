@@ -56,7 +56,7 @@ import java.util.Map;
 /**
  * Created by Prots on 2/12/16.
  */
-public class UserStoreRequestManager<T extends User> {
+public class UserStoreRequestManager {
 
 
     public static final String USER_COLLECTION_NAME = "user";
@@ -82,7 +82,7 @@ public class UserStoreRequestManager<T extends User> {
 
     private final AbstractClient client;
     private final KinveyAuthRequest.Builder builder;
-    private final Class<T> myClazz;
+    private final Class<User> myClazz;
     private final String clientAppVersion;
     private final GenericData customRequestProperties;
     private String authToken;
@@ -113,12 +113,12 @@ public class UserStoreRequestManager<T extends User> {
         return client;
     }
 
-    public UserStoreRequestManager(AbstractClient client, Class<T> userClass, KinveyAuthRequest.Builder builder){
+    public UserStoreRequestManager(AbstractClient client, KinveyAuthRequest.Builder builder){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
         this.builder = builder;
-        this.myClazz = userClass;
+        this.myClazz = User.class;
         this.builder.setUser(client.getUser());
         this.clientAppVersion = client.getClientAppVersion();
         this.customRequestProperties = client.getCustomRequestProperties();
@@ -157,7 +157,7 @@ public class UserStoreRequestManager<T extends User> {
         return currentUser;
     }
 
-    private User initUser(Credential credential, T userObject) {
+    private User initUser(Credential credential, User userObject) {
         User currentUser = new User();
         currentUser.setId(credential.getUserId());
         currentUser.setAuthToken(credential.getAuthToken());
@@ -239,10 +239,8 @@ public class UserStoreRequestManager<T extends User> {
         } else {
             currentUser = client.getUser();
         }
-        String authToken = this.authToken;
         currentUser.putAll(ret.getUnknownKeys());
         currentUser.setUsername(ret.getUsername());
-//        this.authToken = authToken;
         client.setUser(currentUser);
         return currentUser;
     }
@@ -398,10 +396,10 @@ public class UserStoreRequestManager<T extends User> {
      * @return Retrieve Request
      * @throws IOException
      */
-    public Retrieve<T> retrieveBlocking() throws IOException{
+    public Retrieve retrieveBlocking() throws IOException{
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        Retrieve<T> retrieve = new Retrieve<T>(this, client.getUser().getId(), myClazz);
+        Retrieve retrieve = new Retrieve(this, client.getUser().getId());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -412,8 +410,8 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public RetrieveUsers<T> retrieveBlocking(Query query) throws IOException{
-        RetrieveUsers<T> retrieve = new RetrieveUsers(this, query, Array.newInstance(myClazz, 0).getClass());
+    public RetrieveUsers retrieveBlocking(Query query) throws IOException{
+        RetrieveUsers retrieve = new RetrieveUsers(this, query);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -425,10 +423,10 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve<T> retrieveBlocking(String[] resolves) throws IOException{
+    public Retrieve retrieveBlocking(String[] resolves) throws IOException{
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser(), "currentUser ID must not be null");
-        Retrieve<T> retrieve = new Retrieve<T>(this, client.getUser().getId(), resolves, 1, true, myClazz);
+        Retrieve retrieve = new Retrieve(this, client.getUser().getId(), resolves, 1, true);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -441,9 +439,9 @@ public class UserStoreRequestManager<T extends User> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public RetrieveUsers<T> retrieveBlocking(Query query, String[] resolves) throws IOException{
+    public RetrieveUsers retrieveBlocking(Query query, String[] resolves) throws IOException{
         Preconditions.checkNotNull(query, "query must not be null");
-        RetrieveUsers<T> retrieve = new RetrieveUsers(this, query, resolves, 1, true, Array.newInstance(myClazz,0).getClass());
+        RetrieveUsers retrieve = new RetrieveUsers(this, query, resolves, 1, true);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -457,7 +455,7 @@ public class UserStoreRequestManager<T extends User> {
     public Update updateBlocking() throws IOException{
         Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        Update<T> update = new Update<T>(this, client.getUser(), User.class);
+        Update update = new Update(this, client.getUser());
         client.initializeRequest(update);
         return update;
     }
@@ -472,7 +470,7 @@ public class UserStoreRequestManager<T extends User> {
     public Update updateBlocking(User user) throws IOException{
         Preconditions.checkNotNull(user, "currentUser must not be null");
         Preconditions.checkNotNull(user.getId(), "currentUser ID must not be null");
-        Update update = new Update<T>(this, user, User.class);
+        Update update = new Update(this, user);
         client.initializeRequest(update);
         return update;
     }
@@ -482,7 +480,7 @@ public class UserStoreRequestManager<T extends User> {
         Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
         PasswordRequest passwordRequest = new PasswordRequest();
         passwordRequest.setPassword(newPassword);
-        Update update = new Update<T>(this, client.getUser(), passwordRequest, User.class);
+        Update update = new Update(this, client.getUser(), passwordRequest);
         client.initializeRequest(update);
         return update;
     }
@@ -498,7 +496,7 @@ public class UserStoreRequestManager<T extends User> {
 
     public Update getUser(String userId) throws IOException {
         Preconditions.checkNotNull(userId, "username must not be null");
-        Update update = new Update<T>(this, userId, User.class);
+        Update update = new Update(this, userId);
         client.initializeRequest(update);
         return update;
     }
@@ -606,7 +604,7 @@ public class UserStoreRequestManager<T extends User> {
         return getToken;
     }
 
-    public GetMICTempURL<T> getMICTempURL() throws IOException{
+    public GetMICTempURL getMICTempURL() throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -618,7 +616,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
 
         HttpContent content = new UrlEncodedContent(data) ;
-        GetMICTempURL<T> getTemp = new GetMICTempURL<T>(client, content);
+        GetMICTempURL getTemp = new GetMICTempURL(client, content);
         getTemp.setRequireAppCredentials(true);
         client.initializeRequest(getTemp);
         return getTemp;
@@ -626,7 +624,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
 
-    public LoginToTempURL<T> MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
+    public LoginToTempURL MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -643,7 +641,7 @@ public class UserStoreRequestManager<T extends User> {
         data.put("password", password);
 
         HttpContent content = new UrlEncodedContent(data) ;
-        LoginToTempURL<T> loginTemp = new LoginToTempURL<T>(this, tempURL, content);
+        LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, content);
         loginTemp.setRequireAppCredentials(true);
         client.initializeRequest(loginTemp);
         return loginTemp;
@@ -694,7 +692,7 @@ public class UserStoreRequestManager<T extends User> {
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
             String userType = "";
-            T ret;
+            User ret;
             try {
                 ret = myClazz.newInstance();
             } catch (Exception e) {

@@ -13,10 +13,10 @@ import java.lang.reflect.Field;
  */
 public class KinveyAuthRequestTest extends KinveyMockUnitTest {
 
-    private UserStoreRequestManager<User> currentUser;
+    private UserStoreRequestManager currentUser;
 
     private void initializeUser() {
-        currentUser = new UserStoreRequestManager<User>(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+        currentUser = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
     }
 

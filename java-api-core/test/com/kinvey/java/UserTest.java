@@ -40,15 +40,15 @@ import com.kinvey.java.testing.MockKinveyAuthRequest;
  */
 public class UserTest extends KinveyMockUnitTest {
 
-    private UserStoreRequestManager<User> requestManager;
+    private UserStoreRequestManager requestManager;
 
     private void initializeRequestManager() {
-        requestManager = new UserStoreRequestManager<User>(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+        requestManager = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
     }
 
     public void testInitializeUser() {
-        UserStoreRequestManager<User> user = new UserStoreRequestManager<User>(getClient(), User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+        UserStoreRequestManager user = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
         assertNotNull(user);
         assertEquals(getClient(),user.getClient());
@@ -57,7 +57,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeUserNullClient() {
         try {
-            UserStoreRequestManager<User> user = new UserStoreRequestManager<User>(null, User.class, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
+            UserStoreRequestManager user = new UserStoreRequestManager(null, new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                     getClient().getJsonFactory(), "mockAppKey","mockAppSecret",null));
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
@@ -65,7 +65,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testInitializeNoBuilder() {
         try {
-            UserStoreRequestManager<User> user = new UserStoreRequestManager<User>(getClient(), User.class, null);
+            UserStoreRequestManager user = new UserStoreRequestManager(getClient(), null);
             fail("NullPointerException should be thrown");
         } catch (NullPointerException ex) {}
     }
@@ -285,7 +285,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testMICLoginWithAccessToken() throws IOException{
 
-    	requestManager = new UserStoreRequestManager<>(getClient(new MockHttpForMIC()), User.class, new KinveyAuthRequest.Builder(new MockHttpForMIC(),
+    	requestManager = new UserStoreRequestManager(getClient(new MockHttpForMIC()), new KinveyAuthRequest.Builder(new MockHttpForMIC(),
                 new GsonFactory(),"https://baas.kinvey.com",  "mockAppKey","mockAppSecret",null));
 
     	GetMICAccessToken token = requestManager.getMICToken("MyToken");

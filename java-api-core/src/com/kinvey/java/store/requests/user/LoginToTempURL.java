@@ -28,11 +28,11 @@ import java.io.IOException;
 /**
  * Created by Prots on 2/12/16.
  */
-public final class LoginToTempURL<T extends User> extends AbstractKinveyClientRequest<GenericJson> {
+public final class LoginToTempURL extends AbstractKinveyClientRequest<GenericJson> {
 
-    private UserStoreRequestManager<T> userStoreRequestManager;
+    private UserStoreRequestManager userStoreRequestManager;
 
-    public LoginToTempURL(UserStoreRequestManager<T> userStoreRequestManager, String tempURL, HttpContent content) {
+    public LoginToTempURL(UserStoreRequestManager userStoreRequestManager, String tempURL, HttpContent content) {
         super(userStoreRequestManager.getClient(), tempURL, "POST", "", content, GenericJson.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.setOverrideRedirect(true);

@@ -28,7 +28,7 @@ import com.kinvey.java.store.UserStoreRequestManager;
  * Retrieve Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
  * Retrieve User requests.
  */
-public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequest<T> {
+public final class Retrieve extends AbstractKinveyJsonClientRequest<User> {
     private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
     private UserStoreRequestManager userStoreRequestManager;
@@ -50,8 +50,8 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
     @Key("retainReferences")
     private String retainReferences;
 
-    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID, Class<T> myClass) {
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID) {
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userID;
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -60,8 +60,8 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
         }
     }
 
-    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query, Class<T> myClass){
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();
@@ -76,8 +76,8 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
         }
     }
 
-    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, String userID, String[] resolve, int resolve_depth, boolean retain){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userID;
 
@@ -91,8 +91,8 @@ public final class Retrieve<T extends User> extends AbstractKinveyJsonClientRequ
         }
     }
 
-    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain, Class<T> myClass){
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public Retrieve(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();

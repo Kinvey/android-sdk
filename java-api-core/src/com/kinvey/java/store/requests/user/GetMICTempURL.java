@@ -26,7 +26,7 @@ import com.kinvey.java.store.UserStoreRequestManager;
 /**
  * Created by Prots on 2/12/16.
  */
-public final class GetMICTempURL<T extends User> extends AbstractKinveyClientRequest<GenericJson> {
+public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson> {
     private static final String REST_PATH = "oauth/auth";
 
 

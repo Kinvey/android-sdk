@@ -24,11 +24,13 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
 
+import java.lang.reflect.Array;
+
 /**
  * Retrieve Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
  * Retrieve User requests.
  */
-public final class RetrieveUsers<T extends User> extends AbstractKinveyJsonClientRequest<T[]> {
+public final class RetrieveUsers extends AbstractKinveyJsonClientRequest<User[]> {
     private static final String REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
     private UserStoreRequestManager userStoreRequestManager;
@@ -50,8 +52,8 @@ public final class RetrieveUsers<T extends User> extends AbstractKinveyJsonClien
     @Key("retainReferences")
     private String retainReferences;
 
-    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query, Class<T[]> myClass){
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User[].class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();
@@ -66,8 +68,8 @@ public final class RetrieveUsers<T extends User> extends AbstractKinveyJsonClien
         }
     }
 
-    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain, Class<T[]> myClass){
-        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, myClass);
+    public RetrieveUsers(UserStoreRequestManager userStoreRequestManager, Query query, String[] resolve, int resolve_depth, boolean retain){
+        super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, User[].class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().getJsonFactory());
         int queryLimit = query.getLimit();

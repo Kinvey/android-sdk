@@ -31,15 +31,15 @@ import java.io.IOException;
  * Update Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object for
  * Update User requests.
  */
-public final class Update<T extends User> extends AbstractKinveyJsonClientRequest<User> {
+public final class Update extends AbstractKinveyJsonClientRequest<User> {
     private static final String REST_PATH = "user/{appKey}/{userID}";
 
-    private UserStoreRequestManager<T> userStoreRequestManager;
+    private UserStoreRequestManager userStoreRequestManager;
     @Key
     private String userID;
 
-    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, Class<User> myClass) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, user, myClass);
+    public Update(UserStoreRequestManager userStoreRequestManager, User user) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, user, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = user.getId();
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -48,8 +48,8 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
         }
     }
 
-    public Update(UserStoreRequestManager<T> userStoreRequestManager, User user, PasswordRequest passwordRequest, Class<User> myClass) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, myClass);
+    public Update(UserStoreRequestManager userStoreRequestManager, User user, PasswordRequest passwordRequest) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = user.getId();
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -58,8 +58,8 @@ public final class Update<T extends User> extends AbstractKinveyJsonClientReques
         }
     }
 
-    public Update(UserStoreRequestManager<T> userStoreRequestManager, String userId, Class<User> myClass) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, myClass);
+    public Update(UserStoreRequestManager userStoreRequestManager, String userId) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, User.class);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userId;
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
