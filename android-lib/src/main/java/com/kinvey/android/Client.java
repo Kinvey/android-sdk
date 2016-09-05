@@ -52,7 +52,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
-import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
@@ -62,7 +62,6 @@ import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.UserStore;
-import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -104,7 +103,7 @@ public class Client extends AbstractClient {
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
     private AsyncUserGroup userGroup;
-    private ClientUsers clientUsers;
+    private ClientUser clientUser;
 //    private AsyncUser currentUser;
     private long syncRate;
     private long batchRate;
@@ -344,12 +343,12 @@ public class Client extends AbstractClient {
 
     /** {@inheritDoc} */
     @Override
-    public ClientUsers getClientUsers() {
+    public ClientUser getClientUser() {
         synchronized (lock) {
-            if (this.clientUsers == null) {
-                this.clientUsers = AndroidClientUsers.getClientUsers(this.context);
+            if (this.clientUser == null) {
+                this.clientUser = AndroidUserStore.getClientUsers(this.context);
             }
-            return this.clientUsers;
+            return this.clientUser;
         }
 
     }
@@ -647,7 +646,7 @@ public class Client extends AbstractClient {
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy(), this.context);
             client.setUserClass(userClass);
-            client.clientUsers = AndroidClientUsers.getClientUsers(this.context);
+            client.clientUser = AndroidUserStore.getClientUsers(this.context);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
@@ -800,7 +799,7 @@ public class Client extends AbstractClient {
                 throws AndroidCredentialStoreException, IOException {
             Credential credential = null;
             if (!client.isUserLoggedIn()) {
-                String userID = client.getClientUsers().getCurrentUser();
+                String userID = client.getClientUser().getUser();
                 if (userID != null && !userID.equals("")) {
                     CredentialStore store = getCredentialStore();
 
