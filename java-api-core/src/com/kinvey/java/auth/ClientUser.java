@@ -16,17 +16,11 @@
 
 package com.kinvey.java.auth;
 
-public interface ClientUsers {
+public interface ClientUser {
 
-    void addUser(String userID, String type);
+    void setUser(String userID);
 
-    void removeUser(String userID);
+    String getUser();
 
-    void switchUser(String userID);
-
-    void setCurrentUser(String userID);
-
-    String getCurrentUser();
-
-    String getCurrentUserType();
+    void clear();
 }

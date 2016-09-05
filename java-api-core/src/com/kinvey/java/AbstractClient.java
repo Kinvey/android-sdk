@@ -30,7 +30,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
@@ -190,7 +190,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         this.userModelClass = userClass;
     }
 
-    public abstract ClientUsers getClientUsers();
+    public abstract ClientUser getClientUser();
 
 
     public abstract  <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);

@@ -90,8 +90,7 @@ public final class Update extends AbstractKinveyJsonClientRequest<User> {
                     auth.put(key.toString(), u.get(key));
                 }
             }
-            String userType = userStoreRequestManager.getClient().getClientUsers().getCurrentUserType();
-            return userStoreRequestManager.initUser(auth, userType, u);
+            return userStoreRequestManager.initUser(auth, u);
         }else{
             return u;
         }

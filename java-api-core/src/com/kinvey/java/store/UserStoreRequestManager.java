@@ -49,7 +49,6 @@ import com.kinvey.java.store.requests.user.Update;
 import com.kinvey.java.store.requests.user.UserExists;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,7 +131,7 @@ public class UserStoreRequestManager {
      * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
      */
-    public User initUser(KinveyAuthResponse response, String userType, User userObject) throws IOException {
+    public User initUser(KinveyAuthResponse response, User userObject) throws IOException {
 
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
@@ -149,11 +148,8 @@ public class UserStoreRequestManager {
         CredentialManager credentialManager = new CredentialManager(client.getStore());
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer())
                 .setCredential(credentialManager.createAndStoreCredential(response, userObject.getId()));
-        client.getClientUsers().addUser(currentUser.getId(), userType);
-        client.getClientUsers().setCurrentUser(currentUser.getId());
-
+        client.getClientUser().setUser(currentUser.getId());
         client.setUser(currentUser);
-        client.getUser();
         return currentUser;
     }
 
@@ -691,7 +687,6 @@ public class UserStoreRequestManager {
                         "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
-            String userType = "";
             User ret;
             try {
                 ret = myClazz.newInstance();
@@ -701,25 +696,10 @@ public class UserStoreRequestManager {
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
                 initUser(credential, ret);
-            } else {
-                switch (this.type) {
-                    case IMPLICIT:
-                        userType = "Implicit";
-                        break;
-                    case KINVEY:
-                        userType = "Kinvey";
-                        break;
-                    case THIRDPARTY:
-                        userType = "ThirdParty";
-                        break;
-                    default:
-                        Preconditions.checkArgument(false, "Invalid LoginType operation");
-                }
-
             }
             KinveyAuthResponse response = this.request.execute();
             //if (response.)
-            return initUser(response, userType, ret);
+            return initUser(response, ret);
         }
     }
 
