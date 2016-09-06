@@ -299,7 +299,7 @@ public class AsyncUserStore {
         //keep a reference to the callback and redirect uri for later
 
         MICCallback = callback;
-        /*MICRedirectURI = redirectURI;*/
+        MICRedirectURI = redirectURI;
 
         if (callback != null){
             callback.onReadyToRender(myURLToRender);
@@ -345,7 +345,7 @@ public class AsyncUserStore {
      * @param token the access code returned from the MIC Auth service
      */
     public static void getMICAccessToken(String token, AbstractClient client){
-        new PostForAccessToken(client, token, (KinveyClientCallback) MICCallback).execute();
+        new PostForAccessToken(client, MICRedirectURI, token, (KinveyClientCallback) MICCallback).execute();
     }
 
     /***
@@ -537,18 +537,21 @@ public class AsyncUserStore {
     private static class PostForAccessToken extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
+        private final String redirectURI;
         private String token;
 
-        public PostForAccessToken(AbstractClient client, String token, KinveyClientCallback<User> callback) {
+        public PostForAccessToken(AbstractClient client, String redirectURI, String token, KinveyClientCallback<User> callback) {
             super(callback);
             this.client = client;
-            
+            this.redirectURI = redirectURI;
+
             this.token = token;
         }
 
         @Override
         protected User executeAsync() throws IOException {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+            requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getMICToken(token).execute();
 
             User ret =  UserStore.loginMobileIdentity(result.get("access_token").toString(), client);

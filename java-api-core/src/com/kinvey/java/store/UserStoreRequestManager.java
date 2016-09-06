@@ -695,7 +695,7 @@ public class UserStoreRequestManager {
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                initUser(credential, ret);
+                return initUser(credential, ret);
             }
             KinveyAuthResponse response = this.request.execute();
             //if (response.)

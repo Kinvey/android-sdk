@@ -57,6 +57,7 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
@@ -346,7 +347,7 @@ public class Client extends AbstractClient {
     public ClientUser getClientUser() {
         synchronized (lock) {
             if (this.clientUser == null) {
-                this.clientUser = AndroidUserStore.getClientUsers(this.context);
+                this.clientUser = AndroidUserStore.getUserStore(this.context);
             }
             return this.clientUser;
         }
@@ -461,7 +462,7 @@ public class Client extends AbstractClient {
     public static class Builder extends AbstractClient.Builder {
 
         private Context context = null;
-        private KinveyUserCallback retrieveUserCallback = null;
+        private KinveyUserCallback<User> retrieveUserCallback = null;
         //GCM Push Fields
         private String GCM_SenderID = "";
         private boolean GCM_Enabled = false;
@@ -646,20 +647,8 @@ public class Client extends AbstractClient {
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy(), this.context);
             client.setUserClass(userClass);
-            client.clientUser = AndroidUserStore.getClientUsers(this.context);
-            try {
-                Credential credential = retrieveUserFromCredentialStore(client);
-                if (credential != null) {
-                    loginWithCredential(client, credential);
-                }
+            client.clientUser = AndroidUserStore.getUserStore(this.context);
 
-            } catch (AndroidCredentialStoreException ex) {
-            	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                client.setUser(null);
-            } catch (IOException ex) {
-            	Logger.ERROR("Credential store failed to load");
-                client.setUser(null);
-            }
 
             //GCM explicitely enabled
             if (this.GCM_Enabled){
@@ -679,6 +668,21 @@ public class Client extends AbstractClient {
             if(this.MICBaseURL != null){
                client.setMICHostName(this.MICBaseURL);
             }
+
+            try {
+                Credential credential = retrieveUserFromCredentialStore(client);
+                if (credential != null) {
+                    loginWithCredential(client, credential);
+                }
+
+            } catch (AndroidCredentialStoreException ex) {
+                Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
+                client.setUser(null);
+            } catch (IOException ex) {
+                Logger.ERROR("Credential store failed to load");
+                client.setUser(null);
+            }
+
 
             return client;
         }
@@ -816,7 +820,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                AsyncUserStore.login(credential, client, null);
+                UserStore.login(credential, client);
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }

@@ -44,7 +44,7 @@ class AndroidUserStore implements ClientUser {
         editor.commit();
     }
 
-    static AndroidUserStore getClientUsers(Context context) {
+    static AndroidUserStore getUserStore(Context context) {
         if (_instance == null) {
             _instance = new AndroidUserStore(context);
         }
