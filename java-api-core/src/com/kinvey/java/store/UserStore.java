@@ -22,7 +22,7 @@ public abstract class UserStore {
     }
 
     public static  User login(String username, String password,
-                                              AbstractClient client) throws IOException {
+                              AbstractClient client) throws IOException {
         return new UserStoreRequestManager(client, createBuilder(client))
                 .loginBlocking(username, password).execute();
     }
@@ -61,8 +61,8 @@ public abstract class UserStore {
     }
 
     public static User loginSalesForce(String accessToken, String clientId,
-                                                                String refreshToken, String id,
-                                                                AbstractClient client) throws IOException {
+                                       String refreshToken, String id,
+                                       AbstractClient client) throws IOException {
         return new UserStoreRequestManager(client, createBuilder(client))
                 .loginSalesForceBlocking(accessToken, clientId, refreshToken, id).execute();
     }

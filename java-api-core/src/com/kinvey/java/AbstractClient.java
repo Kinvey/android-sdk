@@ -179,8 +179,6 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract UserGroup userGroup();
 
-    //public abstract <T extends User> T user();
-
 
     public <T extends User> Class<T> getUserClass(){
         return this.userModelClass;
