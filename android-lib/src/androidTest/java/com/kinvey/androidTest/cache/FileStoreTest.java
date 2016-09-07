@@ -126,7 +126,7 @@ public class FileStoreTest {
                     new DownloaderProgressListener() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
-
+                            success = false;
                         }
 
                         @Override
