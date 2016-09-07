@@ -810,7 +810,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
         }
 
         @Override
-        protected T executeAsync() throws IOException {
+        protected T executeAsync() throws IOException, InstantiationException, IllegalAccessException {
             return AbstractAsyncUserStore.this.retrieveMetadataBlocking();
         }
     }
@@ -875,7 +875,7 @@ public abstract class AbstractAsyncUserStore<T extends User> extends UserStore<T
 
 
         @Override
-        protected T executeAsync() throws IOException {
+        protected T executeAsync() throws IOException, InstantiationException, IllegalAccessException {
             return AbstractAsyncUserStore.this.loginKinveyAuthTokenBlocking(userID,  authToken).execute();
 
         }

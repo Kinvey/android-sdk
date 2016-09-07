@@ -27,7 +27,9 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
+import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
@@ -210,7 +212,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute(;
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
     }
 
     /**
@@ -357,7 +359,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(String entityID, KinveyDeleteCallback callback) {
-        new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute();
     }
 
 
@@ -385,7 +387,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
-        new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute();
     }
 
     /**
@@ -486,11 +488,11 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 //        callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
-            public void onSuccess(Integer result) {
-                AsyncDataStore.this.pull(query, new KinveyPullCallback() {
+            public void onSuccess(KinveyPushResponse result) {
+                AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
 
                     @Override
-                    public void onSuccess(Integer result) {
+                    public void onSuccess(KinveyPullResponse<T> result) {
                         callback.onSuccess(result);
 
                     }

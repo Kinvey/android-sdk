@@ -49,12 +49,12 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
         this.callback = callback;
     }
 
-    @Override
+/*    @Override
     protected void onPostExecute(KinveyPullResponse<T> response) {
         KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
         kinveyPullResponse.setResult(response.getResult());
         callback.onSuccess(kinveyPullResponse);
-    }
+    }*/
 
     @Override
     protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {

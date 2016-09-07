@@ -288,12 +288,12 @@ public class UserStore<T extends User> {
      * @return Current user object with refreshed metadata
      * @throws IOException
      */
-    public User retrieveMetadataBlocking() throws IOException {
+    public T retrieveMetadataBlocking() throws IOException, IllegalAccessException, InstantiationException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         User ret = this.retrieveBlocking().execute();
         if (this.currentUser == null){
-            this.currentUser = new User();
+            this.currentUser = myClazz.newInstance();
         }
         String authToken = this.authToken;
         currentUser.putAll(ret.getUnknownKeys());
@@ -366,9 +366,9 @@ public class UserStore<T extends User> {
      * @return a LoginRequest ready to be executed
      * @throws IOException
      */
-    public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
+    public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException, IllegalAccessException, InstantiationException {
         Preconditions.checkNotNull(userId, "UserId cannot be null.");
-        currentUser = new User();
+        currentUser = myClazz.newInstance();
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);

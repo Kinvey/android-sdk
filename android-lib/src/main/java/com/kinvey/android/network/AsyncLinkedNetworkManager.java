@@ -166,7 +166,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
 
 
 
-    private class Get extends AsyncClientRequest<T[]> {
+    private class Get extends AsyncClientRequest<List<T>> {
 
         Query query = null;
         String[] attachments;
@@ -186,7 +186,7 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
         }
 
         @Override
-        protected T[] executeAsync() throws IOException {
+        protected List<T> executeAsync() throws IOException {
             return AsyncLinkedNetworkManager.this.getBlocking(this.query, this.progress, this.attachments, this.resolves, this.resolve_depth, this.retain).execute();
         }
     }
