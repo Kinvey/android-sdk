@@ -133,21 +133,21 @@ public class AsyncFileStore extends FileStore {
     public void download(FileMetaData metadata, OutputStream os, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), metaCallback,
-                metaCallback, os, progressListener ).execute();
+                metadata, os, progressListener ).execute();
     }
 
     public void download(Query q, String dst, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
 
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), metaCallback,
-                metaCallback, q, dst, progressListener ).execute();
+                q, dst, progressListener ).execute();
 
     }
 
     public void download(String filename, String dst, KinveyClientCallback<FileMetaData> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
         new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
-                metaCallback, filename, dst, progressListener ).execute();
+                filename, dst, progressListener ).execute();
     }
 
     public void clear() {
