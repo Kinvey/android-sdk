@@ -16,7 +16,6 @@
 
 package com.kinvey.android.store;
 
-import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.Query;
@@ -49,7 +48,7 @@ public class AsyncFileStore extends FileStore {
         UPLOAD_FILE_METADATA,
         UPLOAD_STREAM_METADATA,
         UPLOAD_STREAM_FILENAME,
-        DELETE_ID,
+        REMOVE_ID,
         DOWNLOAD_METADATA,
         DOWNLOAD_QUERY,
         DOWNLOAD_FILENAME
@@ -76,10 +75,10 @@ public class AsyncFileStore extends FileStore {
                             InputStream.class,
                             UploaderProgressListener.class));
 
-            //DELETE METHODS
+            //REMOVE METHODS
 
-            asyncMethods.put(FileMethods.DELETE_ID,
-                    FileStore.class.getDeclaredMethod("delete", String.class));
+            asyncMethods.put(FileMethods.REMOVE_ID,
+                    FileStore.class.getDeclaredMethod("remove", FileMetaData.class));
 
             //DOWNLOAD METHODS
             asyncMethods.put(FileMethods.DOWNLOAD_FILENAME,
@@ -125,9 +124,9 @@ public class AsyncFileStore extends FileStore {
                 filename, is, listener ).execute();
     }
 
-    public void delete(String id, KinveyDeleteCallback callback) throws IOException {
-        new AsyncRequest<Integer>(this, asyncMethods.get(FileMethods.DELETE_ID), callback,
-                id ).execute();
+    public void remove(FileMetaData metadata, KinveyDeleteCallback callback) throws IOException {
+        new AsyncRequest<Integer>(this, asyncMethods.get(FileMethods.REMOVE_ID), callback,
+                metadata ).execute();
     }
 
     public void download(FileMetaData metadata, OutputStream os, KinveyClientCallback<FileMetaData> metaCallback,
@@ -150,6 +149,11 @@ public class AsyncFileStore extends FileStore {
                 filename, dst, progressListener ).execute();
     }
 
+    public FileMetaData refresh(FileMetaData fileMetaData) throws IOException {
+        return getFileMetadata(fileMetaData.getId());
+    }
+
     public void clear() {
+        cache.clear();
     }
 }
