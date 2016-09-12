@@ -158,7 +158,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
         try {
             networkFileManagerApiUnderTest.deleteBlocking(new FileMetaData("testfilename.txt"));
         } catch (IOException e) {
-            fail("file api should not throw an exception on delete");
+            fail("file api should not throw an exception on remove");
         }
     }
     

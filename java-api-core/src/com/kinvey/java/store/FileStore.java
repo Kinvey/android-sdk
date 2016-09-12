@@ -54,7 +54,7 @@ public class FileStore {
     private final ICacheManager cacheManager;
     private final Long ttl;
     private final String cacheFolder;
-    private final ICache<FileMetadataWithPath> cache;
+    protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
     public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
@@ -126,8 +126,8 @@ public class FileStore {
         return upload.execute();
     };
 
-    public Integer delete(String id) throws IOException {
-        return networkFileManager.deleteBlocking(id).execute().getCount();
+    protected Integer remove(FileMetaData metadata) throws IOException {
+        return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
     };
 
 
