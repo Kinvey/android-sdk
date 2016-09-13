@@ -51,7 +51,8 @@ public class AsyncFileStore extends FileStore {
         REMOVE_ID,
         DOWNLOAD_METADATA,
         DOWNLOAD_QUERY,
-        DOWNLOAD_FILENAME
+        DOWNLOAD_FILENAME,
+        REFRESH_FILE
     }
 
     private static HashMap<FileMethods, Method> asyncMethods =
@@ -89,6 +90,9 @@ public class AsyncFileStore extends FileStore {
             asyncMethods.put(FileMethods.DOWNLOAD_QUERY,
                     FileStore.class.getDeclaredMethod("download", Query.class, String.class, DownloaderProgressListener.class));
 
+            //REFRESH
+            asyncMethods.put(FileMethods.REFRESH_FILE,
+                    FileStore.class.getDeclaredMethod("refresh", FileMetaData.class));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -149,8 +153,20 @@ public class AsyncFileStore extends FileStore {
                 filename, dst, progressListener ).execute();
     }
 
-    public FileMetaData refresh(FileMetaData fileMetaData) throws IOException {
-        return getFileMetadata(fileMetaData.getId());
+    public void refresh(FileMetaData fileMetaData,  KinveyClientCallback<FileMetaData> metaCallback) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.REFRESH_FILE), metaCallback).execute();
+    }
+
+    public FileMetaData cachedFile(String fileId) {
+        return cache.get(fileId);
+    }
+
+    public FileMetaData cachedFile(FileMetaData fileMetaData) {
+        if (fileMetaData.getId() == null) {
+            //"File.fileId is required"
+            return null;
+        }
+        return cache.get(fileMetaData.getId());
     }
 
     public void clearCache() {

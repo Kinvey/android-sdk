@@ -172,6 +172,10 @@ public class FileStore {
 
     };
 
+    public FileMetaData refresh(FileMetaData fileMetaData) throws IOException {
+        return getFileMetadata(fileMetaData.getId());
+    }
+
 
 
     public void download(FileMetaData metadata, OutputStream os, DownloaderProgressListener progressListener) throws IOException {
