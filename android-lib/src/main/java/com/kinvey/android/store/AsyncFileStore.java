@@ -52,7 +52,8 @@ public class AsyncFileStore extends FileStore {
         DOWNLOAD_METADATA,
         DOWNLOAD_QUERY,
         DOWNLOAD_FILENAME,
-        REFRESH_FILE
+        REFRESH_FILE,
+        FIND_QUERY
     }
 
     private static HashMap<FileMethods, Method> asyncMethods =
@@ -93,6 +94,11 @@ public class AsyncFileStore extends FileStore {
             //REFRESH
             asyncMethods.put(FileMethods.REFRESH_FILE,
                     FileStore.class.getDeclaredMethod("refresh", FileMetaData.class));
+
+            //FIND
+            asyncMethods.put(FileMethods.FIND_QUERY,
+                    FileStore.class.getDeclaredMethod("find", Query.class));
+
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -153,8 +159,12 @@ public class AsyncFileStore extends FileStore {
                 filename, dst, progressListener ).execute();
     }
 
-    public void refresh(FileMetaData fileMetaData,  KinveyClientCallback<FileMetaData> metaCallback) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.REFRESH_FILE), metaCallback).execute();
+    public void refresh(FileMetaData metadata,  KinveyClientCallback<FileMetaData> metaCallback) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.REFRESH_FILE), metaCallback, metadata).execute();
+    }
+
+    public void find(Query q, KinveyClientCallback<FileMetaData[]> metaCallback) {
+        new AsyncRequest<FileMetaData[]>(this, asyncMethods.get(FileMethods.FIND_QUERY), metaCallback, q).execute();
     }
 
     public FileMetaData cachedFile(String fileId) {

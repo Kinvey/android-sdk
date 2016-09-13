@@ -34,7 +34,6 @@ import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.file.FileUtils;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import java.io.File;
@@ -131,7 +130,7 @@ public class FileStore {
     };
 
 
-    public FileMetaData[] getFileMetadata(Query q) throws IOException {
+    public FileMetaData[] find(Query q) throws IOException {
         NetworkFileManager.DownloadMetadataQuery download = networkFileManager.prepDownloadBlocking(q);
         FileMetaData[] metaData = null;
         switch (storeType.readPolicy){
@@ -153,7 +152,7 @@ public class FileStore {
 
     };
 
-    public FileMetaData getFileMetadata(String id) throws IOException {
+    public FileMetaData find(String id) throws IOException {
         NetworkFileManager.DownloadMetadata download = networkFileManager.downloadMetaDataBlocking(id);
         FileMetaData metaData = null;
         switch (storeType.readPolicy){
@@ -173,14 +172,14 @@ public class FileStore {
     };
 
     public FileMetaData refresh(FileMetaData fileMetaData) throws IOException {
-        return getFileMetadata(fileMetaData.getId());
+        return find(fileMetaData.getId());
     }
 
 
 
     public void download(FileMetaData metadata, OutputStream os, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(metadata.getId());
-        FileMetaData resultMetadata = getFileMetadata(metadata.getId());
+        FileMetaData resultMetadata = find(metadata.getId());
 
         if (resultMetadata == null){
             progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
@@ -192,7 +191,7 @@ public class FileStore {
     };
 
     public void download(Query q, String dst, DownloaderProgressListener progressListener) throws IOException {
-        FileMetaData[] resultMetadata = getFileMetadata(q);
+        FileMetaData[] resultMetadata = find(q);
         if (resultMetadata == null || resultMetadata.length == 0){
             progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
         } else {
@@ -206,7 +205,7 @@ public class FileStore {
     };
 
     public void download(Query q, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
-        FileMetaData[] resultMetadata = getFileMetadata(q);
+        FileMetaData[] resultMetadata = find(q);
 
         if (resultMetadata == null || resultMetadata.length == 0){
             progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
