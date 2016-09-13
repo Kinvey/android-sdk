@@ -218,7 +218,7 @@ public class Client extends AbstractClient {
             getCacheManager().clear();
         }
 
-        this.getFileStore(StoreType.SYNC).clear();
+        this.getFileStore(StoreType.SYNC).clearCache();
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
             e.performLockdown(userStore().getCurrentUser().getId());

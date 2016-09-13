@@ -153,7 +153,7 @@ public class AsyncFileStore extends FileStore {
         return getFileMetadata(fileMetaData.getId());
     }
 
-    public void clear() {
+    public void clearCache() {
         cache.clear();
     }
 }

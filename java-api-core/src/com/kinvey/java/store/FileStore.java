@@ -126,7 +126,7 @@ public class FileStore {
         return upload.execute();
     };
 
-    protected Integer remove(FileMetaData metadata) throws IOException {
+    public Integer remove(FileMetaData metadata) throws IOException {
         return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
     };
 
