@@ -32,6 +32,7 @@ import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.List;
 
 /**
  * Subset of the NetworkManager API, offering support for downloading and uploading associated files with an entity.
@@ -308,7 +309,7 @@ public class LinkedNetworkManager<T extends LinkedGenericJson> extends NetworkMa
      * requests.
      *
      */
-    public class Get extends GetLinkedResourceClientRequest<T[]> {
+    public class Get extends GetLinkedResourceClientRequest<List<T>> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -371,7 +372,7 @@ public class LinkedNetworkManager<T extends LinkedGenericJson> extends NetworkMa
         }
 
         @Override
-        public T[] execute() throws IOException {
+        public List<T> execute() throws IOException {
             return super.execute();
         }
     }

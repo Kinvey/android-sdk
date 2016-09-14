@@ -24,12 +24,10 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICacheManager;
-import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.UserDiscovery;
 import com.kinvey.java.UserGroup;
-import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
@@ -83,8 +81,7 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
 		return null;
 	}
 
-	@Override
-	public ClientUsers getClientUsers() {
+	public ClientUser getClientUser() {
 		// TODO Auto-generated method stub
 		return null;
 	}
