@@ -138,8 +138,19 @@ public class FileStore {
 
     public Integer remove(FileMetaData metadata) throws IOException {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
-        return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
-    };
+        switch (storeType.writePolicy){
+            case FORCE_LOCAL:
+                cache.delete(metadata.getId());
+                return 1;
+            case LOCAL_THEN_NETWORK:
+                cache.delete(metadata.getId());
+            case FORCE_NETWORK:
+                return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
+            //TODO check return default value
+            default:
+                return 0;
+        }
+    }
 
 
     public FileMetaData[] find(Query q) throws IOException {
