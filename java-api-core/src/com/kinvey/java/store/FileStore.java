@@ -82,8 +82,6 @@ public class FileStore {
         Preconditions.checkNotNull(file, "file must not be null");
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
-        NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(metadata,
-                new FileContent(null, file), listener);
 
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
@@ -92,7 +90,8 @@ public class FileStore {
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }
 
-
+        NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath,
+                new FileContent(null, file), listener);
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -218,7 +217,7 @@ public class FileStore {
         return metaData;
 
 
-    };
+    }
 
     public FileMetaData refresh(FileMetaData fileMetaData) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "metadata must not be null");
@@ -227,7 +226,7 @@ public class FileStore {
 
 
 
-    public void download(FileMetaData metadata, OutputStream os, DownloaderProgressListener progressListener) throws IOException {
+    public FileMetaData download(FileMetaData metadata, OutputStream os, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
@@ -239,10 +238,10 @@ public class FileStore {
             sendMetadata(resultMetadata, progressListener);
             getFile(resultMetadata, os, progressListener);
         }
+        return resultMetadata;
+    }
 
-    };
-
-    public void download(Query q, String dst, DownloaderProgressListener progressListener) throws IOException {
+    public FileMetaData[] download(Query q, String dst, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(q, "query must not be null");
         Preconditions.checkNotNull(dst, "dst must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
@@ -256,10 +255,10 @@ public class FileStore {
                 getNetworkFile(resultMetadata, dst, progressListener);
             }
         }
+        return resultMetadata;
+    }
 
-    };
-
-    public void download(Query q, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
+    public FileMetaData[] download(Query q, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(q, "query must not be null");
         Preconditions.checkNotNull(dst, "dst must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
@@ -270,26 +269,26 @@ public class FileStore {
         } else {
             getFile(resultMetadata[0], dst, progressListener);
         }
+        return resultMetadata;
+    }
 
-    };
-
-    public void download(String filename, String dst, DownloaderProgressListener progressListener) throws IOException {
+    public FileMetaData[] download(String filename, String dst, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(filename, "filename must not be null");
         Preconditions.checkNotNull(dst, "dst must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.equals("_filename", filename);
-        download(q, dst, progressListener);
-    };
+        return download(q, dst, progressListener);
+    }
 
-    public void download(String filename, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
+    public FileMetaData[] download(String filename, OutputStream dst, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(filename, "filename must not be null");
         Preconditions.checkNotNull(dst, "dst must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.equals("_filename", filename);
-        download(q, dst, progressListener);
-    };
+        return download(q, dst, progressListener);
+    }
 
     private File cacheStorage(){
         File f = new File(getCacheFolder());
@@ -334,7 +333,7 @@ public class FileStore {
             ret = new File(cacheFilePath);
 
         }
-        return ret == null || !ret.exists() || ret.length() <= 0 ? null : ret ;
+        return ret == null || !ret.exists() ? null : ret ;
     }
 
     private void getFile(final FileMetaData metadata, final OutputStream os, final DownloaderProgressListener listener) throws IOException {
