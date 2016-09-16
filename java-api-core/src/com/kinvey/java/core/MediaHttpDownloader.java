@@ -225,15 +225,14 @@ public class MediaHttpDownloader {
                 // If last byte position has been specified use it iff it is smaller than the chunksize.
                 currentRequestLastBytePos = Math.min(lastBytePos, currentRequestLastBytePos);
             }
-            currentRequest.getHeaders().setRange(
-                    "bytes=" + bytesDownloaded + "-" + currentRequestLastBytePos);
+//            currentRequest.getHeaders().setRange(
+//                    "bytes=" + bytesDownloaded + "-" + currentRequestLastBytePos);
 
             if (backOffPolicyEnabled) {
                 // Set ExponentialBackOffPolicy as the BackOffPolicy of the HTTP Request which will
                 // retry the same request again if there is a server error.
                 currentRequest.setBackOffPolicy(new ExponentialBackOffPolicy());
             }
-
             HttpResponse response = currentRequest.execute();
             if (response.getContent() != null)
                 IOUtils.copy(response.getContent(), out);

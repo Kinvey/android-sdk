@@ -145,7 +145,6 @@ public class FileStore {
                 cache.delete(metadata.getId());
             case FORCE_NETWORK:
                 return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
-            //TODO check return default value
             default:
                 return 0;
         }
@@ -252,7 +251,7 @@ public class FileStore {
 
             for (FileMetaData meta : resultMetadata) {
                 getFile(meta, new FileOutputStream(new File(cacheStorage(), meta.getId())), progressListener);
-                getNetworkFile(resultMetadata, dst, progressListener);
+                getNetworkFile(meta, dst, progressListener);
             }
         }
         return resultMetadata;
@@ -309,7 +308,7 @@ public class FileStore {
         downloader.download(metadata, os);
     }
 
-    private void getNetworkFile(FileMetaData[] metadata, String dst, DownloaderProgressListener listener) throws IOException {
+    private void getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
         File f = new File(dst);
         if (!f.exists()){
             f.mkdirs();
@@ -317,13 +316,11 @@ public class FileStore {
             throw new KinveyException("dst is not a dirrectory", "Please provide valid path to file destination", "");
         }
 
-        for (FileMetaData meta : metadata){
-            File out = new File(f, meta.getId());
+            File out = new File(f, metadata.getId());
             if (!out.exists()){
                 out.createNewFile();
             }
-            getNetworkFile(meta, new FileOutputStream(out), listener);
-        }
+            getNetworkFile(metadata, new FileOutputStream(out), listener);
     }
 
     private File getCachedFile(FileMetaData metadata){
