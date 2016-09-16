@@ -153,9 +153,9 @@ public class AsyncFileStore extends FileStore {
 
     }
 
-    public void download(String filename, String dst, KinveyClientCallback<FileMetaData> metaCallback,
+    public void download(String filename, String dst, KinveyClientCallback<FileMetaData[]> metaCallback,
                          DownloaderProgressListener progressListener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
+        new AsyncRequest<FileMetaData[]>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
                 filename, dst, progressListener ).execute();
     }
 
