@@ -15,10 +15,8 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,9 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -39,9 +34,10 @@ import static org.junit.Assert.assertTrue;
 public class FileStoreAsyncTest {
 
     Client client = null;
+    boolean success;
+    FileMetaData fileMetaDataResult;
 
-
-    private static class DefaultUploadProgressListener implements UploaderProgressListener {
+private static class DefaultUploadProgressListener implements UploaderProgressListener {
         private CountDownLatch latch;
         FileMetaData fileMetaDataResult;
         Throwable error;
@@ -356,5 +352,284 @@ public class FileStoreAsyncTest {
                 Looper.loop();
             }
         }).start();
+    }
+
+    @Test
+    public void testDownloadFileByQueryNetwork() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFileWithMetaData(StoreType.NETWORK, true);
+        Query query = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("_id", fileMetaData.getId());
+        downloadFileQuery(StoreType.NETWORK, query);
+    }
+
+    @Test
+    public void testDownloadFileByQuerySync() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.SYNC, true);
+        Query query = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("_id", fileMetaData.getId());
+        downloadFileQuery(StoreType.SYNC, query);
+    }
+
+    @Test
+    public void testDownloadFileByQueryCache() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.CACHE, true);
+        Query query = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("_id", fileMetaData.getId());
+        downloadFileQuery(StoreType.CACHE, query);
+    }
+
+    public void downloadFileQuery(final StoreType storeType, final Query query) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                try {
+                    String dst = client.getContext().getFilesDir() + "test.xml";
+                    client.getFileStore(storeType).download(query, dst, new KinveyClientCallback<FileMetaData[]>() {
+                        @Override
+                        public void onSuccess(FileMetaData[] result) {
+                            finish(true);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            finish(false);
+                        }
+
+                        public void finish(boolean result) {
+                            success = result;
+                            latch.countDown();
+                        }
+                    }, new DownloaderProgressListener() {
+                        @Override
+                        public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            finish(true);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            finish(false);
+                        }
+
+                        public void finish(boolean result) {
+                            success = result;
+                            latch.countDown();
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    latch.countDown();
+                }
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        assertTrue(success);
+    }
+
+    @Test
+    public void testDownloadFileByFileNameNetwork() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.NETWORK, true);
+        downloadFileByFileName(StoreType.NETWORK, fileMetaData.getFileName());
+    }
+
+    @Test
+    public void testDownloadFileByFileNameCache() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.CACHE, true);
+        downloadFileByFileName(StoreType.CACHE, fileMetaData.getFileName());
+    }
+
+    @Test
+    public void testDownloadFileByFileNameSync() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.SYNC, true);
+        downloadFileByFileName(StoreType.SYNC, fileMetaData.getFileName());
+    }
+
+    public void downloadFileByFileName(final StoreType storeType, final String fileName) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                try {
+                    String dst = client.getContext().getFilesDir() + fileName;
+                    client.getFileStore(storeType).download(fileName, dst, new KinveyClientCallback<FileMetaData[]>() {
+                        @Override
+                        public void onSuccess(FileMetaData[] result) {
+                            finish(true);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            finish(false);
+                        }
+
+                        public void finish(boolean result) {
+                            success = result;
+                            latch.countDown();
+                        }
+                    }, new DownloaderProgressListener() {
+                        @Override
+                        public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            finish(true);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            finish(false);
+                        }
+
+                        public void finish(boolean result) {
+                            success = result;
+                            latch.countDown();
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    latch.countDown();
+                }
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        assertTrue(success);
+    }
+
+    @Test
+    public void testRefreshFileNetwork() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.NETWORK, true);
+        refresh(StoreType.NETWORK, fileMetaData);
+    }
+
+    @Test
+    public void testRefreshFileCache() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.CACHE, true);
+        fileMetaData.setPublic(true);
+        refresh(StoreType.CACHE, fileMetaData);
+    }
+
+    @Test
+    public void testRefreshFileSync() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.SYNC, true);
+        refresh(StoreType.SYNC, fileMetaData);
+    }
+
+    public void refresh(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                try {
+                    client.getFileStore(storeType).refresh(fileMetaData, new KinveyClientCallback<FileMetaData>() {
+                        @Override
+                        public void onSuccess(FileMetaData result) {
+                            finish(result != null);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            finish(false);
+                        }
+
+                        public void finish(boolean result) {
+                            success = result;
+                            latch.countDown();
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    latch.countDown();
+                }
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        assertTrue(success);
+    }
+
+    @Test
+    public void testFindFileNetwork() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.NETWORK, true);
+        find(StoreType.NETWORK, fileMetaData, false);
+    }
+
+    @Test
+    public void testFindFileCache() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.CACHE, true);
+        find(StoreType.CACHE, fileMetaData, false);
+    }
+
+    @Test
+    public void testFindFileSync() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.SYNC, true);
+        find(StoreType.SYNC, fileMetaData, false);
+    }
+
+    public void find(final StoreType storeType, final FileMetaData fileMetaData, final boolean isCacheCleaning) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                Query query = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals("_id", fileMetaData.getId());
+                client.getFileStore(storeType).find(query, new KinveyClientCallback<FileMetaData[]>() {
+                    @Override
+                    public void onSuccess(FileMetaData[] result) {
+                        if (isCacheCleaning) {
+                            finish(result != null && result.length == 0);
+                        } else {
+                            finish(result != null && result.length > 0);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        if (isCacheCleaning) {
+                            finish(true);
+                        } else {
+                            finish(false);
+                        }
+                    }
+
+                    public void finish(boolean result) {
+                        success = result;
+                        latch.countDown();
+                    }
+                });
+
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        assertTrue(success);
+        if (!isCacheCleaning) {
+            fileMetaDataResult = fileMetaData;
+            storeTypeResult = storeType;
+        } else {
+            fileMetaDataResult = null;
+            storeTypeResult = null;
+        }
+    }
+
+    @Test
+    public void testClearCacheCache() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.CACHE, true);
+        client.getFileStore(StoreType.CACHE).clearCache();
+        find(StoreType.CACHE, fileMetaData, true);
+    }
+
+    @Test
+    public void testClearCacheSync() throws InterruptedException, IOException {
+        FileMetaData fileMetaData = uploadFile(StoreType.SYNC, true);
+        client.getFileStore(StoreType.SYNC).clearCache();
+        find(StoreType.SYNC, fileMetaData, false);
     }
 }
