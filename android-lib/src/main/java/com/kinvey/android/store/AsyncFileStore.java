@@ -111,26 +111,26 @@ public class AsyncFileStore extends FileStore {
         super(networkFileManager, cacheManager, ttl, storeType, cacheFolder);
     }
 
-    public void upload(File file, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE), metaCallback, file, listener )
+    public void uploadAsync(File file, UploaderProgressListener listener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE), listener, file, listener )
                 .execute();
     }
 
-    public void upload(File file, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback,
+    public void uploadAsync(File file, FileMetaData metadata,
                                UploaderProgressListener listener) throws IOException {
 
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE_METADATA), metaCallback,
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE_METADATA), listener,
                 file, metadata, listener ).execute();
     }
 
-    public void upload(InputStream is, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_METADATA), metaCallback,
+    public void uploadAsync(InputStream is, FileMetaData metadata, UploaderProgressListener listener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_METADATA), listener,
                 is, metadata, listener ).execute();
     }
 
-    public void upload(String filename, InputStream is, KinveyClientCallback<FileMetaData> metaCallback,
+    public void uploadAsync(String filename, InputStream is,
                        UploaderProgressListener listener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_FILENAME), metaCallback,
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_FILENAME), listener,
                 filename, is, listener ).execute();
     }
 
@@ -139,23 +139,23 @@ public class AsyncFileStore extends FileStore {
                 metadata ).execute();
     }
 
-    public void download(FileMetaData metadata, OutputStream os, KinveyClientCallback<FileMetaData> metaCallback,
+    public void downloadAsync(FileMetaData metadata, OutputStream os,
                          DownloaderProgressListener progressListener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), metaCallback,
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), progressListener,
                 metadata, os, progressListener ).execute();
     }
 
-    public void download(Query q, String dst, KinveyClientCallback<FileMetaData> metaCallback,
+    public void downloadAsync(Query q, String dst,
                          DownloaderProgressListener progressListener) throws IOException {
 
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), metaCallback,
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), progressListener,
                 q, dst, progressListener ).execute();
 
     }
 
-    public void download(String filename, String dst, KinveyClientCallback<FileMetaData> metaCallback,
+    public void downloadAsync(String filename, String dst,
                          DownloaderProgressListener progressListener) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), progressListener,
                 filename, dst, progressListener ).execute();
     }
 

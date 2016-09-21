@@ -334,7 +334,7 @@ public class FileStore {
             ret = new File(cacheFilePath);
 
         }
-        return ret == null || !ret.exists() || ret.length() <= 0 ? null : ret ;
+        return ret == null || !ret.exists() ? null : ret ;
     }
 
     private void getFile(final FileMetaData metadata, final OutputStream os, final DownloaderProgressListener listener) throws IOException {
@@ -350,7 +350,7 @@ public class FileStore {
                     listener.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
                 } else {
                     FileUtils.copyStreams(new FileInputStream(f), os);
-                    listener.onSuccess(null);
+                    listener.onSuccess(metadata);
                 }
 
                 break;
@@ -367,7 +367,7 @@ public class FileStore {
                 }
                 if (f.exists()) {
                     FileUtils.copyStreams(new FileInputStream(f), os);
-                    listener.onSuccess(null);
+                    listener.onSuccess(metadata);
                 }
                 break;
             case PREFER_NETWORK:
@@ -379,7 +379,7 @@ public class FileStore {
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
+                    public void onSuccess(FileMetaData result) {
                         listener.onSuccess(result);
                     }
 

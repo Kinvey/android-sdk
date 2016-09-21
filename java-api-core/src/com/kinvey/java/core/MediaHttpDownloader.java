@@ -246,6 +246,9 @@ public class MediaHttpDownloader {
                 // All required bytes have been downloaded from the server.
                 bytesDownloaded = mediaContentLength;
                 updateStateAndNotifyListener(DownloadState.DOWNLOAD_COMPLETE);
+                if (progressListener != null){
+                    progressListener.onSuccess(metaData);
+                }
                 return;
             }
 

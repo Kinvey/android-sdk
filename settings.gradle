@@ -3,7 +3,7 @@ include ':java-api-core'//, ':app', ':TestDrive-Android'//, ':TestDrive', ':Stat
 include ':android-lib'
 include ':android-secure'
 //include ':java-lib'
-include ':StatusShare'
+//include ':StatusShare'
 //include ':android-samples'
 //include ':samples-java'
 //include ':HelloWorld'
@@ -15,7 +15,7 @@ project(':android-secure').projectDir = "$rootDir/android-secure" as File
 //project(':android-samples').projectDir = "$rootDir/samples" as File
 //project(':samples-java').projectDir = "$rootDir/samples-java" as File
 //project(':TestDrive').projectDir = "samples/TestDrive-Android" as File
-project(':StatusShare').projectDir = "samples/StatusShare-Android" as File
+//project(':StatusShare').projectDir = "samples/StatusShare-Android" as File
 //project(':HelloWorld').projectDir = "samples-java/HelloWorld" as File
 
 
