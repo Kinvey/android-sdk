@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  */
 public class AsyncRequest<T> extends AsyncClientRequest<T> {
 
-    private Object scope;
+    protected Object scope;
     Method mMethod;
     Object[] args;
 
