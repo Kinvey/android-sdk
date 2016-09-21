@@ -182,7 +182,7 @@ public class FileStoreAsyncTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getMessage(), "metadata must not be null");
+        assertEquals(listener.error.getMessage(), "file must not be null");
     }
 
     @Test
