@@ -9,13 +9,14 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.AsyncDownloaderProgressListener;
+import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -43,7 +44,7 @@ public class FileStoreAsyncTest {
     FileMetaData fileMetaDataResult;
     StoreType storeTypeResult;
 
-    private static class DefaultUploadProgressListener implements UploaderProgressListener {
+    private static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
         FileMetaData fileMetaDataResult;
         Throwable error;
@@ -73,7 +74,7 @@ public class FileStoreAsyncTest {
         }
     }
 
-    private static class DefaultDownloadProgressListener implements DownloaderProgressListener {
+    private static class DefaultDownloadProgressListener implements AsyncDownloaderProgressListener<FileMetaData> {
 
         private CountDownLatch latch;
         FileMetaData fileMetaDataResult;
@@ -202,7 +203,7 @@ public class FileStoreAsyncTest {
         nullUpload(StoreType.SYNC);
     }
 
-    public void uploadFile(final StoreType storeType, final UploaderProgressListener listener,
+    public void uploadFile(final StoreType storeType, final AsyncUploaderProgressListener listener,
                            final File f, final FileMetaData metaData) throws InterruptedException, IOException {
         new Thread(new Runnable() {
             public void run() {
@@ -281,7 +282,7 @@ public class FileStoreAsyncTest {
         downloadFile(StoreType.SYNC);
     }
 
-    public void downloadFile(final StoreType storeType, final FileMetaData metaFile, final DownloaderProgressListener listener) throws InterruptedException, IOException {
+    public void downloadFile(final StoreType storeType, final FileMetaData metaFile, final AsyncDownloaderProgressListener listener) throws InterruptedException, IOException {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -402,14 +403,14 @@ public class FileStoreAsyncTest {
                 Looper.prepare();
                 try {
                     String dst = client.getContext().getFilesDir() + "test.xml";
-                    client.getFileStore(storeType).download(query, dst, new DownloaderProgressListener() {
+                    client.getFileStore(storeType).downloadAsync(query, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
 
                         }
 
                         @Override
-                        public void onSuccess(FileMetaData result) {
+                        public void onSuccess(FileMetaData[] result) {
                             finish(true);
                         }
 
@@ -475,14 +476,14 @@ public class FileStoreAsyncTest {
                 Looper.prepare();
                 try {
                     String dst = client.getContext().getFilesDir() + fileName;
-                    client.getFileStore(storeType).download(fileName, dst, new DownloaderProgressListener() {
+                    client.getFileStore(storeType).downloadAsync(fileName, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
-
+                            Log.d("downloadFileByFileName", String.valueOf(downloader.getProgress()));
                         }
 
                         @Override
-                        public void onSuccess(FileMetaData result) {
+                        public void onSuccess(FileMetaData[] result) {
                             finish(true);
                         }
 
