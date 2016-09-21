@@ -112,7 +112,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
 
                             }
 
-                            @Override
+/*                            @Override
                             public void onSuccess(FileMetaData result) {
 
                             }
@@ -120,7 +120,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             @Override
                             public void onFailure(Throwable error) {
 
-                            }
+                            }*/
                         };
 
                         FileStore fileStore = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
@@ -144,7 +144,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                                 }
                             }
 
-                            @Override
+                            /*@Override
                             public void onSuccess(FileMetaData result) {
                                 if (upload != null) {
                                     upload.onSuccess(result);
@@ -156,7 +156,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                                 if (upload != null) {
                                     upload.onFailure(error);
                                 }
-                            }
+                            }*/
                         });
 
                     }

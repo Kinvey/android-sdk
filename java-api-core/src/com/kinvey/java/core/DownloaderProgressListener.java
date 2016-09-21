@@ -47,7 +47,7 @@ import java.io.IOException;
  * </pre>
  *
  */
-public interface DownloaderProgressListener extends KinveyClientCallback<FileMetaData> {
+public interface DownloaderProgressListener{
 
   /**
    * Called to notify that progress has been changed.

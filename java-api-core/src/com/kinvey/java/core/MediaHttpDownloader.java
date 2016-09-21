@@ -195,18 +195,13 @@ public class MediaHttpDownloader {
      * @param out output stream to dump bytes as they stream off the wire
      * @throws IOException
      */
-    public void download(FileMetaData metaData, OutputStream out) throws IOException {
+    public FileMetaData download(FileMetaData metaData, OutputStream out) throws IOException {
         Preconditions.checkArgument(downloadState == DownloadState.NOT_STARTED);
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
+        boolean isDownloaded = false;
 
         // Make initial request to get the unique upload URL.
 
-        if (metaData == null){
-            if (progressListener != null) {
-                progressListener.onFailure(new KinveyException("BlobNotFound", "This blob not found for this app backend", "The file being downloaded does not exist."));
-            }
-        	return;
-        }
 
         GenericUrl downloadUrl;
         if(metaData.getDownloadURL() != null){
@@ -217,7 +212,7 @@ public class MediaHttpDownloader {
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
-        while (true && !cancelled) {
+        while (!cancelled) {
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
             currentRequest.setSuppressUserAgentSuffix(true);
             long currentRequestLastBytePos = bytesDownloaded + chunkSize - 1;
@@ -245,15 +240,14 @@ public class MediaHttpDownloader {
                 // All required bytes have been downloaded from the server.
                 bytesDownloaded = mediaContentLength;
                 updateStateAndNotifyListener(DownloadState.DOWNLOAD_COMPLETE);
-                if (progressListener != null){
-                    progressListener.onSuccess(metaData);
-                }
-                return;
+                isDownloaded = true;
+                return metaData;
             }
 
             bytesDownloaded = nextByteIndex;
             updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
         }
+        return isDownloaded ? metaData : null;
     }
 
 

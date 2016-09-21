@@ -56,7 +56,7 @@ public class FileStore {
     protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
-    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
+    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
 
         this.networkFileManager = networkFileManager;
         this.cacheManager = cacheManager;
@@ -72,8 +72,7 @@ public class FileStore {
         FileMetaData fm = new FileMetaData();
         fm.setFileName(file.getName());
         return upload(file, fm, listener);
-    };
-
+    }
 
 
 
@@ -86,14 +85,14 @@ public class FileStore {
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-        if (fileMetadataWithPath.getId() == null){
+        if (fileMetadataWithPath.getId() == null) {
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }
 
         NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath,
                 new FileContent(null, file), listener);
 
-        switch (storeType.writePolicy){
+        switch (storeType.writePolicy) {
             case FORCE_LOCAL:
                 saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
                 metadata = fileMetadataWithPath;
@@ -105,14 +104,16 @@ public class FileStore {
                 saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
                 try {
                     upload.execute();
-                } catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 metadata = fileMetadataWithPath;
         }
 
         return metadata;
-    };
+    }
+
+    ;
 
     public FileMetaData upload(InputStream is, FileMetaData metadata, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(is, "inputStream must not be null");
@@ -122,7 +123,9 @@ public class FileStore {
                 networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is), listener);
 
         return upload.execute();
-    };
+    }
+
+    ;
 
     public FileMetaData upload(String filename, InputStream is, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(filename, "filename must not be null");
@@ -133,11 +136,13 @@ public class FileStore {
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fm, new InputStreamContent(null, is), listener);
         return upload.execute();
-    };
+    }
+
+    ;
 
     public Integer remove(FileMetaData metadata) throws IOException {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
-        switch (storeType.writePolicy){
+        switch (storeType.writePolicy) {
             case FORCE_LOCAL:
                 cache.delete(metadata.getId());
                 return 1;
@@ -155,7 +160,7 @@ public class FileStore {
         Preconditions.checkNotNull(q, "query must not be null");
         NetworkFileManager.DownloadMetadataQuery download = networkFileManager.prepDownloadBlocking(q);
         FileMetaData[] metaData = null;
-        switch (storeType.readPolicy){
+        switch (storeType.readPolicy) {
             case FORCE_LOCAL:
                 List<FileMetadataWithPath> list = cache.get(q);
                 metaData = new FileMetaData[list.size()];
@@ -186,13 +191,15 @@ public class FileStore {
         return metaData;
 
 
-    };
+    }
+
+    ;
 
     public FileMetaData find(String id) throws IOException {
         Preconditions.checkNotNull(id, "id must not be null");
         NetworkFileManager.DownloadMetadata download = networkFileManager.downloadMetaDataBlocking(id);
         FileMetaData metaData = null;
-        switch (storeType.readPolicy){
+        switch (storeType.readPolicy) {
             case FORCE_LOCAL:
                 metaData = cache.get(id);
                 break;
@@ -224,20 +231,13 @@ public class FileStore {
     }
 
 
-
     public FileMetaData download(FileMetaData metadata, OutputStream os, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         FileMetaData resultMetadata = find(metadata.getId());
-
-        if (resultMetadata == null){
-            progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
-        } else {
-            sendMetadata(resultMetadata, progressListener);
-            getFile(resultMetadata, os, progressListener);
-        }
-        return resultMetadata;
+        sendMetadata(resultMetadata, progressListener);
+        return getFile(resultMetadata, os, progressListener);
     }
 
     public FileMetaData[] download(Query q, String dst, DownloaderProgressListener progressListener) throws IOException {
@@ -246,9 +246,8 @@ public class FileStore {
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         FileMetaData[] resultMetadata = find(q);
         if (resultMetadata == null || resultMetadata.length == 0){
-            progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
+            throw new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", "");
         } else {
-
             for (FileMetaData meta : resultMetadata) {
                 getFile(meta, new FileOutputStream(new File(cacheStorage(), meta.getId())), progressListener);
                 getNetworkFile(meta, dst, progressListener);
@@ -262,9 +261,8 @@ public class FileStore {
         Preconditions.checkNotNull(dst, "dst must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         FileMetaData[] resultMetadata = find(q);
-
         if (resultMetadata == null || resultMetadata.length == 0){
-            progressListener.onFailure(new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", ""));
+            throw new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", "");
         } else {
             getFile(resultMetadata[0], dst, progressListener);
         }
@@ -289,81 +287,78 @@ public class FileStore {
         return download(q, dst, progressListener);
     }
 
-    private File cacheStorage(){
+    private File cacheStorage() {
         File f = new File(getCacheFolder());
-        if (!f.exists()){
+        if (!f.exists()) {
             f.mkdirs();
-        } else if(!f.isDirectory()){
+        } else if (!f.isDirectory()) {
             throw new KinveyException("InvalidCachedFolder", "file with name already exists", "");
         }
         return f;
     }
 
 
-    private void getNetworkFile(FileMetaData metadata, OutputStream os, DownloaderProgressListener listener) throws IOException {
+    private FileMetaData getNetworkFile(FileMetaData metadata, OutputStream os, DownloaderProgressListener listener) throws IOException {
         AbstractClient client = networkFileManager.getClient();
         MediaHttpDownloader downloader = new MediaHttpDownloader(client.getRequestFactory().getTransport(),
                 client.getRequestFactory().getInitializer());
         downloader.setProgressListener(listener);
-        downloader.download(metadata, os);
+        return downloader.download(metadata, os);
     }
 
-    private void getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
+    private FileMetaData getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
         File f = new File(dst);
-        if (!f.exists()){
+        if (!f.exists()) {
             f.mkdirs();
-        } else if (!f.isDirectory()){
+        } else if (!f.isDirectory()) {
             throw new KinveyException("dst is not a dirrectory", "Please provide valid path to file destination", "");
         }
 
-            File out = new File(f, metadata.getId());
-            if (!out.exists()){
-                out.createNewFile();
-            }
-            getNetworkFile(metadata, new FileOutputStream(out), listener);
+        File out = new File(f, metadata.getId());
+        if (!out.exists()) {
+            out.createNewFile();
+        }
+        return getNetworkFile(metadata, new FileOutputStream(out), listener);
     }
 
-    private File getCachedFile(FileMetaData metadata){
+    private File getCachedFile(FileMetaData metadata) {
+        Preconditions.checkNotNull(metadata, "metadata must not be null");
         File ret = null;
-        if (metadata.containsKey(CACHE_FILE_PATH)){
+        if (metadata.containsKey(CACHE_FILE_PATH)) {
             String cacheFilePath = metadata.get(CACHE_FILE_PATH).toString();
             ret = new File(cacheFilePath);
 
         }
-        return ret == null || !ret.exists() ? null : ret ;
+        return ret == null || !ret.exists() ? null : ret;
     }
 
-    private void getFile(final FileMetaData metadata, final OutputStream os, final DownloaderProgressListener listener) throws IOException {
+    private FileMetaData getFile(final FileMetaData metadata, final OutputStream os, final DownloaderProgressListener listener) throws IOException {
         File f = new File(cacheStorage(), metadata.getId());
-
 
         File cacheStorage = cacheStorage();
 
-        switch (storeType.readPolicy){
+        switch (storeType.readPolicy) {
             case FORCE_LOCAL:
                 f = getCachedFile(metadata);
                 if (f == null){
-                    listener.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
+                    throw new KinveyException("FileMissing", "File Missing in cache", "");
                 } else {
                     FileUtils.copyStreams(new FileInputStream(f), os);
-                    listener.onSuccess(metadata);
+                    return metadata;
                 }
-
-                break;
             case FORCE_NETWORK:
-                getNetworkFile(metadata, os, listener);
-                break;
+                return getNetworkFile(metadata, os, listener);
             case PREFER_LOCAL:
                 f = getCachedFile(metadata);
 
-                if (f == null){
+                if (f == null) {
                     f = new File(cacheStorage, metadata.getId());
 
-                    getNetworkFile(metadata, new FileOutputStream(f), listener);
+                    return getNetworkFile(metadata, new FileOutputStream(f), listener);
                 }
                 if (f.exists()) {
                     FileUtils.copyStreams(new FileInputStream(f), os);
-                    listener.onSuccess(metadata);
+                    return metadata;
                 }
                 break;
             case PREFER_NETWORK:
@@ -373,56 +368,44 @@ public class FileStore {
                     public void progressChanged(MediaHttpDownloader downloader) throws IOException {
                         listener.progressChanged(downloader);
                     }
-
-                    @Override
-                    public void onSuccess(FileMetaData result) {
-                        listener.onSuccess(result);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable error) {
-                        File f = getCachedFile(metadata);
-                        try {
-                            if (f == null) {
-                                listener.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
-                            } else {
-                                FileUtils.copyStreams(new FileInputStream(f), os);
-                                listener.onSuccess(null);
-                            }
-                        } catch (IOException e){
-                            listener.onFailure(e);
-                        }
-                    }
                 };
-
-                getNetworkFile(metadata, new FileOutputStream(f), wrappedListener);
+                FileMetaData fileMetaData = null;
+                try {
+                    fileMetaData = getNetworkFile(metadata, new FileOutputStream(f), wrappedListener);
+                } catch (KinveyException e) {
+                    File file = getCachedFile(metadata);
+                    if (file == null) {
+                        throw new KinveyException("FileMissing", "File Missing in cache", "");
+                    } else {
+                        FileUtils.copyStreams(new FileInputStream(f), os);
+                        return metadata;
+                    }
+                }
 
                 FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
-                fileMetadataWithPath.putAll(metadata);
+                fileMetadataWithPath.putAll(fileMetaData);
                 fileMetadataWithPath.setPath(f.getAbsolutePath());
 
                 cache.save(fileMetadataWithPath);
 
-                if (f.exists()){
+                if (f.exists()) {
                     FileUtils.copyStreams(new FileInputStream(f), os);
-                    listener.onSuccess(null);
+                    return fileMetadataWithPath;
                 }
-
-                listener.onSuccess(null);
-
                 break;
         }
+        return null;
     }
 
-    private void sendMetadata(FileMetaData metadata, DownloaderProgressListener listener){
+    private void sendMetadata(FileMetaData metadata, DownloaderProgressListener listener) {
         if (listener != null && (listener instanceof MetaDownloadProgressListener)) {
-            ((MetaDownloadProgressListener)listener).metaDataRetrieved(metadata);
+            ((MetaDownloadProgressListener) listener).metaDataRetrieved(metadata);
         }
     }
 
     private void saveCacheFile(InputStream is, FileMetadataWithPath metadata) throws IOException {
         File f = new File(cacheStorage(), metadata.getId());
-        if (!f.exists()){
+        if (!f.exists()) {
             f.createNewFile();
         }
 
@@ -438,11 +421,11 @@ public class FileStore {
         this.storeType = storeType;
     }
 
-    protected String getCacheFolder(){
+    protected String getCacheFolder() {
         return cacheFolder;
-    };
+    }
 
-    public static class FileMetadataWithPath extends FileMetaData{
+    public static class FileMetadataWithPath extends FileMetaData {
         @Key(CACHE_FILE_PATH)
         private String path;
 
