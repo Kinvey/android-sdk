@@ -64,16 +64,6 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
 
             }
-
-            @Override
-            public void onSuccess(FileMetaData result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-
-            }
         });
         HttpRequest request = upload.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
@@ -99,16 +89,6 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
                     mockContent, new UploaderProgressListener() {
                         @Override
                         public void progressChanged(MediaHttpUploader uploader) throws IOException {
-
-                        }
-
-                        @Override
-                        public void onSuccess(FileMetaData result) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
 
                         }
                     });

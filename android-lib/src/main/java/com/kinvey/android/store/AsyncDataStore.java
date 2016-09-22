@@ -214,9 +214,9 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
 
-//        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
 
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+//        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
 
     }
 

@@ -62,15 +62,6 @@ public class MediaHttpUploaderTest extends TestCase {
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
                 argValueRecorder.push(uploader.getUploadState());
             }
-
-            @Override
-            public void onSuccess(FileMetaData result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-            }
         });
         MockKinveyClientRequest<Void> initiationClientRequest = new MockKinveyClientRequest<Void>("GET", HttpTesting.SIMPLE_URL, null, Void.class);
 

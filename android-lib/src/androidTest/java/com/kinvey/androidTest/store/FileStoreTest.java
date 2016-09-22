@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.async;
+package com.kinvey.androidTest.store;
 
 import android.content.Context;
 import android.os.Looper;
@@ -12,6 +12,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.AsyncDownloaderProgressListener;
 import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -21,6 +22,7 @@ import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.UserStore;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class FileStoreAsyncTest {
+public class FileStoreTest {
 
     Client client = null;
     boolean success;
@@ -139,21 +141,25 @@ public class FileStoreAsyncTest {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
-        if (!client.userStore().isUserLoggedIn()) {
+        if (!client.isUserLoggedIn()) {
             new Thread(new Runnable() {
                 public void run() {
                     Looper.prepare();
-                    client.userStore().login(new KinveyClientCallback<User>() {
-                        @Override
-                        public void onSuccess(User result) {
-                            latch.countDown();
-                        }
+                    try {
+                        AsyncUserStore.login("test", "test", client, new KinveyClientCallback() {
+                            @Override
+                            public void onSuccess(Object result) {
 
-                        @Override
-                        public void onFailure(Throwable error) {
-                            latch.countDown();
-                        }
-                    });
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+                                latch.countDown();
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     Looper.loop();
                 }
             }).start();
