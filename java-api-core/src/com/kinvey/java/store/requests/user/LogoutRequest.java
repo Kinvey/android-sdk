@@ -16,28 +16,27 @@
 
 package com.kinvey.java.store.requests.user;
 
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * Logout Request Class.  Constructs the HTTP request object for Logout requests.
  */
 public final class LogoutRequest {
 
-    private UserStore userStore;
-    private CredentialStore store;
+    private AbstractClient client;
 
-    public LogoutRequest(UserStore userStore, CredentialStore store){
-        this.userStore = userStore;
-        this.store = store;
+    public LogoutRequest(AbstractClient client){
+        this.client = client;
     }
 
     public void execute() {
-        CredentialManager manager = new CredentialManager(this.store);
-        manager.removeCredential(userStore.getCurrentUser().getId());
-        userStore.setCurrentUser(null);
-        ((KinveyClientRequestInitializer) userStore.getClient().getKinveyRequestInitializer()).setCredential(null);
+        CredentialManager manager = new CredentialManager(client.getStore());
+        manager.removeCredential(client.getUser().getId());
+        client.setUser(null);
+        ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setCredential(null);
     }
 }

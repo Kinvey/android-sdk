@@ -22,6 +22,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.User;
 
 /**
  * Wraps the {@link com.kinvey.java.UserGroup} public methods in asynchronous functionality using native Android AsyncTask.

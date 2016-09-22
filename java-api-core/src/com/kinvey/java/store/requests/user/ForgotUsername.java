@@ -16,25 +16,15 @@
 
 package com.kinvey.java.store.requests.user;
 
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStoreRequestManager;
-
-/**
- * Created by Prots on 2/12/16.
- */
-public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson> {
-    private static final String REST_PATH = "oauth/auth";
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.dto.Email;
 
 
-    public GetMICTempURL(AbstractClient client, HttpContent content) {
-        super(client, client.getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
-        String MICApiVersion = client.getMICApiVersion();
-        if (MICApiVersion != null && MICApiVersion.length() > 0) {
-            this.uriTemplate = MICApiVersion + "/" + this.uriTemplate;
-        }
+public final class ForgotUsername extends AbstractKinveyJsonClientRequest<Void> {
+    private static final String REST_PATH = "rpc/{appKey}/user-forgot-username";
+
+    public ForgotUsername(AbstractClient client, Email email) {
+        super(client, "POST", REST_PATH, email, Void.class);
     }
 }

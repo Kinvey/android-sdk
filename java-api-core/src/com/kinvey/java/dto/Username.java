@@ -14,22 +14,21 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.dto;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.store.UserStoreRequestManager;
+import com.google.api.client.util.Key;
 
-/**
- * Created by Prots on 2/12/16.
- */
-public final class LockDownUser extends AbstractKinveyJsonClientRequest<Void> {
-    private static final String REST_PATH = "rpc/{appKey}/lockdown-user";
+public class Username extends GenericJson {
+    @Key("username")
+    private String username;
 
-    private UserStoreRequestManager userStoreRequestManager;
 
-    public LockDownUser(UserStoreRequestManager userStoreRequestManager, GenericJson lock) {
-        super(userStoreRequestManager.getClient(), "POST", REST_PATH, lock, Void.class);
-        this.userStoreRequestManager = userStoreRequestManager;
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

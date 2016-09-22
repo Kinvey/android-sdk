@@ -21,10 +21,9 @@ import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.core.KinveyJsonError;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessControlException;
@@ -76,12 +75,13 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
             } catch (AccessControlException | KinveyException e) { //TODO check Exception
                 errors.add(e);
             }
-            notify(pushResponse);
+
+//            notify(pushResponse);
 //            publishProgress(pushResponse);
+            callback.onProgress(pushResponse.getSuccessCount(), requests.size());
         }
 
         pushResponse.setListOfExceptions(errors);
         return pushResponse;
     }
-
 }

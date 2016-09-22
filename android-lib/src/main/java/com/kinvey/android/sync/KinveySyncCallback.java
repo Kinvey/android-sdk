@@ -23,16 +23,9 @@ import com.kinvey.java.core.KinveyClientCallback;
  *
  * @author edwardf
  */
-public interface KinveySyncCallback<T> extends KinveyClientCallback {
+public interface KinveySyncCallback<T> {
 
-
-    @Override
-    void onSuccess(Object result);
-
-    /**
-     * Used to indicate successful execution of a request by the background service.
-     */
-    void onSuccess();
+    void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<T> kinveyPullResponse);
 
     /**
      * Used to indicate start of pull request by background service
@@ -47,17 +40,17 @@ public interface KinveySyncCallback<T> extends KinveyClientCallback {
     /**
      * Used to indicate successfull execution of pull request by background service
      */
-    void onPullSuccess();
+    void onPullSuccess(KinveyPullResponse<T> kinveyPullResponse);
 
     /**
      * Used to indicate successfull execution of push request by background service
      */
-    void onPushSuccess();
+    void onPushSuccess(KinveyPushResponse kinveyPushResponse);
 
 
     /**
      * Used to indicate the failed execution of a request by the background service.
      */
-    @Override
+
     void onFailure(Throwable t);
 }

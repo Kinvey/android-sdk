@@ -35,6 +35,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.DataStore;
@@ -212,7 +213,11 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+
+//        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+
     }
 
     /**
@@ -430,18 +435,18 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute();
     }
 
-    public void pull(Query query, KinveyPullCallback callback){
+    public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
-        new AsyncPullRequest(this, query, callback).execute();
+        new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
-    public void pull(KinveyPullCallback callback){
+    public void pull(KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
-        new AsyncPullRequest(this, null, callback).execute();
+        new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
     public void purge(KinveyPurgeCallback callback){
@@ -485,15 +490,27 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void sync(final Query query, final KinveySyncCallback<T> callback) {
-//        callback.onPushStarted();
+        callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
-            public void onSuccess(KinveyPushResponse result) {
+
+//            public void onSuccess(KinveyPushResponse result) {
+//                AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
+//
+//                    @Override
+//                    public void onSuccess(KinveyPullResponse<T> result) {
+//                        callback.onSuccess(result);
+
+
+            public void onSuccess(final KinveyPushResponse pushResult) {
+                callback.onPushSuccess(pushResult);
+               callback.onPullStarted();
                 AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> result) {
-                        callback.onSuccess(result);
+                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                        callback.onPullSuccess(pullResult);
+                        callback.onSuccess(pushResult, pullResult);
 
                     }
 

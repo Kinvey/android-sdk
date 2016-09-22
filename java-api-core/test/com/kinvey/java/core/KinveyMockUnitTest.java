@@ -23,9 +23,8 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
-import com.google.common.base.Preconditions;
 import com.kinvey.java.*;
-import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.ClientUser;
 
 import junit.framework.TestCase;
 
@@ -33,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.kinvey.java.cache.ICacheManager;
-import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -91,45 +89,24 @@ public abstract class KinveyMockUnitTest extends TestCase {
             return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
-        @Override
-        public ClientUsers getClientUsers() {
-            return new ClientUsers() {
-				
-				@Override
-				public void switchUser(String userID) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void setCurrentUser(String userID) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void removeUser(String userID) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public String getCurrentUserType() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public String getCurrentUser() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public void addUser(String userID, String type) {
-					// TODO Auto-generated method stub
-					
-				}
+        public ClientUser getClientUser() {
+            return new ClientUser() {
+
+                @Override
+                public void setUser(String userID) {
+                    // TODO Auto-generated method stub
+                }
+
+                @Override
+                public String getUser() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public void clear() {
+                    // TODO Auto-generated method stub
+                }
 			};
         }
 

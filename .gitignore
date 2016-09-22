@@ -12,3 +12,4 @@ release/zipped
 .idea
 .gradle/
 .iml
+local.properties

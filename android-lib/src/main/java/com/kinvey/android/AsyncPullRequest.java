@@ -19,9 +19,8 @@ package com.kinvey.android;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.store.DataStore;
-import com.kinvey.java.sync.SyncManager;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
     private final DataStore store;
     private Query query;
-    private KinveyPullCallback callback;
 
     /**
      * Async pull request constructor
@@ -42,19 +40,12 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
      */
     public AsyncPullRequest(DataStore store,
                             Query query,
-                            KinveyPullCallback callback){
+                            KinveyPullCallback<T> callback){
         super(callback);
         this.query = query;
         this.store = store;
-        this.callback = callback;
     }
 
-/*    @Override
-    protected void onPostExecute(KinveyPullResponse<T> response) {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
-        kinveyPullResponse.setResult(response.getResult());
-        callback.onSuccess(kinveyPullResponse);
-    }*/
 
     @Override
     protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {

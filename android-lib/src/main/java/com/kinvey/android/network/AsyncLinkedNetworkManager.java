@@ -21,6 +21,7 @@ import com.kinvey.android.AndroidMimeTypeFinder;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.dto.User;
 import com.kinvey.java.network.LinkedNetworkManager;
 import com.kinvey.java.Query;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
@@ -162,7 +163,6 @@ public class AsyncLinkedNetworkManager<T extends LinkedGenericJson> extends Link
     public void save(T entity, KinveyClientCallback<T> callback, UploaderProgressListener upload) {
         new Save(entity, callback, upload, null).execute();
     }
-
 
 
 
