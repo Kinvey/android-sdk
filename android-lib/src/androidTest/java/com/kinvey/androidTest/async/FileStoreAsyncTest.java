@@ -185,7 +185,7 @@ public class FileStoreAsyncTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getMessage(), "file must not be null");
+        assertEquals(listener.error.getCause().getMessage(), "file must not be null");
     }
 
     @Test
@@ -227,7 +227,7 @@ public class FileStoreAsyncTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getMessage(), "metadata must not be null");
+        assertEquals(listener.error.getCause().getMessage(), "metadata must not be null");
     }
 
     @Test
@@ -593,7 +593,7 @@ public class FileStoreAsyncTest {
         final CountDownLatch latch = new CountDownLatch(1);
         DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
 
-        uploadFile(StoreType.NETWORK, listener, testFile(), testMetadata());
+        uploadFile(StoreType.CACHE, listener, testFile(), testMetadata());
         latch.await();
         assertNotNull(listener.fileMetaDataResult);
         find(StoreType.CACHE, listener.fileMetaDataResult, false);
@@ -676,6 +676,6 @@ public class FileStoreAsyncTest {
         latch.await();
         assertNotNull(listener.fileMetaDataResult);
         client.getFileStore(StoreType.SYNC).clearCache();
-        find(StoreType.SYNC, listener.fileMetaDataResult, false);
+        find(StoreType.SYNC, listener.fileMetaDataResult, true);
     }
 }
