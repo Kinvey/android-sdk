@@ -250,7 +250,6 @@ public class FileStore {
         } else {
             for (FileMetaData meta : resultMetadata) {
                 getFile(meta, new FileOutputStream(new File(cacheStorage(), meta.getId())), progressListener);
-                getNetworkFile(meta, dst, progressListener);
             }
         }
         return resultMetadata;
