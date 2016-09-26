@@ -16,7 +16,6 @@
 
 package com.kinvey.android.store;
 
-import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.Query;
@@ -26,7 +25,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 
 import java.io.File;
@@ -39,7 +38,7 @@ import java.util.HashMap;
 /**
  * Created by Prots on 2/22/16.
  */
-public class AsyncFileStore extends FileStore {
+public class FileStore extends BaseFileStore {
 
 
 
@@ -62,33 +61,33 @@ public class AsyncFileStore extends FileStore {
         try {
             //UPLOAD METHODS
             asyncMethods.put(FileMethods.UPLOAD_FILE,
-                    FileStore.class.getDeclaredMethod("upload", File.class, UploaderProgressListener.class));
+                    BaseFileStore.class.getDeclaredMethod("upload", File.class, UploaderProgressListener.class));
             asyncMethods.put(FileMethods.UPLOAD_FILE_METADATA,
-                    FileStore.class.getDeclaredMethod("upload", File.class,
+                    BaseFileStore.class.getDeclaredMethod("upload", File.class,
                             FileMetaData.class,
                             UploaderProgressListener.class));
             asyncMethods.put(FileMethods.UPLOAD_STREAM_METADATA,
-                    FileStore.class.getDeclaredMethod("upload", InputStream.class,
+                    BaseFileStore.class.getDeclaredMethod("upload", InputStream.class,
                             FileMetaData.class,
                             UploaderProgressListener.class));
             asyncMethods.put(FileMethods.UPLOAD_STREAM_FILENAME,
-                    FileStore.class.getDeclaredMethod("upload", String.class,
+                    BaseFileStore.class.getDeclaredMethod("upload", String.class,
                             InputStream.class,
                             UploaderProgressListener.class));
 
             //DELETE METHODS
 
             asyncMethods.put(FileMethods.DELETE_ID,
-                    FileStore.class.getDeclaredMethod("delete", String.class));
+                    BaseFileStore.class.getDeclaredMethod("delete", String.class));
 
             //DOWNLOAD METHODS
             asyncMethods.put(FileMethods.DOWNLOAD_FILENAME,
-                    FileStore.class.getDeclaredMethod("download", String.class, String.class, DownloaderProgressListener.class));
+                    BaseFileStore.class.getDeclaredMethod("download", String.class, String.class, DownloaderProgressListener.class));
 
             asyncMethods.put(FileMethods.DOWNLOAD_METADATA,
-                    FileStore.class.getDeclaredMethod("download", FileMetaData.class, OutputStream.class, DownloaderProgressListener.class));
+                    BaseFileStore.class.getDeclaredMethod("download", FileMetaData.class, OutputStream.class, DownloaderProgressListener.class));
             asyncMethods.put(FileMethods.DOWNLOAD_QUERY,
-                    FileStore.class.getDeclaredMethod("download", Query.class, String.class, DownloaderProgressListener.class));
+                    BaseFileStore.class.getDeclaredMethod("download", Query.class, String.class, DownloaderProgressListener.class));
 
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -97,8 +96,8 @@ public class AsyncFileStore extends FileStore {
 
 
 
-    public AsyncFileStore(NetworkFileManager networkFileManager,
-                          ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
+    public FileStore(NetworkFileManager networkFileManager,
+                     ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
         super(networkFileManager, cacheManager, ttl, storeType, cacheFolder);
     }
 

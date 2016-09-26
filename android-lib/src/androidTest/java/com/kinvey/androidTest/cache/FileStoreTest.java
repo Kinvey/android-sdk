@@ -5,8 +5,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.store.AsyncFileStore;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.FileStore;
+import com.kinvey.android.store.UserStore;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
@@ -14,9 +14,8 @@ import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStoreRequestManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,13 +43,13 @@ public class FileStoreTest {
         Client.Builder builder = new Client.Builder(InstrumentationRegistry.getContext());
         client = builder.build();
         if (!client.isUserLoggedIn()) {
-            AsyncUserStore.login(client, User.class);
+            UserStore.login(client, User.class);
         }
     }
     @Test
     public void testUpload() throws IOException {
 
-        FileStore fileStore = client.getFileStore(StoreType.CACHE);
+        BaseFileStore fileStore = client.getFileStore(StoreType.CACHE);
 
         File test = new File(client.getContext().getFilesDir(), "test.xml");
         if (!test.exists()){
@@ -84,7 +83,7 @@ public class FileStoreTest {
     public void testUploadAndGet() throws IOException {
 
         for (StoreType storeType : StoreType.values()){
-            FileStore fileStore = client.getFileStore(storeType);
+            BaseFileStore fileStore = client.getFileStore(storeType);
             fileStore.setStoreType(storeType);
 
             File test = new File(client.getContext().getFilesDir(), "test"+storeType.toString()+".xml");
@@ -150,7 +149,7 @@ public class FileStoreTest {
 
     @Test
     public void asyncCallsShouldNotFail() throws IOException {
-        AsyncFileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = client.getFileStore(StoreType.SYNC);
 
         File test = new File(client.getContext().getFilesDir(), "test.xml");
         if (!test.exists()){

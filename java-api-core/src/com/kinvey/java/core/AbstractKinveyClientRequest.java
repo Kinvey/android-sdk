@@ -28,9 +28,6 @@ import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
-import com.kinvey.java.dto.User;
-import com.kinvey.java.store.FileCache;
-import com.kinvey.java.store.UserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**

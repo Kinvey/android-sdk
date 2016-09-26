@@ -10,7 +10,7 @@ import com.kinvey.java.dto.User;
 
 import java.io.IOException;
 
-public abstract class UserStore {
+public abstract class BaseUserStore {
 
     public static User signUp(String userId, String password, AbstractClient client) throws IOException {
         return new UserStoreRequestManager(client, createBuilder(client)).createBlocking(userId, password).execute();
