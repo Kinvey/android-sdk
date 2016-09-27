@@ -17,6 +17,7 @@ package com.kinvey.java.core;
 
 import java.io.*;
 import java.net.UnknownHostException;
+import java.util.Locale;
 
 import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
@@ -292,9 +293,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 || requestMethod.equals(HttpMethods.PUT))) {
             httpRequest.setContent(new EmptyContent());
         }
-        httpRequest.getHeaders().putAll(requestHeaders);
+        for (Entry<String, Object> entry: requestHeaders.entrySet()) {
+            httpRequest.getHeaders().set(entry.getKey().toLowerCase(Locale.US), entry.getValue());
+        }
         if (httpRequest.getHeaders().containsKey("x-kinvey-custom-request-properties")){
-        	String customHeaders = (String) httpRequest.getHeaders().get("X-Kinvey-Custom-Request-Properties");
+        	String customHeaders = (String) httpRequest.getHeaders().get("x-kinvey-custom-request-properties");
         	if (customHeaders.getBytes("UTF-8").length > 2000){
         		throw new KinveyException(KinveyClientErrorCode.RequestError, "Cannot attach more than 2000 bytes of Custom Request Properties");
         	}
