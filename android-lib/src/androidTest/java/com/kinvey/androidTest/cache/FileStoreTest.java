@@ -43,11 +43,11 @@ public class FileStoreTest {
     public void setUp() throws IOException {
         Client.Builder builder = new Client.Builder(InstrumentationRegistry.getContext());
         client = builder.build();
-        if (!client.isUserLoggedIn()) {
-            AsyncUserStore.login(client, User.class);
-        }
+//        if (!client.isUserLoggedIn()) {
+//            AsyncUserStore.login(client, User.class);
+//        }
     }
-    @Test
+    /*@Test
     public void testUpload() throws IOException {
 
         FileStore fileStore = client.getFileStore(StoreType.CACHE);
@@ -198,7 +198,7 @@ public class FileStoreTest {
         fileStore.upload("test.xml", new FileInputStream(test), metaCallback, progress);
 
 
-    }
+    }*/
 
 
 }
