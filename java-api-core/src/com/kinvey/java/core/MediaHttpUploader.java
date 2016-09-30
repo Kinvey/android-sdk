@@ -34,6 +34,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.api.client.http.AbstractInputStreamContent;
@@ -342,10 +343,10 @@ public class MediaHttpUploader {
                 // then it's a list
 				if (curHeader.contains(", ")) {
 					String[] listheaders = curHeader.split(", ");
-					currentRequest.getHeaders().put(header,
+					currentRequest.getHeaders().put(header.toLowerCase(Locale.US),
 							Arrays.asList(listheaders));
 				} else {
-					currentRequest.getHeaders().put(header, curHeader);
+					currentRequest.getHeaders().put(header.toLowerCase(Locale.US), curHeader);
 				}
 			}
 		}

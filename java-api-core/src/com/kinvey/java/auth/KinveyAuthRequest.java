@@ -32,6 +32,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.Locale;
 
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyHeaders;
@@ -196,7 +197,9 @@ public class KinveyAuthRequest extends GenericJson {
                 .setBackOffPolicy(policy)
                 .setRetryOnExecuteIOException(true);
         if (kinveyHeaders != null) {
-            request.getHeaders().putAll(kinveyHeaders);
+            for (Entry<String, Object>  entry: kinveyHeaders.entrySet()){
+                request.getHeaders().set(entry.getKey().toLowerCase(Locale.US), entry.getValue());
+            }
         }
 
         try {
