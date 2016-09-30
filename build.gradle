@@ -127,7 +127,7 @@ task prepSecure{
 
 
 
-task release(dependsOn: ['prepCore', /*'prepJava',*/ 'prepAndroid', 'prepSecure', 'makeAndroidJar', 'copyAndroid', /*'copyJava',*/ 'zipAndroid', /*'zipJava'*/]){
+task release(dependsOn: ['prepCore', /*'prepJava',*/ 'prepAndroid'/*, 'prepSecure'*/, 'makeAndroidJar', 'copyAndroid', /*'copyJava',*/ 'zipAndroid', /*'zipJava'*/]){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 
@@ -136,7 +136,7 @@ prepAndroid.mustRunAfter prepCore
 //prepJava.mustRunAfter prepAndroid
 //prepSecure.mustRunAfter prepJava
 prepSecure.mustRunAfter prepAndroid
-makeAndroidJar.mustRunAfter prepSecure
+//makeAndroidJar.mustRunAfter prepSecure
 copyAndroid.mustRunAfter makeAndroidJar
 //copyJava.mustRunAfter copyAndroid
 //zipAndroid.mustRunAfter copyJava
