@@ -18,6 +18,7 @@ import com.google.api.client.util.Key;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
@@ -44,7 +45,7 @@ public class DataStoreTest {
     public void setUp() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        personAsyncDataStore = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        personAsyncDataStore = client.dataStore(Person.COLLECTION, Person.class, StoreType.CACHE);
         final CountDownLatch latch = new CountDownLatch(1);
         if (!client.isUserLoggedIn()) {
             new Thread(new Runnable() {
@@ -54,7 +55,7 @@ public class DataStoreTest {
                         AsyncUserStore.login("test", "test", client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
-
+                                latch.countDown();
                             }
 
                             @Override
@@ -73,6 +74,7 @@ public class DataStoreTest {
         }
         latch.await();
     }
+
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<Person> {
 
@@ -109,7 +111,9 @@ public class DataStoreTest {
     }
 
 
-    private void save(final Person person, final DefaultKinveyClientCallback callback) {
+    private DefaultKinveyClientCallback save(final Person person) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -117,12 +121,6 @@ public class DataStoreTest {
                 Looper.loop();
             }
         }).start();
-    }
-
-    private DefaultKinveyClientCallback save(Person person) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
-        save(person, callback);
         latch.await();
         return callback;
     }
@@ -138,31 +136,5 @@ public class DataStoreTest {
     }
 
 
-    private class Person extends GenericJson {
-
-        static final String COLLECTION = "Persons";
-
-        @Key
-        private String name;
-
-        @Key
-        private String age;
-
-        public String getName() {
-            return name;
-        }
-
-        void setName(String name) {
-            this.name = name;
-        }
-
-        public String getAge() {
-            return age;
-        }
-
-        public void setAge(String age) {
-            this.age = age;
-        }
-    }
 }
 
