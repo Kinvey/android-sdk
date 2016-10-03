@@ -33,13 +33,11 @@ import com.google.api.client.util.Key;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.UserStore;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
-import com.kinvey.java.store.UserStoreRequestManager;
 
 
 /**
@@ -140,7 +138,7 @@ public class GCMPush extends AbstractPush {
             client.push().enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	AsyncUserStore.retrieve(client, new KinveyUserCallback<User>() {
+                	UserStore.retrieve(client, new KinveyUserCallback<User>() {
 						
 						@Override
 						public void onSuccess(User result) {

@@ -26,7 +26,7 @@ import com.kinvey.java.Logger;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 
 /**
@@ -112,7 +112,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
 
                 entity.getFile(key).setOutput(new ByteArrayOutputStream());
 
-                FileStore store = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
+                BaseFileStore store = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
 
                 FileMetaData meta = new FileMetaData();
                 if (((Map) entity.get(key)).containsKey("_id")){

@@ -34,7 +34,6 @@ import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
-import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
@@ -42,10 +41,9 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.store.DataStore;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseDataStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.sync.SyncManager;
 
 /**
@@ -484,15 +482,10 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public abstract ICacheManager getCacheManager();
 
-    public <T extends GenericJson> DataStore<T> dataStore(String collection,
-                                                          Class<T> clazz, StoreType storeType){
-        return new DataStore<T>(this, collection, clazz, storeType);
-    }
-
     public abstract String getFileCacheFolder();
 
-    public FileStore getFileStore(StoreType storeType){
-        return new FileStore(new NetworkFileManager(this),
+    public BaseFileStore getFileStore(StoreType storeType){
+        return new BaseFileStore(new NetworkFileManager(this),
                 getCacheManager(), 60*1000*1000L,
                 storeType, getFileCacheFolder());
     }

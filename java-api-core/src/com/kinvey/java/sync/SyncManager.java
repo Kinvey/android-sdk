@@ -25,7 +25,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.dto.SyncCollections;
 import com.kinvey.java.sync.dto.SyncRequest;
@@ -161,8 +161,7 @@ public class SyncManager {
             e.printStackTrace();
         }
 
-
-        DataStore networkDataStore = client.dataStore(request.getCollectionName(), GenericJson.class, StoreType.NETWORK);
+        BaseDataStore networkDataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
 
         if (request.getHttpVerb().equals(SyncRequest.HttpVerb.PUT) || request.getHttpVerb().equals((SyncRequest.HttpVerb.POST))) {
 

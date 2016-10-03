@@ -46,7 +46,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 
-public class FileStore {
+public class BaseFileStore {
 
     private static final String CACHE_FILE_PATH = "KinveyCachePath";
 
@@ -57,7 +57,7 @@ public class FileStore {
     private final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
-    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
+    public BaseFileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
 
         this.networkFileManager = networkFileManager;
         this.cacheManager = cacheManager;
