@@ -13,13 +13,12 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
 
@@ -27,11 +26,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -45,7 +46,6 @@ public class DataStoreTest {
     public void setUp() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        personAsyncDataStore = client.dataStore(Person.COLLECTION, Person.class, StoreType.CACHE);
         final CountDownLatch latch = new CountDownLatch(1);
         if (!client.isUserLoggedIn()) {
             new Thread(new Runnable() {
@@ -128,6 +128,7 @@ public class DataStoreTest {
 
     @Test
     public void testSave() throws InterruptedException {
+        personAsyncDataStore = client.dataStore(Person.COLLECTION, Person.class, StoreType.CACHE);
         String personName = "TestName";
         DefaultKinveyClientCallback callback = save(createPerson(personName));
         assertNotNull(callback.result);
@@ -136,5 +137,34 @@ public class DataStoreTest {
     }
 
 
+    @Test
+    public void testCustomTag() {
+        String path = client.getContext().getFilesDir().getAbsolutePath();
+        String customPath = path + "/_baas.kinvey.com_-1";
+        removeFiles(customPath);
+        File file = new File(customPath);
+        assertFalse(file.exists());
+        personAsyncDataStore = client.dataStore(Person.COLLECTION, Person.class, StoreType.CACHE);
+        assertTrue(file.exists());
+        removeFiles(customPath);
+        assertFalse(file.exists());
+    }
+
+    private void removeFiles(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+        String lockPath = path.concat(".lock");
+        file = new File(lockPath);
+        if (file.exists()) {
+            file.delete();
+        }
+        String logPath = path.concat(".management");
+        file = new File(logPath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 }
 
