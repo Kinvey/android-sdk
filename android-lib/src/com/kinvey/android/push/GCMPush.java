@@ -293,7 +293,7 @@ public class GCMPush extends AbstractPush {
     public void disablePush(KinveyClientCallback callback) {
      	if (getClient() == null || getClient().getContext() == null){
             if (callback != null){
-                callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestAbortError););
+                callback.onFailure(new KinveyException(KinveyClientErrorCode.RequestAbortError));
             }
     		return;
     	}

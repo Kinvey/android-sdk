@@ -102,7 +102,6 @@ dependencies {
 }
 
 task docgen(type: Javadoc) {
-    
 
     source = android.sourceSets.main.java.srcDirs
 
@@ -112,7 +111,7 @@ task docgen(type: Javadoc) {
     classpath = configurations.classpaths + configurations.compile + configurations.testCompile
     title = null
 
-    options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
+    options.bootClasspath (file((System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")), file((System.getenv('ANDROID_HOME') + "platforms/android-10/android.jar")))
     options.overview = "javadoc/overview.html"
 
     options.addStringOption("quiet")
@@ -120,6 +119,8 @@ task docgen(type: Javadoc) {
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android/reference/api/java/reference/")
     options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
+    options.addStringOption("federate android", "http://d.android.com/reference")
+    options.addStringOption("federationxml android", "../tools/doclava_api/android-9.xml")
     //options.addStringOption("d", "target/apidocs")
     options.addStringOption("d", "../../../devcenter/content/reference/android/api")
 }
