@@ -1,9 +1,7 @@
 package com.kinvey.androidTest.store;
 
 /**
- *
  * Created by Prots on 30/09/2016.
- *
  */
 
 import android.content.Context;
@@ -12,7 +10,11 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.LowLevelHttpResponse;
@@ -24,6 +26,7 @@ import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncUserStore;
 import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.model.Person;
@@ -92,7 +95,7 @@ public class DataStoreTest {
         Person result;
         Throwable error;
 
-        DefaultKinveyClientCallback(CountDownLatch latch){
+        DefaultKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -118,7 +121,7 @@ public class DataStoreTest {
         private CountDownLatch latch;
         Throwable error;
 
-        DefaultKinveyPurgeCallback(CountDownLatch latch){
+        DefaultKinveyPurgeCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -145,7 +148,7 @@ public class DataStoreTest {
         KinveyPullResponse<Person> kinveyPullResponse;
         Throwable error;
 
-        DefaultKinveySyncCallback(CountDownLatch latch){
+        DefaultKinveySyncCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -187,6 +190,37 @@ public class DataStoreTest {
         }
     }
 
+    private static class DefaultKinveyPushCallback implements KinveyPushCallback {
+
+        private CountDownLatch latch;
+        KinveyPushResponse result;
+        Throwable error;
+
+        DefaultKinveyPushCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(KinveyPushResponse result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        @Override
+        public void onProgress(long current, long all) {
+
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
 
     private Person createPerson(String name) {
         Person person = new Person();
@@ -229,7 +263,7 @@ public class DataStoreTest {
         removeFiles(customPath);
         File file = new File(customPath);
         assertFalse(file.exists());
-        AsyncDataStore<Person>  store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
         assertTrue(file.exists());
     }
 
@@ -282,7 +316,7 @@ public class DataStoreTest {
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
-        assertNull(purgeCallback.error);
+        assertNotNull(purgeCallback.error);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
 
@@ -297,25 +331,34 @@ public class DataStoreTest {
                     @Override
                     public LowLevelHttpResponse execute() throws IOException {
                         MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+
+                        /*
                         try {
-                            Thread.sleep(60*1000);
+                            Thread.sleep(60 * 1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                        }
+                        }*/
                         return response;
                     }
                 };
             }
         };
 
+/*        final ChangeTimeout changeTimeout = new ChangeTimeout();
+        HttpRequestInitializer initializer = new HttpRequestInitializer() {
+            public void initialize(HttpRequest request) {
+                changeTimeout.initialize(request);
+            }
+        };*/
+
+        client = new Client.Builder(client.getContext(), transport).build();
 
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+
         Person person = createPerson("PersonForTestPurge");
         save(store, person);
         person.setAge("25");
         save(store, person);
-
-        client = new Client.Builder(client.getContext(), transport).build();
 
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
         assertNotNull(purgeCallback.error);
@@ -347,6 +390,78 @@ public class DataStoreTest {
         assertNotNull(syncCallback.kinveyPullResponse);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
+
+    @Test
+    public void testSyncInvalidDataStoreType() throws InterruptedException {
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        save(store, createPerson("PersonForTestPurge"));
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        DefaultKinveySyncCallback syncCallback = sync(store);
+        assertNotNull(syncCallback.error);
+        assertNull(syncCallback.kinveyPushResponse);
+        assertNull(syncCallback.kinveyPullResponse);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    //TODO uncomment
+/*    @Test
+    public void testSyncTimeoutError() {
+
+    }*/
+
+    //TODO uncomment
+/*    @Test
+    public void testSyncNoCompletionHandler() {
+
+    }*/
+
+    private DefaultKinveyPushCallback push(final AsyncDataStore<Person> store) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                store.push(callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
+    @Test
+    public void testPush() throws InterruptedException {
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        save(store, createPerson("PersonForTestPush"));
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        DefaultKinveyPushCallback syncCallback = push(store);
+        assertNull(syncCallback.error);
+        assertNotNull(syncCallback.result);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    //TODO check
+    @Test
+    public void testPushInvalidDataStoreType() throws InterruptedException {
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        save(store, createPerson("PersonForTestPush"));
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        DefaultKinveyPushCallback syncCallback = push(store);
+        assertNotNull(syncCallback.error);
+        assertNull(syncCallback.result);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
+
+
+
+/*    class ChangeTimeout implements HttpRequestInitializer {
+        public void initialize(HttpRequest request) {
+            request.setConnectTimeout(5000);
+            request.setReadTimeout(5000);
+        }
+    }*/
+
+
 
 }
 
