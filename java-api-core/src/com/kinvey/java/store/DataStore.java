@@ -255,7 +255,7 @@ public class DataStore<T extends GenericJson> {
      * @param query query to pull the objects
      */
     public void syncBlocking(Query query) {
-        pus hBlocking();
+        pushBlocking();
         pullBlocking(query);
     }
 
