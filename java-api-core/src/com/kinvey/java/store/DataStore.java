@@ -224,6 +224,7 @@ public class DataStore<T extends GenericJson> {
      * should be user with {@link StoreType#SYNC}
      */
     public void pushBlocking() {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new PushRequest<T>(collection, client).execute();
@@ -234,7 +235,8 @@ public class DataStore<T extends GenericJson> {
      * should be user with {@link StoreType#SYNC}
      */
     public List<T> pullBlocking(Query query) {
-            Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         List<T> networkData = null;
         try {
@@ -253,11 +255,12 @@ public class DataStore<T extends GenericJson> {
      * @param query query to pull the objects
      */
     public void syncBlocking(Query query) {
-        pushBlocking();
+        pus hBlocking();
         pullBlocking(query);
     }
 
     public void purge(){
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSycManager().clear(collectionName);
