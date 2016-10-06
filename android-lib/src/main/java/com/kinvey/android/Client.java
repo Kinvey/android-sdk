@@ -19,6 +19,7 @@ package com.kinvey.android;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -630,6 +631,18 @@ public class Client extends AbstractClient {
 
         }
 
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.kinvey.java.core.AbstractKinveyJsonClient.Builder#
+         * setHttpRequestInitializer
+         * (com.google.api.client.http.HttpRequestInitializer)
+         */
+        @Override
+        public Builder setHttpRequestInitializer(
+                HttpRequestInitializer httpRequestInitializer) {
+            return (Builder) super.setHttpRequestInitializer(httpRequestInitializer);
+        }
 
         /**
          * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
@@ -751,7 +764,7 @@ public class Client extends AbstractClient {
          * which contains factory methods for accessing various functionality.
          */
         @Override
-        public Client build() {
+        public Client build(){
 
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
@@ -938,44 +951,31 @@ public class Client extends AbstractClient {
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
-            new AsyncTask<Void, Void, User>(){
 
-                private Exception error = null;
-                @Override
-                protected User doInBackground(Void... voids) {
-                    User result = null;
-                    try{
-                        result = UserStore.convenience(client);
-                        client.setUser(result);
-                    }catch (Exception error){
-                        this.error = error;
-                        if ((error instanceof HttpResponseException)) {
-                            try {
-                                UserStore.logout(client);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    return result;
-                }
-
-                @Override
-                protected void onPostExecute(User response) {
-                    if(retrieveUserCallback == null){
-                        return;
-                    }
-
-                    if(error != null){
-                        retrieveUserCallback.onFailure(error);
-                    }else{
-                        retrieveUserCallback.onSuccess(response);
+            User result = null;
+            Exception exception = null;
+            try{
+                result = UserStore.convenience(client);
+                client.setUser(result);
+            }catch (Exception error){
+                exception = error;
+                if ((error instanceof HttpResponseException)) {
+                    try {
+                        UserStore.logout(client);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
+            if(retrieveUserCallback == null){
+                return;
+            }
 
-            }.execute();
-
-
+            if(exception != null){
+                retrieveUserCallback.onFailure(exception);
+            }else{
+                retrieveUserCallback.onSuccess(result);
+            }
 
         }
 
