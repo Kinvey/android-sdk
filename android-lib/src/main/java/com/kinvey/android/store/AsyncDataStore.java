@@ -428,7 +428,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
-        new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, callback).execute();
+        new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, storeType, callback).execute();
     }
 
     public void pull(Query query, KinveyPullCallback<T> callback) {

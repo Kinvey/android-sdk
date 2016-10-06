@@ -16,12 +16,14 @@
 
 package com.kinvey.android.async;
 
+import com.google.api.client.util.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
@@ -39,6 +41,7 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
     private final SyncManager manager;
     private List<SyncRequest> requests = null;
     private final AbstractClient client;
+    private StoreType storeType;
     private KinveyPushCallback callback;
 
     /**
@@ -52,16 +55,19 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
     public AsyncPushRequest(String collection,
                             SyncManager manager,
                             AbstractClient client,
+                            StoreType storeType,
                             KinveyPushCallback callback) {
         super(callback);
         this.collection = collection;
         this.manager = manager;
         this.client = client;
+        this.storeType = storeType;
         this.callback = callback;
     }
 
     @Override
     protected KinveyPushResponse executeAsync() throws IOException, InvocationTargetException {
+        com.google.common.base.Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         KinveyPushResponse pushResponse = new KinveyPushResponse();
         List<Exception> errors = new ArrayList<>();
         requests = manager.popSingleQueue(collection);
