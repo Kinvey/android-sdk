@@ -45,7 +45,7 @@ public class DataStore<T extends GenericJson> {
 
     protected final AbstractClient client;
     private final String collection;
-    private StoreType storeType;
+    protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
     NetworkManager<T> networkManager;
@@ -234,19 +234,15 @@ public class DataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public List<T> pullBlocking(Query query) {
+    public List<T> pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         List<T> networkData = null;
-        try {
-            query = query == null ? client.query() : query;
-            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
-            cache.delete(query);
-            cache.save(networkData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        query = query == null ? client.query() : query;
+        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
+        cache.delete(query);
+        cache.save(networkData);
         return networkData;
     }
 
@@ -254,12 +250,12 @@ public class DataStore<T extends GenericJson> {
      * Run sync operation to sync local and network storages
      * @param query query to pull the objects
      */
-    public void syncBlocking(Query query) {
+    public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
     }
 
-    public void purge(){
+    public void purge() throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");

@@ -10,17 +10,9 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.LowLevelHttpRequest;
-import com.google.api.client.http.LowLevelHttpResponse;
-import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.http.MockLowLevelHttpRequest;
-import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.store.AsyncDataStore;
@@ -40,6 +32,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertFalse;
@@ -56,7 +49,7 @@ public class DataStoreTest {
 
 
     @Before
-    public void setUp() throws InterruptedException {
+    public void setUp() throws InterruptedException, IOException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -322,36 +315,17 @@ public class DataStoreTest {
 
 
     @Test
-    public void testPurgeTimeoutError() throws InterruptedException {
-
-        HttpTransport transport = new MockHttpTransport() {
-            @Override
-            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
-                return new MockLowLevelHttpRequest() {
-                    @Override
-                    public LowLevelHttpResponse execute() throws IOException {
-                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
-
-                        /*
-                        try {
-                            Thread.sleep(60 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }*/
-                        return response;
-                    }
-                };
+    public void testPurgeTimeoutError() throws InterruptedException, IOException {
+        final ChangeTimeout changeTimeout = new ChangeTimeout();
+        HttpRequestInitializer initializer = new HttpRequestInitializer() {
+            public void initialize(HttpRequest request) throws SocketTimeoutException {
+                changeTimeout.initialize(request);
             }
         };
 
-/*        final ChangeTimeout changeTimeout = new ChangeTimeout();
-        HttpRequestInitializer initializer = new HttpRequestInitializer() {
-            public void initialize(HttpRequest request) {
-                changeTimeout.initialize(request);
-            }
-        };*/
-
-        client = new Client.Builder(client.getContext(), transport).build();
+        client = new Client.Builder(client.getContext())
+                .setHttpRequestInitializer(initializer)
+                .build();
 
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
 
@@ -362,6 +336,8 @@ public class DataStoreTest {
 
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
         assertNotNull(purgeCallback.error);
+        assertNotNull(purgeCallback.error.getCause());
+        assertTrue(purgeCallback.error.getCause().getClass() == SocketTimeoutException.class);
     }
 
 
@@ -440,7 +416,7 @@ public class DataStoreTest {
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
 
-    //TODO check
+
     @Test
     public void testPushInvalidDataStoreType() throws InterruptedException {
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
@@ -454,13 +430,11 @@ public class DataStoreTest {
 
 
 
-/*    class ChangeTimeout implements HttpRequestInitializer {
-        public void initialize(HttpRequest request) {
-            request.setConnectTimeout(5000);
-            request.setReadTimeout(5000);
+    class ChangeTimeout implements HttpRequestInitializer {
+        public void initialize(HttpRequest request) throws SocketTimeoutException {
+            throw new SocketTimeoutException();
         }
-    }*/
-
+    }
 
 
 }
