@@ -17,6 +17,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.store.AsyncDataStore;
 import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -164,12 +166,12 @@ public class DataStoreTest {
 
         @Override
         public void onPullSuccess(KinveyPullResponse<Person> kinveyPullResponse) {
-
+            this.kinveyPullResponse = kinveyPullResponse;
         }
 
         @Override
         public void onPushSuccess(KinveyPushResponse kinveyPushResponse) {
-
+            this.kinveyPushResponse = kinveyPushResponse;
         }
 
         @Override
@@ -208,6 +210,33 @@ public class DataStoreTest {
         @Override
         public void onProgress(long current, long all) {
 
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class DefaultKinveyPullCallback implements KinveyPullCallback<Person> {
+
+        private CountDownLatch latch;
+        KinveyPullResponse<Person> result;
+        Throwable error;
+
+        DefaultKinveyPullCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(KinveyPullResponse<Person> result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
         }
 
         void finish() {
@@ -344,7 +373,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveySyncCallback sync(final AsyncDataStore<Person> store) throws InterruptedException {
+    private DefaultKinveySyncCallback sync(final AsyncDataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
         new Thread(new Runnable() {
@@ -354,7 +383,7 @@ public class DataStoreTest {
                 Looper.loop();
             }
         }).start();
-        latch.await();
+        latch.await(seconds, TimeUnit.SECONDS);
         return callback;
     }
 
@@ -364,7 +393,7 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
-        DefaultKinveySyncCallback syncCallback = sync(store);
+        DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNull(syncCallback.error);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
@@ -377,7 +406,7 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveySyncCallback syncCallback = sync(store);
+        DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNotNull(syncCallback.error);
         assertNull(syncCallback.kinveyPushResponse);
         assertNull(syncCallback.kinveyPullResponse);
@@ -385,18 +414,41 @@ public class DataStoreTest {
     }
 
 
-/*    @Test
-    public void testSyncTimeoutError() {
+    @Test
+    public void testSyncTimeoutError() throws InterruptedException {
+        final ChangeTimeout changeTimeout = new ChangeTimeout();
+        HttpRequestInitializer initializer = new HttpRequestInitializer() {
+            public void initialize(HttpRequest request) throws SocketTimeoutException {
+                changeTimeout.initialize(request);
+            }
+        };
+        client = new Client.Builder(client.getContext())
+                .setHttpRequestInitializer(initializer)
+                .build();
+        client.getSycManager().clear(Person.COLLECTION);
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        Person person = createPerson("PersonForTestSyncTimeOut");
+        save(store, person);
+        DefaultKinveySyncCallback syncCallback = sync(store, 120);
+        assertNotNull(syncCallback.error);
+        assertTrue(syncCallback.error.getClass() == SocketTimeoutException.class);
+    }
 
-    }*/
 
-    //TODO uncomment
-/*    @Test
-    public void testSyncNoCompletionHandler() {
+    @Test
+    public void testSyncNoCompletionHandler() throws InterruptedException {
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        client.getSycManager().clear(Person.COLLECTION);
+        save(store, createPerson("PersonForSyncNoCompletionHandler"));
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        DefaultKinveySyncCallback syncCallback = sync(store, 60);
+        assertFalse(syncCallback.error == null && syncCallback.kinveyPullResponse == null && syncCallback.kinveyPushResponse == null);
+        assertNotNull(syncCallback.kinveyPushResponse);
+        assertNotNull(syncCallback.kinveyPullResponse);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
 
-    }*/
-
-    private DefaultKinveyPushCallback push(final AsyncDataStore<Person> store) throws InterruptedException {
+    private DefaultKinveyPushCallback push(final AsyncDataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
         new Thread(new Runnable() {
@@ -406,7 +458,7 @@ public class DataStoreTest {
                 Looper.loop();
             }
         }).start();
-        latch.await();
+        latch.await(seconds, TimeUnit.SECONDS);
         return callback;
     }
 
@@ -416,9 +468,9 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPush"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
-        DefaultKinveyPushCallback syncCallback = push(store);
-        assertNull(syncCallback.error);
-        assertNotNull(syncCallback.result);
+        DefaultKinveyPushCallback pushCallback = push(store, 120);
+        assertNull(pushCallback.error);
+        assertNotNull(pushCallback.result);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
 
@@ -429,12 +481,51 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPush"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyPushCallback syncCallback = push(store);
-        assertNotNull(syncCallback.error);
-        assertNull(syncCallback.result);
+        DefaultKinveyPushCallback pushCallback = push(store, 120);
+        assertNotNull(pushCallback.error);
+        assertNull(pushCallback.result);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
 
+    @Test
+    public void testPushNoCompletionHandler() throws InterruptedException {
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        client.getSycManager().clear(Person.COLLECTION);
+        save(store, createPerson("PersonForPushNoCompletionHandler"));
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        DefaultKinveyPushCallback pushCallback = push(store, 60);
+        assertFalse(pushCallback.error == null && pushCallback.result == null);
+        assertNull(pushCallback.error);
+        assertNotNull(pushCallback.result);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
+
+
+    private DefaultKinveyPullCallback pull(final AsyncDataStore<Person> store) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                store.pull(callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
+    @Test
+    public void testPull() throws InterruptedException {
+/*        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        client.getSycManager().clear(Person.COLLECTION);
+        pull(store);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        DefaultKinveyPullCallback pullCallback = pull(store);
+        assertNull(pullCallback.error);
+        assertNotNull(pullCallback.result);
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);*/
+    }
 
 
     class ChangeTimeout implements HttpRequestInitializer {
@@ -442,7 +533,6 @@ public class DataStoreTest {
             throw new SocketTimeoutException();
         }
     }
-
 
 }
 
