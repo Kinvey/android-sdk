@@ -959,7 +959,7 @@ public class Client extends AbstractClient {
                 client.setUser(result);
             }catch (Exception error){
                 exception = error;
-                if ((error instanceof HttpResponseException)) {
+                if (error instanceof HttpResponseException) {
                     try {
                         UserStore.logout(client);
                     } catch (IOException e) {

@@ -191,6 +191,7 @@ public class KinveyAuthRequest extends GenericJson {
         HttpRequest request = transport.createRequestFactory(appKeyAuthentication)
                 .buildPostRequest(buildHttpRequestUrl(), content)
                 .setSuppressUserAgentSuffix(true)
+                .setNumberOfRetries(3)
                 .setThrowExceptionOnExecuteError(false)
                 .setParser(jsonFactory.createJsonObjectParser())
                 .setBackOffPolicy(policy)
