@@ -29,14 +29,10 @@ import com.kinvey.java.store.DataStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.dto.SyncCollections;
 import com.kinvey.java.sync.dto.SyncRequest;
-import com.sun.jndi.toolkit.url.Uri;
-import com.sun.jndi.toolkit.url.UrlUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;

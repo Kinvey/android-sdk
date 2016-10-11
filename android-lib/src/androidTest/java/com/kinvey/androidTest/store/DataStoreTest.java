@@ -533,13 +533,17 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyPullCallback pull(final AsyncDataStore<Person> store) throws InterruptedException {
+    private DefaultKinveyPullCallback pull(final AsyncDataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                store.pull(callback);
+                if (query != null) {
+                    store.pull(query, callback);
+                } else {
+                    store.pull(callback);
+                }
                 Looper.loop();
             }
         }).start();
@@ -547,14 +551,12 @@ public class DataStoreTest {
         return callback;
     }
 
-    private DefaultKinveyDeleteCallback deleteAllCollection(final AsyncDataStore<Person> store) throws InterruptedException {
+    private DefaultKinveyDeleteCallback delete(final AsyncDataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                Query query = client.query();
-                query.notEqual("age", "100500");
                 store.delete(query, callback);
                 Looper.loop();
             }
@@ -563,20 +565,30 @@ public class DataStoreTest {
         return callback;
     }
 
+    //cleaning backend store
+    private void cleanBackendDataStore(AsyncDataStore<Person> store) throws InterruptedException {
+        DefaultKinveySyncCallback syncCallback = sync(store, 120);
+        assertNull(syncCallback.error);
+        Query query = client.query();
+        query = query.notEqual("age", "100500");
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
+        assertNull(deleteCallback.error);
+        DefaultKinveyPushCallback pushCallback = push(store, 120);
+        assertNull(pushCallback.error);
+        Log.d("testPull", " : clearing backend store successful");
+    }
+
+    //use for Person.COLLECTION and for Person.class
+    private int getCacheSize(StoreType storeType) {
+        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
+    }
+
     @Test
     public void testPull() throws InterruptedException {
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
         client.getSycManager().clear(Person.COLLECTION);
 
-        //clearing backend store
-        DefaultKinveySyncCallback syncCallback = sync(store, 120);
-        assertNull(syncCallback.error);
-        DefaultKinveyDeleteCallback deleteCallback = deleteAllCollection(store);
-        assertNull(deleteCallback.error);
-        Log.d("testPull", " : clearing backend store successful");
-        DefaultKinveyPushCallback pushCallback = push(store, 120);
-        assertNull(pushCallback.error);
-
+        cleanBackendDataStore(store);
 
         // uploading 3 person to backend
         ArrayList<Person> persons = new ArrayList<>();
@@ -589,21 +601,73 @@ public class DataStoreTest {
         for (Person person : persons) {
             save(store, person);
         }
-        pushCallback = push(store, 120);
+        DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
         assertNotNull(pushCallback.result);
-        Log.d("testPull", " : uploading 3 person to backend successful");
 
-        //clearing cache store
-        client.getSycManager().clear(Person.COLLECTION);
+        //cleaning cache store
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        //pulling data from backend
-        DefaultKinveyPullCallback pullCallback = pull(store);
+        //test pulling all data from backend
+        DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
         assertTrue(pullCallback.result.getResult().size() == 3);
-        Log.d("testPull", " : pulling data from backend successful");
+//        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
 
+        //cleaning cache store
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        //test pull only 1 item by query
+        Query query = client.query();
+        query = query.equals("name", victor.getName());
+        pullCallback = pull(store, query);
+        assertNull(pullCallback.error);
+        assertNotNull(pullCallback.result);
+        assertTrue(pullCallback.result.getResult().size() == 1);
+        assertTrue(pullCallback.result.getResult().get(0).getName().equals(victor.getName()));
+//        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+
+        cleanBackendDataStore(store);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        //creating 1 entity and uploading to backend
+        save(store, hugo);
+        pushCallback = push(store, 120);
+        assertNull(pushCallback.error);
+        assertNotNull(pushCallback.result);
+
+        //cleaning cache store
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        //test pulling not existing data from backend
+        query = client.query();
+        query = query.equals("name", victor.getName());
+        pullCallback = pull(store, query);
+        assertNull(pullCallback.error);
+        assertNotNull(pullCallback.result);
+        assertTrue(pullCallback.result.getResult().size() == 0);
+//        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+
+        cleanBackendDataStore(store);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        //creating 1 entity and uploading to backend
+        save(store, victor);
+        pushCallback = push(store, 120);
+        assertNull(pushCallback.error);
+        assertNotNull(pushCallback.result);
+
+        //cleaning cache store
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        //test pulling 1 entity if only 1 entity exist at backend
+        query = client.query();
+        query = query.equals("name", victor.getName());
+        pullCallback = pull(store, query);
+        assertNull(pullCallback.error);
+        assertNotNull(pullCallback.result);
+        assertTrue(pullCallback.result.getResult().size() == 1);
+        assertTrue(pullCallback.result.getResult().get(0).getName().equals(victor.getName()));
+//        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
     }
 
 
