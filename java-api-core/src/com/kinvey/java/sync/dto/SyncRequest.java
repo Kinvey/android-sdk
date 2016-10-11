@@ -120,6 +120,10 @@ public class SyncRequest extends GenericJson implements Serializable {
         this.collectionName = collectionName;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     /**
      * This class represents the uniqueness of an entity, containing the _id, customerAppVersion, and any CustomHeaders.
      *
