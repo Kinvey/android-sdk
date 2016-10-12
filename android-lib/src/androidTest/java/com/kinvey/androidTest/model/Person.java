@@ -2,9 +2,10 @@ package com.kinvey.androidTest.model;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.java.dto.User;
 
 
-public class Person extends GenericJson {
+public class Person extends User {
 
     public static final String COLLECTION = "Persons";
 
@@ -12,18 +13,7 @@ public class Person extends GenericJson {
     }
 
     @Key
-    private String name;
-
-    @Key
     private String age;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getAge() {
         return age;
