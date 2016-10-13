@@ -1,8 +1,5 @@
 package com.kinvey.androidTest.store;
 
-/**
- * Created by Prots on 30/09/2016.
- */
 
 import android.content.Context;
 import android.os.Looper;
@@ -919,7 +916,7 @@ public class DataStoreTest {
     }*/
 
 
-    //TODO check: test should be failed, result.size() should be 0
+    //TODO check: result.size() should be 0
     @Test
     public void testExpiredTTL() throws InterruptedException {
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
@@ -945,6 +942,49 @@ public class DataStoreTest {
     }
 
 
+    @Test
+    public void testSaveAndFind10SkipLimit() throws IOException, InterruptedException {
+        assertNotNull(client.getUser());
+        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        cleanBackendDataStore(store);
+        sync(store, 120);
+
+        User user = client.getUser();
+
+        for (int i = 0; i < 10; i++) {
+            Person person = createPerson("Person_" + i);
+            DefaultKinveyClientCallback saveCallback = save(store, person);
+            assertNull(saveCallback.error);
+            assertNotNull(saveCallback.result);
+        }
+
+        push(store, 60);
+        int skip = 0;
+        int limit = 2;
+
+        DefaultKinveyListCallback kinveyListCallback;
+        Query query = client.query();
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(skip);
+            query.setLimit(limit);
+            kinveyListCallback = find(store, query, 1000);
+            assertNull(kinveyListCallback.error);
+            assertNotNull(kinveyListCallback.result);
+            assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_" + i);
+            assertEquals(kinveyListCallback.result.get(1).getUsername(), "Person_" + (i+1));
+            skip += limit;
+        }
+
+        query = client.query();
+        query.setLimit(5);
+        kinveyListCallback = find(store, query, 60);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.size() == 5);
+        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_0");
+        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_4");
+
+    }
 
     class ChangeTimeout implements HttpRequestInitializer {
         public void initialize(HttpRequest request) throws SocketTimeoutException {
