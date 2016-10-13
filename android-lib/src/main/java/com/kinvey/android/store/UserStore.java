@@ -35,8 +35,12 @@ public class UserStore {
     private static KinveyUserCallback MICCallback;
     private static String MICRedirectURI;
 
-    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback callback) {
+    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback<User> callback) {
         new Create(username, password, client, callback).execute();
+    }
+
+    public static void login(AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(client, callback).execute();
     }
 
     public static void login(String userId, String password, AbstractClient client, KinveyClientCallback callback) throws IOException {
