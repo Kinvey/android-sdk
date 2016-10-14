@@ -65,6 +65,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         RealmResults<DynamicRealmObject> objects = null;
 
         final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
+        int limit = query.getLimit();
+        int skip = query.getSkip();
 
         objects = realmQuery.findAll();
 
@@ -126,6 +128,19 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             });
         }
 
+
+        //own skipping implementation
+        if (skip > 0) {
+            for (int i = 0; i < skip; i++) {
+                ret.remove(0);
+            }
+        }
+
+
+        //own limit implementation
+        if (limit > 0 && ret.size() > limit) {
+            ret = ret.subList(0, limit);
+        }
 
         mRealm.close();
         return ret;
