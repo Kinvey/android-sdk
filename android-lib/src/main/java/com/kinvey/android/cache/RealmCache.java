@@ -132,7 +132,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         //own skipping implementation
         if (skip > 0) {
             for (int i = 0; i < skip; i++) {
-                ret.remove(0);
+                if (ret.size() > 0) {
+                    ret.remove(0);
+                }
             }
         }
 

@@ -26,6 +26,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
@@ -958,7 +959,6 @@ public class DataStoreTest {
             assertNotNull(saveCallback.result);
         }
 
-        push(store, 60);
         int skip = 0;
         int limit = 2;
 
@@ -967,11 +967,11 @@ public class DataStoreTest {
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
             query.setLimit(limit);
-            kinveyListCallback = find(store, query, 1000);
+            kinveyListCallback = find(store, query, 60);
             assertNull(kinveyListCallback.error);
             assertNotNull(kinveyListCallback.result);
-            assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_" + i);
-            assertEquals(kinveyListCallback.result.get(1).getUsername(), "Person_" + (i+1));
+            assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_" + skip);
+            assertEquals(kinveyListCallback.result.get(1).getUsername(), "Person_" + (skip+1));
             skip += limit;
         }
 
@@ -983,6 +983,65 @@ public class DataStoreTest {
         assertTrue(kinveyListCallback.result.size() == 5);
         assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_0");
         assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_4");
+
+
+        query = client.query();
+        query.setSkip(5);
+        kinveyListCallback = find(store, query, 60);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.size() == 5);
+        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_5");
+        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_9");
+
+        query = client.query();
+        query.setLimit(6);
+        query.setSkip(6);
+        kinveyListCallback = find(store, query, 60);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.size() == 4);
+        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_6");
+        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_9");
+
+
+        query = client.query();
+        query.setSkip(10);
+        kinveyListCallback = find(store, query, 60);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.size() == 0);
+
+        query = client.query();
+        query.setSkip(11);
+        kinveyListCallback = find(store, query, 60);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.size() == 0);
+
+
+        DefaultKinveyPushCallback pushCallback = push(store, 60);
+        assertNull(pushCallback.error);
+        assertNotNull(pushCallback.result);
+        assertTrue(pushCallback.result.getSuccessCount() == 10);
+
+        skip = 0;
+
+        for (int i = 0; i < 5; i++) {
+            query = client.query();
+            query.equals("_acl", user.getId());
+            query.setSkip(skip);
+            query.setLimit(limit);
+
+            DefaultKinveyPullCallback pullCallback = pull(store, query);
+            assertNull(pullCallback.error);
+            assertNotNull(pullCallback.result);
+            assertTrue(pullCallback.result.getResult().size() == limit);
+            assertNotNull(pullCallback.result.getResult().get(0));
+            assertEquals(pullCallback.result.getResult().get(0).getUsername(), "Person_" + skip);
+            assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_" + (skip+1));
+            skip += limit;
+        }
 
     }
 
