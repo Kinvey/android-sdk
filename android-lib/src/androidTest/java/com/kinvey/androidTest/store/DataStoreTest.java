@@ -36,6 +36,8 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -752,12 +754,12 @@ public class DataStoreTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
 
-        String userId = saveCallback.result.getId();
+        String personId = saveCallback.result.getId();
 
-        DefaultKinveyClientCallback findCallback = find(store, userId, 60);
+        DefaultKinveyClientCallback findCallback = find(store, personId, 60);
         assertNotNull(findCallback.result);
         assertNull(saveCallback.error);
-        assertEquals(findCallback.result.getId(), userId);
+        assertEquals(findCallback.result.getId(), personId);
     }
 
 
@@ -920,9 +922,9 @@ public class DataStoreTest {
     //TODO check: result.size() should be 0
     @Test
     public void testExpiredTTL() throws InterruptedException {
+        StoreType.SYNC.ttl = 1;
         AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
         client.getSycManager().clear(Person.COLLECTION);
-        StoreType.SYNC.ttl = 1;
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson("Test1FindByIdPerson"));
         assertNotNull(saveCallback.result);
@@ -939,7 +941,7 @@ public class DataStoreTest {
         assertNull(findCallback.error);
         assertNotNull(findCallback.result);
         assertTrue(findCallback.result.size() == 0);
-
+        StoreType.SYNC.ttl = Long.MAX_VALUE;
     }
 
 
@@ -1026,10 +1028,9 @@ public class DataStoreTest {
         assertTrue(pushCallback.result.getSuccessCount() == 10);
 
         skip = 0;
-
         for (int i = 0; i < 5; i++) {
             query = client.query();
-            query.equals("_acl", user.getId());
+            query.equals("_acl.creator", user.getId());
             query.setSkip(skip);
             query.setLimit(limit);
 
@@ -1039,7 +1040,7 @@ public class DataStoreTest {
             assertTrue(pullCallback.result.getResult().size() == limit);
             assertNotNull(pullCallback.result.getResult().get(0));
             assertEquals(pullCallback.result.getResult().get(0).getUsername(), "Person_" + skip);
-            assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_" + (skip+1));
+            assertEquals(pullCallback.result.getResult().get(pullCallback.result.getResult().size()-1).getUsername(), "Person_" + (skip+1));
             skip += limit;
         }
 
