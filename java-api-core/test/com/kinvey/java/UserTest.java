@@ -23,7 +23,6 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.Delete;
 import com.kinvey.java.store.requests.user.EmailVerification;

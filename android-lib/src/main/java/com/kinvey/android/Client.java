@@ -17,14 +17,7 @@
 package com.kinvey.android;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import android.content.Context;
-import android.os.AsyncTask;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
@@ -41,29 +34,26 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.android.network.AndroidNetworkManager;
-import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.store.AsyncDataStore;
-import com.kinvey.android.store.AsyncFileStore;
-import com.kinvey.android.store.AsyncLinkedDataStore;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.FileStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.cache.ICacheManager;
-import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
@@ -98,9 +88,9 @@ public class Client extends AbstractClient {
 
     private Context context = null;
 
-    private ConcurrentHashMap<String, AsyncDataStore> appDataInstanceCache;
-    private ConcurrentHashMap<String, AsyncLinkedDataStore> linkedDataInstanceCache;
-    private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
+//    private ConcurrentHashMap<String, DataStore> appDataInstanceCache;
+//    private ConcurrentHashMap<String, LinkedDataStore> linkedDataInstanceCache;
+//    private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
     private AsyncCustomEndpoints customEndpoints;
     private AbstractPush pushProvider;
     private AsyncUserDiscovery userDiscovery;
@@ -146,73 +136,6 @@ public class Client extends AbstractClient {
     public static Client sharedInstance(){
     	return _sharedInstance;
     }
-
-
-    /**
-     * DataStore factory method
-     * <p>
-     * Returns an instance of {@link AsyncDataStore} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of {@link AndroidNetworkManager} is created per collection.  The method is Generic and takes an instance of a
-     * {@link com.google.api.client.json.GenericJson} entity type that is used for fetching/saving of {@link com.kinvey.java.store.DataStore}.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-        DataStore<myEntity> myAppData = kinveyClient.appData("entityCollection", myEntity.class);
-     }
-     * </pre>
-     * </p>
-     *
-     * @param collectionName The name of the collection
-     * @param myClass The class that defines the entity of type {@link com.google.api.client.json.GenericJson} used
-     *                for saving and fetching of data
-     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @return Instance of {@link com.kinvey.java.store.DataStore} for getStoreTypethe defined collection
-     */
-    public <T extends GenericJson> AsyncDataStore<T> dataStore(String collectionName, Class<T> myClass, StoreType storeType) {
-        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
-        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
-        Preconditions.checkArgument(isInitialize(), "client must be initialized.");
-        return new AsyncDataStore(collectionName, myClass, this, storeType);
-    }
-
-    /**
-     * LinkedDataStore factory method
-     * <p>
-     * Returns an instance of {@link AsyncLinkedNetworkManager} for the supplied collection.  A new instance is created for each collection, but
-     * only one instance of LinkedNetworkManager is created per collection.  The method is Generic and takes an instance of a
-     * {@link LinkedGenericJson} entity type that is used for fetching/saving of {@link AsyncLinkedNetworkManager}.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-    LinkedDataStore<myEntity> myAppData = kinveyClient.linkedData("entityCollection", myEntity.class);
-    }
-     * </pre>
-     * </p>
-     *
-     * @param collectionName The name of the collection
-     * @param myClass The class that defines the entity of type {@link LinkedGenericJson} used for saving and fetching of data
-     * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
-     * @param storeType indicate what kind of store will we use
-     * @return Instance of {@link AsyncLinkedNetworkManager} for the defined collection
-     */
-    public <T extends LinkedGenericJson> AsyncLinkedDataStore<T> linkedData(String collectionName, Class<T> myClass, StoreType storeType) {
-        Preconditions.checkArgument(isInitialize(), "client must be initialized.");
-        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
-        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
-        return new AsyncLinkedDataStore(this, collectionName, myClass,
-                storeType);
-    }
-
 
     @Override
     public void performLockDown() {
@@ -947,7 +870,7 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                UserStore.login(credential, client);
+                BaseUserStore.login(credential, client);
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
@@ -955,13 +878,13 @@ public class Client extends AbstractClient {
             User result = null;
             Exception exception = null;
             try{
-                result = UserStore.convenience(client);
+                result = BaseUserStore.convenience(client);
                 client.setUser(result);
             }catch (Exception error){
                 exception = error;
                 if (error instanceof HttpResponseException) {
                     try {
-                        UserStore.logout(client);
+                        BaseUserStore.logout(client);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -1011,8 +934,8 @@ public class Client extends AbstractClient {
     }
 
     @Override
-    public AsyncFileStore getFileStore(StoreType storeType) {
-        return new AsyncFileStore(new NetworkFileManager(this),
+    public FileStore getFileStore(StoreType storeType) {
+        return new FileStore(new NetworkFileManager(this),
                     getCacheManager(), 60*60*1000L, storeType, getFileCacheFolder()
                 );
     }
