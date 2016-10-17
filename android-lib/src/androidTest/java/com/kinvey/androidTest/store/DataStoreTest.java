@@ -15,8 +15,8 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
-import com.kinvey.android.store.AsyncDataStore;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.DataStore;
+import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
@@ -26,7 +26,6 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
@@ -36,8 +35,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 public class DataStoreTest {
 
     private Client client;
-    private AsyncDataStore<Person> personAsyncDataStore;
 
 
     @Before
@@ -70,7 +66,7 @@ public class DataStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        AsyncUserStore.login("test", "test", client, new KinveyClientCallback<User>() {
+                        UserStore.login("test", "test", client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 latch.countDown();
@@ -315,7 +311,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyClientCallback save(final AsyncDataStore<Person> store, final Person person) throws InterruptedException {
+    private DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
@@ -332,7 +328,7 @@ public class DataStoreTest {
 
     @Test
     public void testSave() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         String personName = "TestName";
         DefaultKinveyClientCallback callback = save(store, createPerson(personName));
@@ -350,7 +346,7 @@ public class DataStoreTest {
         removeFiles(customPath);
         File file = new File(customPath);
         assertFalse(file.exists());
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(file.exists());
     }
 
@@ -372,7 +368,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyPurgeCallback purge(final AsyncDataStore<Person> store) throws InterruptedException {
+    private DefaultKinveyPurgeCallback purge(final DataStore<Person> store) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPurgeCallback callback = new DefaultKinveyPurgeCallback(latch);
         new Thread(new Runnable() {
@@ -388,7 +384,7 @@ public class DataStoreTest {
 
     @Test
     public void testPurge() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
@@ -400,7 +396,7 @@ public class DataStoreTest {
 
     @Test
     public void testPurgeInvalidDataStoreType() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
@@ -423,7 +419,7 @@ public class DataStoreTest {
                 .setHttpRequestInitializer(initializer)
                 .build();
 
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = createPerson("PersonForTestPurge");
         save(store, person);
@@ -437,7 +433,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveySyncCallback sync(final AsyncDataStore<Person> store, int seconds) throws InterruptedException {
+    private DefaultKinveySyncCallback sync(final DataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
         new Thread(new Runnable() {
@@ -453,7 +449,7 @@ public class DataStoreTest {
 
     @Test
     public void testSync() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
@@ -466,7 +462,7 @@ public class DataStoreTest {
 
     @Test
     public void testSyncInvalidDataStoreType() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPurge"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
@@ -490,7 +486,7 @@ public class DataStoreTest {
                 .setHttpRequestInitializer(initializer)
                 .build();
         client.getSycManager().clear(Person.COLLECTION);
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson("PersonForTestSyncTimeOut");
         save(store, person);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
@@ -501,7 +497,7 @@ public class DataStoreTest {
 
     @Test
     public void testSyncNoCompletionHandler() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForSyncNoCompletionHandler"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
@@ -512,7 +508,7 @@ public class DataStoreTest {
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
 
-    private DefaultKinveyPushCallback push(final AsyncDataStore<Person> store, int seconds) throws InterruptedException {
+    private DefaultKinveyPushCallback push(final DataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
         new Thread(new Runnable() {
@@ -528,7 +524,7 @@ public class DataStoreTest {
 
     @Test
     public void testPush() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPush"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
@@ -541,7 +537,7 @@ public class DataStoreTest {
 
     @Test
     public void testPushInvalidDataStoreType() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForTestPush"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
@@ -553,7 +549,7 @@ public class DataStoreTest {
 
     @Test
     public void testPushNoCompletionHandler() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson("PersonForPushNoCompletionHandler"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
@@ -565,7 +561,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyPullCallback pull(final AsyncDataStore<Person> store, final Query query) throws InterruptedException {
+    private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
         new Thread(new Runnable() {
@@ -583,7 +579,7 @@ public class DataStoreTest {
         return callback;
     }
 
-    private DefaultKinveyDeleteCallback delete(final AsyncDataStore<Person> store, final Query query) throws InterruptedException {
+    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         new Thread(new Runnable() {
@@ -598,7 +594,7 @@ public class DataStoreTest {
     }
 
     //cleaning backend store
-    private void cleanBackendDataStore(AsyncDataStore<Person> store) throws InterruptedException {
+    private void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNull(syncCallback.error);
         Query query = client.query();
@@ -618,7 +614,7 @@ public class DataStoreTest {
     //TODO check: getCacheSize(StoreType.SYNC) return 0 after saving items to store cache
     @Test
     public void testPull() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         cleanBackendDataStore(store);
@@ -707,7 +703,7 @@ public class DataStoreTest {
     //TODO check: can we do pull if unsaved data exists?
 /*    @Test
     public void testPullPendingSyncItems() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         save(store, createPerson("TestPullPendingSyncItems"));
@@ -720,7 +716,7 @@ public class DataStoreTest {
 
     @Test
     public void testPullInvalidDataStoreType() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.NETWORK);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         DefaultKinveyPullCallback pullCallback = pull(store, null);
@@ -729,7 +725,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyClientCallback find(final AsyncDataStore<Person> store, final String id, int seconds) throws InterruptedException {
+    private DefaultKinveyClientCallback find(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
@@ -745,7 +741,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindById() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         Person person = createPerson("TestFindByIdPerson");
@@ -763,7 +759,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyListCallback find(final AsyncDataStore<Person> store, final Query query, int seconds) throws InterruptedException {
+    private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
         new Thread(new Runnable() {
@@ -779,7 +775,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindByQuery() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         Person person = createPerson("TestFindByIdPerson");
@@ -800,7 +796,7 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyDeleteCallback delete(final AsyncDataStore<Person> store, final String id, int seconds) throws InterruptedException {
+    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         new Thread(new Runnable() {
@@ -816,7 +812,7 @@ public class DataStoreTest {
 
     @Test
     public void testRemovePersistable() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         Person person = createPerson("TestFindByIdPerson");
@@ -836,7 +832,7 @@ public class DataStoreTest {
 
     @Test
     public void testRemovePersistableIdMissing() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         Person person = createPerson("TestFindByIdPerson");
@@ -850,7 +846,7 @@ public class DataStoreTest {
         assertNull(deleteCallback.result);
     }
 
-    private DefaultKinveyDeleteCallback delete(final AsyncDataStore<Person> store, final Iterable<String> entityIDs) throws InterruptedException {
+    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Iterable<String> entityIDs) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         new Thread(new Runnable() {
@@ -866,7 +862,7 @@ public class DataStoreTest {
 
     @Test
     public void testRemovePersistableArray() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson("Test1FindByIdPerson"));
@@ -893,7 +889,7 @@ public class DataStoreTest {
     //TODO check: need create request for deleting all items from store
 /*    @Test
     public void testRemoveAll() throws InterruptedException {
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson("TestRemoveAll1Person"));
@@ -923,7 +919,7 @@ public class DataStoreTest {
     @Test
     public void testExpiredTTL() throws InterruptedException {
         StoreType.SYNC.ttl = 1;
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson("Test1FindByIdPerson"));
@@ -948,7 +944,7 @@ public class DataStoreTest {
     @Test
     public void testSaveAndFind10SkipLimit() throws IOException, InterruptedException {
         assertNotNull(client.getUser());
-        AsyncDataStore<Person> store = client.dataStore(Person.COLLECTION, Person.class, StoreType.SYNC);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
         sync(store, 120);
 
