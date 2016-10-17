@@ -242,6 +242,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSycManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         List<T> networkData = null;
         query = query == null ? client.query() : query;
         networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
