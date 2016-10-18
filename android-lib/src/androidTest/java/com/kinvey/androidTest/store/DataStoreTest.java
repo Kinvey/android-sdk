@@ -25,11 +25,10 @@ import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -612,6 +611,47 @@ public class DataStoreTest {
     //use for Person.COLLECTION and for Person.class
     private long getCacheSize(StoreType storeType) {
         return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
+    }
+
+
+    @Test
+    public void testGettingItemsByIds() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        ICacheManager cacheManager = client.getCacheManager();
+        ICache<Person> cache = cacheManager.getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl);
+        cache.clear();
+
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        List<Person> items = new ArrayList<>();
+
+        List<String> ids = new ArrayList<>();
+
+        Person person;
+        for (int i = 0 ; i < 100; i++){
+            person = createPerson("Test" + i);
+            person.setId(String.valueOf(i));
+            items.add(person);
+            ids.add(String.valueOf(i));
+        }
+
+
+        for (Person p:items) {
+            save(store, p);
+        }
+
+        List<Person> cachedObjects = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
+        assertEquals(100, cachedObjects.size());
+
+        for (int i = 0 ; i < cachedObjects.size() ; i ++){
+            Person res = cachedObjects.get(i);
+            assertEquals(res.getId(), String.valueOf(i));
+        }
+
+        assertTrue(true);
+        client.getSycManager().clear(Person.COLLECTION);
+
     }
 
     @Test
