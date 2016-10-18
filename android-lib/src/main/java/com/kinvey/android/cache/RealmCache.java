@@ -31,11 +31,8 @@ import java.util.Map;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
-import io.realm.FieldAttribute;
-import io.realm.RealmObjectSchema;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.RealmSchema;
 import io.realm.Sort;
 
 /**
@@ -195,19 +192,23 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public List<T> get() {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
-                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
-
-        RealmResults<DynamicRealmObject> objects = query
-                .findAll();
-
+        mRealm.beginTransaction();
         List<T> ret = new ArrayList<T>();
+        try {
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
 
-        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
-            DynamicRealmObject obj = iterator.next();
-            ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+            RealmResults<DynamicRealmObject> objects = query
+                    .findAll();
+
+
+            for (DynamicRealmObject obj : objects) {
+                ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+            }
+
+        } finally {
+            mRealm.commitTransaction();
         }
-        mRealm.close();
         return ret;
     }
 
