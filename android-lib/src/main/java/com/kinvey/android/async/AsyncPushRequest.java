@@ -75,6 +75,9 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
             } catch (AccessControlException | KinveyException e) { //TODO check Exception
                 errors.add(e);
             }
+
+//            notify(pushResponse);
+//            publishProgress(pushResponse);
             callback.onProgress(pushResponse.getSuccessCount(), requests.size());
         }
 

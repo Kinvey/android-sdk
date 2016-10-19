@@ -89,7 +89,7 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
      * @throws java.io.IOException if any.
      */
 
-    protected abstract Result executeAsync() throws IOException, InvocationTargetException, IllegalAccessException;
+    protected abstract Result executeAsync() throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException;
 
     /**
      * Get the callback for this request

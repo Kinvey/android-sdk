@@ -497,7 +497,7 @@ public class NetworkFileManager {
     /**
      * Deletes the given file from the Kinvey file service.
      *
-     * @param metaData the metadata of the NetworkFileManager to delete (requires an ID)
+     * @param metaData the metadata of the NetworkFileManager to remove (requires an ID)
      * @return a valid DELETE request to be executed
      * @throws IOException
      */
@@ -510,7 +510,7 @@ public class NetworkFileManager {
     /**
      * Deletes the given file from the Kinvey file service.
      *
-     * @param fileID the _id of the file to delete
+     * @param fileID the _id of the file to remove
      * @return a valid DELETE request to be executed
      * @throws IOException
      */
@@ -522,7 +522,7 @@ public class NetworkFileManager {
     /**
      * Deletes the given file from the Kinvey file service.
      *
-     * @param id the metadata of the NetworkFileManager to delete (requires an ID)
+     * @param id the metadata of the NetworkFileManager to remove (requires an ID)
      * @return a valid DELETE request to be executed
      * @throws IOException
      */
@@ -765,7 +765,7 @@ public class NetworkFileManager {
 
         public DeleteFile(FileMetaData metaData){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
-            this.id = Preconditions.checkNotNull(metaData.getId(), "cannot delete a file without an _id!");
+            this.id = Preconditions.checkNotNull(metaData.getId(), "cannot remove a file without an _id!");
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
             if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
@@ -773,7 +773,7 @@ public class NetworkFileManager {
             setUploadHeader(metaData, this);
         }
 
-        //TODO edwardf re-add delete by query support once it is supported in kcs
+        //TODO edwardf re-add remove by query support once it is supported in kcs
 //        public DeleteFile(Query q){
 //            super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
 //            this.queryFilter = q.getQueryFilterJson(client.getJsonFactory());
