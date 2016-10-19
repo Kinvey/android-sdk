@@ -17,7 +17,6 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,13 +47,6 @@ public class QueryTest {
 
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder(mMockContext).build());
 
-
-        if (!realm.getSchema().contains("test")){
-            realm.beginTransaction();
-            realm.getSchema().create("test").addField("_id", Integer.class);
-            realm.commitTransaction();
-        }
-
         RealmQuery<DynamicRealmObject> obj = RealmQuery.createDynamicQuery(realm, "test");
         query = spy(obj);
         doReturn(query).when(query).beginGroup();
@@ -63,19 +55,6 @@ public class QueryTest {
         doReturn(query).when(query).or();
         doReturn(query).when(query).not();
 
-    }
-
-    @After
-    public void tearDown() {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder(mMockContext).build());
-
-        if (realm.getSchema().contains("test")){
-            realm.beginTransaction();
-
-            realm.getSchema().remove("test");
-            realm.commitTransaction();
-        }
     }
 
 

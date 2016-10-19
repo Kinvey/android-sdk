@@ -52,7 +52,7 @@ import java.util.Map;
  * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link DataStore convenience method.  BaseDataStore
+ * This functionality can be accessed through the {@link Client#dataStore convenience method.  BaseDataStore
  * gets and saves and sync entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -137,7 +137,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    protected DataStore(String collectionName, Class<T> myClass, AbstractClient client, StoreType storeType) {
+    protected DataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType) {
         super(client, collectionName, myClass, storeType);
         loadMethodMap();
     }
@@ -148,7 +148,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    public DataStore(String collectionName, Class<T> myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
+    public DataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
         super(client, collectionName, myClass, storeType, networkManager);
         loadMethodMap();
     }
@@ -157,7 +157,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new DataStore<T>(collectionName, myClass, client, storeType);
+        return new DataStore(collectionName, myClass, client, storeType);
     }
 
     private void loadMethodMap() {
@@ -215,7 +215,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
     }
 
     /**

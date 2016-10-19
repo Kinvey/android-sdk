@@ -222,7 +222,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
 //        NetworkManager<Entity> appData = getGenericAppData(Entity.class);
 //        String entityID = "myEntity";
 //        try {
-//            NetworkManager<Entity>.Delete<Entity> myDelete = appData.remove(null);   TODO now ambigious because of query support...
+//            NetworkManager<Entity>.Delete<Entity> myDelete = appData.delete(null);   TODO now ambigious because of query support...
 //            fail("NullPointerException should be thrown.");
 //        } catch (NullPointerException ex) {}
 //

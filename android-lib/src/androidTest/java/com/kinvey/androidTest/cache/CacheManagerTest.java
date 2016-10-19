@@ -61,4 +61,10 @@ public class CacheManagerTest {
     public void getCacheShouldBeInstanceOfRealmCache(){
         assertTrue(manager.getCache("test", SampleGsonObject1.class, Long.MAX_VALUE) instanceof RealmCache);
     }
+
+    @Test
+     public void getCacheShouldReturnSameInstance(){
+        assertEquals(manager.getCache("test", SampleGsonObject1.class, Long.MAX_VALUE),
+                manager.getCache("test", SampleGsonObject1.class, Long.MAX_VALUE));
+    }
 }

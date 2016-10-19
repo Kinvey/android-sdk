@@ -16,13 +16,8 @@
 
 package com.kinvey.android.store;
 
-import com.kinvey.android.async.AsyncDownloadRequest;
 import com.kinvey.android.async.AsyncRequest;
-import com.kinvey.android.async.AsyncUploadRequest;
-import com.kinvey.android.callback.AsyncDownloaderProgressListener;
-import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.DownloaderProgressListener;
@@ -53,12 +48,10 @@ public class FileStore extends BaseFileStore {
         UPLOAD_FILE_METADATA,
         UPLOAD_STREAM_METADATA,
         UPLOAD_STREAM_FILENAME,
-        REMOVE_ID,
+        DELETE_ID,
         DOWNLOAD_METADATA,
         DOWNLOAD_QUERY,
-        DOWNLOAD_FILENAME,
-        REFRESH_FILE,
-        FIND_QUERY
+        DOWNLOAD_FILENAME
     }
 
     private static HashMap<FileMethods, Method> asyncMethods =
@@ -84,8 +77,8 @@ public class FileStore extends BaseFileStore {
 
             //DELETE METHODS
 
-            asyncMethods.put(FileMethods.REMOVE_ID,
-                    BaseFileStore.class.getDeclaredMethod("remove", FileMetaData.class));
+            asyncMethods.put(FileMethods.DELETE_ID,
+                    BaseFileStore.class.getDeclaredMethod("delete", String.class));
 
             //DOWNLOAD METHODS
             asyncMethods.put(FileMethods.DOWNLOAD_FILENAME,
@@ -96,14 +89,6 @@ public class FileStore extends BaseFileStore {
             asyncMethods.put(FileMethods.DOWNLOAD_QUERY,
                     BaseFileStore.class.getDeclaredMethod("download", Query.class, String.class, DownloaderProgressListener.class));
 
-            //REFRESH
-            asyncMethods.put(FileMethods.REFRESH_FILE,
-                    BaseFileStore.class.getDeclaredMethod("refresh", FileMetaData.class));
-
-            //FIND
-            asyncMethods.put(FileMethods.FIND_QUERY,
-                    BaseFileStore.class.getDeclaredMethod("find", Query.class));
-
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -112,77 +97,58 @@ public class FileStore extends BaseFileStore {
 
 
     public FileStore(NetworkFileManager networkFileManager,
-                          ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
+                     ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
         super(networkFileManager, cacheManager, ttl, storeType, cacheFolder);
     }
 
-    public void upload(File file, final AsyncUploaderProgressListener<FileMetaData> listener) throws IOException, KinveyException {
-        new AsyncUploadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE), listener, file).execute();
+    public void upload(File file, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE), metaCallback, file, listener )
+                .execute();
     }
 
-    public void upload(File file, FileMetaData metadata,
-                            AsyncUploaderProgressListener<FileMetaData> listener) throws IOException {
+    public void upload(File file, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback,
+                               UploaderProgressListener listener) throws IOException {
 
-        new AsyncUploadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE_METADATA), listener,
-                file, metadata).execute();
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_FILE_METADATA), metaCallback,
+                file, metadata, listener ).execute();
     }
 
-    public void upload(InputStream is, FileMetaData metadata, AsyncUploaderProgressListener<FileMetaData> listener) throws IOException {
-        new AsyncUploadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_METADATA), listener,
-                is, metadata).execute();
+    public void upload(InputStream is, FileMetaData metadata, KinveyClientCallback<FileMetaData> metaCallback, UploaderProgressListener listener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_METADATA), metaCallback,
+                is, metadata, listener ).execute();
     }
 
-    public void upload(String filename, InputStream is,
-                            AsyncUploaderProgressListener<FileMetaData> listener) throws IOException {
-        new AsyncUploadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_FILENAME), listener,
-                filename, is).execute();
+    public void upload(String filename, InputStream is, KinveyClientCallback<FileMetaData> metaCallback,
+                       UploaderProgressListener listener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.UPLOAD_STREAM_FILENAME), metaCallback,
+                filename, is, listener ).execute();
     }
 
-    public void remove(FileMetaData metadata, KinveyDeleteCallback callback) throws IOException {
-        new AsyncRequest<Integer>(this, asyncMethods.get(FileMethods.REMOVE_ID), callback,
-                metadata).execute();
+    public void delete(String id, KinveyDeleteCallback callback) throws IOException {
+        new AsyncRequest<Integer>(this, asyncMethods.get(FileMethods.DELETE_ID), callback,
+                id ).execute();
     }
 
-    public void download(FileMetaData metadata, OutputStream os,
-                              AsyncDownloaderProgressListener<FileMetaData> progressListener) throws IOException {
-        new AsyncDownloadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), progressListener,
-                metadata, os).execute();
+    public void download(FileMetaData metadata, OutputStream os, KinveyClientCallback<FileMetaData> metaCallback,
+                         DownloaderProgressListener progressListener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), metaCallback,
+                metaCallback, os, progressListener ).execute();
     }
 
-    public void download(Query q, String dst,
-                              AsyncDownloaderProgressListener<FileMetaData[]> progressListener) throws IOException {
-        new AsyncDownloadRequest<FileMetaData[]>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), progressListener,
-                q, dst).execute();
+    public void download(Query q, String dst, KinveyClientCallback<FileMetaData> metaCallback,
+                         DownloaderProgressListener progressListener) throws IOException {
+
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_QUERY), metaCallback,
+                metaCallback, q, dst, progressListener ).execute();
 
     }
 
-    public void download(String filename, String dst,
-                              AsyncDownloaderProgressListener<FileMetaData[]> progressListener) throws IOException {
-        new AsyncDownloadRequest<FileMetaData[]>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), progressListener,
-                filename, dst).execute();
+    public void download(String filename, String dst, KinveyClientCallback<FileMetaData> metaCallback,
+                         DownloaderProgressListener progressListener) throws IOException {
+        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_FILENAME), metaCallback,
+                metaCallback, filename, dst, progressListener ).execute();
     }
 
-    public void refresh(FileMetaData metadata,  KinveyClientCallback<FileMetaData> metaCallback) throws IOException {
-        new AsyncRequest<FileMetaData>(this, asyncMethods.get(FileMethods.REFRESH_FILE), metaCallback, metadata).execute();
-    }
-
-    public void find(Query q, KinveyClientCallback<FileMetaData[]> metaCallback) {
-        new AsyncRequest<FileMetaData[]>(this, asyncMethods.get(FileMethods.FIND_QUERY), metaCallback, q).execute();
-    }
-
-    public FileMetaData cachedFile(String fileId) {
-        return cache.get(fileId);
-    }
-
-    public FileMetaData cachedFile(FileMetaData fileMetaData) {
-        if (fileMetaData.getId() == null) {
-            //"File.fileId is required"
-            return null;
-        }
-        return cache.get(fileMetaData.getId());
-    }
-
-    public void clearCache() {
-        cache.clear();
+    public void clear() {
     }
 }

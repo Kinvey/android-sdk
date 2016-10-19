@@ -32,12 +32,12 @@ import java.lang.reflect.Method;
  */
 public class AsyncRequest<T> extends AsyncClientRequest<T> {
 
-    protected Object scope;
+    private Object scope;
     Method mMethod;
     Object[] args;
 
 
-    public AsyncRequest(Object scope, Method method, KinveyClientCallback<T> callback, Object... args) {
+    public AsyncRequest(Object scope, Method method, KinveyClientCallback callback, Object... args) {
         super(callback);
         this.scope = scope;
         this.mMethod = method;
