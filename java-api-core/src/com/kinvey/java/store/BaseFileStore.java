@@ -16,6 +16,7 @@
 
 package com.kinvey.java.store;
 
+import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.Key;
@@ -34,6 +35,7 @@ import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.file.FileUtils;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import java.io.File;
@@ -45,7 +47,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 
-public class FileStore {
+public class BaseFileStore {
 
     private static final String CACHE_FILE_PATH = "KinveyCachePath";
 
@@ -56,7 +58,7 @@ public class FileStore {
     protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
-    public FileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder) {
+    public BaseFileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
 
         this.networkFileManager = networkFileManager;
         this.cacheManager = cacheManager;
@@ -72,7 +74,8 @@ public class FileStore {
         FileMetaData fm = new FileMetaData();
         fm.setFileName(file.getName());
         return upload(file, fm, listener);
-    }
+    };
+
 
 
 
@@ -85,14 +88,15 @@ public class FileStore {
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-        if (fileMetadataWithPath.getId() == null) {
+        if (fileMetadataWithPath.getId() == null){
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }
 
-        NetworkFileManager.UploadMetadataAndFile upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath,
-                new FileContent(null, file), listener);
+        NetworkFileManager.UploadMetadataAndFile upload =
+                networkFileManager.prepUploadBlocking(metadata,
+                        new FileContent(metadata.getMimetype(), file), listener);
 
-        switch (storeType.writePolicy) {
+        switch (storeType.writePolicy){
             case FORCE_LOCAL:
                 saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
                 metadata = fileMetadataWithPath;
@@ -104,16 +108,14 @@ public class FileStore {
                 saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
                 try {
                     upload.execute();
-                } catch (Exception e) {
+                } catch (Exception e){
                     e.printStackTrace();
                 }
                 metadata = fileMetadataWithPath;
         }
 
         return metadata;
-    }
-
-    ;
+    };
 
     public FileMetaData upload(InputStream is, FileMetaData metadata, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(is, "inputStream must not be null");
@@ -123,9 +125,7 @@ public class FileStore {
                 networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is), listener);
 
         return upload.execute();
-    }
-
-    ;
+    };
 
     public FileMetaData upload(String filename, InputStream is, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(filename, "filename must not be null");
@@ -136,20 +136,18 @@ public class FileStore {
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fm, new InputStreamContent(null, is), listener);
         return upload.execute();
-    }
+    };
 
-    ;
-
-    public Integer remove(FileMetaData metadata) throws IOException {
-        Preconditions.checkNotNull(metadata, "metadata must not be null");
+    public Integer delete(String id) throws IOException {
+        Preconditions.checkNotNull(id, "metadata must not be null");
         switch (storeType.writePolicy) {
             case FORCE_LOCAL:
-                cache.delete(metadata.getId());
+                cache.delete(id);
                 return 1;
             case LOCAL_THEN_NETWORK:
-                cache.delete(metadata.getId());
+                cache.delete(id);
             case FORCE_NETWORK:
-                return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
+                return networkFileManager.deleteBlocking(id).execute().getCount();
             default:
                 return 0;
         }
@@ -191,9 +189,7 @@ public class FileStore {
         return metaData;
 
 
-    }
-
-    ;
+    };
 
     public FileMetaData find(String id) throws IOException {
         Preconditions.checkNotNull(id, "id must not be null");
@@ -236,9 +232,9 @@ public class FileStore {
         Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         FileMetaData resultMetadata = find(metadata.getId());
-        sendMetadata(resultMetadata, progressListener);
+            sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, progressListener);
-    }
+        }
 
     public FileMetaData[] download(Query q, String dst, DownloaderProgressListener progressListener) throws IOException {
         Preconditions.checkNotNull(q, "query must not be null");
@@ -315,8 +311,8 @@ public class FileStore {
 
         File out = new File(f, metadata.getId());
         if (!out.exists()) {
-            out.createNewFile();
-        }
+                out.createNewFile();
+            }
         return getNetworkFile(metadata, new FileOutputStream(out), listener);
     }
 
@@ -369,17 +365,17 @@ public class FileStore {
                     }
                 };
                 FileMetaData fileMetaData = null;
-                try {
+                        try {
                     fileMetaData = getNetworkFile(metadata, new FileOutputStream(f), wrappedListener);
                 } catch (KinveyException e) {
                     File file = getCachedFile(metadata);
                     if (file == null) {
                         throw new KinveyException("FileMissing", "File Missing in cache", "");
-                    } else {
-                        FileUtils.copyStreams(new FileInputStream(f), os);
+                            } else {
+                                FileUtils.copyStreams(new FileInputStream(f), os);
                         return metadata;
-                    }
-                }
+                            }
+                        }
 
                 FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
                 fileMetadataWithPath.putAll(fileMetaData);

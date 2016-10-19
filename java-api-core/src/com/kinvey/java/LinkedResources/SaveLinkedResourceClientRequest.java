@@ -18,19 +18,17 @@ package com.kinvey.java.LinkedResources;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.MimeTypeFinder;
-import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 
 /**
@@ -123,7 +121,7 @@ public class SaveLinkedResourceClientRequest<T> extends AbstractKinveyJsonClient
                             }*/
                         };
 
-                        FileStore fileStore = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
+                        BaseFileStore fileStore = getAbstractKinveyClient().getFileStore(StoreType.SYNC);
 
                         LinkedFile lf = ((LinkedGenericJson) getJsonContent()).getFile(key);
                         FileMetaData meta = new FileMetaData(lf.getId());

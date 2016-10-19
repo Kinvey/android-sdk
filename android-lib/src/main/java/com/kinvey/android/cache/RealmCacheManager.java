@@ -108,7 +108,7 @@ public class RealmCacheManager implements ICacheManager {
                 if (!collectionItemClass.isAssignableFrom(cache.getCollectionItemClass()) &&
                         !cache.getCollectionItemClass().isAssignableFrom(collectionItemClass)){
                     throw new KinveyException("Class implementation for collection have been changed during runtime",
-                            "Please review the DataStore usage, parameter should remain the same for same collection",
+                            "Please review the BaseDataStore usage, parameter should remain the same for same collection",
                             "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
                 }
                 //create new instance because ttl values differs for diffetent store types and

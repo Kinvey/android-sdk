@@ -19,8 +19,7 @@ package com.kinvey.android;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.dto.User;
-import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -29,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
  * Class represents internal implementation of Async pull request that is used to create pull
  */
 public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
-    private final DataStore store;
+    private final BaseDataStore store;
     private Query query;
 
     /**
@@ -38,7 +37,7 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(DataStore store,
+    public AsyncPullRequest(BaseDataStore store,
                             Query query,
                             KinveyPullCallback<T> callback){
         super(callback);

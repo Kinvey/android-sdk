@@ -27,7 +27,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ObjectParser;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.store.FileStore;
+import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 
 /**
@@ -93,9 +93,9 @@ public abstract class AbstractKinveyClient {
 
 
     /**
-     * Access to the FileStore service where files of all sizes including images and videos can be uploaded and downloaded.
+     * Access to the BaseFileStore service where files of all sizes including images and videos can be uploaded and downloaded.
      */
-    public abstract FileStore getFileStore(StoreType storeType);
+    public abstract BaseFileStore getFileStore(StoreType storeType);
 
 
     /**

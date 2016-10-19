@@ -21,7 +21,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
@@ -29,14 +29,18 @@ import com.kinvey.java.store.requests.user.LogoutRequest;
 
 import java.io.IOException;
 
-public class AsyncUserStore {
+public class UserStore {
 
     private static boolean clearStorage = true;
     private static KinveyUserCallback MICCallback;
     private static String MICRedirectURI;
 
-    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback callback) {
+    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback<User> callback) {
         new Create(username, password, client, callback).execute();
+    }
+
+    public static void login(AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
+        new Login(client, callback).execute();
     }
 
     public static void login(String userId, String password, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -471,25 +475,25 @@ public class AsyncUserStore {
         protected User executeAsync() throws IOException {
             switch(this.type) {
                 case IMPLICIT:
-                    return UserStore.login(client);
+                    return BaseUserStore.login(client);
                 case KINVEY:
-                    return UserStore.login(username, password, client);
+                    return BaseUserStore.login(username, password, client);
                 case FACEBOOK:
-                    return UserStore.loginFacebook(accessToken, client);
+                    return BaseUserStore.loginFacebook(accessToken, client);
                 case GOOGLE:
-                    return UserStore.loginGoogle(accessToken, client);
+                    return BaseUserStore.loginGoogle(accessToken, client);
                 case TWITTER:
-                    return UserStore.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    return BaseUserStore.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
                 case LINKED_IN:
-                    return UserStore.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    return BaseUserStore.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client);
                 case AUTH_LINK:
-                    return UserStore.loginAuthLink(accessToken, refreshToken, client);
+                    return BaseUserStore.loginAuthLink(accessToken, refreshToken, client);
                 case SALESFORCE:
-                    return UserStore.loginSalesForce(accessToken, client_id, refreshToken, id, client);
+                    return BaseUserStore.loginSalesForce(accessToken, client_id, refreshToken, id, client);
                 case MOBILE_IDENTITY:
-                    return UserStore.loginMobileIdentity(accessToken, client);
+                    return BaseUserStore.loginMobileIdentity(accessToken, client);
                 case CREDENTIALSTORE:
-                    return UserStore.login(credential, client);
+                    return BaseUserStore.login(credential, client);
             }
             return null;
         }
@@ -511,7 +515,7 @@ public class AsyncUserStore {
 
         @Override
         protected User executeAsync() throws IOException {
-            return UserStore.signUp(username, password, client);
+            return BaseUserStore.signUp(username, password, client);
         }
     }
 
@@ -529,7 +533,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.destroy(hardDelete, client);
+            BaseUserStore.destroy(hardDelete, client);
             return null;
         }
     }
@@ -554,7 +558,7 @@ public class AsyncUserStore {
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getMICToken(token).execute();
 
-            User ret =  UserStore.loginMobileIdentity(result.get("access_token").toString(), client);
+            User ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
             Credential currentCred = client.getStore().load(client.getUser().getId());
             currentCred.setRefreshToken(result.get("refresh_token").toString());
@@ -591,7 +595,7 @@ public class AsyncUserStore {
             LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
             GenericJson accessResult = loginToTempURL.execute();
 
-            User user = UserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
+            User user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
 
 
             Credential currentCred = client.getStore().load(client.getUser().getId());
@@ -622,9 +626,9 @@ public class AsyncUserStore {
         @Override
         public User executeAsync() throws IOException {
             if (resolves == null){
-                return UserStore.retrieve(client);
+                return BaseUserStore.retrieve(client);
             }else{
-                return UserStore.retrieve(resolves, client);
+                return BaseUserStore.retrieve(resolves, client);
             }
         }
     }
@@ -654,9 +658,9 @@ public class AsyncUserStore {
         @Override
         public User[] executeAsync() throws IOException {
             if (resolves == null){
-                return UserStore.retrieve(query, client);
+                return BaseUserStore.retrieve(query, client);
             }else{
-                return UserStore.retrieve(query, resolves, client);
+                return BaseUserStore.retrieve(query, resolves, client);
             }
         }
     }
@@ -674,7 +678,7 @@ public class AsyncUserStore {
 
         @Override
         protected User executeAsync() throws IOException {
-            return UserStore.convenience(client);
+            return BaseUserStore.convenience(client);
         }
     }
 
@@ -691,7 +695,7 @@ public class AsyncUserStore {
 
         @Override
         protected User executeAsync() throws IOException {
-            return UserStore.save(client);
+            return BaseUserStore.save(client);
         }
     }
 
@@ -710,7 +714,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.changePassword(password, client);
+            BaseUserStore.changePassword(password, client);
             return null;
         }
     }
@@ -731,7 +735,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.resetPassword(usernameOrEmail, client);
+            BaseUserStore.resetPassword(usernameOrEmail, client);
             return null;
         }
     }
@@ -751,7 +755,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.exists(username, client);
+            BaseUserStore.exists(username, client);
             return null;
         }
     }
@@ -771,7 +775,7 @@ public class AsyncUserStore {
 
         @Override
         protected User executeAsync() throws IOException {
-            UserStore.get(userId, client);
+            BaseUserStore.get(userId, client);
             return null;
         }
     }
@@ -789,7 +793,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.sendEmailConfirmation(client);
+            BaseUserStore.sendEmailConfirmation(client);
             return null;
         }
     }
@@ -809,7 +813,7 @@ public class AsyncUserStore {
 
         @Override
         protected Void executeAsync() throws IOException {
-            UserStore.forgotUsername(client, email);
+            BaseUserStore.forgotUsername(client, email);
             return null;
         }
     }
@@ -831,7 +835,7 @@ public class AsyncUserStore {
 
         @Override
         protected User executeAsync() throws IOException {
-            return UserStore.loginKinveyAuthToken(userID, authToken, client);
+            return BaseUserStore.loginKinveyAuthToken(userID, authToken, client);
 
         }
     }

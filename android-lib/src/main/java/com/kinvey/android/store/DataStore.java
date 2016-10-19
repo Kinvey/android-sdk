@@ -35,12 +35,10 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.store.DataStore;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -54,7 +52,7 @@ import java.util.Map;
  * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link Client#dataStore convenience method.  DataStore
+ * This functionality can be accessed through the {@link DataStore convenience method.  BaseDataStore
  * gets and saves and sync entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
@@ -100,7 +98,7 @@ import java.util.Map;
  * @version $Id: $
  * @since 2.0
  */
-public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
+public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
@@ -116,9 +114,6 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
 
     private static final String KEY_PURGE = "KEY_PURGE";
-
-
-
 
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
@@ -142,7 +137,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType) {
+    protected DataStore(String collectionName, Class<T> myClass, AbstractClient client, StoreType storeType) {
         super(client, collectionName, myClass, storeType);
         loadMethodMap();
     }
@@ -153,24 +148,31 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * @param collectionName Name of the appData collection
      * @param myClass        Class Type to marshall data between.
      */
-    public AsyncDataStore(String collectionName, Class myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
+    public DataStore(String collectionName, Class<T> myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
         super(client, collectionName, myClass, storeType, networkManager);
         loadMethodMap();
+    }
+
+    public static <T extends GenericJson> DataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
+        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
+        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new DataStore<T>(collectionName, myClass, client, storeType);
     }
 
     private void loadMethodMap() {
         Map<String, Method> tempMap = new HashMap<String, Method>();
         try {
-            tempMap.put(KEY_GET_BY_ID, DataStore.class.getMethod("find", String.class));
-            tempMap.put(KEY_GET_BY_QUERY, DataStore.class.getMethod("find", Query.class));
-            tempMap.put(KEY_GET_ALL, DataStore.class.getMethod("find"));
-            tempMap.put(KEY_GET_BY_IDS, DataStore.class.getMethod("find", Iterable.class));
+            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod("find", String.class));
+            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class));
+            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find"));
+            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class));
 
-            tempMap.put(KEY_DELETE_BY_ID, DataStore.class.getMethod("delete", String.class));
-            tempMap.put(KEY_DELETE_BY_QUERY, DataStore.class.getMethod("delete", Query.class));
-            tempMap.put(KEY_DELETE_BY_IDS, DataStore.class.getMethod("delete", Iterable.class));
+            tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
 
-            tempMap.put(KEY_PURGE, DataStore.class.getMethod("purge"));
+            tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
@@ -197,7 +199,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
      *             new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity entity) { ... }
@@ -213,11 +215,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-
         new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
-
-//        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
-
     }
 
     /**
@@ -230,7 +228,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new String[]{"189472023", "10193583"}, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -261,7 +259,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
@@ -292,7 +290,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.get(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -320,7 +318,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -351,7 +349,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -378,7 +376,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     List<String> ids = ...
      *     myAppData.delete(ids, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
@@ -405,7 +403,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
@@ -468,7 +466,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     AsyncDataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
@@ -493,25 +491,15 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
         callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
-
-//            public void onSuccess(KinveyPushResponse result) {
-//                AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
-//
-//                    @Override
-//                    public void onSuccess(KinveyPullResponse<T> result) {
-//                        callback.onSuccess(result);
-
-
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
-               callback.onPullStarted();
-                AsyncDataStore.this.pull(query, new KinveyPullCallback<T>() {
+                callback.onPullStarted();
+                DataStore.this.pull(query, new KinveyPullCallback<T>() {
 
                     @Override
                     public void onSuccess(KinveyPullResponse<T> pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
-
                     }
 
                     @Override
@@ -558,7 +546,7 @@ public class AsyncDataStore<T extends GenericJson> extends DataStore<T> {
 
         @Override
         protected T executeAsync() throws IOException {
-            return (AsyncDataStore.super.save(entity));
+            return (DataStore.super.save(entity));
         }
     }
 }

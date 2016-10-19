@@ -21,10 +21,8 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.requests.data.PushRequest;
-import com.kinvey.java.store.requests.data.ReadRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
@@ -36,12 +34,11 @@ import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class DataStore<T extends GenericJson> {
+public class BaseDataStore<T extends GenericJson> {
 
     protected final AbstractClient client;
     private final String collection;
@@ -55,18 +52,18 @@ public class DataStore<T extends GenericJson> {
 
 
     /**
-     * Constructor for creating DataStore for given collection that will be mapped to itemType class
+     * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
      * @param collection collection name
      * @param itemType class that data should be mapped to
      * @param storeType type of storage that client want to use
      */
-    public DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
+    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
         this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
     }
 
-    protected  DataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
-                         NetworkManager<T> networkManager){
+    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
+                            NetworkManager<T> networkManager){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.storeType = storeType;
@@ -76,6 +73,13 @@ public class DataStore<T extends GenericJson> {
         cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
         this.networkManager = networkManager;
         this.collectionName = collection;
+    }
+
+    public static <T extends GenericJson> BaseDataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
+        Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
+        Preconditions.checkNotNull(storeType, "storeType cannot be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new BaseDataStore<T>(client, collectionName, myClass, storeType);
     }
 
     /**
@@ -266,7 +270,7 @@ public class DataStore<T extends GenericJson> {
 
 
     /**
-     * Set store type for current DataStore
+     * Set store type for current BaseDataStore
      * @param storeType
      */
     public void setStoreType(StoreType storeType) {
@@ -276,7 +280,7 @@ public class DataStore<T extends GenericJson> {
 
     /**
      * Getter for client
-     * @return Client instance for given DataStore
+     * @return Client instance for given BaseDataStore
      */
     public AbstractClient getClient() {
         return client;

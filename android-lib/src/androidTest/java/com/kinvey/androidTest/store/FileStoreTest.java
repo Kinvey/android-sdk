@@ -12,7 +12,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.AsyncDownloaderProgressListener;
 import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.store.AsyncUserStore;
+import com.kinvey.android.store.UserStore;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -22,7 +22,7 @@ import com.kinvey.java.dto.User;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStore;
+import com.kinvey.java.store.BaseUserStore;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +41,10 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 public class FileStoreTest {
 
-    Client client = null;
-    boolean success;
-    FileMetaData fileMetaDataResult;
-    StoreType storeTypeResult;
+    private Client client = null;
+    private boolean success;
+    private FileMetaData fileMetaDataResult;
+    private StoreType storeTypeResult;
 
     private static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
@@ -52,7 +52,7 @@ public class FileStoreTest {
         Throwable error;
 
 
-        public DefaultUploadProgressListener(CountDownLatch latch){
+        DefaultUploadProgressListener(CountDownLatch latch){
             this.latch = latch;
         }
 
@@ -146,7 +146,7 @@ public class FileStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        AsyncUserStore.login("test", "test", client, new KinveyClientCallback() {
+                        UserStore.login("test", "test", client, new KinveyClientCallback() {
                             @Override
                             public void onSuccess(Object result) {
 
@@ -215,7 +215,7 @@ public class FileStoreTest {
             public void run() {
                 Looper.prepare();
                 try {
-                    client.getFileStore(storeType).uploadAsync(f, metaData, listener);
+                    client.getFileStore(storeType).upload(f, metaData, listener);
                 } catch (IOException e) {
                     e.printStackTrace();
                     listener.onFailure(e);
@@ -298,7 +298,7 @@ public class FileStoreTest {
                         file.createNewFile();
                     }
                     final FileOutputStream fos = new FileOutputStream(file);
-                    client.getFileStore(storeType).downloadAsync(metaFile, fos, listener);
+                    client.getFileStore(storeType).download(metaFile, fos, listener);
 
                 } catch (IOException e) {
                     listener.onFailure(e);
@@ -352,7 +352,7 @@ public class FileStoreTest {
                     if (!file.exists()) {
                         file.createNewFile();
                     }
-                    client.getFileStore(storeType).remove(fileMetaData, callback);
+                    client.getFileStore(storeType).delete(fileMetaData.getId(), callback);
 
                 } catch (IOException e) {
                     callback.onFailure(e);
@@ -409,7 +409,7 @@ public class FileStoreTest {
                 Looper.prepare();
                 try {
                     String dst = client.getContext().getFilesDir() + "test.xml";
-                    client.getFileStore(storeType).downloadAsync(query, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
+                    client.getFileStore(storeType).download(query, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
 
@@ -482,7 +482,7 @@ public class FileStoreTest {
                 Looper.prepare();
                 try {
                     String dst = client.getContext().getFilesDir() + fileName;
-                    client.getFileStore(storeType).downloadAsync(fileName, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
+                    client.getFileStore(storeType).download(fileName, dst, new AsyncDownloaderProgressListener<FileMetaData[]>() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
                             Log.d("downloadFileByFileName", String.valueOf(downloader.getProgress()));
