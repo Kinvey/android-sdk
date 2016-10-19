@@ -195,18 +195,13 @@ public class MediaHttpDownloader {
      * @param out output stream to dump bytes as they stream off the wire
      * @throws IOException
      */
-    public void download(FileMetaData metaData, OutputStream out) throws IOException {
+    public FileMetaData download(FileMetaData metaData, OutputStream out) throws IOException {
         Preconditions.checkArgument(downloadState == DownloadState.NOT_STARTED);
         updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
+        boolean isDownloaded = false;
 
         // Make initial request to get the unique upload URL.
 
-        if (metaData == null){
-            if (progressListener != null) {
-                progressListener.onFailure(new KinveyException("BlobNotFound", "This blob not found for this app backend", "The file being downloaded does not exist."));
-            }
-        	return;
-        }
 
         GenericUrl downloadUrl;
         if(metaData.getDownloadURL() != null){
@@ -217,7 +212,7 @@ public class MediaHttpDownloader {
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
 
-        while (true && !cancelled) {
+        while (!cancelled) {
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
             currentRequest.setSuppressUserAgentSuffix(true);
             long currentRequestLastBytePos = bytesDownloaded + chunkSize - 1;
@@ -225,15 +220,14 @@ public class MediaHttpDownloader {
                 // If last byte position has been specified use it iff it is smaller than the chunksize.
                 currentRequestLastBytePos = Math.min(lastBytePos, currentRequestLastBytePos);
             }
-            currentRequest.getHeaders().setRange(
-                    "bytes=" + bytesDownloaded + "-" + currentRequestLastBytePos);
+//            currentRequest.getHeaders().setRange(
+//                    "bytes=" + bytesDownloaded + "-" + currentRequestLastBytePos);
 
             if (backOffPolicyEnabled) {
                 // Set ExponentialBackOffPolicy as the BackOffPolicy of the HTTP Request which will
                 // retry the same request again if there is a server error.
                 currentRequest.setBackOffPolicy(new ExponentialBackOffPolicy());
             }
-
             HttpResponse response = currentRequest.execute();
             if (response.getContent() != null)
                 IOUtils.copy(response.getContent(), out);
@@ -246,12 +240,14 @@ public class MediaHttpDownloader {
                 // All required bytes have been downloaded from the server.
                 bytesDownloaded = mediaContentLength;
                 updateStateAndNotifyListener(DownloadState.DOWNLOAD_COMPLETE);
-                return;
+                isDownloaded = true;
+                return metaData;
             }
 
             bytesDownloaded = nextByteIndex;
             updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
         }
+        return isDownloaded ? metaData : null;
     }
 
 
