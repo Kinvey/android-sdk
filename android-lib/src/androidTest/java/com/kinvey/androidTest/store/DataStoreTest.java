@@ -71,11 +71,13 @@ public class DataStoreTest {
                         UserStore.login("test", "test", client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
+                                assertNotNull(result);
                                 latch.countDown();
                             }
 
                             @Override
                             public void onFailure(Throwable error) {
+                                assertNull(error);
                                 latch.countDown();
                             }
                         });
@@ -532,6 +534,7 @@ public class DataStoreTest {
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
+        assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
@@ -544,7 +547,7 @@ public class DataStoreTest {
         save(store, createPerson("PersonForTestPush"));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
-        assertNotNull(pushCallback.error);
+        assertTrue(pushCallback.error != null || pushCallback.result.getListOfExceptions() != null);
         assertNull(pushCallback.result);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
@@ -558,6 +561,7 @@ public class DataStoreTest {
         DefaultKinveyPushCallback pushCallback = push(store, 60);
         assertFalse(pushCallback.error == null && pushCallback.result == null);
         assertNull(pushCallback.error);
+        assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
     }
@@ -605,6 +609,7 @@ public class DataStoreTest {
         assertNull(deleteCallback.error);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
+        assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         Log.d("testPull", " : clearing backend store successful");
     }
 

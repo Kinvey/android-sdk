@@ -148,7 +148,7 @@ public class SyncManager {
      * @param client kinvey client to execute request with
      * @param request Sync request to be executed
      */
-    public void executeRequest(final AbstractClient client, SyncRequest request)  {
+    public void executeRequest(final AbstractClient client, SyncRequest request) throws IOException {
 
         client.setClientAppVersion(request.getEntityID().customerVersion);
         client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
@@ -172,6 +172,7 @@ public class SyncManager {
                     GenericJson ret = networkDataStore.save(entity);
                 } catch (Exception e){
                     enqueueRequest(request);
+                    throw e;
                 }
             }
         } else if (request.getHttpVerb().equals(SyncRequest.HttpVerb.DELETE)){
@@ -184,6 +185,7 @@ public class SyncManager {
                     networkDataStore.delete(q);
                 } catch(Exception e) {
                     enqueueRequest(request);
+                    throw e;
                 }
 
 
@@ -206,6 +208,7 @@ public class SyncManager {
                     networkDataStore.delete(q);
                 } catch(Exception e) {
                     enqueueRequest(request);
+                    throw e;
                 }
 
             } else {
@@ -215,6 +218,7 @@ public class SyncManager {
                     } catch(Exception e) {
                         //TODO: need to check the errors
                         //enqueueRequest(request);
+                        throw e;
                     }
 
                 }

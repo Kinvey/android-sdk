@@ -227,7 +227,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Push local changes to network
      * should be user with {@link StoreType#SYNC}
      */
-    public void pushBlocking() {
+    public void pushBlocking() throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");

@@ -28,6 +28,7 @@ import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.SocketTimeoutException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,8 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
                 pushResponse.setSuccessCount(++progress);
             } catch (AccessControlException | KinveyException e) { //TODO check Exception
                 errors.add(e);
+            } catch (Exception e) {
+                callback.onFailure(e);
             }
             callback.onProgress(pushResponse.getSuccessCount(), requests.size());
         }
