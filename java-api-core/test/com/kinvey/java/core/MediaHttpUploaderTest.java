@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.java.core;
 
@@ -61,15 +61,6 @@ public class MediaHttpUploaderTest extends TestCase {
             @Override
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
                 argValueRecorder.push(uploader.getUploadState());
-            }
-
-            @Override
-            public void onSuccess(FileMetaData result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
             }
         });
         MockKinveyClientRequest<Void> initiationClientRequest = new MockKinveyClientRequest<Void>("GET", HttpTesting.SIMPLE_URL, null, Void.class);

@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,7 +11,7 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
 package com.kinvey.java;
 
@@ -64,16 +64,6 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
             public void progressChanged(MediaHttpUploader uploader) throws IOException {
 
             }
-
-            @Override
-            public void onSuccess(FileMetaData result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-
-            }
         });
         HttpRequest request = upload.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
@@ -99,16 +89,6 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
                     mockContent, new UploaderProgressListener() {
                         @Override
                         public void progressChanged(MediaHttpUploader uploader) throws IOException {
-
-                        }
-
-                        @Override
-                        public void onSuccess(FileMetaData result) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
 
                         }
                     });
@@ -158,10 +138,10 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
         try {
             networkFileManagerApiUnderTest.deleteBlocking(new FileMetaData("testfilename.txt"));
         } catch (IOException e) {
-            fail("file api should not throw an exception on delete");
+            fail("file api should not throw an exception on remove");
         }
     }
-    
+
     public void testFileCustomVersion() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
         networkFileManagerApi.setClientAppVersion("1.2.3");
@@ -171,7 +151,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
     	assertEquals("1.2.3", (String) header);
     }
-    
+
     public void testFileCustomHeader() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
     	GenericJson custom = new GenericJson();
@@ -181,26 +161,26 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         NetworkFileManager.DownloadMetadataAndFile request = networkFileManagerApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
-    	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);    	
-    	
+    	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);
+
     }
-    
+
     public void testFileCustomVersionNull() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
     	networkFileManagerApi.setClientAppVersion(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         NetworkFileManager.DownloadMetadataAndFile request = networkFileManagerApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
-    	assertEquals(null, header);    	
+    	assertEquals(null, header);
     }
-    
+
     public void testFileCustomHeaderNull() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
     	networkFileManagerApi.setCustomRequestProperties(null);
     	FileMetaData meta = new FileMetaData("testfilename.txt");
         NetworkFileManager.DownloadMetadataAndFile request = networkFileManagerApi.prepDownloadBlocking(meta);
         Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
-    	assertEquals(null, header);      	
+    	assertEquals(null, header);
     }
 
     private static class MockNetworkFileManager extends NetworkFileManager {
