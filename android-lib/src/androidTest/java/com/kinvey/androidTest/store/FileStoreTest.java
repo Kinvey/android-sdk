@@ -12,6 +12,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.AsyncDownloaderProgressListener;
 import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.store.FileStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
@@ -149,7 +150,7 @@ public class FileStoreTest {
                         UserStore.login("test", "test", client, new KinveyClientCallback() {
                             @Override
                             public void onSuccess(Object result) {
-
+                                latch.countDown();
                             }
 
                             @Override
@@ -209,7 +210,7 @@ public class FileStoreTest {
         nullUpload(StoreType.SYNC);
     }
 
-    public void uploadFile(final StoreType storeType, final AsyncUploaderProgressListener listener,
+    public void uploadFile(final StoreType storeType, final AsyncUploaderProgressListener<FileMetaData> listener,
                            final File f, final FileMetaData metaData) throws InterruptedException, IOException {
         new Thread(new Runnable() {
             public void run() {
@@ -288,7 +289,7 @@ public class FileStoreTest {
         downloadFile(StoreType.SYNC);
     }
 
-    public void downloadFile(final StoreType storeType, final FileMetaData metaFile, final AsyncDownloaderProgressListener listener) throws InterruptedException, IOException {
+    public void downloadFile(final StoreType storeType, final FileMetaData metaFile, final AsyncDownloaderProgressListener<FileMetaData> listener) throws InterruptedException, IOException {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -348,11 +349,8 @@ public class FileStoreTest {
             public void run() {
                 Looper.prepare();
                 try {
-                    File file = new File(client.getContext().getFilesDir(), "testDownload.xml");
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-                    client.getFileStore(storeType).delete(fileMetaData.getId(), callback);
+
+                    client.getFileStore(storeType).remove(fileMetaData, callback);
 
                 } catch (IOException e) {
                     callback.onFailure(e);

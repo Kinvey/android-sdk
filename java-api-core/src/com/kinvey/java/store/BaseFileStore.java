@@ -16,7 +16,6 @@
 
 package com.kinvey.java.store;
 
-import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.Key;
@@ -35,15 +34,13 @@ import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.file.FileUtils;
 
-import java.io.FileNotFoundException;
-import java.util.List;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -93,8 +90,8 @@ public class BaseFileStore {
         }
 
         NetworkFileManager.UploadMetadataAndFile upload =
-                networkFileManager.prepUploadBlocking(metadata,
-                        new FileContent(metadata.getMimetype(), file), listener);
+                networkFileManager.prepUploadBlocking(fileMetadataWithPath,
+                        new FileContent(fileMetadataWithPath.getMimetype(), file), listener);
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -138,16 +135,16 @@ public class BaseFileStore {
         return upload.execute();
     };
 
-    public Integer delete(String id) throws IOException {
-        Preconditions.checkNotNull(id, "metadata must not be null");
+    public Integer remove(FileMetaData metadata) throws IOException {
+        Preconditions.checkNotNull(metadata.getId(), "metadata must not be null");
         switch (storeType.writePolicy) {
             case FORCE_LOCAL:
-                cache.delete(id);
+                cache.delete(metadata.getId());
                 return 1;
             case LOCAL_THEN_NETWORK:
-                cache.delete(id);
+                cache.delete(metadata.getId());
             case FORCE_NETWORK:
-                return networkFileManager.deleteBlocking(id).execute().getCount();
+                return networkFileManager.deleteBlocking(metadata.getId()).execute().getCount();
             default:
                 return 0;
         }
