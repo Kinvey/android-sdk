@@ -343,7 +343,7 @@ public class DataStoreTest {
     }
 
 
-    @Test
+/*    @Test
     public void testCustomTag() {
         String path = client.getContext().getFilesDir().getAbsolutePath();
         String customPath = path + "/_baas.kinvey.com_-1";
@@ -352,7 +352,7 @@ public class DataStoreTest {
         assertFalse(file.exists());
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(file.exists());
-    }
+    }*/
 
     private void removeFiles(String path) {
         File file = new File(path);
