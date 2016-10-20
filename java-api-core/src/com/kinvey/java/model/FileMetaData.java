@@ -17,7 +17,10 @@
 package com.kinvey.java.model;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Data;
 import com.google.api.client.util.Key;
+
+import java.util.Map;
 
 /**
  * This class maintains information about a file that has been stored with Kinvey.  Every file has a unique ID, as well as other attributes
@@ -28,7 +31,7 @@ import com.google.api.client.util.Key;
  *
  * @author edwardf
  */
-public class FileMetaData extends GenericJson{
+public class FileMetaData extends GenericJson {
 
 
     @Key("_id")
@@ -43,8 +46,14 @@ public class FileMetaData extends GenericJson{
     @Key("mimeType")
     private String mimetype;
 
+    @Key("_public")
+    private boolean _public = false;
+
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
+
+    @Key("_kmd")
+    private KinveyMetaData kinveyMetaData;
 
     @Key("_uploadURL")
     private String uploadUrl;
@@ -52,9 +61,18 @@ public class FileMetaData extends GenericJson{
     @Key("_downloadURL")
     private String downloadURL;
 
-    @Key("_public")
-    private boolean _public = false;
+    /// Expiration data of the 'downloadURL'.
+    private Data expiresAt;
 
+    private Map<String, String> uploadHeaders;
+
+    private Map<String, Object> resumeDownloadData;
+
+    private String etag;
+
+    private String path;
+
+    private String pathUrl;
 
     /**
      * Create a new instance, without setting any fields
@@ -136,5 +154,53 @@ public class FileMetaData extends GenericJson{
 
     public void setPublic(boolean isPublic) {
         this._public = isPublic;
+    }
+
+    public KinveyMetaData getKinveyMetaData() {
+        return kinveyMetaData;
+    }
+
+    public void setKinveyMetaData(KinveyMetaData kinveyMetaData) {
+        this.kinveyMetaData = kinveyMetaData;
+    }
+
+    public Map<String, String> getUploadHeaders() {
+        return uploadHeaders;
+    }
+
+    public void setUploadHeaders(Map<String, String> uploadHeaders) {
+        this.uploadHeaders = uploadHeaders;
+    }
+
+    public Map<String, Object> getResumeDownloadData() {
+        return resumeDownloadData;
+    }
+
+    public void setResumeDownloadData(Map<String, Object> resumeDownloadData) {
+        this.resumeDownloadData = resumeDownloadData;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPathUrl() {
+        return pathUrl;
+    }
+
+    public void setPathUrl(String pathUrl) {
+        this.pathUrl = pathUrl;
     }
 }

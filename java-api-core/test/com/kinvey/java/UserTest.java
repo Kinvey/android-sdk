@@ -294,6 +294,7 @@ public class UserTest extends KinveyMockUnitTest {
     	GetMICAccessToken token = requestManager.getMICToken("MyToken");
     	GenericJson result =  (GenericJson) token.execute();
 
+        //check
 /*        if (getClient().isUserLoggedIn()) {
             requestManager.logout().execute();
         }*/

@@ -33,4 +33,6 @@ public interface FileCache {
     public String getFilenameForID(AbstractClient client, String id);
 
     public void save(AbstractClient client, FileMetaData meta, InputStream is);
+
+    public void remove(AbstractClient client, String id);
 }

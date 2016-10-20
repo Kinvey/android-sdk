@@ -16,6 +16,8 @@
 
 package com.kinvey.java.core;
 
+import com.kinvey.java.model.FileMetaData;
+
 import java.io.IOException;
 
 
@@ -45,7 +47,7 @@ import java.io.IOException;
  * </pre>
  *
  */
-public interface DownloaderProgressListener extends KinveyClientCallback<Void> {
+public interface DownloaderProgressListener{
 
   /**
    * Called to notify that progress has been changed.
