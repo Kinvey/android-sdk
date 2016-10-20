@@ -42,7 +42,7 @@ public class BaseDataStore<T extends GenericJson> {
 
     protected final AbstractClient client;
     private final String collection;
-    private StoreType storeType;
+    protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
     NetworkManager<T> networkManager;
@@ -227,7 +227,8 @@ public class BaseDataStore<T extends GenericJson> {
      * Push local changes to network
      * should be user with {@link StoreType#SYNC}
      */
-    public void pushBlocking() {
+    public void pushBlocking() throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new PushRequest<T>(collection, client).execute();
@@ -237,18 +238,16 @@ public class BaseDataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public List<T> pullBlocking(Query query) {
-            Preconditions.checkNotNull(client, "client must not be null.");
+    public List<T> pullBlocking(Query query) throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSycManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         List<T> networkData = null;
-        try {
-            query = query == null ? client.query() : query;
-            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
-            cache.delete(query);
-            cache.save(networkData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        query = query == null ? client.query() : query;
+        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
+        cache.delete(query);
+        cache.save(networkData);
         return networkData;
     }
 
@@ -256,12 +255,13 @@ public class BaseDataStore<T extends GenericJson> {
      * Run sync operation to sync local and network storages
      * @param query query to pull the objects
      */
-    public void syncBlocking(Query query) {
+    public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
     }
 
-    public void purge(){
+    public void purge() throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSycManager().clear(collectionName);

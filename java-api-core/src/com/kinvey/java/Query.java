@@ -240,7 +240,7 @@ public class Query extends AbstractQuery implements Serializable {
 //        return this;
 //    }
     /**
-     * Add a filter condition for a specific field holds an array and containsa ll the values
+     * Add a filter condition for a specific field holds an array and contains all the values
      *
      * @param key Field to filter on
      * @param value An array of values Values

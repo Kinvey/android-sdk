@@ -20,6 +20,8 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
+
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
     }
 
     @Override
-    public Void execute() {
+    public Void execute() throws IOException {
         List<SyncRequest> requestList = syncManager.popSingleQueue(collectionName);
         for (SyncRequest syncRequest: requestList) {
             syncManager.executeRequest(client, syncRequest);

@@ -32,6 +32,8 @@ import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +148,7 @@ public class SyncManager {
      * @param client kinvey client to execute request with
      * @param request Sync request to be executed
      */
-    public void executeRequest(final AbstractClient client, SyncRequest request)  {
+    public void executeRequest(final AbstractClient client, SyncRequest request) throws IOException {
 
         client.setClientAppVersion(request.getEntityID().customerVersion);
         client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
@@ -170,35 +172,57 @@ public class SyncManager {
                     GenericJson ret = networkDataStore.save(entity);
                 } catch (Exception e){
                     enqueueRequest(request);
+                    throw e;
                 }
             }
         } else if (request.getHttpVerb().equals(SyncRequest.HttpVerb.DELETE)){
             String curID = request.getEntityID().id;
 
-            if (curID.startsWith("{") && curID.endsWith("}")){
+            if (curID != null && curID.startsWith("{") && curID.endsWith("}")){
                 //it's a query
                 Query q = new Query().setQueryString(curID);
                 try {
                     networkDataStore.delete(q);
                 } catch(Exception e) {
                     enqueueRequest(request);
+                    throw e;
                 }
 
 
-            }else{
-                //it's a single ID
+            } else if (curID == null && request.getUrl().contains("?query=")) {
+
+                String url = request.getUrl();
+                int index = url.indexOf("?query=") + 7;
+                String qString = url.substring(index);
+                String decodedQuery = null;
                 try {
-                    networkDataStore.delete(request.getEntityID().id);
+                    decodedQuery = URLDecoder.decode(qString, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                if (decodedQuery == null) {
+                    return;
+                }
+                Query q = new Query().setQueryString(decodedQuery);
+                try {
+                    networkDataStore.delete(q);
                 } catch(Exception e) {
-                    //TODO: need to check the errors
-                    //enqueueRequest(request);
+                    enqueueRequest(request);
+                    throw e;
                 }
 
+            } else {
+                    //it's a single ID
+                    try {
+                        networkDataStore.delete(request.getEntityID().id);
+                    } catch(Exception e) {
+                        //TODO: need to check the errors
+                        //enqueueRequest(request);
+                        throw e;
+                    }
+
+                }
             }
-
-
-
-        }
     }
 
     public int clear(String collectionName) {

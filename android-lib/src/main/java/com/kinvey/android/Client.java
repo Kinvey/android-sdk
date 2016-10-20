@@ -18,7 +18,6 @@ package com.kinvey.android;
 
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
@@ -49,8 +48,8 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.BaseUserStore;
+import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -447,6 +446,128 @@ public class Client extends AbstractClient {
 
 
         /**
+         * This constructor provides support for unit test
+         * <p>
+         * This constructor requires a  properties file, containing configuration for your Kinvey Client.
+         * Save this file within your Android project, at:  assets/kinvey.properties
+         * </p>
+         * <p>
+         * This constructor provides support for push notifications.
+         * </p>
+         * <p>
+         * <a href="http://devcenter.kinvey.com/android/guides/getting-started#InitializeClient">Kinvey Guide for initializing Client with a properties file.</a>
+         * </p>
+         *
+         * @param context - Your Android Application Context
+         * @param transport - Your HttpTransport
+         *
+         */
+        public Builder(Context context, HttpTransport transport) {
+            super(transport, null);
+
+            try {
+                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
+
+                super.getProps().load(in);
+            } catch (IOException e) {
+                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+            } catch (NullPointerException ex){
+                Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+            }
+
+            if (super.getString(Option.BASE_URL) != null) {
+                this.setBaseUrl(super.getString(Option.BASE_URL));
+            }
+
+            if (super.getString(Option.PORT) != null){
+                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.GCM_PUSH_ENABLED) != null){
+                this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
+            }
+
+            if (super.getString(Option.GCM_PROD_MODE) != null){
+                this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
+            }
+
+            if (super.getString(Option.GCM_SENDER_ID) != null){
+                this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
+            }
+
+            if (super.getString(Option.DEBUG_MODE) != null){
+                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
+            }
+
+            if (super.getString(Option.SYNC_RATE) != null){
+                this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
+            }
+
+            if (super.getString(Option.BATCH_SIZE) != null){
+                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
+            }
+
+            if (super.getString(Option.BATCH_RATE) != null){
+                this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
+            }
+
+            if (super.getString(Option.PARSER) != null){
+                try {
+                    AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
+                    this.factory = AndroidJson.newCompatibleJsonFactory(parser);
+                }catch (Exception e){
+                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                    Logger.WARNING("Defaulting to: GSON");
+//                    e.printStackTrace();
+                    this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
+                }
+            }
+            setJsonFactory(factory);
+
+            if (super.getString(Option.MIC_BASE_URL) != null) {
+                this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
+            }
+            if (super.getString(Option.MIC_VERSION) != null){
+                this.MICVersion = super.getString(Option.MIC_VERSION);
+            }
+
+            String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
+            String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
+
+            KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context));
+            this.setKinveyClientRequestInitializer(initializer);
+
+            this.context = context.getApplicationContext();
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+            if (getCredentialStore() == null){
+                try{
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                } catch (AndroidCredentialStoreException ex) {
+                    Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
+                } catch (IOException ex) {
+                    Logger.ERROR("Credential store failed to load");
+                }
+            }
+
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.kinvey.java.core.AbstractKinveyJsonClient.Builder#
+         * setHttpRequestInitializer
+         * (com.google.api.client.http.HttpRequestInitializer)
+         */
+        @Override
+        public Builder setHttpRequestInitializer(
+                HttpRequestInitializer httpRequestInitializer) {
+            return (Builder) super.setHttpRequestInitializer(httpRequestInitializer);
+        }
+
+        /**
          * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
          * set for the Android Operating System.
          * <p>
@@ -566,7 +687,7 @@ public class Client extends AbstractClient {
          * which contains factory methods for accessing various functionality.
          */
         @Override
-        public Client build() {
+        public Client build(){
 
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
@@ -753,44 +874,31 @@ public class Client extends AbstractClient {
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
-            new AsyncTask<Void, Void, User>(){
 
-                private Exception error = null;
-                @Override
-                protected User doInBackground(Void... voids) {
-                    User result = null;
-                    try{
-                        result = BaseUserStore.convenience(client);
-                        client.setUser(result);
-                    }catch (Exception error){
-                        this.error = error;
-                        if ((error instanceof HttpResponseException)) {
-                            try {
-                                BaseUserStore.logout(client);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    return result;
-                }
-
-                @Override
-                protected void onPostExecute(User response) {
-                    if(retrieveUserCallback == null){
-                        return;
-                    }
-
-                    if(error != null){
-                        retrieveUserCallback.onFailure(error);
-                    }else{
-                        retrieveUserCallback.onSuccess(response);
+            User result = null;
+            Exception exception = null;
+            try{
+                result = BaseUserStore.convenience(client);
+                client.setUser(result);
+            }catch (Exception error){
+                exception = error;
+                if (error instanceof HttpResponseException) {
+                    try {
+                        BaseUserStore.logout(client);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
+            if(retrieveUserCallback == null){
+                return;
+            }
 
-            }.execute();
-
-
+            if(exception != null){
+                retrieveUserCallback.onFailure(exception);
+            }else{
+                retrieveUserCallback.onSuccess(result);
+            }
 
         }
 
