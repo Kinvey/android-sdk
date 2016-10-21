@@ -36,6 +36,10 @@ android {
   lintOptions {
     abortOnError false
   }
+  packagingOptions {
+    exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
+    exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
+  }
 }
 
 configurations {
@@ -134,7 +138,10 @@ task docgen(type: Javadoc) {
   classpath = configurations.classpaths + configurations.compile + configurations.testCompile
   title = null
 
-  options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
+  options.bootClasspath = [
+      file(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar"),
+      file(System.getenv('ANDROID_HOME') + "/platforms/android-10/android.jar")
+  ]
   options.overview = "javadoc/overview.html"
 
   options.addStringOption("quiet")

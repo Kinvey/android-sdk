@@ -31,7 +31,7 @@ subprojects {
 task makeAndroidJar(type: Copy)  {
     from 'android-lib/build/intermediates/bundles/release'
     from 'android-lib/build/outputs/aar'
-    into 'android-lib/build/libs'
+    into 'release/build/android'
     include('classes.jar')
     include('android-lib-release.aar')
     rename('classes.jar', 'kinvey-android-' + version + '.jar')
@@ -40,7 +40,6 @@ task makeAndroidJar(type: Copy)  {
 }
 
 task copyAndroid(type: Copy)  {
-  from 'android-lib/build/libs'
   from 'java-api-core/build/libs'
   into 'release/build/android'
 }
@@ -135,8 +134,8 @@ task release(dependsOn: ['prepCore', /*'prepJava',*/ 'prepAndroid'/*, 'prepSecur
 prepAndroid.mustRunAfter prepCore
 //prepJava.mustRunAfter prepAndroid
 //prepSecure.mustRunAfter prepJava
-prepSecure.mustRunAfter prepAndroid
-//makeAndroidJar.mustRunAfter prepSecure
+//prepSecure.mustRunAfter prepAndroid
+makeAndroidJar.mustRunAfter prepAndroid
 copyAndroid.mustRunAfter makeAndroidJar
 //copyJava.mustRunAfter copyAndroid
 //zipAndroid.mustRunAfter copyJava
