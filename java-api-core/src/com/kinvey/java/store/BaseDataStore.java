@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
@@ -87,16 +88,17 @@ public class BaseDataStore<T extends GenericJson> {
      * @param id the id of object we need to find
      * @return null or object that matched given id
      */
-    public T find (String id){
+    public T find (String id, KinveyCachedClientCallback<T> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         T ret = null;
-        try {
-            ret = new ReadSingleRequest<T>(cache, id, this.storeType.readPolicy, networkManager).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            ret = new ReadSingleRequest<T>(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute();
+            cachedCallback.onSuccess(ret);
         }
+        ret = new ReadSingleRequest<T>(cache, id, this.storeType.readPolicy, networkManager).execute();
         return ret;
     }
 
@@ -105,16 +107,17 @@ public class BaseDataStore<T extends GenericJson> {
      * @param ids collection of strings that identify a set of ids we have to look for
      * @return List of object found for given ids
      */
-    public List<T> find(Iterable<String> ids){
+    public List<T> find(Iterable<String> ids, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         List<T> ret = null;
-        try {
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
-        } catch (IOException e){
-
+            cachedCallback.onSuccess(ret);
         }
+        ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
         return ret;
     }
 
@@ -124,17 +127,18 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query prepared query we have to look with
      * @return list of objects that are found
      */
-    public List<T> find (Query query) {
+    public List<T> find (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
         List<T> ret = null;
-        try {
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
-        } catch (IOException e){
-
+            cachedCallback.onSuccess(ret);
         }
+        ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
         return ret;
     }
 
@@ -143,16 +147,17 @@ public class BaseDataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
-    public List<T> find() {
+    public List<T> find(KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
         List<T> ret = null;
-        try {
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
-        } catch (IOException e){
-
+            cachedCallback.onSuccess(ret);
         }
+        ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
         return ret;
     }
 

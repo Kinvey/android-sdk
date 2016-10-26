@@ -17,7 +17,6 @@
 package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
@@ -48,11 +47,10 @@ public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyData
         T ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-            case PREFER_LOCAL:
                 ret = cache.get(id);
                 break;
             case FORCE_NETWORK:
-            case PREFER_NETWORK:
+            case BOTH: // Logic for getting cached data implemented before running Request
                 ret = networkManager.getEntityBlocking(id).execute();
                 break;
         }

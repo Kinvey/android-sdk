@@ -17,7 +17,6 @@
 package com.kinvey.java.store.requests.data.delete;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -59,15 +58,14 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = deleteCached();
-                break;
-            case FORCE_NETWORK:
-                KinveyDeleteResponse response = request.execute();
-                ret = response.getCount();
+                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
                 break;
             case LOCAL_THEN_NETWORK:
                 //write to local, and push to sync network request
-                ret = deleteCached();
-                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
+                deleteCached();
+            case FORCE_NETWORK:
+                KinveyDeleteResponse response = request.execute();
+                ret = response.getCount();
                 break;
         }
         return ret;

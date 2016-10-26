@@ -34,6 +34,7 @@ import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
+import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -163,10 +164,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private void loadMethodMap() {
         Map<String, Method> tempMap = new HashMap<String, Method>();
         try {
-            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod("find", String.class));
-            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class));
-            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find"));
-            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class));
+            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod("find", String.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
 
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
@@ -211,11 +212,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entityID entityID to fetch
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(String entityID, KinveyClientCallback<T> callback)  {
+    public void find(String entityID, KinveyClientCallback<T> callback, KinveyCachedClientCallback<T> cachedCallback)  {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, cachedCallback).execute();
     }
 
     /**
@@ -240,11 +241,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Iterable<String> ids, KinveyListCallback<T> callback){
+    public void find(Iterable<String> ids, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, cachedCallback).execute();
     }
 
 
@@ -273,11 +274,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Query query, KinveyListCallback<T> callback){
+    public void find(Query query, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, cachedCallback).execute();
     }
 
     /**
@@ -301,10 +302,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(KinveyListCallback<T> callback) {
+    public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, cachedCallback).execute();
     }
 
 

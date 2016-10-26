@@ -161,7 +161,7 @@ public class BaseFileStore {
                 metaData = new FileMetaData[list.size()];
                 list.toArray(metaData);
                 break;
-            case PREFER_LOCAL:
+            case BOTH:
                 List<FileMetadataWithPath> listPreferLocal = cache.get(q);
                 metaData = new FileMetaData[listPreferLocal.size()];
                 listPreferLocal.toArray(metaData);
@@ -172,14 +172,14 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
-            case PREFER_NETWORK:
+/*            case PREFER_NETWORK:
                 metaData = download.execute();
                 if (metaData == null || metaData.length == 0) {
                     List<FileMetadataWithPath> listPreferNetwork = cache.get(q);
                     metaData = new FileMetaData[listPreferNetwork.size()];
                     listPreferNetwork.toArray(metaData);
                 }
-                break;
+                break;*/
 
         }
 
@@ -196,7 +196,7 @@ public class BaseFileStore {
             case FORCE_LOCAL:
                 metaData = cache.get(id);
                 break;
-            case PREFER_LOCAL:
+            case BOTH:
                 metaData = cache.get(id);
                 if (metaData == null) {
                     metaData = download.execute();
@@ -205,12 +205,12 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
-            case PREFER_NETWORK:
+/*            case PREFER_NETWORK:
                 metaData = download.execute();
                 if (metaData == null) {
                     metaData = cache.get(id);
                 }
-                break;
+                break;*/
         }
 
         return metaData;
@@ -340,7 +340,7 @@ public class BaseFileStore {
                 }
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
-            case PREFER_LOCAL:
+            case BOTH:
                 f = getCachedFile(metadata);
 
                 if (f == null) {
@@ -353,7 +353,7 @@ public class BaseFileStore {
                     return metadata;
                 }
                 break;
-            case PREFER_NETWORK:
+            /*case PREFER_NETWORK:
 
                 DownloaderProgressListener wrappedListener = new DownloaderProgressListener() {
                     @Override
@@ -384,7 +384,7 @@ public class BaseFileStore {
                     FileUtils.copyStreams(new FileInputStream(f), os);
                     return fileMetadataWithPath;
                 }
-                break;
+                break;*/
         }
         return null;
     }
