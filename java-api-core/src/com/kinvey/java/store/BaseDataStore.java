@@ -114,7 +114,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         List<T> ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            ret = new ReadIdsRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute();
             cachedCallback.onSuccess(ret);
         }
         ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
@@ -135,7 +135,7 @@ public class BaseDataStore<T extends GenericJson> {
         // perform request based on policy
         List<T> ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            ret = new ReadQueryRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
             cachedCallback.onSuccess(ret);
         }
         ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
@@ -154,7 +154,7 @@ public class BaseDataStore<T extends GenericJson> {
         // perform request based on policy
         List<T> ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
+            ret = new ReadAllRequest<T>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute();
             cachedCallback.onSuccess(ret);
         }
         ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
