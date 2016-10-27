@@ -16,10 +16,6 @@
 
 package com.kinvey.java.LinkedResources;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Map;
-
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
@@ -28,6 +24,10 @@ import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Implementation of a Client Request, which can download linked resources through the NetworkFileManager API as well as the NetworkManager API in one request.
@@ -117,12 +117,12 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 FileMetaData meta = new FileMetaData();
                 if (((Map) entity.get(key)).containsKey("_id")){
                     meta.setId(((Map) entity.get(key)).get("_id").toString());
-                    store.download(meta, entity.getFile(key).getOutput(), download);
+                    store.download(meta, entity.getFile(key).getOutput(), null, download);
 
                 }else if(((Map) entity.get(key)).containsKey("_loc")){
                     meta.setFileName(((Map) entity.get(key)).get("_loc").toString());
                     store.download(((Map) entity.get(key)).get("_loc").toString(),
-                            entity.getFile(key).getOutput(), download);
+                            entity.getFile(key).getOutput(), null, download);
 
                 }
 
