@@ -20,7 +20,6 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
-import com.kinvey.android.Client;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
@@ -265,7 +264,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
@@ -294,7 +293,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.CACHE);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.CACHE);
      *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
@@ -330,7 +329,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     Query myQuery = myAppData.query();
      *     myQuery.equals("age",21);
      *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
@@ -363,7 +362,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.CACHE);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.CACHE);
      *     Query myQuery = myAppData.query();
      *     myQuery.equals("age",21);
      *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
@@ -399,7 +398,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     myAppData.find(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
@@ -427,7 +426,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     myAppData.find(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -459,7 +458,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     myAppData.save(entityID, new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -490,7 +489,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
@@ -517,7 +516,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = kDataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     List<String> ids = ...
      *     myAppData.delete(ids, new KinveyDeleteCallback {
      *         public void onFailure(Throwable t) { ... }
@@ -544,7 +543,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.delete(myQuery, new KinveyDeleteCallback {
@@ -607,7 +606,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
      *     Query myQuery = new Query();
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
