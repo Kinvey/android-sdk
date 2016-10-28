@@ -53,7 +53,7 @@ import java.util.Map;
  * Wraps the {@link BaseDataStore} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
- * This functionality can be accessed through the {@link DataStore convenience method.  BaseDataStore
+ * This functionality can be accessed through the {@link DataStore} convenience method.  BaseDataStore
  * gets and saves and sync entities that extend {@link com.google.api.client.json.GenericJson}.  A class that extends GenericJson
  * can map class members to KinveyCollection properties using {@link com.google.api.client.util.Key} attributes.  For example,
  * the following will map a string "city" to a Kinvey collection attributed named "city":
