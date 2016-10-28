@@ -383,38 +383,6 @@ public class BaseFileStore {
                     }
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
-            /*case PREFER_NETWORK:
-
-                DownloaderProgressListener wrappedListener = new DownloaderProgressListener() {
-                    @Override
-                    public void progressChanged(MediaHttpDownloader downloader) throws IOException {
-                        listener.progressChanged(downloader);
-                    }
-                };
-                FileMetaData fileMetaData = null;
-                        try {
-                    fileMetaData = getNetworkFile(metadata, new FileOutputStream(f), wrappedListener);
-                } catch (KinveyException e) {
-                    File file = getCachedFile(metadata);
-                    if (file == null) {
-                        throw new KinveyException("FileMissing", "File Missing in cache", "");
-                            } else {
-                                FileUtils.copyStreams(new FileInputStream(f), os);
-                        return metadata;
-                            }
-                        }
-
-                FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
-                fileMetadataWithPath.putAll(fileMetaData);
-                fileMetadataWithPath.setPath(f.getAbsolutePath());
-
-                cache.save(fileMetadataWithPath);
-
-                if (f.exists()) {
-                    FileUtils.copyStreams(new FileInputStream(f), os);
-                    return fileMetadataWithPath;
-                }
-                break;*/
         }
         return null;
     }
