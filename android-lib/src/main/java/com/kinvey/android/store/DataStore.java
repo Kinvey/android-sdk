@@ -310,8 +310,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     public void find(Iterable<String> ids, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, cachedCallback).execute();
     }
@@ -343,8 +343,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(Query query, KinveyListCallback<T> callback){
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, null).execute();
     }
@@ -380,8 +380,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     public void find(Query query, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, cachedCallback).execute();
     }
@@ -408,8 +408,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(KinveyListCallback<T> callback) {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, null).execute();
     }
 
@@ -440,8 +440,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, cachedCallback).execute();
     }
 
@@ -469,8 +469,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyClientCallback<T>
      */
     public void save(T entity, KinveyClientCallback<T> callback)  {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
         new SaveRequest(entity, callback).execute();
 
@@ -556,8 +556,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void delete(Query query, KinveyDeleteCallback callback) {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute();
 
@@ -565,29 +565,29 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
 
     public void push(KinveyPushCallback callback){
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, storeType, callback).execute();
     }
 
     public void pull(Query query, KinveyPullCallback<T> callback) {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
     public void pull(KinveyPullCallback<T> callback) {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
     public void purge(KinveyPurgeCallback callback){
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         SyncManager syncManager = client.getSycManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
     }
