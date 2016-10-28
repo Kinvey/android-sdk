@@ -16,12 +16,30 @@
 
 package com.kinvey.java.store;
 
+import com.kinvey.java.Query;
+
 /**
  * Created by Prots on 2/4/16.
  */
 public enum StoreType {
+    /**
+     * This StoreType means that all changes will be done locally, and sending the local changes to the server is done via {@link BaseDataStore#pushBlocking()}
+     * updating local storage could be done via {@link BaseDataStore#pullBlocking(Query)}
+     * to perform both operation in batch use {@link BaseDataStore#syncBlocking(Query)}
+     */
     SYNC(ReadPolicy.FORCE_LOCAL, WritePolicy.FORCE_LOCAL, Long.MAX_VALUE),
+    /**
+     * This StoreType means that all fetch request may have 2 callbacks:
+     *  - Callback when cached data will be retreived
+     *  - Callbach when network data will be fetched
+     *  that store type is used if you need your app works even if network is down
+     *  all the changes will be stored both locally and remotely and sync in case of network failtures
+     */
     CACHE(ReadPolicy.BOTH, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
+    /**
+     * This store type means that all the changes goes dirrectly to the server
+     * no caching will be used
+     */
     NETWORK(ReadPolicy.FORCE_NETWORK, WritePolicy.FORCE_NETWORK, 0L);
 
     public ReadPolicy readPolicy;

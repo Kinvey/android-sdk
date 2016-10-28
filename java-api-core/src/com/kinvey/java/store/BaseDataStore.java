@@ -86,6 +86,7 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Look up for data with given id
      * @param id the id of object we need to find
+     * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return null or object that matched given id
      */
     public T find (String id, KinveyCachedClientCallback<T> cachedCallback) throws IOException{
@@ -103,8 +104,18 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
+     * Look up for data with given id
+     * @param id the id of object we need to find
+     * @return null or object that matched given id
+     */
+    public T find (String id) throws IOException {
+        return find(id, null);
+    }
+
+    /**
      * Look up for object that have id in given collection of ids
      * @param ids collection of strings that identify a set of ids we have to look for
+     * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return List of object found for given ids
      */
     public List<T> find(Iterable<String> ids, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException{
@@ -121,10 +132,20 @@ public class BaseDataStore<T extends GenericJson> {
         return ret;
     }
 
+    /**
+     * Look up for object that have id in given collection of ids
+     * @param ids collection of strings that identify a set of ids we have to look for
+     * @return List of object found for given ids
+     */
+    public List<T> find(Iterable<String> ids) throws IOException {
+        return find(ids, null);
+    };
+
 
     /**
      * Lookup objects in given collection by given query
      * @param query prepared query we have to look with
+     * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return list of objects that are found
      */
     public List<T> find (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
@@ -142,9 +163,18 @@ public class BaseDataStore<T extends GenericJson> {
         return ret;
     }
 
+    /**
+     * Lookup objects in given collection by given query
+     * @param query prepared query we have to look with
+     * @return list of objects that are found
+     */
+    public List<T> find (Query query) throws IOException {
+        return find(query, null);
+    }
 
     /**
      * get all objects for given collections
+     * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
     public List<T> find(KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
@@ -161,6 +191,13 @@ public class BaseDataStore<T extends GenericJson> {
         return ret;
     }
 
+    /**
+     * get all objects for given collections
+     * @return all objects in given collection
+     */
+    public List<T> find() throws IOException {
+        return find((KinveyCachedClientCallback<List<T>>)null);
+    }
 
     /**
      * Save multiple objects for collections

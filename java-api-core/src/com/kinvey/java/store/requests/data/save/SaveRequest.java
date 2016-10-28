@@ -21,6 +21,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -48,16 +49,32 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
     @Override
     public T execute() throws IOException {
         T ret = null;
+        NetworkManager<T>.Save save = networkManager.saveBlocking(object);
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = cache.save(object);
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager.saveBlocking(object));
+                        save);
                 break;
             case LOCAL_THEN_NETWORK:
-                cache.save(object);
+                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
+                        networkManager.getClient());
+                try {
+                    pushRequest.execute();
+                } catch (Throwable t){
+                    // silent fall, will be synced next time
+                }
+
+                ret = cache.save(object);
+                try{
+                    ret = save.execute();
+                } catch (IOException e) {
+                    syncManager.enqueueRequest(networkManager.getCollectionName(),
+                            save);
+                    throw e;
+                }
+                break;
             case FORCE_NETWORK:
-                NetworkManager<T>.Save save = networkManager.saveBlocking(object);
                 ret = save.execute();
                 break;
         }

@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Wraps the {@link NetworkManager} public methods in asynchronous functionality using native Android AsyncTask.
+ * Wraps the {@link BaseDataStore} public methods in asynchronous functionality using native Android AsyncTask.
  * <p/>
  * <p>
  * This functionality can be accessed through the {@link DataStore convenience method.  BaseDataStore
@@ -84,10 +84,10 @@ import java.util.Map;
  * Entity Set sample:
  * <pre>
  * {@code
- *     NetworkManager<EventEntity> myAppData = kinveyClient.appData("myCollection",EventEntity.class);
- *     myAppData.get(appData().query, new KinveyListCallback<EventEntity> {
+ *     DataStore<EventEntity> dataStore = DataStore.collection("myCollection",EventEntity.class, myClient, StoreType.SYNC);
+ *     dataStore.find(myClient.query(), new KinveyListCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
- *         public void onSuccess(EventEntity[] entities) { ... }
+ *         public void onSuccess(List<EventEntity> entities) { ... }
  *     });
  * }
  * </pre>
@@ -200,7 +200,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class).get("123",
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC).find("123",
      *             new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity entity) { ... }
@@ -212,27 +212,62 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entityID entityID to fetch
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(String entityID, KinveyClientCallback<T> callback, KinveyCachedClientCallback<T> cachedCallback)  {
-        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
-        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+    public void find(String entityID, KinveyClientCallback<T> callback)  {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, cachedCallback).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, null).execute();
     }
 
+
     /**
-     * Asynchronous request to fetch an array of Entities using an array of _ids.
+     * Asynchronous request to fetch a single Entity by ID with additional callback with data from cache.
      * <p>
-     * Constructs an asynchronous request to fetch an Array of Entities, filtering by the provided list of _ids.  Uses
-     * KinveyListCallback<T> to return an Array of type T.  This method uses a Query {@link Query}.
+     * Constructs an asynchronous request to fetch a single Entity by its Entity ID.  Returns an instance of that Entity
+     * via KinveyClientCallback<T>
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     myAppData.get(new String[]{"189472023", "10193583"}, new KinveyListCallback<EventEntity> {
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.CACHE).find("123",
+     *             new KinveyClientCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
-     *         public void onSuccess(EventEntity[] entities) { ... }
+     *         public void onSuccess(EventEntity entity) { ... }
+     *     }, new KinveyCachedClientCallback<EventEntity>(){
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity entity) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param entityID entityID to fetch
+     * @param callback either successfully returns list of resolved entities or an error
+     * @param cachedCallback either successfully returns list of resolved entities from cache or an error
+     *
+     */
+    public void find(String entityID, KinveyClientCallback<T> callback, KinveyCachedClientCallback<T> cachedCallback)  {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(entityID, "entityID must not be null.");
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, cachedCallback).execute();
+    }
+
+    /**
+     * Asynchronous request to fetch an list of Entities using an list of _ids.
+     * <p>
+     * Constructs an asynchronous request to fetch an List of Entities, filtering by the provided list of _ids.  Uses
+     * KinveyListCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entities) { ... }
      *     });
      * }
      * </pre>
@@ -240,6 +275,39 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
+     */
+    public void find(Iterable<String> ids, KinveyListCallback<T> callback){
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(ids, "ids must not be null.");
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, null).execute();
+    }
+
+    /**
+     * Asynchronous request to fetch an list of Entities using an list of _ids.
+     * <p>
+     * Constructs an asynchronous request to fetch an List of Entities, filtering by the provided list of _ids.  Uses
+     * KinveyListCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.CACHE);
+     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entities) { ... }
+     *     }, new KinveyCachedListCallback<EventEntity>(){
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entity) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param ids A list of _ids to query by.
+     * @param callback either successfully returns list of resolved entities or an error
+     * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     public void find(Iterable<String> ids, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
@@ -250,20 +318,20 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
 
     /**
-     * Asynchronous request to fetch an array of Entities using a Query object.
+     * Asynchronous request to fetch an list of Entities using a Query object.
      * <p>
-     * Constructs an asynchronous request to fetch an Array of Entities, filtering by a Query object.  Uses
-     * KinveyListCallback<T> to return an Array of type T.  Queries can be constructed with {@link Query}.
+     * Constructs an asynchronous request to fetch an List of Entities, filtering by a Query object.  Uses
+     * KinveyListCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
      * An empty Query object will return all items in the collection.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     Query myQuery = new Query();
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = myAppData.query();
      *     myQuery.equals("age",21);
-     *     myAppData.get(myQuery, new KinveyListCallback<EventEntity> {
+     *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
      *     });
@@ -274,6 +342,43 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
+    public void find(Query query, KinveyListCallback<T> callback){
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(query, "Query must not be null.");
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, null).execute();
+    }
+
+
+    /**
+     * Asynchronous request to fetch an list of Entities using a Query object.
+     * <p>
+     * Constructs an asynchronous request to fetch an List of Entities, filtering by a Query object.  Uses
+     * KinveyListCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
+     * An empty Query object will return all items in the collection.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.CACHE);
+     *     Query myQuery = myAppData.query();
+     *     myQuery.equals("age",21);
+     *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entities) { ... }
+     *     }, new KinveyCachedListCallback<EventEntity>(){
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entity) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param query {@link Query} to filter the results.
+     * @param callback either successfully returns list of resolved entities or an error
+     * @param cachedCallback either successfully returns list of resolved entities from cache or an error
+     */
     public void find(Query query, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
         Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
@@ -282,25 +387,57 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     }
 
     /**
-     * Asynchronous request to fetch an array of all Entities in a collection.
+     * Asynchronous request to fetch an list of all Entities in a collection.
      * <p>
-     * Constructs an asynchronous request to fetch an Array of all entities in a collection.  Uses
-     * KinveyListCallback<T> to return an Array of type T.
+     * Constructs an asynchronous request to fetch an List of all entities in a collection.  Uses
+     * KinveyListCallback<T> to return an List of type T.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *     DataStore<EventEntity> myAppData = kinveyClient.appData("myCollection", EventEntity.class);
-     *     myAppData.get(new KinveyListCallback<EventEntity> {
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.find(new KinveyListCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
-     *         public void onSuccess(EventEntity[] entities) { ... }
+     *         public void onSuccess(List<EventEntity> entities) { ... }
      *     });
      * }
      * </pre>
      * </p>
      *
      * @param callback either successfully returns list of resolved entities or an error
+     */
+    public void find(KinveyListCallback<T> callback) {
+        Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
+        Preconditions.checkArgument(Client.sharedInstance().isInitialize(), "client must be initialized.");
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, null).execute();
+    }
+
+
+    /**
+     * Asynchronous request to fetch an list of all Entities in a collection.
+     * <p>
+     * Constructs an asynchronous request to fetch an List of all entities in a collection.  Uses
+     * KinveyListCallback<T> to return an List of type T.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.find(new KinveyListCallback<EventEntity> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(EventEntity[] entities) { ... }
+     *     }, new KinveyCachedListCallback<EventEntity>(){
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entity) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param callback either successfully returns list of resolved entities or an error
+     * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
         Preconditions.checkNotNull(Client.sharedInstance(), "client must not be null");
