@@ -565,7 +565,27 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     }
 
-
+    /**
+     * Asynchronous request to push a collection of entites to backend.
+     * <p>
+     * Creates an asynchronous request to push a collection of entites.  Uses KinveyPushCallback to return a
+     * {@link KinveyPushResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.push(new KinveyPushCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(KinveyPushResponse kinveyPushResponse) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param callback KinveyPushCallback
+     */
     public void push(KinveyPushCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -573,6 +593,30 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, storeType, callback).execute();
     }
 
+    /**
+     * Asynchronous request to pull a collection of entites from backend.
+     * <p>
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback<T> to return a
+     * {@link KinveyPullResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     myAppData.pull(myQuery, new KinveyPullCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyPullCallback
+     */
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -580,6 +624,27 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
+    /**
+     * Asynchronous request to pull a collection of entites from backend.
+     * <p>
+     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * {@link KinveyPullResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.pull(new KinveyPullCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param callback KinveyPullCallback
+     */
     public void pull(KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -587,6 +652,27 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
+    /**
+     * Asynchronous request to clear cache from a collection of entity and pull all collection.
+     * <p>
+     * Creates an asynchronous request to clear cache from a collection of entity and pull all collection.
+     * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     myAppData.purge(new KinveyPurgeCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Void result) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param callback KinveyPurgeCallback
+     */
     public void purge(KinveyPurgeCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
