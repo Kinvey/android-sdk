@@ -982,12 +982,12 @@ public class DataStoreTest {
 
     @Test
     public void testSaveAndFind10SkipLimit() throws IOException, InterruptedException {
-        assertNotNull(client.getUser());
+        assertNotNull(client.activeUser());
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
         sync(store, 120);
 
-        User user = client.getUser();
+        User user = client.activeUser();
 
         for (int i = 0; i < 10; i++) {
             Person person = createPerson("Person_" + i);

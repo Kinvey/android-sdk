@@ -142,7 +142,7 @@ public class GCMPush extends AbstractPush {
 						
 						@Override
 						public void onSuccess(User result) {
-							client.getUser().put("_messaging", result.get("_messaging"));
+							client.activeUser().put("_messaging", result.get("_messaging"));
 							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
@@ -215,8 +215,8 @@ public class GCMPush extends AbstractPush {
         if (gcmID == null || gcmID.equals("")){
         	return false;
         }
-        if (getClient().getUser().containsKey("_messaging")){
-            AbstractMap<String, Object> pushField = (AbstractMap<String, Object>) getClient().getUser().get("_messaging");
+        if (getClient().activeUser().containsKey("_messaging")){
+            AbstractMap<String, Object> pushField = (AbstractMap<String, Object>) getClient().activeUser().get("_messaging");
             if (pushField.containsKey("pushTokens")){
                 ArrayList<AbstractMap<String, Object>> gcmField = (ArrayList<AbstractMap<String, Object>>) pushField.get("pushTokens");
                 for(AbstractMap<String, Object> gcm : gcmField){

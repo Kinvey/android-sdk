@@ -146,7 +146,7 @@ public class Client extends AbstractClient {
         this.getFileStore(StoreType.SYNC).clearCache();
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
-            e.performLockdown(getUser().getId());
+            e.performLockdown(activeUser().getId());
         }
     }
 
@@ -397,7 +397,6 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
-        private Class userClass = User.class;
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
@@ -676,12 +675,6 @@ public class Client extends AbstractClient {
 
         }
 
-        public Builder setUserClass(Class userClass){
-            this.userClass = userClass;
-            return this;
-        }
-
-
         /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
@@ -696,7 +689,6 @@ public class Client extends AbstractClient {
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy(), this.context);
-            client.setUserClass(userClass);
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
 
@@ -835,8 +827,7 @@ public class Client extends AbstractClient {
         /**
         *
         * @see
-        * com.kinvey.java.core.AbstractKinveyJsonClient.Builder#setRootUrl(java
-        * .lang.String)
+        * com.kinvey.java.core.AbstractKinveyJsonClient.Builder#setBaseUrl(String)
         */
         @Override
         public Client.Builder setBaseUrl(String baseUrl) {

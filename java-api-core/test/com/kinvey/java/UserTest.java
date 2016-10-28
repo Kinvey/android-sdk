@@ -118,18 +118,18 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testDeleteHardDeleteTrue() throws IOException {
         initializeRequestManager(true);
-        User user = requestManager.getClient().getUser();
+        User user = requestManager.getClient().activeUser();
         user.setId("testUser");
         Delete del = requestManager.deleteBlocking(true);
-        assertEquals(requestManager.getClient().getUser().getId(), del.get("userID").toString());
+        assertEquals(requestManager.getClient().activeUser().getId(), del.get("userID").toString());
         assertEquals(true, del.get("hard"));
     }
 
     public void testDeleteHardDeleteFalse() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         Delete del = requestManager.deleteBlocking(false);
-        assertEquals(requestManager.getClient().getUser().getId(),del.get("userID").toString());
+        assertEquals(requestManager.getClient().activeUser().getId(),del.get("userID").toString());
         assertEquals(false,del.get("hard"));
         assertEquals("DELETE",del.getRequestMethod());
     }
@@ -144,9 +144,9 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testRetrieve() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         Retrieve ret = requestManager.retrieveBlocking();
-        assertEquals(requestManager.getClient().getUser().getId(),ret.get("userID").toString());
+        assertEquals(requestManager.getClient().activeUser().getId(),ret.get("userID").toString());
         assertEquals("GET", ret.getRequestMethod());
     }
 
@@ -160,9 +160,9 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUpdate() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         Update update = requestManager.updateBlocking();
-        assertEquals(requestManager.getClient().getUser().getId(),update.get("userID").toString());
+        assertEquals(requestManager.getClient().activeUser().getId(),update.get("userID").toString());
         assertEquals("PUT", update.getRequestMethod());
     }
 
@@ -176,11 +176,11 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testResetPassword() throws IOException {
         initializeRequestManager(true);
-        User user = requestManager.getClient().getUser();
+        User user = requestManager.getClient().activeUser();
         user.setId("testUser");
-        requestManager.getClient().getUser().setUsername("test");
-        ResetPassword pwd = requestManager.resetPasswordBlocking(requestManager.getClient().getUser().getUsername());
-        assertEquals(requestManager.getClient().getUser().getUsername(),pwd.get("userID").toString());
+        requestManager.getClient().activeUser().setUsername("test");
+        ResetPassword pwd = requestManager.resetPasswordBlocking(requestManager.getClient().activeUser().getUsername());
+        assertEquals(requestManager.getClient().activeUser().getUsername(),pwd.get("userID").toString());
         assertEquals("POST", pwd.getRequestMethod());
     }
 
@@ -194,9 +194,9 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testEmailVerification() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         EmailVerification email = requestManager.sendEmailVerificationBlocking();
-        assertEquals(requestManager.getClient().getUser().getId(),email.get("userID").toString());
+        assertEquals(requestManager.getClient().activeUser().getId(),email.get("userID").toString());
         assertEquals("POST", email.getRequestMethod());
     }
 
@@ -210,7 +210,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomVersion() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion("1.2.3");
     	Retrieve request = requestManager.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
@@ -219,7 +219,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomVesionAsNumber() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         requestManager.getClient().setClientAppVersion(1, 2, 3);
         Retrieve request = requestManager.retrieveBlocking();
         Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
@@ -229,7 +229,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomHeader() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
     	GenericJson custom = new GenericJson();
     	custom.put("First", 1);
     	custom.put("Second", "two");
@@ -242,7 +242,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomHeaderOverload() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
 
         requestManager.getClient().setCustomRequestProperty("First", 1);
         requestManager.getClient().setCustomRequestProperty("Second", "two");
@@ -255,7 +255,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomVersionNull() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion(null);
     	Retrieve request = requestManager.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
@@ -264,7 +264,7 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testUserCustomHeaderNull() throws IOException {
         initializeRequestManager(true);
-        requestManager.getClient().getUser().setId("testUser");
+        requestManager.getClient().activeUser().setId("testUser");
         requestManager.getClient().clearCustomRequestProperties();
     	Retrieve request = requestManager.retrieveBlocking();
     	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
