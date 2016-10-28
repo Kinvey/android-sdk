@@ -560,9 +560,9 @@ public class UserStore {
 
             User ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
-            Credential currentCred = client.getStore().load(client.getUser().getId());
+            Credential currentCred = client.getStore().load(client.activeUser().getId());
             currentCred.setRefreshToken(result.get("refresh_token").toString());
-            client.getStore().store(client.getUser().getId(), currentCred);
+            client.getStore().store(client.activeUser().getId(), currentCred);
 
             return ret;
         }
@@ -598,9 +598,9 @@ public class UserStore {
             User user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
 
 
-            Credential currentCred = client.getStore().load(client.getUser().getId());
+            Credential currentCred = client.getStore().load(client.activeUser().getId());
             currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
-            client.getStore().store(client.getUser().getId(), currentCred);
+            client.getStore().store(client.activeUser().getId(), currentCred);
 
             return user;
         }

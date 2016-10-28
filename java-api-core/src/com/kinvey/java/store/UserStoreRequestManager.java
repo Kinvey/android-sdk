@@ -118,7 +118,7 @@ public class UserStoreRequestManager {
         this.client = client;
         this.builder = builder;
         this.myClazz = User.class;
-        this.builder.setUser(client.getUser());
+        this.builder.setUser(client.activeUser()());
         this.clientAppVersion = client.getClientAppVersion();
         this.customRequestProperties = client.getCustomRequestProperties();
     }
@@ -230,10 +230,10 @@ public class UserStoreRequestManager {
     public User retrieveMetadataBlocking() throws IOException {
         User ret = this.retrieveBlocking().execute();
         User currentUser = null;
-        if (client.getUser() == null){
+        if (client.activeUser()() == null){
             currentUser = new User();
         } else {
-            currentUser = client.getUser();
+            currentUser = client.activeUser()();
         }
         currentUser.putAll(ret.getUnknownKeys());
         currentUser.setUsername(ret.getUsername());
@@ -379,9 +379,9 @@ public class UserStoreRequestManager {
      */
     public Delete deleteBlocking(boolean hardDelete) throws IOException {
 
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        Delete delete = new Delete(this, client.getUser().getId(), hardDelete);
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()().getId(), "currentUser ID must not be null");
+        Delete delete = new Delete(this, client.activeUser()().getId(), hardDelete);
         client.initializeRequest(delete);
         return delete;
     }
@@ -393,9 +393,9 @@ public class UserStoreRequestManager {
      * @throws IOException
      */
     public Retrieve retrieveBlocking() throws IOException{
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, client.getUser().getId());
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()().getId(), "currentUser ID must not be null");
+        Retrieve retrieve = new Retrieve(this, client.activeUser()().getId());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -420,9 +420,9 @@ public class UserStoreRequestManager {
      * @throws IOException
      */
     public Retrieve retrieveBlocking(String[] resolves) throws IOException{
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, client.getUser().getId(), resolves, 1, true);
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser ID must not be null");
+        Retrieve retrieve = new Retrieve(this, client.activeUser()().getId(), resolves, 1, true);
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -449,9 +449,9 @@ public class UserStoreRequestManager {
      * @throws IOException
      */
     public Update updateBlocking() throws IOException{
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        Update update = new Update(this, client.getUser());
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()().getId(), "currentUser ID must not be null");
+        Update update = new Update(this, client.activeUser()());
         client.initializeRequest(update);
         return update;
     }
@@ -472,11 +472,11 @@ public class UserStoreRequestManager {
     }
 
     public Update changePassword(String newPassword) throws IOException{
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()().getId(), "currentUser ID must not be null");
         PasswordRequest passwordRequest = new PasswordRequest();
         passwordRequest.setPassword(newPassword);
-        Update update = new Update(this, client.getUser(), passwordRequest);
+        Update update = new Update(this, client.activeUser()(), passwordRequest);
         client.initializeRequest(update);
         return update;
     }
@@ -522,9 +522,9 @@ public class UserStoreRequestManager {
      * @throws IOException
      */
     public EmailVerification sendEmailVerificationBlocking() throws IOException {
-        Preconditions.checkNotNull(client.getUser(), "currentUser must not be null");
-        Preconditions.checkNotNull(client.getUser().getId(), "currentUser ID must not be null");
-        EmailVerification verify = new EmailVerification(this, client.getUser().getId());
+        Preconditions.checkNotNull(client.activeUser()(), "currentUser must not be null");
+        Preconditions.checkNotNull(client.activeUser()().getId(), "currentUser ID must not be null");
+        EmailVerification verify = new EmailVerification(this, client.activeUser()().getId());
         client.initializeRequest(verify);
         return verify;
     }
@@ -658,14 +658,14 @@ public class UserStoreRequestManager {
         public LoginRequest(String username, String password, boolean setCreate) {
             builder.setUsernameAndPassword(username, password);
             builder.setCreate(setCreate);
-            builder.setUser(client.getUser());
+            builder.setUser(client.activeUser()());
             this.type = UserStoreRequestManager.LoginType.KINVEY;
 
         }
 
         public LoginRequest(ThirdPartyIdentity identity) {
             builder.setThirdPartyIdentity(identity);
-            builder.setUser(client.getUser());
+            builder.setUser(client.activeUser()());
             builder.setCreate(false);
             this.type = UserStoreRequestManager.LoginType.THIRDPARTY;
         }

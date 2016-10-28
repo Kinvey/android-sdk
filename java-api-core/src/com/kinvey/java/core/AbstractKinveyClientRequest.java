@@ -345,7 +345,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
 
             //get the refresh token
-            Credential cred = client.getStore().load(client.getUser().getId());
+            Credential cred = client.getStore().load(client.activeUser().getId());
             String refreshToken = null;
             if (cred != null){
                 refreshToken = cred.getRefreshToken();
@@ -370,9 +370,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 userStoreRequestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
                 //store the new refresh token
-                Credential currentCred = client.getStore().load(client.getUser().getId());
+                Credential currentCred = client.getStore().load(client.activeUser().getId());
                 currentCred.setRefreshToken(result.get("refresh_token").toString());
-                client.getStore().store(client.getUser().getId(), currentCred);
+                client.getStore().store(client.activeUser().getId(), currentCred);
                 hasRetryed = true;
                 return executeUnparsed();
             }
