@@ -251,7 +251,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, new ThreadedKinveyCachedClientCallback<T>(cachedCallback)).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
     /**
@@ -314,7 +314,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids,
-                new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
+                getWrappedCacheCallback(cachedCallback)).execute();
     }
 
 
@@ -385,7 +385,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query,
-                new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
+                getWrappedCacheCallback(cachedCallback)).execute();
     }
 
     /**
@@ -444,7 +444,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
 
@@ -774,6 +774,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         protected T executeAsync() throws IOException {
             return (DataStore.super.save(entity));
         }
+    }
+
+    private static <T> KinveyCachedClientCallback<T> getWrappedCacheCallback(KinveyCachedClientCallback<T> callback) {
+        KinveyCachedClientCallback<T> ret = null;
+        if (callback != null) {
+            ret = new ThreadedKinveyCachedClientCallback<T>(callback);
+        }
+        return ret;
     }
 
     private static class ThreadedKinveyCachedClientCallback<T> implements KinveyCachedClientCallback<T> {

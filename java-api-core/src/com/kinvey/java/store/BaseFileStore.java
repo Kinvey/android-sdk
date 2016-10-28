@@ -56,8 +56,15 @@ public class BaseFileStore {
     protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
 
+    /**
+     * File store constructor
+     * @param networkFileManager manager for the network file requests
+     * @param cacheManager manager for local cache file request
+     * @param ttl Time to Live for cached files
+     * @param storeType Store type to be used
+     * @param cacheFolder local cache folder to be used on device
+     */
     public BaseFileStore(NetworkFileManager networkFileManager, ICacheManager cacheManager, Long ttl, StoreType storeType, String cacheFolder){
-
         this.networkFileManager = networkFileManager;
         this.cacheManager = cacheManager;
         this.ttl = ttl;
@@ -66,6 +73,13 @@ public class BaseFileStore {
         this.storeType = storeType;
     }
 
+    /**
+     * Uploading file using specified StoreType
+     * @param file File to upload
+     * @param listener progress listener to be used to track file upload progress
+     * @return FileMetadata object that contains usefull informaton about file
+     * @throws IOException
+     */
     public FileMetaData upload(File file, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(file);
         Preconditions.checkNotNull(listener);
@@ -75,8 +89,14 @@ public class BaseFileStore {
     };
 
 
-
-
+    /**
+     * Uploading file with specific metadata, where you can define additional fields to be stored along the file
+     * @param file File to be uploaded
+     * @param metadata additional metadata to be stored
+     * @param listener progress listener to be used to track file upload progress
+     * @return FileMetadata object that contains usefull informaton about file
+     * @throws IOException
+     */
     public FileMetaData upload(File file, FileMetaData metadata,
                                UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(file, "file must not be null");
@@ -115,6 +135,14 @@ public class BaseFileStore {
         return metadata;
     };
 
+    /**
+     * Upload specified stream with additional metadata to the store
+     * @param is Input stream to be uploaded
+     * @param metadata Matadata to be stored along with file
+     * @param listener progress listener to be used to track file upload progress
+     * @return FileMetadata object that contains usefull informaton about file
+     * @throws IOException
+     */
     public FileMetaData upload(InputStream is, FileMetaData metadata, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(is, "inputStream must not be null");
         Preconditions.checkNotNull(metadata, "metadata must not be null");
@@ -125,6 +153,15 @@ public class BaseFileStore {
         return upload.execute();
     };
 
+
+    /**
+     * Upload specified stream with specified file name to the store
+     * @param is Input stream to be uploaded
+     * @param filename will be stored as file name to saved stream
+     * @param listener progress listener to be used to track file upload progress
+     * @return FileMetadata object that contains usefull informaton about file
+     * @throws IOException
+     */
     public FileMetaData upload(String filename, InputStream is, UploaderProgressListener listener) throws IOException {
         Preconditions.checkNotNull(filename, "filename must not be null");
         Preconditions.checkNotNull(is, "inputStream must not be null");
@@ -136,6 +173,13 @@ public class BaseFileStore {
         return upload.execute();
     };
 
+
+    /**
+     * Remove file from the store
+     * @param metadata of the file to be deleted, the id field of metadata is required
+     * @return number of removed items 1 if file was removed and 0 if file was not found
+     * @throws IOException
+     */
     public Integer remove(FileMetaData metadata) throws IOException {
         Preconditions.checkNotNull(metadata.getId(), "metadata must not be null");
         switch (storeType.writePolicy) {
@@ -151,7 +195,13 @@ public class BaseFileStore {
         }
     }
 
-
+    /**
+     * Query server for matching files
+     * @param q query to be executed against Files store
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of file metadata that matches the query
+     * @throws IOException
+     */
     public FileMetaData[] find(Query q,
                                KinveyCachedClientCallback<FileMetaData[]> cachedCallback) throws IOException {
         Preconditions.checkNotNull(q, "query must not be null");
@@ -173,6 +223,12 @@ public class BaseFileStore {
         return metaData;
     };
 
+    /**
+     * Query cache for matching files
+     * @param q query to be executed against Cached store
+     * @return Array of file metadata that matches the query
+     * @throws IOException
+     */
     private FileMetaData[] getFileMetaDataFromCache(Query q) {
         FileMetaData[] metaData = null;
         List<FileMetadataWithPath> list = cache.get(q);
@@ -181,6 +237,13 @@ public class BaseFileStore {
         return metaData;
     }
 
+    /**
+     * Query server for matching file
+     * @param id id of file we are looking for
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of file metadata that matches the query
+     * @throws IOException
+     */
     public FileMetaData find(String id,
                              KinveyCachedClientCallback<FileMetaData> cachedCallback) throws IOException {
         Preconditions.checkNotNull(id, "id must not be null");
@@ -205,6 +268,13 @@ public class BaseFileStore {
 
     }
 
+    /**
+     * Refreshes metadata on local cache by grabbing latest info from server
+     * @param fileMetaData metadata that we want to refresh
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of file metadata that matches the query
+     * @throws IOException
+     */
     public FileMetaData refresh(FileMetaData fileMetaData,
                                 KinveyCachedClientCallback<FileMetaData> cachedCallback) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "metadata must not be null");
@@ -212,7 +282,14 @@ public class BaseFileStore {
         return find(fileMetaData.getId(), cachedCallback);
     }
 
-
+    /**
+     * download file with given metadata to specified OutputStream
+     * @param metadata metadata of the file we want to download
+     * @param os OutputStream where file content should be streamed
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return metadata of the file we are downloading
+     * @throws IOException
+     */
     public FileMetaData download(FileMetaData metadata,
                                  OutputStream os,
                                  KinveyCachedClientCallback<FileMetaData> cachedCallback,
@@ -224,8 +301,17 @@ public class BaseFileStore {
         FileMetaData resultMetadata = find(metadata.getId(), null);
             sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
-        }
+    }
 
+    /**
+     * Batch download of files matched query
+     * @param q query to look for the files
+     * @param dst path for the folder that will contain all the files
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @param progressListener listener of download progress
+     * @return Array of metadata of the file we are downloading
+     * @throws IOException
+     */
     public FileMetaData[] download(Query q,
                                    String dst,
                                    KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
@@ -252,6 +338,14 @@ public class BaseFileStore {
         return resultMetadata;
     }
 
+    /**
+     * Batch download of files matched query
+     * @param q query to look for the files
+     * @param dst OutputStream where all found files will be streamed
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of metadata of the file we are downloading
+     * @throws IOException
+     */
     public FileMetaData[] download(Query q,
                                    OutputStream dst,
                                    KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
@@ -279,6 +373,14 @@ public class BaseFileStore {
         return resultMetadata;
     }
 
+    /**
+     * Batch download with specified file name to destination folder
+     * @param filename file name of the file to be downloaded
+     * @param dst path of the folder where all found files will be stored
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of metadata of the file we are downloading
+     * @throws IOException
+     */
     public FileMetaData[] download(String filename,
                                    String dst,
                                    KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
@@ -292,6 +394,15 @@ public class BaseFileStore {
         return download(q, dst, cachedCallback, progressListener);
     }
 
+
+    /**
+     * Batch download with specified file name to destination folder
+     * @param filename file name of the file to be downloaded
+     * @param dst OutputStream where all found files will be streamed
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return Array of metadata of the file we are downloading
+     * @throws IOException
+     */
     public FileMetaData[] download(String filename,
                 OutputStream dst,
                 KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
