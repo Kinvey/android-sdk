@@ -132,7 +132,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public boolean isUserLoggedIn() {
-        return getUser() != null && getUser().getId() !=null;
+        return activeUser() != null && activeUser().getId() !=null;
     }
 
 
