@@ -69,7 +69,7 @@ public class DataStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login("test", "test", client, new KinveyClientCallback<User>() {
+                        UserStore.login(client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);
