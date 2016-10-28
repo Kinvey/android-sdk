@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
 import com.kinvey.android.Client;
+import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -247,11 +248,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      *
      */
-    public void find(String entityID, KinveyClientCallback<T> callback, KinveyCachedClientCallback<T> cachedCallback)  {
+    public void find(String entityID, KinveyClientCallback<T> callback, final KinveyCachedClientCallback<T> cachedCallback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, cachedCallback).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, new ThreadedKinveyCachedClientCallback<T>(cachedCallback)).execute();
     }
 
     /**
@@ -313,7 +314,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, cachedCallback).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids,
+                new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
     }
 
 
@@ -383,7 +385,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, cachedCallback).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query,
+                new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
     }
 
     /**
@@ -442,7 +445,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, cachedCallback).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, new ThreadedKinveyCachedClientCallback<List<T>>(cachedCallback)).execute();
     }
 
 
@@ -687,4 +690,28 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             return (DataStore.super.save(entity));
         }
     }
+
+    private static class ThreadedKinveyCachedClientCallback<T> implements KinveyCachedClientCallback<T> {
+
+        private KinveyCachedClientCallback<T> callback;
+        KinveyCallbackHandler<T> handler;
+
+
+        ThreadedKinveyCachedClientCallback(KinveyCachedClientCallback<T> callback) {
+            handler = new KinveyCallbackHandler<T>();
+            this.callback = callback;
+        }
+
+        @Override
+        public void onSuccess(T result) {
+            handler.onResult(result, callback);
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            handler.onFailure(error, callback);
+
+        }
+    }
+
 }
