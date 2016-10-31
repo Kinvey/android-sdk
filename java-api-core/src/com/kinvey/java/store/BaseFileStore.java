@@ -32,7 +32,6 @@ import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
-import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.file.FileUtils;
 
 import java.io.File;
@@ -301,119 +300,6 @@ public class BaseFileStore {
         FileMetaData resultMetadata = find(metadata.getId(), null);
             sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
-    }
-
-    /**
-     * Batch download of files matched query
-     * @param q query to look for the files
-     * @param dst path for the folder that will contain all the files
-     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
-     * @param progressListener listener of download progress
-     * @return Array of metadata of the file we are downloading
-     * @throws IOException
-     */
-    public FileMetaData[] download(Query q,
-                                   String dst,
-                                   KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
-                                   DownloaderProgressListener progressListener) throws IOException {
-        Preconditions.checkNotNull(q, "query must not be null");
-        Preconditions.checkNotNull(dst, "dst must not be null");
-        Preconditions.checkNotNull(progressListener, "listener must not be null");
-        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        if (storeType == StoreType.CACHE && cachedCallback != null) {
-            FileMetaData[] fmd = getFileMetaDataFromCache(q);
-            for (FileMetaData meta : fmd) {
-                getFile(meta, new FileOutputStream(new File(cacheStorage(), meta.getId())), ReadPolicy.FORCE_LOCAL, null, null);
-            }
-            cachedCallback.onSuccess(fmd);
-        }
-        FileMetaData[] resultMetadata = find(q, null);
-        if (resultMetadata == null || resultMetadata.length == 0){
-            throw new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", "");
-        } else {
-            for (FileMetaData meta : resultMetadata) {
-                getFile(meta, new FileOutputStream(new File(cacheStorage(), meta.getId())), storeType.readPolicy, progressListener, null);
-            }
-        }
-        return resultMetadata;
-    }
-
-    /**
-     * Batch download of files matched query
-     * @param q query to look for the files
-     * @param dst OutputStream where all found files will be streamed
-     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
-     * @return Array of metadata of the file we are downloading
-     * @throws IOException
-     */
-    public FileMetaData[] download(Query q,
-                                   OutputStream dst,
-                                   KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
-                                   DownloaderProgressListener progressListener) throws IOException {
-        Preconditions.checkNotNull(q, "query must not be null");
-        Preconditions.checkNotNull(dst, "dst must not be null");
-        Preconditions.checkNotNull(progressListener, "listener must not be null");
-        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        if (storeType == StoreType.CACHE && cachedCallback != null) {
-            FileMetaData[] fmd = getFileMetaDataFromCache(q);
-            for (FileMetaData meta : fmd) {
-                getFile(meta, dst, storeType.readPolicy, null, null);
-            }
-            cachedCallback.onSuccess(fmd);
-        }
-        FileMetaData[] resultMetadata = find(q, null);
-        if (resultMetadata == null || resultMetadata.length == 0){
-            throw new KinveyException("FileMetadataMissing", "Missing FileMetaData in cache", "");
-        } else {
-            for (FileMetaData meta : resultMetadata) {
-                getFile(meta, dst, storeType.readPolicy, progressListener, null);
-            }
-
-        }
-        return resultMetadata;
-    }
-
-    /**
-     * Batch download with specified file name to destination folder
-     * @param filename file name of the file to be downloaded
-     * @param dst path of the folder where all found files will be stored
-     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
-     * @return Array of metadata of the file we are downloading
-     * @throws IOException
-     */
-    public FileMetaData[] download(String filename,
-                                   String dst,
-                                   KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
-                                   DownloaderProgressListener progressListener) throws IOException {
-        Preconditions.checkNotNull(filename, "filename must not be null");
-        Preconditions.checkNotNull(dst, "dst must not be null");
-        Preconditions.checkNotNull(progressListener, "listener must not be null");
-        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.equals("_filename", filename);
-        return download(q, dst, cachedCallback, progressListener);
-    }
-
-
-    /**
-     * Batch download with specified file name to destination folder
-     * @param filename file name of the file to be downloaded
-     * @param dst OutputStream where all found files will be streamed
-     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
-     * @return Array of metadata of the file we are downloading
-     * @throws IOException
-     */
-    public FileMetaData[] download(String filename,
-                OutputStream dst,
-                KinveyCachedClientCallback<FileMetaData[]> cachedCallback,
-                DownloaderProgressListener progressListener) throws IOException {
-            Preconditions.checkNotNull(filename, "filename must not be null");
-            Preconditions.checkNotNull(dst, "dst must not be null");
-            Preconditions.checkNotNull(progressListener, "listener must not be null");
-            Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-            Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-            q.equals("_filename", filename);
-            return download(q, dst, cachedCallback, progressListener);
     }
 
     private File cacheStorage() {

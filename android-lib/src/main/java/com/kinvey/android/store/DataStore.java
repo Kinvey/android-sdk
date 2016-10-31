@@ -213,10 +213,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(String entityID, KinveyClientCallback<T> callback)  {
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, getWrappedCacheCallback(null)).execute();
+        find(entityID, callback, null);
     }
 
 
@@ -277,10 +274,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(Iterable<String> ids, KinveyListCallback<T> callback){
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, getWrappedCacheCallback(null)).execute();
+        find(ids, callback, null);
     }
 
     /**
@@ -344,10 +338,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(Query query, KinveyListCallback<T> callback){
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, getWrappedCacheCallback(null)).execute();
+        find(query, callback, null);
     }
 
 
@@ -410,9 +401,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      */
     public void find(KinveyListCallback<T> callback) {
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(null)).execute();
+        find(callback, null);
     }
 
 
