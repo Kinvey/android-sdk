@@ -146,10 +146,36 @@ public class BaseFileStore {
         Preconditions.checkNotNull(is, "inputStream must not be null");
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
-        NetworkFileManager.UploadMetadataAndFile upload =
-                networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is), listener);
 
-        return upload.execute();
+        FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
+        fileMetadataWithPath.putAll(metadata);
+
+        if (fileMetadataWithPath.getId() == null){
+            fileMetadataWithPath.setId(UUID.randomUUID().toString());
+        }
+
+        NetworkFileManager.UploadMetadataAndFile upload =
+                networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);
+
+        switch (storeType.writePolicy){
+            case FORCE_LOCAL:
+                saveCacheFile(is, fileMetadataWithPath);
+                metadata = fileMetadataWithPath;
+                break;
+            case FORCE_NETWORK:
+                metadata = upload.execute();
+                break;
+            case LOCAL_THEN_NETWORK:
+                saveCacheFile(is, fileMetadataWithPath);
+                try {
+                    upload.execute();
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+                metadata = fileMetadataWithPath;
+        }
+
+        return metadata;
     };
 
 
@@ -165,11 +191,11 @@ public class BaseFileStore {
         Preconditions.checkNotNull(filename, "filename must not be null");
         Preconditions.checkNotNull(is, "inputStream must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
-        FileMetaData fm = new FileMetaData();
-        fm.setFileName(filename);
-        NetworkFileManager.UploadMetadataAndFile upload =
-                networkFileManager.prepUploadBlocking(fm, new InputStreamContent(null, is), listener);
-        return upload.execute();
+
+        FileMetaData fileMetaData = new FileMetaData();
+        fileMetaData.setFileName(filename);
+
+        return upload(is, fileMetaData, listener);
     };
 
 
