@@ -662,7 +662,7 @@ public class DataStoreTest {
 
     @Test
     public void testPull() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         cleanBackendDataStore(store);
@@ -680,17 +680,17 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pulling all data from backend
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
         assertTrue(pullCallback.result.getResult().size() == 3);
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pull only 1 item by query
         Query query = client.query();
@@ -740,7 +740,7 @@ public class DataStoreTest {
         assertNotNull(pullCallback.result);
         assertTrue(pullCallback.result.getResult().size() == 1);
         assertTrue(pullCallback.result.getResult().get(0).getUsername().equals(victor.getUsername()));
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
     }
 
 
