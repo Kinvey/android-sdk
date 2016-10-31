@@ -216,7 +216,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, null).execute();
+        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, getWrappedCacheCallback(null)).execute();
     }
 
 
@@ -280,7 +280,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, null).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids, getWrappedCacheCallback(null)).execute();
     }
 
     /**
@@ -347,7 +347,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, null).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query, getWrappedCacheCallback(null)).execute();
     }
 
 
@@ -412,7 +412,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void find(KinveyListCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, null).execute();
+        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(null)).execute();
     }
 
 
