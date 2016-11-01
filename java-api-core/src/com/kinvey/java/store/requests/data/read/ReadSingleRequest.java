@@ -49,9 +49,12 @@ public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyData
             case FORCE_LOCAL:
                 ret = cache.get(id);
                 break;
-            case FORCE_NETWORK:
-            case BOTH: // Logic for getting cached data implemented before running Request
+            case FORCE_NETWORK: // Logic for getting cached data implemented before running Request
                 ret = networkManager.getEntityBlocking(id).execute();
+                break;
+            case BOTH:
+                ret = networkManager.getEntityBlocking(id).execute();
+                cache.save(ret);
                 break;
         }
         return ret;

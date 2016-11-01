@@ -122,13 +122,13 @@ public class BaseFileStore {
                 metadata = upload.execute();
                 break;
             case LOCAL_THEN_NETWORK:
-                saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
                 try {
-                    upload.execute();
+                    metadata = upload.execute();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
-                metadata = fileMetadataWithPath;
+                fileMetadataWithPath.putAll(metadata);
+                saveCacheFile(new FileInputStream(file), fileMetadataWithPath);
         }
 
         return metadata;
@@ -166,13 +166,14 @@ public class BaseFileStore {
                 metadata = upload.execute();
                 break;
             case LOCAL_THEN_NETWORK:
-                saveCacheFile(is, fileMetadataWithPath);
                 try {
-                    upload.execute();
+                    metadata = upload.execute();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
-                metadata = fileMetadataWithPath;
+                fileMetadataWithPath.putAll(metadata);
+                saveCacheFile(is, fileMetadataWithPath);
+                break;
         }
 
         return metadata;
@@ -324,7 +325,7 @@ public class BaseFileStore {
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         FileMetaData resultMetadata = find(metadata.getId(), null);
-            sendMetadata(resultMetadata, progressListener);
+        sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
     }
 
@@ -393,17 +394,29 @@ public class BaseFileStore {
                     return metadata;
                 }
             case BOTH:
-                    f = getCachedFile(metadata);
-                    if (f == null) {
-                        if (cachedCallback != null) {
-                            cachedCallback.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
-                        }
-                    } else {
-                        FileUtils.copyStreams(new FileInputStream(f), os);
-                        if (cachedCallback != null) {
-                            cachedCallback.onSuccess(metadata);
-                        }
+                f = getCachedFile(metadata);
+                if (f == null) {
+                    if (cachedCallback != null) {
+                        cachedCallback.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
                     }
+                } else {
+                    FileUtils.copyStreams(new FileInputStream(f), os);
+                    if (cachedCallback != null) {
+                        cachedCallback.onSuccess(metadata);
+                    }
+                }
+                FileMetaData fmd = getNetworkFile(metadata, os, listener);
+                if (fmd != null) {
+                    FileMetadataWithPath fmdWithPath = new FileMetadataWithPath();
+                    fmdWithPath.putAll(fmd);
+                    if (f == null) {
+                        f = new File(cacheStorage(), metadata.getId());
+                    }
+                    FileInputStream is = new FileInputStream(f);
+                    FileUtils.copyStreams(is, os);
+                    saveCacheFile(is, fmdWithPath);
+                }
+                return fmd;
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
         }

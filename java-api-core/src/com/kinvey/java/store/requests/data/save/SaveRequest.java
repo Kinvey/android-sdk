@@ -73,6 +73,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                             save);
                     throw e;
                 }
+                cache.save(ret);
                 break;
             case FORCE_NETWORK:
                 ret = save.execute();
