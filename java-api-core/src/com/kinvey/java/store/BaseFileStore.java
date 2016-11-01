@@ -411,6 +411,9 @@ public class BaseFileStore {
                     fmdWithPath.putAll(fmd);
                     if (f == null) {
                         f = new File(cacheStorage(), metadata.getId());
+                        if (!f.exists()) {
+                            f.createNewFile();
+                        }
                     }
                     FileInputStream is = new FileInputStream(f);
                     FileUtils.copyStreams(is, os);
