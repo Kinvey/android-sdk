@@ -132,7 +132,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public boolean isUserLoggedIn() {
-        return getUser() != null && getUser().getId() !=null;
+        return activeUser() != null && activeUser().getId() !=null;
     }
 
 
@@ -182,16 +182,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
                 ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret() != null);
     }
 
-    public <T extends User> Class<T> getUserClass(){
-        return this.userModelClass;
-    }
-
-    public void setUserClass(Class userClass){
-        this.userModelClass = userClass;
-    }
-
     public abstract ClientUser getClientUser();
-
 
     public abstract  <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass);
 
@@ -213,7 +204,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         }
     }
 
-    public User getUser() {
+    public User activeUser() {
         synchronized (lock) {
             return this.user;
         }
