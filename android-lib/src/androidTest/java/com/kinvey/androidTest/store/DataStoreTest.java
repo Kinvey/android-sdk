@@ -26,6 +26,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
@@ -68,7 +69,7 @@ public class DataStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login("test", "test", client, new KinveyClientCallback<User>() {
+                        UserStore.login(client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);
@@ -661,7 +662,7 @@ public class DataStoreTest {
 
     @Test
     public void testPull() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
         client.getSycManager().clear(Person.COLLECTION);
 
         cleanBackendDataStore(store);
@@ -679,17 +680,17 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pulling all data from backend
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
         assertTrue(pullCallback.result.getResult().size() == 3);
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pull only 1 item by query
         Query query = client.query();
@@ -739,7 +740,7 @@ public class DataStoreTest {
         assertNotNull(pullCallback.result);
         assertTrue(pullCallback.result.getResult().size() == 1);
         assertTrue(pullCallback.result.getResult().get(0).getUsername().equals(victor.getUsername()));
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
     }
 
 
@@ -765,13 +766,13 @@ public class DataStoreTest {
     }
 
 
-    private DefaultKinveyClientCallback find(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
+    private DefaultKinveyClientCallback find(final DataStore<Person> store, final String id, int seconds, final KinveyCachedClientCallback<Person> cachedClientCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                store.find(id, callback);
+                store.find(id, callback, cachedClientCallback);
                 Looper.loop();
             }
         }).start();
@@ -782,7 +783,6 @@ public class DataStoreTest {
     @Test
     public void testFindById() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-//        client.getSycManager().clear(Person.COLLECTION);
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
         Log.d("testPull: ", "cache size = " + getCacheSize(StoreType.SYNC)  + " should be n");
         Person person = createPerson("TestFindByIdPerson");
@@ -794,13 +794,39 @@ public class DataStoreTest {
 
         String personId = saveCallback.result.getId();
 
-        DefaultKinveyClientCallback findCallback = find(store, personId, 60);
+        DefaultKinveyClientCallback findCallback = find(store, personId, 60, null);
         assertNotNull(findCallback.result);
         assertNull(saveCallback.error);
         assertEquals(findCallback.result.getId(), personId);
         Log.d("testPull: ", "cache size = " + getCacheSize(StoreType.SYNC)  + " should be n+1");
     }
 
+    @Test
+    public void testFindByIdWithCacheCallback() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        Person person = createPerson("testFindByIdWithCacheCallback");
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        assertNotNull(saveCallback.result.getId());
+
+        String personId = saveCallback.result.getId();
+        DefaultKinveyClientCallback findCallback = find(store, personId, 360, new KinveyCachedClientCallback<Person>() {
+            @Override
+            public void onSuccess(Person result) {
+                Log.d("testFindById: username ", result.getUsername());
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("testFindById: ", error.getMessage());
+            }
+        });
+        assertNotNull(findCallback.result);
+        assertNull(saveCallback.error);
+        assertEquals(findCallback.result.getId(), personId);
+    }
 
     private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -808,7 +834,7 @@ public class DataStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                store.find(query, callback);
+                store.find(query, callback, null);
                 Looper.loop();
             }
         }).start();
@@ -956,12 +982,12 @@ public class DataStoreTest {
 
     @Test
     public void testSaveAndFind10SkipLimit() throws IOException, InterruptedException {
-        assertNotNull(client.getUser());
+        assertNotNull(client.activeUser());
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
         sync(store, 120);
 
-        User user = client.getUser();
+        User user = client.activeUser();
 
         for (int i = 0; i < 10; i++) {
             Person person = createPerson("Person_" + i);

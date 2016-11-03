@@ -17,13 +17,13 @@
 package com.kinvey.java.store.requests.data.delete;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -59,15 +59,29 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = deleteCached();
+                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
+                break;
+            case LOCAL_THEN_NETWORK:
+                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
+                        networkManager.getClient());
+                try {
+                    pushRequest.execute();
+                } catch (Throwable t){
+                    // silent fall, will be synced next time
+                }
+
+                ret = deleteCached();
+                try{
+                    ret = request.execute().getCount();
+                } catch (IOException e) {
+                    syncManager.enqueueRequest(networkManager.getCollectionName(),
+                            request);
+                    throw e;
+                }
                 break;
             case FORCE_NETWORK:
                 KinveyDeleteResponse response = request.execute();
                 ret = response.getCount();
-                break;
-            case LOCAL_THEN_NETWORK:
-                //write to local, and push to sync network request
-                ret = deleteCached();
-                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
                 break;
         }
         return ret;

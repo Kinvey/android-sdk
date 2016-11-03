@@ -140,7 +140,7 @@ public class NetworkManager<T extends GenericJson> {
      * Gets current client for this NetworkManager
      * @return current client instance
      */
-    protected AbstractClient getClient(){
+    public AbstractClient getClient(){
         return this.client;
     }
 

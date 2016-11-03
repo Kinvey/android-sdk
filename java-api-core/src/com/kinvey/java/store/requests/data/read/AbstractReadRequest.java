@@ -17,15 +17,13 @@
 package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyDataListRequest;
 
-import java.util.List;
-
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Prots on 2/8/16.
@@ -46,12 +44,14 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-            case PREFER_LOCAL:
                 ret = getCached();
                 break;
             case FORCE_NETWORK:
-            case PREFER_NETWORK:
                 ret = getNetwork();
+                break;
+            case BOTH:
+                ret = getNetwork();
+                cache.save(ret);
                 break;
         }
         return ret;
