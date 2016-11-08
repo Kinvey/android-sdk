@@ -24,6 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.google.api.client.http.AbstractInputStreamContent;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.EmptyContent;
+import com.google.api.client.http.GZipEncoding;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
@@ -35,6 +38,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.util.ByteStreams;
 import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
@@ -194,6 +198,13 @@ public class MediaHttpUploader {
     private UploaderProgressListener progressListener;
 
     /**
+     * The media content length is used in the "Content-Range" header. If we reached the end of the
+     * stream, this variable will be set with the length of the stream. This value is used only in
+     * resumable media upload.
+     */
+    String mediaContentLengthStr = "*";
+    
+    /**
      * The total number of bytes uploaded by this uploader. This value will not be calculated for
      * direct uploads when the content length is not known in advance.
      */
@@ -206,6 +217,48 @@ public class MediaHttpUploader {
      */
     private int chunkSize = DEFAULT_CHUNK_SIZE;
 
+    /**
+     * Used to cache a single byte when the media content length is unknown or {@code null} for none.
+     */
+    private Byte cachedByte;
+
+    /**
+     * The number of bytes the client had sent to the server so far or {@code 0} for none. It is used
+     * for resumable media upload when the media content length is not specified.
+     */
+    private long totalBytesClientSent;
+
+    /**
+     * The number of bytes of the current chunk which was sent to the server or {@code 0} for none.
+     * This value equals to chunk size for each chunk the client send to the server, except for the
+     * ending chunk.
+     */
+    private int currentChunkLength;
+
+    /**
+     * The content buffer of the current request or {@code null} for none. It is used for resumable
+     * media upload when the media content length is not specified. It is instantiated for every
+     * request in {@link #setContentAndHeadersOnCurrentRequest} and is set to {@code null} when the
+     * request is completed in {@link #upload}.
+     */
+    private byte currentRequestContentBuffer[];
+
+    /**
+     * Whether to disable GZip compression of HTTP content.
+     *
+     * <p>
+     * The default value is {@code false}.
+     * </p>
+     */
+    private boolean disableGZipContent;
+
+    /**
+     * The number of bytes the server received so far. This value will not be calculated for direct
+     * uploads when the content length is not known in advance.
+     */
+    // TODO(rmistry): Figure out a way to compute the content length using CountingInputStream.
+    private long totalBytesServerReceived;
+    
     /**
      * Construct the {@link MediaHttpUploader}.
      *
@@ -300,7 +353,7 @@ public class MediaHttpUploader {
             }else{
                 throw new KinveyException("_uploadURL is null!","do not remove _uploadURL in collection hooks for NetworkFileManager!","The library cannot upload a file without this url");
             }
-            uploadUrl = new GenericUrl(meta.getUploadUrl());
+//            uploadUrl = new GenericUrl(meta.getUploadUrl());
         } finally {
             initialResponse.disconnect();
         }
@@ -315,42 +368,133 @@ public class MediaHttpUploader {
         }
 
         HttpResponse response;
-        
-        currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
-        currentRequest.setSuppressUserAgentSuffix(true);
-        setContentAndHeadersOnCurrentRequest(meta.getMimetype(), bytesUploaded);
+        while (true) {
+            currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
+            currentRequest.setSuppressUserAgentSuffix(true);
+            setContentAndHeadersOnCurrentRequest(meta.getMimetype());
 
-        currentRequest.setThrowExceptionOnExecuteError(false);
-        currentRequest.setRetryOnExecuteIOException(true);
-        // if there are custom headers, add them
-		if (headers != null) {
-			for (String header : headers.keySet()) {
+            currentRequest.setThrowExceptionOnExecuteError(false);
+//            currentRequest.setRetryOnExecuteIOException(true);
+            // if there are custom headers, add them
+            if (headers != null) {
+                for (String header : headers.keySet()) {
 
-				String curHeader = headers.get(header);
-				// then it's a list
-				if (curHeader.contains(", ")) {
-					String[] listheaders = curHeader.split(", ");
-					currentRequest.getHeaders().put(header.toLowerCase(Locale.US),
-							Arrays.asList(listheaders));
-				} else {
-					currentRequest.getHeaders().put(header.toLowerCase(Locale.US), curHeader);
-				}
-			}
-		}
+                    String curHeader = headers.get(header);
+                    // then it's a list
+                    if (curHeader.contains(", ")) {
+                        String[] listheaders = curHeader.split(", ");
+                        currentRequest.getHeaders().put(header.toLowerCase(Locale.US),
+                                Arrays.asList(listheaders));
+                    } else {
+                        currentRequest.getHeaders().put(header.toLowerCase(Locale.US), curHeader);
+                    }
+                }
+            }
 
-		response = currentRequest.execute();
-		if (response.isSuccessStatusCode()) {
-			bytesUploaded = getMediaContentLength();
-			contentInputStream.close();
-			updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
-			
-		} else {
-            throw  new KinveyException("Uploading NetworkFileManager Failed", response.parseAsString(), "");
+            // TODO: 08.11.2016  
+            if (isMediaLengthKnown()) {
+                // TODO(rmistry): Support gzipping content for the case where media content length is
+                // known (https://code.google.com/p/google-api-java-client/issues/detail?id=691).
+                response = executeCurrentRequestWithoutGZip(currentRequest);
+            } else {
+                response = executeCurrentRequest(currentRequest);
+            }
+            boolean returningResponse = false;
+            try {
+                if (response.isSuccessStatusCode()) {
+                    totalBytesServerReceived = getMediaContentLength();
+                    if (mediaContent.getCloseInputStream()) {
+                        contentInputStream.close();
+                    }
+                    updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
+                    returningResponse = true;
+                    return meta;
+                }
+
+                if (response.getStatusCode() != 308) {
+                    returningResponse = true;
+                    return meta;
+                }
+
+                // Check to see if the upload URL has changed on the server.
+                String updatedUploadUrl = response.getHeaders().getLocation();
+                if (updatedUploadUrl != null) {
+                    uploadUrl = new GenericUrl(updatedUploadUrl);
+                }
+
+                // we check the amount of bytes the server received so far, because the server may process
+                // fewer bytes than the amount of bytes the client had sent
+                long newBytesServerReceived = getNextByteIndex(response.getHeaders().getRange());
+                // the server can receive any amount of bytes from 0 to current chunk length
+                long currentBytesServerReceived = newBytesServerReceived - totalBytesServerReceived;
+                com.google.api.client.util.Preconditions.checkState(
+                        currentBytesServerReceived >= 0 && currentBytesServerReceived <= currentChunkLength);
+                long copyBytes = currentChunkLength - currentBytesServerReceived;
+                if (isMediaLengthKnown()) {
+                    if (copyBytes > 0) {
+                        // If the server didn't receive all the bytes the client sent the current position of
+                        // the input stream is incorrect. So we should reset the stream and skip those bytes
+                        // that the server had already received.
+                        // Otherwise (the server got all bytes the client sent), the stream is in its right
+                        // position, and we can continue from there
+                        contentInputStream.reset();
+                        long actualSkipValue = contentInputStream.skip(currentBytesServerReceived);
+                        com.google.api.client.util.Preconditions.checkState(currentBytesServerReceived == actualSkipValue);
+                    }
+                } else if (copyBytes == 0) {
+                    // server got all the bytes, so we don't need to use this buffer. Otherwise, we have to
+                    // keep the buffer and copy part (or all) of its bytes to the stream we are sending to the
+                    // server
+                    currentRequestContentBuffer = null;
+                }
+                totalBytesServerReceived = newBytesServerReceived;
+
+                updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
+            } finally {
+                if (!returningResponse) {
+                    response.disconnect();
+                }
+            }
+            // TODO: 08.11.2016  
+
+
+            response = currentRequest.execute();
+            
+/*            response = currentRequest.execute();
+            if (response.isSuccessStatusCode()) {
+                bytesUploaded = getMediaContentLength();
+                contentInputStream.close();
+                updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
+
+            } else {
+                throw new KinveyException("Uploading NetworkFileManager Failed", response.parseAsString(), "");
+            }*/
         }
-		return meta;
-		
+//		return meta;
     }
 
+    /**
+     * Returns the next byte index identifying data that the server has not yet received, obtained
+     * from the HTTP Range header (E.g a header of "Range: 0-55" would cause 56 to be returned).
+     * <code>null</code> or malformed headers cause 0 to be returned.
+     *
+     * @param rangeHeader in the HTTP response
+     * @return the byte index beginning where the server has yet to receive data
+     */
+    private long getNextByteIndex(String rangeHeader) {
+        if (rangeHeader == null) {
+            return 0L;
+        }
+        return Long.parseLong(rangeHeader.substring(rangeHeader.indexOf('-') + 1)) + 1;
+    }
+
+    /**
+     * @return {@code true} if the media length is known, otherwise {@code false}
+     */
+    private boolean isMediaLengthKnown() throws IOException {
+        return getMediaContentLength() >= 0;
+    }
+    
     /**
      * Uses lazy initialization to compute the media content length.
      *
@@ -396,20 +540,141 @@ public class MediaHttpUploader {
         return response;
     }
 
+
+    /**
+     * Executes the current request with some minimal common code.
+     *
+     * @param request current request
+     * @return HTTP response
+     */
+    private HttpResponse executeCurrentRequestWithoutGZip(HttpRequest request) throws IOException {
+        // TODO: 08.11.2016 check it
+        // method override for non-POST verbs
+        /*new MethodOverride().intercept(request);*/
+        // don't throw an exception so we can let a custom Google exception be thrown
+        request.setThrowExceptionOnExecuteError(false);
+        // execute the request
+
+        HttpResponse response = request.execute();
+        return response;
+    }
+
+    /**
+     * Executes the current request with some common code that includes exponential backoff and GZip
+     * encoding.
+     *
+     * @param request current request
+     * @return HTTP response
+     */
+    private HttpResponse executeCurrentRequest(HttpRequest request) throws IOException {
+        // enable GZip encoding if necessary
+        if (!disableGZipContent && !(request.getContent() instanceof EmptyContent)) {
+            request.setEncoding(new GZipEncoding());
+        }
+        // execute request
+        HttpResponse response = executeCurrentRequestWithoutGZip(request);
+        return response;
+    }
+
     /**
      * Sets the HTTP media content chunk and the required headers that should be used in the upload
      * request.
      *
-     * @param bytesWritten The number of bytes that have been successfully uploaded on the server
      */
-    private void setContentAndHeadersOnCurrentRequest(String mimeType, long bytesWritten) throws IOException {
+    private void setContentAndHeadersOnCurrentRequest(String mimeType) throws IOException {
+
+        int blockSize;
+        if (isMediaLengthKnown()) {
+            // We know exactly what the blockSize will be because we know the media content length.
+            blockSize = (int) Math.min(chunkSize, getMediaContentLength() - totalBytesServerReceived);
+        } else {
+            // Use the chunkSize as the blockSize because we do know what what it is yet.
+            blockSize = chunkSize;
+        }
 
         AbstractInputStreamContent contentChunk;
-            contentChunk = new InputStreamContent(mimeType, contentInputStream)
-                    .setRetrySupported(true)
-                    .setCloseInputStream(false);
+        int actualBlockSize = blockSize;
+        if (isMediaLengthKnown()) {
+            // Mark the current position in case we need to retry the request.
+            contentInputStream.mark(blockSize);
 
+            InputStream limitInputStream = ByteStreams.limit(contentInputStream, blockSize);
+            contentChunk = new InputStreamContent(
+                    mimeType, limitInputStream).setRetrySupported(true)
+                    .setLength(blockSize).setCloseInputStream(false);
+            mediaContentLengthStr = String.valueOf(getMediaContentLength());
+        } else {
+            // If the media content length is not known we implement a custom buffered input stream that
+            // enables us to detect the length of the media content when the last chunk is sent. We
+            // accomplish this by always trying to read an extra byte further than the end of the current
+            // chunk.
+            int actualBytesRead;
+            int bytesAllowedToRead;
+
+            // amount of bytes which need to be copied from last chunk buffer
+            int copyBytes = 0;
+            if (currentRequestContentBuffer == null) {
+                bytesAllowedToRead = cachedByte == null ? blockSize + 1 : blockSize;
+                currentRequestContentBuffer = new byte[blockSize + 1];
+                if (cachedByte != null) {
+                    currentRequestContentBuffer[0] = cachedByte;
+                }
+            } else {
+                // currentRequestContentBuffer is not null that means one of the following:
+                // 1. This is a request to recover from a server error (e.g. 503)
+                // or
+                // 2. The server received less bytes than the amount of bytes the client had sent. For
+                // example, the client sends bytes 100-199, but the server returns back status code 308,
+                // and its "Range" header is "bytes=0-150".
+                // In that case, the new request will be constructed from the previous request's byte buffer
+                // plus new bytes from the stream.
+                copyBytes = (int) (totalBytesClientSent - totalBytesServerReceived);
+                // shift copyBytes bytes to the beginning - those are the bytes which weren't received by
+                // the server in the last chunk.
+                System.arraycopy(currentRequestContentBuffer, currentChunkLength - copyBytes,
+                        currentRequestContentBuffer, 0, copyBytes);
+                if (cachedByte != null) {
+                    // add the last cached byte to the buffer
+                    currentRequestContentBuffer[copyBytes] = cachedByte;
+                }
+
+                bytesAllowedToRead = blockSize - copyBytes;
+            }
+
+            actualBytesRead = ByteStreams.read(
+                    contentInputStream, currentRequestContentBuffer, blockSize + 1 - bytesAllowedToRead,
+                    bytesAllowedToRead);
+
+            if (actualBytesRead < bytesAllowedToRead) {
+                actualBlockSize = copyBytes + Math.max(0, actualBytesRead);
+                if (cachedByte != null) {
+                    actualBlockSize++;
+                    cachedByte = null;
+                }
+
+                if (mediaContentLengthStr.equals("*")) {
+                    // At this point we know we reached the media content length because we either read less
+                    // than the specified chunk size or there is no more data left to be read.
+                    mediaContentLengthStr = String.valueOf(totalBytesServerReceived + actualBlockSize);
+                }
+            } else {
+                cachedByte = currentRequestContentBuffer[blockSize];
+            }
+
+            contentChunk = new ByteArrayContent(
+                    mediaContent.getType(), currentRequestContentBuffer, 0, actualBlockSize);
+            totalBytesClientSent = totalBytesServerReceived + actualBlockSize;
+        }
+
+        currentChunkLength = actualBlockSize;
         currentRequest.setContent(contentChunk);
+        if (actualBlockSize == 0) {
+            // special case of zero content media being uploaded
+            currentRequest.getHeaders().setContentRange("bytes */0");
+        } else {
+            currentRequest.getHeaders().setContentRange("bytes " + totalBytesServerReceived + "-"
+                    + (totalBytesServerReceived + actualBlockSize - 1) + "/" + mediaContentLengthStr);
+        }
     }
 
 
@@ -520,6 +785,31 @@ public class MediaHttpUploader {
      */
     public int getChunkSize() {
         return chunkSize;
+    }
+
+    /**
+     * Returns whether to disable GZip compression of HTTP content.
+     */
+    public boolean getDisableGZipContent() {
+        return disableGZipContent;
+    }
+
+    /**
+     * Sets whether to disable GZip compression of HTTP content.
+     *
+     * <p>
+     * By default it is {@code false}.
+     * </p>
+     *
+     * <p>
+     * If {@link #setDisableGZipContent(boolean)} is set to false (the default value) then content is
+     * gzipped for direct media upload and resumable media uploads when content length is not known.
+     * Due to a current limitation, content is not gzipped for resumable media uploads when content
+     * length is known; this limitation will be removed in the future.
+     * </p>
+     */
+    public void setDisableGZipContent(boolean disableGZipContent) {
+        this.disableGZipContent = disableGZipContent;
     }
 
     /**
