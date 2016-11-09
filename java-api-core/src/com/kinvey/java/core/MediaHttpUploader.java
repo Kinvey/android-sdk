@@ -118,9 +118,10 @@ public class MediaHttpUploader {
 
     /**
      * Default maximum number of bytes that will be uploaded to the server in any single HTTP request
-     * (set to 10 MB).
+     * (set to 100 KB).
      */
-    public static final int DEFAULT_CHUNK_SIZE = 10 * MB;
+    // TODO: 09.11.2016 change size, default was 10MB
+    public static final int DEFAULT_CHUNK_SIZE = 100 * KB;
 
     /** The HTTP content of the media to be uploaded. */
     private final AbstractInputStreamContent mediaContent;
@@ -369,11 +370,13 @@ public class MediaHttpUploader {
 
         HttpResponse response;
         while (true) {
+            System.out.println("MediaHTTP: while start ");
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
             setContentAndHeadersOnCurrentRequest(meta.getMimetype());
 
-            currentRequest.setThrowExceptionOnExecuteError(false);
+
+//            currentRequest.setThrowExceptionOnExecuteError(false);
 //            currentRequest.setRetryOnExecuteIOException(true);
             // if there are custom headers, add them
             if (headers != null) {
@@ -391,7 +394,8 @@ public class MediaHttpUploader {
                 }
             }
 
-            // TODO: 08.11.2016  
+            // TODO: 08.11.2016
+            System.out.println("MediaHTTP: Before start execute ");
             if (isMediaLengthKnown()) {
                 // TODO(rmistry): Support gzipping content for the case where media content length is
                 // known (https://code.google.com/p/google-api-java-client/issues/detail?id=691).
@@ -399,6 +403,7 @@ public class MediaHttpUploader {
             } else {
                 response = executeCurrentRequest(currentRequest);
             }
+            System.out.println("MediaHTTP: After start execute: " + response.getStatusCode());
             boolean returningResponse = false;
             try {
                 if (response.isSuccessStatusCode()) {
@@ -411,6 +416,7 @@ public class MediaHttpUploader {
                     return meta;
                 }
 
+                System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
                 if (response.getStatusCode() != 308) {
                     returningResponse = true;
                     return meta;
@@ -458,7 +464,7 @@ public class MediaHttpUploader {
             // TODO: 08.11.2016  
 
 
-            response = currentRequest.execute();
+//            response = currentRequest.execute();
             
 /*            response = currentRequest.execute();
             if (response.isSuccessStatusCode()) {
@@ -525,6 +531,13 @@ public class MediaHttpUploader {
      */
     private HttpResponse executeUploadInitiation(AbstractKinveyClientRequest abstractKinveyClientRequest) throws IOException {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED);
+        abstractKinveyClientRequest.put("uploadType", "resumable");
+
+        initiationHeaders.set(CONTENT_TYPE_HEADER, mediaContent.getType());
+        if (isMediaLengthKnown()) {
+            initiationHeaders.set(CONTENT_LENGTH_HEADER, getMediaContentLength());
+        }
+        abstractKinveyClientRequest.setInitiationHeaders(initiationHeaders);
 
         HttpResponse response = abstractKinveyClientRequest.executeUnparsed(false);
         boolean notificationCompleted = false;
