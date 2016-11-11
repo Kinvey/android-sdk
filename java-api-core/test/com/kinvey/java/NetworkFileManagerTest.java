@@ -54,7 +54,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
     }
 
 
-    @Test
+/*    @Test
     public void uploadUrlEndpointMatches() throws IOException {
         NetworkFileManager networkFileManagerApi = new MockNetworkFileManager(super.getClient());
         FileMetaData meta = new FileMetaData("testfilename.txt");
@@ -68,7 +68,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
         HttpRequest request = upload.buildHttpRequest();
         String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
         assertEquals(expectedPath, request.getUrl().toString());
-    }
+    }*/
 
 
     @Test

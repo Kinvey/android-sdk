@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.api.client.googleapis.MethodOverride;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.EmptyContent;
@@ -39,7 +40,6 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ByteStreams;
-import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
@@ -65,8 +65,8 @@ import com.kinvey.java.model.FileMetaData;
  * @since 1.9
  *
  * @author rmistry@google.com (Ravi Mistry)
- * @author morgan@kinvey.com  Portions of this code have been modified for Kinvey purposes. 
- *      Specifically Kinvey needed it to interact with AbstractKinveyClient class and upload 
+ * @author morgan@kinvey.com  Portions of this code have been modified for Kinvey purposes.
+ *      Specifically Kinvey needed it to interact with AbstractKinveyClient class and upload
  *      media files using Kinvey's propritary upload protocol.
  */
 public class MediaHttpUploader {
@@ -118,10 +118,10 @@ public class MediaHttpUploader {
 
     /**
      * Default maximum number of bytes that will be uploaded to the server in any single HTTP request
-     * (set to 100 KB).
+     * (set to 50 KB).
      */
     // TODO: 09.11.2016 change size, default was 10MB
-    public static final int DEFAULT_CHUNK_SIZE = 100 * KB;
+    public static final int DEFAULT_CHUNK_SIZE = 5 * KB;
 
     /** The HTTP content of the media to be uploaded. */
     private final AbstractInputStreamContent mediaContent;
@@ -204,7 +204,7 @@ public class MediaHttpUploader {
      * resumable media upload.
      */
     String mediaContentLengthStr = "*";
-    
+
     /**
      * The total number of bytes uploaded by this uploader. This value will not be calculated for
      * direct uploads when the content length is not known in advance.
@@ -259,7 +259,7 @@ public class MediaHttpUploader {
      */
     // TODO(rmistry): Figure out a way to compute the content length using CountingInputStream.
     private long totalBytesServerReceived;
-    
+
     /**
      * Construct the {@link MediaHttpUploader}.
      *
@@ -322,7 +322,7 @@ public class MediaHttpUploader {
      }
      * </pre>
      *
-     * @param initiationClientRequest
+     * @param initiationClientRequest initiationClientRequest
      * @return HTTP response
      * @throws IOException
      */
@@ -406,6 +406,9 @@ public class MediaHttpUploader {
             System.out.println("MediaHTTP: After start execute: " + response.getStatusCode());
             boolean returningResponse = false;
             try {
+
+                System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
+
                 if (response.isSuccessStatusCode()) {
                     totalBytesServerReceived = getMediaContentLength();
                     if (mediaContent.getCloseInputStream()) {
@@ -416,7 +419,6 @@ public class MediaHttpUploader {
                     return meta;
                 }
 
-                System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
                 if (response.getStatusCode() != 308) {
                     returningResponse = true;
                     return meta;
@@ -456,16 +458,19 @@ public class MediaHttpUploader {
                 totalBytesServerReceived = newBytesServerReceived;
 
                 updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
+                System.out.println("MediaHTTP: end of  while before finally");
             } finally {
+                System.out.println("MediaHTTP: finally ");
                 if (!returningResponse) {
+                    System.out.println("MediaHTTP: finally disconnect");
                     response.disconnect();
                 }
             }
-            // TODO: 08.11.2016  
+            // TODO: 08.11.2016
 
 
 //            response = currentRequest.execute();
-            
+
 /*            response = currentRequest.execute();
             if (response.isSuccessStatusCode()) {
                 bytesUploaded = getMediaContentLength();
@@ -500,7 +505,7 @@ public class MediaHttpUploader {
     private boolean isMediaLengthKnown() throws IOException {
         return getMediaContentLength() >= 0;
     }
-    
+
     /**
      * Uses lazy initialization to compute the media content length.
      *
@@ -531,12 +536,33 @@ public class MediaHttpUploader {
      */
     private HttpResponse executeUploadInitiation(AbstractKinveyClientRequest abstractKinveyClientRequest) throws IOException {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED);
-        abstractKinveyClientRequest.put("uploadType", "resumable");
+//        abstractKinveyClientRequest.put("uploadType", "resumable");
+//        abstractKinveyClientRequest.set("uploadType", "resumable");
 
-        initiationHeaders.set(CONTENT_TYPE_HEADER, mediaContent.getType());
+        // TODO: 11.11.2016 remove this
+/*        if (getMediaContent() != null && getMediaContent().getType() == null) {
+            mediaContent.setType("image/jpeg");
+            System.out.println("MediaHTTP: mediaContent.setType(\"image/jpeg\");");
+        }*/
+
+        if (getMediaContent() == null) {
+            System.out.println("MediaHTTP: mediaContent == null");
+        }
+
+        initiationHeaders.setContentLength((long) 38);
+
+        initiationHeaders.set(CONTENT_TYPE_HEADER, "application/octet-stream");
+        System.out.println("MediaHTTP: executeUploadInitiation CONTENT_TYPE_HEADER: " + "application/octet-stream");
         if (isMediaLengthKnown()) {
             initiationHeaders.set(CONTENT_LENGTH_HEADER, getMediaContentLength());
+            System.out.println("MediaHTTP: executeUploadInitiation CONTENT_LENGTH_HEADER: " + getMediaContentLength());
         }
+
+//        initiationHeaders.set("uploadType", "resumable");
+
+//        initiationHeaders.set("x-goog-resumable", "start");
+
+
         abstractKinveyClientRequest.setInitiationHeaders(initiationHeaders);
 
         HttpResponse response = abstractKinveyClientRequest.executeUnparsed(false);
@@ -563,7 +589,7 @@ public class MediaHttpUploader {
     private HttpResponse executeCurrentRequestWithoutGZip(HttpRequest request) throws IOException {
         // TODO: 08.11.2016 check it
         // method override for non-POST verbs
-        /*new MethodOverride().intercept(request);*/
+        new MethodOverride().intercept(request);
         // don't throw an exception so we can let a custom Google exception be thrown
         request.setThrowExceptionOnExecuteError(false);
         // execute the request
@@ -675,7 +701,7 @@ public class MediaHttpUploader {
             }
 
             contentChunk = new ByteArrayContent(
-                    mediaContent.getType(), currentRequestContentBuffer, 0, actualBlockSize);
+                    mimeType, currentRequestContentBuffer, 0, actualBlockSize);
             totalBytesClientSent = totalBytesServerReceived + actualBlockSize;
         }
 
@@ -683,11 +709,17 @@ public class MediaHttpUploader {
         currentRequest.setContent(contentChunk);
         if (actualBlockSize == 0) {
             // special case of zero content media being uploaded
-            currentRequest.getHeaders().setContentRange("bytes */0");
+            currentRequest.getHeaders().setContentRange("bytes */" + getMediaContentLength());
+            currentRequest.getHeaders().setContentLength(Long.valueOf(0));
         } else {
             currentRequest.getHeaders().setContentRange("bytes " + totalBytesServerReceived + "-"
-                    + (totalBytesServerReceived + actualBlockSize - 1) + "/" + mediaContentLengthStr);
+                    + (totalBytesServerReceived + actualBlockSize - 1) + "/" + getMediaContentLength());
+            currentRequest.getHeaders().setContentLength((long) chunkSize);
         }
+        System.out.println("MediaHTTP: finished setContentAndHeadersOnCurrentRequest");
+        System.out.println("MediaHTTP: currentRequest.getHeaders().setContentLength: " +  currentRequest.getHeaders().getContentLength());
+        System.out.println("MediaHTTP: currentRequest.getHeaders().setContentRange: " +  currentRequest.getHeaders().getContentRange());
+
     }
 
 
