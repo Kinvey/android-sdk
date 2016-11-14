@@ -102,6 +102,8 @@ public class BaseFileStore {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
 
+        metadata.setSize(file.length());
+
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
