@@ -924,7 +924,7 @@ public class MediaHttpUploader {
             // special case of zero content media being uploaded
             currentRequest.getHeaders().setContentRange("bytes */" + getMediaContentLength());
             currentRequest.getHeaders().setContentLength(0L);
-        } else {
+        } else if (totalBytesServerReceived != 0){
             currentRequest.getHeaders().setContentLength((long) chunkSize);
             currentRequest.getHeaders().setContentRange("bytes " + totalBytesServerReceived + "-"
                     + (totalBytesServerReceived + actualBlockSize - 1) + "/" + getMediaContentLength());
@@ -932,6 +932,7 @@ public class MediaHttpUploader {
 
         System.out.println("MediaHTTP: currentRequest.getHeaders().setContentLength: " + currentRequest.getHeaders().getContentLength());
         System.out.println("MediaHTTP: currentRequest.getHeaders().setContentRange: " + currentRequest.getHeaders().getContentRange());
+        System.out.println("MediaHTTP: totalBytesServerReceived: " + totalBytesServerReceived);
 
     }
 

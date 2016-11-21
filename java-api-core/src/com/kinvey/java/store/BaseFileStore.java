@@ -17,6 +17,7 @@
 package com.kinvey.java.store;
 
 import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
@@ -111,9 +112,10 @@ public class BaseFileStore {
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }*/
 
-        NetworkFileManager.UploadMetadataAndFile upload =
+        NetworkFileManager.UploadMetadataAndFile prepUpload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath,
                         new FileContent(fileMetadataWithPath.getMimetype(), file), listener);
+        NetworkFileManager.UploadMetadataAndFile upload;
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -121,11 +123,32 @@ public class BaseFileStore {
                 metadata = fileMetadataWithPath;
                 break;
             case FORCE_NETWORK:
-                metadata = upload.execute();
-                break;
+                metadata = prepUpload.execute();
+                HttpResponse response = prepUpload.getResponse();
+
+                if (response == null || !response.isSuccessStatusCode()) {
+                    int i = 0;
+                    do {
+                        upload = networkFileManager.prepUploadBlocking(metadata,
+                                new FileContent(metadata.getMimetype(), file), listener);
+                        metadata = upload.execute();
+                        response = upload.getResponse();
+                        if (response != null && response.isSuccessStatusCode()) {
+                            metadata = upload.getUploader().getUploadedFileMetaData();
+                        }
+                        if (!upload.getUploader().checkResponseForReconnectPossibility(response)) {
+                            System.out.println("MediaHTTP: break");
+                            break;
+                        }
+
+                        upload.getUploader().backOffCounter();
+                        i++;
+                        System.out.println("MediaHTTP: i++");
+                    } while (i < upload.getUploader().getRequestRetryNumber());
+                }
             case LOCAL_THEN_NETWORK:
                 try {
-                    metadata = upload.execute();
+                    metadata = prepUpload.execute();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -156,8 +179,9 @@ public class BaseFileStore {
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
         }*/
 
-        NetworkFileManager.UploadMetadataAndFile upload =
+        NetworkFileManager.UploadMetadataAndFile prepUpload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);
+        NetworkFileManager.UploadMetadataAndFile upload;
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -165,11 +189,32 @@ public class BaseFileStore {
                 metadata = fileMetadataWithPath;
                 break;
             case FORCE_NETWORK:
-                metadata = upload.execute();
+                metadata = prepUpload.execute();
+                HttpResponse response = prepUpload.getResponse();
+
+                if (response == null || !response.isSuccessStatusCode()) {
+                    int i = 0;
+                    do {
+                        upload = networkFileManager.prepUploadBlocking(metadata, new InputStreamContent(null, is), listener);
+                        metadata = upload.execute();
+                        response = upload.getResponse();
+                        if (response != null && response.isSuccessStatusCode()) {
+                            metadata = upload.getUploader().getUploadedFileMetaData();
+                        }
+                        if (!upload.getUploader().checkResponseForReconnectPossibility(response)) {
+                            System.out.println("MediaHTTP: break");
+                            break;
+                        }
+
+                        upload.getUploader().backOffCounter();
+                        i++;
+                        System.out.println("MediaHTTP: i++");
+                    } while (i < upload.getUploader().getRequestRetryNumber());
+                }
                 break;
             case LOCAL_THEN_NETWORK:
                 try {
-                    metadata = upload.execute();
+                    metadata = prepUpload.execute();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
