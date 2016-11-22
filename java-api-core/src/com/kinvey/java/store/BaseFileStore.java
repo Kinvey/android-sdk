@@ -102,12 +102,14 @@ public class BaseFileStore {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
 
+        metadata.setSize(file.length());
+
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-        if (fileMetadataWithPath.getId() == null){
+/*        if (fileMetadataWithPath.getId() == null){
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
-        }
+        }*/
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath,
@@ -150,9 +152,9 @@ public class BaseFileStore {
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-        if (fileMetadataWithPath.getId() == null){
+/*        if (fileMetadataWithPath.getId() == null){
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
-        }
+        }*/
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);

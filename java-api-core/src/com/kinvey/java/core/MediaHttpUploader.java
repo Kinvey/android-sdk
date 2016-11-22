@@ -19,6 +19,7 @@ package com.kinvey.java.core;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -84,6 +85,7 @@ public class MediaHttpUploader {
      * @since 1.13
      */
     public static final String CONTENT_TYPE_HEADER = "X-Upload-Content-Type";
+    private int retryBackOffCounter;
 
     /**
      * Upload state associated with the Media HTTP uploader.
@@ -118,10 +120,10 @@ public class MediaHttpUploader {
 
     /**
      * Default maximum number of bytes that will be uploaded to the server in any single HTTP request
-     * (set to 100 KB).
+     * (set to 512 KB).
      */
     // TODO: 09.11.2016 change size, default was 10MB
-    public static final int DEFAULT_CHUNK_SIZE = 100 * KB;
+    public static final int DEFAULT_CHUNK_SIZE = 512 * KB;
 
     /** The HTTP content of the media to be uploaded. */
     private final AbstractInputStreamContent mediaContent;
@@ -403,10 +405,17 @@ public class MediaHttpUploader {
             } else {
                 response = executeCurrentRequest(currentRequest);
             }
-            System.out.println("MediaHTTP: After start execute: " + response.getStatusCode());
+
             boolean returningResponse = false;
             try {
+
+                if (response == null) {
+                    backOffCounter();
+                    continue;
+                }
+
                 if (response.isSuccessStatusCode()) {
+
                     totalBytesServerReceived = getMediaContentLength();
                     if (mediaContent.getCloseInputStream()) {
                         contentInputStream.close();
@@ -416,17 +425,18 @@ public class MediaHttpUploader {
                     return meta;
                 }
 
-                System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
+
                 if (response.getStatusCode() != 308) {
+                    System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
                     returningResponse = true;
                     return meta;
                 }
 
                 // Check to see if the upload URL has changed on the server.
-                String updatedUploadUrl = response.getHeaders().getLocation();
-                if (updatedUploadUrl != null) {
-                    uploadUrl = new GenericUrl(updatedUploadUrl);
-                }
+                    String updatedUploadUrl = response.getHeaders().getLocation();
+                    if (updatedUploadUrl != null) {
+                        uploadUrl = new GenericUrl(updatedUploadUrl);
+                    }
 
                 // we check the amount of bytes the server received so far, because the server may process
                 // fewer bytes than the amount of bytes the client had sent
@@ -457,7 +467,7 @@ public class MediaHttpUploader {
 
                 updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
             } finally {
-                if (!returningResponse) {
+                if (response!= null && !returningResponse) {
                     response.disconnect();
                 }
             }
@@ -477,6 +487,22 @@ public class MediaHttpUploader {
             }*/
         }
 //		return meta;
+    }
+
+    private void backOffCounter() {
+        retryBackOffCounter++;
+        if (retryBackOffCounter <= 5) {
+            try {
+                System.out.println("MediaHTTP: error, backOffCounter started ");
+                Thread.sleep(10 * 1000);
+                System.out.println("MediaHTTP: backOffCounter finished");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // TODO: 15.11.2016  change message
+            throw new KinveyException("error file uploading", "check internet connection", "check internet connection");
+        }
     }
 
     /**
@@ -531,7 +557,7 @@ public class MediaHttpUploader {
      */
     private HttpResponse executeUploadInitiation(AbstractKinveyClientRequest abstractKinveyClientRequest) throws IOException {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED);
-        abstractKinveyClientRequest.put("uploadType", "resumable");
+//        abstractKinveyClientRequest.put("uploadType", "resumable");
 
         initiationHeaders.set(CONTENT_TYPE_HEADER, mediaContent.getType());
         if (isMediaLengthKnown()) {
@@ -568,7 +594,12 @@ public class MediaHttpUploader {
         request.setThrowExceptionOnExecuteError(false);
         // execute the request
 
-        HttpResponse response = request.execute();
+        HttpResponse response = null;
+        try {
+            response = request.execute();
+        } catch (ProtocolException e) {
+            System.out.println(e.getMessage());
+        }
         return response;
     }
 
