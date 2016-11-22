@@ -411,6 +411,7 @@ public class MediaHttpUploader {
 
                 if (response == null) {
                     backOffCounter();
+//                    updateUploadedDataInfo(uploadUrl);
                     continue;
                 }
 
@@ -487,6 +488,36 @@ public class MediaHttpUploader {
             }*/
         }
 //		return meta;
+    }
+
+    private void updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
+        HttpResponse response = null;
+        HttpRequest httpRequest;
+        while (response == null || response.isSuccessStatusCode()) {
+            backOffCounter();
+            try {
+                httpRequest = requestFactory.buildPutRequest(uploadUrl, null);
+                httpRequest.getHeaders().setContentLength(0L);
+                httpRequest.getHeaders().setContentRange("bytes */" + getMediaContentLength());
+                httpRequest.setThrowExceptionOnExecuteError(false);
+                response = httpRequest.execute();
+                if (response != null && (response.isSuccessStatusCode() || response.getStatusCode() == 308)) {
+                    String range = response.getHeaders().getRange();
+                    range = range.substring(range.lastIndexOf("-") + 1);
+                    System.out.println("totalBytesServerReceived range: " + range);
+                    System.out.println("totalBytesServerReceived before: " + totalBytesServerReceived);
+                    totalBytesServerReceived = Long.parseLong(range) + 1;
+                    System.out.println("totalBytesServerReceived after: " + totalBytesServerReceived);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (response != null) {
+                    response.disconnect();
+                }
+            }
+        }
+        retryBackOffCounter = 0;
     }
 
     private void backOffCounter() {
