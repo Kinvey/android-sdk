@@ -67,14 +67,14 @@ public class MediaHttpUploaderTest extends TestCase {
 
         // Run the simulation
         objectUnderTest.setProgressListener(mockListener);
-/*        objectUnderTest.upload(initiationClientRequest);
+        objectUnderTest.upload(initiationClientRequest);
 
         // Verify the values were what we expected
         verify(mockListener, times(4)).progressChanged(any(MediaHttpUploader.class));
         assertEquals(MediaHttpUploader.UploadState.UPLOAD_COMPLETE, argValueRecorder.pop());
         assertEquals(MediaHttpUploader.UploadState.INITIATION_COMPLETE, argValueRecorder.pop());
         assertEquals(MediaHttpUploader.UploadState.INITIATION_STARTED, argValueRecorder.pop());
-        assertEquals(MediaHttpUploader.UploadState.UPLOAD_IN_PROGRESS, argValueRecorder.pop());*/
+        assertEquals(MediaHttpUploader.UploadState.UPLOAD_IN_PROGRESS, argValueRecorder.pop());
 
     }
 }

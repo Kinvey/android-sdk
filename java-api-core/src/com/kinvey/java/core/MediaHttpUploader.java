@@ -20,14 +20,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import com.google.api.client.googleapis.MethodOverride;
 import com.google.api.client.http.AbstractInputStreamContent;
@@ -318,7 +313,6 @@ public class MediaHttpUploader {
 
     private int retryBackOffCounter;
 
-    private int requestRetryNumber;
     /**
      * Executes a direct media upload or resumable media upload conforming to the specifications
      * listed <a href='http://code.google.com/apis/gdata/docs/resumable_upload.html'>here.</a>
@@ -363,7 +357,6 @@ public class MediaHttpUploader {
         updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
         FileMetaData meta = null;
         retryBackOffCounter = 0;
-        requestRetryNumber = 5;
         // Make initial request to get the unique upload URL.
         HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
         if (!initialResponse.isSuccessStatusCode()) {
@@ -406,7 +399,7 @@ public class MediaHttpUploader {
         HttpResponse response = null;
 
         chunkSize = (int) getMediaContentLength();
-        totalBytesServerReceived = 0;
+        totalBytesServerReceived = getMediaContentLength();
 
 //            currentRequest.setRetryOnExecuteIOException(true);
         while (true) {
@@ -433,6 +426,7 @@ public class MediaHttpUploader {
                 }
             }
 
+
             // TODO: 08.11.2016
             System.out.println("MediaHTTP: Before start execute ");
 
@@ -443,6 +437,7 @@ public class MediaHttpUploader {
             } else {
                 response = executeCurrentRequest(currentRequest);
             }
+
 
             if (response != null) {
                 System.out.println("MediaHTTP: After start execute: " + response.getStatusCode());
@@ -463,14 +458,16 @@ public class MediaHttpUploader {
                 }
 
                 //uploading failed
-                if (response != null && (
+                if (response == null ||
                         response.getStatusCode() != 408 ||
                         response.getStatusCode() != 500 ||
                         response.getStatusCode() != 502 ||
                         response.getStatusCode() != 503 ||
-                        response.getStatusCode() != 504)) {
-                    System.out.println("MediaHTTP: uploading interrupted");
-                    throw new KinveyException(String.valueOf(response.getStatusCode()) + ": " + response.getStatusMessage(), "", "");
+                        response.getStatusCode() != 504) {
+
+                    if (retryBackOffCounter == 5) {
+                        returningResponse = true;
+                    }
                 }
 
                 // Check to see if the upload URL has changed on the server.
@@ -481,33 +478,17 @@ public class MediaHttpUploader {
                     }
                 }
 
-                //it will be work if file wasn't loaded
-                while (retryBackOffCounter <= requestRetryNumber) {
-                    System.out.println("MediaHTTP: starting reconnect: " + retryBackOffCounter);
-                    HttpResponse checkUploadedResponse = null;
-                    try {
-                        checkUploadedResponse = checkUploadedStatus(uploadUrl, meta.getMimetype());
-                    } catch (Exception e) {
-                        System.out.println("MediaHTTP: Exception -> " + e.getMessage());
-                    }
-
-                    if (checkUploadedResponse != null && checkUploadedResponse.getStatusCode() == 308) {
+                while (retryBackOffCounter <= 5) {
+                    HttpResponse checkUploadedResponse = checkUploadedStatus(uploadUrl);
+                    if (checkUploadedResponse.getStatusCode() == 308) {
                         String sRange = checkUploadedResponse.getHeaders().getRange();
                         sRange = sRange.substring(sRange.lastIndexOf("-") + 1);
                         totalBytesServerReceived = Long.valueOf(sRange) + 1;
-                        retryBackOffCounter = requestRetryNumber + 1;
-                        returningResponse = false;
-                        continue;
-                    }
-
-                    if (retryBackOffCounter == requestRetryNumber) {
-                        returningResponse = true;
-                        return meta;
                     }
                     backOffCounter();
                 }
-                System.out.println("MediaHTTP: reconnect was success");
                 retryBackOffCounter = 0;
+
 
 /*                // we check the amount of bytes the server received so far, because the server may process
                 // fewer bytes than the amount of bytes the client had sent
@@ -540,7 +521,7 @@ public class MediaHttpUploader {
                 System.out.println("MediaHTTP: end of  while before finally");
             } finally {
                 System.out.println("MediaHTTP: finally ");
-                if (!returningResponse && response != null) {
+                if (!returningResponse) {
                     System.out.println("MediaHTTP: finally disconnect");
                     response.disconnect();
                 }
@@ -549,18 +530,10 @@ public class MediaHttpUploader {
     }
 
 
-    private HttpResponse checkUploadedStatus(GenericUrl uploadUrl, String mimetype) throws IOException {
-
+    private HttpResponse checkUploadedStatus(GenericUrl uploadUrl) throws IOException {
         HttpRequest checkUploadStatusRequest = requestFactory.buildPutRequest(uploadUrl, null);
-        checkUploadStatusRequest.getHeaders().setContentLength((long) 0);
-        checkUploadStatusRequest.getHeaders().setContentType(mimetype);
-
-//        SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.US);
-//        formatter.setTimeZone(TimeZone.getTimeZone("GTM"));
-//        checkUploadStatusRequest.getHeaders().setDate(formatter.format(new Date(System.currentTimeMillis() - 10015000)) + " GTM");
-
+        initiationHeaders.setContentLength((long) 0);
         checkUploadStatusRequest.getHeaders().setContentRange("bytes */" + getMediaContentLength());
-        checkUploadStatusRequest.setContent(new EmptyContent());
         HttpResponse uploadedResponse = checkUploadStatusRequest.execute();
         boolean notificationCompleted = false;
         try {
@@ -577,10 +550,10 @@ public class MediaHttpUploader {
 
     private void backOffCounter() {
         retryBackOffCounter++;
-        if (retryBackOffCounter <= requestRetryNumber) {
+        if (retryBackOffCounter <= 5) {
             try {
                 System.out.println("MediaHTTP: error, backOffCounter started ");
-                Thread.sleep(10 * 1000);
+                Thread.sleep(5 * 1000);
                 System.out.println("MediaHTTP: backOffCounter finished");
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -645,6 +618,20 @@ public class MediaHttpUploader {
      */
     private HttpResponse executeUploadInitiation(AbstractKinveyJsonClientRequest abstractKinveyClientRequest) throws IOException {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED);
+//        abstractKinveyClientRequest.put("uploadType", "resumable");
+//        abstractKinveyClientRequest.set("uploadType", "resumable");
+
+        // TODO: 11.11.2016 remove this
+/*        if (getMediaContent() != null && getMediaContent().getType() == null) {
+            mediaContent.setType("image/jpeg");
+            System.out.println("MediaHTTP: mediaContent.setType(\"image/jpeg\");");
+        }*/
+
+/*        if (getMediaContent() == null) {
+            System.out.println("MediaHTTP: mediaContent == null");
+        }*/
+
+
 
 /*        initiationHeaders.set(CONTENT_TYPE_HEADER, "application/octet-stream");
         System.out.println("MediaHTTP: executeUploadInitiation CONTENT_TYPE_HEADER: " + "application/octet-stream");
