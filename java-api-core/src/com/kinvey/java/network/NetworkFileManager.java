@@ -19,14 +19,12 @@ package com.kinvey.java.network;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -617,26 +615,7 @@ public class NetworkFileManager {
 
         @Override
         public FileMetaData execute() throws IOException {
-            //should be post request
-            HttpResponse response = uploader.upload(this);
-
-            if (response == null || !response.isSuccessStatusCode()) {
-
-
-
-                for (int i = 0; i < uploader.getRequestRetryNumber(); i++) {
-                    if (uploader.checkResponseForReconnectPossibility(response)) {
-                        //should be put request
-                        response = uploader.resumeUpload(this);
-                        if (response != null && response.isSuccessStatusCode()) {
-                            return uploader.getUploadedFileMetaData();
-                        }
-                    }
-                    uploader.backOffCounter();
-                }
-            }
-
-            return uploader.getUploadedFileMetaData();
+            return uploader.upload(this);
         }
 
         /**
@@ -651,7 +630,6 @@ public class NetworkFileManager {
             uploader = createMediaHttpUploader(content, requestFactory);
             uploader.setDirectUploadEnabled(false);
             uploader.setProgressListener(progressListener);
-            uploader.setRequestRetryNumber(5);
         }
         /**
          * Factory to instantiate a new http uploader object during the {@link #initializeMediaHttpUploader(com.google.api.client.http.AbstractInputStreamContent, UploaderProgressListener)}

@@ -291,6 +291,18 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         return executeUnparsed(false);
     }
 
+    /** Sets the HTTP headers used for the initiation request. */
+    public void setInitiationHeaders(HttpHeaders initiationHeaders) {
+        this.initiationHeaders = initiationHeaders;
+    }
+
+    /** Returns the HTTP headers used for the initiation request. */
+    public HttpHeaders getInitiationHeaders() {
+        return initiationHeaders;
+    }
+
+    /** The HTTP headers used in the initiation request. */
+    private HttpHeaders initiationHeaders;
 
     /**
      * Executes the http request and returns the raw {@link HttpResponse}. If
@@ -331,9 +343,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             request.setFollowRedirects(false);
         }
 
-//        if (initiationHeaders != null) {
-//            request.getHeaders().putAll(initiationHeaders);
-//        }
+        if (initiationHeaders != null) {
+            request.getHeaders().putAll(initiationHeaders);
+        }
 
 
         response = request.execute();
