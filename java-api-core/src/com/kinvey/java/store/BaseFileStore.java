@@ -123,22 +123,18 @@ public class BaseFileStore {
                 metadata = fileMetadataWithPath;
                 break;
             case FORCE_NETWORK:
-
-                FileMetaData prepareMetaData = prepUpload.execute();
+                metadata = prepUpload.execute();
                 HttpResponse response = prepUpload.getResponse();
 
                 if (response == null || !response.isSuccessStatusCode()) {
                     int i = 0;
                     do {
-                        System.out.println("MediaHTTP: reconnect");
-                        upload = networkFileManager.prepUploadBlocking(prepareMetaData,
-                                new FileContent(prepareMetaData.getMimetype(), file), listener);
+                        upload = networkFileManager.prepUploadBlocking(metadata,
+                                new FileContent(metadata.getMimetype(), file), listener);
                         metadata = upload.execute();
                         response = upload.getResponse();
                         if (response != null && response.isSuccessStatusCode()) {
                             metadata = upload.getUploader().getUploadedFileMetaData();
-                            System.out.println("MediaHTTP: success");
-                            break;
                         }
                         if (!upload.getUploader().checkResponseForReconnectPossibility(response)) {
                             System.out.println("MediaHTTP: break");
@@ -149,10 +145,7 @@ public class BaseFileStore {
                         i++;
                         System.out.println("MediaHTTP: i++");
                     } while (i < upload.getUploader().getRequestRetryNumber());
-                } else {
-                    metadata = prepareMetaData;
                 }
-                break;
             case LOCAL_THEN_NETWORK:
                 try {
                     metadata = prepUpload.execute();
