@@ -43,17 +43,17 @@ import com.kinvey.java.model.KinveyDeleteResponse;
 
 /**
  * Wraps the {@link NetworkFileManager} public methods in asynchronous functionality using native Android AsyncTask.
- * <p>
+ *
  * <p>
  * This class is constructed via {@link com.kinvey.java.AbstractClient#file()} factory method.
  * </p>
- * <p>
+ *
  * <p>
  * The callback mechanism for this api is extended to include the {@link UploaderProgressListener#progressChanged(com.kinvey.java.core.MediaHttpUploader)}
  * method, which receives notifications as the upload process transitions through and progresses with the upload.
  * process.
  * </p>
- * <p>
+ *
  * <p>
  * Sample usage:
  * <pre>
@@ -89,83 +89,74 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  * }
  *
  * </pre>
- * <p>
- * </p>
  *
+ * </p>
  * @author edwardf
  * @since 2.4
  */
 public class NetworkFileManager {
 
-    /**
-     * the client for this api
-     **/
+    /** the client for this api **/
     private AbstractClient client;
 
-    /**
-     * the upload request listener, can be {@code null} if the calling code has not explicitly set it
-     **/
+    /** the upload request listener, can be {@code null} if the calling code has not explicitly set it **/
     private UploaderProgressListener uploadProgressListener;
 
-    /**
-     * the download request listener, can be {@code null} if the call code has not set it
-     **/
+    /** the download request listener, can be {@code null} if the call code has not set it **/
     private DownloaderProgressListener downloaderProgressListener;
 
-    /**
-     * Used to calculate the MimeType of files
-     **/
+    /** Used to calculate the MimeType of files **/
     protected MimeTypeFinder mimeTypeFinder;
 
 
     private String clientAppVersion = null;
-
+    
     private GenericData customRequestProperties = new GenericData();
 
-    public void setClientAppVersion(String appVersion) {
-        this.clientAppVersion = appVersion;
+    public void setClientAppVersion(String appVersion){
+    	this.clientAppVersion = appVersion;	
+    }
+    
+    public void setClientAppVersion(int major, int minor, int revision){
+    	setClientAppVersion(major + "." + minor + "." + revision);
+    }
+    
+    public void setCustomRequestProperties(GenericJson customheaders){
+    	this.customRequestProperties = customheaders;
+    }
+    
+    public void setCustomRequestProperty(String key, Object value){
+    	if (this.customRequestProperties == null){
+    		this.customRequestProperties = new GenericJson();
+    	}
+    	this.customRequestProperties.put(key, value);
+    }
+    
+    public void clearCustomRequestProperties(){
+    	this.customRequestProperties = new GenericJson();
     }
 
-    public void setClientAppVersion(int major, int minor, int revision) {
-        setClientAppVersion(major + "." + minor + "." + revision);
-    }
-
-    public void setCustomRequestProperties(GenericJson customheaders) {
-        this.customRequestProperties = customheaders;
-    }
-
-    public void setCustomRequestProperty(String key, Object value) {
-        if (this.customRequestProperties == null) {
-            this.customRequestProperties = new GenericJson();
-        }
-        this.customRequestProperties.put(key, value);
-    }
-
-    public void clearCustomRequestProperties() {
-        this.customRequestProperties = new GenericJson();
-    }
 
 
     /**
      * Calculate and set metadata for file upload request according FileMetadata
-     *
      * @param metaData
      * @param request
      */
-    private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<?> request) {
+    private void setUploadHeader(FileMetaData metaData, AbstractKinveyJsonClientRequest<?> request){
         if (metaData != null) {
             if (metaData.getMimetype() == null) {
                 if (mimeTypeFinder != null) {
                     mimeTypeFinder.getMimeType(metaData);
                 }
             }
-            if (metaData.getMimetype() == null) {
+            if (metaData.getMimetype() == null){
                 metaData.setMimetype("application/octet-stream");
             }
 
             request.getRequestHeaders().put("x-Kinvey-content-type", metaData.getMimetype());
 
-        } else {
+        }else {
             request.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
         }
     }
@@ -177,7 +168,6 @@ public class NetworkFileManager {
      * {@link com.kinvey.java.core.AbstractKinveyClient#initializeRequest(com.kinvey.java.core.AbstractKinveyClientRequest)} is used to initialize all requests
      * constructed by this api.
      * </p>
-     *
      * @param client required instance
      * @throws NullPointerException if the client parameter is non-null
      */
@@ -192,22 +182,22 @@ public class NetworkFileManager {
      *
      * @param finder an implementaiton of a {@code MimeTypeFinder} to use
      */
-    protected void setMimeTypeManager(MimeTypeFinder finder) {
+    protected void setMimeTypeManager(MimeTypeFinder finder){
         this.mimeTypeFinder = finder;
     }
-
     /**
+     *
      * @return an instance of a client associated with this instance of NetworkFileManager
      */
-    public AbstractClient getClient() {
+    public AbstractClient getClient(){
         return this.client;
     }
-
+    
     /**
      * Prepares a request to upload a given file and its contents to the Kinvey file service.
      *
      * @param fileMetaData Metadata object about the file to uplaod
-     * @param content      the input stream from which the file contents will be sourced
+     * @param content  the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
@@ -215,9 +205,9 @@ public class NetworkFileManager {
                                                     UploaderProgressListener uploadProgressListener) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
         NetworkManager.SaveMode mode;
-        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
+        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)){
             mode = NetworkManager.SaveMode.PUT;
-        } else {
+        }else{
             mode = NetworkManager.SaveMode.POST;
         }
 
@@ -227,12 +217,12 @@ public class NetworkFileManager {
 
         return upload;
     }
-
+    
     /**
      * Uploads a given file and its contents to the Kinvey file service.
      *
      * @param fileMetaData Metadata object about the file to uplaod
-     * @param content      the input stream from which the file contents will be sourced
+     * @param content  the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      * @deprecated use upload methods which take an `InputStream` or a `NetworkFileManager`
@@ -241,9 +231,9 @@ public class NetworkFileManager {
                                                 UploaderProgressListener uploadProgressListener) throws IOException {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null");
         NetworkManager.SaveMode mode;
-        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
+        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)){
             mode = NetworkManager.SaveMode.PUT;
-        } else {
+        }else{
             mode = NetworkManager.SaveMode.POST;
         }
 
@@ -255,28 +245,29 @@ public class NetworkFileManager {
     }
 
 
+
     /**
      * Prepares a request to upload a given file and its contents to the Kinvey file service.
      *
      * @param fileName the filename used for the metadata
-     * @param content  the input stream from which the file contents will be sourced
+     * @param content the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      */
     public UploadMetadataAndFile prepUploadBlocking(String fileName, AbstractInputStreamContent content,
                                                     UploaderProgressListener uploadProgressListener) throws IOException {
         FileMetaData meta = new FileMetaData();
-        if (fileName != null) {
+        if (fileName != null){
             meta.setFileName(fileName);
         }
         return this.prepUploadBlocking(meta, content, uploadProgressListener);
     }
-
+    
     /**
      * Uploads a given file and its contents to the Kinvey file service.
      *
      * @param fileName the filename used for the metadata
-     * @param content  the input stream from which the file contents will be sourced
+     * @param content the input stream from which the file contents will be sourced
      * @return a valid request to be executed for the upload operation to Kinvey
      * @throws IOException if initializing the request fails
      * @deprecated use upload methods which take an `InputStream` or a `NetworkFileManager`
@@ -284,7 +275,7 @@ public class NetworkFileManager {
     public UploadMetadataAndFile uploadBlocking(String fileName, AbstractInputStreamContent content,
                                                 UploaderProgressListener uploadProgressListener) throws IOException {
         FileMetaData meta = new FileMetaData();
-        if (fileName != null) {
+        if (fileName != null){
             meta.setFileName(fileName);
         }
         return this.prepUploadBlocking(meta, content, uploadProgressListener);
@@ -303,7 +294,7 @@ public class NetworkFileManager {
         client.initializeRequest(download);
         return download;
     }
-
+    
     /**
      * Download a given file from the Kinvey file service.
      * <p>
@@ -332,7 +323,7 @@ public class NetworkFileManager {
         return download;
 
     }
-
+    
     /**
      * Query for files to download
      *
@@ -350,9 +341,9 @@ public class NetworkFileManager {
 
     /**
      * Prepares a request to attach query parameters when requesting metadata for a specific file.
-     * <p>
+     *
      * Use this method to specify a custom time to live.
-     * <p>
+     *
      * <p>
      * Sample usage:
      * <pre>
@@ -378,12 +369,12 @@ public class NetworkFileManager {
         return download;
 
     }
-
+    
     /**
      * Attach query parameters when requesting metadata for a specific file.
-     * <p>
+     *
      * Use this method to specify a custom time to live.
-     * <p>
+     *
      * <p>
      * Sample usage:
      * <pre>
@@ -413,7 +404,7 @@ public class NetworkFileManager {
 
     /**
      * Prepares a request to download a file with a custom Time-To-Live
-     * <p>
+     *
      * <p>
      * Sample usage:
      * <pre>
@@ -430,15 +421,15 @@ public class NetworkFileManager {
      * @return a {@link DownloadMetadataQuery} request ready to be executed.
      * @throws IOException
      */
-    public DownloadMetadataQuery prepDownloadWithTTLBlocking(String id, int ttl) throws IOException {
+    public DownloadMetadataQuery prepDownloadWithTTLBlocking(String id, int ttl) throws IOException{
         Query q = new Query();
         q.equals("ttl_in_seconds", ttl);
         return prepDownloadBlocking(id, q);
     }
-
+    
     /**
      * Download a file with a custom Time-To-Live
-     * <p>
+     *
      * <p>
      * Sample usage:
      * <pre>
@@ -456,7 +447,7 @@ public class NetworkFileManager {
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataQuery downloadWithTTLBlocking(String id, int ttl) throws IOException {
+    public DownloadMetadataQuery downloadWithTTLBlocking(String id, int ttl) throws IOException{
         Query q = new Query();
         q.equals("ttl_in_seconds", ttl);
         return prepDownloadBlocking(id, q);
@@ -465,27 +456,27 @@ public class NetworkFileManager {
 
     /**
      * Prepares a request to query to find a file by it's filename.
-     * <p>
+     *
      * As Kinvey NetworkFileManager now supports non-unique file names, this method will only return a single file with this name.
      *
      * @param filename
      * @return
      * @throws IOException
      */
-    public DownloadMetadataQuery prepDownloadBlocking(String filename) throws IOException {
+    public DownloadMetadataQuery prepDownloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
         DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
-
+    
     /**
      * This method performs a query to find a file by it's filename.
-     * <p>
+     *
      * As Kinvey NetworkFileManager now supports non-unique file names, this method will only return a single file with this name.
      *
      * @param filename
@@ -493,13 +484,13 @@ public class NetworkFileManager {
      * @throws IOException
      * @deprecated use the download methods which take an `Outputstream` or a `NetworkFileManager`
      */
-    public DownloadMetadataQuery downloadBlocking(String filename) throws IOException {
+    public DownloadMetadataQuery downloadBlocking(String filename) throws IOException{
         Query q = new Query();
         q.equals("_filename", filename);
         q.addSort("_kmd.lmt", Query.SortOrder.DESC);
         DownloadMetadataQuery download = new DownloadMetadataQuery(null, q);
         client.initializeRequest(download);
-        download.getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
+        download.getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         return download;
 
     }
@@ -517,7 +508,7 @@ public class NetworkFileManager {
         client.initializeRequest(delete);
         return delete;
     }
-
+    
     /**
      * Deletes the given file from the Kinvey file service.
      *
@@ -526,7 +517,7 @@ public class NetworkFileManager {
      * @throws IOException
      */
     public DeleteFile deleteBlocking(String fileID) throws IOException {
-        return deleteBlocking(new FileMetaData(fileID));
+    	return deleteBlocking(new FileMetaData(fileID));
     }
 
 
@@ -551,17 +542,18 @@ public class NetworkFileManager {
      * @return a valid PUT or POST request to be executed
      * @throws IOException
      */
-    public UploadMetadata uploadMetaDataBlocking(FileMetaData metaData) throws IOException {
+    public UploadMetadata uploadMetaDataBlocking(FileMetaData metaData) throws IOException{
         NetworkManager.SaveMode mode;
-        if (metaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
+        if (metaData.containsKey(NetworkManager.ID_FIELD_NAME)){
             mode = NetworkManager.SaveMode.PUT;
-        } else {
+        }else{
             mode = NetworkManager.SaveMode.POST;
         }
         UploadMetadata upload = new UploadMetadata(metaData, mode);
         client.initializeRequest(upload);
         return upload;
     }
+
 
 
     /**
@@ -571,7 +563,7 @@ public class NetworkFileManager {
      * @return a valid PUT or POST request to be executed
      * @throws IOException
      */
-    public DownloadMetadata downloadMetaDataBlocking(String id) throws IOException {
+    public DownloadMetadata downloadMetaDataBlocking(String id) throws IOException{
         DownloadMetadata download = new DownloadMetadata(id);
         client.initializeRequest(download);
         return download;
@@ -593,39 +585,31 @@ public class NetworkFileManager {
     }
 
 
+
     //----------------------------------------------------Client Requests
 
     /**
      * This class uploads a {@link FileMetaData} object to Kinvey, returning another {@link FileMetaData} containing the upload URL
+     *
+     *
      */
-    public class UploadMetadataAndFile extends AbstractKinveyJsonClientRequest<FileMetaData> {
+    public class UploadMetadataAndFile extends AbstractKinveyJsonClientRequest<FileMetaData>{
         private final static String REST_URL = "blob/{appKey}/{id}";
 
         @Key
         private String id;
 
-        public HttpResponse getResponse() {
-            return response;
-        }
-
-        public MediaHttpUploader getUploader() {
-            return uploader;
-        }
-
         private MediaHttpUploader uploader;
-        private HttpResponse response;
-        private boolean isResume;
 
         private UploadMetadataAndFile(FileMetaData meta, NetworkManager.SaveMode verb, AbstractInputStreamContent mediaContent, UploaderProgressListener progressListener) {
             super(client, verb.toString(), REST_URL, meta, FileMetaData.class);
             initializeMediaHttpUploader(mediaContent, progressListener);
-            if (verb.equals(NetworkManager.SaveMode.PUT)) {
+            if (verb.equals(NetworkManager.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
-                isResume = true;
             }
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
 
             setUploadHeader(meta, this);
@@ -634,10 +618,22 @@ public class NetworkFileManager {
         @Override
         public FileMetaData execute() throws IOException {
             //should be post request
-            if (isResume) {
-                response = uploader.resumeUpload(this);
-            } else {
-                response = uploader.upload(this);
+            HttpResponse response = uploader.upload(this);
+
+            if (response == null || !response.isSuccessStatusCode()) {
+
+
+
+                for (int i = 0; i < uploader.getRequestRetryNumber(); i++) {
+                    if (uploader.checkResponseForReconnectPossibility(response)) {
+                        //should be put request
+                        response = uploader.resumeUpload(this);
+                        if (response != null && response.isSuccessStatusCode()) {
+                            return uploader.getUploadedFileMetaData();
+                        }
+                    }
+                    uploader.backOffCounter();
+                }
             }
 
             return uploader.getUploadedFileMetaData();
@@ -646,7 +642,7 @@ public class NetworkFileManager {
         /**
          * Sets up this request object to be used for uploading media.
          *
-         * @param content          data to be uploaded
+         * @param content data to be uploaded
          * @param progressListener an object to be notified of the different state changes as the upload progresses.
          *                         Optional {@code null} can be passed in.
          */
@@ -657,11 +653,10 @@ public class NetworkFileManager {
             uploader.setProgressListener(progressListener);
             uploader.setRequestRetryNumber(5);
         }
-
         /**
          * Factory to instantiate a new http uploader object during the {@link #initializeMediaHttpUploader(com.google.api.client.http.AbstractInputStreamContent, UploaderProgressListener)}
          *
-         * @param content        data to be uploaded
+         * @param content data to be uploaded
          * @param requestFactory request factory to be used
          * @return a valid http uploader with default settings
          */
@@ -671,11 +666,11 @@ public class NetworkFileManager {
     }
 
     /**
-     * This class will upload new file metadata without actually effecting the file
-     * <p>
-     * Note it is not recommended to change the filename without ensuring a file exists with the new name.
+     *  This class will upload new file metadata without actually effecting the file
+     *
+     *  Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
-    public class UploadMetadata extends AbstractKinveyJsonClientRequest<FileMetaData> {
+    public class UploadMetadata extends AbstractKinveyJsonClientRequest<FileMetaData>{
         private final static String REST_URL = "blob/{appKey}/{id}";
 
         @Key
@@ -683,23 +678,23 @@ public class NetworkFileManager {
 
         private UploadMetadata(FileMetaData meta, NetworkManager.SaveMode verb) {
             super(client, verb.toString(), REST_URL, meta, FileMetaData.class);
-            if (verb.equals(NetworkManager.SaveMode.PUT)) {
+            if (verb.equals(NetworkManager.SaveMode.PUT)){
                 this.id = Preconditions.checkNotNull(meta.getId());
             }
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
             setUploadHeader(meta, this);
         }
     }
 
     /**
-     * This class will upload new file metadata without actually effecting the file
-     * <p>
-     * Note it is not recommended to change the filename without ensuring a file exists with the new name.
+     *  This class will upload new file metadata without actually effecting the file
+     *
+     *  Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
-    public class DownloadMetadata extends AbstractKinveyJsonClientRequest<FileMetaData> {
+    public class DownloadMetadata extends AbstractKinveyJsonClientRequest<FileMetaData>{
         private static final String REST_URL = "blob/{appKey}/{id}";
 
         @Key
@@ -709,11 +704,11 @@ public class NetworkFileManager {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
         }
-
+        
     }
 
 
@@ -732,8 +727,8 @@ public class NetworkFileManager {
             super(client, "GET", REST_URL, null, FileMetaData.class);
             this.id = Preconditions.checkNotNull(meta.getId());
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
             setUploadHeader(meta, this);
         }
@@ -750,7 +745,7 @@ public class NetworkFileManager {
 
         @Key("id")
         private String id;
-
+        
         @Key("query")
         private String queryFilter;
         @Key("sort")
@@ -761,7 +756,7 @@ public class NetworkFileManager {
         private String skip;
 
 
-        private DownloadMetadataQuery(String id, Query query) {
+        private DownloadMetadataQuery(String id, Query query){
             super(client, "GET", REST_URL, null, FileMetaData[].class);
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
@@ -772,15 +767,16 @@ public class NetworkFileManager {
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
             this.id = id;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
-            getRequestHeaders().put("x-Kinvey-content-type", "application/octet-stream");
+            getRequestHeaders().put("x-Kinvey-content-type","application/octet-stream" );
         }
     }
 
 
-    public class DeleteFile extends AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
+
+    public class DeleteFile extends AbstractKinveyJsonClientRequest<KinveyDeleteResponse>{
 
         private final static String REST_URL = "blob/{appKey}/{id}";// + "{?query}";
 
@@ -789,12 +785,12 @@ public class NetworkFileManager {
 //        @Key("query")
 //        private String queryFilter;
 
-        public DeleteFile(FileMetaData metaData) {
+        public DeleteFile(FileMetaData metaData){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(metaData.getId(), "cannot remove a file without an _id!");
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
             setUploadHeader(metaData, this);
         }
@@ -806,18 +802,21 @@ public class NetworkFileManager {
 //
 //        }
 
-        public DeleteFile(String id) {
+        public DeleteFile(String id){
             super(client, "DELETE", REST_URL, null, KinveyDeleteResponse.class);
             this.id = Preconditions.checkNotNull(id);
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkFileManager.this.clientAppVersion);
-            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()) {
-                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties));
+            if (NetworkFileManager.this.customRequestProperties != null && !NetworkFileManager.this.customRequestProperties.isEmpty()){
+            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkFileManager.this.customRequestProperties) );
             }
 
 
         }
 
     }
+
+
+
 
 
 }
