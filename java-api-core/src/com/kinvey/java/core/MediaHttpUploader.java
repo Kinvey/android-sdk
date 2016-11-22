@@ -398,7 +398,7 @@ public class MediaHttpUploader {
         try {
             JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
             meta = parse(jsonObjectParser, initialResponse);
-
+            setUploadedFileMetaData(meta);
             headers = fillHeaders(meta);
 
             notifyListenerWithMetaData(meta);
