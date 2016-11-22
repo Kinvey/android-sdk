@@ -23,10 +23,8 @@ import java.net.ProtocolException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -387,28 +385,12 @@ public class MediaHttpUploader {
 
             if (meta.getUploadUrl() != null) {
                 uploadUrl = new GenericUrl(meta.getUploadUrl());
-
             } else {
                 throw new KinveyException("_uploadURL is null!", "do not remove _uploadURL in collection hooks for NetworkFileManager!", "The library cannot upload a file without this url");
             }
         } finally {
             initialResponse.disconnect();
         }
-
-        String signature = (String)(((ArrayList) uploadUrl.get("Signature")).get(0));
-        String googleAccessId = (String)(((ArrayList) uploadUrl.get("GoogleAccessId")).get(0));
-        String expires = (String)(((ArrayList) uploadUrl.get("Expires")).get(0));
-
-        HttpRequest stepOneRequest = requestFactory.buildPostRequest(uploadUrl, null);
-        stepOneRequest.getHeaders().setContentLength((long) 0);
-        stepOneRequest.getHeaders().setContentType(meta.getMimetype());
-        stepOneRequest.getHeaders().set("x-goog-resumable", "start");
-//        stepOneRequest.getHeaders().set("Authorization", "Bearer " + signature);
-
-        HttpResponse stepOneResponse = stepOneRequest.execute();
-        String location = (String) stepOneResponse.getHeaders().get("Location");
-
-        uploadUrl = new GenericUrl(location);
 
         // Convert media content into a byte stream to upload in chunks.
         contentInputStream = mediaContent.getInputStream();
