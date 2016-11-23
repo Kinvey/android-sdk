@@ -44,6 +44,7 @@ import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
+import com.kinvey.java.UploadFileException;
 import com.kinvey.java.model.FileMetaData;
 
 /**
@@ -261,7 +262,7 @@ public class MediaHttpUploader {
      */
     // TODO(rmistry): Figure out a way to compute the content length using CountingInputStream.
     private long totalBytesServerReceived;
-    
+
     /**
      * Construct the {@link MediaHttpUploader}.
      *
@@ -372,6 +373,7 @@ public class MediaHttpUploader {
 
         HttpResponse response;
         while (true) {
+            response = null;
             System.out.println("MediaHTTP: while start ");
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
@@ -398,22 +400,29 @@ public class MediaHttpUploader {
 
             // TODO: 08.11.2016
             System.out.println("MediaHTTP: Before start execute ");
-            if (isMediaLengthKnown()) {
-                // TODO(rmistry): Support gzipping content for the case where media content length is
-                // known (https://code.google.com/p/google-api-java-client/issues/detail?id=691).
-                response = executeCurrentRequestWithoutGZip(currentRequest);
-            } else {
-                response = executeCurrentRequest(currentRequest);
+            try {
+                if (isMediaLengthKnown()) {
+                    // TODO(rmistry): Support gzipping content for the case where media content length is
+                    // known (https://code.google.com/p/google-api-java-client/issues/detail?id=691).
+                    response = executeCurrentRequestWithoutGZip(currentRequest);
+                } else {
+                    response = executeCurrentRequest(currentRequest);
+                }
+            } catch (IOException e) {
+                UploadFileException exception = new UploadFileException("Connection was interrupted", "Retry request", e.getMessage());
+                exception.setUploadedFileMetaData(meta);
+                throw exception;
             }
 
             boolean returningResponse = false;
             try {
 
-                if (response == null) {
+/*                if (response == null) {
                     backOffCounter();
-//                    updateUploadedDataInfo(uploadUrl);
+                    updateUploadedDataInfo(uploadUrl);
                     continue;
                 }
+                retryBackOffCounter = 0;*/
 
                 if (response.isSuccessStatusCode()) {
 
@@ -472,22 +481,7 @@ public class MediaHttpUploader {
                     response.disconnect();
                 }
             }
-            // TODO: 08.11.2016  
-
-
-//            response = currentRequest.execute();
-            
-/*            response = currentRequest.execute();
-            if (response.isSuccessStatusCode()) {
-                bytesUploaded = getMediaContentLength();
-                contentInputStream.close();
-                updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
-
-            } else {
-                throw new KinveyException("Uploading NetworkFileManager Failed", response.parseAsString(), "");
-            }*/
         }
-//		return meta;
     }
 
     private void updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
@@ -517,7 +511,6 @@ public class MediaHttpUploader {
                 }
             }
         }
-        retryBackOffCounter = 0;
     }
 
     private void backOffCounter() {
@@ -624,14 +617,7 @@ public class MediaHttpUploader {
         // don't throw an exception so we can let a custom Google exception be thrown
         request.setThrowExceptionOnExecuteError(false);
         // execute the request
-
-        HttpResponse response = null;
-        try {
-            response = request.execute();
-        } catch (ProtocolException e) {
-            System.out.println(e.getMessage());
-        }
-        return response;
+        return request.execute();
     }
 
     /**
@@ -647,8 +633,7 @@ public class MediaHttpUploader {
             request.setEncoding(new GZipEncoding());
         }
         // execute request
-        HttpResponse response = executeCurrentRequestWithoutGZip(request);
-        return response;
+        return executeCurrentRequestWithoutGZip(request);
     }
 
     /**
