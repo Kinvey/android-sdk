@@ -628,7 +628,7 @@ public class NetworkFileManager {
         protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
             HttpRequestFactory requestFactory = client.getRequestFactory();
             uploader = createMediaHttpUploader(content, requestFactory);
-            uploader.setDirectUploadEnabled(true);
+            uploader.setDirectUploadEnabled(false);
             uploader.setProgressListener(progressListener);
         }
         /**
