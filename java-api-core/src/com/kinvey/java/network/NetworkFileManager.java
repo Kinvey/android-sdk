@@ -611,6 +611,7 @@ public class NetworkFileManager {
             }
 
             setUploadHeader(meta, this);
+            uploader.setFileMetaDataForUploading(meta);
         }
 
         @Override

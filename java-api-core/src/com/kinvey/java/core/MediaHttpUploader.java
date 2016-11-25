@@ -42,6 +42,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ByteStreams;
 import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.UploadFileException;
@@ -289,6 +290,10 @@ public class MediaHttpUploader {
     // TODO(rmistry): Figure out a way to compute the content length using CountingInputStream.
     private long totalBytesServerReceived;
 
+    private FileMetaData fileMetaDataForUploading;
+
+    boolean isResume;
+
     /**
      * Construct the {@link MediaHttpUploader}.
      * <p>
@@ -358,32 +363,39 @@ public class MediaHttpUploader {
         Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
         updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
         FileMetaData meta = null;
-        // Make initial request to get the unique upload URL.
-        HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
-        if (!initialResponse.isSuccessStatusCode()) {
-            // If the initiation request is not successful return it immediately.
-            throw new KinveyException("Uploading Metadata Failed");
-        }
-        GenericUrl uploadUrl;
         Map<String, String> headers = null;
-        try {
-            JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
-            meta = parse(jsonObjectParser, initialResponse);
+        GenericUrl uploadUrl;
+        isResume = fileMetaDataForUploading.getUploadUrl() != null;
 
-            if (meta.containsKey("_requiredHeaders")) {
-                //then there are special headers to use in the request to google
-                headers = (Map<String, String>) meta.get("_requiredHeaders");
+        if (isResume) {
+            uploadUrl = new GenericUrl(fileMetaDataForUploading.getUploadUrl());
+            meta = fileMetaDataForUploading;
+        } else {
+            // Make initial request to get the unique upload URL.
+            HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
+            if (!initialResponse.isSuccessStatusCode()) {
+                // If the initiation request is not successful return it immediately.
+                throw new KinveyException("Uploading Metadata Failed");
             }
 
+            try {
+                JsonObjectParser jsonObjectParser = (JsonObjectParser) initiationClientRequest.getAbstractKinveyClient().getObjectParser();
+                meta = parse(jsonObjectParser, initialResponse);
 
-            notifyListenerWithMetaData(meta);
-            if (meta.getUploadUrl() != null) {
-                uploadUrl = new GenericUrl(meta.getUploadUrl());
-            } else {
-                throw new KinveyException("_uploadURL is null!", "do not remove _uploadURL in collection hooks for NetworkFileManager!", "The library cannot upload a file without this url");
+                if (meta.containsKey("_requiredHeaders")) {
+                    //then there are special headers to use in the request to google
+                    headers = (Map<String, String>) meta.get("_requiredHeaders");
+                }
+
+                notifyListenerWithMetaData(meta);
+                if (meta.getUploadUrl() != null) {
+                    uploadUrl = new GenericUrl(meta.getUploadUrl());
+                } else {
+                    throw new KinveyException("_uploadURL is null!", "do not remove _uploadURL in collection hooks for NetworkFileManager!", "The library cannot upload a file without this url");
+                }
+            } finally {
+                initialResponse.disconnect();
             }
-        } finally {
-            initialResponse.disconnect();
         }
 
         // Convert media content into a byte stream to upload in chunks.
@@ -395,24 +407,12 @@ public class MediaHttpUploader {
             contentInputStream = new BufferedInputStream(contentInputStream);
         }
 
-/*        if (initiationClientRequest.getRequestMethod().equals(HttpMethods.PUT)) {
-            System.out.println("MediaHTTP: retry start");
-            HttpResponse response = updateUploadedDataInfo(uploadUrl);
-            updateContent(response);
-            System.out.println("MediaHTTP: retry end");
-        }*/
-
         HttpResponse response;
         while (true) {
-            response = null;
-            System.out.println("MediaHTTP: while start ");
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
             setContentAndHeadersOnCurrentRequest(meta.getMimetype());
 
-
-//            currentRequest.setThrowExceptionOnExecuteError(false);
-//            currentRequest.setRetryOnExecuteIOException(true);
             // if there are custom headers, add them
             if (headers != null) {
                 for (String header : headers.keySet()) {
@@ -429,8 +429,6 @@ public class MediaHttpUploader {
                 }
             }
 
-            // TODO: 08.11.2016
-            System.out.println("MediaHTTP: Before start execute ");
             try {
                 if (isMediaLengthKnown()) {
                     // TODO(rmistry): Support gzipping content for the case where media content length is
@@ -448,15 +446,7 @@ public class MediaHttpUploader {
             boolean returningResponse = false;
             try {
 
-/*                if (response == null) {
-                    backOffCounter();
-                    updateUploadedDataInfo(uploadUrl);
-                    continue;
-                }
-                retryBackOffCounter = 0;*/
-
                 if (response.isSuccessStatusCode()) {
-
                     totalBytesServerReceived = getMediaContentLength();
                     if (mediaContent.getCloseInputStream()) {
                         contentInputStream.close();
@@ -466,9 +456,7 @@ public class MediaHttpUploader {
                     return meta;
                 }
 
-
                 if (response.getStatusCode() != 308) {
-                    System.out.println("MediaHTTP: Response.getStatusCode: " + response.getStatusCode());
                     returningResponse = true;
                     return meta;
                 }
@@ -479,10 +467,36 @@ public class MediaHttpUploader {
                     uploadUrl = new GenericUrl(updatedUploadUrl);
                 }
 
+                // we check the amount of bytes the server received so far, because the server may process
+                // fewer bytes than the amount of bytes the client had sent
+                long newBytesServerReceived = getNextByteIndex(response.getHeaders().getRange());
+                // the server can receive any amount of bytes from 0 to current chunk length
+                long currentBytesServerReceived = newBytesServerReceived - totalBytesServerReceived;
+                if (!isResume) {
+                    com.google.api.client.util.Preconditions.checkState(
+                            currentBytesServerReceived >= 0 && currentBytesServerReceived <= currentChunkLength);
+                }
+                long copyBytes = currentChunkLength - currentBytesServerReceived;
+                if (isMediaLengthKnown()) {
+                    if (copyBytes != 0) {
+                        // If the server didn't receive all the bytes the client sent the current position of
+                        // the input stream is incorrect. So we should reset the stream and skip those bytes
+                        // that the server had already received.
+                        // Otherwise (the server got all bytes the client sent), the stream is in its right
+                        // position, and we can continue from there
+                        contentInputStream.reset();
+                        long actualSkipValue = contentInputStream.skip(currentBytesServerReceived);
+                        com.google.api.client.util.Preconditions.checkState(currentBytesServerReceived == actualSkipValue);
+                    }
+                } else if (copyBytes == 0) {
+                    // server got all the bytes, so we don't need to use this buffer. Otherwise, we have to
+                    // keep the buffer and copy part (or all) of its bytes to the stream we are sending to the
+                    // server
+                    currentRequestContentBuffer = null;
+                }
+                totalBytesServerReceived = newBytesServerReceived;
 
-                updateContent(response);
-
-
+                isResume = false;
                 updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
             } finally {
                 if (response != null && !returningResponse) {
@@ -492,54 +506,21 @@ public class MediaHttpUploader {
         }
     }
 
-    private void updateContent(HttpResponse response) throws IOException {
-        // we check the amount of bytes the server received so far, because the server may process
-        // fewer bytes than the amount of bytes the client had sent
-        long newBytesServerReceived = getNextByteIndex(response.getHeaders().getRange());
-        // the server can receive any amount of bytes from 0 to current chunk length
-        long currentBytesServerReceived = newBytesServerReceived - totalBytesServerReceived;
-        com.google.api.client.util.Preconditions.checkState(
-                currentBytesServerReceived >= 0 && currentBytesServerReceived <= currentChunkLength);
-        long copyBytes = currentChunkLength - currentBytesServerReceived;
-        if (isMediaLengthKnown()) {
-            if (copyBytes > 0) {
-                // If the server didn't receive all the bytes the client sent the current position of
-                // the input stream is incorrect. So we should reset the stream and skip those bytes
-                // that the server had already received.
-                // Otherwise (the server got all bytes the client sent), the stream is in its right
-                // position, and we can continue from there
-                contentInputStream.reset();
-                long actualSkipValue = contentInputStream.skip(currentBytesServerReceived);
-                com.google.api.client.util.Preconditions.checkState(currentBytesServerReceived == actualSkipValue);
-            }
-        } else if (copyBytes == 0) {
-            // server got all the bytes, so we don't need to use this buffer. Otherwise, we have to
-            // keep the buffer and copy part (or all) of its bytes to the stream we are sending to the
-            // server
-            currentRequestContentBuffer = null;
-        }
-        totalBytesServerReceived = newBytesServerReceived;
-    }
-
     private HttpResponse updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
         HttpResponse response = null;
         HttpRequest httpRequest;
-//        while (response == null || response.isSuccessStatusCode()) {
-//            backOffCounter();
         try {
             httpRequest = requestFactory.buildPutRequest(uploadUrl, null);
-            httpRequest.getHeaders().setContentLength(0L);
+            httpRequest.setContent(new EmptyContent());
+            httpRequest.setSuppressUserAgentSuffix(true);
             httpRequest.getHeaders().setContentRange("bytes */" + getMediaContentLength());
             httpRequest.setThrowExceptionOnExecuteError(false);
             response = httpRequest.execute();
             if (response != null && (response.isSuccessStatusCode() || response.getStatusCode() == 308)) {
                 String range = response.getHeaders().getRange();
                 range = range.substring(range.lastIndexOf("-") + 1);
-                System.out.println("totalBytesServerReceived range: " + range);
-                System.out.println("totalBytesServerReceived before: " + totalBytesServerReceived);
                 totalBytesServerReceived = Long.parseLong(range) + 1;
                 totalBytesClientSent = Long.parseLong(range) + 1;
-                System.out.println("totalBytesServerReceived after: " + totalBytesServerReceived);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -549,23 +530,6 @@ public class MediaHttpUploader {
             }
         }
         return response;
-//        }
-    }
-
-    private void backOffCounter() {
-        retryBackOffCounter++;
-        if (retryBackOffCounter <= 5) {
-            try {
-                System.out.println("MediaHTTP: error, backOffCounter started ");
-                Thread.sleep(10 * 1000);
-                System.out.println("MediaHTTP: backOffCounter finished");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else {
-            // TODO: 15.11.2016  change message
-            throw new KinveyException("error file uploading", "check internet connection", "check internet connection");
-        }
     }
 
     /**
@@ -657,9 +621,6 @@ public class MediaHttpUploader {
      * @return HTTP response
      */
     private HttpResponse executeCurrentRequestWithoutGZip(HttpRequest request) throws IOException {
-        // TODO: 08.11.2016 check it
-        // method override for non-POST verbs
-        /*new MethodOverride().intercept(request);*/
         // don't throw an exception so we can let a custom Google exception be thrown
         request.setThrowExceptionOnExecuteError(false);
         // execute the request
@@ -688,9 +649,6 @@ public class MediaHttpUploader {
      */
     private void setContentAndHeadersOnCurrentRequest(String mimeType) throws IOException {
 
-        //chunk isn't used
-        chunkSize = (int) getMediaContentLength();
-
         int blockSize;
         if (isMediaLengthKnown()) {
             // We know exactly what the blockSize will be because we know the media content length.
@@ -698,6 +656,10 @@ public class MediaHttpUploader {
         } else {
             // Use the chunkSize as the blockSize because we do know what what it is yet.
             blockSize = chunkSize;
+        }
+
+        if (isResume) {
+            blockSize = 0;
         }
 
         AbstractInputStreamContent contentChunk;
@@ -774,15 +736,14 @@ public class MediaHttpUploader {
             totalBytesClientSent = totalBytesServerReceived + actualBlockSize;
         }
 
+
         currentChunkLength = actualBlockSize;
         currentRequest.setContent(contentChunk);
         if (actualBlockSize == 0) {
-            // special case of zero content media being uploaded
-//            currentRequest.getHeaders().setContentRange("bytes 0");
-            System.out.println("Content-Range is absent");
+            currentRequest.getHeaders().setContentRange("bytes */" + mediaContentLengthStr);
         } else {
-//            currentRequest.getHeaders().setContentRange("bytes " + totalBytesServerReceived + "-"
-//                    + (totalBytesServerReceived + actualBlockSize - 1) + "/" + mediaContentLengthStr);
+            currentRequest.getHeaders().setContentRange("bytes " + totalBytesServerReceived + "-"
+                    + (totalBytesServerReceived + actualBlockSize - 1) + "/" + mediaContentLengthStr);
         }
     }
 
@@ -1058,5 +1019,13 @@ public class MediaHttpUploader {
 
     public boolean isCancelled() {
         return this.cancelled;
+    }
+
+    public FileMetaData getFileMetaDataForUploading() {
+        return fileMetaDataForUploading;
+    }
+
+    public void setFileMetaDataForUploading(FileMetaData fileMetaDataForUploading) {
+        this.fileMetaDataForUploading = fileMetaDataForUploading;
     }
 }
