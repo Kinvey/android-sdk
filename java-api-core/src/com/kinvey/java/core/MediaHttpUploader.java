@@ -1010,7 +1010,7 @@ public class MediaHttpUploader {
         Preconditions.checkArgument(getMediaContentLength() >= 0, "Cannot call getProgress() if " +
                 "the specified AbstractInputStreamContent has no content length. Use " +
                 " getNumBytesUploaded() to denote progress instead.");
-        return getMediaContentLength() == 0 ? 0 : (double) bytesUploaded / getMediaContentLength();
+        return getMediaContentLength() == 0 ? 0 : (double) totalBytesServerReceived / getMediaContentLength();
     }
 
     public void cancel() {
