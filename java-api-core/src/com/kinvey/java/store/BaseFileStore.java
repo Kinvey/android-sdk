@@ -326,7 +326,12 @@ public class BaseFileStore {
         Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        FileMetaData resultMetadata = find(metadata.getId(), null);
+        FileMetaData resultMetadata;
+        if (metadata.getResumeDownloadData() != null) {
+            resultMetadata = metadata;
+        } else {
+            resultMetadata =find(metadata.getId(), null);
+        }
         sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
     }
@@ -350,7 +355,7 @@ public class BaseFileStore {
         return downloader.download(metadata, os);
     }
 
-    private FileMetaData getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
+/*    private FileMetaData getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
         File f = new File(dst);
         if (!f.exists()) {
             f.mkdirs();
@@ -363,7 +368,7 @@ public class BaseFileStore {
                 out.createNewFile();
             }
         return getNetworkFile(metadata, new FileOutputStream(out), listener);
-    }
+    }*/
 
     private File getCachedFile(FileMetaData metadata) {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
@@ -382,9 +387,7 @@ public class BaseFileStore {
                                  final DownloaderProgressListener listener,
                                  KinveyCachedClientCallback<FileMetaData> cachedCallback) throws IOException {
         Preconditions.checkArgument(cachedCallback == null || readPolicy == ReadPolicy.BOTH, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        File f = new File(cacheStorage(), metadata.getId());
-
-        File cacheStorage = cacheStorage();
+        File f/* = new File(cacheStorage(), metadata.getId())*/;
 
         switch (readPolicy) {
             case FORCE_LOCAL:

@@ -3,15 +3,15 @@ package com.kinvey.java;
 
 import com.kinvey.java.model.FileMetaData;
 
-public class UploadFileException extends KinveyException{
+public class KinveyUploadFileException extends KinveyException{
 
     private FileMetaData uploadedFileMetaData;
 
-    public UploadFileException(String reason, String fix, String explanation) {
+    public KinveyUploadFileException(String reason, String fix, String explanation) {
         super(reason, fix, explanation);
     }
 
-    public UploadFileException(String reason) {
+    public KinveyUploadFileException(String reason) {
         super(reason);
     }
 

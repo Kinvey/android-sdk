@@ -19,7 +19,6 @@ package com.kinvey.java.core;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -40,16 +39,11 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.ByteStreams;
-import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
-import com.kinvey.java.UploadFileException;
+import com.kinvey.java.KinveyUploadFileException;
 import com.kinvey.java.model.FileMetaData;
-
-import org.apache.http.protocol.HTTP;
-import org.apache.tools.ant.taskdefs.condition.Http;
 
 /**
  * Media HTTP Uploader, with support for both direct and resumable media uploads. Documentation is
@@ -437,7 +431,7 @@ public class MediaHttpUploader {
                     response = executeCurrentRequest(currentRequest);
                 }
             } catch (IOException e) {
-                UploadFileException exception = new UploadFileException("Connection was interrupted", "Retry request", e.getMessage());
+                KinveyUploadFileException exception = new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage());
                 exception.setUploadedFileMetaData(meta);
                 throw exception;
             }
