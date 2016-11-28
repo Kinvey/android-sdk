@@ -189,7 +189,7 @@ public class FileStoreTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getCause().getMessage(), "file must not be null");
+        assertEquals(listener.error.getMessage(), "file must not be null");
     }
 
     @Test
@@ -231,7 +231,7 @@ public class FileStoreTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getCause().getMessage(), "metadata must not be null");
+        assertEquals(listener.error.getMessage(), "metadata must not be null");
     }
 
     @Test

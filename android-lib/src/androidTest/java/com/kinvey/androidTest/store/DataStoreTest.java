@@ -433,8 +433,7 @@ public class DataStoreTest {
 
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
         assertNotNull(purgeCallback.error);
-        assertNotNull(purgeCallback.error.getCause());
-        assertTrue(purgeCallback.error.getCause().getClass() == SocketTimeoutException.class);
+        assertTrue(purgeCallback.error.getClass() == SocketTimeoutException.class);
     }
 
 

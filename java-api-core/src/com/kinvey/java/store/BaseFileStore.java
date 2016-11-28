@@ -107,9 +107,9 @@ public class BaseFileStore {
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-/*        if (fileMetadataWithPath.getId() == null){
+        if (fileMetadataWithPath.getId() == null){
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
-        }*/
+        }
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath,
@@ -152,9 +152,9 @@ public class BaseFileStore {
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
-/*        if (fileMetadataWithPath.getId() == null){
+        if (fileMetadataWithPath.getId() == null){
             fileMetadataWithPath.setId(UUID.randomUUID().toString());
-        }*/
+        }
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);
