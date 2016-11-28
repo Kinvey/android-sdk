@@ -136,10 +136,9 @@ public class MediaHttpUploader {
 
     /**
      * Default maximum number of bytes that will be uploaded to the server in any single HTTP request
-     * (set to 512 KB).
+     * (set to 5 MB).
      */
-    // TODO: 09.11.2016 change size, default was 10MB
-    public static final int DEFAULT_CHUNK_SIZE = 512 * KB;
+    public static final int DEFAULT_CHUNK_SIZE = 5 * MB;
 
     /**
      * The HTTP content of the media to be uploaded.
