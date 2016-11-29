@@ -28,6 +28,7 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -54,6 +55,8 @@ public class BaseFileStore {
     private final String cacheFolder;
     protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
+    private MediaHttpDownloader downloader;
+    private MediaHttpUploader uploader;
 
     /**
      * File store constructor
@@ -114,6 +117,7 @@ public class BaseFileStore {
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath,
                         new FileContent(fileMetadataWithPath.getMimetype(), file), listener);
+        setUploader(upload.getUploader());
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -158,6 +162,8 @@ public class BaseFileStore {
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);
+        setUploader(upload.getUploader());
+
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -336,6 +342,24 @@ public class BaseFileStore {
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
     }
 
+    public boolean cancelDownloading() {
+        if (downloader != null) {
+            downloader.cancel();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean cancelUploading() {
+        if(this.uploader != null) {
+            this.uploader.cancel();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private File cacheStorage() {
         File f = new File(getCacheFolder());
         if (!f.exists()) {
@@ -352,6 +376,7 @@ public class BaseFileStore {
         MediaHttpDownloader downloader = new MediaHttpDownloader(client.getRequestFactory().getTransport(),
                 client.getRequestFactory().getInitializer());
         downloader.setProgressListener(listener);
+        setDownloader(downloader);
         return downloader.download(metadata, os);
     }
 
@@ -472,4 +497,11 @@ public class BaseFileStore {
         }
     }
 
+    private void setDownloader(MediaHttpDownloader downloader) {
+        this.downloader = downloader;
+    }
+
+    private void setUploader(MediaHttpUploader uploader) {
+        this.uploader = uploader;
+    }
 }

@@ -29,11 +29,17 @@ import com.google.api.client.json.JsonParser;
 import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.io.ByteStreams;
 import com.kinvey.java.KinveyDownloadFileException;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.KinveyUploadFileException;
@@ -240,11 +246,9 @@ public class MediaHttpDownloader {
         }
 
         while (!cancelled) {
-            System.out.println("MediaHttp Downloading: while start");
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
             currentRequest.setSuppressUserAgentSuffix(true);
             long currentRequestLastBytePos = bytesDownloaded + chunkSize - 1;
-            System.out.println("MediaHttp Downloading: currentRequestLastBytePos ->" + currentRequestLastBytePos);
             if (lastBytePos != -1) {
                 // If last byte position has been specified use it iff it is smaller than the chunksize.
                 currentRequestLastBytePos = Math.min(lastBytePos, currentRequestLastBytePos);
@@ -259,18 +263,15 @@ public class MediaHttpDownloader {
                 }
                 currentRequest.getHeaders().setRange(rangeHeader.toString());
             }
-
             if (backOffPolicyEnabled) {
                 // Set ExponentialBackOffPolicy as the BackOffPolicy of the HTTP Request which will
                 // retry the same request again if there is a server error.
                 currentRequest.setBackOffPolicy(new ExponentialBackOffPolicy());
             }
 
-            System.out.println("MediaHttp Downloading: start request");
             HttpResponse response = null;
             try {
                 response = currentRequest.execute();
-                System.out.println("MediaHttp Downloading: finished request");
             } catch (Exception e) {
                 KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
                 Map<String, Object> hashMap = new HashMap<>();
@@ -283,8 +284,19 @@ public class MediaHttpDownloader {
 
             try {
                 if (response != null && response.getContent() != null) {
-                    IOUtils.copy(response.getContent(), out);
+                    InputStream is = response.getContent();
+                    byte[] bytes = ByteStreams.toByteArray(is);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                    IOUtils.copy(bis, out);
                 }
+            } catch (Exception e) {
+                KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
+                Map<String, Object> hashMap = new HashMap<>();
+                hashMap.put("LastBytePosition", lastBytePos);
+                hashMap.put("NumBytesDownloaded", bytesDownloaded);
+                metaData.setResumeDownloadData(hashMap);
+                kinveyUploadFileException.setDownloadedFileMetaData(metaData);
+                throw kinveyUploadFileException;
             } finally {
                 if (response != null) {
                     response.disconnect();
@@ -292,10 +304,8 @@ public class MediaHttpDownloader {
             }
 
             String contentRange = response.getHeaders().getContentRange();
-            System.out.println("MediaHttp Downloading: contentRange ->" + contentRange);
             long nextByteIndex = getNextByteIndex(contentRange);
             setMediaContentLength(contentRange);
-            System.out.println("MediaHttp Downloading: nextByteIndex -> " + nextByteIndex);
             if (mediaContentLength <= nextByteIndex) {
                 // All required bytes have been downloaded from the server.
                 bytesDownloaded = mediaContentLength;
@@ -306,10 +316,18 @@ public class MediaHttpDownloader {
 
             bytesDownloaded = nextByteIndex;
             updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
-            System.out.println("MediaHttp Downloading: while finish");
         }
+
+        if (cancelled) {
+            System.out.println("cancelled");
+            out.flush();
+        }
+
+        System.out.println("isDownloaded: " + isDownloaded);
         return isDownloaded ? metaData : null;
     }
+
+
 
 
     /**

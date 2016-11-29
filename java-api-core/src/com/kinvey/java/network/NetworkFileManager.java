@@ -642,6 +642,11 @@ public class NetworkFileManager {
         protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
             return new MediaHttpUploader(content, requestFactory.getTransport(), requestFactory.getInitializer());
         }
+
+        public MediaHttpUploader getUploader() {
+            return uploader;
+        }
+
     }
 
     /**

@@ -401,7 +401,7 @@ public class MediaHttpUploader {
         }
 
         HttpResponse response;
-        while (true) {
+        while (!cancelled) {
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
             setContentAndHeadersOnCurrentRequest(meta.getMimetype());
@@ -497,6 +497,8 @@ public class MediaHttpUploader {
                 }
             }
         }
+
+        return cancelled ? null : meta;
     }
 
     private HttpResponse updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
