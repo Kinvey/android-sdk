@@ -57,6 +57,16 @@ public class FileStoreTest {
         public void progressChanged(MediaHttpUploader uploader) throws IOException {}
 
         @Override
+        public void onCancelled() {
+
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
         public void onSuccess(FileMetaData result) {
             this.fileMetaDataResult = result;
             finish();
@@ -86,6 +96,16 @@ public class FileStoreTest {
         @Override
         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
 
+        }
+
+        @Override
+        public void onCancelled() {
+
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
         }
 
         @Override

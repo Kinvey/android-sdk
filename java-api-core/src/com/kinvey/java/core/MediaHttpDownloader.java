@@ -102,7 +102,7 @@ public class MediaHttpDownloader {
      * Default maximum number of bytes that will be downloaded from the server in any single HTTP
      * request. Set to 32MB because that is the maximum App Engine request size.
      */
-    public static final int MAXIMUM_CHUNK_SIZE = 1 * MediaHttpUploader.MB;
+    public static final int MAXIMUM_CHUNK_SIZE = 5 * MediaHttpUploader.MB;
 
     /**
      * The request factory for connections to the server.
