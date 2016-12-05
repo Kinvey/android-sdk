@@ -1,12 +1,18 @@
 package com.kinvey.android.store;
 
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 
 import com.google.api.client.json.GenericJson;
+import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
+import com.kinvey.android.authentication.KinveyAuthenticator;
+import com.kinvey.android.authentication.KinveyAuthenticatorService;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -473,29 +479,71 @@ public class UserStore {
 
         @Override
         protected User executeAsync() throws IOException {
+            User user = null;
             switch(this.type) {
                 case IMPLICIT:
-                    return BaseUserStore.login(client);
+                    user = BaseUserStore.login(client);
+                    break;
                 case KINVEY:
-                    return BaseUserStore.login(username, password, client);
+                    user = BaseUserStore.login(username, password, client);
+                    break;
                 case FACEBOOK:
-                    return BaseUserStore.loginFacebook(accessToken, client);
+                    user = BaseUserStore.loginFacebook(accessToken, client);
+                    break;
                 case GOOGLE:
-                    return BaseUserStore.loginGoogle(accessToken, client);
+                    user = BaseUserStore.loginGoogle(accessToken, client);
+                    break;
                 case TWITTER:
-                    return BaseUserStore.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    user = BaseUserStore.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    break;
                 case LINKED_IN:
-                    return BaseUserStore.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    user = BaseUserStore.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client);
+                    break;
                 case AUTH_LINK:
-                    return BaseUserStore.loginAuthLink(accessToken, refreshToken, client);
+                    user = BaseUserStore.loginAuthLink(accessToken, refreshToken, client);
+                    break;
                 case SALESFORCE:
-                    return BaseUserStore.loginSalesForce(accessToken, client_id, refreshToken, id, client);
+                    user = BaseUserStore.loginSalesForce(accessToken, client_id, refreshToken, id, client);
+                    break;
                 case MOBILE_IDENTITY:
-                    return BaseUserStore.loginMobileIdentity(accessToken, client);
+                    user = BaseUserStore.loginMobileIdentity(accessToken, client);
+                    break;
                 case CREDENTIALSTORE:
-                    return BaseUserStore.login(credential, client);
+                    user = BaseUserStore.login(credential, client);
+                    break;
             }
-            return null;
+            saveUserToAccountManager(user, this, client);
+            return user;
+        }
+    }
+
+    private static void saveUserToAccountManager(User user, UserStore.Login login, AbstractClient client) {
+        Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
+        String accountType = ((Client)client).getAccountType();
+
+//        Preconditions.checkNotNull(client.getAccountName(), "Account Name must be added to Client");
+        Preconditions.checkNotNull(accountType, "Account Type must be added to Client");
+        if (user != null) {
+            AccountManager mAccountManager = AccountManager.get(Client.sharedInstance().getContext());
+            String authToken = user.getAuthToken();
+            boolean success = ((authToken != null) && (authToken.length() > 0));
+            if (success) {
+                final Account account = new Account(user.getUsername(), client.getBaseUrl());
+                /*if (isNewAccount) {*/
+                Bundle userData = new Bundle();
+                userData.putString(KinveyAuthenticator.LOGIN_TYPE_KEY, accountType);
+                userData.putString(KinveyAuthenticator.KINVEY_TOKEN_KEY, authToken);
+                mAccountManager.addAccountExplicitly(account, login.password, userData);
+
+//                    mAccountManager.addAccountExplicitly(account, login.password, userData);
+
+              /*  } else {
+                    mAccountManager.setPassword(account, user.get);
+                    mAccountManager.setUserData(account, KinveyAuthenticatorService.LOGIN_TYPE_KEY, PARAM_LOGIN_TYPE_KINVEY);
+                }*/
+            } else {
+
+            }
         }
     }
 

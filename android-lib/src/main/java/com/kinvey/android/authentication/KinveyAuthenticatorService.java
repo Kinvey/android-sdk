@@ -9,8 +9,7 @@ import android.util.Log;
 public class KinveyAuthenticatorService extends Service {
 
     private static final String TAG = "KinveyAccountService";
-    private static final String ACCOUNT_TYPE = "com.kinvey.android.authentication";
-    public static final String ACCOUNT_NAME = "Kinvey";
+
 
     // Instance field that stores the authenticator object
     private KinveyAuthenticator mAuthenticator;

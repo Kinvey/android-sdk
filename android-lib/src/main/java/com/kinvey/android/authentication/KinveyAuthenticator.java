@@ -4,15 +4,26 @@ package com.kinvey.android.authentication;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
-public class KinveyAuthenticator extends AbstractAccountAuthenticator {
+    public class KinveyAuthenticator extends AbstractAccountAuthenticator {
 
-    // Simple constructor
+    private final Context mContext;
+
+//    public static final String ACCOUNT_TYPE = "com.kinvey.android.authentication";
+//    public static final String ACCOUNT_NAME = "Kinvey";
+    public static final String LOGIN_TYPE_KEY = "loginType";
+    public static final String KINVEY_TOKEN_KEY = "tokenKey";
+    public static final String KINVEY_TOKEN_TYPE_KEY = "tokenTypeKey";
+
+        // Simple constructor
     public KinveyAuthenticator(Context context) {
         super(context);
+        mContext = context;
     }
     // Editing properties is not supported
     @Override

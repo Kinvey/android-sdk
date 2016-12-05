@@ -95,7 +95,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public void setMICHostName(String MICHostName) throws IllegalArgumentException {
         if (!MICHostName.startsWith("https://")){
-            throw new IllegalArgumentException("MIC url should be sercure url");
+            throw new IllegalArgumentException("MIC url should be secure url");
         }
         this.MICHostName = MICHostName.endsWith("/") ? MICHostName : MICHostName + "/";
     }

@@ -17,7 +17,16 @@
 package com.kinvey.android;
 
 
+import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
@@ -30,6 +39,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
+import com.kinvey.android.authentication.KinveyAuthenticatorService;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
@@ -51,8 +61,16 @@ import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.StoreType;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.List;
 
 /**
@@ -88,7 +106,7 @@ public class Client extends AbstractClient {
 
     private Context context = null;
 
-//    private ConcurrentHashMap<String, DataStore> appDataInstanceCache;
+    //    private ConcurrentHashMap<String, DataStore> appDataInstanceCache;
 //    private ConcurrentHashMap<String, LinkedDataStore> linkedDataInstanceCache;
 //    private ConcurrentHashMap<String, AsyncCustomEndpoints> customeEndpointsCache;
     private AsyncCustomEndpoints customEndpoints;
@@ -96,16 +114,18 @@ public class Client extends AbstractClient {
     private AsyncUserDiscovery userDiscovery;
     private AsyncUserGroup userGroup;
     private ClientUser clientUser;
-//    private AsyncUser currentUser;
+    //    private AsyncUser currentUser;
     private long syncRate;
     private long batchRate;
     private int batchSize;
+    private String accountType;
+    private String accountName;
     private RealmCacheManager cacheManager;
 
     private static KinveyHandlerThread kinveyHandlerThread;
-    
+
     private static Client _sharedInstance;
-    
+
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
      * called directly.
@@ -133,19 +153,19 @@ public class Client extends AbstractClient {
         syncCacheManager = new RealmCacheManager("sync_", this);
     }
 
-    public static Client sharedInstance(){
-    	return _sharedInstance;
+    public static Client sharedInstance() {
+        return _sharedInstance;
     }
 
     @Override
     public void performLockDown() {
-        if(getCacheManager() != null){
+        if (getCacheManager() != null) {
             getCacheManager().clear();
         }
 
         this.getFileStore(StoreType.SYNC).clearCache();
         List<ClientExtension> extensions = getExtensions();
-        for (ClientExtension e : extensions){
+        for (ClientExtension e : extensions) {
             e.performLockdown(activeUser().getId());
         }
     }
@@ -163,7 +183,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      {@code
-      CustomEndpoints myCustomEndpoints = kinveyClient.customEndpoints();
+     CustomEndpoints myCustomEndpoints = kinveyClient.customEndpoints();
      }
      * </pre>
      * </p>
@@ -171,11 +191,12 @@ public class Client extends AbstractClient {
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
     @Deprecated
-    public AsyncCustomEndpoints customEndpoints(){
-        synchronized (lock){
-            return  new AsyncCustomEndpoints(GenericJson.class, this);
+    public AsyncCustomEndpoints customEndpoints() {
+        synchronized (lock) {
+            return new AsyncCustomEndpoints(GenericJson.class, this);
         }
     }
+
     /**
      * Custom Endpoints factory method
      *<p>
@@ -296,7 +317,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      {@code
-        AbstractPush myPush = kinveyClient.push();
+     AbstractPush myPush = kinveyClient.push();
      }
      * </pre>
      * </p>
@@ -314,7 +335,7 @@ public class Client extends AbstractClient {
         }
     }
 
- /**
+    /**
      * Asynchronous Ping service method
      * <p>
      * Performs an authenticated ping against the configured Kinvey backend.
@@ -323,10 +344,10 @@ public class Client extends AbstractClient {
      * Sample Usage:
      * <pre>
      {@code
-        kinveyClient.ping(new KinveyPingCallback() {
-            onSuccess(Boolean result) { ... }
-            onFailure(Throwable error) { ... }
-        }
+     kinveyClient.ping(new KinveyPingCallback() {
+     onSuccess(Boolean result) { ... }
+     onFailure(Throwable error) { ... }
+     }
      }
      * </pre>
      * </p>
@@ -354,15 +375,15 @@ public class Client extends AbstractClient {
      *
      * @return the number of milliseconds for offline sync to wait between failures
      */
-    public long getSyncRate(){
+    public long getSyncRate() {
         return this.syncRate;
     }
 
-    public long getBatchRate(){
+    public long getBatchRate() {
         return this.batchRate;
     }
 
-    public int getBatchSize(){
+    public int getBatchSize() {
         return this.batchSize;
     }
 
@@ -370,7 +391,7 @@ public class Client extends AbstractClient {
      * Get a reference to the Application Context used to create this instance of the Client
      * @return {@code null} or the live Application Context
      */
-    public Context getContext(){
+    public Context getContext() {
         return this.context;
     }
 
@@ -407,7 +428,7 @@ public class Client extends AbstractClient {
          * creating new HttpTransport with fix for 401 error that rais an exception
          * @return HttpTransport
          */
-        private static HttpTransport newCompatibleTransport(){
+        private static HttpTransport newCompatibleTransport() {
             return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 18 ?  //versions affected by no auth challenge exception
                     new ApacheHttpTransport() :
                     AndroidHttp.newCompatibleTransport();
@@ -432,7 +453,7 @@ public class Client extends AbstractClient {
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
 
-            if (getCredentialStore() == null){
+            if (getCredentialStore() == null) {
                 try {
                     this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (Exception ex) {
@@ -471,7 +492,7 @@ public class Client extends AbstractClient {
             } catch (IOException e) {
                 Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
-            } catch (NullPointerException ex){
+            } catch (NullPointerException ex) {
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
                 throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
@@ -481,43 +502,43 @@ public class Client extends AbstractClient {
                 this.setBaseUrl(super.getString(Option.BASE_URL));
             }
 
-            if (super.getString(Option.PORT) != null){
+            if (super.getString(Option.PORT) != null) {
                 this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
             }
 
-            if (super.getString(Option.GCM_PUSH_ENABLED) != null){
+            if (super.getString(Option.GCM_PUSH_ENABLED) != null) {
                 this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
             }
 
-            if (super.getString(Option.GCM_PROD_MODE) != null){
+            if (super.getString(Option.GCM_PROD_MODE) != null) {
                 this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
             }
 
-            if (super.getString(Option.GCM_SENDER_ID) != null){
+            if (super.getString(Option.GCM_SENDER_ID) != null) {
                 this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
             }
 
-            if (super.getString(Option.DEBUG_MODE) != null){
+            if (super.getString(Option.DEBUG_MODE) != null) {
                 this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
-            if (super.getString(Option.SYNC_RATE) != null){
+            if (super.getString(Option.SYNC_RATE) != null) {
                 this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
             }
 
-            if (super.getString(Option.BATCH_SIZE) != null){
+            if (super.getString(Option.BATCH_SIZE) != null) {
                 this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
             }
 
-            if (super.getString(Option.BATCH_RATE) != null){
+            if (super.getString(Option.BATCH_RATE) != null) {
                 this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
             }
 
-            if (super.getString(Option.PARSER) != null){
+            if (super.getString(Option.PARSER) != null) {
                 try {
                     AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser);
-                }catch (Exception e){
+                } catch (Exception e) {
                     Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
                     Logger.WARNING("Defaulting to: GSON");
 //                    e.printStackTrace();
@@ -529,7 +550,7 @@ public class Client extends AbstractClient {
             if (super.getString(Option.MIC_BASE_URL) != null) {
                 this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
             }
-            if (super.getString(Option.MIC_VERSION) != null){
+            if (super.getString(Option.MIC_VERSION) != null) {
                 this.MICVersion = super.getString(Option.MIC_VERSION);
             }
 
@@ -541,8 +562,8 @@ public class Client extends AbstractClient {
 
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            if (getCredentialStore() == null){
-                try{
+            if (getCredentialStore() == null) {
+                try {
                     this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (AndroidCredentialStoreException ex) {
                     Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
@@ -591,9 +612,9 @@ public class Client extends AbstractClient {
 
                 super.getProps().load(in);
             } catch (IOException e) {
-            	Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
                 super.loadPropertiesFromDisk(getAndroidPropertyFile());
-            } catch (NullPointerException ex){
+            } catch (NullPointerException ex) {
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
                 throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
@@ -603,45 +624,45 @@ public class Client extends AbstractClient {
                 this.setBaseUrl(super.getString(Option.BASE_URL));
             }
 
-            if (super.getString(Option.PORT) != null){
+            if (super.getString(Option.PORT) != null) {
                 this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
             }
 
-            if (super.getString(Option.GCM_PUSH_ENABLED) != null){
+            if (super.getString(Option.GCM_PUSH_ENABLED) != null) {
                 this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
             }
 
-            if (super.getString(Option.GCM_PROD_MODE) != null){
+            if (super.getString(Option.GCM_PROD_MODE) != null) {
                 this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
             }
 
-            if (super.getString(Option.GCM_SENDER_ID) != null){
+            if (super.getString(Option.GCM_SENDER_ID) != null) {
                 this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
             }
 
-            if (super.getString(Option.DEBUG_MODE) != null){
+            if (super.getString(Option.DEBUG_MODE) != null) {
                 this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
-            if (super.getString(Option.SYNC_RATE) != null){
+            if (super.getString(Option.SYNC_RATE) != null) {
                 this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
             }
 
-            if (super.getString(Option.BATCH_SIZE) != null){
+            if (super.getString(Option.BATCH_SIZE) != null) {
                 this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
             }
 
-            if (super.getString(Option.BATCH_RATE) != null){
+            if (super.getString(Option.BATCH_RATE) != null) {
                 this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
             }
 
-            if (super.getString(Option.PARSER) != null){
+            if (super.getString(Option.PARSER) != null) {
                 try {
                     AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser);
-                }catch (Exception e){
-                	Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
-                	Logger.WARNING("Defaulting to: GSON");
+                } catch (Exception e) {
+                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                    Logger.WARNING("Defaulting to: GSON");
 //                    e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
                 }
@@ -651,7 +672,7 @@ public class Client extends AbstractClient {
             if (super.getString(Option.MIC_BASE_URL) != null) {
                 this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
             }
-            if (super.getString(Option.MIC_VERSION) != null){
+            if (super.getString(Option.MIC_VERSION) != null) {
                 this.MICVersion = super.getString(Option.MIC_VERSION);
             }
 
@@ -663,13 +684,13 @@ public class Client extends AbstractClient {
 
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            if (getCredentialStore() == null){
-                try{
+            if (getCredentialStore() == null) {
+                try {
                     this.setCredentialStore(new AndroidCredentialStore(this.context));
                 } catch (AndroidCredentialStoreException ex) {
-                	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
+                    Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
                 } catch (IOException ex) {
-                	Logger.ERROR("Credential store failed to load");
+                    Logger.ERROR("Credential store failed to load");
                 }
             }
 
@@ -680,7 +701,7 @@ public class Client extends AbstractClient {
          * which contains factory methods for accessing various functionality.
          */
         @Override
-        public Client build(){
+        public Client build() {
 
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
@@ -693,28 +714,33 @@ public class Client extends AbstractClient {
 
 
             //GCM explicitely enabled
-            if (this.GCM_Enabled){
+            if (this.GCM_Enabled) {
                 client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
             }
 
-            if (this.debugMode){
+            if (this.debugMode) {
                 client.enableDebugLogging();
             }
 
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
-            if (this.MICVersion != null){
+            if (this.MICVersion != null) {
                 client.setMICApiVersion(this.MICVersion);
             }
-            if(this.MICBaseURL != null){
-               client.setMICHostName(this.MICBaseURL);
+            if (this.MICBaseURL != null) {
+                client.setMICHostName(this.MICBaseURL);
             }
 
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
                     loginWithCredential(client, credential);
+                } else if (loggedIn()) {
+                    System.out.println("loggedIn() true");
+                    // TODO: 05.12.2016 Credential creating must be added
+//                    credential = new Credential()
+//                    loginWithCredential(client, credential);
                 }
 
             } catch (AndroidCredentialStoreException ex) {
@@ -723,10 +749,104 @@ public class Client extends AbstractClient {
             } catch (IOException ex) {
                 Logger.ERROR("Credential store failed to load");
                 client.setUser(null);
+            } catch (XmlPullParserException e) {
+                Logger.ERROR(e.getMessage());
+                e.printStackTrace();
             }
 
 
             return client;
+        }
+
+        private boolean loggedIn() throws IOException, XmlPullParserException {
+            ComponentName myService = new ComponentName(context, KinveyAuthenticatorService.class);
+            Bundle data = null;
+            try {
+                data = context.getPackageManager().getServiceInfo(myService, PackageManager.GET_META_DATA).metaData;
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+            int resource = data.getInt("android.accounts.AccountAuthenticator");
+            System.out.println("Resource: " + resource);
+            String accountType;
+
+            accountType = getAccountTypeFromResource(resource);
+            System.out.println("AccountType: " + accountType);
+            System.out.println(readRawTextFile(context, resource));
+            AccountManager am = AccountManager.get(context);
+            Account[] accounts = null;
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                System.out.println("getAccountsByType before");
+                accounts = am.getAccountsByType(accountType);
+                System.out.println("getAccountsByType");
+
+
+            }
+
+            System.out.println("getAccountsByType after");
+
+            if (accounts!= null && accounts.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private static String readRawTextFile(Context ctx, int resId)
+        {
+            InputStream inputStream = ctx.getResources().openRawResource(resId);
+
+            InputStreamReader inputreader = new InputStreamReader(inputStream);
+            BufferedReader buffreader = new BufferedReader(inputreader);
+            String line;
+            StringBuilder text = new StringBuilder();
+
+            try {
+                while (( line = buffreader.readLine()) != null) {
+                    text.append(line);
+                    text.append('\n');
+                }
+            } catch (IOException e) {
+                return null;
+            }
+            return text.toString();
+        }
+
+        private String getAccountTypeFromResource(int resourceFile) throws XmlPullParserException, IOException {
+            String accountType = null;
+            String name;
+            XmlResourceParser xpp = context.getResources().getXml(resourceFile);
+            // check state
+            int eventType = xpp.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                // instead of the following if/else if lines
+                // you should custom parse your xml
+                if(eventType == XmlPullParser.START_DOCUMENT) {
+                    System.out.println("Start document");
+                } else if(eventType == XmlPullParser.START_TAG) {
+                     name = xpp.getName();
+                    if (name.equals("account-authenticator")) {
+                        accountType = xpp.getAttributeValue("android", "accountType");
+                        System.out.println("Start tag " + xpp.getAttributeValue("android", "accountType"));
+                    }
+                } else if(eventType == XmlPullParser.END_TAG) {
+                    System.out.println("End tag "+xpp.getName());
+                } else if(eventType == XmlPullParser.TEXT) {
+                    System.out.println("Text "+xpp.getText());
+                }
+                eventType = xpp.next();
+            }
+            // indicate app done reading the resource.
+            xpp.close();
+            return accountType;
         }
 
         /**
@@ -823,7 +943,7 @@ public class Client extends AbstractClient {
             this.GCM_SenderID = senderID;
             return this;
         }
-        
+
         /**
         *
         * @see
@@ -934,6 +1054,22 @@ public class Client extends AbstractClient {
     @Override
     protected ICacheManager getSyncCacheManager() {
         return syncCacheManager;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 }
 
