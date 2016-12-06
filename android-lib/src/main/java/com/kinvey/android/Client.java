@@ -802,10 +802,9 @@ public class Client extends AbstractClient {
                 accounts = am.getAccountsByType(accountType);;
             }*/
 
-            accounts = am.getAccountsByType(accountType);;
+            accounts = am.getAccountsByType(accountType);
 
 
-            // TODO: 06.12.2016 Check  return accounts[0];
             if (accounts!= null && accounts.length > 0) {
                 return accounts[0];
             } else {

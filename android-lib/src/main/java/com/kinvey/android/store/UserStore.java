@@ -3,8 +3,11 @@ package com.kinvey.android.store;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.api.client.json.GenericJson;
@@ -100,10 +103,15 @@ public class UserStore {
     }
 
     public static void logout(AbstractClient client) {
-        if(clearStorage) {
-            client.performLockDown();
+        if (client.isUserLoggedIn()) {
+            removeAccountFromAccountManager(client);
+
+            new LogoutRequest(client).execute();
+
+            if (clearStorage) {
+                client.performLockDown();
+            }
         }
-        new LogoutRequest(client).execute();
     }
 
     public static void destroy(boolean isHard, AbstractClient client, KinveyUserDeleteCallback callback) {
@@ -511,12 +519,12 @@ public class UserStore {
                     user = BaseUserStore.login(credential, client);
                     break;
             }
-            saveUserToAccountManager(user, this, client);
+            saveAccountToAccountManager(user, this, client);
             return user;
         }
     }
 
-    private static void saveUserToAccountManager(User user, UserStore.Login login, AbstractClient client) {
+    private static void saveAccountToAccountManager(User user, UserStore.Login login, AbstractClient client) {
         Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
         String accountType = ((Client)client).getAccountType();
         Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
@@ -525,14 +533,35 @@ public class UserStore {
             String authToken = user.getAuthToken();
             boolean success = ((authToken != null) && (authToken.length() > 0));
             if (success) {
-                final Account account = new Account(user.getUsername(), accountType);
+                final Account account = new Account(getApplicationName(((Client) client).getContext()), accountType);
                 Bundle userData = new Bundle();
                 userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
                 userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
                 mAccountManager.addAccountExplicitly(account, login.password, userData);
-
             }
         }
+    }
+
+    private static void removeAccountFromAccountManager(AbstractClient client) {
+        Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
+        String accountType = ((Client)client).getAccountType();
+        Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
+        AccountManager mAccountManager = AccountManager.get(((Client)client).getContext());
+        User user = client.activeUser();
+        if (user != null) {
+            final Account account = new Account(getApplicationName(((Client) client).getContext()), accountType);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                mAccountManager.removeAccountExplicitly(account);
+            } else {
+                mAccountManager.removeAccount(account, null, null);
+            }
+        }
+    }
+
+    public static String getApplicationName(Context context) {
+        ApplicationInfo applicationInfo = context.getApplicationInfo();
+        int stringId = applicationInfo.labelRes;
+        return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
     }
 
     private static class Create extends AsyncClientRequest<User> {

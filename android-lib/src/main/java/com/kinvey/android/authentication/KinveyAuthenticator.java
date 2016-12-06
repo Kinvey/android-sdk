@@ -8,11 +8,12 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.os.Bundle;
 
-    public class KinveyAuthenticator extends AbstractAccountAuthenticator {
+public class KinveyAuthenticator extends AbstractAccountAuthenticator {
 
     private final Context mContext;
 
     public static final String KINVEY_TOKEN = "tokenKey";
+    public static final String KINVEY_NAME = "Kinvey";
     public static final String KINVEY_USER_ID = "userId";
 
         // Simple constructor
