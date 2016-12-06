@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.authentication.KinveyAuthenticator;
-import com.kinvey.android.authentication.KinveyAuthenticatorService;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -520,28 +519,17 @@ public class UserStore {
     private static void saveUserToAccountManager(User user, UserStore.Login login, AbstractClient client) {
         Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
         String accountType = ((Client)client).getAccountType();
-
-//        Preconditions.checkNotNull(client.getAccountName(), "Account Name must be added to Client");
-        Preconditions.checkNotNull(accountType, "Account Type must be added to Client");
+        Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
         if (user != null) {
             AccountManager mAccountManager = AccountManager.get(Client.sharedInstance().getContext());
             String authToken = user.getAuthToken();
             boolean success = ((authToken != null) && (authToken.length() > 0));
             if (success) {
-                final Account account = new Account(user.getUsername(), client.getBaseUrl());
-                /*if (isNewAccount) {*/
+                final Account account = new Account(user.getUsername(), accountType);
                 Bundle userData = new Bundle();
-                userData.putString(KinveyAuthenticator.LOGIN_TYPE_KEY, accountType);
-                userData.putString(KinveyAuthenticator.KINVEY_TOKEN_KEY, authToken);
+                userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
+                userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
                 mAccountManager.addAccountExplicitly(account, login.password, userData);
-
-//                    mAccountManager.addAccountExplicitly(account, login.password, userData);
-
-              /*  } else {
-                    mAccountManager.setPassword(account, user.get);
-                    mAccountManager.setUserData(account, KinveyAuthenticatorService.LOGIN_TYPE_KEY, PARAM_LOGIN_TYPE_KINVEY);
-                }*/
-            } else {
 
             }
         }

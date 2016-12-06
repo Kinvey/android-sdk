@@ -456,8 +456,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**MIC Base URL**/
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
-            MIC_VERSION("mic.version");
-
+            MIC_VERSION("mic.version"),
+            /**Account type**/
+            ACCOUNT_TYPE("account.type");
 
             private final String value;
 

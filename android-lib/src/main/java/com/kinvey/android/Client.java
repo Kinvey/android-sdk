@@ -39,6 +39,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
+import com.kinvey.android.authentication.KinveyAuthenticator;
 import com.kinvey.android.authentication.KinveyAuthenticatorService;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
@@ -417,6 +418,7 @@ public class Client extends AbstractClient {
         private boolean GCM_Enabled = false;
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
+        private String accountType = null;
         private long syncRate = 1000 * 60 * 10; //10 minutes
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
@@ -452,6 +454,23 @@ public class Client extends AbstractClient {
             this.setJsonFactory(factory);
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+
+            try {
+                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
+
+                super.getProps().load(in);
+            } catch (IOException e) {
+                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+            } catch (NullPointerException ex) {
+                Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+            }
+
+            if (super.getString(Option.ACCOUNT_TYPE) != null) {
+                this.accountType = super.getString(Option.ACCOUNT_TYPE);
+            }
 
             if (getCredentialStore() == null) {
                 try {
@@ -552,6 +571,10 @@ public class Client extends AbstractClient {
             }
             if (super.getString(Option.MIC_VERSION) != null) {
                 this.MICVersion = super.getString(Option.MIC_VERSION);
+            }
+
+            if (super.getString(Option.ACCOUNT_TYPE) != null) {
+                this.accountType = super.getString(Option.ACCOUNT_TYPE);
             }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
@@ -656,6 +679,10 @@ public class Client extends AbstractClient {
                 this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
             }
 
+            if (super.getString(Option.ACCOUNT_TYPE) != null) {
+                this.accountType = super.getString(Option.ACCOUNT_TYPE);
+            }
+
             if (super.getString(Option.PARSER) != null) {
                 try {
                     AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
@@ -711,7 +738,7 @@ public class Client extends AbstractClient {
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy(), this.context);
             client.clientUser = AndroidUserStore.getUserStore(this.context);
-
+            client.accountType = this.accountType;
 
             //GCM explicitely enabled
             if (this.GCM_Enabled) {
@@ -734,13 +761,15 @@ public class Client extends AbstractClient {
 
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
+                Account account = loggedIn();
                 if (credential != null) {
                     loginWithCredential(client, credential);
-                } else if (loggedIn()) {
-                    System.out.println("loggedIn() true");
-                    // TODO: 05.12.2016 Credential creating must be added
-//                    credential = new Credential()
-//                    loginWithCredential(client, credential);
+                } else if (account != null) {
+                    AccountManager am = AccountManager.get(context);
+                    String userId = am.getUserData(account, KinveyAuthenticator.KINVEY_USER_ID);
+                    String authToken = am.getUserData(account, KinveyAuthenticator.KINVEY_TOKEN);
+                    credential = new Credential(userId, authToken, null);
+                    loginWithCredential(client, credential);
                 }
 
             } catch (AndroidCredentialStoreException ex) {
@@ -758,25 +787,11 @@ public class Client extends AbstractClient {
             return client;
         }
 
-        private boolean loggedIn() throws IOException, XmlPullParserException {
-            ComponentName myService = new ComponentName(context, KinveyAuthenticatorService.class);
-            Bundle data = null;
-            try {
-                data = context.getPackageManager().getServiceInfo(myService, PackageManager.GET_META_DATA).metaData;
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-                return false;
-            }
-            int resource = data.getInt("android.accounts.AccountAuthenticator");
-            System.out.println("Resource: " + resource);
-            String accountType;
-
-            accountType = getAccountTypeFromResource(resource);
-            System.out.println("AccountType: " + accountType);
-            System.out.println(readRawTextFile(context, resource));
+        private Account loggedIn() throws IOException, XmlPullParserException {
             AccountManager am = AccountManager.get(context);
             Account[] accounts = null;
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+
+/*            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -784,70 +799,20 @@ public class Client extends AbstractClient {
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
                 // for ActivityCompat#requestPermissions for more details.
-                System.out.println("getAccountsByType before");
-                accounts = am.getAccountsByType(accountType);
-                System.out.println("getAccountsByType");
+                accounts = am.getAccountsByType(accountType);;
+            }*/
+
+            accounts = am.getAccountsByType(accountType);;
 
 
-            }
-
-            System.out.println("getAccountsByType after");
-
+            // TODO: 06.12.2016 Check  return accounts[0];
             if (accounts!= null && accounts.length > 0) {
-                return true;
+                return accounts[0];
             } else {
-                return false;
-            }
-        }
-
-        private static String readRawTextFile(Context ctx, int resId)
-        {
-            InputStream inputStream = ctx.getResources().openRawResource(resId);
-
-            InputStreamReader inputreader = new InputStreamReader(inputStream);
-            BufferedReader buffreader = new BufferedReader(inputreader);
-            String line;
-            StringBuilder text = new StringBuilder();
-
-            try {
-                while (( line = buffreader.readLine()) != null) {
-                    text.append(line);
-                    text.append('\n');
-                }
-            } catch (IOException e) {
                 return null;
             }
-            return text.toString();
         }
 
-        private String getAccountTypeFromResource(int resourceFile) throws XmlPullParserException, IOException {
-            String accountType = null;
-            String name;
-            XmlResourceParser xpp = context.getResources().getXml(resourceFile);
-            // check state
-            int eventType = xpp.getEventType();
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                // instead of the following if/else if lines
-                // you should custom parse your xml
-                if(eventType == XmlPullParser.START_DOCUMENT) {
-                    System.out.println("Start document");
-                } else if(eventType == XmlPullParser.START_TAG) {
-                     name = xpp.getName();
-                    if (name.equals("account-authenticator")) {
-                        accountType = xpp.getAttributeValue("android", "accountType");
-                        System.out.println("Start tag " + xpp.getAttributeValue("android", "accountType"));
-                    }
-                } else if(eventType == XmlPullParser.END_TAG) {
-                    System.out.println("End tag "+xpp.getName());
-                } else if(eventType == XmlPullParser.TEXT) {
-                    System.out.println("Text "+xpp.getText());
-                }
-                eventType = xpp.next();
-            }
-            // indicate app done reading the resource.
-            xpp.close();
-            return accountType;
-        }
 
         /**
          * Asynchronous Client build method
@@ -1058,18 +1023,6 @@ public class Client extends AbstractClient {
 
     public String getAccountType() {
         return accountType;
-    }
-
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
     }
 }
 
