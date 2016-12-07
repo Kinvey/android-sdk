@@ -533,12 +533,16 @@ public class UserStore {
             String authToken = user.getAuthToken();
             boolean success = ((authToken != null) && (authToken.length() > 0));
             if (success) {
-                
+
                 //
                 String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
                 Account existedAccount = loggedIn(accountType, ((Client) client).getContext());
                 if (existedAccount!= null && !existedAccount.name.equals(appKey)) {
-                    return;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        mAccountManager.removeAccountExplicitly(existedAccount);
+                    } else {
+                        mAccountManager.removeAccount(existedAccount, null, null);
+                    }
                 }
                 //
 
