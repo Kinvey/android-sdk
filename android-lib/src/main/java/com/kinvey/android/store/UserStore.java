@@ -533,7 +533,8 @@ public class UserStore {
             String authToken = user.getAuthToken();
             boolean success = ((authToken != null) && (authToken.length() > 0));
             if (success) {
-                final Account account = new Account(getApplicationName(((Client) client).getContext()), accountType);
+                String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+                final Account account = new Account(appKey, accountType);
                 Bundle userData = new Bundle();
                 userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
                 userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
@@ -546,10 +547,12 @@ public class UserStore {
         Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
         String accountType = ((Client)client).getAccountType();
         Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
+        String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         AccountManager mAccountManager = AccountManager.get(((Client)client).getContext());
         User user = client.activeUser();
         if (user != null) {
-            final Account account = new Account(getApplicationName(((Client) client).getContext()), accountType);
+
+            final Account account = new Account(appKey, accountType);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 mAccountManager.removeAccountExplicitly(account);
             } else {
