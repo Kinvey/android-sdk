@@ -533,13 +533,46 @@ public class UserStore {
             String authToken = user.getAuthToken();
             boolean success = ((authToken != null) && (authToken.length() > 0));
             if (success) {
+                
+                //
                 String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+                Account existedAccount = loggedIn(accountType, ((Client) client).getContext());
+                if (existedAccount!= null && !existedAccount.name.equals(appKey)) {
+                    return;
+                }
+                //
+
                 final Account account = new Account(appKey, accountType);
                 Bundle userData = new Bundle();
                 userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
                 userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
                 mAccountManager.addAccountExplicitly(account, login.password, userData);
             }
+        }
+    }
+
+    private static Account loggedIn(String accountType, Context context) {
+        AccountManager am = AccountManager.get(context);
+        Account[] accounts = null;
+
+/*            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                accounts = am.getAccountsByType(accountType);;
+            }*/
+
+        accounts = am.getAccountsByType(accountType);
+
+
+        if (accounts!= null && accounts.length > 0) {
+            return accounts[0];
+        } else {
+            return null;
         }
     }
 
