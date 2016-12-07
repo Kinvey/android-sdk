@@ -160,9 +160,11 @@ public class Client extends AbstractClient {
 
     @Override
     public void performLockDown() {
-        if (getCacheManager() != null) {
+
+        //It removes realm table
+/*        if (getCacheManager() != null) {
             getCacheManager().clear();
-        }
+        }*/
 
         this.getFileStore(StoreType.SYNC).clearCache();
         List<ClientExtension> extensions = getExtensions();
@@ -762,9 +764,10 @@ public class Client extends AbstractClient {
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 Account account = loggedIn();
+                String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
                 if (credential != null) {
                     loginWithCredential(client, credential);
-                } else if (account != null) {
+                } else if (account != null && account.name.equals(appKey)) {
                     AccountManager am = AccountManager.get(context);
                     String userId = am.getUserData(account, KinveyAuthenticator.KINVEY_USER_ID);
                     String authToken = am.getUserData(account, KinveyAuthenticator.KINVEY_TOKEN);
