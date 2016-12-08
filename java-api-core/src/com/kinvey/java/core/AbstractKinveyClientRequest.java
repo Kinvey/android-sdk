@@ -330,10 +330,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             request.setFollowRedirects(false);
         }
 
-        if (initiationHeaders != null) {
-            request.getHeaders().putAll(initiationHeaders);
-        }
-
 
         response = request.execute();
 
