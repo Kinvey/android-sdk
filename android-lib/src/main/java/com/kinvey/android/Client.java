@@ -120,6 +120,7 @@ public class Client extends AbstractClient {
     private long batchRate;
     private int batchSize;
     private String accountType;
+    private boolean isSSOEnabled;
     private String accountName;
     private RealmCacheManager cacheManager;
 
@@ -421,6 +422,7 @@ public class Client extends AbstractClient {
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
         private String accountType = null;
+        private boolean isSSOEnabled = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
@@ -444,6 +446,7 @@ public class Client extends AbstractClient {
          * <p>
          * This constructor does NOT support push notification functionality.
          * If push notifications are necessary, use a properties file and the overloaded constructor.
+         * For using SSO you should use setSSOEnabled(true) before call build()
          * </p>
          *
          * @param appKey Your Kinvey Application Key
@@ -456,23 +459,6 @@ public class Client extends AbstractClient {
             this.setJsonFactory(factory);
             this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-
-            try {
-                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
-
-                super.getProps().load(in);
-            } catch (IOException e) {
-                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
-            } catch (NullPointerException ex) {
-                Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
-                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-            }
-
-            if (super.getString(Option.ACCOUNT_TYPE) != null) {
-                this.accountType = super.getString(Option.ACCOUNT_TYPE);
-            }
 
             if (getCredentialStore() == null) {
                 try {
@@ -491,6 +477,7 @@ public class Client extends AbstractClient {
          * <p>
          * This constructor requires a  properties file, containing configuration for your Kinvey Client.
          * Save this file within your Android project, at:  assets/kinvey.properties
+         * For using SSO you should use setSSOEnabled(true) before call build() or add account.type = yout.account.type to assets/kinvey.properties
          * </p>
          * <p>
          * This constructor provides support for push notifications.
@@ -577,6 +564,7 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.ACCOUNT_TYPE) != null) {
                 this.accountType = super.getString(Option.ACCOUNT_TYPE);
+                this.isSSOEnabled = true;
             }
 
             String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
@@ -618,6 +606,7 @@ public class Client extends AbstractClient {
          * <p>
          * This constructor requires a  properties file, containing configuration for your Kinvey Client.
          * Save this file within your Android project, at:  assets/kinvey.properties
+         * For using SSO you should use setSSOEnabled(true) before call build() or add account.type = yout.account.type to assets/kinvey.properties
          * </p>
          * <p>
          * This constructor provides support for push notifications.
@@ -683,6 +672,7 @@ public class Client extends AbstractClient {
 
             if (super.getString(Option.ACCOUNT_TYPE) != null) {
                 this.accountType = super.getString(Option.ACCOUNT_TYPE);
+                this.isSSOEnabled = true;
             }
 
             if (super.getString(Option.PARSER) != null) {
@@ -741,6 +731,7 @@ public class Client extends AbstractClient {
                     getRequestBackoffPolicy(), this.context);
             client.clientUser = AndroidUserStore.getUserStore(this.context);
             client.accountType = this.accountType;
+            client.isSSOEnabled = this.isSSOEnabled;
 
             //GCM explicitely enabled
             if (this.GCM_Enabled) {
@@ -763,11 +754,14 @@ public class Client extends AbstractClient {
 
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
-                Account account = loggedIn();
+                Account account = null;
+                if (isSSOEnabled) {
+                    account = loggedIn();
+                }
                 String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
                 if (credential != null) {
                     loginWithCredential(client, credential);
-                } else if (account != null && account.name.equals(appKey)) {
+                } else if (isSSOEnabled && account != null && account.name.equals(appKey)) {
                     AccountManager am = AccountManager.get(context);
                     String userId = am.getUserData(account, KinveyAuthenticator.KINVEY_USER_ID);
                     String authToken = am.getUserData(account, KinveyAuthenticator.KINVEY_TOKEN);
@@ -786,8 +780,17 @@ public class Client extends AbstractClient {
                 e.printStackTrace();
             }
 
-
             return client;
+        }
+
+        public Builder setSSOEnabled(boolean SSOEnabled) {
+            isSSOEnabled = SSOEnabled;
+            return this;
+        }
+
+        public Builder setAccountType(String accountType) {
+            this.accountType = accountType;
+            return this;
         }
 
         private Account loggedIn() throws IOException, XmlPullParserException {
@@ -1025,6 +1028,10 @@ public class Client extends AbstractClient {
 
     public String getAccountType() {
         return accountType;
+    }
+
+    public boolean isSSOEnabled() {
+        return isSSOEnabled;
     }
 }
 

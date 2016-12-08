@@ -526,31 +526,33 @@ public class UserStore {
 
     private static void saveAccountToAccountManager(User user, UserStore.Login login, AbstractClient client) {
         Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
-        String accountType = ((Client)client).getAccountType();
-        Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
-        if (user != null) {
-            AccountManager mAccountManager = AccountManager.get(Client.sharedInstance().getContext());
-            String authToken = user.getAuthToken();
-            boolean success = ((authToken != null) && (authToken.length() > 0));
-            if (success) {
+        if (((Client)client).isSSOEnabled()) {
+            String accountType = ((Client) client).getAccountType();
+            Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
+            if (user != null) {
+                AccountManager mAccountManager = AccountManager.get(Client.sharedInstance().getContext());
+                String authToken = user.getAuthToken();
+                boolean success = ((authToken != null) && (authToken.length() > 0));
+                if (success) {
 
-                //
-                String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
-                Account existedAccount = loggedIn(accountType, ((Client) client).getContext());
-                if (existedAccount!= null && !existedAccount.name.equals(appKey)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        mAccountManager.removeAccountExplicitly(existedAccount);
-                    } else {
-                        mAccountManager.removeAccount(existedAccount, null, null);
+                    //
+                    String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+                    Account existedAccount = loggedIn(accountType, ((Client) client).getContext());
+                    if (existedAccount != null && !existedAccount.name.equals(appKey)) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                            mAccountManager.removeAccountExplicitly(existedAccount);
+                        } else {
+                            mAccountManager.removeAccount(existedAccount, null, null);
+                        }
                     }
-                }
-                //
+                    //
 
-                final Account account = new Account(appKey, accountType);
-                Bundle userData = new Bundle();
-                userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
-                userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
-                mAccountManager.addAccountExplicitly(account, login.password, userData);
+                    final Account account = new Account(appKey, accountType);
+                    Bundle userData = new Bundle();
+                    userData.putString(KinveyAuthenticator.KINVEY_TOKEN, authToken);
+                    userData.putString(KinveyAuthenticator.KINVEY_USER_ID, user.getId());
+                    mAccountManager.addAccountExplicitly(account, login.password, userData);
+                }
             }
         }
     }
@@ -582,18 +584,20 @@ public class UserStore {
 
     private static void removeAccountFromAccountManager(AbstractClient client) {
         Preconditions.checkArgument(client instanceof  Client, "Client.class must be used for this method");
-        String accountType = ((Client)client).getAccountType();
-        Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
-        String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
-        AccountManager mAccountManager = AccountManager.get(((Client)client).getContext());
-        User user = client.activeUser();
-        if (user != null) {
+        if (((Client)client).isSSOEnabled()) {
+            String accountType = ((Client) client).getAccountType();
+            Preconditions.checkNotNull(accountType, "Account Type must be initialized in Client");
+            String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+            AccountManager mAccountManager = AccountManager.get(((Client) client).getContext());
+            User user = client.activeUser();
+            if (user != null) {
 
-            final Account account = new Account(appKey, accountType);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                mAccountManager.removeAccountExplicitly(account);
-            } else {
-                mAccountManager.removeAccount(account, null, null);
+                final Account account = new Account(appKey, accountType);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    mAccountManager.removeAccountExplicitly(account);
+                } else {
+                    mAccountManager.removeAccount(account, null, null);
+                }
             }
         }
     }
