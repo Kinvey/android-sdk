@@ -587,11 +587,10 @@ public class MediaHttpUploader {
             abstractKinveyClientRequest.getRequestHeaders().setRange("bytes */" + getMediaContentLength());
             abstractKinveyClientRequest.getRequestHeaders().setContentLength(0L);
         } else {
-            initiationHeaders.set(CONTENT_TYPE_HEADER, mediaContent.getType());
+            abstractKinveyClientRequest.getRequestHeaders().set(CONTENT_TYPE_HEADER, mediaContent.getType());
             if (isMediaLengthKnown()) {
-                initiationHeaders.set(CONTENT_LENGTH_HEADER, getMediaContentLength());
+                abstractKinveyClientRequest.getRequestHeaders().set(CONTENT_LENGTH_HEADER, getMediaContentLength());
             }
-            abstractKinveyClientRequest.setInitiationHeaders(initiationHeaders);
         }
 
         HttpResponse response = abstractKinveyClientRequest.executeUnparsed(false);

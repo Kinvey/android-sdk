@@ -291,19 +291,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         return executeUnparsed(false);
     }
 
-    /** Sets the HTTP headers used for the initiation request. */
-    public void setInitiationHeaders(HttpHeaders initiationHeaders) {
-        this.initiationHeaders = initiationHeaders;
-    }
-
-    /** Returns the HTTP headers used for the initiation request. */
-    public HttpHeaders getInitiationHeaders() {
-        return initiationHeaders;
-    }
-
-    /** The HTTP headers used in the initiation request. */
-    private HttpHeaders initiationHeaders;
-
     /**
      * Executes the http request and returns the raw {@link HttpResponse}. If
      * throwExceptionOnError is {@code true} an {@link HttpResponseException} is
