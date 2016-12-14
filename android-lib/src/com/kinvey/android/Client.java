@@ -906,7 +906,7 @@ public class Client extends AbstractClient {
             } catch (IOException ex) {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
-            new AsyncTask<Void, Void, User>(){
+            /*new AsyncTask<Void, Void, User>(){
 
                 private Exception error = null;
                 @Override
@@ -937,7 +937,7 @@ public class Client extends AbstractClient {
                     }
                 }
 
-            }.execute();
+            }.execute();*/
 
 
 

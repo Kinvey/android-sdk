@@ -334,6 +334,9 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @throws IOException
      */
     HttpResponse executeUnparsed(boolean upload) throws IOException {
+        if (hasRetryed) {
+            client.initializeRequest(this);
+        }
         HttpResponse response;
         boolean throwExceptionOnError;
 
