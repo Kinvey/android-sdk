@@ -600,6 +600,27 @@ public class Client extends AbstractClient {
             return (Builder) super.setHttpRequestInitializer(httpRequestInitializer);
         }
 
+        private String getAccountType() {
+            String accountType = super.getString(Option.ACCOUNT_TYPE);
+            ComponentName myService = new ComponentName(context, KinveyAuthenticatorService.class);
+            try {
+                Bundle data = context.getPackageManager().getServiceInfo(myService, PackageManager.GET_META_DATA).metaData;
+                int accountMetadataResource = data.getInt("android.accounts.AccountAuthenticator");
+                XmlResourceParser xrp = context.getResources().getXml(accountMetadataResource);
+                int code = 0;
+                while ((code = xrp.next()) != XmlResourceParser.END_DOCUMENT && !"account-authenticator".equals(xrp.getName()) ){};
+                if (xrp != null && "account-authenticator".equals(xrp.getName())) {
+                    accountType = xrp.getAttributeValue("http://schemas.android.com/apk/res/android", "accountType");
+                }
+
+            } catch (PackageManager.NameNotFoundException e) {
+                Logger.INFO("There is no AuthenticationService" + KinveyAuthenticatorService.class);
+            } catch (XmlPullParserException | IOException e) {
+                Logger.INFO("Error while parsing resource" + e.getMessage());
+            }
+            return accountType;
+        }
+
         /**
          * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
          * set for the Android Operating System.
@@ -670,8 +691,10 @@ public class Client extends AbstractClient {
                 this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
             }
 
+            this.context = context.getApplicationContext();
+
             if (super.getString(Option.ACCOUNT_TYPE) != null) {
-                this.accountType = super.getString(Option.ACCOUNT_TYPE);
+                this.accountType = this.getAccountType();
                 this.isSSOEnabled = true;
             }
 
@@ -701,7 +724,6 @@ public class Client extends AbstractClient {
             KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context));
             this.setKinveyClientRequestInitializer(initializer);
 
-            this.context = context.getApplicationContext();
             this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
             if (getCredentialStore() == null) {
                 try {
