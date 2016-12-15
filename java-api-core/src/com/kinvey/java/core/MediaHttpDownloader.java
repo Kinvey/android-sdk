@@ -326,7 +326,7 @@ public class MediaHttpDownloader {
             out.flush();
         }
 
-        Logger.INFO(("isDownloaded: " + isDownloaded);
+        Logger.INFO("isDownloaded: " + isDownloaded);
         return isDownloaded ? metaData : null;
     }
 
