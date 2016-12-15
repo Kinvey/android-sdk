@@ -9,6 +9,7 @@ import com.kinvey.java.core.UploaderProgressListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class AsyncUploadRequest<T> extends AsyncRequest<T> {
 
@@ -40,10 +41,7 @@ public class AsyncUploadRequest<T> extends AsyncRequest<T> {
 
     @Override
     public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        Object[] newArgs = new Object[args.length + 1];
-        for (int i = 0; i < args.length; i++) {
-            newArgs[i] = args[i];
-        }
+        Object[] newArgs = Arrays.copyOf(args, args.length + 1);
         newArgs[args.length] = listener;
         T ret = (T) mMethod.invoke(scope, newArgs);
         return ret;

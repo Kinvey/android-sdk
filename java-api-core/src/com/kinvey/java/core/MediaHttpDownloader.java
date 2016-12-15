@@ -43,6 +43,7 @@ import com.google.common.io.ByteStreams;
 import com.kinvey.java.KinveyDownloadFileException;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.KinveyUploadFileException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**
@@ -100,7 +101,9 @@ public class MediaHttpDownloader {
 
     /**
      * Default maximum number of bytes that will be downloaded from the server in any single HTTP
-     * request. Set to 32MB because that is the maximum App Engine request size.
+     * request. Set to 5MB because that is average value in terms of performance and resume if chunk download fails.
+     * for resumable download - the lower chunk - the more precise we can define the last known successfull download position,
+     * but more requests will go to the server, so we decide to stay with 5MB
      */
     public static final int MAXIMUM_CHUNK_SIZE = 5 * MediaHttpUploader.MB;
 
@@ -319,11 +322,11 @@ public class MediaHttpDownloader {
         }
 
         if (cancelled) {
-            System.out.println("cancelled");
+            Logger.INFO("DOWNLOAD REQUEST cancelled");
             out.flush();
         }
 
-        System.out.println("isDownloaded: " + isDownloaded);
+        Logger.INFO(("isDownloaded: " + isDownloaded);
         return isDownloaded ? metaData : null;
     }
 

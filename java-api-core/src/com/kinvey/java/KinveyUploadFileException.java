@@ -7,12 +7,14 @@ public class KinveyUploadFileException extends KinveyException{
 
     private FileMetaData uploadedFileMetaData;
 
-    public KinveyUploadFileException(String reason, String fix, String explanation) {
+    public KinveyUploadFileException(String reason, String fix, String explanation, FileMetaData metadata) {
         super(reason, fix, explanation);
+        this.uploadedFileMetaData = metadata;
     }
 
-    public KinveyUploadFileException(String reason) {
+    public KinveyUploadFileException(String reason, FileMetaData metadata) {
         super(reason);
+        this.uploadedFileMetaData = metadata;
     }
 
     public FileMetaData getUploadedFileMetaData() {

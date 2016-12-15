@@ -43,6 +43,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.KinveyUploadFileException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**
@@ -132,7 +133,7 @@ public class MediaHttpUploader {
      * Default maximum number of bytes that will be uploaded to the server in any single HTTP request
      * (set to 5 MB).
      */
-    public static final int DEFAULT_CHUNK_SIZE = 5 * MB;
+    public static final int DEFAULT_CHUNK_SIZE = 10 * MB;
 
     /**
      * The HTTP content of the media to be uploaded.
@@ -431,12 +432,10 @@ public class MediaHttpUploader {
                     response = executeCurrentRequest(currentRequest);
                 }
             } catch (IOException e) {
-                KinveyUploadFileException exception = new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage());
-                exception.setUploadedFileMetaData(meta);
+                KinveyUploadFileException exception = new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage(), meta);
                 throw exception;
             }
 
-            boolean returningResponse = false;
             try {
 
                 if (response.isSuccessStatusCode()) {
@@ -445,13 +444,13 @@ public class MediaHttpUploader {
                         contentInputStream.close();
                     }
                     updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
-                    returningResponse = true;
                     return meta;
                 }
 
                 if (response.getStatusCode() != 308) {
-                    returningResponse = true;
-                    return meta;
+                    throw new KinveyUploadFileException("File upload failed",
+                            "try to reupload file using FileStore.upload(file, metadata, listener) where metadata should be taken from exception.getUploadedFileMetaData()",
+                            "This error usually means that server error on backend side occurs, that could be resolver by reupload", meta);
                 }
 
                 // Check to see if the upload URL has changed on the server.
@@ -492,8 +491,12 @@ public class MediaHttpUploader {
                 isResume = false;
                 updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
             } finally {
-                if (response != null && !returningResponse) {
-                    response.disconnect();
+                if (response != null) {
+                    try {
+                        response.disconnect();
+                    } catch (Throwable t){
+                        Logger.INFO("close response failed");
+                    }
                 }
             }
         }
