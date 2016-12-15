@@ -502,7 +502,7 @@ public class MediaHttpUploader {
 
                 if (statusCode != 308) {
                     throw new KinveyUploadFileException("File upload failed",
-                            "try to reupload file using FileStore.upload(file, metadata, listener) where metadata should be taken from exception.getUploadedFileMetaData()",
+                            "Try to upload file again",
                             "This error usually means that server error on backend side occurs, that could be resolver by reupload", meta);
                 }
 
