@@ -386,8 +386,6 @@ public class MediaHttpUploader {
     public FileMetaData upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
         FileMetaData meta = null;
         Map<String, String> headers = null;
-        currentChunkLength = 0;
-        totalBytesServerReceived = 0;
         GenericUrl uploadUrl;
         isResume = fileMetaDataForUploading.getUploadUrl() != null;
 
@@ -425,14 +423,7 @@ public class MediaHttpUploader {
             }
         }
 
-        // Convert media content into a byte stream to upload in chunks.
-        contentInputStream = mediaContent.getInputStream();
-        if (!contentInputStream.markSupported() && getMediaContentLength() >= 0) {
-            // If we know the media content length then wrap the stream into a Buffered input stream to
-            // support the {@link InputStream#mark} and {@link InputStream#reset} methods required for
-            // handling server errors.
-            contentInputStream = new BufferedInputStream(contentInputStream);
-        }
+        createInputStream();
 
         HttpResponse response = null;
         int statusCode;
@@ -469,8 +460,10 @@ public class MediaHttpUploader {
             } catch (IOException e) {
                 if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
                     backOffThreadSleep();
-                    fileMetaDataForUploading = meta;
-                    return upload(initiationClientRequest);
+                    retryBackOffCounter++;
+                    invalidateUnUploadedChunk();
+                    isResume = true;
+                    continue;
                 } else {
                     throw new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage(), meta);
                 }
@@ -488,16 +481,19 @@ public class MediaHttpUploader {
                 }
                 statusCode = response.getStatusCode();
 
-                if ((statusCode == 500 || statusCode == 502 || statusCode == 503 || statusCode == 504) && retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT ) {
+                if ((statusCode == 500 || statusCode == 502 || statusCode == 503 || statusCode == 504) && retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
                     backOffThreadSleep();
-                    fileMetaDataForUploading = meta;
-                    return upload(initiationClientRequest);
+                    retryBackOffCounter++;
+                    invalidateUnUploadedChunk();
+                    isResume = true;
+                    continue;
                 }
 
                 if (statusCode == 404 && retry404ErrorCounter < MAXIMUM_ERROR404_RETRY_CONT) {
                     //start upload from the beginning
                     retry404ErrorCounter++;
-                    return upload(initiationClientRequest);
+                    invalidateUnUploadedChunk();
+                    continue;
                 }
 
                 if (statusCode != 308) {
@@ -551,7 +547,7 @@ public class MediaHttpUploader {
                 if (response != null) {
                     try {
                         response.disconnect();
-                    } catch (Throwable t){
+                    } catch (Throwable t) {
                         Logger.INFO("close response failed");
                     }
                 }
@@ -561,6 +557,23 @@ public class MediaHttpUploader {
         return cancelled ? null : meta;
     }
 
+    private void invalidateUnUploadedChunk() throws IOException {
+        currentChunkLength = 0;
+        totalBytesServerReceived = 0;
+        createInputStream();
+    }
+
+    private void createInputStream() throws IOException {
+        // Convert media content into a byte stream to upload in chunks.
+        contentInputStream = mediaContent.getInputStream();
+        if (!contentInputStream.markSupported() && getMediaContentLength() >= 0) {
+            // If we know the media content length then wrap the stream into a Buffered input stream to
+            // support the {@link InputStream#mark} and {@link InputStream#reset} methods required for
+            // handling server errors.
+            contentInputStream = new BufferedInputStream(contentInputStream);
+        }
+    }
+
     private void backOffThreadSleep() {
         //use exponential backoff
         try {
@@ -568,7 +581,6 @@ public class MediaHttpUploader {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        retryBackOffCounter++;
     }
 
     private HttpResponse updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
