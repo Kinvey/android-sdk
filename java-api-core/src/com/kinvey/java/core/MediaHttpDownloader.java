@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.common.io.ByteStreams;
 import com.kinvey.java.KinveyDownloadFileException;
@@ -107,6 +108,12 @@ public class MediaHttpDownloader {
      */
     public static final int MAXIMUM_CHUNK_SIZE = 5 * MediaHttpUploader.MB;
 
+    /* Retries after this point do not need to continue increasing backoff time. */
+    private int MAXIMUM_BACKOFF_TIME_WAITING = 64000;
+
+    /* Retries after this point do not need to continue increasing backoff retry counter. */
+    private int MAXIMUM_BACKOFF_RETRY_CONT = 10;
+
     /**
      * The request factory for connections to the server.
      */
@@ -172,6 +179,11 @@ public class MediaHttpDownloader {
      * has the request been cancelled?
      */
     private boolean cancelled = false;
+
+    /**
+     * Counter for backoff retry if connection was interrupted
+     */
+    private int retryBackOffCounter;
 
     /**
      * Construct the {@link MediaHttpDownloader}.
@@ -276,13 +288,19 @@ public class MediaHttpDownloader {
             try {
                 response = currentRequest.execute();
             } catch (Exception e) {
-                KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
-                Map<String, Object> hashMap = new HashMap<>();
-                hashMap.put("LastBytePosition", lastBytePos);
-                hashMap.put("NumBytesDownloaded", bytesDownloaded);
-                metaData.setResumeDownloadData(hashMap);
-                kinveyUploadFileException.setDownloadedFileMetaData(metaData);
-                throw kinveyUploadFileException;
+                if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
+                    backOffThreadSleep();
+                    retryBackOffCounter++;
+                    continue;
+                } else {
+                    KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
+                    Map<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("LastBytePosition", lastBytePos);
+                    hashMap.put("NumBytesDownloaded", bytesDownloaded);
+                    metaData.setResumeDownloadData(hashMap);
+                    kinveyUploadFileException.setDownloadedFileMetaData(metaData);
+                    throw kinveyUploadFileException;
+                }
             }
 
             try {
@@ -293,13 +311,19 @@ public class MediaHttpDownloader {
                     IOUtils.copy(bis, out);
                 }
             } catch (Exception e) {
-                KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
-                Map<String, Object> hashMap = new HashMap<>();
-                hashMap.put("LastBytePosition", lastBytePos);
-                hashMap.put("NumBytesDownloaded", bytesDownloaded);
-                metaData.setResumeDownloadData(hashMap);
-                kinveyUploadFileException.setDownloadedFileMetaData(metaData);
-                throw kinveyUploadFileException;
+                if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
+                    backOffThreadSleep();
+                    retryBackOffCounter++;
+                    continue;
+                } else {
+                    KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
+                    Map<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("LastBytePosition", lastBytePos);
+                    hashMap.put("NumBytesDownloaded", bytesDownloaded);
+                    metaData.setResumeDownloadData(hashMap);
+                    kinveyUploadFileException.setDownloadedFileMetaData(metaData);
+                    throw kinveyUploadFileException;
+                }
             } finally {
                 if (response != null) {
                     response.disconnect();
@@ -331,7 +355,18 @@ public class MediaHttpDownloader {
     }
 
 
+    private void backOffThreadSleep() {
+        //use exponential backoff
+        try {
+            Thread.sleep((long) Math.min((Math.pow(2, retryBackOffCounter)*1000+ getRandom(1, 1000)), MAXIMUM_BACKOFF_TIME_WAITING));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private int getRandom(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
+    }
 
     /**
      * Returns the next byte index identifying data that the server has not yet sent out, obtained
