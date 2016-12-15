@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ByteArrayContent;
@@ -84,7 +85,6 @@ public class MediaHttpUploader {
      * @since 1.13
      */
     public static final String CONTENT_TYPE_HEADER = "X-Upload-Content-Type";
-    private int retryBackOffCounter;
 
     /**
      * Upload state associated with the Media HTTP uploader.
@@ -209,6 +209,15 @@ public class MediaHttpUploader {
      */
     private boolean backOffPolicyEnabled = true;
 
+    /* Retries after this point do not need to continue increasing backoff time. */
+    private int MAXIMUM_BACKOFF_TIME_WAITING = 64000;
+
+    /* Retries after this point do not need to continue increasing backoff retry counter. */
+    private int MAXIMUM_BACKOFF_RETRY_CONT = 10;
+
+    /* Retries after this point do not need to continue increasing error 404 retry counter. */
+    private int MAXIMUM_ERROR404_RETRY_CONT = 5;
+
     /**
      * Determines whether direct media upload is enabled or disabled. If value is set to {@code true}
      * then a direct upload will be done where the whole media content is uploaded in a single request
@@ -284,9 +293,28 @@ public class MediaHttpUploader {
     // TODO(rmistry): Figure out a way to compute the content length using CountingInputStream.
     private long totalBytesServerReceived;
 
+    /* *
+    * Metadata for uploading if previous uploading was interrupted
+    * If fileMetaDataForUploading != null then previous uploading was interrupted
+    * and some chunk of file was uploaded.
+    */
     private FileMetaData fileMetaDataForUploading;
 
+    /**
+     * If isResume == true then previous uploading was interrupted
+     */
     boolean isResume;
+
+    /**
+     * Counter for backoff retry if connection was interrupted
+     */
+    private int retryBackOffCounter;
+
+    /**
+     * Counter for uploading retry if connection was interrupted and error 404 was reason
+     */
+    private int retry404ErrorCounter;
+
 
     /**
      * Construct the {@link MediaHttpUploader}.
@@ -310,6 +338,8 @@ public class MediaHttpUploader {
                              HttpRequestInitializer httpRequestInitializer) {
         this.mediaContent = Preconditions.checkNotNull(mediaContent);
         this.transport = Preconditions.checkNotNull(transport);
+        this.retryBackOffCounter = 0;
+        this.retry404ErrorCounter = 0;
         this.requestFactory = httpRequestInitializer == null
                 ? transport.createRequestFactory() : transport.createRequestFactory(httpRequestInitializer);
     }
@@ -354,10 +384,10 @@ public class MediaHttpUploader {
      * @throws IOException
      */
     public FileMetaData upload(AbstractKinveyClientRequest initiationClientRequest) throws IOException {
-        Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
-        updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
         FileMetaData meta = null;
         Map<String, String> headers = null;
+        currentChunkLength = 0;
+        totalBytesServerReceived = 0;
         GenericUrl uploadUrl;
         isResume = fileMetaDataForUploading.getUploadUrl() != null;
 
@@ -365,6 +395,9 @@ public class MediaHttpUploader {
             uploadUrl = new GenericUrl(fileMetaDataForUploading.getUploadUrl());
             meta = fileMetaDataForUploading;
         } else {
+            Preconditions.checkArgument(uploadState == UploadState.NOT_STARTED);
+            updateStateAndNotifyListener(UploadState.UPLOAD_IN_PROGRESS);
+
             // Make initial request to get the unique upload URL.
             HttpResponse initialResponse = executeUploadInitiation(initiationClientRequest);
             if (!initialResponse.isSuccessStatusCode()) {
@@ -401,7 +434,9 @@ public class MediaHttpUploader {
             contentInputStream = new BufferedInputStream(contentInputStream);
         }
 
-        HttpResponse response;
+        HttpResponse response = null;
+        int statusCode;
+
         while (!cancelled) {
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null);
             currentRequest.setSuppressUserAgentSuffix(true);
@@ -432,8 +467,13 @@ public class MediaHttpUploader {
                     response = executeCurrentRequest(currentRequest);
                 }
             } catch (IOException e) {
-                KinveyUploadFileException exception = new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage(), meta);
-                throw exception;
+                if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
+                    backOffThreadSleep();
+                    fileMetaDataForUploading = meta;
+                    return upload(initiationClientRequest);
+                } else {
+                    throw new KinveyUploadFileException("Connection was interrupted", "Retry request", e.getMessage(), meta);
+                }
             }
 
             try {
@@ -446,12 +486,29 @@ public class MediaHttpUploader {
                     updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE);
                     return meta;
                 }
+                statusCode = response.getStatusCode();
 
-                if (response.getStatusCode() != 308) {
+                if ((statusCode == 500 || statusCode == 502 || statusCode == 503 || statusCode == 504) && retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT ) {
+                    backOffThreadSleep();
+                    fileMetaDataForUploading = meta;
+                    return upload(initiationClientRequest);
+                }
+
+                if (statusCode == 404 && retry404ErrorCounter < MAXIMUM_ERROR404_RETRY_CONT) {
+                    //start upload from the beginning
+                    retry404ErrorCounter++;
+                    return upload(initiationClientRequest);
+                }
+
+                if (statusCode != 308) {
                     throw new KinveyUploadFileException("File upload failed",
                             "try to reupload file using FileStore.upload(file, metadata, listener) where metadata should be taken from exception.getUploadedFileMetaData()",
                             "This error usually means that server error on backend side occurs, that could be resolver by reupload", meta);
                 }
+
+                //upload was resumed
+                retry404ErrorCounter = 0;
+                retryBackOffCounter = 0;
 
                 // Check to see if the upload URL has changed on the server.
                 String updatedUploadUrl = response.getHeaders().getLocation();
@@ -504,6 +561,16 @@ public class MediaHttpUploader {
         return cancelled ? null : meta;
     }
 
+    private void backOffThreadSleep() {
+        //use exponential backoff
+        try {
+            Thread.sleep((long) Math.min((Math.pow(2, retryBackOffCounter)*1000+ getRandom(1, 1000)), MAXIMUM_BACKOFF_TIME_WAITING));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        retryBackOffCounter++;
+    }
+
     private HttpResponse updateUploadedDataInfo(GenericUrl uploadUrl) throws IOException {
         HttpResponse response = null;
         HttpRequest httpRequest;
@@ -528,6 +595,10 @@ public class MediaHttpUploader {
             }
         }
         return response;
+    }
+
+    private int getRandom(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
     }
 
     /**
