@@ -386,6 +386,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 Credential currentCred = client.getStore().load(client.user().getId());
                 currentCred.setRefreshToken(result.get("refresh_token").toString());
                 client.getStore().store(client.user().getId(), currentCred);
+                client.initializeRequest(this);
                 hasRetryed = true;
                 return executeUnparsed();
             }
