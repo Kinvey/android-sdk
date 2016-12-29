@@ -44,6 +44,7 @@ import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -120,14 +121,13 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
-    private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";
-    
+    private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";*/
 
     private static final String KEY_COUNT = "KEY_COUNT";
     private static final String KEY_SUM = "KEY_SUM";
     private static final String KEY_MAX = "KEY_MAX";
     private static final String KEY_MIN = "KEY_MIN";
-    private static final String KEY_AVERAGE = "KEY_AVERAGE";*/
+    private static final String KEY_AVERAGE = "KEY_AVERAGE";
 
     private static Map<String, Method> methodMap;
 
@@ -172,6 +172,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
             tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
+
+            tempMap.put(KEY_SUM, BaseDataStore.class.getMethod("sum", ArrayList.class, String.class, Query.class));
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
@@ -552,6 +554,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(query, "query cannot be null.");
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_QUERY), callback, query).execute();
 
+    }
+
+    public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback<Number> callback) {
+        new AsyncRequest<Number>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query).execute();
     }
 
     /**

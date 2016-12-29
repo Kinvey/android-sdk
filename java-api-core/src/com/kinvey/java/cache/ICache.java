@@ -110,6 +110,12 @@ public interface ICache<T extends GenericJson> {
     long count(Query q);
 
     /**
+     * gets the sum of elements from the sumField from the cache
+     * @return the sum of elements from the sumField from the cache
+     */
+    Number sum(String sumField, Query q);
+
+    /**
      * get current ttl value
      * @return current ttl value
      */

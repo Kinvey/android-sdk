@@ -28,6 +28,7 @@ import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadSumRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
 import com.kinvey.java.store.requests.data.read.ReadAllRequest;
@@ -35,6 +36,7 @@ import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -308,6 +310,12 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSycManager().clear(collectionName);
         pullBlocking(null);
+    }
+
+    public T sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
     }
 
 

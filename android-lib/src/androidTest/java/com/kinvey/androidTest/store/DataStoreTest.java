@@ -1087,5 +1087,67 @@ public class DataStoreTest {
         }
     }
 
+
+    @Test
+    public void testSum() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        save(store, createPerson("PersonForSUM"));
+        save(store, createPerson("PersonForSUM"));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+
+        DefaultKinveyNumberCallback callback = sum(store, query);
+
+
+        assertNotNull(callback.result);
+
+    }
+
+
+    private DefaultKinveyNumberCallback sum(final DataStore<Person> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyNumberCallback callback = new DefaultKinveyNumberCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                ArrayList<String> list = new ArrayList<String>();
+                list.add("money");
+                store.sum(list, "money", query, callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
+    private static class DefaultKinveyNumberCallback implements KinveyClientCallback<Number> {
+
+        private CountDownLatch latch;
+        Number result;
+        Throwable error;
+
+        DefaultKinveyNumberCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(Number result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
 }
 

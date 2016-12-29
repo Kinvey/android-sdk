@@ -414,6 +414,22 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
+    @Override
+    public Number sum(String sumField, Query q) {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+        Number ret = 0;
+
+        mRealm.beginTransaction();
+        try {
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+            ret = query.sum(sumField);
+        } finally {
+            mRealm.commitTransaction();
+        }
+        return ret;
+    }
+
     public Class<T> getCollectionItemClass() {
         return mCollectionItemClass;
     }
