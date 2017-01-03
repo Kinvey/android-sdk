@@ -22,6 +22,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
@@ -312,10 +313,10 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(null);
     }
 
-    public T sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
+    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
+        return new ReadSumRequest<Aggregation.Result>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
     }
 
 

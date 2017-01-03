@@ -27,8 +27,11 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
@@ -312,6 +315,7 @@ public class DataStoreTest {
     private Person createPerson(String name) {
         Person person = new Person();
         person.setUsername(name);
+        person.setMoney(125);
         return person;
     }
 
@@ -1090,10 +1094,13 @@ public class DataStoreTest {
 
     @Test
     public void testSum() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSycManager().clear(Person.COLLECTION);
-        save(store, createPerson("PersonForSUM"));
-        save(store, createPerson("PersonForSUM"));
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM"));
+        assertNotNull(clientCallback.result);
+
+        clientCallback = save(store, createPerson("PersonForSUM"));
+        assertNotNull(clientCallback.result);
 
         Query query = client.query();
         query = query.notEqual("age", "100200300");
@@ -1122,10 +1129,10 @@ public class DataStoreTest {
         return callback;
     }
 
-    private static class DefaultKinveyNumberCallback implements KinveyClientCallback<Number> {
+    private static class DefaultKinveyNumberCallback extends KinveyAggregateCallback {
 
         private CountDownLatch latch;
-        Number result;
+        Aggregation result;
         Throwable error;
 
         DefaultKinveyNumberCallback(CountDownLatch latch) {
@@ -1133,14 +1140,14 @@ public class DataStoreTest {
         }
 
         @Override
-        public void onSuccess(Number result) {
-            this.result = result;
+        public void onFailure(Throwable error) {
+            this.error = error;
             finish();
         }
 
         @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
+        public void onSuccess(Aggregation response) {
+            this.result = response;
             finish();
         }
 

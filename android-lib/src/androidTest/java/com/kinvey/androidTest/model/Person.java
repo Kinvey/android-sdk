@@ -18,8 +18,8 @@ public class Person extends GenericJson{
     @Key("_id")
     private String id;
 
-    @Key
-    private int money;
+    @Key("money")
+    private double money;
 
     @Key("username")
     private String username;
@@ -48,11 +48,11 @@ public class Person extends GenericJson{
         this.username = username;
     }
 
-    public int getMoney() {
+    public double getMoney() {
         return money;
     }
 
-    public void setMoney(int money) {
+    public void setMoney(double money) {
         this.money = money;
     }
 }

@@ -35,7 +35,9 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
@@ -556,8 +558,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     }
 
-    public void sum(ArrayList<String> fields, String sumField, Query query, KinveyClientCallback<Number> callback) {
-        new AsyncRequest<Number>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query).execute();
+    public void sum(ArrayList<String> fields, String sumField, Query query, KinveyAggregateCallback callback) {
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query).execute();
     }
 
     /**
