@@ -16,22 +16,24 @@
 
 package com.kinvey.java.store.requests.data.read;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyDataRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Prots on 12/29/16.
  */
-public class ReadSumRequest<T> extends AbstractKinveyDataRequest {
-    private final ICache cache;
-    private final ReadPolicy readPolicy;
-    private NetworkManager networkManager;
+public class ReadSumRequest<T extends GenericJson> extends AbstractReduceFunctionRequest<Aggregation.Result> {
     private final Query query;
     private ArrayList<String> fields;
     private final String sumFiled;
@@ -39,9 +41,7 @@ public class ReadSumRequest<T> extends AbstractKinveyDataRequest {
     public ReadSumRequest(ICache cache, ReadPolicy readPolicy,
                           NetworkManager networkManager,
                           ArrayList<String> fields, String sumFiled, Query query) {
-        this.cache = cache;
-        this.readPolicy = readPolicy;
-        this.networkManager = networkManager;
+        super(cache, readPolicy, networkManager);
         this.fields = fields;
         this.sumFiled = sumFiled;
         this.query = query;
@@ -49,22 +49,19 @@ public class ReadSumRequest<T> extends AbstractKinveyDataRequest {
 
 
     @Override
-    public T execute() throws IOException {
-        T ret = null;
-        switch (readPolicy){
-            case FORCE_LOCAL:
-                ret = (T) cache.sum(sumFiled, query);
-                break;
-            case FORCE_NETWORK: // Logic for getting cached data implemented before running Request
-            case BOTH:
-                ret = (T) networkManager.sumBlocking(fields, sumFiled, query).execute();
-                break;
-        }
-        return ret;
+    public void cancel() {
+
     }
 
     @Override
-    public void cancel() {
+    protected Double getCached() {
+        return (Double) cache.sum(sumFiled, query);
+    }
 
+    @Override
+    protected Aggregation.Result[] getNetwork() throws IOException {
+        Aggregation.Result t =  networkManager.sumBlocking(fields, sumFiled, Aggregation.Result.class, query).execute();
+        System.out.println(t.toString());
+        return new Aggregation.Result[] {t};
     }
 }
