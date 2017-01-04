@@ -1148,6 +1148,7 @@ public class DataStoreTest {
         @Override
         public void onSuccess(Aggregation response) {
             this.result = response;
+            Log.i("DATASTORE_TEST",  "got: " + response.results[1].result);
             finish();
         }
 

@@ -64,8 +64,9 @@ public class Aggregation {
      *
      */
     public static class Result extends GenericJson{
+
         @Key("_result")
-        public Number result;
+        public Double result;
 
         public Result(){}
     }

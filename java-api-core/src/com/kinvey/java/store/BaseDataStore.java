@@ -316,7 +316,7 @@ public class BaseDataStore<T extends GenericJson> {
     public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new ReadSumRequest<Aggregation.Result>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
+        return new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
     }
 
 

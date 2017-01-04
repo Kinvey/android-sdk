@@ -27,7 +27,9 @@ import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyDataRequest;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,8 +62,8 @@ public class ReadSumRequest<T extends GenericJson> extends AbstractReduceFunctio
 
     @Override
     protected Aggregation.Result[] getNetwork() throws IOException {
-        Aggregation.Result t =  networkManager.sumBlocking(fields, sumFiled, Aggregation.Result.class, query).execute();
-        System.out.println(t.toString());
-        return new Aggregation.Result[] {t};
+        Aggregation.Result[] t =  networkManager.sumBlocking(fields, sumFiled, Aggregation.Result.class, query).execute();
+        System.out.println(Arrays.toString(t));
+        return t;
     }
 }

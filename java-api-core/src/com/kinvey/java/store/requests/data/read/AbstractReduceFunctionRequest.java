@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * Created by Prots on 12/30/16.
  */
-public abstract class AbstractReduceFunctionRequest<T extends GenericJson> implements IRequest<Aggregation.Result[]> {
+public abstract class AbstractReduceFunctionRequest<T extends GenericJson> implements IRequest<T[]> {
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
     protected NetworkManager<T> networkManager;
@@ -43,8 +43,8 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
     }
 
     @Override
-    public Aggregation.Result[] execute() throws IOException {
-        Aggregation.Result[] ret = null;
+    public T[] execute() throws IOException {
+        T[] ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
 //                ret = getCached();
@@ -66,6 +66,6 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
     }
 
     abstract protected Double getCached();
-    abstract protected Aggregation.Result[] getNetwork() throws IOException;
+    abstract protected T[] getNetwork() throws IOException;
 
 }
