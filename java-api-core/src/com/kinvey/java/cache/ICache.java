@@ -19,6 +19,10 @@ package com.kinvey.java.cache;
 import com.google.api.client.json.GenericJson;
 import com.google.gson.Gson;
 import com.kinvey.java.Query;
+import com.kinvey.java.model.Aggregation;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -110,10 +114,10 @@ public interface ICache<T extends GenericJson> {
     long count(Query q);
 
     /**
-     * gets the sum of elements from the sumField from the cache
+     * gets the sum of elements from the sumField from the cache, fields to group by
      * @return the sum of elements from the sumField from the cache
      */
-    Number sum(String sumField, Query q);
+    Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q);
 
     /**
      * get current ttl value

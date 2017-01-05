@@ -18,9 +18,6 @@ package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyReduceFunctionResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.IRequest;
@@ -47,7 +44,7 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
         T[] ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-//                ret = getCached();
+                ret = getCached();
                 break;
             case FORCE_NETWORK:
 //                ret = getNetwork();
@@ -65,7 +62,7 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
 
     }
 
-    abstract protected Double getCached();
+    abstract protected T[] getCached();
     abstract protected T[] getNetwork() throws IOException;
 
 }

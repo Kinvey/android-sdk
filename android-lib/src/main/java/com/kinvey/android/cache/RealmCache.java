@@ -19,25 +19,23 @@ package com.kinvey.android.cache;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
-import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
-import io.realm.FieldAttribute;
-import io.realm.RealmObjectSchema;
+import io.realm.RealmFieldType;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.RealmSchema;
 import io.realm.Sort;
 
 /**
@@ -415,20 +413,79 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public Number sum(String sumField, Query q) {
+    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-        Number ret = 0;
+
+        List<Aggregation.Result> results = new ArrayList<>();
 
         mRealm.beginTransaction();
         try {
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-            ret = query.sum(sumField);
+            RealmFieldType fieldType;
+            Number ret = null;
+            Aggregation.Result result;
+            for (String field : fields) {
+                RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
+                for (DynamicRealmObject d : realmObjects) {
+
+                    String f = String.valueOf(d.get(field)).trim();
+                    if (isFieldContains(results, d, f)) {
+                      continue;
+                    }
+
+                    fieldType = d.getFieldType(field);
+                    result = new Aggregation.Result();
+
+                    switch (fieldType) {
+                        case STRING:
+                            ret = realmObjects.where().equalTo(field, String.valueOf(d.get(field))).sum(sumField);
+                            break;
+                        case INTEGER:
+                            ret = realmObjects.where().equalTo(field, (Long) (d.get(field))).sum(sumField);
+                            break;
+                        case BOOLEAN:
+                            ret = realmObjects.where().equalTo(field, (Boolean) (d.get(field))).sum(sumField);
+                            break;
+                        case DATE:
+                            ret = realmObjects.where().equalTo(field, (Date) (d.get(field))).sum(sumField);
+                            break;
+                        case FLOAT:
+                            ret = realmObjects.where().equalTo(field, (Float) (d.get(field))).sum(sumField);
+                            break;
+                        case DOUBLE:
+                            ret = realmObjects.where().equalTo(field, (Double) (d.get(field))).sum(sumField);
+                            break;
+
+                    }
+                    if (ret != null) {
+                        result.set(f, ret);
+                        results.add(result);
+
+                    }
+
+                }
+            }
+
         } finally {
             mRealm.commitTransaction();
         }
-        return ret;
+
+        Aggregation.Result[] r = new Aggregation.Result[results.size()];
+        results.toArray(r);
+
+        return r;
     }
+
+    private boolean isFieldContains(List<Aggregation.Result> results, DynamicRealmObject d, String field) {
+        for (Aggregation.Result r : results) {
+            if (r.containsKey(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public Class<T> getCollectionItemClass() {
         return mCollectionItemClass;

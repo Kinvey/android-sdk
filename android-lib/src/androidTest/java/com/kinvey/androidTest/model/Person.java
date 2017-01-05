@@ -21,6 +21,9 @@ public class Person extends GenericJson{
     @Key("money")
     private double money;
 
+    @Key("testInt")
+    private int testInt;
+
     @Key("username")
     private String username;
 
@@ -54,5 +57,13 @@ public class Person extends GenericJson{
 
     public void setMoney(double money) {
         this.money = money;
+    }
+
+    public int getTestInt() {
+        return testInt;
+    }
+
+    public void setTestInt(int testInt) {
+        this.testInt = testInt;
     }
 }

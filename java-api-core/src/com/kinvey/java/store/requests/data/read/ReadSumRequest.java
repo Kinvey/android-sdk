@@ -19,18 +19,13 @@ package com.kinvey.java.store.requests.data.read;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
-import com.kinvey.java.store.requests.data.AbstractKinveyDataRequest;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Prots on 12/29/16.
@@ -56,8 +51,10 @@ public class ReadSumRequest<T extends GenericJson> extends AbstractReduceFunctio
     }
 
     @Override
-    protected Double getCached() {
-        return (Double) cache.sum(sumFiled, query);
+    protected Aggregation.Result[] getCached() {
+        Aggregation.Result[] results = cache.sum(fields, sumFiled, query);
+        System.out.println(Arrays.toString(results));
+        return results;
     }
 
     @Override
