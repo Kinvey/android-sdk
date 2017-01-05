@@ -23,6 +23,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyCancellableCallback;
@@ -69,7 +70,12 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
             }
         }catch(Throwable e){
 //            e.printStackTrace();
-            error = e;
+            if (e instanceof InvocationTargetException) {
+                error = ((InvocationTargetException)e ).getTargetException();
+            } else {
+                error = e;
+            }
+
             Log.d("TEST","test", e);
         }
 //        KinveyCallbackHandler kinveyCallbackHandler = new KinveyCallbackHandler();
@@ -89,7 +95,7 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
      * @throws java.io.IOException if any.
      */
 
-    protected abstract Result executeAsync() throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException;
+    protected abstract Result executeAsync() throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException, KinveyException;
 
     /**
      * Get the callback for this request

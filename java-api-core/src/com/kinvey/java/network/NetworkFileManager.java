@@ -611,6 +611,7 @@ public class NetworkFileManager {
             }
 
             setUploadHeader(meta, this);
+            uploader.setFileMetaDataForUploading(meta);
         }
 
         @Override
@@ -628,7 +629,7 @@ public class NetworkFileManager {
         protected void initializeMediaHttpUploader(AbstractInputStreamContent content, UploaderProgressListener progressListener) {
             HttpRequestFactory requestFactory = client.getRequestFactory();
             uploader = createMediaHttpUploader(content, requestFactory);
-            uploader.setDirectUploadEnabled(true);
+            uploader.setDirectUploadEnabled(false);
             uploader.setProgressListener(progressListener);
         }
         /**
@@ -641,6 +642,11 @@ public class NetworkFileManager {
         protected MediaHttpUploader createMediaHttpUploader(AbstractInputStreamContent content, HttpRequestFactory requestFactory) {
             return new MediaHttpUploader(content, requestFactory.getTransport(), requestFactory.getInitializer());
         }
+
+        public MediaHttpUploader getUploader() {
+            return uploader;
+        }
+
     }
 
     /**

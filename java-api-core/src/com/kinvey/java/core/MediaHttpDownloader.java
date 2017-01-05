@@ -29,27 +29,38 @@ import com.google.api.client.json.JsonParser;
 import com.google.api.client.util.IOUtils;
 import com.google.common.base.Preconditions;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
+import com.google.common.io.ByteStreams;
+import com.kinvey.java.KinveyDownloadFileException;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.KinveyUploadFileException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.model.FileMetaData;
 
 /**
  * Media HTTP Downloader, with support for both direct and resumable media downloads. Documentation
  * is available <a
  * href='http://code.google.com/p/google-api-java-client/wiki/MediaDownload'>here</a>.
- *
+ * <p>
  * <p>
  * Implementation is not thread-safe.
  * </p>
  *
- * @since 1.9
- *
  * @author rmistry@google.com (Ravi Mistry)
- * @author morgan@kinvey.com  Portions of this code have been modified for Kinvey purposes. 
- *      Specifically Kinvey needed it to interact with AbstractKinveyClient class and download 
- *      media files using Kinvey's propritary download protocol.
+ * @author morgan@kinvey.com  Portions of this code have been modified for Kinvey purposes.
+ *         Specifically Kinvey needed it to interact with AbstractKinveyClient class and download
+ *         media files using Kinvey's propritary download protocol.
+ * @since 1.9
  */
 public class MediaHttpDownloader {
 
@@ -57,36 +68,60 @@ public class MediaHttpDownloader {
      * Download state associated with the Media HTTP downloader.
      */
     public enum DownloadState {
-        /** The download process has not started yet. */
+        /**
+         * The download process has not started yet.
+         */
         NOT_STARTED,
 
-        /** Set before the initiation request is sent. */
+        /**
+         * Set before the initiation request is sent.
+         */
         INITIATION_STARTED,
 
-        /** Set after the initiation request completes. */
+        /**
+         * Set after the initiation request completes.
+         */
         INITIATION_COMPLETE,
 
-        /** Set after a media file chunk is downloaded. */
+        /**
+         * Set after a media file chunk is downloaded.
+         */
         DOWNLOAD_IN_PROGRESS,
 
-        /** Set after the complete media file is successfully downloaded. */
-        DOWNLOAD_COMPLETE, 
-        
-        /** Set when a download cannot be completed because the metadata doesn't exist */
+        /**
+         * Set after the complete media file is successfully downloaded.
+         */
+        DOWNLOAD_COMPLETE,
+
+        /**
+         * Set when a download cannot be completed because the metadata doesn't exist
+         */
         DOWNLOAD_FAILED_FILE_NOT_FOUND
-        
+
     }
 
     /**
      * Default maximum number of bytes that will be downloaded from the server in any single HTTP
-     * request. Set to 32MB because that is the maximum App Engine request size.
+     * request. Set to 5MB because that is average value in terms of performance and resume if chunk download fails.
+     * for resumable download - the lower chunk - the more precise we can define the last known successfull download position,
+     * but more requests will go to the server, so we decide to stay with 5MB
      */
-    public static final int MAXIMUM_CHUNK_SIZE = 32 * MediaHttpUploader.MB;
+    public static final int MAXIMUM_CHUNK_SIZE = 5 * MediaHttpUploader.MB;
 
-    /** The request factory for connections to the server. */
+    /* Retries after this point do not need to continue increasing backoff time. */
+    private int MAXIMUM_BACKOFF_TIME_WAITING = 64000;
+
+    /* Retries after this point do not need to continue increasing backoff retry counter. */
+    private int MAXIMUM_BACKOFF_RETRY_CONT = 10;
+
+    /**
+     * The request factory for connections to the server.
+     */
     private final HttpRequestFactory requestFactory;
 
-    /** The transport to use for requests. */
+    /**
+     * The transport to use for requests.
+     */
     private final HttpTransport transport;
 
     /**
@@ -121,15 +156,19 @@ public class MediaHttpDownloader {
      */
     private long mediaContentLength;
 
-    /** The current state of the downloader. */
+    /**
+     * The current state of the downloader.
+     */
     private DownloadState downloadState = DownloadState.NOT_STARTED;
 
-    /** The total number of bytes downloaded by this downloader. */
+    /**
+     * The total number of bytes downloaded by this downloader.
+     */
     private long bytesDownloaded;
 
     /**
      * The last byte position of the media file we want to download, default value is {@code -1}.
-     *
+     * <p>
      * <p>
      * If its value is {@code -1} it means there is no upper limit on the byte position.
      * </p>
@@ -142,11 +181,16 @@ public class MediaHttpDownloader {
     private boolean cancelled = false;
 
     /**
+     * Counter for backoff retry if connection was interrupted
+     */
+    private int retryBackOffCounter;
+
+    /**
      * Construct the {@link MediaHttpDownloader}.
      *
-     * @param transport The transport to use for requests
+     * @param transport              The transport to use for requests
      * @param httpRequestInitializer The initializer to use when creating an {@link HttpRequest} or
-     *        {@code null} for none
+     *                               {@code null} for none
      */
     public MediaHttpDownloader(HttpTransport transport,
                                HttpRequestInitializer httpRequestInitializer) {
@@ -155,8 +199,6 @@ public class MediaHttpDownloader {
                 httpRequestInitializer == null ? transport.createRequestFactory() : transport
                         .createRequestFactory(httpRequestInitializer);
     }
-
-
 
 
     /**
@@ -169,30 +211,30 @@ public class MediaHttpDownloader {
         try {
             meta = (FileMetaData) parser.parse(FileMetaData.class, false, null);
         } catch (Exception e) {
-        	try{
-        		meta = ((FileMetaData[]) parser.parse(FileMetaData[].class, false, null))[0];
-        	}catch(Exception arrayError){}
-        }finally {
+            try {
+                meta = ((FileMetaData[]) parser.parse(FileMetaData[].class, false, null))[0];
+            } catch (Exception arrayError) {
+            }
+        } finally {
             response.getContent().close();
         }
         return meta;
     }
 
     /**
-     *
      * Executes a direct media download or a resumable media download.
-     *
+     * <p>
      * <p>
      * This method does not close the given output stream.
      * </p>
-     *
+     * <p>
      * <p>
      * This method is not reentrant. A new instance of {@link MediaHttpDownloader} must be
      * instantiated before download called be called again.
      * </p>
      *
      * @param metaData metadata taken feom kinvey backend that contains download url and other info required for file download
-     * @param out output stream to dump bytes as they stream off the wire
+     * @param out      output stream to dump bytes as they stream off the wire
      * @throws IOException
      */
     public FileMetaData download(FileMetaData metaData, OutputStream out) throws IOException {
@@ -204,13 +246,19 @@ public class MediaHttpDownloader {
 
 
         GenericUrl downloadUrl;
-        if(metaData.getDownloadURL() != null){
+        if (metaData.getDownloadURL() != null) {
             downloadUrl = new GenericUrl(metaData.getDownloadURL());
-        }else{
-            throw new KinveyException("_downloadURL is null!","do not remove _downloadURL in collection hooks for NetworkFileManager!","The library cannot download a file without this url");
+        } else {
+            throw new KinveyException("_downloadURL is null!", "do not remove _downloadURL in collection hooks for NetworkFileManager!", "The library cannot download a file without this url");
         }
 
         updateStateAndNotifyListener(DownloadState.INITIATION_COMPLETE);
+
+        Map<String, Object> map = metaData.getResumeDownloadData();
+        if (map != null && map.containsKey("LastBytePosition") && map.containsKey("NumBytesDownloaded")) {
+            lastBytePos = (Long) metaData.getResumeDownloadData().get("LastBytePosition");
+            bytesDownloaded = (Long) metaData.getResumeDownloadData().get("NumBytesDownloaded");
+        }
 
         while (!cancelled) {
             HttpRequest currentRequest = requestFactory.buildGetRequest(downloadUrl);
@@ -220,22 +268,71 @@ public class MediaHttpDownloader {
                 // If last byte position has been specified use it iff it is smaller than the chunksize.
                 currentRequestLastBytePos = Math.min(lastBytePos, currentRequestLastBytePos);
             }
-//            currentRequest.getHeaders().setRange(
-//                    "bytes=" + bytesDownloaded + "-" + currentRequestLastBytePos);
 
+            // set Range header (if necessary)
+            if (bytesDownloaded != 0 || currentRequestLastBytePos != -1) {
+                StringBuilder rangeHeader = new StringBuilder();
+                rangeHeader.append("bytes=").append(bytesDownloaded).append("-");
+                if (currentRequestLastBytePos != -1) {
+                    rangeHeader.append(currentRequestLastBytePos);
+                }
+                currentRequest.getHeaders().setRange(rangeHeader.toString());
+            }
             if (backOffPolicyEnabled) {
                 // Set ExponentialBackOffPolicy as the BackOffPolicy of the HTTP Request which will
                 // retry the same request again if there is a server error.
                 currentRequest.setBackOffPolicy(new ExponentialBackOffPolicy());
             }
-            HttpResponse response = currentRequest.execute();
-            if (response.getContent() != null)
-                IOUtils.copy(response.getContent(), out);
+
+            HttpResponse response = null;
+            try {
+                response = currentRequest.execute();
+            } catch (Exception e) {
+                if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
+                    backOffThreadSleep();
+                    retryBackOffCounter++;
+                    continue;
+                } else {
+                    KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
+                    Map<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("LastBytePosition", lastBytePos);
+                    hashMap.put("NumBytesDownloaded", bytesDownloaded);
+                    metaData.setResumeDownloadData(hashMap);
+                    kinveyUploadFileException.setDownloadedFileMetaData(metaData);
+                    throw kinveyUploadFileException;
+                }
+            }
+
+            try {
+                if (response != null && response.getContent() != null) {
+                    InputStream is = response.getContent();
+                    byte[] bytes = ByteStreams.toByteArray(is);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                    IOUtils.copy(bis, out);
+                }
+            } catch (Exception e) {
+                if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
+                    backOffThreadSleep();
+                    retryBackOffCounter++;
+                    continue;
+                } else {
+                    KinveyDownloadFileException kinveyUploadFileException = new KinveyDownloadFileException(e.getMessage());
+                    Map<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("LastBytePosition", lastBytePos);
+                    hashMap.put("NumBytesDownloaded", bytesDownloaded);
+                    metaData.setResumeDownloadData(hashMap);
+                    kinveyUploadFileException.setDownloadedFileMetaData(metaData);
+                    throw kinveyUploadFileException;
+                }
+            } finally {
+                if (response != null) {
+                    response.disconnect();
+                }
+            }
 
             String contentRange = response.getHeaders().getContentRange();
             long nextByteIndex = getNextByteIndex(contentRange);
             setMediaContentLength(contentRange);
-
             if (mediaContentLength <= nextByteIndex) {
                 // All required bytes have been downloaded from the server.
                 bytesDownloaded = mediaContentLength;
@@ -247,9 +344,29 @@ public class MediaHttpDownloader {
             bytesDownloaded = nextByteIndex;
             updateStateAndNotifyListener(DownloadState.DOWNLOAD_IN_PROGRESS);
         }
+
+        if (cancelled) {
+            Logger.INFO("DOWNLOAD REQUEST cancelled");
+            out.flush();
+        }
+
+        Logger.INFO("isDownloaded: " + isDownloaded);
         return isDownloaded ? metaData : null;
     }
 
+
+    private void backOffThreadSleep() {
+        //use exponential backoff
+        try {
+            Thread.sleep((long) Math.min((Math.pow(2, retryBackOffCounter)*1000+ getRandom(1, 1000)), MAXIMUM_BACKOFF_TIME_WAITING));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getRandom(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
+    }
 
     /**
      * Returns the next byte index identifying data that the server has not yet sent out, obtained
@@ -269,12 +386,12 @@ public class MediaHttpDownloader {
 
     /**
      * Sets the total number of bytes that have been downloaded of the media resource.
-     *
+     * <p>
      * <p>
      * If a download was aborted mid-way due to a connection failure then users can resume the
      * download from the point where it left off.
      * </p>
-     *
+     * <p>
      * <p>
      * Use {@link #setContentRange} if you need to specify both the bytes downloaded and the last byte
      * position.
@@ -290,18 +407,18 @@ public class MediaHttpDownloader {
 
     /**
      * Sets the content range of the next download request. Eg: bytes=firstBytePos-lastBytePos.
-     *
+     * <p>
      * <p>
      * If a download was aborted mid-way due to a connection failure then users can resume the
      * download from the point where it left off.
      * </p>
-     *
+     * <p>
      * <p>
      * Use {@link #setBytesDownloaded} if you only need to specify the first byte position.
      * </p>
      *
      * @param firstBytePos The first byte position in the content range string
-     * @param lastBytePos The last byte position in the content range string.
+     * @param lastBytePos  The last byte position in the content range string.
      * @since 1.13
      */
     public MediaHttpDownloader setContentRange(long firstBytePos, int lastBytePos) {
@@ -383,7 +500,9 @@ public class MediaHttpDownloader {
         return backOffPolicyEnabled;
     }
 
-    /** Returns the transport to use for requests. */
+    /**
+     * Returns the transport to use for requests.
+     */
     public HttpTransport getTransport() {
         return transport;
     }
@@ -391,7 +510,7 @@ public class MediaHttpDownloader {
     /**
      * Sets the maximum size of individual chunks that will get downloaded by single HTTP requests.
      * The default value is {@link #MAXIMUM_CHUNK_SIZE}.
-     *
+     * <p>
      * <p>
      * The maximum allowable value is {@link #MAXIMUM_CHUNK_SIZE}.
      * </p>
@@ -461,11 +580,11 @@ public class MediaHttpDownloader {
         return mediaContentLength == 0 ? 0 : (double) bytesDownloaded / mediaContentLength;
     }
 
-    public void cancel(){
+    public void cancel() {
         this.cancelled = true;
     }
 
-    public boolean isCancelled(){
+    public boolean isCancelled() {
         return this.cancelled;
     }
 

@@ -67,6 +67,7 @@ public class MediaHttpUploaderTest extends TestCase {
 
         // Run the simulation
         objectUnderTest.setProgressListener(mockListener);
+        objectUnderTest.setFileMetaDataForUploading(new FileMetaData());
         objectUnderTest.upload(initiationClientRequest);
 
         // Verify the values were what we expected

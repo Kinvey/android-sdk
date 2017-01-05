@@ -330,6 +330,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             request.setFollowRedirects(false);
         }
 
+
         response = request.execute();
 
         lastResponseCode = response.getStatusCode();

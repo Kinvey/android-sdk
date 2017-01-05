@@ -57,6 +57,16 @@ public class FileStoreTest {
         public void progressChanged(MediaHttpUploader uploader) throws IOException {}
 
         @Override
+        public void onCancelled() {
+
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
         public void onSuccess(FileMetaData result) {
             this.fileMetaDataResult = result;
             finish();
@@ -86,6 +96,16 @@ public class FileStoreTest {
         @Override
         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
 
+        }
+
+        @Override
+        public void onCancelled() {
+
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
         }
 
         @Override
@@ -189,7 +209,7 @@ public class FileStoreTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getCause().getMessage(), "file must not be null");
+        assertEquals(listener.error.getMessage(), "file must not be null");
     }
 
     @Test
@@ -231,7 +251,7 @@ public class FileStoreTest {
         latch.await();
 
         assertNotNull(listener.error);
-        assertEquals(listener.error.getCause().getMessage(), "metadata must not be null");
+        assertEquals(listener.error.getMessage(), "metadata must not be null");
     }
 
     @Test

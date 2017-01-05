@@ -28,6 +28,7 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
@@ -54,6 +55,8 @@ public class BaseFileStore {
     private final String cacheFolder;
     protected final ICache<FileMetadataWithPath> cache;
     private StoreType storeType;
+    private MediaHttpDownloader downloader;
+    private MediaHttpUploader uploader;
 
     /**
      * File store constructor
@@ -102,6 +105,8 @@ public class BaseFileStore {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
         Preconditions.checkNotNull(listener, "listener must not be null");
 
+        metadata.setSize(file.length());
+
         FileMetadataWithPath fileMetadataWithPath = new FileMetadataWithPath();
         fileMetadataWithPath.putAll(metadata);
 
@@ -112,6 +117,7 @@ public class BaseFileStore {
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath,
                         new FileContent(fileMetadataWithPath.getMimetype(), file), listener);
+        setUploader(upload.getUploader());
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -156,6 +162,8 @@ public class BaseFileStore {
 
         NetworkFileManager.UploadMetadataAndFile upload =
                 networkFileManager.prepUploadBlocking(fileMetadataWithPath, new InputStreamContent(null, is), listener);
+        setUploader(upload.getUploader());
+
 
         switch (storeType.writePolicy){
             case FORCE_LOCAL:
@@ -324,9 +332,32 @@ public class BaseFileStore {
         Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
         Preconditions.checkNotNull(progressListener, "listener must not be null");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        FileMetaData resultMetadata = find(metadata.getId(), null);
+        FileMetaData resultMetadata;
+        if (metadata.getResumeDownloadData() != null) {
+            resultMetadata = metadata;
+        } else {
+            resultMetadata =find(metadata.getId(), null);
+        }
         sendMetadata(resultMetadata, progressListener);
         return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
+    }
+
+    public boolean cancelDownloading() {
+        if (downloader != null) {
+            downloader.cancel();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean cancelUploading() {
+        if(this.uploader != null) {
+            this.uploader.cancel();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private File cacheStorage() {
@@ -345,10 +376,11 @@ public class BaseFileStore {
         MediaHttpDownloader downloader = new MediaHttpDownloader(client.getRequestFactory().getTransport(),
                 client.getRequestFactory().getInitializer());
         downloader.setProgressListener(listener);
+        setDownloader(downloader);
         return downloader.download(metadata, os);
     }
 
-    private FileMetaData getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
+/*    private FileMetaData getNetworkFile(FileMetaData metadata, String dst, DownloaderProgressListener listener) throws IOException {
         File f = new File(dst);
         if (!f.exists()) {
             f.mkdirs();
@@ -361,7 +393,7 @@ public class BaseFileStore {
                 out.createNewFile();
             }
         return getNetworkFile(metadata, new FileOutputStream(out), listener);
-    }
+    }*/
 
     private File getCachedFile(FileMetaData metadata) {
         Preconditions.checkNotNull(metadata, "metadata must not be null");
@@ -380,9 +412,7 @@ public class BaseFileStore {
                                  final DownloaderProgressListener listener,
                                  KinveyCachedClientCallback<FileMetaData> cachedCallback) throws IOException {
         Preconditions.checkArgument(cachedCallback == null || readPolicy == ReadPolicy.BOTH, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        File f = new File(cacheStorage(), metadata.getId());
-
-        File cacheStorage = cacheStorage();
+        File f/* = new File(cacheStorage(), metadata.getId())*/;
 
         switch (readPolicy) {
             case FORCE_LOCAL:
@@ -467,4 +497,11 @@ public class BaseFileStore {
         }
     }
 
+    private void setDownloader(MediaHttpDownloader downloader) {
+        this.downloader = downloader;
+    }
+
+    private void setUploader(MediaHttpUploader uploader) {
+        this.uploader = uploader;
+    }
 }
