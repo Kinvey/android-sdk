@@ -317,7 +317,8 @@ public class DataStoreTest {
         person.setUsername(name);
         person.setMoney(125);
         person.setAge("22");
-        person.setTestInt(10);
+//        person.setTestInt(100);
+//        person.setTime(1000000);
         return person;
     }
 
@@ -1096,9 +1097,9 @@ public class DataStoreTest {
 
     @Test
     public void testSum() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSycManager().clear(Person.COLLECTION);
-        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM22"));
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
         assertNotNull(clientCallback.result);
 
         Query query = client.query();
@@ -1120,7 +1121,8 @@ public class DataStoreTest {
                 ArrayList<String> list = new ArrayList<String>();
                 list.add("username");
                 list.add("testInt");
-                store.sum(list, "money", query, callback);
+//                list.add("time");
+                store.sum(list, "time", query, callback);
                 Looper.loop();
             }
         }).start();

@@ -17,6 +17,7 @@
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.Aggregation;
@@ -423,47 +424,54 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             RealmFieldType fieldType;
-            Number ret = null;
+            Number ret;
             Aggregation.Result result;
             for (String field : fields) {
                 RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
                 for (DynamicRealmObject d : realmObjects) {
 
-                    String f = String.valueOf(d.get(field)).trim();
-                    if (isFieldContains(results, d, f)) {
-                      continue;
-                    }
-
-                    fieldType = d.getFieldType(field);
                     result = new Aggregation.Result();
 
-                    switch (fieldType) {
-                        case STRING:
-                            ret = realmObjects.where().equalTo(field, String.valueOf(d.get(field))).sum(sumField);
-                            break;
-                        case INTEGER:
-                            ret = realmObjects.where().equalTo(field, (Long) (d.get(field))).sum(sumField);
-                            break;
-                        case BOOLEAN:
-                            ret = realmObjects.where().equalTo(field, (Boolean) (d.get(field))).sum(sumField);
-                            break;
-                        case DATE:
-                            ret = realmObjects.where().equalTo(field, (Date) (d.get(field))).sum(sumField);
-                            break;
-                        case FLOAT:
-                            ret = realmObjects.where().equalTo(field, (Float) (d.get(field))).sum(sumField);
-                            break;
-                        case DOUBLE:
-                            ret = realmObjects.where().equalTo(field, (Double) (d.get(field))).sum(sumField);
-                            break;
+                    query = realmObjects.where();
+                    for (String fieldToQuery : fields) {
+
+                        fieldType = d.getFieldType(fieldToQuery);
+
+                        switch (fieldType) {
+                            case STRING:
+                                query = query.equalTo(fieldToQuery, String.valueOf(d.get(fieldToQuery)));
+                                break;
+                            case INTEGER:
+                                query = query.equalTo(fieldToQuery, (Long) (d.get(fieldToQuery)));
+                                break;
+                            case BOOLEAN:
+                                query = query.equalTo(field, (Boolean) (d.get(field)));
+                                break;
+                            case DATE:
+                                query = query.equalTo(field, (Date) (d.get(field)));
+                                break;
+                            case FLOAT:
+                                query = query.equalTo(field, (Float) (d.get(field)));
+                                break;
+                            case DOUBLE:
+                                query = query.equalTo(field, (Double) (d.get(field)));
+                                break;
+                            default:
+                                throw new KinveyException("Current fileType doesn't support. Supported types: STRING, INTEGER, BOOLEAN, DATE, FLOAT, DOUBLE");
+
+                        }
+                        result.put(fieldToQuery, d.get(fieldToQuery));
 
                     }
+                    ret = query.sum(sumField);
+
                     if (ret != null) {
-                        result.set(f, ret);
+                        result.put("_result", ret.doubleValue());
+                        if (results.contains(result)) {
+                            continue;
+                        }
                         results.add(result);
-
                     }
-
                 }
             }
 
@@ -475,15 +483,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         results.toArray(r);
 
         return r;
-    }
-
-    private boolean isFieldContains(List<Aggregation.Result> results, DynamicRealmObject d, String field) {
-        for (Aggregation.Result r : results) {
-            if (r.containsKey(field)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 

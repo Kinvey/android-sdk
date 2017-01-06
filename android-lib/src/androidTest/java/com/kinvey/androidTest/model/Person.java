@@ -27,6 +27,9 @@ public class Person extends GenericJson{
     @Key("username")
     private String username;
 
+    @Key("time")
+    private long time;
+
     public String getAge() {
         return age;
     }
@@ -65,5 +68,13 @@ public class Person extends GenericJson{
 
     public void setTestInt(int testInt) {
         this.testInt = testInt;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }
