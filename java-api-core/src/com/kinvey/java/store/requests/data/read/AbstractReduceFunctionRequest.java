@@ -47,11 +47,8 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
                 ret = getCached();
                 break;
             case FORCE_NETWORK:
-//                ret = getNetwork();
-//                break;
             case BOTH:
                 ret = getNetwork();
-//                cache.save(ret);
                 break;
         }
         return ret;

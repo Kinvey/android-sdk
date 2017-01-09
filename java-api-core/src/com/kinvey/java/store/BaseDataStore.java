@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.cache.KinveyCachedAggregateCallback;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
@@ -313,10 +314,18 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(null);
     }
 
-    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query query) throws IOException {
+    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query query,
+                                    KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        Aggregation.Result[] ret = null;
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            ret = new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
+            cachedCallback.onSuccess(ret);
+        }
+        ret = new ReadSumRequest<T>(cache, this.storeType.readPolicy, networkManager, fields, sumField, query).execute();
+        return ret;
     }
 
 

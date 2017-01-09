@@ -26,6 +26,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.cache.KinveyCachedAggregateCallback;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -1097,7 +1098,7 @@ public class DataStoreTest {
 
     @Test
     public void testSum() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
         client.getSycManager().clear(Person.COLLECTION);
         DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
         assertNotNull(clientCallback.result);
@@ -1105,14 +1106,24 @@ public class DataStoreTest {
         Query query = client.query();
         query = query.notEqual("age", "100200300");
 
-        DefaultKinveyNumberCallback callback = sum(store, query);
+        DefaultKinveyNumberCallback callback = sum(store, query, new KinveyCachedAggregateCallback() {
+            @Override
+            public void onSuccess(Aggregation result) {
+                Log.d("TestSum", Arrays.toString(result.results));
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("TestSum", error.getMessage());
+            }
+        });
 
 
         assertNotNull(callback.result);
     }
 
 
-    private DefaultKinveyNumberCallback sum(final DataStore<Person> store, final Query query) throws InterruptedException {
+    private DefaultKinveyNumberCallback sum(final DataStore<Person> store, final Query query, final KinveyCachedAggregateCallback cachedClientCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyNumberCallback callback = new DefaultKinveyNumberCallback(latch);
         new Thread(new Runnable() {
@@ -1122,7 +1133,7 @@ public class DataStoreTest {
                 list.add("username");
                 list.add("testInt");
 //                list.add("time");
-                store.sum(list, "time", query, callback);
+                store.sum(list, "time", query, callback, cachedClientCallback);
                 Looper.loop();
             }
         }).start();

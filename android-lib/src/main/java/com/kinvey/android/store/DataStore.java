@@ -34,6 +34,7 @@ import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
+import com.kinvey.java.cache.KinveyCachedAggregateCallback;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -175,7 +176,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
             tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
 
-            tempMap.put(KEY_SUM, BaseDataStore.class.getMethod("sum", ArrayList.class, String.class, Query.class));
+            tempMap.put(KEY_SUM, BaseDataStore.class.getMethod("sum", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
@@ -558,8 +559,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     }
 
-    public void sum(ArrayList<String> fields, String sumField, Query query, KinveyAggregateCallback callback) {
-        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query).execute();
+    public void sum(ArrayList<String> fields, String sumField, Query query,
+                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
     }
 
     /**
