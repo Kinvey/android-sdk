@@ -561,7 +561,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     public void sum(ArrayList<String> fields, String sumField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
+        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
     }
 
     /**

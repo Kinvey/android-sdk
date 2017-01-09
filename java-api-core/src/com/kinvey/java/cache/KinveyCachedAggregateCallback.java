@@ -19,17 +19,17 @@ package com.kinvey.java.cache;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.Aggregation;
 
+import java.util.List;
+
 /**
- * @author edwardf
+ * Created by Prots on 1/09/17.
  */
-public abstract class KinveyCachedAggregateCallback implements KinveyClientCallback<Aggregation.Result[]> {
+public abstract class KinveyCachedAggregateCallback implements KinveyClientCallback<List<Aggregation.Result>> {
 
     @Override
-    public void onSuccess(Aggregation.Result[] result) {
-
+    public void onSuccess(List<Aggregation.Result> result) {
         Aggregation response = new Aggregation(result);
         onSuccess(response);
-
     }
 
 

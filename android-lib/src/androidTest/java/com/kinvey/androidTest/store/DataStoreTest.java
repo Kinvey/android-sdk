@@ -1109,7 +1109,7 @@ public class DataStoreTest {
         DefaultKinveyNumberCallback callback = sum(store, query, new KinveyCachedAggregateCallback() {
             @Override
             public void onSuccess(Aggregation result) {
-                Log.d("TestSum", Arrays.toString(result.results));
+                Log.d("TestSum", String.valueOf(result.results));
             }
 
             @Override
@@ -1120,6 +1120,7 @@ public class DataStoreTest {
 
 
         assertNotNull(callback.result);
+        Log.d("TestSum", String.valueOf(callback.result.results));
     }
 
 
@@ -1133,7 +1134,7 @@ public class DataStoreTest {
                 list.add("username");
                 list.add("testInt");
 //                list.add("time");
-                store.sum(list, "time", query, callback, cachedClientCallback);
+                store.sum(list, "money", query, callback, cachedClientCallback);
                 Looper.loop();
             }
         }).start();

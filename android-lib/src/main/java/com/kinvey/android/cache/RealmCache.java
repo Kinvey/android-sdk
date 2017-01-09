@@ -414,7 +414,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q) {
+    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<Aggregation.Result> results = new ArrayList<>();
@@ -479,10 +479,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             mRealm.commitTransaction();
         }
 
-        Aggregation.Result[] r = new Aggregation.Result[results.size()];
-        results.toArray(r);
 
-        return r;
+        return results;
     }
 
 

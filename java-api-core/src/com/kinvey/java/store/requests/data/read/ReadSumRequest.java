@@ -26,6 +26,7 @@ import com.kinvey.java.store.ReadPolicy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Prots on 12/29/16.
@@ -51,16 +52,12 @@ public class ReadSumRequest<T extends GenericJson> extends AbstractReduceFunctio
     }
 
     @Override
-    protected Aggregation.Result[] getCached() {
-        Aggregation.Result[] results = cache.sum(fields, sumFiled, query);
-        System.out.println(Arrays.toString(results));
-        return results;
+    protected List<Aggregation.Result> getCached() {
+        return cache.sum(fields, sumFiled, query);
     }
 
     @Override
-    protected Aggregation.Result[] getNetwork() throws IOException {
-        Aggregation.Result[] t =  networkManager.sumBlocking(fields, sumFiled, Aggregation.Result.class, query).execute();
-        System.out.println(Arrays.toString(t));
-        return t;
+    protected List<Aggregation.Result> getNetwork() throws IOException {
+        return Arrays.asList(networkManager.sumBlocking(fields, sumFiled, Aggregation.Result.class, query).execute());
     }
 }

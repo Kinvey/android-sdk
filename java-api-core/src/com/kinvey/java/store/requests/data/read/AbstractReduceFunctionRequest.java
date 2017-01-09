@@ -23,11 +23,12 @@ import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Prots on 12/30/16.
  */
-public abstract class AbstractReduceFunctionRequest<T extends GenericJson> implements IRequest<T[]> {
+public abstract class AbstractReduceFunctionRequest<T extends GenericJson> implements IRequest<List<T>> {
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
     protected NetworkManager<T> networkManager;
@@ -40,8 +41,8 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
     }
 
     @Override
-    public T[] execute() throws IOException {
-        T[] ret = null;
+    public List<T> execute() throws IOException {
+        List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
                 ret = getCached();
@@ -59,7 +60,7 @@ public abstract class AbstractReduceFunctionRequest<T extends GenericJson> imple
 
     }
 
-    abstract protected T[] getCached();
-    abstract protected T[] getNetwork() throws IOException;
+    abstract protected List<T> getCached();
+    abstract protected List<T> getNetwork() throws IOException;
 
 }

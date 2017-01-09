@@ -18,17 +18,17 @@ package com.kinvey.java.core;
 
 import com.kinvey.java.model.Aggregation;
 
+import java.util.List;
+
 /**
  * @author edwardf
  */
-public abstract class KinveyAggregateCallback implements KinveyClientCallback<Aggregation.Result[]> {
+public abstract class KinveyAggregateCallback implements KinveyClientCallback<List<Aggregation.Result>> {
 
     @Override
-    public void onSuccess(Aggregation.Result[] result) {
-
+    public void onSuccess(List<Aggregation.Result> result) {
         Aggregation response = new Aggregation(result);
         onSuccess(response);
-
     }
 
 

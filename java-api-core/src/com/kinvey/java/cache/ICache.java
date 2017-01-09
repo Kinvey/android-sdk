@@ -117,7 +117,7 @@ public interface ICache<T extends GenericJson> {
      * gets the sum of elements from the sumField from the cache, fields to group by
      * @return the sum of elements from the sumField from the cache
      */
-    Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q);
+    List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q);
 
     /**
      * get current ttl value
