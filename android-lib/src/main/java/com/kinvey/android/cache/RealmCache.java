@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
 
@@ -38,6 +39,12 @@ import io.realm.RealmFieldType;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
+
+import static com.kinvey.java.model.AggregateEntity.AggregateType.AVERAGE;
+import static com.kinvey.java.model.AggregateEntity.AggregateType.COUNT;
+import static com.kinvey.java.model.AggregateEntity.AggregateType.MAX;
+import static com.kinvey.java.model.AggregateEntity.AggregateType.MIN;
+import static com.kinvey.java.model.AggregateEntity.AggregateType.SUM;
 
 /**
  * Created by Prots on 1/26/16.
@@ -413,8 +420,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
-    @Override
-    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q) {
+    private List<Aggregation.Result> aggregationFunction(AggregateEntity.AggregateType type, String operationField, ArrayList<String> fields, Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<Aggregation.Result> results = new ArrayList<>();
@@ -424,7 +430,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             RealmFieldType fieldType;
-            Number ret;
+            Number ret = null;
             Aggregation.Result result;
             for (String field : fields) {
                 RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
@@ -463,7 +469,24 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                         result.put(fieldToQuery, d.get(fieldToQuery));
 
                     }
-                    ret = query.sum(sumField);
+
+                    switch (type) {
+                        case SUM:
+                            ret = query.sum(operationField);
+                            break;
+                        case MIN:
+                            ret = query.min(operationField);
+                            break;
+                        case MAX:
+                            ret = query.max(operationField);
+                            break;
+                        case AVERAGE:
+                            ret = query.average(operationField);
+                            break;
+                        case COUNT:
+                            ret = query.count();
+                            break;
+                    }
 
                     if (ret != null) {
                         result.put("_result", ret.doubleValue());
@@ -481,6 +504,31 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
 
         return results;
+    }
+
+    @Override
+    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q) {
+        return aggregationFunction(SUM, sumField, fields, q);
+    }
+
+    @Override
+    public List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query q) {
+        return aggregationFunction(MIN, minField, fields, q);
+    }
+
+    @Override
+    public List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query q) {
+        return aggregationFunction(MAX, maxField, fields, q);
+    }
+
+    @Override
+    public List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query q) {
+        return aggregationFunction(AVERAGE, averageField, fields, q);
+    }
+
+    @Override
+    public List<Aggregation.Result> count(ArrayList<String> fields, Query q) {
+        return aggregationFunction(COUNT, null, fields, q);
     }
 
 

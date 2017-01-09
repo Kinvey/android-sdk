@@ -177,6 +177,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
 
             tempMap.put(KEY_SUM, BaseDataStore.class.getMethod("sum", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_MIN, BaseDataStore.class.getMethod("min", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_MAX, BaseDataStore.class.getMethod("max", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_AVERAGE, BaseDataStore.class.getMethod("average", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_COUNT, BaseDataStore.class.getMethod("count", ArrayList.class, Query.class, KinveyCachedAggregateCallback.class));
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
@@ -562,6 +566,26 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void sum(ArrayList<String> fields, String sumField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
+    }
+
+    public void min(ArrayList<String> fields, String minField, Query query,
+                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MIN), callback, fields, minField, query, cachedCallback).execute();
+    }
+
+    public void max(ArrayList<String> fields, String maxField, Query query,
+                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MAX), callback, fields, maxField, query, cachedCallback).execute();
+    }
+
+    public void average(ArrayList<String> fields, String averageField, Query query,
+                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_AVERAGE), callback, fields, averageField, query, cachedCallback).execute();
+    }
+
+    public void count(ArrayList<String> fields, Query query,
+                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_COUNT), callback, fields, query, cachedCallback).execute();
     }
 
     /**

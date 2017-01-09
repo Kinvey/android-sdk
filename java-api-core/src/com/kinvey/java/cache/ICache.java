@@ -120,6 +120,30 @@ public interface ICache<T extends GenericJson> {
     List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q);
 
     /**
+     * gets the min of elements from the minField from the cache, fields to group by
+     * @return the min of elements from the minField from the cache
+     */
+    List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query q);
+
+    /**
+     * gets the max of elements from the maxField from the cache, fields to group by
+     * @return the max of elements from the maxField from the cache
+     */
+    List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query q);
+
+    /**
+     * gets the average of elements from the averageField from the cache, fields to group by
+     * @return the average of elements from the averageField from the cache
+     */
+    List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query q);
+
+    /**
+     * gets the count of elements from the countField from the cache, fields to group by
+     * @return the count of elements from the countField from the cache
+     */
+    List<Aggregation.Result> count(ArrayList<String> fields, Query q);
+
+    /**
      * get current ttl value
      * @return current ttl value
      */
