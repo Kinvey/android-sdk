@@ -31,8 +31,8 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
+import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
@@ -316,7 +316,7 @@ public class DataStoreTest {
     private Person createPerson(String name) {
         Person person = new Person();
         person.setUsername(name);
-        person.setMoney(125);
+        person.setMoney(200);
         person.setAge("22");
 //        person.setTestInt(100);
 //        person.setTime(1000000);
@@ -1106,7 +1106,7 @@ public class DataStoreTest {
         Query query = client.query();
         query = query.notEqual("age", "100200300");
 
-        DefaultKinveyNumberCallback callback = sum(store, query, new KinveyCachedAggregateCallback() {
+        DefaultKinveyNumberCallback callback = aggregation(AggregateEntity.AggregateType.SUM, store, query, new KinveyCachedAggregateCallback() {
             @Override
             public void onSuccess(Aggregation result) {
                 Log.d("TestSum", String.valueOf(result.results));
@@ -1118,13 +1118,12 @@ public class DataStoreTest {
             }
         });
 
-
         assertNotNull(callback.result);
         Log.d("TestSum", String.valueOf(callback.result.results));
     }
 
 
-    private DefaultKinveyNumberCallback sum(final DataStore<Person> store, final Query query, final KinveyCachedAggregateCallback cachedClientCallback) throws InterruptedException {
+    private DefaultKinveyNumberCallback aggregation(final AggregateEntity.AggregateType type, final DataStore<Person> store, final Query query, final KinveyCachedAggregateCallback cachedClientCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyNumberCallback callback = new DefaultKinveyNumberCallback(latch);
         new Thread(new Runnable() {
@@ -1133,8 +1132,26 @@ public class DataStoreTest {
                 ArrayList<String> list = new ArrayList<String>();
                 list.add("username");
                 list.add("testInt");
+                String field = "money";
 //                list.add("time");
-                store.sum(list, "money", query, callback, cachedClientCallback);
+                switch (type) {
+                    case COUNT:
+                        store.count(list, query, callback, cachedClientCallback);
+                        break;
+                    case SUM:
+                        store.sum(list, field, query, callback, cachedClientCallback);
+                        break;
+                    case MIN:
+                        store.min(list, field, query, callback, cachedClientCallback);
+                        break;
+                    case MAX:
+                        store.max(list, field, query, callback, cachedClientCallback);
+                        break;
+                    case AVERAGE:
+                        store.average(list, field, query, callback, cachedClientCallback);
+                        break;
+                }
+
                 Looper.loop();
             }
         }).start();
@@ -1169,5 +1186,109 @@ public class DataStoreTest {
         }
     }
 
+
+    @Test
+    public void testMin() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
+        assertNotNull(clientCallback.result);
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+
+        DefaultKinveyNumberCallback callback = aggregation(AggregateEntity.AggregateType.MIN, store, query, new KinveyCachedAggregateCallback() {
+            @Override
+            public void onSuccess(Aggregation result) {
+                Log.d("TestAggregationMIN", String.valueOf(result.results));
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("TestAggregationMIN", error.getMessage());
+            }
+        });
+
+        assertNotNull(callback.result);
+        Log.d("TestAggregationMIN", String.valueOf(callback.result.results));
+    }
+
+    @Test
+    public void testMax() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
+        assertNotNull(clientCallback.result);
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+
+        DefaultKinveyNumberCallback callback = aggregation(AggregateEntity.AggregateType.MAX, store, query, new KinveyCachedAggregateCallback() {
+            @Override
+            public void onSuccess(Aggregation result) {
+                Log.d("TestAggregationMAX", String.valueOf(result.results));
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("TestAggregationMAX", error.getMessage());
+            }
+        });
+
+        assertNotNull(callback.result);
+        Log.d("TestAggregationMAX", String.valueOf(callback.result.results));
+    }
+
+    @Test
+    public void testCount() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
+        assertNotNull(clientCallback.result);
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+
+        DefaultKinveyNumberCallback callback = aggregation(AggregateEntity.AggregateType.COUNT, store, query, new KinveyCachedAggregateCallback() {
+            @Override
+            public void onSuccess(Aggregation result) {
+                Log.d("TestAggregationCOUNT", String.valueOf(result.results));
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("TestAggregationCOUNT", error.getMessage());
+            }
+        });
+
+        assertNotNull(callback.result);
+        Log.d("TestAggregationCOUNT", String.valueOf(callback.result.results));
+    }
+
+    @Test
+    public void testAverage() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        DefaultKinveyClientCallback clientCallback = save(store, createPerson("PersonForSUM23"));
+        assertNotNull(clientCallback.result);
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+
+        DefaultKinveyNumberCallback callback = aggregation(AggregateEntity.AggregateType.AVERAGE, store, query, new KinveyCachedAggregateCallback() {
+            @Override
+            public void onSuccess(Aggregation result) {
+                Log.d("TestAggregationAverage", String.valueOf(result.results));
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("TestAggregationAverage", error.getMessage());
+            }
+        });
+
+        assertNotNull(callback.result);
+        Log.d("TestAggregationAverage", String.valueOf(callback.result.results));
+    }
 }
 
