@@ -316,10 +316,10 @@ public class DataStoreTest {
     private Person createPerson(String name) {
         Person person = new Person();
         person.setUsername(name);
-        person.setMoney(200);
+        person.setMoney(200D);
         person.setAge("22");
-//        person.setTestInt(100);
-//        person.setTime(1000000);
+        person.setTestInt(100);
+        person.setTime(1000000L);
         return person;
     }
 

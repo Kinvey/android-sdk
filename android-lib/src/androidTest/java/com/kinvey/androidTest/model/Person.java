@@ -19,16 +19,16 @@ public class Person extends GenericJson{
     private String id;
 
     @Key("money")
-    private double money;
+    private Double money;
 
     @Key("testInt")
-    private int testInt;
+    private Integer testInt;
 
     @Key("username")
     private String username;
 
     @Key("time")
-    private long time;
+    private Long time;
 
     public String getAge() {
         return age;
@@ -46,6 +46,22 @@ public class Person extends GenericJson{
         this.id = id;
     }
 
+    public Double getMoney() {
+        return money;
+    }
+
+    public void setMoney(Double money) {
+        this.money = money;
+    }
+
+    public Integer getTestInt() {
+        return testInt;
+    }
+
+    public void setTestInt(Integer testInt) {
+        this.testInt = testInt;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -54,27 +70,11 @@ public class Person extends GenericJson{
         this.username = username;
     }
 
-    public double getMoney() {
-        return money;
-    }
-
-    public void setMoney(double money) {
-        this.money = money;
-    }
-
-    public int getTestInt() {
-        return testInt;
-    }
-
-    public void setTestInt(int testInt) {
-        this.testInt = testInt;
-    }
-
-    public long getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 }
