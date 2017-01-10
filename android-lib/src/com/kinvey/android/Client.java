@@ -560,6 +560,38 @@ public class Client extends AbstractClient {
 
         }
 
+
+        /**
+         * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
+         * set for the Android Operating System.
+         * <p>
+         * This constructor does NOT support push notification functionality.
+         * If push notifications are necessary, use a properties file and the overloaded constructor.
+         * </p>
+         *
+         * @param appKey Your Kinvey Application Key
+         * @param appSecret Your Kinvey Application Secret
+         * @param transport Custom http transport to be used for library requests
+         * @param context Your Android Application Context
+         */
+        public Builder(String appKey, String appSecret, HttpTransport transport, Context context) {
+            super(transport, null
+                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
+            this.setJsonFactory(factory);
+            this.context = context.getApplicationContext();
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+
+            if (getCredentialStore() == null){
+                try {
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                } catch (Exception ex) {
+                    //TODO Add handling
+                }
+            }
+
+
+        }
+
         /**
          * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
          * set for the Android Operating System.

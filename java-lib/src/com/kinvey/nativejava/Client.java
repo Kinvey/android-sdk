@@ -324,6 +324,27 @@ public class Client extends AbstractClient {
          *
          * @param appKey Your Kinvey Application Key
          * @param appSecret Your Kinvey Application Secret
+         * @param  transport Custom http transport to be uset to send any http request of the lib
+         */
+        public Builder(String appKey, String appSecret, HttpTransport transport) {
+            super(transport, null
+                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders()));
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+            try {
+                this.setCredentialStore(new InMemoryCredentialStore());
+            } catch (Exception ex) {
+                Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
+            }
+            this.setJsonFactory(this.factory);
+
+        }
+
+        /**
+         * Use this constructor to create a AbstractClient.Builder, which can be used to build a Kinvey AbstractClient with defaults
+         * set for the Java runtime.
+         *
+         * @param appKey Your Kinvey Application Key
+         * @param appSecret Your Kinvey Application Secret
          */
         public Builder(String appKey, String appSecret) {
             super(new NetHttpTransport(), null
