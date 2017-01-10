@@ -2,6 +2,8 @@ package com.kinvey.java.model;
 
 import com.kinvey.java.core.KinveyMockUnitTest;
 
+import java.util.ArrayList;
+
 /**
  * Created by edward on 7/31/15.
  */
@@ -10,7 +12,7 @@ public class AggregationTest extends KinveyMockUnitTest {
     public Aggregation agg;
 
     public void testConstruction(){
-        agg = new Aggregation(new Aggregation.Result[1]);
+        agg = new Aggregation(new ArrayList<Aggregation.Result>());
         assertNotNull(agg.results);
         agg = new Aggregation(null);
         assertNotNull(agg.results);
@@ -20,12 +22,13 @@ public class AggregationTest extends KinveyMockUnitTest {
 
     public void testResults(){
         Aggregation.Result res = new Aggregation.Result();
-        res.result = 1;
+        res.result = 1D;
         res.put("key", "value");
 
-
-        agg = new Aggregation(new Aggregation.Result[]{res});
-        assertEquals(1, agg.getResultsFor("key", "value").get(0));
+        ArrayList<Aggregation.Result> list = new ArrayList<Aggregation.Result>();
+        list.add(res);
+        agg = new Aggregation(list);
+        assertEquals(1D, agg.getResultsFor("key", "value").get(0));
         assertEquals(0, agg.getResultsFor("key", "novalue").size());
         assertEquals(0, agg.getResultsFor("nokey", "novalue").size());
 
