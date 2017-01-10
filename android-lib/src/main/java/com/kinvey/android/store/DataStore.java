@@ -563,26 +563,195 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     }
 
+    /**
+     * Asynchronous request to a sum of numeric fields in group by Query.
+     * <p>
+     * Creates an asynchronous request to sum a numeric fields in group by Query.
+     * Uses KinveyAggregateCallback to return a {@link List<Aggregation.Result>}
+     * and KinveyCachedAggregateCallback to return a {@link List<Aggregation.Result>} for cached result for StoreType.CACHE
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     list.add("username");
+     *     String field = "payment";
+     *     myAppData.sum(field, field, myQuery, new KinveyAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     }, new KinveyCachedAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param fields {@link String} fields for group by.
+     * @param sumField {@link String} field for sum.
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyAggregateCallback.
+     * @param cachedCallback KinveyCachedAggregateCallback.
+     */
     public void sum(ArrayList<String> fields, String sumField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
     }
 
+    /**
+     * Asynchronous request to find a min of numeric fields in group by Query.
+     * <p>
+     * Creates an asynchronous request to find min a numeric fields in group by Query.
+     * Uses KinveyAggregateCallback to return a {@link List<Aggregation.Result>}
+     * and KinveyCachedAggregateCallback to return a {@link List<Aggregation.Result>} for cached result for StoreType.CACHE
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     list.add("username");
+     *     String field = "payment";
+     *     myAppData.min(field, field, myQuery, new KinveyAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     }, new KinveyCachedAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param fields {@link String} fields for group by.
+     * @param minField {@link String} field for finding min value.
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyAggregateCallback.
+     * @param cachedCallback KinveyCachedAggregateCallback.
+     */
     public void min(ArrayList<String> fields, String minField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MIN), callback, fields, minField, query, cachedCallback).execute();
     }
 
+    /**
+     * Asynchronous request to find a max of numeric fields in group by Query.
+     * <p>
+     * Creates an asynchronous request to find max a numeric fields in group by Query.
+     * Uses KinveyAggregateCallback to return a {@link List<Aggregation.Result>}
+     * and KinveyCachedAggregateCallback to return a {@link List<Aggregation.Result>} for cached result for StoreType.CACHE
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     list.add("username");
+     *     String field = "payment";
+     *     myAppData.max(field, field, myQuery, new KinveyAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     }, new KinveyCachedAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param fields {@link String} fields for group by.
+     * @param maxField {@link String} field for finding max value.
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyAggregateCallback.
+     * @param cachedCallback KinveyCachedAggregateCallback.
+     */
     public void max(ArrayList<String> fields, String maxField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MAX), callback, fields, maxField, query, cachedCallback).execute();
     }
 
+    /**
+     * Asynchronous request to find an average of numeric fields in group by Query.
+     * <p>
+     * Creates an asynchronous request to find an average of numeric fields in group by Query.
+     * Uses KinveyAggregateCallback to return a {@link List<Aggregation.Result>}
+     * and KinveyCachedAggregateCallback to return a {@link List<Aggregation.Result>} for cached result for StoreType.CACHE
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     list.add("username");
+     *     String field = "payment";
+     *     myAppData.average(field, field, myQuery, new KinveyAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     }, new KinveyCachedAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param fields {@link String} fields for group by.
+     * @param averageField {@link String} field for finding a average value.
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyAggregateCallback.
+     * @param cachedCallback KinveyCachedAggregateCallback.
+     */
     public void average(ArrayList<String> fields, String averageField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_AVERAGE), callback, fields, averageField, query, cachedCallback).execute();
     }
 
+    /**
+     * Asynchronous request to find a count all elements in the group.
+     * <p>
+     * Creates an asynchronous request to find a count all elements in the group.
+     * Uses KinveyAggregateCallback to return a {@link List<Aggregation.Result>}
+     * and KinveyCachedAggregateCallback to return a {@link List<Aggregation.Result>} for cached result for StoreType.CACHE
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, myClient, StoreType.SYNC);
+     *     Query myQuery = new Query();
+     *     myQuery.equals("age",21);
+     *     ArrayList<String> fields = new ArrayList<String>();
+     *     list.add("username");
+     *     String field = "payment";
+     *     myAppData.count(field, myQuery, new KinveyAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     }, new KinveyCachedAggregateCallback() {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(Aggregation response) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param fields {@link String} fields for group by.
+     * @param query {@link Query} to filter the results.
+     * @param callback KinveyAggregateCallback.
+     * @param cachedCallback KinveyCachedAggregateCallback.
+     */
     public void count(ArrayList<String> fields, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_COUNT), callback, fields, query, cachedCallback).execute();

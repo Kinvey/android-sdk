@@ -315,7 +315,16 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(null);
     }
 
-    public  List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query query,
+    /**
+     * Sums together the numeric values for the sumField
+     * @param fields fields for group by
+     * @param sumField field for sum
+     * @param query query
+     * @param cachedCallback callback for returning cached result
+     * @return list of Aggregation.Result
+     * @throws IOException
+     */
+    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query query,
                                          KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -323,31 +332,66 @@ public class BaseDataStore<T extends GenericJson> {
         return aggregation(AggregateEntity.AggregateType.SUM, fields, sumField, query, cachedCallback);
     }
 
-    public  List<Aggregation.Result> min(ArrayList<String> fields, String sumField, Query query,
+    /**
+     * Finds the minimum of the numeric values of the minField
+     * @param fields fields for group by
+     * @param minField field for finding min value
+     * @param query query
+     * @param cachedCallback callback for returning cached result
+     * @return list of Aggregation.Result
+     * @throws IOException
+     */
+    public List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query query,
                                          KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        return aggregation(AggregateEntity.AggregateType.MIN, fields, sumField, query, cachedCallback);
+        return aggregation(AggregateEntity.AggregateType.MIN, fields, minField, query, cachedCallback);
     }
 
-    public  List<Aggregation.Result> max(ArrayList<String> fields, String sumField, Query query,
+    /**
+     * Finds the maximum of the numeric values of the maxField
+     * @param fields fields for group by
+     * @param maxField field for finding max value
+     * @param query query
+     * @param cachedCallback callback for returning cached result
+     * @return list of Aggregation.Result
+     * @throws IOException
+     */
+    public List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query query,
                                          KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        return aggregation(AggregateEntity.AggregateType.MAX, fields, sumField, query, cachedCallback);
+        return aggregation(AggregateEntity.AggregateType.MAX, fields, maxField, query, cachedCallback);
     }
 
-    public  List<Aggregation.Result> average(ArrayList<String> fields, String sumField, Query query,
+    /**
+     * Finds the average of the numeric values of the averageField
+     * @param fields fields for group by
+     * @param averageField field for finding average value
+     * @param query query
+     * @param cachedCallback callback for returning cached result
+     * @return list of Aggregation.Result
+     * @throws IOException
+     */
+    public List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query query,
                                          KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        return aggregation(AggregateEntity.AggregateType.AVERAGE, fields, sumField, query, cachedCallback);
+        return aggregation(AggregateEntity.AggregateType.AVERAGE, fields, averageField, query, cachedCallback);
     }
 
-    public  List<Aggregation.Result> count(ArrayList<String> fields, Query query,
+    /**
+     * Counts all elements in the group
+     * @param fields fields for group by
+     * @param query query
+     * @param cachedCallback callback for returning cached result
+     * @return list of Aggregation.Result
+     * @throws IOException
+     */
+    public List<Aggregation.Result> count(ArrayList<String> fields, Query query,
                                              KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -355,6 +399,9 @@ public class BaseDataStore<T extends GenericJson> {
         return aggregation(AggregateEntity.AggregateType.COUNT, fields, null, query, cachedCallback);
     }
 
+    /**
+     * Used for aggregate fields
+     */
     private List<Aggregation.Result> aggregation(AggregateEntity.AggregateType type, ArrayList<String> fields,
                                                  String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
         List<Aggregation.Result> ret = null;
