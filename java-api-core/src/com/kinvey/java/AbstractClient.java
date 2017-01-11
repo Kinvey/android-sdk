@@ -41,7 +41,6 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
@@ -132,7 +131,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     }
 
     public boolean isUserLoggedIn() {
-        return activeUser() != null && activeUser().getId() !=null;
+        return getActiveUser() != null && getActiveUser().getId() !=null;
     }
 
 
@@ -204,7 +203,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         }
     }
 
-    public User activeUser() {
+    public User getActiveUser() {
         synchronized (lock) {
             return this.user;
         }
