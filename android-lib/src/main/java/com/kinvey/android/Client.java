@@ -497,8 +497,14 @@ public class Client extends AbstractClient {
 
                 super.getProps().load(in);
             } catch (IOException e) {
-                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                try {
+                    Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                    super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                } catch (NullPointerException ex) {
+                    Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                    Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                    throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                }
             } catch (NullPointerException ex){
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
@@ -619,8 +625,14 @@ public class Client extends AbstractClient {
 
                 super.getProps().load(in);
             } catch (IOException e) {
-            	Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                try {
+                    Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                    super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                } catch (NullPointerException ex) {
+                    Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                    Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                    throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                }
             } catch (NullPointerException ex){
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
