@@ -605,23 +605,8 @@ public class Client extends AbstractClient {
          * @param context Your Android Application Context
          */
         public Builder(String appKey, String appSecret, Context context) {
-            super(newCompatibleTransport(), null
-                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
-            this.setJsonFactory(factory);
-            this.context = context.getApplicationContext();
-            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-
-            if (getCredentialStore() == null){
-                try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context));
-                } catch (Exception ex) {
-                    //TODO Add handling
-                }
-            }
-
-
+            this(appKey, appSecret, newCompatibleTransport(), context);
         }
-
 
         /**
          * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
@@ -641,15 +626,43 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            super(newCompatibleTransport(), null);
+            this(newCompatibleTransport(), context);
+        }
+
+
+        /**
+         * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
+         * set for the Android Operating System.
+         * <p>
+         * This constructor requires a  properties file, containing configuration for your Kinvey Client.
+         * Save this file within your Android project, at:  assets/kinvey.properties
+         * </p>
+         * <p>
+         * This constructor provides support for push notifications.
+         * </p>
+         * <p>
+         * <a href="http://devcenter.kinvey.com/android/guides/getting-started#InitializeClient">Kinvey Guide for initializing Client with a properties file.</a>
+         * </p>
+         *
+         * @param transport Custom http transport to be used for library requests
+         * @param context - Your Android Application Context
+         */
+        public Builder(HttpTransport transport, Context context) {
+            super(transport, null);
 
             try {
                 final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
 
                 super.getProps().load(in);
             } catch (IOException e) {
-            	Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                try {
+                    Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                    super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                } catch (NullPointerException ex) {
+                    Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                    Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                    throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                }
             } catch (NullPointerException ex){
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
