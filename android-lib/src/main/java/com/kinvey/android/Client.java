@@ -426,21 +426,7 @@ public class Client extends AbstractClient {
          * @param context Your Android Application Context
          */
         public Builder(String appKey, String appSecret, Context context) {
-            super(newCompatibleTransport(), null
-                    , new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context)));
-            this.setJsonFactory(factory);
-            this.context = context.getApplicationContext();
-            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-
-            if (getCredentialStore() == null){
-                try {
-                    this.setCredentialStore(new AndroidCredentialStore(this.context));
-                } catch (Exception ex) {
-                    //TODO Add handling
-                }
-            }
-
-
+            this(appKey, appSecret, context, newCompatibleTransport());
         }
 
         /**
@@ -497,8 +483,14 @@ public class Client extends AbstractClient {
 
                 super.getProps().load(in);
             } catch (IOException e) {
-                Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                try {
+                    Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
+                    super.loadPropertiesFromDisk(getAndroidPropertyFile());
+                } catch (NullPointerException ex) {
+                    Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                    Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
+                    throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
+                }
             } catch (NullPointerException ex){
                 Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
                 Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
@@ -612,95 +604,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            super(newCompatibleTransport(), null);
-
-            try {
-                final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
-
-                super.getProps().load(in);
-            } catch (IOException e) {
-            	Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                super.loadPropertiesFromDisk(getAndroidPropertyFile());
-            } catch (NullPointerException ex){
-                Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
-                throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-            }
-
-            if (super.getString(Option.BASE_URL) != null) {
-                this.setBaseUrl(super.getString(Option.BASE_URL));
-            }
-
-            if (super.getString(Option.PORT) != null){
-                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
-            }
-
-            if (super.getString(Option.GCM_PUSH_ENABLED) != null){
-                this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
-            }
-
-            if (super.getString(Option.GCM_PROD_MODE) != null){
-                this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
-            }
-
-            if (super.getString(Option.GCM_SENDER_ID) != null){
-                this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
-            }
-
-            if (super.getString(Option.DEBUG_MODE) != null){
-                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
-            }
-
-            if (super.getString(Option.SYNC_RATE) != null){
-                this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
-            }
-
-            if (super.getString(Option.BATCH_SIZE) != null){
-                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
-            }
-
-            if (super.getString(Option.BATCH_RATE) != null){
-                this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
-            }
-
-            if (super.getString(Option.PARSER) != null){
-                try {
-                    AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
-                    this.factory = AndroidJson.newCompatibleJsonFactory(parser);
-                }catch (Exception e){
-                	Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
-                	Logger.WARNING("Defaulting to: GSON");
-//                    e.printStackTrace();
-                    this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
-                }
-            }
-            setJsonFactory(factory);
-
-            if (super.getString(Option.MIC_BASE_URL) != null) {
-                this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
-            }
-            if (super.getString(Option.MIC_VERSION) != null){
-                this.MICVersion = super.getString(Option.MIC_VERSION);
-            }
-
-            String appKey = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
-            String appSecret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
-
-            KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(appKey, appSecret, new KinveyHeaders(context));
-            this.setKinveyClientRequestInitializer(initializer);
-
-            this.context = context.getApplicationContext();
-            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
-            if (getCredentialStore() == null){
-                try{
-                    this.setCredentialStore(new AndroidCredentialStore(this.context));
-                } catch (AndroidCredentialStoreException ex) {
-                	Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                } catch (IOException ex) {
-                	Logger.ERROR("Credential store failed to load");
-                }
-            }
-
+            this(context, newCompatibleTransport());
         }
 
         /**
