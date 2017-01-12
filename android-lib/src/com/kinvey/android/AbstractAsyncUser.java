@@ -438,6 +438,46 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     }
 
     /**
+     * Asynchronous method to create a new Kinvey User.
+     * <p>
+     * Constructs an asynchronous request to create a Kinvey user with username, password and email, and returns the associated
+     * User object via a KinveyUserCallback.  All metadata that is added to the user object prior to creating the user
+     * will be persisted to the Kinvey backend.
+     * </p>
+     *
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+    kinveyClient.user().put("State","MA");
+    kinveyClient.user().put("Age", 25);
+    kinveyClient.user().create(mEditUserName.getText().toString(), mEditPassword.getText().toString(),
+    mEditEmail.getText().toString(), new KinveyUserCallback() {
+
+    public void onFailure(Throwable t) {
+    CharSequence text = "Unable to create account.";
+    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+    }
+
+    public void onSuccess(User u) {
+    CharSequence text = "Welcome " + u.getUsername() + ".";
+    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+    }
+    });
+    }
+     * </pre>
+     * </p>
+     *
+     * @param username username of the Kinvey User
+     * @param password password of the Kinvey user
+     * @param email email of the Kinvey user
+     * @param callback {@link KinveyUserCallback} containing a new User instance.
+     */
+    public void create(String username, String password, String email, KinveyClientCallback<T> callback) {
+        new Create(username, password, email, callback).execute(AsyncClientRequest.ExecutorType.KINVEYSERIAL);
+    }
+
+    /**
      * Get the Client associated with this instance.
      *
      * @return
@@ -984,17 +1024,25 @@ public abstract class AbstractAsyncUser<T extends User> extends User<T> {
     private class Create extends AsyncClientRequest<User> {
         String username;
         String password;
+        String email;
 
         private Create(String username, String password, KinveyClientCallback<T> callback) {
             super(callback);
             this.username=username;
             this.password=password;
+            this.email=null;
+        }
 
+        private Create(String username, String password, String email, KinveyClientCallback<T> callback) {
+            super(callback);
+            this.username=username;
+            this.password=password;
+            this.email = email;
         }
 
         @Override
         protected User executeAsync() throws IOException {
-            return AbstractAsyncUser.this.createBlocking(username, password).execute();
+            return AbstractAsyncUser.this.createBlocking(username, password, email).execute();
         }
     }
 
