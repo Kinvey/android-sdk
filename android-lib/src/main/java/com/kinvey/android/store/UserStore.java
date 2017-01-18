@@ -397,7 +397,7 @@ public class UserStore {
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.destroy("true", credential, mClient, new KinveyUserDeleteCallback() {
+     *  UserStore.destroy("true", mClient, new KinveyUserDeleteCallback() {
      *          void onSuccess(Void aVoid){...};
      *          void onFailure(Throwable t){...};
      *  });
@@ -421,10 +421,51 @@ public class UserStore {
         clearStorage = false;
     }
 
+    /**
+     * Asynchronous request to send email confirmation.
+     * <p>
+     * Creates an Asynchronous request to send email confirmation.
+     * Uses {@link KinveyUserManagementCallback} to return a status of request execution.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *  UserStore.sendEmailConfirmation(mClient, new KinveyUserManagementCallback() {
+     *          void onSuccess(Void aVoid){...};
+     *          void onFailure(Throwable t){...};
+     *  });
+     * }
+     * </pre>
+     * </p>
+     * @param client {@link Client} an instance of the client
+     * @param callback {@link KinveyUserManagementCallback} the callback
+     */
     public static void sendEmailConfirmation(AbstractClient client, KinveyUserManagementCallback callback) {
         new EmailVerification(client, callback).execute();
     }
 
+    /**
+     * Asynchronous request to forgot username.
+     * <p>
+     * Creates an Asynchronous request to forgot username.
+     * Uses {@link KinveyUserManagementCallback} to return a status of request execution.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *  UserStore.forgotUsername(mClient, "email", new KinveyUserManagementCallback() {
+     *          void onSuccess(Void aVoid){...};
+     *          void onFailure(Throwable t){...};
+     *  });
+     * }
+     * </pre>
+     * </p>
+     * @param client {@link Client} an instance of the client
+     * @param email {@link String} a user's email
+     * @param callback {@link KinveyUserManagementCallback} the callback
+     */
     public static void forgotUsername(AbstractClient client, String email, KinveyUserManagementCallback callback) {
         new ForgotUsername(client, email, callback).execute();
     }
