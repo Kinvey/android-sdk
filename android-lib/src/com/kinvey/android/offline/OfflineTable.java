@@ -264,7 +264,7 @@ public class OfflineTable<T extends GenericJson> {
 
 
                     for (int i = 0; i < resultIDs.length; i++) {
-                        ret[i] = getEntity(handler, client, resultIDs[i], singleClass, req);
+                        ret[i] = (T) getEntity(handler, client, resultIDs[i], singleClass, req);
                     }
                 }
             }
@@ -368,8 +368,6 @@ public class OfflineTable<T extends GenericJson> {
      * Remove an Entity from the entity table directly
      * 
      * @param handler
-     * @param client
-     * @param toRemove
      * @return true if removed
      */
     public boolean removeEntity(DatabaseHandler handler,  String IDtoRemove){
