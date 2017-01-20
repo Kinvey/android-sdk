@@ -20,12 +20,15 @@ import java.util.List;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
@@ -33,12 +36,14 @@ import com.google.gson.Gson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.offline.AbstractKinveyOfflineClientRequest;
+import com.kinvey.java.query.KinveyClientErrorCode;
 
 /**
  * This class provides functionality for background execution when in offline mode.
@@ -101,20 +106,27 @@ public abstract class AbstractSyncService extends IntentService{
 
         if (client == null || !client.user().isUserLoggedIn()) {
         	Logger.INFO("building new Client");
-            client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
-                @Override
-                public void onSuccess(User result) {
-                	Logger.INFO("offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
-                	Logger.INFO("offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
-                    getFromStoreAndExecute();
-                }
 
-                @Override
-                public void onFailure(Throwable error) {
-                	Logger.ERROR("don't call logout when expecting an offline sync to occur!  Sync needs a current user");
-                	Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> " + error);
-                }
-            }).build();
+            try {
+                ComponentName componentName = new ComponentName(this, this.getClass());
+                Bundle data = getPackageManager().getServiceInfo(componentName, PackageManager.GET_META_DATA).metaData;
+                    if (data != null) {
+                        String key = data.getString("appKey");
+                        String secret = data.getString("appSecret");
+                        if (key != null && secret != null) {
+                            initClient(key, secret);
+                        } else {
+                            //appKey or appSecret is absent in manifest in metadata of service, initialize client with credentials from assets file
+                            initClient();
+                        }
+                    } else {
+                        //metadata of service is absent in manifest, initialize client with credentials from assets file
+                        initClient();
+                    }
+            } catch (PackageManager.NameNotFoundException e) {
+                Logger.ERROR(e.getMessage());
+                throw new KinveyException(KinveyClientErrorCode.MissingSyncService);
+            }
 
             if (!client.user().isUserLoggedIn()){
             	Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> don't call logout! need an active current user!");
@@ -127,6 +139,40 @@ public abstract class AbstractSyncService extends IntentService{
             getFromStoreAndExecute();
         }
 
+    }
+
+    private void initClient() {
+        client = new Client.Builder(getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                Logger.INFO("offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                Logger.INFO("offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
+                getFromStoreAndExecute();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.ERROR("don't call logout when expecting an offline sync to occur!  Sync needs a current user");
+                Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> " + error);
+            }
+        }).build();
+    }
+
+    private void initClient(String key, String secret) {
+        client = new Client.Builder(key, secret, getApplicationContext()).setRetrieveUserCallback(new KinveyUserCallback() {
+            @Override
+            public void onSuccess(User result) {
+                Logger.INFO("offline Logged in as -> " + client.user().getUsername() + " (" + client.user().getId() +")");
+                Logger.INFO("offline sync batch size: " + client.getBatchSize() +", and batch rate (in ms): " + client.getBatchRate());
+                getFromStoreAndExecute();
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.ERROR("don't call logout when expecting an offline sync to occur!  Sync needs a current user");
+                Logger.ERROR("offline Unable to login from Kinvey Sync Service! -> " + error);
+            }
+        }).build();
     }
 
     /**

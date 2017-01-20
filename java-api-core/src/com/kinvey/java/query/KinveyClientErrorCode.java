@@ -41,6 +41,13 @@ public enum  KinveyClientErrorCode {
      */
     MissingMasterCredentials("Missing credentials: `appKey` and/or `masterSecret`.",
             "Did you forget to call `KinveyClient.init` with your `appKey` and/or `masterSecret`?", ""),
+
+    /**
+     * Missing master credentials.
+     */
+    MissingSyncService("Missing KinveySyncService",
+            "Did you forget to add KinveySyncService to Manifest file?", ""),
+
     /**
      * No active user.
      */
