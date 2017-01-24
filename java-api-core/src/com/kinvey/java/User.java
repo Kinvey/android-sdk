@@ -446,11 +446,9 @@ public class User<T extends User> extends GenericJson   {
      * @return LoginRequest Object
      * @throws IOException
      */
-    public LoginRequest createBlocking(String userid, String password) throws IOException {
-        return new LoginRequest(userid, password, true).buildAuthRequest();
+    public LoginRequest createBlocking(String userid, String password, String email) throws IOException {
+        return new LoginRequest(userid, password, email, true).buildAuthRequest();
     }
-    
-    
     
 
     /**
@@ -714,9 +712,19 @@ public class User<T extends User> extends GenericJson   {
             builder.setCreate(setCreate);
             builder.setUser(User.this);
             this.type = LoginType.KINVEY;
-            
+
         }
-        
+
+        public LoginRequest(String username, String password, String email, boolean setCreate) {
+            builder.setUsernameAndPassword(username, password);
+            builder.setCreate(setCreate);
+            if (email != null) {
+                put("email", email);
+            }
+            builder.setUser(User.this);
+            this.type = LoginType.KINVEY;
+        }
+
         public LoginRequest(ThirdPartyIdentity identity) {
             builder.setThirdPartyIdentity(identity);
             builder.setUser(User.this);
