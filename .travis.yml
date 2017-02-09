@@ -9,6 +9,8 @@ android:
     - build-tools-23.0.2
     - android-23
     - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
 
     # Additional components    
     #- extra-google-m2repository
