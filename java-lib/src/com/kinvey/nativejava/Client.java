@@ -14,29 +14,28 @@
 package com.kinvey.nativejava;
 
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
-import com.kinvey.java.auth.ClientUsers;
+import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
-import com.kinvey.java.auth.InMemoryClientUsers;
 import com.kinvey.java.auth.InMemoryCredentialStore;
-import com.kinvey.java.auth.KinveyAuthRequest;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.network.NetworkManager;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** {@inheritDoc}
  *
@@ -50,7 +49,7 @@ public class Client extends AbstractClient {
     private UserDiscovery userDiscovery;
     private com.kinvey.nativejava.NetworkFileManager file;
     private UserGroup userGroup;
-    private ClientUsers clientUsers;
+    private ClientUser clientUser;
 
 
     /**
@@ -94,7 +93,7 @@ public class Client extends AbstractClient {
      * @param <T> Generic of type {@link com.google.api.client.json.GenericJson} of same type as myClass
      * @return Instance of {@link NetworkManager} for the defined collection
      */
-    public <T> com.kinvey.nativejava.NetworkManager<T> appData(String collectionName, Class<T> myClass) {
+    public <T extends GenericJson> NetworkManager<T> appData(String collectionName, Class<T> myClass) {
         synchronized (lock) {
             Preconditions.checkNotNull(collectionName, "collectionName must not be null");
             if (appDataInstanceCache == null) {
@@ -111,65 +110,10 @@ public class Client extends AbstractClient {
         }
     }
 
-    /**
-     * NetworkFileManager factory method
-     * <p>
-     * Returns an instance of {@link NetworkFileManager} for uploading and downloading of files.  Only one instance is created for each
-     * instance of the Kinvey client.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-    NetworkFileManager myFile = kinveyClient.file();
-    }
-     * </pre>
-     * </p>
-     *
-     * @return Instance of {@link NetworkFileManager} for the defined collection
-     */
-    @Override
-    public com.kinvey.nativejava.NetworkFileManager file() {
-        synchronized (lock) {
-            if (file == null) {
-                file = new com.kinvey.nativejava.NetworkFileManager(this);
-            }
-            return file;
-        }
-    }
 
     @Override
     public void performLockDown() {
         //native java doesn't have any lockdown support as of yet
-    }
-
-    /**
-     * Custom Endpoints factory method
-     *<p>
-     * Returns the instance of {@link com.kinvey.java.CustomEndpoints} used for executing RPC requests.  Only one instance
-     * of Custom Endpoints is created for each instance of the Kinvey Client.
-     *</p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     {@code
-     AsyncCustomEndpoints<MyRequestClass, MyResponseClass> endpoints = getClient().customEndpoints(MyResponseClass.class);
-     }
-     * </pre>
-     * </p>
-     *
-     * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
-     */
-    public <I, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-        synchronized (lock) {
-            return new CustomEndpoints(myClass, this);
-        }
     }
 
     /**
@@ -235,51 +179,33 @@ public class Client extends AbstractClient {
 
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected ClientUsers getClientUsers() {
-        synchronized (lock) {
-            if (this.clientUsers == null) {
-                this.clientUsers = InMemoryClientUsers.getClientUsers();
-            }
-            return this.clientUsers;
-        }
-
+    public ClientUser getClientUser() {
+        return null;
     }
 
-
-    /**
-     * User factory method
-     * <p>
-     * Returns the instance of {@link com.kinvey.java.User} that contains the current active user.  If no active user context
-     * has been established, the {@link com.kinvey.java.User} object returned will be instantiated and empty.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     * {@code
-    User currentUser = kinveyClient.currentUser();
-    }
-     * </pre>
-     * </p>
-     *
-     * @return Instance of {@link com.kinvey.java.User} for the defined collection
-     */
     @Override
-    public User user() {
-        synchronized (lock) {
-            if (getCurrentUser() == null) {
-                String appKey = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppKey();
-                String appSecret = ((KinveyClientRequestInitializer) getKinveyRequestInitializer()).getAppSecret();
-                setCurrentUser(new User(this, new KinveyAuthRequest.Builder(getRequestFactory().getTransport(), getJsonFactory(),
-                        getBaseUrl(), appKey, appSecret, null)));
-            }
-            return (User) getCurrentUser();
-        }
+    public <I extends GenericJson, O> com.kinvey.java.CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        return null;
     }
+
+    @Override
+    public ICacheManager getCacheManager() {
+        return null;
+    }
+
+    @Override
+    public String getFileCacheFolder() {
+        return null;
+    }
+
+    @Override
+    protected ICacheManager getSyncCacheManager() {
+        return null;
+    }
+
+
+
 
     /**
      * Asynchronous Ping service method
@@ -372,7 +298,8 @@ public class Client extends AbstractClient {
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy());
-            client.clientUsers = InMemoryClientUsers.getClientUsers();
+            // TODO: 10.2.17 get user from java user storage
+//            client.clientUser =
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
@@ -380,7 +307,7 @@ public class Client extends AbstractClient {
                 }
             } catch (IOException ex) {
             	Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
-                client.setCurrentUser(null);
+                client.setUser(null);
             }
 
 
@@ -394,8 +321,8 @@ public class Client extends AbstractClient {
         private Credential retrieveUserFromCredentialStore(Client client)
                 throws IOException {
             Credential credential = null;
-            if (!client.user().isUserLoggedIn()) {
-                String userID = client.getClientUsers().getCurrentUser();
+            if (!client.isUserLoggedIn()) {
+                String userID = client.getActiveUser().getId();
                 if (userID != null && !userID.equals("")) {
                     CredentialStore store;
                     store = new InMemoryCredentialStore();
@@ -410,20 +337,17 @@ public class Client extends AbstractClient {
         private void loginWithCredential(final Client client, Credential credential) {
             getKinveyClientRequestInitializer().setCredential(credential);
             try {
-                client.user().login(credential).execute();
+                UserStore.login(credential, client);
             } catch (IOException ex) {
             	Logger.INFO("KINVEY" + "Could not retrieve user Credentials");
             }
 
             try{
-            client.setCurrentUser(client.user().retrieveMetadataBlocking());
+            client.setUser(UserStore.retrieve(client));
             }catch (IOException ex){
             	Logger.INFO("KINVEY" +  "Unable to login!" + ex);
             }
         }
-
-
-
 
     }
 

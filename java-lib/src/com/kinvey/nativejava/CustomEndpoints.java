@@ -20,7 +20,7 @@ import com.kinvey.java.AbstractClient;
  *
  * @author edwardf
  * */
-public class CustomEndpoints<I, O> extends com.kinvey.java.CustomEndpoints<I, O> {
+public class CustomEndpoints<I extends GenericJson, O> extends com.kinvey.java.CustomEndpoints<I, O> {
 
     public CustomEndpoints(Class<O> responseClass, AbstractClient client) {
         super(responseClass, client);
