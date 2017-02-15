@@ -13,20 +13,12 @@
  */
 package com.kinvey.nativejava;
 
-import com.google.common.base.Preconditions;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.auth.KinveyAuthRequest;
-
 /** {@inheritDoc}
  *
  * @author edwardf
  * */
-public class User extends com.kinvey.java.User {
+public class UserStore extends com.kinvey.java.store.BaseUserStore {
 
 
-    protected User(AbstractClient client, KinveyAuthRequest.Builder builder) {
-        super(client, User.class, builder);
-    }
 
-    public User(){}
 }

@@ -14,13 +14,14 @@
 package com.kinvey.nativejava;
 
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 
 /** {@inheritDoc}
  *
  * @author edwardf
  * */
-public class NetworkManager<T> extends com.kinvey.java.network.NetworkManager<T> {
+public class NetworkManager<T extends GenericJson> extends com.kinvey.java.network.NetworkManager<T> {
 
     /**
      * Constructor to instantiate the NetworkManager class.

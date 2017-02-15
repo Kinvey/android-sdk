@@ -65,7 +65,9 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        this.prepUploadBlocking(meta, mediaContent).execute();
+
+        // TODO: 10.2.17 null should be changed to listener
+        this.prepUploadBlocking(meta, mediaContent, null).execute();
     }
 
     /**
@@ -87,7 +89,9 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        return this.prepUploadBlocking(meta, mediaContent).execute();        }
+
+        // TODO: 10.2.17 null should be changed to listener
+        return this.prepUploadBlocking(meta, mediaContent, null).execute();        }
 
     /**
      * Uploads the contents of the stream to the Kinvey file service endpoint.
@@ -110,7 +114,9 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        prepUploadBlocking(meta, mediaContent).execute();
+
+        // TODO: 10.2.17 null should be changed to listener
+        prepUploadBlocking(meta, mediaContent, null).execute();
     }
     
     /***
@@ -145,14 +151,16 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
 
         mediaContent.setCloseInputStream(false);
         mediaContent.setRetrySupported(false);
-        prepUploadBlocking(meta, mediaContent).execute();
+
+        // TODO: 10.2.17 null should be changed to listener
+        prepUploadBlocking(meta, mediaContent, null).execute();
     }
 
-    public void downloadBlocking(FileMetaData metaData, OutputStream out, DownloaderProgressListener listener) throws IOException{
+ /*   public void downloadBlocking(FileMetaData metaData, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
         this.prepDownloadBlocking(metaData).executeAndDownloadTo(out);
 
-    }
+    }*/
 
 
     /**
@@ -163,10 +171,10 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
      * @param out - where to download the file
      * @param listener - for progress notifications
      */
-    public void downloadBlocking(Query query, OutputStream out, DownloaderProgressListener listener) throws IOException{
+/*    public void downloadBlocking(Query query, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
         this.prepDownloadBlocking(query).executeAndDownloadTo(out);
-    }
+    }*/
 
 
     /**
@@ -177,10 +185,10 @@ public class NetworkFileManager extends com.kinvey.java.network.NetworkFileManag
      * @param out - where to download the file
      * @param listener - for progress notifications
      */
-    public void downloadWithTTLBlocking(String id, int ttl, OutputStream out, DownloaderProgressListener listener) throws IOException{
+/*    public void downloadWithTTLBlocking(String id, int ttl, OutputStream out, DownloaderProgressListener listener) throws IOException{
         this.setDownloaderProgressListener(listener);
         this.prepDownloadWithTTLBlocking(id, ttl).executeAndDownloadTo(out);
-    }
+    }*/
 
     /**
      * Deletes the given file from the Kinvey file service.
