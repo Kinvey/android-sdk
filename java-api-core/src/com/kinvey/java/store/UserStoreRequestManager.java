@@ -352,10 +352,19 @@ public class UserStoreRequestManager {
      * @return LogoutRequest object
      * @throws IOException
      */
-    public LogoutRequest logout() {
-        return new LogoutRequest(client);
+    public LogoutRequest logout(boolean clearStorage) {
+        return new LogoutRequest(client, clearStorage);
     }
 
+    /**
+     * Logs the user out of the current app
+     *
+     * @return LogoutRequest object
+     * @throws IOException
+     */
+    public LogoutRequest logout() {
+        return logout(true);
+    }
 
     /**
      * Creates an explicit Kinvey User.

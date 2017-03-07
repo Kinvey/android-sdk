@@ -80,8 +80,12 @@ public abstract class BaseUserStore {
         return new UserStoreRequestManager(client, createBuilder(client)).loginKinveyAuthTokenBlocking(userId, authToken).execute();
     }
 
+    public static void logout(AbstractClient client, boolean clearStorage) throws IOException {
+        new UserStoreRequestManager(client, createBuilder(client)).logout(clearStorage).execute();
+    }
+
     public static void logout(AbstractClient client) throws IOException {
-        new UserStoreRequestManager(client, createBuilder(client)).logout().execute();
+        logout(client, true);
     }
 
     public static void sendEmailConfirmation(AbstractClient client) throws IOException {

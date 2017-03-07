@@ -33,6 +33,7 @@ import java.util.Set;
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
+import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
@@ -136,6 +137,23 @@ public class RealmCacheManager implements ICacheManager {
             }
             mRealm.commitTransaction();
             mRealm.close();
+
+
+/*            DynamicRealm mRealm = getDynamicRealm();
+
+            mRealm.beginTransaction();
+            try {
+                mRealm.deleteAll();
+            } finally {
+                mRealm.commitTransaction();
+            }
+            mRealm.close();*/
+
+/*            DynamicRealm mRealm = getDynamicRealm();
+            mRealm.close();
+            Realm.deleteRealm(mRealm.getConfiguration());*/
+
+
         }
     }
 
