@@ -84,7 +84,7 @@ public class Client extends AbstractClient {
 
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
-    private final RealmCacheManager syncCacheManager;
+    private RealmCacheManager syncCacheManager;
 
     private Context context = null;
 
@@ -139,12 +139,13 @@ public class Client extends AbstractClient {
 
     @Override
     public void performLockDown() {
-        if(getCacheManager() != null){
-            getCacheManager().clear();
-        }
+        //clear data cache and file cache
+        cacheManager.clear();
+        //clear sync cache
+        syncCacheManager.clear();
 
-
-//        this.getFileStore(StoreType.SYNC).clearCache();
+        cacheManager = new RealmCacheManager(this);
+        syncCacheManager = new RealmCacheManager("sync_", this);
 
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
