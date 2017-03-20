@@ -590,7 +590,6 @@ public class Client extends AbstractClient {
 
         }
 
-
         /**
          * Use this constructor to create a Client.Builder, which can be used to build a Kinvey Client with defaults
          * set for the Android Operating System.
