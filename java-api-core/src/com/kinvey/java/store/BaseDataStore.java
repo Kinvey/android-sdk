@@ -49,7 +49,13 @@ public class BaseDataStore<T extends GenericJson> {
     NetworkManager<T> networkManager;
     private String collectionName;
 
-
+    /**
+     * It is a parameter to enable mechanism to optimize the amount of data retrieved from the backend.
+     * When you use a Sync or Cache datastore, data requests to the backend
+     * only fetch data that changed since the previous update.
+     * Default value is false.
+     */
+    private boolean deltaSetCachingEnabled = false;
 
 
     /**
@@ -287,7 +293,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.getSycManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         List<T> networkData = null;
         query = query == null ? client.query() : query;
-        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query)).execute());
+        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
         cache.delete(query);
         cache.save(networkData);
         return networkData;
@@ -336,5 +342,11 @@ public class BaseDataStore<T extends GenericJson> {
         return collectionName;
     }
 
+    public boolean isDeltaSetCachingEnabled() {
+        return deltaSetCachingEnabled;
+    }
 
+    public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
+        this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
 }
