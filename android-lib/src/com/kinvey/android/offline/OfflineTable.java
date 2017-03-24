@@ -83,10 +83,10 @@ public class OfflineTable<T extends GenericJson> {
 
 
     public OfflineTable(String collection){
-        this.TABLE_NAME = "[" + PREFIX_OFFLINE + collection + "]";
-        this.QUEUE_NAME = "[" + PREFIX_QUEUE + collection + "]";
-        this.QUERY_NAME = "[" + PREFIX_QUERY + collection + "]";
-        this.RESULTS_NAME = "[" + PREFIX_RESULTS + collection + "]";
+        this.TABLE_NAME = "[\'" + PREFIX_OFFLINE + collection + "\']";
+        this.QUEUE_NAME = "[\'" + PREFIX_QUEUE + collection + "\']";
+        this.QUERY_NAME = "[\'" + PREFIX_QUERY + collection + "\']";
+        this.RESULTS_NAME = "[\'" + PREFIX_RESULTS + collection + "\']";
     }
 
     public void onCreate(DatabaseHandler handler) {
