@@ -352,18 +352,8 @@ public class UserStoreRequestManager {
      * @return LogoutRequest object
      * @throws IOException
      */
-    public LogoutRequest logout(boolean clearStorage) {
-        return new LogoutRequest(client, clearStorage);
-    }
-
-    /**
-     * Logs the user out of the current app
-     *
-     * @return LogoutRequest object
-     * @throws IOException
-     */
     public LogoutRequest logout() {
-        return logout(true);
+        return new LogoutRequest(client);
     }
 
     /**

@@ -382,7 +382,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      */
     public static void logout(AbstractClient client, KinveyClientCallback<Void> callback) {
-        new Logout(client, clearStorage, callback).execute();
+        new Logout(client, callback).execute();
     }
 
     /**
@@ -412,21 +412,6 @@ public class UserStore {
         new Delete(isHard, client,callback).execute();
     }
 
-    /**
-     * Set a flag to allow local offline storage to persist after calls to logout.
-     * <p/>
-     * Only use this method if each device will have a guaranteed consistent user and there are no concerns about security
-     */
-    public void keepOfflineStorageOnLogout(){
-        clearStorage = false;
-    }
-
-    /**
-     * Get a flag which allow local offline storage to persist after calls to logout.
-     */
-    public boolean isKeepOfflineStorageOnLogout() {
-        return clearStorage;
-    }
 
     /**
      * Asynchronous request to send email confirmation.
@@ -894,19 +879,17 @@ public class UserStore {
     }
 
     private static class Logout extends AsyncClientRequest<Void> {
-        boolean clearStorage;
         private final AbstractClient client;
 
-        private Logout(AbstractClient client, boolean clearStorage, KinveyClientCallback<Void> callback) {
+        private Logout(AbstractClient client, KinveyClientCallback<Void> callback) {
             super(callback);
-            this.clearStorage = clearStorage;
             this.client = client;
 
         }
 
         @Override
         protected Void executeAsync() throws IOException {
-            BaseUserStore.logout(client, clearStorage);
+            BaseUserStore.logout(client);
             return null;
         }
     }

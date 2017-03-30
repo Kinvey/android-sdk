@@ -26,19 +26,13 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 public final class LogoutRequest {
 
     private AbstractClient client;
-    private boolean clearStorage;
 
-    public LogoutRequest(AbstractClient client, boolean clearStorage) {
+    public LogoutRequest(AbstractClient client) {
         this.client = client;
-        this.clearStorage = clearStorage;
     }
 
     public void execute() {
-
-        if (clearStorage) {
-            client.performLockDown();
-        }
-
+        client.performLockDown();
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setUser(null);
