@@ -595,7 +595,7 @@ public class Client extends AbstractClient {
          * set for the Android Operating System.
          * <p>
          * This constructor requires a  properties file, containing configuration for your Kinvey Client.
-         * Save this file within your Android project, at:  assets/kinvey.properties
+         * create kinvey.properties file in your assets folder according kinvey docs
          * </p>
          * <p>
          * This constructor provides support for push notifications.
@@ -608,7 +608,119 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            this(null, null, true, context);
+            super(newCompatibleTransport(), null);
+
+            InputStream properties = null;
+            try {
+                properties = context.getAssets().open("kinvey.properties");
+            } catch (IOException e) {
+                Logger.WARNING("Couldn't load properties. Ensure there is a file: assets/kinvey.properties which is valid properties file");
+                throw new RuntimeException("Builder cannot find properties file kinvey.properties in your assets.  Ensure this file exists, containing app.key and app.secret!");
+
+            }
+
+            Preconditions.checkNotNull(properties, "Builder cannot find properties file kinvey.properties in your assets.  Ensure this file exists, containing app.key and app.secret!");
+            loadProperties(properties);
+
+            String key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
+            String secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
+
+            KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(key, secret, new KinveyHeaders(context));
+            this.setKinveyClientRequestInitializer(initializer);
+
+            this.context = context.getApplicationContext();
+            this.setRequestBackoffPolicy(new ExponentialBackOffPolicy());
+            if (getCredentialStore() == null){
+                try{
+                    this.setCredentialStore(new AndroidCredentialStore(this.context));
+                } catch (AndroidCredentialStoreException ex) {
+                    Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
+                } catch (IOException ex) {
+                    Logger.ERROR("Credential store failed to load");
+                }
+            }
+        }
+
+
+        /**
+         * loading additional properties from file
+         * @param properties InputStream of properties file
+         */
+        private void loadProperties(InputStream properties) {
+
+            try {
+                super.getProps().load(properties);
+            } catch (IOException e) {
+                Logger.WARNING("Couldn't load properties. Ensure there is a file: assets/kinvey.properties which is valid properties file");
+            }
+
+            if (super.getString(Option.BASE_URL) != null) {
+                this.setBaseUrl(super.getString(Option.BASE_URL));
+            }
+
+            if (super.getString(Option.REQUEST_TIMEOUT) != null) {
+                try {
+                    this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)));
+                } catch (Exception e) {
+                    Logger.WARNING(Option.REQUEST_TIMEOUT.name() + " should have an integer value");
+                }
+            }
+
+            if (super.getString(Option.PORT) != null) {
+                this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
+            }
+
+            if (super.getString(Option.DELTA_SET_CACHE) != null) {
+                this.useDeltaCache = Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE));
+            }
+
+            if (super.getString(Option.GCM_PUSH_ENABLED) != null) {
+                this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
+            }
+
+            if (super.getString(Option.GCM_PROD_MODE) != null) {
+                this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
+            }
+
+            if (super.getString(Option.GCM_SENDER_ID) != null) {
+                this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
+            }
+
+            if (super.getString(Option.DEBUG_MODE) != null) {
+                this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
+            }
+
+            if (super.getString(Option.SYNC_RATE) != null) {
+                this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
+            }
+
+            if (super.getString(Option.BATCH_SIZE) != null) {
+                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
+            }
+
+            if (super.getString(Option.BATCH_RATE) != null) {
+                this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
+            }
+
+            if (super.getString(Option.PARSER) != null) {
+                try {
+                    AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
+                    this.factory = AndroidJson.newCompatibleJsonFactory(parser);
+                } catch (Exception e) {
+                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
+                    Logger.WARNING("Defaulting to: GSON");
+//                    e.printStackTrace();
+                    this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
+                }
+            }
+            setJsonFactory(factory);
+
+            if (super.getString(Option.MIC_BASE_URL) != null) {
+                this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
+            }
+            if (super.getString(Option.MIC_VERSION) != null) {
+                this.MICVersion = super.getString(Option.MIC_VERSION);
+            }
         }
 
 
@@ -617,7 +729,7 @@ public class Client extends AbstractClient {
          * set for the Android Operating System.
          * <p>
          * This constructor can get configuration for your Kinvey Client from properties file.
-         * Save this file within your Android project, at:  assets/kinvey.properties.
+         * Save this file within your Android project, and pass InputStream of that file to constructor.
          * You can set appKey and appSecret in  parameters, in this case appKey and appSecret from kinvey.properties
          * will be ignored.
          * </p>
@@ -631,99 +743,11 @@ public class Client extends AbstractClient {
          * @param context - Your Android Application Context
          *
          */
-        public Builder(String appKey, String appSecret, boolean isUsePropertiesFile, Context context) {
+        public Builder(String appKey, String appSecret, InputStream properties, Context context) {
             super(newCompatibleTransport(), null);
 
-            if (isUsePropertiesFile) {
-
-                try {
-                    final InputStream in = context.getAssets().open("kinvey.properties");//context.getClassLoader().getResourceAsStream(getAndroidPropertyFile());
-
-                    super.getProps().load(in);
-                } catch (IOException e) {
-                    try {
-                        Logger.WARNING("Couldn't load properties, trying another load approach.  Ensure there is a file:  myProject/assets/kinvey.properties which contains: app.key and app.secret.");
-                        super.loadPropertiesFromDisk(getAndroidPropertyFile());
-                    } catch (NullPointerException ex) {
-                        Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                        Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
-                        throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                    }
-                } catch (NullPointerException ex) {
-                    Logger.ERROR("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                    Logger.ERROR("If you are using push notification or offline storage you must configure your client to load from properties, see our guides for instructions.");
-                    throw new RuntimeException("Builder cannot find properties file at assets/kinvey.properties.  Ensure this file exists, containing app.key and app.secret!");
-                }
-
-                if (super.getString(Option.BASE_URL) != null) {
-                    this.setBaseUrl(super.getString(Option.BASE_URL));
-                }
-
-                if (super.getString(Option.REQUEST_TIMEOUT) != null) {
-                    try {
-                        this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)));
-                    } catch (Exception e) {
-                        Logger.WARNING(Option.REQUEST_TIMEOUT.name() + " should have an integer value");
-                    }
-                }
-
-                if (super.getString(Option.PORT) != null) {
-                    this.setBaseUrl(String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT)));
-                }
-
-                if (super.getString(Option.DELTA_SET_CACHE) != null) {
-                    this.useDeltaCache = Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE));
-                }
-
-                if (super.getString(Option.GCM_PUSH_ENABLED) != null) {
-                    this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
-                }
-
-                if (super.getString(Option.GCM_PROD_MODE) != null) {
-                    this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
-                }
-
-                if (super.getString(Option.GCM_SENDER_ID) != null) {
-                    this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
-                }
-
-                if (super.getString(Option.DEBUG_MODE) != null) {
-                    this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
-                }
-
-                if (super.getString(Option.SYNC_RATE) != null) {
-                    this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
-                }
-
-                if (super.getString(Option.BATCH_SIZE) != null) {
-                    this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE));
-                }
-
-                if (super.getString(Option.BATCH_RATE) != null) {
-                    this.batchRate = Long.parseLong(super.getString(Option.BATCH_RATE));
-                }
-
-                if (super.getString(Option.PARSER) != null) {
-                    try {
-                        AndroidJson.JSONPARSER parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER));
-                        this.factory = AndroidJson.newCompatibleJsonFactory(parser);
-                    } catch (Exception e) {
-                        Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions());
-                        Logger.WARNING("Defaulting to: GSON");
-//                    e.printStackTrace();
-                        this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
-                    }
-                }
-                setJsonFactory(factory);
-
-                if (super.getString(Option.MIC_BASE_URL) != null) {
-                    this.MICBaseURL = super.getString(Option.MIC_BASE_URL);
-                }
-                if (super.getString(Option.MIC_VERSION) != null) {
-                    this.MICVersion = super.getString(Option.MIC_VERSION);
-                }
-
-            }
+            Preconditions.checkNotNull(properties, "properties must be not null");
+            loadProperties(properties);
 
             String key;
             String secret;
