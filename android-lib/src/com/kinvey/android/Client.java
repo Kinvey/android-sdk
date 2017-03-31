@@ -651,7 +651,8 @@ public class Client extends AbstractClient {
             try {
                 super.getProps().load(properties);
             } catch (IOException e) {
-                Logger.WARNING("Couldn't load properties. Ensure there is a file: assets/kinvey.properties which is valid properties file");
+                Logger.WARNING("Couldn't load properties. Please make sure that your properties file is valid");
+                throw new RuntimeException("Couldn't load properties. Please make sure that your properties file is valid");
             }
 
             if (super.getString(Option.BASE_URL) != null) {
