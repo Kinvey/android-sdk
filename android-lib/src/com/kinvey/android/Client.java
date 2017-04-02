@@ -744,22 +744,14 @@ public class Client extends AbstractClient {
          * @param context - Your Android Application Context
          *
          */
-        public Builder(String appKey, String appSecret, InputStream properties, Context context) {
+        public Builder(InputStream properties, Context context) {
             super(newCompatibleTransport(), null);
 
             Preconditions.checkNotNull(properties, "properties must be not null");
             loadProperties(properties);
 
-            String key;
-            String secret;
-
-            if (appKey != null && appSecret != null) {
-                key = appKey;
-                secret = appSecret;
-            } else {
-                key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "appKey must not be null");
-                secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "appSecret must not be null");
-            }
+            String key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must not be null");
+            String secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must not be null");
 
             KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(key, secret, new KinveyHeaders(context));
             this.setKinveyClientRequestInitializer(initializer);
