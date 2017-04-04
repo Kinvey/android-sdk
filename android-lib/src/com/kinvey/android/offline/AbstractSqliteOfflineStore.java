@@ -249,10 +249,10 @@ public abstract class AbstractSqliteOfflineStore<T> implements OfflineStore<T> {
         List<String> collections = handler.getCollectionTables();
 
         for (String collection : collections){
-            handler.delete(OfflineTable.PREFIX_QUEUE + collection, null, null);
-            handler.delete(OfflineTable.PREFIX_OFFLINE + collection, null, null);
-            handler.delete(OfflineTable.PREFIX_QUERY + collection, null, null);
-            handler.delete(OfflineTable.PREFIX_RESULTS + collection, null, null);
+            handler.delete("\'" + OfflineTable.PREFIX_QUEUE + collection + "\'", null, null);
+            handler.delete("\'" + OfflineTable.PREFIX_OFFLINE + collection + "\'", null, null);
+            handler.delete("\'" + OfflineTable.PREFIX_QUERY + collection + "\'", null, null);
+            handler.delete("\'" + OfflineTable.PREFIX_RESULTS + collection + "\'", null, null);
         }
 
         //db.close();
