@@ -356,7 +356,6 @@ public class UserStoreRequestManager {
         return new LogoutRequest(client);
     }
 
-
     /**
      * Creates an explicit Kinvey User.
      *
