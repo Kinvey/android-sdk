@@ -24,7 +24,7 @@ import com.google.api.client.util.Key;
  */
 public class KinveyHeaders extends HttpHeaders {
 
-    public static final String VERSION = "2.10.11";
+    public static final String VERSION = "2.10.12";
 
     @Key("X-Kinvey-api-Version")
     private String kinveyApiVersion = "3";
