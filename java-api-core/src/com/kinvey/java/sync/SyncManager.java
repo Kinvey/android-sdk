@@ -163,7 +163,7 @@ public class SyncManager {
             e.printStackTrace();
         }
 
-        BaseDataStore networkDataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
+        BaseDataStore networkDataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, true, client);
 
         if (request.getHttpVerb().equals(SyncRequest.HttpVerb.PUT) || request.getHttpVerb().equals((SyncRequest.HttpVerb.POST))) {
 

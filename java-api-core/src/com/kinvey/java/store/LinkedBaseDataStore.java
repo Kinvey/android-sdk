@@ -29,8 +29,8 @@ public class LinkedBaseDataStore<T extends LinkedGenericJson> extends BaseDataSt
      * @param itemType   class that data should be mapped to
      * @param storeType  type of storage that client want to use
      */
-    public LinkedBaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType) {
-        super(client, collection, itemType, storeType,
+    public LinkedBaseDataStore(AbstractClient client, String collection, Class<T> itemType, boolean isDeltaSetCachingEnabled, StoreType storeType) {
+        super(client, collection, itemType, isDeltaSetCachingEnabled, storeType,
                 new LinkedNetworkManager<T>(collection, itemType, client));
     }
 }
