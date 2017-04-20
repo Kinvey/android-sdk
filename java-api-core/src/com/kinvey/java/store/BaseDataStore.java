@@ -65,11 +65,11 @@ public class BaseDataStore<T extends GenericJson> {
      * @param itemType class that data should be mapped to
      * @param storeType type of storage that client want to use
      */
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, boolean isDeltaSetCachingEnabled, StoreType storeType){
-        this(client, collection, itemType, isDeltaSetCachingEnabled, storeType, new NetworkManager<T>(collection, itemType, client));
+    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
+        this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
     }
 
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, boolean isDeltaSetCachingEnabled, StoreType storeType,
+    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
                             NetworkManager<T> networkManager){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -80,14 +80,14 @@ public class BaseDataStore<T extends GenericJson> {
         cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
         this.networkManager = networkManager;
         this.collectionName = collection;
-        this.deltaSetCachingEnabled = isDeltaSetCachingEnabled;
+        this.deltaSetCachingEnabled = client.isUseDeltaCache();
     }
 
-    public static <T extends GenericJson> BaseDataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, boolean isDeltaSetCachingEnabled, AbstractClient client) {
+    public static <T extends GenericJson> BaseDataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new BaseDataStore<T>(client, collectionName, myClass, isDeltaSetCachingEnabled, storeType);
+        return new BaseDataStore<T>(client, collectionName, myClass, storeType);
     }
 
     /**

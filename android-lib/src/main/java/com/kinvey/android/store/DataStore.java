@@ -142,7 +142,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param storeType storeType.
      */
     protected DataStore(String collectionName, Class<T> myClass, boolean isDeltaSetCachingEnabled, AbstractClient client, StoreType storeType) {
-        super(client, collectionName, myClass, isDeltaSetCachingEnabled, storeType);
+        super(client, collectionName, myClass, storeType);
         loadMethodMap();
     }
 
@@ -151,21 +151,20 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param collectionName    Name of the appData collection
      * @param myClass   Class Type to marshall data between
-     * @param isDeltaSetCachingEnabled  Delta Cache switcher
      * @param client    Kinvey client
      * @param storeType StoreType parameter
      * @param networkManager    NetworkManager object.
      */
-    public DataStore(String collectionName, Class<T> myClass, boolean isDeltaSetCachingEnabled, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
-        super(client, collectionName, myClass, isDeltaSetCachingEnabled, storeType, networkManager);
+    public DataStore(String collectionName, Class<T> myClass, AbstractClient client, StoreType storeType, NetworkManager<T> networkManager) {
+        super(client, collectionName, myClass, storeType, networkManager);
         loadMethodMap();
     }
 
-    public static <T extends GenericJson> DataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, boolean isDeltaSetCachingEnabled, AbstractClient client) {
+    public static <T extends GenericJson> DataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new DataStore<T>(collectionName, myClass, isDeltaSetCachingEnabled, client, storeType);
+        return new DataStore<T>(collectionName, myClass, client.isUseDeltaCache(), client, storeType);
     }
 
     private void loadMethodMap() {

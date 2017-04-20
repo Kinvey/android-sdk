@@ -77,6 +77,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     
     private GenericData customRequestProperties = new GenericData();
 
+    /**
+     * Value that represents state if delta set caching should be enabled
+     */
+    private boolean useDeltaCache;
+
     private User user;
     /**
      * The hostname to use for MIC authentication
@@ -274,6 +279,23 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.INFO);
     }
 
+
+    /**
+     * Getter to check if delta set cache is enabled
+     * @return delta set get flag
+     */
+    public boolean isUseDeltaCache() {
+        return useDeltaCache;
+    }
+
+    /**
+     * Setter for delta set get cache flag
+     * @param useDeltaCache boolean representing if we should use delta set caching
+     */
+    public void setUseDeltaCache(boolean useDeltaCache) {
+        this.useDeltaCache = useDeltaCache;
+    }
+
     /**
      * Builder class for AppdataKinveyClient.
      *
@@ -455,7 +477,9 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             /**MIC Base URL**/
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
-            MIC_VERSION("mic.version");
+            MIC_VERSION("mic.version"),
+            /**DeltaSet cache enabled **/
+            DELTA_SET_CACHE("app.deltaset");
 
 
             private final String value;
