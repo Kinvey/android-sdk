@@ -402,7 +402,7 @@ public class Client extends AbstractClient {
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
         private String MICVersion;
         private String MICBaseURL;
-        private boolean deltaSetCahe;
+        private boolean deltaSetCache = false;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -535,7 +535,7 @@ public class Client extends AbstractClient {
             }
 
             if (super.getString(Option.DELTA_SET_CACHE) != null) {
-                this.deltaSetCahe = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
+                this.deltaSetCache = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
             if (super.getString(Option.PARSER) != null){
@@ -641,7 +641,7 @@ public class Client extends AbstractClient {
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
-            client.setUseDeltaCache(this.deltaSetCahe);
+            client.setUseDeltaCache(this.deltaSetCache);
             if (this.MICVersion != null){
                 client.setMICApiVersion(this.MICVersion);
             }
@@ -844,13 +844,13 @@ public class Client extends AbstractClient {
 
 
         /** Get setting value of delta set caching **/
-        public boolean isDeltaSetCahe() {
-            return deltaSetCahe;
+        public boolean isDeltaSetCache() {
+            return deltaSetCache;
         }
 
         /** Set the setting for delta set cache **/
-        public void setDeltaSetCahe(boolean deltaSetCahe) {
-            this.deltaSetCahe = deltaSetCahe;
+        public void setDeltaSetCache(boolean deltaSetCache) {
+            this.deltaSetCache = deltaSetCache;
         }
 
         private class Build extends AsyncClientRequest<Client> {
