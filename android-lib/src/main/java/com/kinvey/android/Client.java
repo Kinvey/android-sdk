@@ -405,6 +405,7 @@ public class Client extends AbstractClient {
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
         private String MICVersion;
         private String MICBaseURL;
+        private boolean deltaSetCache = false;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -731,6 +732,7 @@ public class Client extends AbstractClient {
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
+            client.setUseDeltaCache(this.deltaSetCache);
             if (this.MICVersion != null){
                 client.setMICApiVersion(this.MICVersion);
             }
@@ -790,6 +792,8 @@ public class Client extends AbstractClient {
             super.setJsonFactory(factory);
             return this;
         }
+
+
 
 
 
@@ -927,6 +931,17 @@ public class Client extends AbstractClient {
          */
         protected static String getAndroidPropertyFile() {
             return "assets/kinvey.properties";
+        }
+
+
+        /** Get setting value of delta set caching **/
+        public boolean isDeltaSetCache() {
+            return deltaSetCache;
+        }
+
+        /** Set the setting for delta set cache **/
+        public void setDeltaSetCache(boolean deltaSetCache) {
+            this.deltaSetCache = deltaSetCache;
         }
 
         private class Build extends AsyncClientRequest<Client> {
