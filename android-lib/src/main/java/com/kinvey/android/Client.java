@@ -478,7 +478,7 @@ public class Client extends AbstractClient {
          * @param context - Your Android Application Context
          *
          */
-        public Builder(HttpTransport transport, Context context) {
+        public Builder(Context context, HttpTransport transport) {
             super(transport, null);
 
             InputStream properties = null;
