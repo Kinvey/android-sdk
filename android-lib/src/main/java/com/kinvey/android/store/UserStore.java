@@ -372,17 +372,17 @@ public class UserStore {
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.logout(mClient);
+     *  UserStore.logout(mClient, new KinveyClientCallback<Vodid>() {
+     *          void onSuccess(Void aVoid){...};
+     *          void onFailure(Throwable t){...};
+     *  });
      * }
      * </pre>
      * </p>
      * @param client {@link Client} an instance of the client
      */
-    public static void logout(AbstractClient client) {
-        if(clearStorage) {
-            client.performLockDown();
-        }
-        new LogoutRequest(client).execute();
+    public static void logout(AbstractClient client, KinveyClientCallback<Void> callback) {
+        new Logout(client, callback).execute();
     }
 
     /**
@@ -412,14 +412,6 @@ public class UserStore {
         new Delete(isHard, client,callback).execute();
     }
 
-    /**
-     * Set a flag to allow local offline storage to persist after calls to logout.
-     * <p/>
-     * Only use this method if each device will have a guaranteed consistent user and there are no concerns about security
-     */
-    public void keepOfflineStorageOnLogout(){
-        clearStorage = false;
-    }
 
     /**
      * Asynchronous request to send email confirmation.
@@ -882,6 +874,22 @@ public class UserStore {
         @Override
         protected Void executeAsync() throws IOException {
             BaseUserStore.destroy(hardDelete, client);
+            return null;
+        }
+    }
+
+    private static class Logout extends AsyncClientRequest<Void> {
+        private final AbstractClient client;
+
+        private Logout(AbstractClient client, KinveyClientCallback<Void> callback) {
+            super(callback);
+            this.client = client;
+
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            BaseUserStore.logout(client);
             return null;
         }
     }

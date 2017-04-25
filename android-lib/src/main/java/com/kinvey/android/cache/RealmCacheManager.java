@@ -33,6 +33,7 @@ import java.util.Set;
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
+import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
@@ -67,56 +68,60 @@ public class RealmCacheManager implements ICacheManager {
     public <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl) {
         synchronized (LOCK){
             DynamicRealm mRealm = getDynamicRealm();
-            String cacheKey = getClientHash()+ File.separator + collection;
-            RealmCache<T> cache = (RealmCache<T>)mCacheMap.get(cacheKey);
+            String cacheKey = getClientHash() + File.separator + collection;
+            RealmCache<T> cache = (RealmCache<T>) mCacheMap.get(cacheKey);
 
-            if (cache == null){
-                cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
-                if (!cache.getHash().equals(getTableHash(collection, mRealm))){
-                    //Recreate table
-                    mRealm.beginTransaction();
-                    try {
-                        //remove existing table if any
-                        RealmSchema currentSceme = mRealm.getSchema();
-                        for (RealmObjectSchema schema : currentSceme.getAll()){
-                            if (schema.getClassName().equals(collection) || schema.getClassName().startsWith(collection + "_")){
-                                String className = schema.getClassName();
-                                if (mRealm.getSchema().get(className).hasPrimaryKey()) {
-                                    mRealm.getSchema().get(className).removePrimaryKey();
+            try {
+                if (cache == null) {
+                    cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
+                    if (!cache.getHash().equals(getTableHash(collection, mRealm))) {
+                        //Recreate table
+                        mRealm.beginTransaction();
+                        try {
+                            //remove existing table if any
+                            RealmSchema currentSceme = mRealm.getSchema();
+                            for (RealmObjectSchema schema : currentSceme.getAll()) {
+                                if (schema.getClassName().equals(collection) || schema.getClassName().startsWith(collection + "_")) {
+                                    String className = schema.getClassName();
+                                    if (mRealm.getSchema().get(className).hasPrimaryKey()) {
+                                        mRealm.getSchema().get(className).removePrimaryKey();
+                                    }
+                                    currentSceme.remove(className);
                                 }
-                                currentSceme.remove(className);
                             }
+                        } finally {
+                            mRealm.commitTransaction();
                         }
-                    } finally {
-                        mRealm.commitTransaction();
-                    }
 
-                    //split table remove and ceate
-                    mRealm.beginTransaction();
-                    try{
-                        //create table scheme
-                        cache.createRealmTable(mRealm);
-                        //store table hash for futher usage
-                        setTableHash(collection, cache.getHash(), mRealm);
-                    } finally {
-                        mRealm.commitTransaction();
+                        //split table remove and ceate
+                        mRealm.beginTransaction();
+                        try {
+                            //create table scheme
+                            cache.createRealmTable(mRealm);
+                            //store table hash for futher usage
+                            setTableHash(collection, cache.getHash(), mRealm);
+                        } finally {
+                            mRealm.commitTransaction();
+                        }
+
                     }
+                    mCacheMap.put(cacheKey, cache);
+                } else {
+                    if (!collectionItemClass.isAssignableFrom(cache.getCollectionItemClass()) &&
+                            !cache.getCollectionItemClass().isAssignableFrom(collectionItemClass)) {
+                        throw new KinveyException("Class implementation for collection have been changed during runtime",
+                                "Please review the BaseDataStore usage, parameter should remain the same for same collection",
+                                "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
+                    }
+                    //create new instance because ttl values differs for different store types and
+                    cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
 
                 }
-                mCacheMap.put(cacheKey, cache);
-            } else {
-                if (!collectionItemClass.isAssignableFrom(cache.getCollectionItemClass()) &&
-                        !cache.getCollectionItemClass().isAssignableFrom(collectionItemClass)){
-                    throw new KinveyException("Class implementation for collection have been changed during runtime",
-                            "Please review the BaseDataStore usage, parameter should remain the same for same collection",
-                            "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
-                }
-                //create new instance because ttl values differs for diffetent store types and
-                cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
-
+                cache.setTtl(ttl);
+            } finally {
+                mRealm.close();
             }
-            cache.setTtl(ttl);
-            mRealm.close();
+
             return cache;
         }
     }
@@ -127,15 +132,7 @@ public class RealmCacheManager implements ICacheManager {
     @Override
     public void clear() {
         synchronized (LOCK) {
-            DynamicRealm mRealm = getDynamicRealm();
-            Set<RealmObjectSchema> schemas = mRealm.getSchema().getAll();
-            mRealm.beginTransaction();
-            for (RealmObjectSchema schema : schemas) {
-                schema.removePrimaryKey();
-                mRealm.getSchema().remove(schema.getClassName());
-            }
-            mRealm.commitTransaction();
-            mRealm.close();
+            Realm.deleteRealm(getRealmConfiguration());
         }
     }
 
@@ -158,13 +155,10 @@ public class RealmCacheManager implements ICacheManager {
     }
 
     private String getTableHash(String collection, DynamicRealm mRealm){
-
-        DynamicRealm realm = DynamicRealm.getInstance(mRealm.getConfiguration());
-        DynamicRealmObject res = realm.where(TABLE_HASH_NAME)
+        DynamicRealmObject res = mRealm.where(TABLE_HASH_NAME)
                 .equalTo("collection", collection)
                 .findFirst();
         return res != null ? res.getString("hash") : "";
-
     }
 
     /**
@@ -195,13 +189,16 @@ public class RealmCacheManager implements ICacheManager {
     DynamicRealm getDynamicRealm(){
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
-            RealmConfiguration rc = new RealmConfiguration.Builder(context)
-                    .name(prefix + "_" + getClientHash())
-                    .build();
-            DynamicRealm realm = DynamicRealm.getInstance(rc);
+            DynamicRealm realm = DynamicRealm.getInstance(getRealmConfiguration());
             init(realm);
             return realm;
         }
+    }
+
+    private RealmConfiguration getRealmConfiguration() {
+        return new RealmConfiguration.Builder(context)
+                .name(prefix + "_" + getClientHash())
+                .build();
     }
 
 }

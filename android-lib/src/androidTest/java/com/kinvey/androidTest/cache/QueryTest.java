@@ -55,8 +55,7 @@ public class QueryTest {
             realm.commitTransaction();
         }
 
-        RealmQuery<DynamicRealmObject> obj = RealmQuery.createDynamicQuery(realm, "test");
-        query = spy(obj);
+        RealmQuery query = spy(RealmQuery.class);
         doReturn(query).when(query).beginGroup();
         doReturn(query).when(query).equalTo(anyString(), anyString());
         doReturn(query).when(query).endGroup();

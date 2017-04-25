@@ -89,6 +89,7 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     private String MICHostName = "https://auth.kinvey.com/";
 
     private String MICApiVersion;
+    private int requestTimeout;
 
     public void setMICApiVersion(String version){
         if (!version.startsWith("v")){
@@ -296,6 +297,14 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         this.useDeltaCache = useDeltaCache;
     }
 
+    public int getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    public void setRequestTimeout(int requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
+
     /**
      * Builder class for AppdataKinveyClient.
      *
@@ -304,6 +313,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
     public static abstract class Builder extends AbstractKinveyJsonClient.Builder {
         private CredentialStore store;
         private Properties props = new Properties();
+        private int requestTimeout;
+        public boolean useDeltaCache;
 
         /**
          * @param transport              HttpTransport
@@ -434,6 +445,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             return getProps().getProperty(opt.value, defaultValue);
         }
 
+        public Builder setRequestTimeout(int requestTimeout) {
+            this.requestTimeout = requestTimeout;
+            return this;
+        }
+
 
         /**
          * Standard set of kinvey property names that are set in the {@code kinvey.properties}
@@ -478,8 +494,11 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
             MIC_VERSION("mic.version"),
+            /** Request Timeout for http requests **/
             /**DeltaSet cache enabled **/
-            DELTA_SET_CACHE("app.deltaset");
+            DELTA_SET_CACHE("app.deltaset"),
+            /** Request Timeout**/
+            REQUEST_TIMEOUT("request.timeout");
 
 
             private final String value;

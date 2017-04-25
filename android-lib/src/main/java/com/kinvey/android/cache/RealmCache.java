@@ -20,8 +20,6 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.query.AbstractQuery;
-import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,11 +31,8 @@ import java.util.Map;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
-import io.realm.FieldAttribute;
-import io.realm.RealmObjectSchema;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.RealmSchema;
 import io.realm.Sort;
 
 /**
@@ -60,93 +55,98 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     @Override
     public List<T> get(Query query) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
-                .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
-        QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-
-        RealmResults<DynamicRealmObject> objects = null;
-
-        final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
-        int limit = query.getLimit();
-        int skip = query.getSkip();
-
-        objects = realmQuery.findAll();
-
         List<T> ret = new ArrayList<T>();
+        try {
+            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
+                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
+            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
-        for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ){
-            DynamicRealmObject obj = iterator.next();
-            ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
-        }
+            RealmResults<DynamicRealmObject> objects = null;
 
-        //own sorting implementation
-        if (sortingOrders != null && sortingOrders.size() > 0) {
-            Collections.sort(ret, new Comparator<T>() {
-                @Override
-                public int compare(T lhs, T rhs) {
-                    int sortRet = 0;
+            final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
+            int limit = query.getLimit();
+            int skip = query.getSkip();
 
-                    for (Map.Entry<String, AbstractQuery.SortOrder> sortOrderEntry : sortingOrders.entrySet()){
-                        String fieldName = sortOrderEntry.getKey();
-                        String[] path = fieldName.split("\\.");
-                        int pathStep = 0;
-                        Map currentLhsPathObject = lhs;
-                        Map currentRhsPathObject = rhs;
-                        while (pathStep < path.length - 1){
-                            if (currentLhsPathObject != null &&
-                                    currentLhsPathObject.containsKey(path[pathStep]) &&
-                                    Map.class.isAssignableFrom(currentLhsPathObject.get(path[pathStep]).getClass())){
-                                currentLhsPathObject = (Map)currentLhsPathObject.get(path[pathStep]);
-                            } else {
-                                currentLhsPathObject = null;
+            objects = realmQuery.findAll();
+
+            
+
+            for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
+                DynamicRealmObject obj = iterator.next();
+                ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+            }
+
+            //own sorting implementation
+            if (sortingOrders != null && sortingOrders.size() > 0) {
+                Collections.sort(ret, new Comparator<T>() {
+                    @Override
+                    public int compare(T lhs, T rhs) {
+                        int sortRet = 0;
+
+                        for (Map.Entry<String, AbstractQuery.SortOrder> sortOrderEntry : sortingOrders.entrySet()) {
+                            String fieldName = sortOrderEntry.getKey();
+                            String[] path = fieldName.split("\\.");
+                            int pathStep = 0;
+                            Map currentLhsPathObject = lhs;
+                            Map currentRhsPathObject = rhs;
+                            while (pathStep < path.length - 1) {
+                                if (currentLhsPathObject != null &&
+                                        currentLhsPathObject.containsKey(path[pathStep]) &&
+                                        Map.class.isAssignableFrom(currentLhsPathObject.get(path[pathStep]).getClass())) {
+                                    currentLhsPathObject = (Map) currentLhsPathObject.get(path[pathStep]);
+                                } else {
+                                    currentLhsPathObject = null;
+                                }
+
+                                if (currentRhsPathObject != null &&
+                                        currentRhsPathObject.containsKey(path[pathStep]) &&
+                                        Map.class.isAssignableFrom(currentRhsPathObject.get(path[pathStep]).getClass())) {
+                                    currentRhsPathObject = (Map) currentRhsPathObject.get(path[pathStep]);
+                                } else {
+                                    currentRhsPathObject = null;
+                                }
+                                pathStep++;
                             }
 
-                            if (currentRhsPathObject != null &&
-                                    currentRhsPathObject.containsKey(path[pathStep]) &&
-                                    Map.class.isAssignableFrom(currentRhsPathObject.get(path[pathStep]).getClass())){
-                                currentRhsPathObject = (Map)currentRhsPathObject.get(path[pathStep]);
-                            } else {
-                                currentRhsPathObject = null;
+
+                            Object l = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
+                            Object r = currentRhsPathObject != null ? currentRhsPathObject.get(path[path.length - 1]) : null;
+
+                            if (Comparable.class.isAssignableFrom(l.getClass())) {
+                                sortRet = (sortOrderEntry.getValue().equals(Sort.DESCENDING) ? 1 : -1) * ((Comparable) l).compareTo(r);
                             }
-                            pathStep++;
+
+                            if (sortRet != 0) {
+                                break;
+                            }
+
                         }
 
-
-                        Object l = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
-                        Object r = currentRhsPathObject != null ? currentRhsPathObject.get(path[path.length - 1]) : null;
-
-                        if (Comparable.class.isAssignableFrom(l.getClass())){
-                            sortRet = (sortOrderEntry.getValue().equals(Sort.DESCENDING) ? 1 : -1) * ((Comparable)l).compareTo(r);
-                        }
-
-                        if (sortRet != 0){
-                            break;
-                        }
-
+                        return sortRet;
                     }
-
-                    return sortRet;
-                }
-            });
-        }
+                });
+            }
 
 
-        //own skipping implementation
-        if (skip > 0) {
-            for (int i = 0; i < skip; i++) {
-                if (ret.size() > 0) {
-                    ret.remove(0);
+            //own skipping implementation
+            if (skip > 0) {
+                for (int i = 0; i < skip; i++) {
+                    if (ret.size() > 0) {
+                        ret.remove(0);
+                    }
                 }
             }
+
+
+            //own limit implementation
+            if (limit > 0 && ret.size() > limit) {
+                ret = ret.subList(0, limit);
+            }
+        } finally {
+            mRealm.close();    
         }
 
-
-        //own limit implementation
-        if (limit > 0 && ret.size() > limit) {
-            ret = ret.subList(0, limit);
-        }
-
-        mRealm.close();
+        
         return ret;
     }
 
@@ -177,8 +177,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -196,8 +197,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
              ret = obj == null ? null : ClassHash.realmToObject(obj, mCollectionItemClass);
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -221,8 +223,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -241,8 +244,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -259,8 +263,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+       
         return item;
     }
 
@@ -281,8 +286,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             result.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
 
         return ret;
 
@@ -313,8 +319,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             result.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -334,8 +341,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             realmResults.deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
+        
         return ret;
     }
 
@@ -353,8 +361,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     .deleteAllFromRealm();
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
-        mRealm.close();
     }
 
     @Override
@@ -371,6 +379,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
 
         return ret;
@@ -392,6 +401,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
 
         return ret;
@@ -410,6 +420,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         } finally {
             mRealm.commitTransaction();
+            mRealm.close();
         }
         return ret;
     }
