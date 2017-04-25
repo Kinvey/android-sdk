@@ -699,7 +699,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(Context context) {
-            this(newCompatibleTransport(), context);
+            this(context, newCompatibleTransport());
         }
 
         /**
