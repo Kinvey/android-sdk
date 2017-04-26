@@ -4,7 +4,7 @@ apply plugin: 'realm-android'
 
 android {
   compileSdkVersion 23
-  buildToolsVersion '23.0.2'
+  buildToolsVersion '25.0.0'
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
@@ -21,7 +21,7 @@ android {
   }
 
   defaultConfig {
-    minSdkVersion 9
+    minSdkVersion 15
     targetSdkVersion 23
     multiDexEnabled true
     testInstrumentationRunner "com.kinvey.androidTest.cache.TestRunner"
@@ -64,7 +64,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.1.2'
+    classpath 'com.android.tools.build:gradle:2.3.1'
     classpath "io.realm:realm-gradle-plugin:1.1.1"
   }
 
@@ -112,7 +112,7 @@ dependencies {
   // Optional -- Mockito framework
   androidTestCompile 'org.mockito:mockito-core:1.10.19'
   androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
-  androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+  androidTestCompile 'com.linkedin.dexmaker:dexmaker-mockito:2.2.0'
   androidTestCompile 'com.android.support:support-annotations:23.2.0'
   androidTestCompile 'com.android.support.test:runner:0.4.1'
   androidTestCompile 'com.android.support.test:rules:0.4.1'

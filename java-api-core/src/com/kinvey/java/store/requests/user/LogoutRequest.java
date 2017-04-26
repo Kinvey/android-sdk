@@ -27,11 +27,12 @@ public final class LogoutRequest {
 
     private AbstractClient client;
 
-    public LogoutRequest(AbstractClient client){
+    public LogoutRequest(AbstractClient client) {
         this.client = client;
     }
 
     public void execute() {
+        client.performLockDown();
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setUser(null);

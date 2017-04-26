@@ -301,9 +301,15 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public Get getBlocking(Query query, List<T> cachedItems) throws IOException {
+    public Get getBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
-        Get get = new DeltaGet(query, Array.newInstance(myClass,0).getClass(), cachedItems);
+        Get get;
+        if (deltaSetCachingEnabled) {
+            get = new DeltaGet(query, Array.newInstance(myClass,0).getClass(), cachedItems);
+        } else {
+            get = new Get(query, Array.newInstance(myClass,0).getClass());
+        }
+
         client.initializeRequest(get);
         return get;
     }
