@@ -50,7 +50,7 @@ import com.kinvey.java.sync.SyncManager;
  *
  * All factory methods for retrieving instances of a Service API are threadsafe, however the builder is not.
  */
-public abstract class AbstractClient extends AbstractKinveyJsonClient {
+public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonClient {
 
     /**
      * The default encoded root URL of the service.
@@ -82,7 +82,8 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
      */
     private boolean useDeltaCache;
 
-    private User user;
+    private T user;
+
     /**
      * The hostname to use for MIC authentication
      */
@@ -203,13 +204,13 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
         return true;
     }
 
-    public void setUser(User user) {
+    public void setUser(T user) {
         synchronized (lock) {
            this.user = user;
         }
     }
 
-    public User getActiveUser() {
+    public T getActiveUser() {
         synchronized (lock) {
             return this.user;
         }
@@ -527,6 +528,14 @@ public abstract class AbstractClient extends AbstractKinveyJsonClient {
 
     public SyncManager getSycManager(){
         return new SyncManager(getSyncCacheManager());
+    }
+
+    public Class getUserClass(){
+        return this.userModelClass;
+    }
+
+    public void setUserClass(Class userClass){
+        this.userModelClass = userClass;
     }
 
 }

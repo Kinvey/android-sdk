@@ -23,8 +23,8 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.Logger;
+import com.kinvey.java.*;
+import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
@@ -185,9 +185,14 @@ public class Client extends AbstractClient {
     }
 
     @Override
-    public <I extends GenericJson, O> com.kinvey.java.CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+    public CustomEndpoints customEndpoints(Class myClass) {
         return null;
     }
+
+/*    @Override
+    public <I extends GenericJson, O> com.kinvey.java.CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        return null;
+    }*/
 
     @Override
     public ICacheManager getCacheManager() {
