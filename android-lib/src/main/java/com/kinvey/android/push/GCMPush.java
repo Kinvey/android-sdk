@@ -63,7 +63,8 @@ public class GCMPush extends AbstractPush {
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
-    private static final String pref_regid = "reg_id"; 
+    private static final String pref_regid = "reg_id";
+    private Class pushServiceClass;
 
     public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
@@ -82,7 +83,8 @@ public class GCMPush extends AbstractPush {
      * @return an instance of GCM push, initialized for the current user.
      */
     @Override
-    public GCMPush initialize(final Application currentApp) {
+    public GCMPush initialize(final Application currentApp, Class pushReceiverClass) {
+        this.pushServiceClass = pushReceiverClass;
         if (!getClient().isUserLoggedIn()) {
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
@@ -129,7 +131,7 @@ public class GCMPush extends AbstractPush {
 						@Override
 						public void onSuccess(User result) {
 							client.getActiveUser().put("_messaging", result.get("_messaging"));
-							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+							Intent reg = new Intent(client.getContext(), pushServiceClass);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
 		                	client.getContext().startService(reg);							
@@ -152,7 +154,7 @@ public class GCMPush extends AbstractPush {
             client.push().disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+                	Intent reg = new Intent(client.getContext(), pushServiceClass);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
                 	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
                 	client.getContext().startService(reg);      
