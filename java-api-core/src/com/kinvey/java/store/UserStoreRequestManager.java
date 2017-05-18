@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * Created by Prots on 2/12/16.
  */
-public class UserStoreRequestManager {
+public class UserStoreRequestManager<T extends User> {
 
 
     public static final String USER_COLLECTION_NAME = "user";
@@ -81,7 +81,8 @@ public class UserStoreRequestManager {
 
     private final AbstractClient client;
     private final KinveyAuthRequest.Builder builder;
-    private final Class<User> myClazz;
+    private final Class<T> myClazz;
+    private T user;
     private final String clientAppVersion;
     private final GenericData customRequestProperties;
     private String authToken;
@@ -117,12 +118,16 @@ public class UserStoreRequestManager {
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
         this.builder = builder;
-        this.myClazz = User.class;
+        this.myClazz = client.getUserClass();
         this.builder.setUser(client.getActiveUser());
         this.clientAppVersion = client.getClientAppVersion();
         this.customRequestProperties = client.getCustomRequestProperties();
     }
 
+    public UserStoreRequestManager(T user, AbstractClient client, KinveyAuthRequest.Builder builder){
+        this(client, builder);
+        this.user = user;
+    }
 
     /**
      * Method to initialize the User after login, create a credential,
@@ -131,12 +136,20 @@ public class UserStoreRequestManager {
      * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
      */
-    public User initUser(KinveyAuthResponse response, User userObject) throws IOException {
-
+    public T initUser(KinveyAuthResponse response, T userObject) throws IOException {
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
         userObject.putAll(response.getUnknownKeys());
-        User currentUser = new User();
+        T currentUser;
+        try {
+            currentUser = myClazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            throw new KinveyException(e.getMessage());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new KinveyException(e.getMessage());
+        }
         currentUser.setId(response.getUserId());
         currentUser.put("_kmd", response.getMetadata());
         currentUser.putAll(response.getUnknownKeys());
@@ -153,14 +166,11 @@ public class UserStoreRequestManager {
         return currentUser;
     }
 
-    private User initUser(Credential credential, User userObject) {
-        User currentUser = new User();
-        currentUser.setId(credential.getUserId());
-        currentUser.setAuthToken(credential.getAuthToken());
+    private T initUser(Credential credential, T userObject) {
         userObject.setId(credential.getUserId());
         userObject.setAuthToken(credential.getAuthToken());
-        client.setUser(currentUser);
-        return currentUser;
+        client.setUser(userObject);
+        return userObject;
     }
 
     public void removeFromStore(String userID) {
@@ -227,18 +237,26 @@ public class UserStoreRequestManager {
      * @return Current user object with refreshed metadata
      * @throws IOException
      */
-    public User retrieveMetadataBlocking() throws IOException {
-        User ret = this.retrieveBlocking().execute();
-        User currentUser = null;
+    public T retrieveMetadataBlocking() throws IOException {
+        T ret = (T) this.retrieveBlocking().execute();
+        T currentUser;
         if (client.getActiveUser() == null){
-            currentUser = new User();
+            try {
+                currentUser = myClazz.newInstance();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+                throw new KinveyException(e.getMessage());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                throw new KinveyException(e.getMessage());
+            }
         } else {
-            currentUser = client.getActiveUser();
+            currentUser = (T) client.getActiveUser();
         }
         currentUser.putAll(ret.getUnknownKeys());
         currentUser.setUsername(ret.getUsername());
         client.setUser(currentUser);
-        return currentUser;
+        return ret;
     }
 
     /**
@@ -304,8 +322,17 @@ public class UserStoreRequestManager {
      * @return a LoginRequest ready to be executed
      * @throws IOException
      */
-    public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException{
-        User currentUser = new User();
+    public LoginRequest loginKinveyAuthTokenBlocking(String userId, String authToken) throws IOException {
+        T currentUser = null;
+        try {
+            currentUser = myClazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            throw new KinveyException(e.getMessage());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new KinveyException(e.getMessage());
+        }
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);
@@ -368,6 +395,17 @@ public class UserStoreRequestManager {
         return new LoginRequest(username, password, true).buildAuthRequest();
     }
 
+    /**
+     * Creates an explicit Kinvey User.
+     *
+     * @param username userName of Kinvey user
+     * @param password password of Kinvey user
+     * @return LoginRequest Object
+     * @throws IOException
+     */
+    public LoginRequest createBlocking(String username, String password, T user) throws IOException {
+        return new LoginRequest(username, password, user, true).buildAuthRequest();
+    }
 
     /**
      * Delete's the given user from the server.
@@ -659,7 +697,13 @@ public class UserStoreRequestManager {
             builder.setCreate(setCreate);
             builder.setUser(client.getActiveUser());
             this.type = UserStoreRequestManager.LoginType.KINVEY;
+        }
 
+        public LoginRequest(String username, String password, T user, boolean setCreate) {
+            builder.setUsernameAndPassword(username, password);
+            builder.setCreate(setCreate);
+            builder.setUser(user);
+            this.type = UserStoreRequestManager.LoginType.KINVEY;
         }
 
         public LoginRequest(ThirdPartyIdentity identity) {
@@ -680,13 +724,13 @@ public class UserStoreRequestManager {
             return this;
         }
 
-        public User execute() throws IOException {
+        public T execute() throws IOException {
             if (client.isUserLoggedIn()) {
                 throw new KinveyException("Attempting to login when a user is already logged in",
                         "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
-            User ret;
+            T ret;
             try {
                 ret = myClazz.newInstance();
             } catch (Exception e) {

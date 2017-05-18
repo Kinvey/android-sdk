@@ -111,9 +111,14 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        public CustomEndpoints customEndpoints(Class myClass) {
             return null;
         }
+
+/*        @Override
+        public <I extends GenericJson, O> CustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+            return null;
+        }*/
 
         @Override
         public ICacheManager getCacheManager() {

@@ -59,7 +59,11 @@ public class UserStore {
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      */
     public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback<User> callback) {
-        new Create(username, password, client, callback).execute();
+        signUp(username, password, null, client, callback);
+    }
+
+    public static <T extends User> void signUp(String username, String password, T user, AbstractClient client, KinveyClientCallback<T> callback) {
+        new Create(username, password, user, client, callback).execute();
     }
 
     /**
@@ -839,23 +843,29 @@ public class UserStore {
         }
     }
 
-    private static class Create extends AsyncClientRequest<User> {
+    private static class Create<T extends User> extends AsyncClientRequest<T> {
         String username;
         String password;
+        private T user;
         private final AbstractClient client;
 
 
-        private Create(String username, String password, AbstractClient client, KinveyClientCallback callback) {
+        private Create(String username, String password, T user, AbstractClient client, KinveyClientCallback callback) {
             super(callback);
             this.username=username;
             this.password=password;
+            this.user = user;
             this.client = client;
 
         }
 
         @Override
-        protected User executeAsync() throws IOException {
-            return BaseUserStore.signUp(username, password, client);
+        protected T executeAsync() throws IOException {
+            if (user == null) {
+                return BaseUserStore.signUp(username, password, client);
+            } else {
+                return BaseUserStore.signUp(username, password, user, client);
+            }
         }
     }
 
