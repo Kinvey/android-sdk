@@ -45,6 +45,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.offline.SqlLiteOfflineStore;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.push.KinveyGCMService;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
 import com.kinvey.java.Logger;
@@ -447,12 +448,37 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link AbstractPush} for the defined collection
      */
+    @Deprecated
     public AbstractPush push() {
+        return push(KinveyGCMService.class);
+    }
+
+    /**
+     * Push factory method
+     * <p>
+     * Returns the instance of {@link AbstractPush} used for configuring Push. Only one instance of
+     * {@link AbstractPush} is created for each instance of the Kinvey Client.
+     * </p>
+     * <p>
+     * This method is thread-safe.
+     * </p>
+     * <p>
+     *     Sample Usage:
+     * <pre>
+     {@code
+     AbstractPush myPush = kinveyClient.push();
+     }
+     * </pre>
+     * </p>
+     * @param pushServiceClass - Service class for push handling
+     * @return Instance of {@link AbstractPush} for the defined collection
+     */
+    public AbstractPush push(Class pushServiceClass) {
         synchronized (lock) {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = new GCMPush(this, true, "");
+                pushProvider = new GCMPush(this, true, pushServiceClass, "");
             }
             return pushProvider;
         }
@@ -805,10 +831,10 @@ public class Client extends AbstractClient {
                 client.setCurrentUser(null);
             }
 
-            //GCM explicitely enabled
-            if (this.GCM_Enabled){
-                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
-            }
+            //GCM explicitly enabled
+//            if (this.GCM_Enabled){
+//                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+//            }
 
             if (this.debugMode){
                 client.enableDebugLogging();

@@ -39,6 +39,7 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.query.KinveyClientErrorCode;
 
+import javax.annotation.Detainted;
 import javax.annotation.Nullable;
 
 
@@ -66,10 +67,12 @@ public class GCMPush extends AbstractPush {
     private String[] senderIDs = new String[0];
     private boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
-    private static final String pref_regid = "reg_id"; 
+    private static final String pref_regid = "reg_id";
+    private Class pushServiceClass;
 
-    public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
+    public GCMPush(Client client, boolean inProduction, final Class pushServiceClass, String ... senderIDs) {
         super(client);
+        this.pushServiceClass = pushServiceClass;
         this.senderIDs = senderIDs;
         this.inProduction = inProduction;
     }
@@ -169,7 +172,7 @@ public class GCMPush extends AbstractPush {
                                 callback.onSuccess(result);
                             }
                             client.user().put("_messaging", result.get("_messaging"));
-							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+							Intent reg = new Intent(client.getContext(), pushServiceClass);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
 		                	client.getContext().startService(reg);							
@@ -206,7 +209,7 @@ public class GCMPush extends AbstractPush {
                     Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
                 	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-                	client.getContext().startService(reg);      
+                	client.getContext().startService(reg);
                 }
 
                 @Override
@@ -325,10 +328,10 @@ public class GCMPush extends AbstractPush {
     		
     		
     	}.execute();
-    	
+
 //        GCMRegistrar.unregister(getClient().getContext());
-        
-        
+
+
     }
 
 
