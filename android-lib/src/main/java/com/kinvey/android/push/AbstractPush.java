@@ -51,7 +51,7 @@ public abstract class AbstractPush {
         return client;
     }
 
-    public abstract AbstractPush initialize(Application currentApp, Class pushReceiverClass);
+    public abstract AbstractPush initialize(Application currentApp, Class pushServiceClass);
 
     public abstract String getPushId();
 
