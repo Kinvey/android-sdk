@@ -25,8 +25,17 @@ import com.kinvey.java.model.KinveyDeleteResponse;
  */
 public interface KinveyDeleteCallback extends KinveyClientCallback<Integer> {
 
+    /**
+     * Used to indicate successful execution of a request by the background service.
+     *
+     * @param result deleted objects count
+     */
     void onSuccess(Integer result);
 
-
+    /**
+     * Used to indicate the failed execution of a request by the background service.
+     *
+     * @param error error
+     */
     void onFailure(Throwable error);
 }
