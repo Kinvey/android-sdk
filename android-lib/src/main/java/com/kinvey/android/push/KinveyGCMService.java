@@ -68,7 +68,7 @@ public abstract class KinveyGCMService extends IntentService {
 			String regID = intent.getExtras().getString(REG_ID);
 			onRegistered(regID);
 			
-		}else if (intent.getExtras().getString(TRIGGER, "default").equals(REGISTERED)){
+		} else if (intent.getExtras().getString(TRIGGER, "default").equals(UNREGISTERED)){
 			String regID = intent.getExtras().getString(REG_ID);
 			onUnregistered(regID);
 		}
@@ -123,7 +123,7 @@ public abstract class KinveyGCMService extends IntentService {
     /**
      * This method is called when GCM messages are deleted.
      *
-     * @param deleteCount the number of deleted messages
+     * @param deleted the number of deleted messages
      */
     public abstract void onDelete(String deleted);
 

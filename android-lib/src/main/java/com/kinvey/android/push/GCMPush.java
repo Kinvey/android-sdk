@@ -23,10 +23,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
@@ -43,7 +42,7 @@ import com.kinvey.java.dto.User;
 /**
  *
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#push()} convenience method.
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#push(Class)} ()} convenience method.
  * </p>
  *
  * <p>This class manages GCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable GCM.</p>
@@ -64,7 +63,7 @@ public class GCMPush extends AbstractPush {
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
-    private static final String pref_regid = "reg_id"; 
+    private static final String pref_regid = "reg_id";
 
     public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
@@ -88,34 +87,21 @@ public class GCMPush extends AbstractPush {
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
-        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
         	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");  
         }
-        
-        
-        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(currentApp);
-    
-        new AsyncTask<Void, Void, Void>() {
+
+        new AsyncRegisterGCM(new KinveyClientCallback() {
             @Override
-            protected Void doInBackground(Void... params) {
-    
-                try {                	
-                    final String regid = gcm.register(getSenderIDs());                    
-                    Logger.INFO("regid is " + regid);
-                    
-                    SharedPreferences.Editor pref = currentApp.getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
-                    pref.putString(pref_regid, regid);
-                    pref.commit();
-
-                    registerWithKinvey(regid, true);
-
-                } catch (IOException ex) {
-                	Logger.ERROR("unable to register with GCM: " + ex.getMessage());
-//                	ex.printStackTrace();
-                }
-				return null;
+            public void onSuccess(Object result) {
+                Logger.ERROR("GCM - successful register CGM");
             }
-        }.execute(null, null, null);
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.ERROR("GCM - unsuccessful register CGM: " + error.getMessage());
+            }
+        }).execute();
 
         return this;
     }
@@ -135,7 +121,7 @@ public class GCMPush extends AbstractPush {
 
         if (register) {
 
-            client.push().enablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
                 	UserStore.retrieve(client, new KinveyUserCallback<User>() {
@@ -143,7 +129,7 @@ public class GCMPush extends AbstractPush {
 						@Override
 						public void onSuccess(User result) {
 							client.getActiveUser().put("_messaging", result.get("_messaging"));
-							Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+							Intent reg = new Intent(client.getContext(), pushServiceClass);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
 		                	client.getContext().startService(reg);							
@@ -152,7 +138,6 @@ public class GCMPush extends AbstractPush {
 						@Override
 						public void onFailure(Throwable error) {
 							Logger.ERROR("GCM - user update error: " + error);
-							
 						}
 					});
                 }
@@ -164,10 +149,10 @@ public class GCMPush extends AbstractPush {
             }, gcmRegID);
 
         } else {
-            client.push().disablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
+                	Intent reg = new Intent(client.getContext(), pushServiceClass);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
                 	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
                 	client.getContext().startService(reg);      
@@ -253,22 +238,18 @@ public class GCMPush extends AbstractPush {
         if (!regid.isEmpty()){
     		registerWithKinvey(regid, false);
     	}
-    	
-   
-    	final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
-    	new AsyncTask<Void, Void, Void>(){
 
-			@Override
-			protected Void doInBackground(Void... arg0) {
-				try{
-					gcm.unregister();
-				}catch(Exception e){}
-				return null;
-			}
-    		
-    		
-    	}.execute();
-    	
+        new AsyncUnRegisterGCM(new KinveyClientCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                Logger.ERROR("GCM - successful unregister CGM");
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.ERROR("GCM - unsuccessful unregister CGM: " + error.getMessage());
+            }
+        }).execute();
 //        GCMRegistrar.unregister(getClient().getContext());
         
         
@@ -367,6 +348,48 @@ public class GCMPush extends AbstractPush {
         new AsyncDisablePush(callback, deviceID).execute();
     }
 
+
+    private class AsyncRegisterGCM extends AsyncClientRequest{
+
+        AsyncRegisterGCM(KinveyClientCallback callback) {
+            super(callback);
+        }
+
+        @Override
+        protected User executeAsync() throws IOException {
+            try {
+                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
+//                final String regid = InstanceID.getInstance(context).getToken(getSenderIDs()[0], "GCM");
+                final String regid = gcm.register(getSenderIDs());
+                Logger.INFO("regid is " + regid);
+                SharedPreferences.Editor pref = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+                pref.putString(pref_regid, regid);
+                pref.apply();
+                registerWithKinvey(regid, true);
+            } catch (IOException ex) {
+                Logger.ERROR("unable to register with GCM: " + ex.getMessage());
+            }
+            return null;
+        }
+    }
+
+    private class AsyncUnRegisterGCM extends AsyncClientRequest{
+
+        AsyncUnRegisterGCM(KinveyClientCallback callback) {
+            super(callback);
+        }
+
+        @Override
+        protected User executeAsync() throws IOException {
+            final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
+            try {
+                gcm.unregister();
+            } catch (IOException ex) {
+                Logger.ERROR("unable to register with GCM: " + ex.getMessage());
+            }
+            return null;
+        }
+    }
 
     private class AsyncEnablePush extends AsyncClientRequest{
 
