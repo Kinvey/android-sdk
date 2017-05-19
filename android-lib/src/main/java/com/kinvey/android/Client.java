@@ -303,15 +303,18 @@ public class Client extends AbstractClient {
      }
      * </pre>
      * </p>
-     *
+     * @param pushServiceClass Service class for handling push notification
      * @return Instance of {@link AbstractPush} for the defined collection
      */
-    public AbstractPush push() {
+    public AbstractPush push(Class pushServiceClass) {
         synchronized (lock) {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
                 pushProvider = new GCMPush(this, true, "");
+            }
+            if (pushProvider.getPushServiceClass() == null) {
+                pushProvider.setPushServiceClass(pushServiceClass);
             }
             return pushProvider;
         }

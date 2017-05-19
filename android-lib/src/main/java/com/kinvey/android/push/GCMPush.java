@@ -42,7 +42,7 @@ import com.kinvey.java.dto.User;
 /**
  *
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#push()} convenience method.
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#push(Class)} ()} convenience method.
  * </p>
  *
  * <p>This class manages GCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable GCM.</p>
@@ -64,7 +64,6 @@ public class GCMPush extends AbstractPush {
     private static boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
     private static final String pref_regid = "reg_id";
-    private Class pushServiceClass;
 
     public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
@@ -83,8 +82,7 @@ public class GCMPush extends AbstractPush {
      * @return an instance of GCM push, initialized for the current user.
      */
     @Override
-    public GCMPush initialize(final Application currentApp, Class pushReceiverClass) {
-        this.pushServiceClass = pushReceiverClass;
+    public GCMPush initialize(final Application currentApp) {
         if (!getClient().isUserLoggedIn()) {
             throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
@@ -123,7 +121,7 @@ public class GCMPush extends AbstractPush {
 
         if (register) {
 
-            client.push().enablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
                 	UserStore.retrieve(client, new KinveyUserCallback<User>() {
@@ -151,7 +149,7 @@ public class GCMPush extends AbstractPush {
             }, gcmRegID);
 
         } else {
-            client.push().disablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
                 	Intent reg = new Intent(client.getContext(), pushServiceClass);
