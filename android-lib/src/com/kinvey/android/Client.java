@@ -441,32 +441,7 @@ public class Client extends AbstractClient {
      *     Sample Usage:
      * <pre>
      {@code
-        AbstractPush myPush = kinveyClient.push();
-     }
-     * </pre>
-     * </p>
-     *
-     * @return Instance of {@link AbstractPush} for the defined collection
-     */
-    @Deprecated
-    public AbstractPush push() {
-        return push(KinveyGCMService.class);
-    }
-
-    /**
-     * Push factory method
-     * <p>
-     * Returns the instance of {@link AbstractPush} used for configuring Push. Only one instance of
-     * {@link AbstractPush} is created for each instance of the Kinvey Client.
-     * </p>
-     * <p>
-     * This method is thread-safe.
-     * </p>
-     * <p>
-     *     Sample Usage:
-     * <pre>
-     {@code
-     AbstractPush myPush = kinveyClient.push();
+     AbstractPush myPush = kinveyClient.push(GCMService.class);
      }
      * </pre>
      * </p>
@@ -478,7 +453,10 @@ public class Client extends AbstractClient {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = new GCMPush(this, true, pushServiceClass, "");
+                pushProvider = new GCMPush(this, true, "");
+            }
+            if (pushProvider.getPushServiceClass() == null) {
+                pushProvider.setPushServiceClass(pushServiceClass);
             }
             return pushProvider;
         }
@@ -832,9 +810,9 @@ public class Client extends AbstractClient {
             }
 
             //GCM explicitly enabled
-//            if (this.GCM_Enabled){
-//                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
-//            }
+            if (this.GCM_Enabled){
+                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+            }
 
             if (this.debugMode){
                 client.enableDebugLogging();

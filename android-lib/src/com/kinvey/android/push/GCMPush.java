@@ -26,7 +26,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
@@ -39,14 +39,13 @@ import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.query.KinveyClientErrorCode;
 
-import javax.annotation.Detainted;
 import javax.annotation.Nullable;
 
 
 /**
  *
  * <p>
- * This functionality can be accessed through the {@link com.kinvey.android.Client#push()} convenience method.
+ * This functionality can be accessed through the {@link com.kinvey.android.Client#push(Class)} ()} convenience method.
  * </p>
  *
  * <p>This class manages GCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable GCM.</p>
@@ -68,11 +67,9 @@ public class GCMPush extends AbstractPush {
     private boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
     private static final String pref_regid = "reg_id";
-    private Class pushServiceClass;
 
-    public GCMPush(Client client, boolean inProduction, final Class pushServiceClass, String ... senderIDs) {
+    public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
-        this.pushServiceClass = pushServiceClass;
         this.senderIDs = senderIDs;
         this.inProduction = inProduction;
     }
@@ -107,8 +104,8 @@ public class GCMPush extends AbstractPush {
         if (!getClient().user().isUserLoggedIn()){
             throw  new KinveyException(KinveyClientErrorCode.NoActiveUser);
         }
-        
-        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
+
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
         	throw new KinveyException(KinveyClientErrorCode.NoGooglePlay);
         }
         
@@ -161,21 +158,21 @@ public class GCMPush extends AbstractPush {
 
         if (register) {
 
-            client.push().enablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
                 	client.user().retrieve(new KinveyUserCallback() {
 						
 						@Override
 						public void onSuccess(User result) {
-                            if (callback != null){
-                                callback.onSuccess(result);
-                            }
                             client.user().put("_messaging", result.get("_messaging"));
 							Intent reg = new Intent(client.getContext(), pushServiceClass);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
 		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-		                	client.getContext().startService(reg);							
+		                	client.getContext().startService(reg);
+                            if (callback != null){
+                                callback.onSuccess(result);
+                            }
 						}
 						
 						@Override
@@ -200,16 +197,16 @@ public class GCMPush extends AbstractPush {
             }, gcmRegID);
 
         } else {
-            client.push().disablePushViaRest(new KinveyClientCallback() {
+            client.push(pushServiceClass).disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                    if (callback != null){
-                        callback.onSuccess(result);
-                    }
                     Intent reg = new Intent(client.getContext(), KinveyGCMService.class);
                 	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
                 	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
                 	client.getContext().startService(reg);
+                    if (callback != null){
+                        callback.onSuccess(result);
+                    }
                 }
 
                 @Override
@@ -471,5 +468,4 @@ public class GCMPush extends AbstractPush {
             return null;
         }
     }
-
 }

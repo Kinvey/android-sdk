@@ -40,6 +40,8 @@ public abstract class AbstractPush {
 
     protected Client client;
 
+    protected Class pushServiceClass;
+
     private AbstractPush() {
     }
 
@@ -135,5 +137,11 @@ public abstract class AbstractPush {
 
     }
 
+    public Class getPushServiceClass() {
+        return pushServiceClass;
+    }
 
+    public void setPushServiceClass(Class pushServiceClass) {
+        this.pushServiceClass = pushServiceClass;
+    }
 }
