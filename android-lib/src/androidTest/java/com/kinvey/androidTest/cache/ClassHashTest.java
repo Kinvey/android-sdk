@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 
 import io.realm.DynamicRealm;
+import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmSchema;
 
@@ -35,6 +36,7 @@ public class ClassHashTest {
     @Before
     public void setup(){
         context = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Realm.init(context);
     }
 
     @Test
@@ -111,7 +113,7 @@ public class ClassHashTest {
 
     @Test
     public void testInnerObjects(){
-        RealmConfiguration rc = new RealmConfiguration.Builder(context)
+        RealmConfiguration rc = new RealmConfiguration.Builder()
                 .name("test_inner")
                 .build();
         DynamicRealm realm = DynamicRealm.getInstance(rc);

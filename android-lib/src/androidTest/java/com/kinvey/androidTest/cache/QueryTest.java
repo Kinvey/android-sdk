@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
+import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 
@@ -45,8 +46,8 @@ public class QueryTest {
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
-
-        DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder(mMockContext).build());
+        Realm.init(mMockContext);
+        DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
 
 
         if (!realm.getSchema().contains("test")){
@@ -67,7 +68,8 @@ public class QueryTest {
     @After
     public void tearDown() {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder(mMockContext).build());
+        Realm.init(mMockContext);
+        DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
 
         if (realm.getSchema().contains("test")){
             realm.beginTransaction();

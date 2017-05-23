@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import io.realm.Realm;
+
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
  * system.
@@ -726,7 +728,7 @@ public class Client extends AbstractClient {
 
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
-
+            Realm.init(context);
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
