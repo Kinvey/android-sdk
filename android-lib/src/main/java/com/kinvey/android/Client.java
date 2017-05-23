@@ -199,7 +199,15 @@ public class Client extends AbstractClient {
      *
      * @return Instance of {@link com.kinvey.java.UserDiscovery} for the defined collection
      */
-    public <I extends GenericJson, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+
+/*    public <I extends GenericJson, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
+        synchronized (lock) {
+            return new AsyncCustomEndpoints(myClass, this);
+        }
+    }*/
+
+    @Override
+    public AsyncCustomEndpoints customEndpoints(Class myClass) {
         synchronized (lock) {
             return new AsyncCustomEndpoints(myClass, this);
         }
@@ -303,15 +311,18 @@ public class Client extends AbstractClient {
      }
      * </pre>
      * </p>
-     *
+     * @param pushServiceClass Service class for handling push notification
      * @return Instance of {@link AbstractPush} for the defined collection
      */
-    public AbstractPush push() {
+    public AbstractPush push(Class pushServiceClass) {
         synchronized (lock) {
             //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
             if (pushProvider == null) {
                 pushProvider = new GCMPush(this, true, "");
+            }
+            if (pushProvider.getPushServiceClass() == null) {
+                pushProvider.setPushServiceClass(pushServiceClass);
             }
             return pushProvider;
         }
@@ -406,6 +417,7 @@ public class Client extends AbstractClient {
         private String MICVersion;
         private String MICBaseURL;
         private boolean deltaSetCache = false;
+        private Class userClass = User.class;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -619,7 +631,7 @@ public class Client extends AbstractClient {
          *
          */
         public Builder(InputStream properties, HttpTransport transport, Context context) {
-            super(newCompatibleTransport(), null);
+            super(transport, null);
 
             Preconditions.checkNotNull(properties, "properties must be not null");
             loadProperties(properties);
@@ -703,6 +715,11 @@ public class Client extends AbstractClient {
             this(context, newCompatibleTransport());
         }
 
+        public Builder setUserClass(Class userClass){
+            this.userClass = userClass;
+            return this;
+        }
+
         /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
@@ -719,6 +736,7 @@ public class Client extends AbstractClient {
                     getRequestBackoffPolicy(), this.context);
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
+            client.setUserClass(userClass);
 
             //GCM explicitely enabled
             if (this.GCM_Enabled){
@@ -897,11 +915,9 @@ public class Client extends AbstractClient {
             	Logger.ERROR("Could not retrieve user Credentials");
             }
 
-            User result = null;
             Exception exception = null;
             try{
-                result = BaseUserStore.convenience(client);
-                client.setUser(result);
+                client.setUser(BaseUserStore.convenience(client));
             }catch (Exception error){
                 exception = error;
                 if (error instanceof HttpResponseException) {
@@ -919,7 +935,7 @@ public class Client extends AbstractClient {
             if(exception != null){
                 retrieveUserCallback.onFailure(exception);
             }else{
-                retrieveUserCallback.onSuccess(result);
+                retrieveUserCallback.onSuccess(client.getActiveUser());
             }
 
         }
