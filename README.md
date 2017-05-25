@@ -36,7 +36,7 @@ Pre-requisites:
 * [gradle build system](http://gradle.org/)
 
 ```
-gradle clean build
+gradle clean
 ```
 
 ```
@@ -46,35 +46,36 @@ gradle release
 ```
 gradle test jacocoTestReport
 ```
-
-
-##Legacy Build (DEPRECATED!)
 ### Regenerate Javadocs
 
 ```
-rm -r <devcenter.home>/content/reference/android/api/*
-cd <project.home> 
-mvn -Pdev javadoc:javadoc install
+<devcenter.home> should be located in this relative path ../../../<devcenter.home> relatively <java-library.home>.
+cd <devcenter.home> 
+git pull devcenter
+cd <java-library.home>
+gradle release
 ```
 
 ### Release
 
 ```
-mvn -Prelease clean install
+cd <java-library.home>
+gradle release
 ```
 
 ###Explicit release steps (including the above)
 ```
-find and replace on version number (all poms.xml and RequestHeader version)
+find and replace on version (build.gradle in project directory and RequestHeader version)
 check in
-double check/update devcenter.home location (in parent pom) relative to trunk/
+double check/update devcenter.home location
 
 git pull devcenter
-remove current android javadocs (rm -r <devcenter.home>/content/reference/android/api/*)
 
-rm -r <devcenter.home>/content/reference/android/api/*
-cd <trunk> 
-mvn -Pdev javadoc:javadoc install
+cd <java-library.home>
+gradle release
+
+cd <devcenter.home> 
+npm start
 
 node . to run at localhost:3000
 
@@ -84,9 +85,7 @@ rm -r node_modules
 (npm install)
 (npm update)
 
-mvn -Prelease clean install
-
-cd devcenter/content/downloads/android-changelog.md
+cd devcenter/content/downloads/android-v3.0-changelog.md
 update changelog
 
 login to AWS S3 and upload zip from trunk/release
@@ -100,13 +99,6 @@ check it
 push to prod
 check it
 
-svn up at root
-
-svn merge -rLastRevisionMergedFromTrunkToBranch:HEAD url/of/trunk path/to/branch/wc
-(merge any changes on trunk into correct branch or create new one for major release)
-svn cp from branch/2.2.x to tag2.2.2 (tag is snapshot of release)
-
-check it all in
 ```
 
 
