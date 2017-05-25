@@ -101,9 +101,9 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
      */
     public void initialize(AbstractKinveyClientRequest<?> request) {
         if (!request.isRequireAppCredentials()){
-            Preconditions.checkNotNull(credential, "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
-            Preconditions.checkNotNull(credential.getUserId(), "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
-            Preconditions.checkNotNull(credential.getAuthToken(), "No Active User - please login a user by calling myClient.user().login( ... ) before retrying this request.");
+            Preconditions.checkNotNull(credential, "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
+            Preconditions.checkNotNull(credential.getUserId(), "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
+            Preconditions.checkNotNull(credential.getAuthToken(), "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
         }
 
         if (credential != null && !request.isRequireAppCredentials()) {

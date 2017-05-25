@@ -84,7 +84,7 @@ public class GCMPush extends AbstractPush {
     @Override
     public GCMPush initialize(final Application currentApp) {
         if (!getClient().isUserLoggedIn()) {
-            throw new KinveyException("No user is currently logged in", "call myClient.User().login(...) first to login", "Registering for Push Notifications needs a logged in user");
+            throw new KinveyException("No user is currently logged in", "call UserStore.login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
