@@ -90,6 +90,9 @@ update changelog
 
 login to AWS S3 and upload zip from trunk/release
 modify links in content/downloads.json
+modify links in content/downloads/android-changelog.json
+modify links in content/downloads/android-v3.0-changelog.json
+
 
 test locally
 commit
