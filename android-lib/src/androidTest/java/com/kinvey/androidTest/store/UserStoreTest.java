@@ -44,8 +44,8 @@ public class UserStoreTest {
     private final String testPassword = testUser;
     private final String username = "test";
     private final String password = "test";
-    private final String appKey = "kid_H1lH5Dsw";
-    private final String appSecret = "cc5c72d261d8473590a0fa01024fb313";
+    private final String appKey = "YOUR_APP_KEY_HERE";
+    private final String appSecret = "YOUR_APP_SECRET_HERE";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
@@ -871,7 +871,6 @@ public class UserStoreTest {
     }
 
     @Test // this test always creates new user, to be careful
-    @Ignore //reason: need master key auth,
     public void testForgotUsername() throws InterruptedException {
         User user = signUp(createRandomUserName("forgotUserName"), password, client).result;
         assertNotNull(user);
