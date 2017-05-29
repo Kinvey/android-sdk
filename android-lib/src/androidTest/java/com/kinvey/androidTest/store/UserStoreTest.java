@@ -473,7 +473,7 @@ public class UserStoreTest {
     @Test
     @Ignore // need facebookAccessToken
     public void testLoginFacebookAsync() throws InterruptedException {
-        String facebookAccessToken = "";
+        String facebookAccessToken = "YOUR_ACCESS_TOKEN_HERE";
         DefaultKinveyClientCallback userCallback = loginFacebook(facebookAccessToken, client);
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
@@ -509,7 +509,7 @@ public class UserStoreTest {
     @Test
     @Ignore // need googleAccessToken
     public void testLoginGoogleAsync() throws InterruptedException {
-        String googleAccessToken = "";
+        String googleAccessToken = "YOUR_ACCESS_TOKEN_HERE";
         DefaultKinveyClientCallback userCallback = loginGoogle(googleAccessToken, client);
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
@@ -545,10 +545,10 @@ public class UserStoreTest {
     @Test
     @Ignore // need to add accessToken,  accessSecret, consumerKey, consumerSecret
     public void testLoginTwitterAsync() throws InterruptedException {
-        String accessToken = "";
-        String accessSecret = "";
-        String consumerKey = "";
-        String consumerSecret = "";
+        String accessToken = "YOUR_ACCESS_TOKEN_HERE";
+        String accessSecret = "YOUR_ACCESS_SECRET_HERE";
+        String consumerKey = "YOUR_CONSUMER_KEY_HERE";
+        String consumerSecret = "YOUR_CONSUMER_SECRET_HERE";
         DefaultKinveyClientCallback userCallback = loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
@@ -556,10 +556,10 @@ public class UserStoreTest {
 
     @Test
     public void testLoginTwitterAsyncBad() throws InterruptedException {
-        String accessToken = "wrongAccessToken";
-        String accessSecret = "wrongAccessSecret";
-        String consumerKey = "wrongConsumerKey";
-        String consumerSecret = "wrongConsumerSecret";
+        String accessToken = "YOUR_ACCESS_TOKEN_HERE";
+        String accessSecret = "YOUR_ACCESS_SECRET_HERE";
+        String consumerKey = "YOUR_CONSUMER_KEY_HERE";
+        String consumerSecret = "YOUR_CONSUMER_SECRET_HERE";
         DefaultKinveyClientCallback userCallback = loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client);
         assertNotNull(userCallback.error);
         assertFalse(client.isUserLoggedIn());
@@ -588,11 +588,11 @@ public class UserStoreTest {
     @Test
     @Ignore // need to add accessToken,  accessSecret, consumerKey, consumerSecret
     public void testLoginLinkedInAsync() throws InterruptedException {
-        String accessToken = "AQXu60okmBXrQkBm5BOpBCBBpCYc3y9uKWHtF559A1j4ttwjf5bXNeq0nVOHtgPomuw9Wn661BYbZal-3IReW0zc-Ed8NvP0FNdOTQVt9c8qz9EL5sezCYKd_I2VPEEMSC-YOyvhi-7WsttjaPnU_9H_kCnfVJuU7Fyt8Ph1XTw66xZeu2U";
-        String accessSecret = "ExAZxYxvo42UfOCN";
-        String consumerKey = "86z99b0orhyt7s";
-        String consumerSecret = "ExAZxYxvo42UfOCN";
-        DefaultKinveyClientCallback userCallback = loginLinkedIn(accessToken, consumerSecret, consumerKey, consumerSecret, client);
+        String accessToken = "YOUR_ACCESS_TOKEN_HERE"; //"AQXu60okmBXrQkBm5BOpBCBBpCYc3y9uKWHtF559A1j4ttwjf5bXNeq0nVOHtgPomuw9Wn661BYbZal-3IReW0zc-Ed8NvP0FNdOTQVt9c8qz9EL5sezCYKd_I2VPEEMSC-YOyvhi-7WsttjaPnU_9H_kCnfVJuU7Fyt8Ph1XTw66xZeu2U"
+        String accessSecret = "YOUR_ACCESS_SECRET_HERE"; //"ExAZxYxvo42UfOCN";
+        String consumerKey = "YOUR_CONSUMER_KEY_HERE"; //"86z99b0orhyt7s";
+        String consumerSecret = "YOUR_CONSUMER_SECRET_HERE"; //"ExAZxYxvo42UfOCN";
+        DefaultKinveyClientCallback userCallback = loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client);
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
     }
@@ -630,10 +630,10 @@ public class UserStoreTest {
     @Test
     @Ignore // need to change accessToken, refreshToken, clientID, ID
     public void testLoginSalesforceAsync() throws InterruptedException {
-        String accessToken = "00D6F000000Dct5!AQkAQFAWrMjHboaD6Yn71NezV9yizZiM_MJLodm.ppn7TgypzET20QagfusU7UCAJw7jbnjWxjsWpYI2Xoa82ehmJum65Phd";
-        String refreshToken = "5Aep861..zRMyCurAW3YNVSrR4jYtnt9rDCBsqQ.ytSywG1HaexWXOn07YXPwep1YmQVmuuc9YM8sWS8pyFbC2G";
-        String clientID = "3MVG9YDQS5WtC11o5afZtRCMB4EGBMjwb0MfQOBSW2u2EZ5r6fHt_sXtYx9i2.nJIkhzicIPWpyhm1zc3HlWw";
-        String ID = "https://login.salesforce.com/id/00D6F000000Dct5UAC/0056F000006Xw0jQAC";
+        String accessToken = "YOUR_ACCESS_TOKEN_HERE"; //"00D6F000000Dct5!AQkAQFAWrMjHboaD6Yn71NezV9yizZiM_MJLodm.ppn7TgypzET20QagfusU7UCAJw7jbnjWxjsWpYI2Xoa82ehmJum65Phd";
+        String refreshToken = "YOUR_REFRESH_TOKEN_HERE"; //"5Aep861..zRMyCurAW3YNVSrR4jYtnt9rDCBsqQ.ytSywG1HaexWXOn07YXPwep1YmQVmuuc9YM8sWS8pyFbC2G";
+        String clientID = "YOUR_CLIENT_ID_HERE"; //"3MVG9YDQS5WtC11o5afZtRCMB4EGBMjwb0MfQOBSW2u2EZ5r6fHt_sXtYx9i2.nJIkhzicIPWpyhm1zc3HlWw";
+        String ID = "YOUR_SALESFORCE_ID_HERE"; //"https://login.salesforce.com/id/00D6F000000Dct5UAC/0056F000006Xw0jQAC";
         DefaultKinveyClientCallback userCallback = loginSalesforce(accessToken, refreshToken, clientID, ID, client);
         if (userCallback.error != null) {
             Log.d("test: ", userCallback.error.getMessage());
@@ -698,8 +698,6 @@ public class UserStoreTest {
     @Test
     public void testMIC_LoginWithAuthorizationCodeAPI() throws InterruptedException {
         String redirectURI = "kinveyAuthDemo://";
-        String appKey = "kid_ZyrG_IFcGe";
-        String appSecret = "f554f49974d14962bf72814268c2a7ba";
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(appKey, appSecret, mMockContext).build();
         if (client.isUserLoggedIn()) {
@@ -832,18 +830,6 @@ public class UserStoreTest {
     }
 
     @Test
-    @Ignore //reason: android UserStore don't have lookupAsync(criteria) method
-    public void testLookupUsersAsync() throws InterruptedException {
-
-    }
-
-    @Test
-    @Ignore //reason: android UserStore don't have lookupAsync(criteria) method
-    public void testLookupUsersAsyncBad() throws InterruptedException {
-
-    }
-
-    @Test
     @Ignore//reason: need master key auth
     public void testDoesUsernameExist() throws InterruptedException {
         User user = login(username, password, client).result;
@@ -871,6 +857,7 @@ public class UserStoreTest {
     }
 
     @Test // this test always creates new user, to be careful
+    @Ignore //reason: need master key auth,
     public void testForgotUsername() throws InterruptedException {
         User user = signUp(createRandomUserName("forgotUserName"), password, client).result;
         assertNotNull(user);
