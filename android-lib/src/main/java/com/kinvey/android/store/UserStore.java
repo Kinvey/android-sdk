@@ -173,7 +173,7 @@ public class UserStore {
      * @throws IOException
      */
     public static void loginGoogle(String accessToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
-        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, client, callback).execute();
+        new Login(accessToken, UserStoreRequestManager.LoginType.GOOGLE, client, callback).execute();
     }
 
     /**
@@ -793,6 +793,7 @@ public class UserStore {
             this.consumerKey = consumerKey;
             this.consumerSecret = consumerSecret;
             this.type=type;
+            this.client = client;
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
