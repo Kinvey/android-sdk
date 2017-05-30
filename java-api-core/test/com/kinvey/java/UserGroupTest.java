@@ -29,18 +29,18 @@ import java.util.ArrayList;
  */
 public class UserGroupTest extends KinveyMockUnitTest {
 
-    private final String _id = "_id";
-    private final String users = "users";
-    private final String list = "users";
+    private static final String ID = "_id";
+    private static final String USERS = "users";
+    private static final String LIST = "list";
 
     public void testUserGroupUpdate(){
         UserGroup group = new UserGroup(getClient(), getKinveyRequestInitializer());
         try{
             UserGroup.Update update = group.addUserToGroupBlocking("Group1", "user1", "subgroup1");
             assertNotNull(update);
-            assertEquals("Group1", ((GenericJson) update.getJsonContent()).get(_id));
-            assertEquals(1, ((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(users))).get(list)).size());
-            assertEquals("user1", ((GenericJson)((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(users))).get(list)).get(0)).get(_id));
+            assertEquals("Group1", ((GenericJson) update.getJsonContent()).get(ID));
+            assertEquals(1, ((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(USERS))).get(LIST)).size());
+            assertEquals("user1", ((GenericJson)((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(USERS))).get(LIST)).get(0)).get(ID));
         }catch (IOException io){
             fail("IO -> " + io.getMessage());
         }

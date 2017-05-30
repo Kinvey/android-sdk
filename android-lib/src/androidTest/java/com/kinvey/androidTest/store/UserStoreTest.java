@@ -40,12 +40,12 @@ import static org.junit.Assert.assertNull;
 public class UserStoreTest {
 
     private Client client = null;
-    private final String testUser = "test40";
-    private final String testPassword = testUser;
-    private final String username = "test";
-    private final String password = "test";
-    private final String appKey = "YOUR_APP_KEY_HERE";
-    private final String appSecret = "YOUR_APP_SECRET_HERE";
+    private static final String TEST_USER = "test40";
+    private static final String TEST_PASSWORD = TEST_USER;
+    private static final String USERNAME = "test";
+    private static final String PASSWORD = "test";
+    private static final String APP_KEY = "YOUR_APP_KEY_HERE";
+    private static final String APP_SECRET = "YOUR_APP_SECRET_HERE";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
@@ -360,7 +360,7 @@ public class UserStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.signUp(testUser, testPassword, client, callback);
+                UserStore.signUp(TEST_USER, TEST_PASSWORD, client, callback);
                 Looper.loop();
             }
         }).start();
@@ -374,7 +374,7 @@ public class UserStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.signUp(testUser, testPassword, user, client, callback);
+                UserStore.signUp(TEST_USER, TEST_PASSWORD, user, client, callback);
                 Looper.loop();
             }
         }).start();
@@ -451,13 +451,13 @@ public class UserStoreTest {
         Client fakeClient = new Client.Builder("app_key_fake", "app_secret_fake", mMockContext).build();
         DefaultKinveyClientCallback userCallback = login(fakeClient);
         assertNotNull(userCallback.error);
-        userCallback = login(username, password, fakeClient);
+        userCallback = login(USERNAME, PASSWORD, fakeClient);
         assertNotNull(userCallback.error);
     }
 
     @Test
     public void testLoginUserPassAsync() throws InterruptedException {
-        DefaultKinveyClientCallback userCallback = login(username, password, client);
+        DefaultKinveyClientCallback userCallback = login(USERNAME, PASSWORD, client);
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
         assertNull(logout(client).error);
@@ -465,7 +465,7 @@ public class UserStoreTest {
 
     @Test
     public void testLoginUserPassAsyncBad() throws InterruptedException {
-        DefaultKinveyClientCallback userCallback = login(username, "wrongPassword", client);
+        DefaultKinveyClientCallback userCallback = login(USERNAME, "wrongPassword", client);
         assertNotNull(userCallback.error);
         assertFalse(client.isUserLoggedIn());
     }
@@ -644,10 +644,10 @@ public class UserStoreTest {
 
     @Test
     public void testLoginSalesforceAsyncBad() throws InterruptedException {
-        String accessToken = "wrong";
-        String refreshToken = "5Aep861..zRMyCurAW3YNVSrR4jYtnt9rDCBsqQ.ytSywG1HactASZdIt3r1Nxf4rdPDcKdjGhHQPU7TIva6NOR";
-        String clientID = "3MVG9YDQS5WtC11o5afZtRCMB4EGBMjwb0MfQOBSW2u2EZ5r6fHt_sXtYx9i2.nJIkhzicIPWpyhm1zc3HlWw";
-        String ID = "https://login.salesforce.com/id/00D6F000000Dct5UAC/0056F000006Xw0jQAC";
+        String accessToken = "wrongAccessToken";
+        String refreshToken = "wrongRefreshToken";
+        String clientID = "wrongClientID";
+        String ID = "wrongID";
         DefaultKinveyClientCallback userCallback = loginSalesforce(accessToken, refreshToken, clientID, ID, client);
         assertNotNull(userCallback.error);
         assertFalse(client.isUserLoggedIn());
@@ -695,15 +695,15 @@ public class UserStoreTest {
         return callback;
     }
 
-    @Test
+    @Test //can be failed if application doesn't have permission for MIC Login
     public void testMIC_LoginWithAuthorizationCodeAPI() throws InterruptedException {
         String redirectURI = "kinveyAuthDemo://";
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(appKey, appSecret, mMockContext).build();
+        client = new Client.Builder(APP_KEY, APP_SECRET, mMockContext).build();
         if (client.isUserLoggedIn()) {
             logout(client);
         }
-        DefaultKinveyUserCallback userCallback = loginWithAuthorizationCodeAPIAsync(username, password, redirectURI, client);
+        DefaultKinveyUserCallback userCallback = loginWithAuthorizationCodeAPIAsync(USERNAME, PASSWORD, redirectURI, client);
         assertNotNull(userCallback.result);
         logout(client);
     }
@@ -724,7 +724,7 @@ public class UserStoreTest {
 
     @Test
     public void testLogout() throws InterruptedException {
-        login(username, password, client);
+        login(USERNAME, PASSWORD, client);
         DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person p = new Person();
         p.setUsername("TestUser");
@@ -754,7 +754,7 @@ public class UserStoreTest {
 
     @Test
     public void testLogoutWithNoDatabaseTables() throws InterruptedException {
-        login(username, password, client);
+        login(USERNAME, PASSWORD, client);
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
@@ -762,7 +762,7 @@ public class UserStoreTest {
 
     @Test
     public void testLogoutWithDatabaseTablesButNoAPICalls() throws InterruptedException {
-        login(username, password, client);
+        login(USERNAME, PASSWORD, client);
         DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
@@ -771,7 +771,7 @@ public class UserStoreTest {
 
     @Test
     public void testLogoutWithDatabaseTablesWithAPICalls() throws InterruptedException, IOException {
-        login(username, password, client);
+        login(USERNAME, PASSWORD, client);
         DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         save(personStore, new Person());
         assertNull(logout(client).error);
@@ -781,11 +781,11 @@ public class UserStoreTest {
 
     @Test
     public void testCreateUserAsync() throws InterruptedException {
-        DefaultKinveyClientCallback callback = signUp(createRandomUserName("CreateUser"), password, client);
+        DefaultKinveyClientCallback callback = signUp(createRandomUserName("CreateUser"), PASSWORD, client);
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
         assertTrue(client.isUserLoggedIn());
-        assertNotNull(callback.result.getUsername().equals(username));
+        assertNotNull(callback.result.getUsername().equals(USERNAME));
         assertNull(logout(client).error);
     }
 
@@ -822,11 +822,11 @@ public class UserStoreTest {
         return callback;
     }
 
-    //Why does master key need here?
+    //Why do appropriate credentials need here?
     @Test
-    @Ignore//reason: need master key auth
+    @Ignore//reason: Please retry your request with appropriate credentials
     public void testDoesUsernameExist() throws InterruptedException {
-        User user = login(username, password, client).result;
+        User user = login(USERNAME, PASSWORD, client).result;
         boolean isNameExists = exists(user.getUsername(), client).result;
         assertTrue(isNameExists);
     }
@@ -851,11 +851,11 @@ public class UserStoreTest {
         return callback;
     }
 
-    //Why does master key need here?
+    //Why do appropriate credentials need here?
     @Test // this test always creates new user, to be careful
-    @Ignore //reason: need master key auth
+    @Ignore //reason: Please retry your request with appropriate credentials
     public void testForgotUsername() throws InterruptedException {
-        User user = signUp(createRandomUserName("forgotUserName"), password, client).result;
+        User user = signUp(createRandomUserName("forgotUserName"), PASSWORD, client).result;
         assertNotNull(user);
         assertNotNull(user.getUsername());
         assertTrue(client.isUserLoggedIn());
@@ -879,7 +879,7 @@ public class UserStoreTest {
 
     @Test // this test always creates new user, to be careful
     public void testDeleteUserSoftAsync() throws InterruptedException {
-        User user = signUp(createRandomUserName("deleteUserSoft"), password, client).result;
+        User user = signUp(createRandomUserName("deleteUserSoft"), PASSWORD, client).result;
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(false, client).error);
@@ -902,7 +902,7 @@ public class UserStoreTest {
 
     @Test
     public void testDeleteUserHardAsync() throws InterruptedException {
-        User user = signUp(createRandomUserName("deleteUserHard"), password, client).result;
+        User user = signUp(createRandomUserName("deleteUserHard"), PASSWORD, client).result;
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(true, client).error);
@@ -911,7 +911,7 @@ public class UserStoreTest {
 
     @Test
     public void testUserEmailVerification() throws InterruptedException {
-        User user = login(username, password, client).result;
+        User user = login(USERNAME, PASSWORD, client).result;
         assertNotNull(user);
         assertNotNull(user.getId());
         boolean isEmailVerificationSent = sentEmailVerification(client).result;
@@ -935,11 +935,11 @@ public class UserStoreTest {
 
     @Test
     public void testUserPasswordReset() throws InterruptedException {
-        User user = login(username, password, client).result;
+        User user = login(USERNAME, PASSWORD, client).result;
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNotNull(user.getUsername());
-        boolean isPasswordReset = resetPassword(username, client).result;
+        boolean isPasswordReset = resetPassword(USERNAME, client).result;
         assertTrue(isPasswordReset);
         assertNull(logout(client).error);
     }
@@ -963,7 +963,7 @@ public class UserStoreTest {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         Client.Builder localBuilder = new Client.Builder(mMockContext);
         Client localClient = localBuilder.build();
-        DefaultKinveyClientCallback callback = login(username, password, localClient);
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD, localClient);
         assertNotNull(callback.result);
         User activeUser = callback.result;
         Context mMockContext2 = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getContext(), "test_");
@@ -974,6 +974,36 @@ public class UserStoreTest {
         assertTrue(activeUser.getUsername().equals(localClient2.getActiveUser().getUsername()));
         assertNull(logout(localClient).error);
         assertNull(logout(localClient2).error);
+    }
+
+    @Test
+    public void testSignUpIfUserLoggedIn() throws InterruptedException {
+        User user = login(USERNAME, PASSWORD, client).result;
+        assertNotNull(user);
+        assertNotNull(user.getId());
+        assertTrue(client.isUserLoggedIn());
+        DefaultKinveyClientCallback callback = signUp();
+        assertNull(callback.result);
+        assertNotNull(callback.error);
+        assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testSignUpWithEmptyUsername() throws InterruptedException {
+        DefaultKinveyClientCallback callback = signUp("", PASSWORD, client);
+        assertNotNull(callback.result);
+        assertNull(callback.error);
+        assertTrue(client.isUserLoggedIn());
+        assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testSignUpWithEmptyPassword() throws InterruptedException {
+        DefaultKinveyClientCallback callback = signUp(createRandomUserName("Test"), "", client);
+        assertNotNull(callback.result);
+        assertNull(callback.error);
+        assertTrue(client.isUserLoggedIn());
+        assertNull(logout(client).error);
     }
 
     private String createRandomUserName(String testName) {
