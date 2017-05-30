@@ -50,8 +50,8 @@ public class UserStoreTest {
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
         private CountDownLatch latch;
-        User result;
-        Throwable error;
+        private User result;
+        private Throwable error;
 
         private DefaultKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -77,8 +77,8 @@ public class UserStoreTest {
     private static class CustomKinveyClientCallback implements KinveyClientCallback<TestUser> {
 
         private CountDownLatch latch;
-        TestUser result;
-        Throwable error;
+        private TestUser result;
+        private Throwable error;
 
         private CustomKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -103,7 +103,7 @@ public class UserStoreTest {
 
     private static class DefaultKinveyUserDeleteCallback implements KinveyUserDeleteCallback {
         private CountDownLatch latch;
-        Throwable error;
+        private Throwable error;
 
         private DefaultKinveyUserDeleteCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -128,8 +128,8 @@ public class UserStoreTest {
     private static class DefaultKinveyVoidCallback implements KinveyClientCallback<Void> {
 
         private CountDownLatch latch;
-        Void result;
-        Throwable error;
+        private Void result;
+        private Throwable error;
 
         private DefaultKinveyVoidCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -155,9 +155,9 @@ public class UserStoreTest {
     private static class DefaultKinveyMICCallback implements KinveyMICCallback<User> {
 
         private CountDownLatch latch;
-        User result;
-        Throwable error;
-        String myURLToRender;
+        private User result;
+        private Throwable error;
+        private String myURLToRender;
 
         private DefaultKinveyMICCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -189,8 +189,8 @@ public class UserStoreTest {
     private static class DefaultKinveyUserCallback implements KinveyUserCallback<User> {
 
         private CountDownLatch latch;
-        User result;
-        Throwable error;
+        private User result;
+        private Throwable error;
 
         private DefaultKinveyUserCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -216,8 +216,8 @@ public class UserStoreTest {
     private static class DefaultPersonKinveyClientCallback implements KinveyClientCallback<Person> {
 
         private CountDownLatch latch;
-        Person result;
-        Throwable error;
+        private Person result;
+        private Throwable error;
 
         DefaultPersonKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
@@ -243,8 +243,8 @@ public class UserStoreTest {
     private static class DefaultKinveyUserManagementCallback implements KinveyUserManagementCallback {
 
         private CountDownLatch latch;
-        boolean result;
-        Throwable error;
+        private boolean result;
+        private Throwable error;
 
         private DefaultKinveyUserManagementCallback(CountDownLatch latch) {
             this.latch = latch;
