@@ -29,19 +29,18 @@ import java.util.ArrayList;
  */
 public class UserGroupTest extends KinveyMockUnitTest {
 
-
-
+    private final String _id = "_id";
+    private final String users = "users";
+    private final String list = "users";
 
     public void testUserGroupUpdate(){
-
         UserGroup group = new UserGroup(getClient(), getKinveyRequestInitializer());
-
         try{
             UserGroup.Update update = group.addUserToGroupBlocking("Group1", "user1", "subgroup1");
             assertNotNull(update);
-            assertEquals("Group1", ((GenericJson) update.getJsonContent()).get("_id"));
-            assertEquals(1, ((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get("users"))).get("list")).size());
-            assertEquals("user1", ((GenericJson)((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get("users"))).get("list")).get(0)).get("_id"));
+            assertEquals("Group1", ((GenericJson) update.getJsonContent()).get(_id));
+            assertEquals(1, ((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(users))).get(list)).size());
+            assertEquals("user1", ((GenericJson)((ArrayList)((GenericJson)(((GenericJson) update.getJsonContent()).get(users))).get(list)).get(0)).get(_id));
         }catch (IOException io){
             fail("IO -> " + io.getMessage());
         }
@@ -67,11 +66,6 @@ public class UserGroupTest extends KinveyMockUnitTest {
         }catch (IOException io){
             fail("IO -> " + io.getMessage());
         }
-
-
     }
-
-
-
 
 }
