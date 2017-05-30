@@ -989,6 +989,20 @@ public class UserStoreTest {
     }
 
     @Test
+    public void testSignUpIfUserExists() throws InterruptedException {
+        User user = signUp(createRandomUserName("TestSignUp"), PASSWORD, client).result;
+        assertNotNull(user);
+        assertNotNull(user.getId());
+        assertTrue(client.isUserLoggedIn());
+        assertNull(logout(client).error);
+        assertFalse(client.isUserLoggedIn());
+        DefaultKinveyClientCallback callback = signUp(user.getUsername(), PASSWORD, client);
+        assertNull(callback.result);
+        assertNotNull(callback.error);
+        assertFalse(client.isUserLoggedIn());
+    }
+
+    @Test
     public void testSignUpWithEmptyUsername() throws InterruptedException {
         DefaultKinveyClientCallback callback = signUp("", PASSWORD, client);
         assertNotNull(callback.result);
