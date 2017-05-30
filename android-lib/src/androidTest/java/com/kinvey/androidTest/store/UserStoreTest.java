@@ -53,7 +53,7 @@ public class UserStoreTest {
         User result;
         Throwable error;
 
-        DefaultKinveyClientCallback(CountDownLatch latch) {
+        private DefaultKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -69,7 +69,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -80,7 +80,7 @@ public class UserStoreTest {
         TestUser result;
         Throwable error;
 
-        CustomKinveyClientCallback(CountDownLatch latch) {
+        private CustomKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -96,7 +96,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -105,7 +105,7 @@ public class UserStoreTest {
         private CountDownLatch latch;
         Throwable error;
 
-        DefaultKinveyUserDeleteCallback(CountDownLatch latch) {
+        private DefaultKinveyUserDeleteCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -120,7 +120,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -131,7 +131,7 @@ public class UserStoreTest {
         Void result;
         Throwable error;
 
-        DefaultKinveyVoidCallback(CountDownLatch latch) {
+        private DefaultKinveyVoidCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -147,7 +147,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -159,7 +159,7 @@ public class UserStoreTest {
         Throwable error;
         String myURLToRender;
 
-        DefaultKinveyMICCallback(CountDownLatch latch) {
+        private DefaultKinveyMICCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -175,7 +175,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
 
@@ -192,7 +192,7 @@ public class UserStoreTest {
         User result;
         Throwable error;
 
-        DefaultKinveyUserCallback(CountDownLatch latch) {
+        private DefaultKinveyUserCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -208,7 +208,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -235,7 +235,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -246,7 +246,7 @@ public class UserStoreTest {
         boolean result;
         Throwable error;
 
-        DefaultKinveyUserManagementCallback(CountDownLatch latch) {
+        private DefaultKinveyUserManagementCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -263,7 +263,7 @@ public class UserStoreTest {
             finish();
         }
 
-        void finish() {
+        private void finish() {
             latch.countDown();
         }
     }
@@ -770,6 +770,16 @@ public class UserStoreTest {
     }
 
     @Test
+    public void testLogoutWithDatabaseTablesWithAPICalls() throws InterruptedException, IOException {
+        login(username, password, client);
+        DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        save(personStore, new Person());
+        assertNull(logout(client).error);
+        assertTrue(!client.isUserLoggedIn());
+        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    @Test
     public void testCreateUserAsync() throws InterruptedException {
         DefaultKinveyClientCallback callback = signUp(createRandomUserName("CreateUser"), password, client);
         assertNotNull(callback.result);
@@ -812,23 +822,7 @@ public class UserStoreTest {
         return callback;
     }
 
-    @Test
-    @Ignore //reason: need master key auth
-    public void testFindUserAsync() throws InterruptedException {
-        DefaultKinveyClientCallback callback = login(username, password, client);
-        User u = callback.result;
-        assertTrue(client.isUserLoggedIn());
-        assertNotNull(client.getActiveUser());
-        assertTrue(client.getActiveUser().getId().equals(u.getId()));
-        assertNull(logout(client).error);
-    }
-
-    @Test
-    @Ignore //reason: need master key auth
-    public void testFindUserAsyncBad() throws InterruptedException {
-
-    }
-
+    //Why does master key need here?
     @Test
     @Ignore//reason: need master key auth
     public void testDoesUsernameExist() throws InterruptedException {
@@ -837,9 +831,10 @@ public class UserStoreTest {
         assertTrue(isNameExists);
     }
 
-    @Test //reason: need master key auth
+    @Test
     public void testDoesUsernameExistBad() throws InterruptedException {
-
+        boolean isNameExists = exists("wrong_username", client).result;
+        assertFalse(isNameExists);
     }
 
     private DefaultKinveyUserManagementCallback exists(final String username, final Client client) throws InterruptedException {
@@ -856,8 +851,9 @@ public class UserStoreTest {
         return callback;
     }
 
+    //Why does master key need here?
     @Test // this test always creates new user, to be careful
-    @Ignore //reason: need master key auth,
+    @Ignore //reason: need master key auth
     public void testForgotUsername() throws InterruptedException {
         User user = signUp(createRandomUserName("forgotUserName"), password, client).result;
         assertNotNull(user);
@@ -881,8 +877,7 @@ public class UserStoreTest {
         return callback;
     }
 
-    @Test
-    @Ignore //this test always creates new user, to be careful
+    @Test // this test always creates new user, to be careful
     public void testDeleteUserSoftAsync() throws InterruptedException {
         User user = signUp(createRandomUserName("deleteUserSoft"), password, client).result;
         assertNotNull(user);
@@ -910,7 +905,7 @@ public class UserStoreTest {
         User user = signUp(createRandomUserName("deleteUserHard"), password, client).result;
         assertNotNull(user);
         assertNotNull(user.getId());
-        assertNull(deleteUser(false, client).error);
+        assertNull(deleteUser(true, client).error);
         assertNull(logout(client).error);
     }
 
@@ -966,13 +961,13 @@ public class UserStoreTest {
     @Test
     public void testUserInitFromCredential() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        Client.Builder localBuilder = new Client.Builder(appKey, appSecret, mMockContext);
+        Client.Builder localBuilder = new Client.Builder(mMockContext);
         Client localClient = localBuilder.build();
         DefaultKinveyClientCallback callback = login(username, password, localClient);
         assertNotNull(callback.result);
         User activeUser = callback.result;
         Context mMockContext2 = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getContext(), "test_");
-        Client.Builder localBuilder2 = new Client.Builder(appKey, appSecret, mMockContext2);
+        Client.Builder localBuilder2 = new Client.Builder(mMockContext2);
         Client localClient2 = localBuilder2.build();
         assertNotNull(localClient2.getActiveUser());
         assertTrue(activeUser.getId().equals(localClient2.getActiveUser().getId()));
