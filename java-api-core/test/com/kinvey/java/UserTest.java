@@ -40,6 +40,9 @@ import com.kinvey.java.testing.MockKinveyAuthRequest;
 public class UserTest extends KinveyMockUnitTest {
 
     private UserStoreRequestManager requestManager;
+    private static final String X_KINVEY_CUSTOM_REQUEST_PROPERTIES = "X-Kinvey-Custom-Request-Properties";
+    private static final String X_KINVEY_CLIENT_APP_VERSION = "X-Kinvey-Client-App-Version";
+    private static final String USER_ID = "userID";
 
     private void initializeRequestManager(boolean isNeedCreateUser) {
         requestManager = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
@@ -121,7 +124,7 @@ public class UserTest extends KinveyMockUnitTest {
         User user = requestManager.getClient().getActiveUser();
         user.setId("testUser");
         Delete del = requestManager.deleteBlocking(true);
-        assertEquals(requestManager.getClient().getActiveUser().getId(), del.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getId(), del.get(USER_ID).toString());
         assertEquals(true, del.get("hard"));
     }
 
@@ -129,7 +132,7 @@ public class UserTest extends KinveyMockUnitTest {
         initializeRequestManager(true);
         requestManager.getClient().getActiveUser().setId("testUser");
         Delete del = requestManager.deleteBlocking(false);
-        assertEquals(requestManager.getClient().getActiveUser().getId(),del.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getId(),del.get(USER_ID).toString());
         assertEquals(false,del.get("hard"));
         assertEquals("DELETE",del.getRequestMethod());
     }
@@ -146,7 +149,7 @@ public class UserTest extends KinveyMockUnitTest {
         initializeRequestManager(true);
         requestManager.getClient().getActiveUser().setId("testUser");
         Retrieve ret = requestManager.retrieveBlocking();
-        assertEquals(requestManager.getClient().getActiveUser().getId(),ret.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getId(),ret.get(USER_ID).toString());
         assertEquals("GET", ret.getRequestMethod());
     }
 
@@ -162,7 +165,7 @@ public class UserTest extends KinveyMockUnitTest {
         initializeRequestManager(true);
         requestManager.getClient().getActiveUser().setId("testUser");
         Update update = requestManager.updateBlocking();
-        assertEquals(requestManager.getClient().getActiveUser().getId(),update.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getId(),update.get(USER_ID).toString());
         assertEquals("PUT", update.getRequestMethod());
     }
 
@@ -180,7 +183,7 @@ public class UserTest extends KinveyMockUnitTest {
         user.setId("testUser");
         requestManager.getClient().getActiveUser().setUsername("test");
         ResetPassword pwd = requestManager.resetPasswordBlocking(requestManager.getClient().getActiveUser().getUsername());
-        assertEquals(requestManager.getClient().getActiveUser().getUsername(),pwd.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getUsername(),pwd.get(USER_ID).toString());
         assertEquals("POST", pwd.getRequestMethod());
     }
 
@@ -196,7 +199,7 @@ public class UserTest extends KinveyMockUnitTest {
         initializeRequestManager(true);
         requestManager.getClient().getActiveUser().setId("testUser");
         EmailVerification email = requestManager.sendEmailVerificationBlocking();
-        assertEquals(requestManager.getClient().getActiveUser().getId(),email.get("userID").toString());
+        assertEquals(requestManager.getClient().getActiveUser().getId(),email.get(USER_ID).toString());
         assertEquals("POST", email.getRequestMethod());
     }
 
@@ -213,7 +216,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager.getClient().getActiveUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion("1.2.3");
     	Retrieve request = requestManager.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
+    	Object header = request.getRequestHeaders().get(X_KINVEY_CLIENT_APP_VERSION);
     	assertEquals("1.2.3", (String) header);
     }
 
@@ -222,7 +225,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager.getClient().getActiveUser().setId("testUser");
         requestManager.getClient().setClientAppVersion(1, 2, 3);
         Retrieve request = requestManager.retrieveBlocking();
-        Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
+        Object header = request.getRequestHeaders().get(X_KINVEY_CLIENT_APP_VERSION);
         assertEquals("1.2.3", (String) header);
 
     }
@@ -235,7 +238,7 @@ public class UserTest extends KinveyMockUnitTest {
     	custom.put("Second", "two");
     	requestManager.getClient().setCustomRequestProperties(custom);
     	Retrieve request = requestManager.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	Object header = request.getRequestHeaders().get(X_KINVEY_CUSTOM_REQUEST_PROPERTIES);
     	assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);
 
     }
@@ -248,7 +251,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager.getClient().setCustomRequestProperty("Second", "two");
 
         Retrieve request = requestManager.retrieveBlocking();
-        Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+        Object header = request.getRequestHeaders().get(X_KINVEY_CUSTOM_REQUEST_PROPERTIES);
         assertEquals("{\"First\":1,\"Second\":\"two\"}", (String) header);
 
     }
@@ -258,7 +261,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager.getClient().getActiveUser().setId("testUser");
     	requestManager.getClient().setClientAppVersion(null);
     	Retrieve request = requestManager.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Client-App-Version");
+    	Object header = request.getRequestHeaders().get(X_KINVEY_CLIENT_APP_VERSION);
     	assertEquals(null, header);
     }
 
@@ -267,7 +270,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager.getClient().getActiveUser().setId("testUser");
         requestManager.getClient().clearCustomRequestProperties();
     	Retrieve request = requestManager.retrieveBlocking();
-    	Object header = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties");
+    	Object header = request.getRequestHeaders().get(X_KINVEY_CUSTOM_REQUEST_PROPERTIES);
     	assertEquals(null, header);
     }
 
