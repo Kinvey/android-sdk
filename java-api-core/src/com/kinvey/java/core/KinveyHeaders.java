@@ -18,7 +18,7 @@ package com.kinvey.java.core;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.util.Key;
-import com.kinvey.config.BuildConfig;
+import com.kinvey.BuildConfig;
 
 /**
  * @author m0rganic
