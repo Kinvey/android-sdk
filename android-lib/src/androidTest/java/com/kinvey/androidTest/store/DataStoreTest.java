@@ -343,6 +343,18 @@ public class DataStoreTest {
         assertTrue(callback.result.getUsername().equals(personName));
     }
 
+    @Test
+    public void testSaveItemLongCollectionNameNetwork() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.LONG_NAME, Person.class, StoreType.NETWORK, client);
+        client.getSycManager().clear(Person.LONG_NAME);
+        String personName = "TestName";
+        DefaultKinveyClientCallback callback = save(store, createPerson(personName));
+        assertNotNull(callback.result);
+        assertNotNull(callback.result.getUsername());
+        assertNull(callback.error);
+        assertTrue(callback.result.getUsername().equals(personName));
+    }
+
 
 /*    @Test
     public void testCustomTag() {
