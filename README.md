@@ -33,6 +33,9 @@ Samples built on top of the libraries. This is a submodule, the full source for 
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
+* Set JAVA_HOME
+* Set ANDROID_HOME
+* Download android_sdk/platforms/android-19, android_sdk/platforms/android-10
 
 ```
 ./gradlew clean
