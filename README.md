@@ -10,7 +10,7 @@ It is recommended you use either IntelliJ or Android Studio. Eclipse is NOT reco
 ## Documentation
 Refer http://devcenter.kinvey.com/android for complete documentation of the library APIs and usage.
 
-## Overview of the Library -
+## Overview of the Library
 
 The codebase is made of the following key projects at the top level (under java-library): 
 
@@ -101,9 +101,11 @@ Update changelog:
 
 You can see Javadocs changes in your browser at localhost:3000
 
-- test locally devcenter and java-library
-- commit changes
-- push to origin master
+Test locally devcenter and java-library
+
+Commit changes
+
+Push to origin master
 
 
 ## License
