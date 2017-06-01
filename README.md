@@ -7,103 +7,99 @@ building Android apps and Java6 server applications.
 
 It is recommended you use either IntelliJ or Android Studio. Eclipse is NOT recommended.
 
-##Documentation
+## Documentation
 Refer http://devcenter.kinvey.com/android for complete documentation of the library APIs and usage.
 
-##Overview of the Library -
+## Overview of the Library -
 
 The codebase is made of the following key projects at the top level (under java-library): 
 
-###java-api-core 
+### java-api-core 
 The core of the library. Most of the library logic is written here. This project contains most of the underlying networking, user management, caching logic. Things that are platform specific (android-specific or standalone-java-specific) are represented as interfaces / abstract classes, and implemented in the other libraries described below.
 
-###android-lib
+### android-lib
 The wrapper library for android, built on top of java-api-core. All the android specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
-###java-lib
+### java-lib
 The wrapper library for java, built on top of java-api-core. All the standalone-java specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
-###android-secure
+### android-secure
 Encryption module built on top of android-lib. Rarely used; not compiled into the standard build process. This may be requested by certain customers who need encryption in their app.
 
-###samples 
+### samples 
 Samples built on top of the libraries. This is a submodule, the full source for samples is under https://github.com/KinveyApps
 
 ## Build
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
-* [gradle build system](http://gradle.org/)
 
 ```
-gradle clean
-```
-
-```
-gradle release
+./gradlew clean
 ```
 
 ```
-gradle test jacocoTestReport
+./gradlew release
+```
+After it you can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
+
+```
+./gradlew test jacocoTestReport
 ```
 ### Regenerate Javadocs
 
 ```
-<devcenter.home> should be located in this relative path ../../../<devcenter.home> relatively <java-library.home>.
+<devcenter.home> should be located in this relative path ../../<java-library.home>
 cd <devcenter.home> 
 git pull devcenter
 cd <java-library.home>
-gradle release
+./gradlew release
 ```
+After it you can found generated Javadocs in directory <devcenter.home>/content
 
 ### Release
 
 ```
 cd <java-library.home>
-gradle release
+./gradlew release
 ```
+After it you can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
 
-###Explicit release steps (including the above)
+### Explicit release steps (including the above)
+
+Find and replace library's version number on build.gradle in project directory
+double check/update <devcenter.home> location
 ```
-find and replace on version (build.gradle in project directory and RequestHeader version)
-check in
-double check/update devcenter.home location
-
 git pull devcenter
-
 cd <java-library.home>
-gradle release
+./gradlew release
+```
+You can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
 
+Login to AWS S3 and upload zip from trunk/release
+
+```
 cd <devcenter.home> 
 npm start
+```
+If you have strange errors from above, try:
+```
+npm install
+```
 
-node . to run at localhost:3000
-
-//strange errors from above?
-nvm is at ~/.nvm
-rm -r node_modules
-(npm install)
-(npm update)
-
-cd devcenter/content/downloads/android-v3.0-changelog.md
-update changelog
-
-login to AWS S3 and upload zip from trunk/release
+```
+cd <devcenter.home>/content/downloads
+```
+Update changelog:
 modify links in content/downloads.json
 modify links in content/downloads/android-changelog.json
 modify links in content/downloads/android-v3.0-changelog.json
 
+You can see Javadocs changes in your browser at localhost:3000
 
-test locally
-commit
+test locally devcenter and java-library
+commit changes
 push to origin master
-push to staging
-check it
-push to prod
-check it
-
-```
-
 
 
 ## License
