@@ -44,7 +44,7 @@ Pre-requisites:
 ```
 ./gradlew release
 ```
-After it you can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
+After these steps .zip with generated .aar and .jar files should be in the directory: /release/zipped
 
 ```
 ./gradlew test jacocoTestReport
@@ -58,7 +58,7 @@ git pull devcenter
 cd <java-library.home>
 ./gradlew release
 ```
-After it you can found generated Javadocs in directory <devcenter.home>/content
+After these steps the generated Javadocs should be in the directory: /content
 
 ### Release
 
@@ -66,18 +66,17 @@ After it you can found generated Javadocs in directory <devcenter.home>/content
 cd <java-library.home>
 ./gradlew release
 ```
-After it you can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
+After these steps .zip with generated .aar and .jar files should be in the directory: /release/zipped
 
 ### Explicit release steps (including the above)
 
-Find and replace library's version number on build.gradle in project directory
-double check/update <devcenter.home> location
+Find and replace the library's version number in build.gradle of the project’s directory and double check/update  location
 ```
 git pull devcenter
 cd <java-library.home>
 ./gradlew release
 ```
-You can found .zip with generated .aar and .jar files in directory <java-library.home>/release/zipped
+.zip with generated .aar and .jar files should be in the directory: /release/zipped
 
 Login to AWS S3 and upload zip from trunk/release
 
@@ -87,22 +86,24 @@ npm start
 ```
 If you have strange errors from above, try:
 ```
-npm install
+npm install 
+or 
+npm update
 ```
 
 ```
 cd <devcenter.home>/content/downloads
 ```
 Update changelog:
-modify links in content/downloads.json
-modify links in content/downloads/android-changelog.json
-modify links in content/downloads/android-v3.0-changelog.json
+- modify links in content/downloads.json
+- modify links in content/downloads/android-changelog.json
+- modify links in content/downloads/android-v3.0-changelog.json
 
 You can see Javadocs changes in your browser at localhost:3000
 
-test locally devcenter and java-library
-commit changes
-push to origin master
+- test locally devcenter and java-library
+- commit changes
+- push to origin master
 
 
 ## License
