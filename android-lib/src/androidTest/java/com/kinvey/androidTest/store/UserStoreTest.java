@@ -40,8 +40,6 @@ import static org.junit.Assert.assertNull;
 public class UserStoreTest {
 
     private Client client = null;
-    private static final String TEST_USER = "test40";
-    private static final String TEST_PASSWORD = TEST_USER;
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
     private static final String APP_KEY = "YOUR_APP_KEY_HERE";
@@ -213,6 +211,33 @@ public class UserStoreTest {
         }
     }
 
+    private static class DefaultKinveyBooleanCallback implements KinveyClientCallback<Boolean> {
+
+        private CountDownLatch latch;
+        private boolean result;
+        private Throwable error;
+
+        private DefaultKinveyBooleanCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(Boolean result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+    }
+
     private static class DefaultPersonKinveyClientCallback implements KinveyClientCallback<Person> {
 
         private CountDownLatch latch;
@@ -360,7 +385,7 @@ public class UserStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.signUp(TEST_USER, TEST_PASSWORD, client, callback);
+                UserStore.signUp(createRandomUserName(USERNAME), PASSWORD, client, callback);
                 Looper.loop();
             }
         }).start();
@@ -374,7 +399,7 @@ public class UserStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.signUp(TEST_USER, TEST_PASSWORD, user, client, callback);
+                UserStore.signUp(createRandomUserName(USERNAME), PASSWORD, user, client, callback);
                 Looper.loop();
             }
         }).start();
@@ -822,9 +847,7 @@ public class UserStoreTest {
         return callback;
     }
 
-    //Why do appropriate credentials need here?
     @Test
-    @Ignore//reason: Please retry your request with appropriate credentials
     public void testDoesUsernameExist() throws InterruptedException {
         User user = login(USERNAME, PASSWORD, client).result;
         boolean isNameExists = exists(user.getUsername(), client).result;
@@ -837,9 +860,9 @@ public class UserStoreTest {
         assertFalse(isNameExists);
     }
 
-    private DefaultKinveyUserManagementCallback exists(final String username, final Client client) throws InterruptedException {
+    private DefaultKinveyBooleanCallback exists(final String username, final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyUserManagementCallback callback = new DefaultKinveyUserManagementCallback(latch);
+        final DefaultKinveyBooleanCallback callback = new DefaultKinveyBooleanCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -851,9 +874,7 @@ public class UserStoreTest {
         return callback;
     }
 
-    //Why do appropriate credentials need here?
     @Test // this test always creates new user, to be careful
-    @Ignore //reason: Please retry your request with appropriate credentials
     public void testForgotUsername() throws InterruptedException {
         User user = signUp(createRandomUserName("forgotUserName"), PASSWORD, client).result;
         assertNotNull(user);
@@ -861,6 +882,7 @@ public class UserStoreTest {
         assertTrue(client.isUserLoggedIn());
         boolean isForgotten = forgot(user.getUsername(), client).result;
         assertTrue(isForgotten);
+        deleteUser(true, client);
     }
 
     private DefaultKinveyUserManagementCallback forgot(final String username, final Client client) throws InterruptedException {

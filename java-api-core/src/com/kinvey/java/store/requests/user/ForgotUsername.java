@@ -26,5 +26,6 @@ public final class ForgotUsername extends AbstractKinveyJsonClientRequest<Void> 
 
     public ForgotUsername(AbstractClient client, Email email) {
         super(client, "POST", REST_PATH, email, Void.class);
+        this.setRequireAppCredentials(true);
     }
 }
