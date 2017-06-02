@@ -522,4 +522,26 @@ public class FileStoreTest {
         removeFile(StoreType.SYNC, listener.fileMetaDataResult);
     }
 
+    @Test
+    public void tesUploadFileNetwork() throws InterruptedException, IOException {
+        testUploadFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void tesUploadFileCache() throws InterruptedException, IOException {
+        testUploadFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void tesUploadFileSync() throws InterruptedException, IOException {
+        testUploadFile(StoreType.SYNC);
+    }
+
+    private void testUploadFile(StoreType type) throws IOException, InterruptedException {
+        DefaultUploadProgressListener listener = uploadFile(type, testFile(), testMetadata());
+        assertNotNull(listener.fileMetaDataResult);
+        DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
+        assertNotNull(deleteListener.result);
+    }
+
 }
