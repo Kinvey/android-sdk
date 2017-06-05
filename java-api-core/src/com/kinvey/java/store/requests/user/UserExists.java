@@ -19,13 +19,14 @@ package com.kinvey.java.store.requests.user;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.UserNameExists;
 
 
-public final class UserExists extends AbstractKinveyJsonClientRequest<Boolean> {
+public final class UserExists extends AbstractKinveyJsonClientRequest<UserNameExists> {
     private static final String REST_PATH = "rpc/{appKey}/check-username-exists";
 
     public UserExists(AbstractClient client, GenericJson username) {
-        super(client, "POST", REST_PATH, username, Boolean.class);
+        super(client, "POST", REST_PATH, username, UserNameExists.class);
+        this.setRequireAppCredentials(true);
     }
 }
