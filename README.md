@@ -7,108 +7,105 @@ building Android apps and Java6 server applications.
 
 It is recommended you use either IntelliJ or Android Studio. Eclipse is NOT recommended.
 
-##Documentation
+## Documentation
 Refer http://devcenter.kinvey.com/android for complete documentation of the library APIs and usage.
 
-##Overview of the Library -
+## Overview of the Library
 
 The codebase is made of the following key projects at the top level (under java-library): 
 
-###java-api-core 
+### java-api-core 
 The core of the library. Most of the library logic is written here. This project contains most of the underlying networking, user management, caching logic. Things that are platform specific (android-specific or standalone-java-specific) are represented as interfaces / abstract classes, and implemented in the other libraries described below.
 
-###android-lib
+### android-lib
 The wrapper library for android, built on top of java-api-core. All the android specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
-###java-lib
+### java-lib
 The wrapper library for java, built on top of java-api-core. All the standalone-java specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
-###android-secure
+### android-secure
 Encryption module built on top of android-lib. Rarely used; not compiled into the standard build process. This may be requested by certain customers who need encryption in their app.
 
-###samples 
+### samples 
 Samples built on top of the libraries. This is a submodule, the full source for samples is under https://github.com/KinveyApps
 
 ## Build
 Pre-requisites:
 
 * [android sdk](http://developer.android.com/sdk/index.html)
-* [gradle build system](http://gradle.org/)
+* Set JAVA_HOME
+* Set ANDROID_HOME
+* Download android_sdk/platforms/android-19, android_sdk/platforms/android-10
 
 ```
-gradle clean build
+./gradlew clean
 ```
 
 ```
-gradle release
+./gradlew release
 ```
+After these steps .zip with generated .aar and .jar files should be in the directory: /release/zipped
 
 ```
-gradle test jacocoTestReport
+./gradlew test jacocoTestReport
 ```
-
-
-##Legacy Build (DEPRECATED!)
 ### Regenerate Javadocs
 
 ```
-rm -r <devcenter.home>/content/reference/android/api/*
-cd <project.home> 
-mvn -Pdev javadoc:javadoc install
+<devcenter.home> should be located in this relative path ../../<java-library.home>
+cd <devcenter.home> 
+git pull devcenter
+cd <java-library.home>
+./gradlew release
 ```
+After these steps the generated Javadocs should be in the directory: /content
 
 ### Release
 
 ```
-mvn -Prelease clean install
+cd <java-library.home>
+./gradlew release
 ```
+After these steps .zip with generated .aar and .jar files should be in the directory: /release/zipped
 
-###Explicit release steps (including the above)
+### Explicit release steps (including the above)
+
+Find and replace the library's version number in build.gradle of the project’s directory and double check/update  location
 ```
-find and replace on version number (all poms.xml and RequestHeader version)
-check in
-double check/update devcenter.home location (in parent pom) relative to trunk/
-
 git pull devcenter
-remove current android javadocs (rm -r <devcenter.home>/content/reference/android/api/*)
+cd <java-library.home>
+./gradlew release
+```
+.zip with generated .aar and .jar files should be in the directory: /release/zipped
 
-rm -r <devcenter.home>/content/reference/android/api/*
-cd <trunk> 
-mvn -Pdev javadoc:javadoc install
+Login to AWS S3 and upload zip from trunk/release
 
-node . to run at localhost:3000
-
-//strange errors from above?
-nvm is at ~/.nvm
-rm -r node_modules
-(npm install)
-(npm update)
-
-mvn -Prelease clean install
-
-cd devcenter/content/downloads/android-changelog.md
-update changelog
-
-login to AWS S3 and upload zip from trunk/release
-modify links in content/downloads.json
-
-test locally
-commit
-push to origin master
-push to staging
-check it
-push to prod
-check it
-
-svn up at root
-
-svn merge -rLastRevisionMergedFromTrunkToBranch:HEAD url/of/trunk path/to/branch/wc
-(merge any changes on trunk into correct branch or create new one for major release)
-svn cp from branch/2.2.x to tag2.2.2 (tag is snapshot of release)
-
-check it all in
+```
+cd <devcenter.home> 
+npm start
+```
+If you have strange errors from above, try:
+```
+npm install 
+or 
+npm update
 ```
 
+```
+cd <devcenter.home>/content/downloads
+```
+Update changelog:
+- modify links in content/downloads.json
+- modify links in content/downloads/android-changelog.json
+- modify links in content/downloads/android-v3.0-changelog.json
+
+You can see Javadocs changes in your browser at localhost:3000
+
+Test locally devcenter and java-library
+
+Commit changes
+
+Push to origin master
 
 
 ## License

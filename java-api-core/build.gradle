@@ -1,3 +1,7 @@
+plugins {
+    id 'de.fuerstenau.buildconfig' version '1.1.8'
+}
+
 apply plugin: 'java'
 
 sourceCompatibility = 1.7
@@ -7,6 +11,21 @@ apply plugin: "jacoco"
 description = 'JavaApiCore'
 
 compileJava.options.encoding = 'UTF-8'
+
+
+buildConfig {
+    appName = project.name       // sets value of NAME field
+    version = project.version // sets value of VERSION field,
+    // 'unspecified' if project.version is not set
+    buildConfigField("String", "KINVEY_API_VERSION", project.kinveyApiVersion)
+
+    clsName = 'BuildConfig'      // sets the name of the BuildConfig class
+    packageName = project.group // sets the package of the BuildConfig class,
+    // 'de.fuerstenau.buildconfig' if project.group is not set
+    charset = 'UTF-8'            // sets charset of the generated class,
+}
+
+apply plugin: 'de.fuerstenau.buildconfig'
 
 sourceSets {
     main {
@@ -55,7 +74,7 @@ dependencies {
 task docgen(type: Javadoc) {
     
 
-    source = sourceSets.main.java.srcDirs
+    source = sourceSets.main.java.srcDirs + "${buildDir}/gen/buildconfig/src/main/"
 
     options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
     options.doclet = "com.google.doclava.Doclava"
@@ -69,6 +88,7 @@ task docgen(type: Javadoc) {
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")
     options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
+
 }
 
 

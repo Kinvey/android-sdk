@@ -1,5 +1,6 @@
 rootProject.name = 'parent'
 include ':java-api-core'//, ':app', ':TestDrive-Android'//, ':TestDrive', ':StatusShare', ':ContentBox-Android'
+include ':TestDrive'
 include ':android-lib'
 //include ':android-secure'
 include ':java-lib'
@@ -14,7 +15,7 @@ project(':android-lib').projectDir = "$rootDir/android-lib" as File
 project(':java-lib').projectDir = "$rootDir/java-lib" as File
 //project(':android-samples').projectDir = "$rootDir/samples" as File
 //project(':samples-java').projectDir = "$rootDir/samples-java" as File
-//project(':TestDrive').projectDir = "samples/TestDrive-Android" as File
+project(':TestDrive').projectDir = "samples/TestDrive-Android" as File
 //project(':StatusShare').projectDir = "samples/StatusShare-Android" as File
 //project(':HelloWorld').projectDir = "samples-java/HelloWorld" as File
 
