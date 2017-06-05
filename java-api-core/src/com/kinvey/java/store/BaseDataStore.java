@@ -77,7 +77,9 @@ public class BaseDataStore<T extends GenericJson> {
         this.client = client;
         this.collection = collection;
         this.storeItemType = itemType;
-        cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
+        if (storeType != StoreType.NETWORK) {
+            cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
+        }
         this.networkManager = networkManager;
         this.collectionName = collection;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();

@@ -9,6 +9,8 @@ public class Person extends GenericJson{
 
     public static final String COLLECTION = "Persons";
 
+    public static final String LONG_NAME = "LoremIpsumissimplydummytextoftheprintingandtypesettingindustry";
+
     public Person() {
     }
 
