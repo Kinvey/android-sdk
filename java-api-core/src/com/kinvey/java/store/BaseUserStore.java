@@ -125,7 +125,7 @@ public abstract class BaseUserStore <T extends User> {
     }
 
     public static boolean exists( String username, AbstractClient client) throws IOException {
-        return new UserStoreRequestManager(client, createBuilder(client)).exists(username).execute().isUsernameExists();
+        return new UserStoreRequestManager(client, createBuilder(client)).exists(username).execute().doesUsernameExist();
     }
 
     public static <T extends User> T get(String userId, AbstractClient client) throws IOException {

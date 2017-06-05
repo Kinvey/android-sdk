@@ -10,7 +10,7 @@ public class UserNameExists {
     @Key("usernameExists")
     private boolean usernameExists;
 
-    public boolean isUsernameExists() {
+    public boolean doesUsernameExist() {
         return usernameExists;
     }
 
