@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.concurrent.CountDownLatch;
 
+import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -770,6 +771,61 @@ public class FileStoreTest {
             file.createNewFile();
         }
         return file;
+    }
+
+    @Test
+    public void testUploadPubliclyReadableFileNetwork() throws InterruptedException, IOException {
+        testUploadPubliclyReadableFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testUploadPubliclyReadableFileCache() throws InterruptedException, IOException {
+        testUploadPubliclyReadableFile(StoreType.CACHE);
+    }
+
+    // TODO: 05.06.2017 Library should be checked
+    @Test
+    public void testUploadPubliclyReadableFileSync() throws InterruptedException, IOException {
+        testUploadPubliclyReadableFile(StoreType.SYNC);
+    }
+
+    private void testUploadPubliclyReadableFile(StoreType storeType) throws IOException, InterruptedException {
+        FileMetaData fileMetaData = testMetadata();
+        fileMetaData.setPublic(true);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(1), fileMetaData);
+        assertNotNull(listener.fileMetaDataResult);
+        DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
+        assertNull(downloadListener.error);
+        assertNotNull(downloadListener.fileMetaDataResult);
+        assertTrue(downloadListener.fileMetaDataResult.isPublic());
+        removeFile(storeType, listener.fileMetaDataResult);
+    }
+
+    @Test
+    public void testUploadPrivatelyReadableFileNetwork() throws InterruptedException, IOException {
+        testUploadPrivatelyReadableFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testUploadPrivatelyReadableFileCache() throws InterruptedException, IOException {
+        testUploadPrivatelyReadableFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testUploadPrivatelyReadableFileSync() throws InterruptedException, IOException {
+        testUploadPrivatelyReadableFile(StoreType.SYNC);
+    }
+
+    private void testUploadPrivatelyReadableFile(StoreType storeType) throws IOException, InterruptedException {
+        FileMetaData fileMetaData = testMetadata();
+        fileMetaData.setPublic(false);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(1), fileMetaData);
+        assertNotNull(listener.fileMetaDataResult);
+        DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
+        assertNull(downloadListener.error);
+        assertNotNull(downloadListener.fileMetaDataResult);
+        removeFile(storeType, listener.fileMetaDataResult);
+        assertFalse(downloadListener.fileMetaDataResult.isPublic());
     }
 
 }
