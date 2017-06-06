@@ -52,10 +52,11 @@ public class FileStoreTest {
     private static final String TEST_FILENAME = "test.xml";
     private static final String USER = "test";
     private static final String PASSWORD = "test";
-    private static final int DEFAULT_FILE_SIZE = 1; //in MB
-    private static final int CUSTOM_FILE_SIZE = 22; //in MB
-    private static final int UPLOAD_CHUNK_SIZE = 10; //in MB
-    private static final int DOWNLOAD_CHUNK_SIZE = 5; //in MB
+    private static final int MB = 1024 * 1024;
+    private static final int DEFAULT_FILE_SIZE_MB = 1;
+    private static final int CUSTOM_FILE_SIZE_MB = 22;
+    private static final int UPLOAD_CHUNK_SIZE_MB = 10;
+    private static final int DOWNLOAD_CHUNK_SIZE_MB = 5;
 
     private static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
@@ -64,7 +65,8 @@ public class FileStoreTest {
         private boolean isCancelled = false;
         private boolean onCancelled = false;
         private int progressChangedCounter = 0;
-        private DefaultUploadProgressListener(CountDownLatch latch){
+
+        private DefaultUploadProgressListener(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -111,7 +113,7 @@ public class FileStoreTest {
         private boolean onCancelled = false;
         private int progressChangedCounter = 0;
 
-        private DefaultDownloadProgressListener(CountDownLatch latch){
+        private DefaultDownloadProgressListener(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -154,7 +156,8 @@ public class FileStoreTest {
         private CountDownLatch latch;
         private Integer result;
         private Throwable error;
-        private DefaultDeleteListener(CountDownLatch latch){
+
+        private DefaultDeleteListener(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -207,7 +210,6 @@ public class FileStoreTest {
         }
         latch.await();
     }
-
 
 
     private FileMetaData testMetadata() {
@@ -278,7 +280,7 @@ public class FileStoreTest {
     }
 
     private void downloadFile(StoreType type) throws InterruptedException, IOException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE), testMetadata());
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         DefaultDownloadProgressListener downloadListener = downloadFile(type, listener.fileMetaDataResult);
         assertNotNull(downloadListener.fileMetaDataResult);
@@ -349,7 +351,7 @@ public class FileStoreTest {
     }
 
     private void executeRemoveFile(StoreType type) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE), testMetadata());
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -405,7 +407,7 @@ public class FileStoreTest {
     }
 
     private void testRefreshFile(StoreType storeType) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE), testMetadata());
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         refresh(storeType, listener.fileMetaDataResult);
         removeFile(storeType, listener.fileMetaDataResult);
@@ -461,7 +463,7 @@ public class FileStoreTest {
     }
 
     private void testFindFile(StoreType storeType) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE), testMetadata());
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         find(storeType, listener.fileMetaDataResult, false);
         removeFile(storeType, listener.fileMetaDataResult);
@@ -511,8 +513,8 @@ public class FileStoreTest {
     }
 
     @Test
-    public void testClearCacheCache() throws InterruptedException, IOException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.CACHE, createFile(DEFAULT_FILE_SIZE), testMetadata());
+    public void testClearCacheStoreCache() throws InterruptedException, IOException {
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.CACHE, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         client.getFileStore(StoreType.CACHE).clearCache();
         find(StoreType.CACHE, listener.fileMetaDataResult, false);
@@ -520,8 +522,8 @@ public class FileStoreTest {
     }
 
     @Test
-    public void testClearCacheSync() throws InterruptedException, IOException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.SYNC, createFile(DEFAULT_FILE_SIZE), testMetadata());
+    public void testClearCacheStoreSync() throws InterruptedException, IOException {
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.SYNC, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         client.getFileStore(StoreType.SYNC).clearCache();
         find(StoreType.SYNC, listener.fileMetaDataResult, true);
@@ -544,7 +546,7 @@ public class FileStoreTest {
     }
 
     private void testUploadFileWithMetadata(StoreType type) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE), testMetadata());
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, createFile(DEFAULT_FILE_SIZE_MB), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -555,7 +557,7 @@ public class FileStoreTest {
         testUploadInputStreamWithMetadata(StoreType.NETWORK);
     }
 
-    // TODO: 05.06.2017 Library should be checked
+    // TODO: 05.06.2017 Should be fixed in Library
     @Test
     @Ignore
     public void testUploadInputStreamWithMetadataCache() throws InterruptedException, IOException {
@@ -568,7 +570,7 @@ public class FileStoreTest {
     }
 
     private void testUploadInputStreamWithMetadata(StoreType type) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadInputStreamWithMetadata(type, new FileInputStream(createFile(DEFAULT_FILE_SIZE)), testMetadata());
+        DefaultUploadProgressListener listener = uploadInputStreamWithMetadata(type, new FileInputStream(createFile(DEFAULT_FILE_SIZE_MB)), testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -610,7 +612,7 @@ public class FileStoreTest {
     }
 
     private void testUploadFileWithOutMetadata(StoreType type) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(type, createFile(DEFAULT_FILE_SIZE));
+        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(type, createFile(DEFAULT_FILE_SIZE_MB));
         assertNotNull(listener.fileMetaDataResult);
         DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -640,7 +642,7 @@ public class FileStoreTest {
         testUploadInputStreamWithFileName(StoreType.NETWORK);
     }
 
-    // TODO: 05.06.2017 Library should be checked
+    // TODO: 05.06.2017 Should be fixed in Library
     @Test
     @Ignore
     public void testUploadInputStreamWithFileNameCache() throws InterruptedException, IOException {
@@ -653,7 +655,7 @@ public class FileStoreTest {
     }
 
     private void testUploadInputStreamWithFileName(StoreType type) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadInputStreamWithFilename(type, new FileInputStream(createFile(DEFAULT_FILE_SIZE)), TEST_FILENAME);
+        DefaultUploadProgressListener listener = uploadInputStreamWithFilename(type, new FileInputStream(createFile(DEFAULT_FILE_SIZE_MB)), TEST_FILENAME);
         assertNotNull(listener.fileMetaDataResult);
         DefaultDeleteListener deleteListener = removeFile(type, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -694,7 +696,7 @@ public class FileStoreTest {
     }
 
     private void testCancelFileUploading(StoreType storeType) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = cancelFileUploading(storeType, createFile(15));
+        DefaultUploadProgressListener listener = cancelFileUploading(storeType, createFile(CUSTOM_FILE_SIZE_MB));
         assertTrue(listener.onCancelled);
         assertNull(listener.error);
         assertNull(listener.fileMetaDataResult);
@@ -772,7 +774,7 @@ public class FileStoreTest {
     private File createFile(int mb) throws IOException {
         File file = createFile();
         RandomAccessFile f = new RandomAccessFile(createFile(), "rw");
-        f.setLength(mb * 1024 * 1024);
+        f.setLength(mb * MB);
         return file;
     }
 
@@ -794,7 +796,7 @@ public class FileStoreTest {
         testUploadPubliclyReadableFile(StoreType.CACHE);
     }
 
-    // TODO: 05.06.2017 Library should be checked
+    // TODO: 05.06.2017 Should be fixed in Library
     @Test
     @Ignore
     public void testUploadPubliclyReadableFileSync() throws InterruptedException, IOException {
@@ -804,7 +806,7 @@ public class FileStoreTest {
     private void testUploadPubliclyReadableFile(StoreType storeType) throws IOException, InterruptedException {
         FileMetaData fileMetaData = testMetadata();
         fileMetaData.setPublic(true);
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE), fileMetaData);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE_MB), fileMetaData);
         assertNotNull(listener.fileMetaDataResult);
         DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
         assertNull(downloadListener.error);
@@ -831,7 +833,7 @@ public class FileStoreTest {
     private void testUploadPrivatelyReadableFile(StoreType storeType) throws IOException, InterruptedException {
         FileMetaData fileMetaData = testMetadata();
         fileMetaData.setPublic(false);
-        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE), fileMetaData);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, createFile(DEFAULT_FILE_SIZE_MB), fileMetaData);
         assertNotNull(listener.fileMetaDataResult);
         DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
         assertNull(downloadListener.error);
@@ -856,12 +858,12 @@ public class FileStoreTest {
     }
 
     private void testUploadProgressChanging(StoreType storeType) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(storeType, createFile(CUSTOM_FILE_SIZE));
+        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(storeType, createFile(CUSTOM_FILE_SIZE_MB));
         assertNotNull(listener.fileMetaDataResult);
         if (storeType == StoreType.SYNC) {
             assertTrue(listener.progressChangedCounter == 0);
         } else {
-            assertTrue(listener.progressChangedCounter >= CUSTOM_FILE_SIZE / UPLOAD_CHUNK_SIZE);
+            assertTrue(listener.progressChangedCounter >= CUSTOM_FILE_SIZE_MB / UPLOAD_CHUNK_SIZE_MB);
         }
         DefaultDeleteListener deleteListener = removeFile(storeType, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
@@ -883,14 +885,14 @@ public class FileStoreTest {
     }
 
     private void testDownloadProgressChanging(StoreType storeType) throws IOException, InterruptedException {
-        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(storeType, createFile(CUSTOM_FILE_SIZE));
+        DefaultUploadProgressListener listener = uploadFileWithOutMetadata(storeType, createFile(CUSTOM_FILE_SIZE_MB));
         assertNotNull(listener.fileMetaDataResult);
         DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
         assertNotNull(downloadListener.fileMetaDataResult);
         if (storeType == StoreType.SYNC) {
             assertTrue(downloadListener.progressChangedCounter == 0);
         } else {
-            assertTrue(downloadListener.progressChangedCounter >= CUSTOM_FILE_SIZE / DOWNLOAD_CHUNK_SIZE);
+            assertTrue(downloadListener.progressChangedCounter >= CUSTOM_FILE_SIZE_MB / DOWNLOAD_CHUNK_SIZE_MB);
         }
         DefaultDeleteListener deleteListener = removeFile(storeType, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
