@@ -173,7 +173,7 @@ public class UserStore {
      * @throws IOException
      */
     public static void loginGoogle(String accessToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
-        new Login(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, client, callback).execute();
+        new Login(accessToken, UserStoreRequestManager.LoginType.GOOGLE, client, callback).execute();
     }
 
     /**
@@ -470,7 +470,7 @@ public class UserStore {
         new ResetPassword(usernameOrEmail, client, callback).execute();
     }
 
-    public static void exists(String username, AbstractClient client, KinveyUserManagementCallback callback) {
+    public static void exists(String username, AbstractClient client, KinveyClientCallback<Boolean> callback) {
         new ExistsUser(username, client, callback).execute();
     }
 
@@ -794,6 +794,7 @@ public class UserStore {
             this.consumerSecret = consumerSecret;
             this.client = client;
             this.type=type;
+            this.client = client;
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
@@ -1107,13 +1108,13 @@ public class UserStore {
         }
     }
 
-    private static class ExistsUser extends AsyncClientRequest<Void> {
+    private static class ExistsUser extends AsyncClientRequest<Boolean> {
 
         String username;
         private final AbstractClient client;
 
 
-        private ExistsUser(String username, AbstractClient client, KinveyClientCallback<Void> callback) {
+        private ExistsUser(String username, AbstractClient client, KinveyClientCallback<Boolean> callback) {
             super(callback);
             this.username = username;
             this.client = client;
@@ -1121,9 +1122,8 @@ public class UserStore {
         }
 
         @Override
-        protected Void executeAsync() throws IOException {
-            BaseUserStore.exists(username, client);
-            return null;
+        protected Boolean executeAsync() throws IOException {
+            return BaseUserStore.exists(username, client);
         }
     }
 

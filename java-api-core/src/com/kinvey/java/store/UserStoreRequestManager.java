@@ -727,7 +727,7 @@ public class UserStoreRequestManager<T extends User> {
         public T execute() throws IOException {
             if (client.isUserLoggedIn()) {
                 throw new KinveyException("Attempting to login when a user is already logged in",
-                        "call `myClient.user().logout().execute() first -or- check `myClient.user().isUserLoggedIn()` before attempting to login again",
+                        "call `UserStore.logout(myClient, kinveyClientCallback)` first -or- check `myClient.isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
             T ret;
