@@ -277,9 +277,6 @@ public abstract class ClassHash {
             object.set(TTL_FIELD, obj.get(TTL_FIELD));
         }
 
-        if (object.get("_id") != obj.get("_id")){
-            object.set("_id", obj.get("_id"));
-        }
 
         if (!obj.containsKey("_kmd") && !name.endsWith("__kmd")){
             KinveyMetaData metadata = new KinveyMetaData();

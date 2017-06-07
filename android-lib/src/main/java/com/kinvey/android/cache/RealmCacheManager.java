@@ -196,7 +196,7 @@ public class RealmCacheManager implements ICacheManager {
     }
 
     private RealmConfiguration getRealmConfiguration() {
-        return new RealmConfiguration.Builder(context)
+        return new RealmConfiguration.Builder()
                 .name(prefix + "_" + getClientHash())
                 .build();
     }
