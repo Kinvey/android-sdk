@@ -557,9 +557,7 @@ public class FileStoreTest {
         testUploadInputStreamWithMetadata(StoreType.NETWORK);
     }
 
-    // TODO: 05.06.2017 Should be fixed in Library
     @Test
-    @Ignore
     public void testUploadInputStreamWithMetadataCache() throws InterruptedException, IOException {
         testUploadInputStreamWithMetadata(StoreType.CACHE);
     }
@@ -642,9 +640,7 @@ public class FileStoreTest {
         testUploadInputStreamWithFileName(StoreType.NETWORK);
     }
 
-    // TODO: 05.06.2017 Should be fixed in Library
     @Test
-    @Ignore
     public void testUploadInputStreamWithFileNameCache() throws InterruptedException, IOException {
         testUploadInputStreamWithFileName(StoreType.CACHE);
     }
