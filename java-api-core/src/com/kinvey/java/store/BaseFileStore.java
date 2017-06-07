@@ -174,13 +174,14 @@ public class BaseFileStore {
                 metadata = upload.execute();
                 break;
             case LOCAL_THEN_NETWORK:
+                saveCacheFile(is, fileMetadataWithPath);
                 try {
                     metadata = upload.execute();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
                 fileMetadataWithPath.putAll(metadata);
-                saveCacheFile(is, fileMetadataWithPath);
+                cache.save(fileMetadataWithPath);
                 break;
         }
 
