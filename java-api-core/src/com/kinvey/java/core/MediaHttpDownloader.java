@@ -270,7 +270,7 @@ public class MediaHttpDownloader {
             }
 
             // set Range header (if necessary)
-            if (bytesDownloaded != 0 || currentRequestLastBytePos != -1) {
+            if (metaData.getSize() != 0 && (bytesDownloaded != 0 || currentRequestLastBytePos != -1)) {
                 StringBuilder rangeHeader = new StringBuilder();
                 rangeHeader.append("bytes=").append(bytesDownloaded).append("-");
                 if (currentRequestLastBytePos != -1) {
