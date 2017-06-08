@@ -15,14 +15,14 @@
  */
 package com.kinvey.android;
 
-import java.io.IOException;
-
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Wraps the {@link com.kinvey.java.CustomEndpoints} public methods in asynchronous functionality using native Android AsyncTask.
@@ -91,7 +91,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
      * @param input - any required input, can be {@code null}
      * @param callback - get results of the command as an array of JSON objects.
      */
-    public void callEndpoint(String commandName, I input, KinveyListCallback callback){
+    public void callEndpoint(String commandName, I input, KinveyListCallback<O> callback){
         new AsyncCommandArray(commandName, input, callback).execute();
     }
 
@@ -118,19 +118,19 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
 
     }
 
-    private class AsyncCommandArray extends AsyncClientRequest<O[]> {
+    private class AsyncCommandArray extends AsyncClientRequest<List<O>> {
 
         private String commandName;
         private I input;
 
-        public AsyncCommandArray(String commandName, I input, KinveyListCallback callback) {
+        public AsyncCommandArray(String commandName, I input, KinveyListCallback<O> callback) {
             super(callback);
             this.commandName = commandName;
             this.input = input;
         }
 
         @Override
-        protected O[] executeAsync() throws IOException {
+        protected List<O> executeAsync() throws IOException {
             return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
         }
 
