@@ -24,8 +24,7 @@ import com.google.gson.Gson;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Array;
 
 /**
  * Class for managing access to custom endpoints.
@@ -118,7 +117,7 @@ public class CustomEndpoints<I extends GenericJson, O> {
      */
     public CustomCommandArray callEndpointArrayBlocking(String endpoint, I input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
-        CustomCommandArray command = new CustomCommandArray(endpoint, input, new ArrayList<>().getClass());
+        CustomCommandArray command = new CustomCommandArray(endpoint, input, Array.newInstance(currentResponseClass, 0).getClass());
         client.initializeRequest(command);
         return command;
     }
@@ -153,7 +152,7 @@ public class CustomEndpoints<I extends GenericJson, O> {
      * A JSON client request which executes against a custom endpoint returning an array.
      *
      */
-    public class CustomCommandArray extends AbstractKinveyJsonClientRequest<List<O>> {
+    public class CustomCommandArray extends AbstractKinveyJsonClientRequest<O[]> {
         private static final String REST_PATH = "rpc/{appKey}/custom/{endpoint}";
 
         @Key

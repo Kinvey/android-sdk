@@ -22,6 +22,7 @@ import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -91,7 +92,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
      * @param input - any required input, can be {@code null}
      * @param callback - get results of the command as an array of JSON objects.
      */
-    public void callEndpoint(String commandName, I input, KinveyListCallback<O> callback){
+    public void callEndpoint(String commandName, I input, KinveyListCallback callback){
         new AsyncCommandArray(commandName, input, callback).execute();
     }
 
@@ -123,7 +124,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         private String commandName;
         private I input;
 
-        public AsyncCommandArray(String commandName, I input, KinveyListCallback<O> callback) {
+        public AsyncCommandArray(String commandName, I input, KinveyListCallback callback) {
             super(callback);
             this.commandName = commandName;
             this.input = input;
@@ -131,7 +132,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
 
         @Override
         protected List<O> executeAsync() throws IOException {
-            return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
+            return Arrays.asList(AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute());
         }
 
     }}
