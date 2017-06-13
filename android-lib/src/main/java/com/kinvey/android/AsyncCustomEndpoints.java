@@ -15,14 +15,15 @@
  */
 package com.kinvey.android;
 
-import java.io.IOException;
-
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Wraps the {@link com.kinvey.java.CustomEndpoints} public methods in asynchronous functionality using native Android AsyncTask.
@@ -118,7 +119,7 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
 
     }
 
-    private class AsyncCommandArray extends AsyncClientRequest<O[]> {
+    private class AsyncCommandArray extends AsyncClientRequest<List<O>> {
 
         private String commandName;
         private I input;
@@ -130,8 +131,8 @@ public class AsyncCustomEndpoints<I extends GenericJson, O> extends CustomEndpoi
         }
 
         @Override
-        protected O[] executeAsync() throws IOException {
-            return AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute();
+        protected List<O> executeAsync() throws IOException {
+            return Arrays.asList(AsyncCustomEndpoints.this.callEndpointArrayBlocking(commandName, input).execute());
         }
 
     }}
