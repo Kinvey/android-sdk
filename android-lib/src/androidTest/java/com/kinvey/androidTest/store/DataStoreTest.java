@@ -60,6 +60,8 @@ public class DataStoreTest {
     private static final String TEST_USERNAME_2 = "Test_UserName_2";
     private static final String USERNAME = "username";
     private static final String ID = "_id";
+    private static final int DEFAULT_TIMEOUT = 60;
+    private static final int LONG_TIMEOUT = 6*DEFAULT_TIMEOUT;
 
     private Client client;
 
@@ -442,7 +444,7 @@ public class DataStoreTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
         String personId = saveCallback.result.getId();
-        DefaultKinveyClientCallback findCallback = find(store, personId, 60, null);
+        DefaultKinveyClientCallback findCallback = find(store, personId, DEFAULT_TIMEOUT, null);
         assertNotNull(findCallback.result);
         assertNull(saveCallback.error);
         assertEquals(findCallback.result.getId(), personId);
@@ -459,7 +461,7 @@ public class DataStoreTest {
         assertNotNull(saveCallback.result.getId());
 
         String personId = saveCallback.result.getId();
-        DefaultKinveyClientCallback findCallback = find(store, personId, 360, new KinveyCachedClientCallback<Person>() {
+        DefaultKinveyClientCallback findCallback = find(store, personId, LONG_TIMEOUT, new KinveyCachedClientCallback<Person>() {
             @Override
             public void onSuccess(Person result) {
                 Log.d("testFindById: username ", result.getUsername());
@@ -515,11 +517,10 @@ public class DataStoreTest {
         String userId = saveCallback.result.getId();
         Query query = client.query();
         query = query.equals(ID, userId);
-        DefaultKinveyListCallback kinveyListCallback = find(store, query, 60);
+        DefaultKinveyListCallback kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertNotNull(kinveyListCallback.result.get(0));
-        assertEquals(kinveyListCallback.result.get(0).getId(), userId);
+        assertTrue(kinveyListCallback.result.size() > 0);
     }
 
     private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
@@ -560,7 +561,7 @@ public class DataStoreTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
         String userId = saveCallback.result.getId();
-        DefaultKinveyDeleteCallback deleteCallback = delete(store, userId, 60);
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, userId, DEFAULT_TIMEOUT);
         assertNull(deleteCallback.error);
         assertNotNull(deleteCallback.result);
         assertTrue(deleteCallback.result == 1);
@@ -589,7 +590,7 @@ public class DataStoreTest {
         assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
-        DefaultKinveyDeleteCallback deleteCallback = delete(store, null, 60);
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, null, DEFAULT_TIMEOUT);
         assertNotNull(deleteCallback.error);
         assertNull(deleteCallback.result);
     }
@@ -641,10 +642,11 @@ public class DataStoreTest {
 
         assertNotEquals(user1Id, user2Id);
 
-        DefaultKinveyDeleteCallback deleteCallback = delete(store, Arrays.asList(user1Id, user2Id));
+        List<String> list = Arrays.asList(user1Id, user2Id);
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, list);
         assertNull(deleteCallback.error);
         assertNotNull(deleteCallback.result);
-        assertTrue(deleteCallback.result == 2);
+        assertTrue(deleteCallback.result == list.size());
     }
 
 /*    @Test
@@ -728,7 +730,6 @@ public class DataStoreTest {
 
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
-        person.setAge("25");
         save(store, person);
 
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
@@ -802,7 +803,7 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
-        DefaultKinveySyncCallback syncCallback = sync(store, 60);
+        DefaultKinveySyncCallback syncCallback = sync(store, DEFAULT_TIMEOUT);
         assertFalse(syncCallback.error == null && syncCallback.kinveyPullResponse == null && syncCallback.kinveyPushResponse == null);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
@@ -854,7 +855,7 @@ public class DataStoreTest {
         client.getSycManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
         assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
-        DefaultKinveyPushCallback pushCallback = push(store, 60);
+        DefaultKinveyPushCallback pushCallback = push(store, DEFAULT_TIMEOUT);
         assertFalse(pushCallback.error == null && pushCallback.result == null);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
@@ -1112,7 +1113,7 @@ public class DataStoreTest {
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
             query.setLimit(limit);
-            kinveyListCallback = find(store, query, 60);
+            kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
             assertNull(kinveyListCallback.error);
             assertNotNull(kinveyListCallback.result);
             assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_" + skip);
@@ -1122,7 +1123,7 @@ public class DataStoreTest {
 
         query = client.query();
         query.setLimit(5);
-        kinveyListCallback = find(store, query, 60);
+        kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() == 5);
@@ -1132,7 +1133,7 @@ public class DataStoreTest {
 
         query = client.query();
         query.setSkip(5);
-        kinveyListCallback = find(store, query, 60);
+        kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() == 5);
@@ -1142,7 +1143,7 @@ public class DataStoreTest {
         query = client.query();
         query.setLimit(6);
         query.setSkip(6);
-        kinveyListCallback = find(store, query, 60);
+        kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() == 4);
@@ -1152,20 +1153,20 @@ public class DataStoreTest {
 
         query = client.query();
         query.setSkip(10);
-        kinveyListCallback = find(store, query, 60);
+        kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() == 0);
 
         query = client.query();
         query.setSkip(11);
-        kinveyListCallback = find(store, query, 60);
+        kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() == 0);
 
 
-        DefaultKinveyPushCallback pushCallback = push(store, 60);
+        DefaultKinveyPushCallback pushCallback = push(store, DEFAULT_TIMEOUT);
         assertNull(pushCallback.error);
         assertNotNull(pushCallback.result);
         assertTrue(pushCallback.result.getSuccessCount() == 10);
