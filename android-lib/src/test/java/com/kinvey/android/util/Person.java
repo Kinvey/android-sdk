@@ -8,10 +8,6 @@ import io.realm.RealmModel;
 
 public class Person implements RealmModel {
 
-    public static final String COLLECTION = "Persons";
-
-    public static final String LONG_NAME = "LoremIpsumissimplydummytextoftheprintingandtypesettingindustry";
-
     public Person() {
     }
 

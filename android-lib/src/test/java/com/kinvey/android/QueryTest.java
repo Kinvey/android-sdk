@@ -117,7 +117,6 @@ public class QueryTest {
         verify(query, times(1)).greaterThan("field", 1.0f);
     }
 
-
     @Test
     public void testGreaterThanOrEqualToClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
