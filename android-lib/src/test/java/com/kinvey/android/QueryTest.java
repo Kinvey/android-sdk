@@ -1,14 +1,10 @@
 package com.kinvey.android;
 
-import android.content.Context;
-import android.test.RenamingDelegatingContext;
-
 import com.kinvey.android.cache.QueryHelper;
 import com.kinvey.android.util.LibraryProjectTestRunner;
 import com.kinvey.java.Query;
 import com.kinvey.java.query.MongoQueryFilter;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,20 +16,13 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.annotation.Config;
 
-import java.util.Date;
-
-import io.realm.Case;
-import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 import io.realm.log.RealmLog;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -46,10 +35,11 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest({Realm.class, RealmLog.class, RealmQuery.class})
 public class QueryTest {
 
+    private static final String TEST_FIELD = "field";
+    private RealmQuery<DynamicRealmObject> query;
+
     @Rule
     public PowerMockRule rule = new PowerMockRule();
-    private RealmQuery<DynamicRealmObject> query;
-    private static final String TEST_FIELD = "field";
 
     @Before
     public void setup() {
@@ -290,5 +280,17 @@ public class QueryTest {
         verify(query, times(1)).notEqualTo(TEST_FIELD, TEST_FIELD);
     }
 
-
+    @Test
+    public void testOrClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Query q2 = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.in(TEST_FIELD, new String[]{"1", "2"});
+        q2.in(TEST_FIELD, new String[]{"1", "2"});
+        q.or(q2);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(5)).beginGroup();
+        verify(query, times(4)).equalTo(eq(TEST_FIELD), anyString());
+        verify(query, times(3)).or();
+        verify(query, times(5)).endGroup();
+    }
 }
