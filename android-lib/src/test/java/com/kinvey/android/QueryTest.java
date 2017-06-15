@@ -22,6 +22,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.Date;
 
+import io.realm.Case;
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.Realm;
@@ -48,6 +49,7 @@ public class QueryTest {
     @Rule
     public PowerMockRule rule = new PowerMockRule();
     private RealmQuery<DynamicRealmObject> query;
+    private static final String TEST_FIELD = "field";
 
     @Before
     public void setup() {
@@ -64,10 +66,10 @@ public class QueryTest {
     @Test
     public void testInClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.in("_id", new String[]{"1", "2"});
+        q.in(TEST_FIELD, new String[]{"1", "2"});
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
         verify(query, times(1)).beginGroup();
-        verify(query, times(2)).equalTo(eq("_id"), anyString());
+        verify(query, times(2)).equalTo(eq(TEST_FIELD), anyString());
         verify(query, times(1)).or();
         verify(query, times(1)).endGroup();
     }
@@ -75,10 +77,10 @@ public class QueryTest {
     @Test
     public void testNotInClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.notIn("_id", new String[]{"1", "2"});
+        q.notIn(TEST_FIELD, new String[]{"1", "2"});
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
         verify(query, times(2)).beginGroup();
-        verify(query, times(2)).equalTo(eq("_id"), anyString());
+        verify(query, times(2)).equalTo(eq(TEST_FIELD), anyString());
         verify(query, times(1)).or();
         verify(query, times(2)).endGroup();
         verify(query, times(1)).not();
@@ -87,42 +89,206 @@ public class QueryTest {
     @Test
     public void testGreaterThanIntClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.greaterThan("field", 1);
+        q.greaterThan(TEST_FIELD, 1);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-        verify(query, times(1)).greaterThan("field", 1);
+        verify(query, times(1)).greaterThan(TEST_FIELD, 1);
     }
 
     @Test
     public void testGreaterThanLongClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.greaterThan("field", 1L);
+        q.greaterThan(TEST_FIELD, 1L);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-        verify(query, times(1)).greaterThan("field", 1L);
+        verify(query, times(1)).greaterThan(TEST_FIELD, 1L);
     }
 
     @Test
     public void testGreaterThanDoubleClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.greaterThan("field", 1.0d);
+        q.greaterThan(TEST_FIELD, 1.0d);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-        verify(query, times(1)).greaterThan("field", 1.0d);
-
+        verify(query, times(1)).greaterThan(TEST_FIELD, 1.0d);
     }
 
     @Test
     public void testGreaterThanFloatClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.greaterThan("field", 1.0f);
+        q.greaterThan(TEST_FIELD, 1.0f);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-        verify(query, times(1)).greaterThan("field", 1.0f);
+        verify(query, times(1)).greaterThan(TEST_FIELD, 1.0f);
     }
 
     @Test
-    public void testGreaterThanOrEqualToClause() {
+    public void testGreaterThanOrEqualToIntClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
-        q.greaterThan("_id", 1);
+        q.greaterThanEqualTo(TEST_FIELD, 1);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-        verify(query, times(1)).greaterThan("_id", 1);
+        verify(query, times(1)).greaterThanOrEqualTo(TEST_FIELD, 1);
     }
+
+    @Test
+    public void testGreaterThanOrEqualToLongClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.greaterThanEqualTo(TEST_FIELD, 1L);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).greaterThanOrEqualTo(TEST_FIELD, 1L);
+    }
+
+    @Test
+    public void testGreaterThanOrEqualToDoubleClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.greaterThanEqualTo(TEST_FIELD, 1.0d);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).greaterThanOrEqualTo(TEST_FIELD, 1.0d);
+    }
+
+    @Test
+    public void testGreaterThanOrEqualToFloatClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.greaterThanEqualTo(TEST_FIELD, 1.0f);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).greaterThanOrEqualTo(TEST_FIELD, 1.0f);
+    }
+
+
+    @Test
+    public void testLessThanIntClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThan(TEST_FIELD, 1);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThan(TEST_FIELD, 1);
+    }
+
+    @Test
+    public void testLessThanLongClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThan(TEST_FIELD, 1L);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThan(TEST_FIELD, 1L);
+    }
+
+    @Test
+    public void testLessThanDoubleClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThan(TEST_FIELD, 1.0d);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThan(TEST_FIELD, 1.0d);
+    }
+
+    @Test
+    public void testLessThanFloatClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThan(TEST_FIELD, 1.0f);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThan(TEST_FIELD, 1.0f);
+    }
+
+    @Test
+    public void testLessThanOrEqualToIntClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThanEqualTo(TEST_FIELD, 1);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThanOrEqualTo(TEST_FIELD, 1);
+    }
+
+    @Test
+    public void testLessThanOrEqualToLongClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThanEqualTo(TEST_FIELD, 1L);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThanOrEqualTo(TEST_FIELD, 1L);
+    }
+
+    @Test
+    public void testLessThanOrEqualToDoubleClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThanEqualTo(TEST_FIELD, 1.0d);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThanOrEqualTo(TEST_FIELD, 1.0d);
+    }
+
+    @Test
+    public void testLessThanOrEqualToFloatClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.lessThanEqualTo(TEST_FIELD, 1.0f);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).lessThanOrEqualTo(TEST_FIELD, 1.0f);
+    }
+
+    @Test
+    public void testNotEqualBooleanClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, true);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, true);
+    }
+
+    @Test
+    public void testNotEqualByteClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Byte aByte = 1;
+        q.notEqual(TEST_FIELD, aByte);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, aByte);
+    }
+
+    @Test
+    public void testNotEqualByteArrayClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        byte[] bytes = {1};
+        q.notEqual(TEST_FIELD, bytes);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, bytes);
+    }
+
+    @Test
+    public void testNotEqualShortClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Short aShort = 12345;
+        q.notEqual(TEST_FIELD, aShort);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, aShort);
+    }
+
+    @Test
+    public void testNotEqualIntClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, 1);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 1);
+    }
+
+    @Test
+    public void testNotEqualLongClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, 1L);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 1L);
+    }
+
+    @Test
+    public void testNotEqualDoubleClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, 1d);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 1d);
+    }
+
+    @Test
+    public void testNotEqualFloatClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, 1f);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 1f);
+    }
+
+    @Test
+    public void testNotEquqlStringClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, TEST_FIELD);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, TEST_FIELD);
+    }
+
 
 }
