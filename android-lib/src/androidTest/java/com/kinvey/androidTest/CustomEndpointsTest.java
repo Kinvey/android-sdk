@@ -261,10 +261,10 @@ public class CustomEndpointsTest {
     private static class DefaultKinveyClientCallback<T> implements KinveyClientCallback<T> {
 
         private CountDownLatch latch;
-        T result;
-        Throwable error;
+        private T result;
+        private Throwable error;
 
-        DefaultKinveyClientCallback(CountDownLatch latch) {
+        private DefaultKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -288,10 +288,10 @@ public class CustomEndpointsTest {
     private static class DefaultKinveyListCallback<T> implements KinveyListCallback<T> {
 
         private CountDownLatch latch;
-        List<T> result;
-        Throwable error;
+        private List<T> result;
+        private Throwable error;
 
-        DefaultKinveyListCallback(CountDownLatch latch) {
+        private DefaultKinveyListCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
