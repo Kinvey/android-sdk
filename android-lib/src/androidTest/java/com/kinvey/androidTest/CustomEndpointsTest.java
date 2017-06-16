@@ -180,6 +180,13 @@ public class CustomEndpointsTest {
     }
 
     @Test
+    public void testCustomEndpointsWrongCustomClass() throws IOException, InterruptedException {
+        AsyncCustomEndpoints endpoints = client.customEndpoints(Person[].class);
+        DefaultKinveyClientCallback<Person> callback = callAsyncEndpoint(GET_PERSON, endpoints, null);
+        assertNotNull(callback.error);
+    }
+
+    @Test
     public void testCustomEndpointsCustomClassNotExist() throws IOException, InterruptedException {
         AsyncCustomEndpoints endpoints = client.customEndpoints(Person.class);
         DefaultKinveyClientCallback<Person> callback = callAsyncEndpoint(NOT_EXIST_CUSTOM_ENDPOINT, endpoints, null);
@@ -200,6 +207,13 @@ public class CustomEndpointsTest {
         assertNotNull(callback.result);
         assertTrue(callback.result instanceof List);
         assertTrue(callback.result.get(0) instanceof Person);
+    }
+
+    @Test
+    public void testCustomEndpointsWrongCustomClassArray() throws IOException, InterruptedException {
+        AsyncCustomEndpoints endpoints = client.customEndpoints(Person[].class);
+        DefaultKinveyListCallback<Person> callback = callAsyncEndpointList(GET_PERSON_LIST, endpoints, null);
+        assertNotNull(callback.error);
     }
 
     @Test
