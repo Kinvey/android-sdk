@@ -293,4 +293,19 @@ public class QueryTest {
         verify(query, times(3)).or();
         verify(query, times(5)).endGroup();
     }
+
+    @Test
+    public void testAndClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Query q2 = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.notEqual(TEST_FIELD, 1);
+        q2.notEqual(TEST_FIELD, 2);
+        q.and(q2);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 1);
+        verify(query, times(1)).notEqualTo(TEST_FIELD, 2);
+        verify(query, times(3)).beginGroup();
+        verify(query, times(3)).endGroup();
+
+    }
 }
