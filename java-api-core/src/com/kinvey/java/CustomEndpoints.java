@@ -117,7 +117,7 @@ public class CustomEndpoints<I extends GenericJson, O> {
      */
     public CustomCommandArray callEndpointArrayBlocking(String endpoint, I input) throws IOException{
         Preconditions.checkNotNull(endpoint, "commandName must not be null");
-        CustomCommandArray command = new CustomCommandArray(endpoint, input,  Array.newInstance(currentResponseClass, 0).getClass());
+        CustomCommandArray command = new CustomCommandArray(endpoint, input, Array.newInstance(currentResponseClass, 0).getClass());
         client.initializeRequest(command);
         return command;
     }

@@ -9,11 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.QueryHelper;
-import com.kinvey.android.cache.RealmCache;
-import com.kinvey.android.cache.RealmCacheManager;
-import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
-import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -21,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
@@ -29,8 +24,12 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Created by Prots on 30/01/16.
@@ -49,7 +48,6 @@ public class QueryTest {
         Realm.init(mMockContext);
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
 
-
         if (!realm.getSchema().contains("test")){
             realm.beginTransaction();
             realm.getSchema().create("test").addField("_id", Integer.class);
@@ -62,7 +60,7 @@ public class QueryTest {
         doReturn(query).when(query).endGroup();
         doReturn(query).when(query).or();
         doReturn(query).when(query).not();
-
+        this.query = query;
     }
 
     @After
@@ -70,19 +68,15 @@ public class QueryTest {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         Realm.init(mMockContext);
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
-
         if (realm.getSchema().contains("test")){
             realm.beginTransaction();
-
             realm.getSchema().remove("test");
             realm.commitTransaction();
         }
     }
 
-
     @Test
     public void testInClause(){
-
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.in("_id", new String[]{"1", "2"});
 
@@ -92,13 +86,10 @@ public class QueryTest {
         verify(query, times(2)).equalTo(eq("_id"), anyString());
         verify(query, times(1)).or();
         verify(query, times(1)).endGroup();
-
-
     }
 
     @Test
     public void testNotInClause(){
-
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.notIn("_id", new String[]{"1", "2"});
 
@@ -109,9 +100,6 @@ public class QueryTest {
         verify(query, times(1)).or();
         verify(query, times(2)).endGroup();
         verify(query, times(1)).not();
-
-
     }
-
 
 }

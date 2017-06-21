@@ -17,11 +17,6 @@
 package com.kinvey.android.cache;
 
 
-import com.kinvey.java.KinveyException;
-import com.kinvey.java.Query;
-import com.kinvey.java.query.AbstractQuery;
-import com.kinvey.java.query.QueryFilter;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -57,7 +52,8 @@ public abstract class QueryHelper {
                     }
                 }
                 realmQuery.endGroup();
-
+            } else  if (field.equalsIgnoreCase("$and")) {
+                and(realmQuery, params);
             } else if (params instanceof Map){
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()){
                     String operation = paramMap.getKey();
@@ -89,6 +85,23 @@ public abstract class QueryHelper {
         return realmQuery;
     }
 
+    private static void and(RealmQuery query, Object params){
+        query.beginGroup();
+        if (params.getClass().isArray()) {
+            Map<String, Object>[] components = (Map<String, Object>[]) params;
+            if (components != null && components.length > 0) {
+                query.beginGroup();
+                prepareRealmQuery(query, components[0]);
+                query.endGroup();
+                for (int i = 1; i < components.length; i++) {
+                    query.beginGroup();
+                    prepareRealmQuery(query, components[i]);
+                    query.endGroup();
+                }
+            }
+        }
+        query.endGroup();
+    }
 
     private static void in(RealmQuery query, String field, Object params){
         if (params.getClass().isArray()) {
