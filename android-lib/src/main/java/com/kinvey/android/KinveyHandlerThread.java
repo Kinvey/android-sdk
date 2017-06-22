@@ -40,13 +40,15 @@ public class KinveyHandlerThread extends HandlerThread {
     }
 
     public synchronized void stopHandlerThread() {
-        mWorkerHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Looper.myLooper().quit();
-                mWorkerHandler.removeCallbacksAndMessages(null);
-            }
-        });
+        if (mWorkerHandler != null) {
+            mWorkerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Looper.myLooper().quit();
+                    mWorkerHandler.removeCallbacksAndMessages(null);
+                }
+            });
+        }
     }
 
 }

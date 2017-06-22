@@ -997,9 +997,11 @@ public class Client extends AbstractClient {
     }
 
     public void stopKinveyHandlerThread() {
-        kinveyHandlerThread.stopHandlerThread();
-        kinveyHandlerThread.quit();
-        kinveyHandlerThread.interrupt();
+        if (kinveyHandlerThread != null) {
+            kinveyHandlerThread.stopHandlerThread();
+            kinveyHandlerThread.quit();
+            kinveyHandlerThread.interrupt();
+        }
     }
 }
 
