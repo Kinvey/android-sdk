@@ -995,5 +995,11 @@ public class Client extends AbstractClient {
     protected ICacheManager getSyncCacheManager() {
         return syncCacheManager;
     }
+
+    public void stopKinveyHandlerThread() {
+        kinveyHandlerThread.stopHandlerThread();
+        kinveyHandlerThread.quit();
+        kinveyHandlerThread.interrupt();
+    }
 }
 

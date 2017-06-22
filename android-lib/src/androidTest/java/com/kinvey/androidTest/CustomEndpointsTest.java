@@ -18,6 +18,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.dto.User;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -309,6 +310,17 @@ public class CustomEndpointsTest {
 
         void finish() {
             latch.countDown();
+        }
+    }
+
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.kinvey.android;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -36,6 +37,16 @@ public class KinveyHandlerThread extends HandlerThread {
                 postTask(task);
             }
         }
+    }
+
+    public synchronized void stopHandlerThread() {
+        mWorkerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Looper.myLooper().quit();
+                mWorkerHandler.removeCallbacksAndMessages(null);
+            }
+        });
     }
 
 }

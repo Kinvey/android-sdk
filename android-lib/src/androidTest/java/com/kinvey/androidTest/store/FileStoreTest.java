@@ -22,6 +22,7 @@ import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -922,6 +923,17 @@ public class FileStoreTest {
         }
         DefaultDeleteListener deleteListener = removeFile(storeType, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
+    }
+
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
     }
 
 }

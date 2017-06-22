@@ -31,6 +31,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,11 +65,13 @@ public class DataStoreTest {
     private static final int LONG_TIMEOUT = 6*DEFAULT_TIMEOUT;
 
     private Client client;
-
+    private Context mMockContext;
     @Before
     public void setUp() throws InterruptedException, IOException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(mMockContext).build();
+        mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        if (client == null) {
+            client = new Client.Builder(mMockContext).build();
+        }
         final CountDownLatch latch = new CountDownLatch(1);
         if (!client.isUserLoggedIn()) {
             new Thread(new Runnable() {
@@ -99,7 +102,6 @@ public class DataStoreTest {
         }
         latch.await();
     }
-
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<Person> {
 
@@ -916,42 +918,45 @@ public class DataStoreTest {
 
     @Test
     public void testGettingItemsByIds() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
 
-        ICacheManager cacheManager = client.getCacheManager();
-        ICache<Person> cache = cacheManager.getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl);
-        cache.clear();
 
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+            DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
 
-        List<Person> items = new ArrayList<>();
+        for (int j = 1; j < 1; j++) {
+            ICacheManager cacheManager = client.getCacheManager();
+            ICache<Person> cache = cacheManager.getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl);
+            cache.clear();
 
-        List<String> ids = new ArrayList<>();
+            client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        Person person;
-        for (int i = 0 ; i < 100; i++){
-            person = createPerson("Test" + i);
-            person.setId(String.valueOf(i));
-            items.add(person);
-            ids.add(String.valueOf(i));
+            List<Person> items = new ArrayList<>();
+
+            List<String> ids = new ArrayList<>();
+
+            Person person;
+            for (int i = 0; i < 100; i++) {
+                person = createPerson("Test" + i);
+                person.setId(String.valueOf(i));
+                items.add(person);
+                ids.add(String.valueOf(i));
+            }
+
+
+            for (Person p : items) {
+                save(store, p);
+            }
+
+            List<Person> cachedObjects = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
+            assertEquals(100, cachedObjects.size());
+
+            for (int i = 0; i < cachedObjects.size(); i++) {
+                Person res = cachedObjects.get(i);
+                assertEquals(res.getId(), String.valueOf(i));
+            }
+
+            assertTrue(true);
+            client.getSycManager().clear(Person.COLLECTION);
         }
-
-
-        for (Person p:items) {
-            save(store, p);
-        }
-
-        List<Person> cachedObjects = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
-        assertEquals(100, cachedObjects.size());
-
-        for (int i = 0 ; i < cachedObjects.size() ; i ++){
-            Person res = cachedObjects.get(i);
-            assertEquals(res.getId(), String.valueOf(i));
-        }
-
-        assertTrue(true);
-        client.getSycManager().clear(Person.COLLECTION);
-
     }
 
     /**
@@ -1195,6 +1200,19 @@ public class DataStoreTest {
             throw new SocketTimeoutException();
         }
     }
+
+
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
+    }
+
 
 }
 
