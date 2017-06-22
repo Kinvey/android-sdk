@@ -47,6 +47,7 @@ public class RealmCacheManager implements ICacheManager {
     private final AbstractClient client;
     private final Context context;
     private String prefix = "";
+    private RealmConfiguration realmConfiguration;
 
 
     private HashMap<String, RealmCache> mCacheMap = new HashMap<String, RealmCache>();
@@ -196,9 +197,12 @@ public class RealmCacheManager implements ICacheManager {
     }
 
     private RealmConfiguration getRealmConfiguration() {
-        return new RealmConfiguration.Builder()
-                .name(prefix + "_" + getClientHash())
-                .build();
+        if (realmConfiguration == null) {
+            realmConfiguration = new RealmConfiguration.Builder()
+                    .name(prefix + "_" + getClientHash())
+                    .build();
+        }
+        return realmConfiguration;
     }
 
 }

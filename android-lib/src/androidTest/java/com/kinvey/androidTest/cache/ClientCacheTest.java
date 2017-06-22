@@ -10,6 +10,7 @@ import com.kinvey.android.cache.RealmCacheManager;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,5 +41,16 @@ public class ClientCacheTest extends InstrumentationTestCase {
     @Test
     public void testgetCacheManagerShouldRetuntRealmCacheManager(){
         assertTrue("cahe is not realm instance", client.getCacheManager() instanceof RealmCacheManager);
+    }
+
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
     }
 }

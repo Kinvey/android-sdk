@@ -995,5 +995,18 @@ public class Client extends AbstractClient {
     protected ICacheManager getSyncCacheManager() {
         return syncCacheManager;
     }
+
+    /**
+     * Terminates KinveyHandlerThread.
+     * Should be called if the Client instance is not used anymore to prevent from memory leaks.
+     * Currently this method is called from Instrumented tests, since each test has its own Client instance.
+     */
+    public void stopKinveyHandlerThread() {
+        if (kinveyHandlerThread != null) {
+            kinveyHandlerThread.stopHandlerThread();
+            kinveyHandlerThread.quit();
+            kinveyHandlerThread.interrupt();
+        }
+    }
 }
 
