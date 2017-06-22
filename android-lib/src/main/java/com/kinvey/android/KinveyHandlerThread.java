@@ -39,7 +39,7 @@ public class KinveyHandlerThread extends HandlerThread {
         }
     }
 
-    public synchronized void stopHandlerThread() {
+    synchronized void stopHandlerThread() {
         if (mWorkerHandler != null) {
             mWorkerHandler.post(new Runnable() {
                 @Override
