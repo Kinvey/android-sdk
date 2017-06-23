@@ -420,7 +420,7 @@ public abstract class ClassHash {
     private static List<Field> getClassFieldsAndParentClassFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        if (clazz.getClass().equals(BaseFileStore.FileMetadataWithPath.class.getClass()) && clazz.getSuperclass() != null) {
+        if (clazz.getSuperclass() != null) {
             fields.addAll(Arrays.asList(clazz.getSuperclass().getDeclaredFields()));
         }
         return fields;
