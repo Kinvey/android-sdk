@@ -21,6 +21,7 @@ import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
 import com.google.api.client.util.FieldInfo;
 import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.store.BaseFileStore;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -28,15 +29,14 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -89,8 +89,8 @@ public abstract class ClassHash {
 
         StringBuilder sb = new StringBuilder();
 
+        List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 
-        Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields){
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
@@ -150,7 +150,8 @@ public abstract class ClassHash {
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
         RealmObjectSchema schema = realm.getSchema().create(name);
 
-        Field[] fields = clazz.getDeclaredFields();
+        List<Field> fields = getClassFieldsAndParentClassFields(clazz);
+
         for (Field f : fields){
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
@@ -197,7 +198,7 @@ public abstract class ClassHash {
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
 
-        Field[] fields = clazz.getDeclaredFields();
+        List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 
         DynamicRealmObject object = null;
 
@@ -416,5 +417,13 @@ public abstract class ClassHash {
         return underlying;
     }
 
+    private static List<Field> getClassFieldsAndParentClassFields(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        if (clazz.getClass().equals(BaseFileStore.FileMetadataWithPath.class.getClass()) && clazz.getSuperclass() != null) {
+            fields.addAll(Arrays.asList(clazz.getSuperclass().getDeclaredFields()));
+        }
+        return fields;
+    }
 
 }
