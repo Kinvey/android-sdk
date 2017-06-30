@@ -44,7 +44,7 @@ public class MICLoginTest {
     private Client client = null;
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
-    private static final String APP_KEY = "kid_BkssrV2eW";
+    private static final String APP_KEY = "YOUR_APP_KEY_HERE";
     private static final String APP_SECRET = "YOUR_APP_SECRET_HERE";
     private static final String CLIENT_ID = "CLIENT_ID";
 
@@ -52,7 +52,7 @@ public class MICLoginTest {
     @Before
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(mMockContext).setUserClass(TestUser.class).build();
+        client = new Client.Builder(APP_KEY, APP_SECRET, mMockContext).setUserClass(TestUser.class).build();
     }
 
     // Check clientId in auth link for MICLoginPage
