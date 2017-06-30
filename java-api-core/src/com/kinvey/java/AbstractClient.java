@@ -84,6 +84,8 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
 
     private T user;
 
+    private String clientId;
+
     /**
      * The hostname to use for MIC authentication
      */
@@ -538,4 +540,11 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
         this.userModelClass = userClass;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 }

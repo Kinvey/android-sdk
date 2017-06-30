@@ -34,6 +34,8 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
 
     private String userId;
 
+    private String clientId;
+
     private String authToken;
     
     private String refreshToken;
@@ -74,6 +76,14 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
 
     protected void setUserId (String userid) {
         this.userId = userid;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getAuthToken() {

@@ -170,6 +170,7 @@ public class UserStoreRequestManager<T extends User> {
         userObject.setId(credential.getUserId());
         userObject.setAuthToken(credential.getAuthToken());
         client.setUser(userObject);
+        client.setClientId(credential.getClientId());
         return userObject;
     }
 
@@ -609,7 +610,11 @@ public class UserStoreRequestManager<T extends User> {
         data.put("grant_type", "authorization_code");
         data.put("code", code);
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String clientID = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (client.getClientId() != null) {
+            clientID = clientID + ":" + client.getClientId();
+        }
+        data.put("client_id",  clientID);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
@@ -628,7 +633,11 @@ public class UserStoreRequestManager<T extends User> {
         data.put("grant_type", "refresh_token");
         data.put("refresh_token", refreshToken);
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String clientID = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (client.getClientId() != null) {
+            clientID = clientID + ":" + client.getClientId();
+        }
+        data.put("client_id",  clientID);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
@@ -646,7 +655,11 @@ public class UserStoreRequestManager<T extends User> {
         Map<String, String> data = new HashMap<String, String>();
         data.put("response_type", "code");
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String clientID = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (client.getClientId() != null) {
+            clientID = clientID + ":" + client.getClientId();
+        }
+        data.put("client_id",  clientID);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICTempURL getTemp = new GetMICTempURL(client, content);
@@ -657,7 +670,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
 
-    public LoginToTempURL MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
+    public LoginToTempURL MICLoginToTempURL(String username, String password, String clientId, String tempURL) throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -667,13 +680,17 @@ public class UserStoreRequestManager<T extends User> {
 
 
         Map<String, String> data = new HashMap<String, String>();
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String clientID = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (client.getClientId() != null) {
+            clientID = clientID + ":" + clientId;
+        }
+        data.put("client_id",  clientID);
         data.put("redirect_uri", MICRedirectURI);
         data.put("response_type", "code");
         data.put("username", username);
         data.put("password", password);
 
-        HttpContent content = new UrlEncodedContent(data) ;
+        HttpContent content = new UrlEncodedContent(data);
         LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, content);
         loginTemp.setRequireAppCredentials(true);
         client.initializeRequest(loginTemp);

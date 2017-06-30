@@ -25,7 +25,6 @@ import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
-import com.kinvey.java.store.requests.user.LogoutRequest;
 
 import java.io.IOException;
 
@@ -634,7 +633,7 @@ public class UserStore {
      * @param redirectURI
      * @param callback
      */
-    public static void loginWithAuthorizationCodeLoginPage(Client client, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
+    public static void loginWithAuthorizationCodeLoginPage(Client client, String clientId, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
         //return URL for login pagef
         //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
         String appkey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
@@ -643,11 +642,16 @@ public class UserStore {
         if (apiVersion != null && apiVersion.length() > 0){
             host = client.getMICHostName() + apiVersion + "/";
         }
-        String myURLToRender = host + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
+        String myURLToRender = host + "oauth/auth?client_id=" + appkey;
+        if (clientId != null) {
+            myURLToRender = myURLToRender + ":" + clientId;
+        }
+        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code";
         //keep a reference to the callback and redirect uri for later
 
         MICCallback = callback;
         MICRedirectURI = redirectURI;
+        client.setClientId(clientId);
 
         if (callback != null){
             callback.onReadyToRender(myURLToRender);
@@ -681,10 +685,10 @@ public class UserStore {
      * @param redirectURI
      * @param callback
      */
-    public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String redirectURI, KinveyUserCallback<User> callback){
+    public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String clientId, String redirectURI, KinveyUserCallback<User> callback){
         MICCallback = callback;
 
-        new PostForTempURL(client, redirectURI, username, password, callback).execute();
+        new PostForTempURL(client, clientId, redirectURI, username, password, callback).execute();
     }
 
     /**
@@ -702,9 +706,9 @@ public class UserStore {
      * @param redirectURI
      * @param callback
      */
-    public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback<User> callback){
+    public static void presentMICLoginActivity(final Client client, String clientId, String redirectURI, final KinveyUserCallback<User> callback){
 
-        loginWithAuthorizationCodeLoginPage(client, redirectURI, new KinveyMICCallback() {
+        loginWithAuthorizationCodeLoginPage(client, clientId, redirectURI, new KinveyMICCallback() {
             @Override
             public void onReadyToRender(String myURLToRender) {
                 Intent i = new Intent(client.getContext(), MICLoginActivity.class);
@@ -929,6 +933,7 @@ public class UserStore {
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(result.get("refresh_token").toString());
+            currentCred.setClientId(client.getClientId());
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
             return ret;
@@ -938,13 +943,15 @@ public class UserStore {
     private static class PostForTempURL extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
+        private String clientId;
         private final String redirectURI;
         String username;
         String password;
 
-        public PostForTempURL(AbstractClient client, String redirectURI, String username, String password, KinveyUserCallback<User> callback) {
+        public PostForTempURL(AbstractClient client, String clientId, String redirectURI, String username, String password, KinveyUserCallback<User> callback) {
             super(callback);
             this.client = client;
+            this.clientId = clientId;
             this.redirectURI = redirectURI;
             this.username=username;
             this.password=password;
@@ -955,11 +962,12 @@ public class UserStore {
 
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
+            client.setClientId(clientId);
             GetMICTempURL micTempURL = requestManager.getMICTempURL();
             GenericJson tempResult = micTempURL.execute();
 
             String tempURL = tempResult.get("temp_login_uri").toString();
-            LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
+            LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, clientId, tempURL);
             GenericJson accessResult = loginToTempURL.execute();
 
             User user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
@@ -967,6 +975,7 @@ public class UserStore {
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
+            currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
             return user;

@@ -36,6 +36,7 @@ public final class LogoutRequest {
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setUser(null);
+        client.setClientId(null);
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setCredential(null);
     }
 }

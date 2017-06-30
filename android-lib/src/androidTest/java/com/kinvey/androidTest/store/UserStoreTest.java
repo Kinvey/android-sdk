@@ -713,7 +713,7 @@ public class UserStoreTest {
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.loginWithAuthorizationCodeLoginPage(client, redirectUrl, callback);
+                UserStore.loginWithAuthorizationCodeLoginPage(client, null, redirectUrl, callback);
                 Looper.loop();
             }
         }).start();
@@ -724,23 +724,24 @@ public class UserStoreTest {
     @Test //can be failed if application doesn't have permission for MIC Login
     public void testMIC_LoginWithAuthorizationCodeAPI() throws InterruptedException {
         String redirectURI = "kinveyAuthDemo://";
+        String clientId = "kinveyAuthDemo://";
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(APP_KEY, APP_SECRET, mMockContext).build();
         if (client.isUserLoggedIn()) {
             logout(client);
         }
-        DefaultKinveyUserCallback userCallback = loginWithAuthorizationCodeAPIAsync(USERNAME, PASSWORD, redirectURI, client);
+        DefaultKinveyUserCallback userCallback = loginWithAuthorizationCodeAPIAsync(USERNAME, PASSWORD, clientId, redirectURI, client);
         assertNotNull(userCallback.result);
         logout(client);
     }
 
-    private DefaultKinveyUserCallback loginWithAuthorizationCodeAPIAsync(final String username, final String password, final String redirectUrl, final Client client) throws InterruptedException {
+    private DefaultKinveyUserCallback loginWithAuthorizationCodeAPIAsync(final String username, final String password, final String clientId, final String redirectUrl, final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyUserCallback callback = new DefaultKinveyUserCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
-                UserStore.loginWithAuthorizationCodeAPI(client, username, password, redirectUrl, callback);
+                UserStore.loginWithAuthorizationCodeAPI(client, username, password, clientId, redirectUrl, callback);
                 Looper.loop();
             }
         }).start();
