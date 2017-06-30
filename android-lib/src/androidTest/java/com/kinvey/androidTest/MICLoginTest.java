@@ -22,6 +22,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
+import com.kinvey.java.store.requests.user.GetMICAccessToken;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 
 import org.junit.Before;
@@ -107,6 +108,23 @@ public class MICLoginTest {
         requestManager.setMICRedirectURI(redirectURI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL();
         assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get("client_id"));
+    }
+
+    // Check clientId for using refresh token
+    @Test
+    public void testMICLoginUseRefreshTokenWithClientId() throws IOException {
+        UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+        client.setClientId(CLIENT_ID);
+        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken("refresh_token");
+        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get("client_id"));
+    }
+
+    // Check clientId (should be absent second part of client_id) for using refresh token
+    @Test
+    public void testMICLoginUseRefreshToken() throws IOException {
+        UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken("refresh_token");
+        assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get("client_id"));
     }
 
     private KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
