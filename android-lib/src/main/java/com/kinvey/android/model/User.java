@@ -13,13 +13,13 @@ import java.io.IOException;
 
 public class User extends BaseUser{
 
-    public void update(KinveyClientCallback<BaseUser> callback) {
+    public void update(KinveyClientCallback<User> callback) {
         new Update(callback).execute();
     }
 
-    private static class Update extends AsyncClientRequest<BaseUser> {
+    private static class Update extends AsyncClientRequest<User> {
 
-        private Update(KinveyClientCallback<BaseUser> callback){
+        private Update(KinveyClientCallback<User> callback){
             super(callback);
         }
 

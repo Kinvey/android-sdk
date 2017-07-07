@@ -19,10 +19,10 @@ import java.io.IOException;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyUserListCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.UserDiscovery;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.model.UserLookup;
 
 /**
@@ -44,7 +44,7 @@ import com.kinvey.java.model.UserLookup;
     public void submit(View view) {
     kinveyClient.userDiscovery().lookupByUserName(username, new KinveyUserListCallback () {
         public void onFailure(Throwable t) { ... }
-        public void onSuccess(BaseUser[] u) { ... }
+        public void onSuccess(User[] u) { ... }
     });
 }
  * </pre>
@@ -68,7 +68,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     /**
      * Asynchronous user lookup by first and last name
      * <p>
-     * Constructs an asynchronous request to find a user by first and last name, and returns the associated BaseUser object
+     * Constructs an asynchronous request to find a user by first and last name, and returns the associated User object
      * via a KinveyUserListCallback.
      * </p>
      * <p>
@@ -77,7 +77,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      *  {@code
         kinveyClient.userDiscovery().lookupByFullName("John","Smith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
-            public void onSuccess(BaseUser[] u) { ... }
+            public void onSuccess(User[] u) { ... }
         });
      *  </pre>
      * }
@@ -100,7 +100,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     /**
      * Asynchronous user lookup by username
      * <p>
-     * Constructs an asynchronous request to find a user by username, and returns the associated BaseUser object
+     * Constructs an asynchronous request to find a user by username, and returns the associated User object
      * via a KinveyUserListCallback.
      * </p>
      * <p>
@@ -109,7 +109,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      * {@code
         kinveyClient.userDiscovery().lookupByFullName("jsmith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
-            public void onSuccess(BaseUser[] u) { ... }
+            public void onSuccess(User[] u) { ... }
         });
     }
      * </pre>
@@ -127,7 +127,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
      /**
      * Asynchronous user lookup by Facebook ID
      * <p>
-     * Constructs an asynchronous request to find a user by facebook ID, and returns the associated BaseUser object
+     * Constructs an asynchronous request to find a user by facebook ID, and returns the associated User object
      * via a KinveyUserListCallback.
      * </p>
      * <p>
@@ -136,7 +136,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
       {@code
         kinveyClient.userDiscovery().lookupByFacebookID("jsmith", new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
-            public void onSuccess(BaseUser[] u) { ... }
+            public void onSuccess(User[] u) { ... }
         });
       }
      * </pre>
@@ -155,7 +155,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
     /**
      * Asynchronous user lookup method
      * <p>
-     * Constructs an asynchronous request to find a user, and returns the associated BaseUser object
+     * Constructs an asynchronous request to find a user, and returns the associated User object
      * via a KinveyClientCallback.   Requests are constructed with a {@link com.google.api.client.json.GenericJson}
      * {@link UserLookup} object, which can be instantiated via the {@link com.kinvey.java.UserDiscovery#userLookup()}
      * factory method.
@@ -168,7 +168,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
         lookup.put("age",21);
         kinveyClient.userDiscovery().lookup(lookup, new KinveyUserListCallback() {
             public void onFailure(Throwable t) { ... }
-            public void onSuccess(BaseUser[] u) { ... }
+            public void onSuccess(User[] u) { ... }
         });
     }
      * </pre>
@@ -183,7 +183,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
 
     }
 
-    private class Lookup extends AsyncClientRequest<BaseUser[]> {
+    private class Lookup extends AsyncClientRequest<User[]> {
 
         private final UserLookup userLookup;
 
@@ -192,8 +192,8 @@ public class AsyncUserDiscovery extends UserDiscovery {
             this.userLookup = lookup;
         }
 
-        protected BaseUser[] executeAsync() throws IOException {
-            return AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
+        protected User[] executeAsync() throws IOException {
+            return (User[]) AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
         }
     }
 }

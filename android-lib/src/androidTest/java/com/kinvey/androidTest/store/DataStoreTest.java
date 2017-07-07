@@ -15,6 +15,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
@@ -28,7 +29,6 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -76,9 +76,9 @@ public class DataStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login(client, new KinveyClientCallback<BaseUser>() {
+                        UserStore.login(client, new KinveyClientCallback<User>() {
                             @Override
-                            public void onSuccess(BaseUser result) {
+                            public void onSuccess(User result) {
                                 assertNotNull(result);
                                 latch.countDown();
                             }
@@ -1095,7 +1095,7 @@ public class DataStoreTest {
         cleanBackendDataStore(store);
         sync(store, 120);
 
-        BaseUser baseUser = client.getActiveUser();
+        User user = client.getActiveUser();
 
         for (int i = 0; i < 10; i++) {
             Person person = createPerson("Person_" + i);
@@ -1173,7 +1173,7 @@ public class DataStoreTest {
         skip = 0;
         for (int i = 0; i < 5; i++) {
             query = client.query();
-            query.equals("_acl.creator", baseUser.getId());
+            query.equals("_acl.creator", user.getId());
             query.setSkip(skip);
             query.setLimit(limit);
 

@@ -15,8 +15,8 @@
  */
 package com.kinvey.android.callback;
 
+import com.kinvey.android.model.User;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
@@ -25,7 +25,7 @@ import com.kinvey.java.store.UserStoreRequestManager;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserCallback<T extends BaseUser> extends KinveyClientCallback<T> {
+public interface KinveyUserCallback<T extends User> extends KinveyClientCallback<T> {
 
 
     @Override

@@ -166,7 +166,7 @@ public class AsyncUserGroup extends UserGroup {
      </p>
      *
      * @param groupID a {@link java.lang.String} group ID to add users to.
-     * @param userIDs a {@link java.util.List} of Strings containing BaseUser IDs.
+     * @param userIDs a {@link java.util.List} of Strings containing User IDs.
      * @param childGroupIDs a {@link java.util.List} child group IDs.
      * @param callback a {@link com.kinvey.java.core.KinveyClientCallback} object.
      * @param <T> a T object.

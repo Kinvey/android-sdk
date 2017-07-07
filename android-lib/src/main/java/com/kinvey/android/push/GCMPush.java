@@ -15,10 +15,6 @@
  */
 package com.kinvey.android.push;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +28,15 @@ import com.google.api.client.util.Key;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.BaseUser;
+
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 
 
 /**
@@ -124,10 +124,10 @@ public class GCMPush extends AbstractPush {
             client.push(pushServiceClass).enablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	UserStore.retrieve(client, new KinveyUserCallback<BaseUser>() {
+                	UserStore.retrieve(client, new KinveyUserCallback<User>() {
 						
 						@Override
-						public void onSuccess(BaseUser result) {
+						public void onSuccess(User result) {
 							client.getActiveUser().put("_messaging", result.get("_messaging"));
 							Intent reg = new Intent(client.getContext(), pushServiceClass);
 		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
@@ -277,7 +277,7 @@ public class GCMPush extends AbstractPush {
     }
 
     /**
-     * This class is used to maintain metadata about the current GCM push configuration in the BaseUser collection.
+     * This class is used to maintain metadata about the current GCM push configuration in the User collection.
      *
      *
      */
@@ -356,7 +356,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             try {
                 GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
 //                final String regid = InstanceID.getInstance(context).getToken(getSenderIDs()[0], "GCM");
@@ -380,7 +380,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
             try {
                 gcm.unregister();
@@ -401,7 +401,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
             RegisterPush p = new RegisterPush(ent);
@@ -424,7 +424,7 @@ public class GCMPush extends AbstractPush {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
             UnregisterPush p = new UnregisterPush(ent);

@@ -13,6 +13,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
@@ -37,16 +38,16 @@ public class UserStore {
     /**
      * Asynchronous request to signUp.
      * <p>
-     * Creates an asynchronous request to create new BaseUser at the kinvey backend.
+     * Creates an asynchronous request to create new User at the kinvey backend.
      * If signUp was successful user will be login automatically.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.signUp("userName", "password", mClient, new KinveyClientCallback<BaseUser>() {
-     *      void onSuccess(BaseUser user){...};
+     *  UserStore.signUp("userName", "password", mClient, new KinveyClientCallback<User>() {
+     *      void onSuccess(User user){...};
      *      void onFailure(Throwable t){...};
      *  });
      * }
@@ -55,13 +56,13 @@ public class UserStore {
      * @param username {@link String} the userName of Kinvey user
      * @param password {@link String} the password of Kinvey user.
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      */
-    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback<BaseUser> callback) {
+    public static void signUp(String username, String password, AbstractClient client, KinveyClientCallback<User> callback) {
         signUp(username, password, null, client, callback);
     }
 
-    public static <T extends BaseUser> void signUp(String username, String password, T user, AbstractClient client, KinveyClientCallback<T> callback) {
+    public static <T extends User> void signUp(String username, String password, T user, AbstractClient client, KinveyClientCallback<T> callback) {
         new Create(username, password, user, client, callback).execute();
     }
 
@@ -71,41 +72,41 @@ public class UserStore {
      * Creates an asynchronous request to login at the kinvey backend.
      * Login with the implicit user. If the implicit user does not exist, the user is created.
      * After calling this method, the application should retrieve and store the userID using getId().
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.login(mClient, new KinveyClientCallback<BaseUser>() {
-     *      void onSuccess(BaseUser user){...};
+     *  UserStore.login(mClient, new KinveyClientCallback<User>() {
+     *      void onSuccess(User user){...};
      *      void onFailure(Throwable t){...};
      *  });
      * }
      * </pre>
      * </p>
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
-    public static void login(AbstractClient client, KinveyClientCallback<BaseUser> callback) throws IOException {
+    public static void login(AbstractClient client, KinveyClientCallback<User> callback) throws IOException {
         new Login(client, callback).execute();
     }
 
     /**
      * Asynchronous request to login with the existing user.
      * <p>
-     * Creates an asynchronous request to login new BaseUser at kinvey backend.
+     * Creates an asynchronous request to login new User at kinvey backend.
      * Login with the with existing user.
      * If user does not exist, returns a error response.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.login("userID", "password", mClient, new KinveyClientCallback<BaseUser>() {
-     *      void onSuccess(BaseUser user){...};
+     *  UserStore.login("userID", "password", mClient, new KinveyClientCallback<User>() {
+     *      void onSuccess(User user){...};
      *      void onFailure(Throwable t){...};
      *  });
      * }
@@ -114,7 +115,7 @@ public class UserStore {
      * @param userId {@link String} the userId of Kinvey user
      * @param password {@link String} the password of Kinvey user.
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void login(String userId, String password, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -126,14 +127,14 @@ public class UserStore {
      * <p>
      * Creates an asynchronous request to login with the Facebook accessToken.
      * Before this request you must authorize in Facebook application and get Facebook access token.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginFacebook("accessToken", mClient, new KinveyClientCallback<BaseUser>() {
-     *      void onSuccess(BaseUser user){...};
+     *  UserStore.loginFacebook("accessToken", mClient, new KinveyClientCallback<User>() {
+     *      void onSuccess(User user){...};
      *      void onFailure(Throwable t){...};
      *  });
      * }
@@ -141,7 +142,7 @@ public class UserStore {
      * </p>
      * @param accessToken {@link String} the Facebook access token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginFacebook(String accessToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -153,14 +154,14 @@ public class UserStore {
      * <p>
      * Creates an asynchronous request to login with the Google accessToken.
      * Before this request you must authorize in Google application and get Google access token.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginGoogle("accessToken", mClient, new KinveyClientCallback<BaseUser>() {
-     *      void onSuccess(BaseUser user){...};
+     *  UserStore.loginGoogle("accessToken", mClient, new KinveyClientCallback<User>() {
+     *      void onSuccess(User user){...};
      *      void onFailure(Throwable t){...};
      *  });
      * }
@@ -168,7 +169,7 @@ public class UserStore {
      * </p>
      * @param accessToken {@link String} the Facebook access token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginGoogle(String accessToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -181,15 +182,15 @@ public class UserStore {
      * Creates an asynchronous request to login with the Twitter.
      * Before this request you must authorize in Twitter application and get Twitter accessToken,
      * accessSecret,consumerKey and consumerSecret.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *  UserStore.loginTwitter("accessToken", "accessSecret", "consumerKey", "consumerSecret", mClient,
-     *      new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *      new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -200,7 +201,7 @@ public class UserStore {
      * @param consumerKey {@link String} the Twitter consumerKey token
      * @param consumerSecret {@link String} the Twitter consumerSecret token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginTwitter(String accessToken, String accessSecret, String consumerKey, String consumerSecret, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -213,15 +214,15 @@ public class UserStore {
      * Creates an asynchronous request to login with the LinkedIn.
      * Before this request you must authorize in LinkedIn application and get LinkedIn accessToken,
      * accessSecret,consumerKey and consumerSecret.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *  UserStore.loginLinkedIn("accessToken", "accessSecret", "consumerKey", "consumerSecret", mClient,
-     *      new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *      new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -232,7 +233,7 @@ public class UserStore {
      * @param consumerKey {@link String} the LinkedIn consumerKey token
      * @param consumerSecret {@link String} the LinkedIn consumerSecret token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginLinkedIn(String accessToken, String accessSecret, String consumerKey, String consumerSecret, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -243,14 +244,14 @@ public class UserStore {
      * Asynchronous request to login with login link.
      * <p>
      * Creates an asynchronous request to login with login link.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginAuthLink("accessToken", "refreshToken", mClient, new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *  UserStore.loginAuthLink("accessToken", "refreshToken", mClient, new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -259,7 +260,7 @@ public class UserStore {
      * @param accessToken {@link String} the access token
      * @param refreshToken {@link String} the refresh token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginAuthLink(String accessToken, String refreshToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -272,15 +273,15 @@ public class UserStore {
      * Creates an asynchronous request to login with the SalesForce.
      * Before this request you must authorize in LinkedIn application and get SalesForce accessToken,
      * client_id, refreshToken and id.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *  UserStore.loginSalesForce("accessToken", "client_id", "refreshToken", "id", mClient,
-     *      new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *      new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -291,7 +292,7 @@ public class UserStore {
      * @param refreshToken {@link String} the SalesForce refresh token
      * @param id {@link String} the SalesForce id
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginSalesForce(String accessToken, String client_id, String refreshToken, String id, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -302,14 +303,14 @@ public class UserStore {
      * Asynchronous request to login with the MobileIdentity accessToken.
      * <p>
      * Creates an asynchronous request to login with the MobileIdentity accessToken.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginSalesForce("accessToken", mClient, new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *  UserStore.loginSalesForce("accessToken", mClient, new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -317,7 +318,7 @@ public class UserStore {
      * </p>
      * @param accessToken {@link String} the MobileIdentity access token
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void loginMobileIdentity(String accessToken, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -329,14 +330,14 @@ public class UserStore {
      * <p>
      * Creates an asynchronous request to login with kinvey Credential object.
      * You can get Credential object from CredentialStorage, if user was logged before.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.login(credential, mClient, new KinveyClientCallback<BaseUser>() {
-     *          void onSuccess(BaseUser user){...};
+     *  UserStore.login(credential, mClient, new KinveyClientCallback<User>() {
+     *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
      * }
@@ -344,7 +345,7 @@ public class UserStore {
      * </p>
      * @param credential {@link Credential} the credential of kinvey user
      * @param client {@link Client} an instance of the client
-     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} the callback
+     * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
      */
     public static void login(Credential credential, AbstractClient client, KinveyClientCallback callback) throws IOException {
@@ -369,7 +370,7 @@ public class UserStore {
      * Creates an Synchronous request to logout.
      * Storage will be cleared in this request. To keep data in storage need to call keepOfflineStorageOnLogout()
      * before this method.
-     * Uses {@link com.kinvey.java.core.KinveyClientCallback<BaseUser>} to return a BaseUser.
+     * Uses {@link com.kinvey.java.core.KinveyClientCallback<User>} to return a User.
      * </p>
      * <p>
      * Sample Usage:
@@ -481,7 +482,13 @@ public class UserStore {
         new GetUser(userId, client, callback).execute();
     }
 
-    public void save(AbstractClient client,KinveyClientCallback<BaseUser> callback) {
+    /**
+     * Asynchronous Update current user info
+     *
+     * @deprecated use {@link User#update(KinveyClientCallback)} ()} instead.
+     */
+    @Deprecated
+    public void save(AbstractClient client,KinveyClientCallback<User> callback) {
         new Update(client, callback).execute();
     }
 
@@ -495,7 +502,7 @@ public class UserStore {
      *
      * @param callback KinveyUserCallback
      */
-    public static void convenience(AbstractClient client,KinveyClientCallback<BaseUser> callback) {
+    public static void convenience(AbstractClient client,KinveyClientCallback<User> callback) {
         new RetrieveMetaData(client, callback).execute();
     }
 
@@ -509,15 +516,15 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     BaseUser user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.update(new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
-     public void onSuccess(BaseUser result) { ... }
+     public void onSuccess(User result) { ... }
      });
      }
      * </pre>
      *
-     * @param callback {@link KinveyUserCallback} containing an updated BaseUser instance.
+     * @param callback {@link KinveyUserCallback} containing an updated User instance.
      */
 /*    public void update(AbstractClient client,KinveyClientCallback callback) {
         new Update(client, callback).execute();
@@ -533,15 +540,15 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     BaseUser user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.retrieve(new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
-     public void onSuccess(BaseUser result) { ... }
+     public void onSuccess(User result) { ... }
      });
      }
      * </pre>
      *
-     * @param callback {@link KinveyUserCallback} containing a refreshed BaseUser instance.
+     * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
      */
     public static void retrieve(AbstractClient client, KinveyClientCallback callback) {
         new Retrieve(client, callback).execute();
@@ -557,10 +564,10 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     BaseUser user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.retrieve(new String[]{"myKinveyReferencedField"}, new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
-     public void onSuccess(BaseUser result) { ... }
+     public void onSuccess(User result) { ... }
      });
      }
      * </pre>
@@ -568,24 +575,24 @@ public class UserStore {
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
-    public static void retrieve(String[] resolves, AbstractClient client, KinveyClientCallback<BaseUser> callback){
+    public static void retrieve(String[] resolves, AbstractClient client, KinveyClientCallback<User> callback){
         new Retrieve(resolves, client, callback).execute();
     }
 
     /**
      * Asynchronous call to retrive (refresh) the users by query, and resolve KinveyReferences
      * <p>
-     * Constructs an asynchronous request to retrieve BaseUser objects via a Query.
+     * Constructs an asynchronous request to retrieve User objects via a Query.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
      * {@code
-    BaseUser user = kinveyClient.user();
+    User user = kinveyClient.getActiveUser();
     user.retrieve(Query query, new String[]{"myKinveyReferenceField"}, new KinveyUserListCallback() {
     public void onFailure(Throwable e) { ... }
-    public void onSuccess(BaseUser[] result) { ... }
+    public void onSuccess(User[] result) { ... }
     });
     }
      * </pre>
@@ -603,17 +610,17 @@ public class UserStore {
     /**
      * Asynchronous Call to Retrieve users via a Query
      * <p>
-     * Constructs an asynchronous request to retrieve BaseUser objects via a Query.
+     * Constructs an asynchronous request to retrieve User objects via a Query.
      * </p>
      * <p>
      * Sample Usage:
      * </p>
      * <pre>
      * {@code
-    BaseUser user = kinveyClient.user();
+    User user = kinveyClient.getActiveUser();
     user.retrieve(Query query, new KinveyUserListCallback() {
     public void onFailure(Throwable e) { ... }
-    public void onSuccess(BaseUser[] result) { ... }
+    public void onSuccess(User[] result) { ... }
     });
     }
      * </pre>
@@ -680,7 +687,7 @@ public class UserStore {
      * @param redirectURI
      * @param callback
      */
-    public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String redirectURI, KinveyUserCallback<BaseUser> callback){
+    public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String redirectURI, KinveyUserCallback<User> callback){
         MICCallback = callback;
 
         new PostForTempURL(client, redirectURI, username, password, callback).execute();
@@ -701,7 +708,7 @@ public class UserStore {
      * @param redirectURI
      * @param callback
      */
-    public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback<BaseUser> callback){
+    public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback<User> callback){
 
         loginWithAuthorizationCodeLoginPage(client, redirectURI, new KinveyMICCallback() {
             @Override
@@ -713,7 +720,7 @@ public class UserStore {
             }
 
             @Override
-            public void onSuccess(BaseUser result) {
+            public void onSuccess(User result) {
                 if(callback != null){
                     callback.onSuccess(result);
                 }
@@ -734,7 +741,7 @@ public class UserStore {
     }
 
 
-    private static class Login extends AsyncClientRequest<BaseUser> {
+    private static class Login extends AsyncClientRequest<User> {
 
         String username;
         String password;
@@ -751,7 +758,7 @@ public class UserStore {
         String id;
         String client_id;
 
-        private Login(AbstractClient client, KinveyClientCallback<BaseUser> callback) {
+        private Login(AbstractClient client, KinveyClientCallback<User> callback) {
             super(callback);
 
             this.client = client;
@@ -816,7 +823,7 @@ public class UserStore {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             switch(this.type) {
                 case IMPLICIT:
                     return BaseUserStore.login(client);
@@ -843,7 +850,7 @@ public class UserStore {
         }
     }
 
-    private static class Create<T extends BaseUser> extends AsyncClientRequest<T> {
+    private static class Create<T extends User> extends AsyncClientRequest<T> {
         String username;
         String password;
         private T user;
@@ -904,13 +911,13 @@ public class UserStore {
         }
     }
 
-    private static class PostForAccessToken extends AsyncClientRequest<BaseUser>{
+    private static class PostForAccessToken extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
         private final String redirectURI;
         private String token;
 
-        public PostForAccessToken(AbstractClient client, String redirectURI, String token, KinveyClientCallback<BaseUser> callback) {
+        public PostForAccessToken(AbstractClient client, String redirectURI, String token, KinveyClientCallback<User> callback) {
             super(callback);
             this.client = client;
             this.redirectURI = redirectURI;
@@ -919,12 +926,12 @@ public class UserStore {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getMICToken(token).execute();
 
-            BaseUser ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
+            User ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(result.get("refresh_token").toString());
@@ -934,14 +941,14 @@ public class UserStore {
         }
     }
 
-    private static class PostForTempURL extends AsyncClientRequest<BaseUser>{
+    private static class PostForTempURL extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
         private final String redirectURI;
         String username;
         String password;
 
-        public PostForTempURL(AbstractClient client, String redirectURI, String username, String password, KinveyUserCallback<BaseUser> callback) {
+        public PostForTempURL(AbstractClient client, String redirectURI, String username, String password, KinveyUserCallback<User> callback) {
             super(callback);
             this.client = client;
             this.redirectURI = redirectURI;
@@ -950,7 +957,7 @@ public class UserStore {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
 
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
@@ -961,7 +968,7 @@ public class UserStore {
             LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
             GenericJson accessResult = loginToTempURL.execute();
 
-            BaseUser baseUser = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
+            User baseUser = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
 
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
@@ -973,24 +980,24 @@ public class UserStore {
     }
 
 
-    private static class Retrieve extends AsyncClientRequest<BaseUser> {
+    private static class Retrieve extends AsyncClientRequest<User> {
 
         private String[] resolves = null;
         private final AbstractClient client;
 
-        private Retrieve(AbstractClient client,KinveyClientCallback<BaseUser> callback) {
+        private Retrieve(AbstractClient client,KinveyClientCallback<User> callback) {
             super(callback);
             this.client = client;
         }
 
-        private Retrieve(String[] resolves, AbstractClient client, KinveyClientCallback<BaseUser> callback){
+        private Retrieve(String[] resolves, AbstractClient client, KinveyClientCallback<User> callback){
             super(callback);
             this.resolves = resolves;
             this.client = client;
         }
 
         @Override
-        public BaseUser executeAsync() throws IOException {
+        public User executeAsync() throws IOException {
             if (resolves == null){
                 return BaseUserStore.retrieve(client);
             }else{
@@ -999,21 +1006,21 @@ public class UserStore {
         }
     }
 
-    private static class RetrieveUserList extends AsyncClientRequest<BaseUser[]> {
+    private static class RetrieveUserList extends AsyncClientRequest<User[]> {
 
         private Query query = null;
         private String[] resolves = null;
         private final AbstractClient client;
 
 
-        private RetrieveUserList(Query query, AbstractClient client,KinveyClientCallback<BaseUser[]> callback){
+        private RetrieveUserList(Query query, AbstractClient client,KinveyClientCallback<User[]> callback){
             super(callback);
             this.query = query;
             this.client = client;
 
         }
 
-        private RetrieveUserList(Query query, String[] resolves, AbstractClient client, KinveyClientCallback<BaseUser[]> callback){
+        private RetrieveUserList(Query query, String[] resolves, AbstractClient client, KinveyClientCallback<User[]> callback){
             super(callback);
             this.query = query;
             this.resolves = resolves;
@@ -1022,7 +1029,7 @@ public class UserStore {
         }
 
         @Override
-        public BaseUser[] executeAsync() throws IOException {
+        public User[] executeAsync() throws IOException {
             if (resolves == null){
                 return BaseUserStore.retrieve(query, client);
             }else{
@@ -1031,36 +1038,36 @@ public class UserStore {
         }
     }
 
-    private static class RetrieveMetaData extends AsyncClientRequest<BaseUser> {
+    private static class RetrieveMetaData extends AsyncClientRequest<User> {
 
         private final AbstractClient client;
 
 
-        private RetrieveMetaData(AbstractClient client, KinveyClientCallback<BaseUser> callback) {
+        private RetrieveMetaData(AbstractClient client, KinveyClientCallback<User> callback) {
             super(callback);
             this.client = client;
 
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return BaseUserStore.convenience(client);
         }
     }
 
-    private static class Update extends AsyncClientRequest<BaseUser> {
+    private static class Update extends AsyncClientRequest<User> {
 
         AbstractClient client = null;
 
 
-        private Update(AbstractClient client, KinveyClientCallback<BaseUser> callback){
+        private Update(AbstractClient client, KinveyClientCallback<User> callback){
             super(callback);
             this.client = client;
 
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return BaseUserStore.save(client);
         }
     }
@@ -1139,7 +1146,7 @@ public class UserStore {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             BaseUserStore.get(userId, client);
             return null;
         }
@@ -1183,7 +1190,7 @@ public class UserStore {
         }
     }
 
-    private class LoginKinveyAuth extends AsyncClientRequest<BaseUser> {
+    private class LoginKinveyAuth extends AsyncClientRequest<User> {
 
         private String authToken;
         private final AbstractClient client;
@@ -1199,7 +1206,7 @@ public class UserStore {
         }
 
         @Override
-        protected BaseUser executeAsync() throws IOException {
+        protected User executeAsync() throws IOException {
             return BaseUserStore.loginKinveyAuthToken(userID, authToken, client);
 
         }
