@@ -16,15 +16,15 @@
 package com.kinvey.android.callback;
 
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 
 /**
- * This callback is typed for an array of {@link com.kinvey.java.dto.User} objects, use it for bulk operations on the User collection..
+ * This callback is typed for an array of {@link BaseUser} objects, use it for bulk operations on the BaseUser collection..
  *
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserListCallback extends KinveyClientCallback<User[]> {
+public interface KinveyUserListCallback extends KinveyClientCallback<BaseUser[]> {
 
     /**
      * Method invoked after a successful request against a set of Users
@@ -32,7 +32,7 @@ public interface KinveyUserListCallback extends KinveyClientCallback<User[]> {
      * @param result - the modified users
      */
     @Override
-    public void onSuccess(User[] result);
+    public void onSuccess(BaseUser[] result);
 
     /**
      * Method invoked after a failed request against a set of Users

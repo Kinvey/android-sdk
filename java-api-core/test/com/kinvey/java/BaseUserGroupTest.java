@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * @author edwardf
  * @since 2.0
  */
-public class UserGroupTest extends KinveyMockUnitTest {
+public class BaseUserGroupTest extends KinveyMockUnitTest {
 
     private static final String ID = "_id";
     private static final String USERS = "users";

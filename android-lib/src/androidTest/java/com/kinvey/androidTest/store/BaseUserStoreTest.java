@@ -13,12 +13,13 @@ import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -34,11 +35,12 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class UserStoreTest {
+public class BaseUserStoreTest {
 
     private Client client = null;
     private static final String USERNAME = "test";
@@ -46,13 +48,40 @@ public class UserStoreTest {
     private static final String APP_KEY = "YOUR_APP_KEY_HERE";
     private static final String APP_SECRET = "YOUR_APP_SECRET_HERE";
 
-    private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
+    private static class DefaultKinveyClientCallback implements KinveyClientCallback<BaseUser> {
+
+        private CountDownLatch latch;
+        private BaseUser result;
+        private Throwable error;
+
+        private DefaultKinveyClientCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(BaseUser baseUser) {
+            this.result = baseUser;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class DefaultUserKinveyClientCallback implements KinveyClientCallback<User> {
 
         private CountDownLatch latch;
         private User result;
         private Throwable error;
 
-        private DefaultKinveyClientCallback(CountDownLatch latch) {
+        private DefaultUserKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -151,10 +180,10 @@ public class UserStoreTest {
         }
     }
 
-    private static class DefaultKinveyMICCallback implements KinveyMICCallback<User> {
+    private static class DefaultKinveyMICCallback implements KinveyMICCallback<BaseUser> {
 
         private CountDownLatch latch;
-        private User result;
+        private BaseUser result;
         private Throwable error;
         private String myURLToRender;
 
@@ -163,7 +192,7 @@ public class UserStoreTest {
         }
 
         @Override
-        public void onSuccess(User result) {
+        public void onSuccess(BaseUser result) {
             this.result = result;
             finish();
         }
@@ -185,10 +214,10 @@ public class UserStoreTest {
         }
     }
 
-    private static class DefaultKinveyUserCallback implements KinveyUserCallback<User> {
+    private static class DefaultKinveyUserCallback implements KinveyUserCallback<BaseUser> {
 
         private CountDownLatch latch;
-        private User result;
+        private BaseUser result;
         private Throwable error;
 
         private DefaultKinveyUserCallback(CountDownLatch latch) {
@@ -196,7 +225,7 @@ public class UserStoreTest {
         }
 
         @Override
-        public void onSuccess(User result) {
+        public void onSuccess(BaseUser result) {
             this.result = result;
             finish();
         }
@@ -298,6 +327,7 @@ public class UserStoreTest {
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).setUserClass(TestUser.class).build();
+        client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         if (client.isUserLoggedIn()) {
             new Thread(new Runnable() {
@@ -364,7 +394,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final BaseUserStoreTest.DefaultKinveyClientCallback callback = new BaseUserStoreTest.DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -382,7 +412,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback signUp() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final BaseUserStoreTest.DefaultKinveyClientCallback callback = new BaseUserStoreTest.DefaultKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -396,7 +426,7 @@ public class UserStoreTest {
 
     private CustomKinveyClientCallback signUp(final TestUser user) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.CustomKinveyClientCallback callback = new UserStoreTest.CustomKinveyClientCallback(latch);
+        final BaseUserStoreTest.CustomKinveyClientCallback callback = new BaseUserStoreTest.CustomKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -850,8 +880,8 @@ public class UserStoreTest {
 
     @Test
     public void testDoesUsernameExist() throws InterruptedException {
-        User user = login(USERNAME, PASSWORD, client).result;
-        boolean isNameExists = exists(user.getUsername(), client).result;
+        BaseUser baseUser = login(USERNAME, PASSWORD, client).result;
+        boolean isNameExists = exists(baseUser.getUsername(), client).result;
         assertTrue(isNameExists);
     }
 
@@ -877,11 +907,11 @@ public class UserStoreTest {
 
     @Test // this test always creates new user, to be careful
     public void testForgotUsername() throws InterruptedException {
-        User user = signUp(createRandomUserName("forgotUserName"), PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getUsername());
+        BaseUser baseUser = signUp(createRandomUserName("forgotUserName"), PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getUsername());
         assertTrue(client.isUserLoggedIn());
-        boolean isForgotten = forgot(user.getUsername(), client).result;
+        boolean isForgotten = forgot(baseUser.getUsername(), client).result;
         assertTrue(isForgotten);
         deleteUser(true, client);
     }
@@ -902,9 +932,9 @@ public class UserStoreTest {
 
     @Test // this test always creates new user, to be careful
     public void testDeleteUserSoftAsync() throws InterruptedException {
-        User user = signUp(createRandomUserName("deleteUserSoft"), PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
+        BaseUser baseUser = signUp(createRandomUserName("deleteUserSoft"), PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
         assertNull(deleteUser(false, client).error);
         assertNull(logout(client).error);
     }
@@ -925,18 +955,18 @@ public class UserStoreTest {
 
     @Test
     public void testDeleteUserHardAsync() throws InterruptedException {
-        User user = signUp(createRandomUserName("deleteUserHard"), PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
+        BaseUser baseUser = signUp(createRandomUserName("deleteUserHard"), PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
         assertNull(deleteUser(true, client).error);
         assertNull(logout(client).error);
     }
 
     @Test
     public void testUserEmailVerification() throws InterruptedException {
-        User user = login(USERNAME, PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
+        BaseUser baseUser = login(USERNAME, PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
         boolean isEmailVerificationSent = sentEmailVerification(client).result;
         assertTrue(isEmailVerificationSent);
         assertNull(logout(client).error);
@@ -958,10 +988,10 @@ public class UserStoreTest {
 
     @Test
     public void testUserPasswordReset() throws InterruptedException {
-        User user = login(USERNAME, PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
-        assertNotNull(user.getUsername());
+        BaseUser baseUser = login(USERNAME, PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
+        assertNotNull(baseUser.getUsername());
         boolean isPasswordReset = resetPassword(USERNAME, client).result;
         assertTrue(isPasswordReset);
         assertNull(logout(client).error);
@@ -988,22 +1018,22 @@ public class UserStoreTest {
         Client localClient = localBuilder.build();
         DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD, localClient);
         assertNotNull(callback.result);
-        User activeUser = callback.result;
+        BaseUser activeBaseUser = callback.result;
         Context mMockContext2 = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getContext(), "test_");
         Client.Builder localBuilder2 = new Client.Builder(mMockContext2);
         Client localClient2 = localBuilder2.build();
         assertNotNull(localClient2.getActiveUser());
-        assertTrue(activeUser.getId().equals(localClient2.getActiveUser().getId()));
-        assertTrue(activeUser.getUsername().equals(localClient2.getActiveUser().getUsername()));
+        assertTrue(activeBaseUser.getId().equals(localClient2.getActiveUser().getId()));
+        assertTrue(activeBaseUser.getUsername().equals(localClient2.getActiveUser().getUsername()));
         assertNull(logout(localClient).error);
         assertNull(logout(localClient2).error);
     }
 
     @Test
     public void testSignUpIfUserLoggedIn() throws InterruptedException {
-        User user = login(USERNAME, PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
+        BaseUser baseUser = login(USERNAME, PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
         assertTrue(client.isUserLoggedIn());
         DefaultKinveyClientCallback callback = signUp();
         assertNull(callback.result);
@@ -1013,13 +1043,13 @@ public class UserStoreTest {
 
     @Test
     public void testSignUpIfUserExists() throws InterruptedException {
-        User user = signUp(createRandomUserName("TestSignUp"), PASSWORD, client).result;
-        assertNotNull(user);
-        assertNotNull(user.getId());
+        BaseUser baseUser = signUp(createRandomUserName("TestSignUp"), PASSWORD, client).result;
+        assertNotNull(baseUser);
+        assertNotNull(baseUser.getId());
         assertTrue(client.isUserLoggedIn());
         assertNull(logout(client).error);
         assertFalse(client.isUserLoggedIn());
-        DefaultKinveyClientCallback callback = signUp(user.getUsername(), PASSWORD, client);
+        DefaultKinveyClientCallback callback = signUp(baseUser.getUsername(), PASSWORD, client);
         assertNull(callback.result);
         assertNotNull(callback.error);
         assertFalse(client.isUserLoggedIn());
@@ -1041,6 +1071,52 @@ public class UserStoreTest {
         assertNull(callback.error);
         assertTrue(client.isUserLoggedIn());
         assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testUpdate() throws InterruptedException {
+        DefaultKinveyClientCallback callback = login(client);
+        assertNotNull(callback.result);
+        assertTrue(client.isUserLoggedIn());
+        String oldUserName = client.getActiveUser().getUsername();
+        client.getActiveUser().setUsername("NewUserName2");
+        DefaultKinveyClientCallback userKinveyClientCallback = update(client);
+        assertNotNull(userKinveyClientCallback.result);
+        assertNotEquals(oldUserName, userKinveyClientCallback.result.getUsername());
+        assertNotNull(deleteUser(true, client));
+        assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testUpdateCustomUser() throws InterruptedException {
+        TestUser user = new TestUser();
+        user.setCompanyName("Test Company");
+        CustomKinveyClientCallback callback = signUp(user);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+
+        assertEquals(user.getCompanyName(), callback.result.getCompanyName(), client.getActiveUser().get("companyName"));
+
+        client.getActiveUser().set("companyName", "New Company");
+        DefaultKinveyClientCallback userKinveyClientCallback = update(client);
+        assertNotNull(userKinveyClientCallback.result);
+        assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getUsername());
+        assertNotNull(deleteUser(true, client));
+        assertNull(logout(client).error);
+    }
+
+    private DefaultKinveyClientCallback update(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                client.getActiveUser().update(callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
     }
 
     private String createRandomUserName(String testName) {

@@ -20,8 +20,6 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.dto.User;
-import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
  * Created by Prots on 2/12/16.

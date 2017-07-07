@@ -28,7 +28,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -76,9 +76,9 @@ public class DataStoreTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(client, new KinveyClientCallback<BaseUser>() {
                             @Override
-                            public void onSuccess(User result) {
+                            public void onSuccess(BaseUser result) {
                                 assertNotNull(result);
                                 latch.countDown();
                             }
@@ -1095,7 +1095,7 @@ public class DataStoreTest {
         cleanBackendDataStore(store);
         sync(store, 120);
 
-        User user = client.getActiveUser();
+        BaseUser baseUser = client.getActiveUser();
 
         for (int i = 0; i < 10; i++) {
             Person person = createPerson("Person_" + i);
@@ -1173,7 +1173,7 @@ public class DataStoreTest {
         skip = 0;
         for (int i = 0; i < 5; i++) {
             query = client.query();
-            query.equals("_acl.creator", user.getId());
+            query.equals("_acl.creator", baseUser.getId());
             query.setSkip(skip);
             query.setLimit(limit);
 

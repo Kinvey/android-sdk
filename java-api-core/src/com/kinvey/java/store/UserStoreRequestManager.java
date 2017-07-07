@@ -30,9 +30,9 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.dto.Email;
 import com.kinvey.java.dto.PasswordRequest;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.dto.Username;
 import com.kinvey.java.store.requests.user.Delete;
 import com.kinvey.java.store.requests.user.EmailVerification;
@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * Created by Prots on 2/12/16.
  */
-public class UserStoreRequestManager<T extends User> {
+public class UserStoreRequestManager<T extends BaseUser> {
 
 
     public static final String USER_COLLECTION_NAME = "user";
@@ -130,7 +130,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Method to initialize the User after login, create a credential,
+     * Method to initialize the BaseUser after login, create a credential,
      * and add it to the KinveyClientRequestInitializer
      *
      * @param response KinveyAuthResponse object containing the login response
@@ -193,7 +193,7 @@ public class UserStoreRequestManager<T extends User> {
     /**
      * Login with Kinvey user and password.   If user does not exist, returns a error response.
      *
-     * @param username userID of Kinvey User
+     * @param username userID of Kinvey BaseUser
      * @param password password of Kinvey user
      * @return LoginRequest object
      * @throws IOException
@@ -384,7 +384,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Creates an explicit Kinvey User.
+     * Creates an explicit Kinvey BaseUser.
      *
      * @param username userName of Kinvey user
      * @param password password of Kinvey user
@@ -396,7 +396,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Creates an explicit Kinvey User.
+     * Creates an explicit Kinvey BaseUser.
      *
      * @param username userName of Kinvey user
      * @param password password of Kinvey user
@@ -438,7 +438,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Retrieves an array of User[] based on a Query.
+     * Retrieves an array of BaseUser[] based on a Query.
      *
      * @return a Retrieve Request ready to be executed
      * @throws IOException
@@ -465,7 +465,7 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Retrieves an array of User[] based on a Query with support for resolving KinveyReferences
+     * Retrieves an array of BaseUser[] based on a Query with support for resolving KinveyReferences
      *
      * @param query the query to execute
      * @param resolves - List of {@link com.kinvey.java.model.KinveyReference} fields to resolve
@@ -494,16 +494,16 @@ public class UserStoreRequestManager<T extends User> {
     }
 
     /**
-     * Updates a provided user's profile
+     * Updates a provided baseUser's profile
      *
-     * @param user the user to update
+     * @param baseUser the baseUser to update
      * @return an Update request ready to be executed
      * @throws IOException
      */
-    public Update updateBlocking(User user) throws IOException{
-        Preconditions.checkNotNull(user, "currentUser must not be null");
-        Preconditions.checkNotNull(user.getId(), "currentUser ID must not be null");
-        Update update = new Update(this, user);
+    public Update updateBlocking(BaseUser baseUser) throws IOException{
+        Preconditions.checkNotNull(baseUser, "currentUser must not be null");
+        Preconditions.checkNotNull(baseUser.getId(), "currentUser ID must not be null");
+        Update update = new Update(this, baseUser);
         client.initializeRequest(update);
         return update;
     }

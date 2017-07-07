@@ -16,7 +16,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyJsonResponseException;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,9 +55,9 @@ public class CustomEndpointsTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(client, new KinveyClientCallback<BaseUser>() {
                             @Override
-                            public void onSuccess(User result) {
+                            public void onSuccess(BaseUser result) {
                                 assertNotNull(result);
                                 latch.countDown();
                             }

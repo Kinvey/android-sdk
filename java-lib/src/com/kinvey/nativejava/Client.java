@@ -33,6 +33,7 @@ import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.InMemoryCredentialStore;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
@@ -182,6 +183,16 @@ public class Client extends AbstractClient {
 
     @Override
     public ClientUser getClientUser() {
+        return null;
+    }
+
+    @Override
+    public void setUser(BaseUser user) {
+
+    }
+
+    @Override
+    public BaseUser getActiveUser() {
         return null;
     }
 

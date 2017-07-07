@@ -17,16 +17,13 @@
 package com.kinvey.java;
 
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.model.UserLookup;
 
 /**
@@ -94,13 +91,13 @@ public class UserDiscovery {
     public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup, User[].class);
+        Lookup lookup = new Lookup(userlookup, BaseUser[].class);
         client.initializeRequest(lookup);
         return lookup;
 
     }
 
-    public class Lookup extends AbstractKinveyJsonClientRequest<User[]> {
+    public class Lookup extends AbstractKinveyJsonClientRequest<BaseUser[]> {
         private static final String REST_PATH = "user/{appKey}/_lookup";
 
         Lookup(UserLookup lookup, Class myClass) {

@@ -34,6 +34,7 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.FileStore;
@@ -46,7 +47,7 @@ import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.StoreType;
@@ -82,7 +83,7 @@ import io.realm.Realm;
  * @since 2.0
  * @version $Id: $
  */
-public class Client extends AbstractClient {
+public class Client<T extends User> extends AbstractClient<T> {
 
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
@@ -137,6 +138,20 @@ public class Client extends AbstractClient {
 
     public static Client sharedInstance(){
     	return _sharedInstance;
+    }
+
+    @Override
+    public void setUser(T user) {
+        synchronized (lock) {
+            this.user = user;
+        }
+    }
+
+    @Override
+    public T getActiveUser() {
+        synchronized (lock) {
+            return this.user;
+        }
     }
 
     @Override
@@ -818,7 +833,7 @@ public class Client extends AbstractClient {
 
 
         /**
-         * Sets a callback to be called after a client is intialized and User attributes is being retrieved.
+         * Sets a callback to be called after a client is intialized and BaseUser attributes is being retrieved.
          *
          * <p>
          * When a client is intialized after an initial login, the user's credentials are cached locally and used for the
@@ -836,7 +851,7 @@ public class Client extends AbstractClient {
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                 }
 
-                public void onSuccess(User u) {
+                public void onSuccess(BaseUser u) {
                     CharSequence text = "Retrieved up-to-date data for " + u.getUserName() + ".";
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                 }
@@ -919,7 +934,7 @@ public class Client extends AbstractClient {
 
             Exception exception = null;
             try{
-                client.setUser(BaseUserStore.convenience(client));
+                client.setUser(BaseUserStore.<User>convenience(client));
             }catch (Exception error){
                 exception = error;
                 if (error instanceof HttpResponseException) {
