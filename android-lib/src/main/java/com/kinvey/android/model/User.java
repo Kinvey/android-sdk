@@ -11,7 +11,7 @@ import java.io.IOException;
  * Created by yuliya on 06/07/17.
  */
 
-public class User extends BaseUser{
+public class User extends BaseUser {
 
     public void update(KinveyClientCallback<User> callback) {
         new Update(callback).execute();
@@ -19,7 +19,7 @@ public class User extends BaseUser{
 
     private static class Update extends AsyncClientRequest<User> {
 
-        private Update(KinveyClientCallback<User> callback){
+        private Update(KinveyClientCallback<User> callback) {
             super(callback);
         }
 

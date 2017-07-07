@@ -84,7 +84,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     protected T user;
 
-    private static AbstractClient _sharedInstance;
+    private static AbstractClient sharedInstance;
 
     /**
      * The hostname to use for MIC authentication
@@ -172,13 +172,13 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
         super(transport, httpRequestInitializer, rootUrl, servicePath,
                 objectParser, kinveyRequestInitializer, requestPolicy);
-        _sharedInstance = this;
+        sharedInstance = this;
         this.user = null;
         this.store = store;
     }
 
     public static AbstractClient sharedInstance(){
-        return _sharedInstance;
+        return sharedInstance;
     }
 
     public Query query() {

@@ -106,7 +106,7 @@ public class Client<T extends User> extends AbstractClient<T> {
 
     private static KinveyHandlerThread kinveyHandlerThread;
     
-    private static Client _sharedInstance;
+    private static Client sharedInstance;
     
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -129,14 +129,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
         Logger.init(new AndroidLogger());
-        _sharedInstance = this;
+        sharedInstance = this;
         this.context = context;
         cacheManager = new RealmCacheManager(this);
         syncCacheManager = new RealmCacheManager("sync_", this);
     }
 
     public static Client sharedInstance(){
-    	return _sharedInstance;
+    	return sharedInstance;
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
@@ -968,14 +967,14 @@ public class UserStore {
             LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
             GenericJson accessResult = loginToTempURL.execute();
 
-            User baseUser = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
+            User user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
 
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
-            return baseUser;
+            return user;
         }
     }
 
