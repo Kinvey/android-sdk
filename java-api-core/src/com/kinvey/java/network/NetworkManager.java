@@ -484,7 +484,7 @@ public class NetworkManager<T extends GenericJson> {
     
     
     private class MetadataGet extends AbstractKinveyJsonClientRequest<DeltaSetItem[]>{
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,fields,tls,sort,limit,skip,resolve,resolve_depth,retainReference}";
         @Key
         private String collectionName;
@@ -507,7 +507,9 @@ public class NetworkManager<T extends GenericJson> {
         MetadataGet(DeltaGet getRequest){
             super(client, "GET", REST_PATH, null, DeltaSetItem[].class);
             this.queryFilter = getRequest.queryFilter;
-
+            if (this.queryFilter.equals("{}")) {
+                this.queryFilter = null;
+            }
 
             this.skip = getRequest.skip;
             this.limit = getRequest.limit;
@@ -541,7 +543,7 @@ public class NetworkManager<T extends GenericJson> {
 
         private static final int IDS_PER_PAGE = 100;
 
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
         private List<T> currentItems;
 
@@ -617,7 +619,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public class Get extends AbstractKinveyJsonClientRequest<T[]> {
 
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
@@ -642,6 +644,9 @@ public class NetworkManager<T extends GenericJson> {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            if (this.queryFilter.equals("{}")) {
+                this.queryFilter = null;
+            }
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -659,6 +664,9 @@ public class NetworkManager<T extends GenericJson> {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            if (this.queryFilter.equals("{}")) {
+                this.queryFilter = null;
+            }
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
