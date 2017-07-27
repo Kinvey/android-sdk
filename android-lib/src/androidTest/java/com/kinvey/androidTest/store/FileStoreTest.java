@@ -815,9 +815,7 @@ public class FileStoreTest {
         testUploadPubliclyReadableFile(StoreType.CACHE);
     }
 
-    // TODO: 05.06.2017 Should be fixed in Library
     @Test
-    @Ignore
     public void testUploadPubliclyReadableFileSync() throws InterruptedException, IOException {
         testUploadPubliclyReadableFile(StoreType.SYNC);
     }
