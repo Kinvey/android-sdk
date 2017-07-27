@@ -641,8 +641,7 @@ public class NetworkManager<T extends GenericJson> {
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
-            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
-            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -659,8 +658,7 @@ public class NetworkManager<T extends GenericJson> {
         Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
-            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
-            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -820,8 +818,7 @@ public class NetworkManager<T extends GenericJson> {
         Delete(Query query) {
             super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
             this.collectionName= NetworkManager.this.collectionName;
-            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
-            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
