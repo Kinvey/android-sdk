@@ -506,10 +506,8 @@ public class NetworkManager<T extends GenericJson> {
 
         MetadataGet(DeltaGet getRequest){
             super(client, "GET", REST_PATH, null, DeltaSetItem[].class);
-            this.queryFilter = getRequest.queryFilter;
-            if (this.queryFilter.equals("{}")) {
-                this.queryFilter = null;
-            }
+            String queryFilterString = getRequest.queryFilter;
+            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
 
             this.skip = getRequest.skip;
             this.limit = getRequest.limit;
@@ -643,10 +641,8 @@ public class NetworkManager<T extends GenericJson> {
         Get(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
-            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
-            if (this.queryFilter.equals("{}")) {
-                this.queryFilter = null;
-            }
+            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
+            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -663,10 +659,8 @@ public class NetworkManager<T extends GenericJson> {
         Get(Query query, Class myClass, String[] resolves, int resolve_depth, boolean retain){
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
-            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
-            if (this.queryFilter.equals("{}")) {
-                this.queryFilter = null;
-            }
+            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
+            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
@@ -687,7 +681,7 @@ public class NetworkManager<T extends GenericJson> {
         Get(String queryString, Class myClass){
         	super(client, "GET", REST_PATH, null, myClass);
         	this.collectionName= NetworkManager.this.collectionName;
-        	this.queryFilter = queryString;
+        	this.queryFilter = !queryString.equals("{}") ? queryString : null;
         	this.setTemplateExpand(false);
         	this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
@@ -826,7 +820,8 @@ public class NetworkManager<T extends GenericJson> {
         Delete(Query query) {
             super(client, "DELETE", REST_PATH, null, KinveyDeleteResponse.class);
             this.collectionName= NetworkManager.this.collectionName;
-            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            String queryFilterString = query.getQueryFilterJson(client.getJsonFactory());
+            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
             this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
