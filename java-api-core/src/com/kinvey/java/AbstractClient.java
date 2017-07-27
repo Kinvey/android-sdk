@@ -210,7 +210,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         return true;
     }
 
-    public abstract void setUser(T user);
+    public abstract void setActiveUser(T user);
 
     public abstract T getActiveUser();
 

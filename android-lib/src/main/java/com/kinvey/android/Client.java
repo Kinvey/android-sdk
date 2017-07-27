@@ -139,8 +139,18 @@ public class Client<T extends User> extends AbstractClient<T> {
     	return sharedInstance;
     }
 
-    @Override
+    /**
+     * @deprecated Renamed to {@link #setActiveUser(T)}
+     */
+    @Deprecated
     public void setUser(T user) {
+        synchronized (lock) {
+            this.user = user;
+        }
+    }
+
+    @Override
+    public void setActiveUser(T user) {
         synchronized (lock) {
             this.user = user;
         }
@@ -782,10 +792,10 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             } catch (AndroidCredentialStoreException ex) {
                 Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                client.setUser(null);
+                client.setActiveUser(null);
             } catch (IOException ex) {
                 Logger.ERROR("Credential store failed to load");
-                client.setUser(null);
+                client.setActiveUser(null);
             }
 
 
@@ -933,7 +943,7 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             Exception exception = null;
             try{
-                client.setUser(BaseUserStore.<User>convenience(client));
+                client.setActiveUser(BaseUserStore.<User>convenience(client));
             }catch (Exception error){
                 exception = error;
                 if (error instanceof HttpResponseException) {

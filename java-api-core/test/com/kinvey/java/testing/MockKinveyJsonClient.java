@@ -88,7 +88,7 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
 	}
 
     @Override
-    public void setUser(BaseUser user) {
+    public void setActiveUser(BaseUser user) {
 
     }
 

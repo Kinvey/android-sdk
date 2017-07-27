@@ -48,7 +48,7 @@ public class BaseUserTest extends KinveyMockUnitTest {
         requestManager = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret", null));
         if (isNeedCreateUser) {
-            requestManager.getClient().setUser(new BaseUser());
+            requestManager.getClient().setActiveUser(new BaseUser());
         }
     }
 
@@ -303,7 +303,7 @@ public class BaseUserTest extends KinveyMockUnitTest {
         }*/
         BaseUser ret = requestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
-        getClient().setUser(ret);
+        getClient().setActiveUser(ret);
 
         assertEquals(true, getClient().isUserLoggedIn());
     }

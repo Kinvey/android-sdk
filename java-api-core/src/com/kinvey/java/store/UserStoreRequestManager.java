@@ -162,14 +162,14 @@ public class UserStoreRequestManager<T extends BaseUser> {
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer())
                 .setCredential(credentialManager.createAndStoreCredential(response, userObject.getId()));
         client.getClientUser().setUser(currentUser.getId());
-        client.setUser(currentUser);
+        client.setActiveUser(currentUser);
         return currentUser;
     }
 
     private T initUser(Credential credential, T userObject) {
         userObject.setId(credential.getUserId());
         userObject.setAuthToken(credential.getAuthToken());
-        client.setUser(userObject);
+        client.setActiveUser(userObject);
         return userObject;
     }
 
@@ -255,7 +255,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         }
         currentUser.putAll(ret.getUnknownKeys());
         currentUser.setUsername(ret.getUsername());
-        client.setUser(currentUser);
+        client.setActiveUser(currentUser);
         return ret;
     }
 
@@ -336,7 +336,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
         Credential c = Credential.from(currentUser);
-        client.setUser(currentUser);
+        client.setActiveUser(currentUser);
         return login(c);
 
     }

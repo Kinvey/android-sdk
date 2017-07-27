@@ -112,7 +112,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public void setUser(BaseUser user) {
+        public void setActiveUser(BaseUser user) {
             synchronized (lock) {
                 this.user = user;
             }

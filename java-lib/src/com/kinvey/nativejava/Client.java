@@ -187,7 +187,7 @@ public class Client extends AbstractClient {
     }
 
     @Override
-    public void setUser(BaseUser user) {
+    public void setActiveUser(BaseUser user) {
 
     }
 
@@ -324,7 +324,7 @@ public class Client extends AbstractClient {
                 }
             } catch (IOException ex) {
             	Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
-                client.setUser(null);
+                client.setActiveUser(null);
             }
 
 
@@ -360,7 +360,7 @@ public class Client extends AbstractClient {
             }
 
             try{
-            client.setUser(UserStore.retrieve(client));
+            client.setActiveUser(UserStore.retrieve(client));
             }catch (IOException ex){
             	Logger.INFO("KINVEY" +  "Unable to login!" + ex);
             }
