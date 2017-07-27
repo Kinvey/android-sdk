@@ -506,8 +506,7 @@ public class NetworkManager<T extends GenericJson> {
 
         MetadataGet(DeltaGet getRequest){
             super(client, "GET", REST_PATH, null, DeltaSetItem[].class);
-            String queryFilterString = getRequest.queryFilter;
-            this.queryFilter = !queryFilterString.equals("{}") ? queryFilterString : null;
+            this.queryFilter = getRequest.queryFilter;
 
             this.skip = getRequest.skip;
             this.limit = getRequest.limit;
