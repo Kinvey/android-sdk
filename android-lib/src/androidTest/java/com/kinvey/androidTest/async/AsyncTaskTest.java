@@ -15,6 +15,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 
+import org.junit.After;
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,5 +89,15 @@ public class AsyncTaskTest {
         assertEquals(currentLooper, resultingLooper);
     }
 
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
+    }
 
 }

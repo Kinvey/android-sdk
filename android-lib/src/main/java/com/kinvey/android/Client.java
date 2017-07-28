@@ -34,6 +34,7 @@ import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.FileStore;
@@ -46,7 +47,6 @@ import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.StoreType;
@@ -82,7 +82,7 @@ import io.realm.Realm;
  * @since 2.0
  * @version $Id: $
  */
-public class Client extends AbstractClient {
+public class Client<T extends User> extends AbstractClient<T> {
 
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
@@ -106,7 +106,7 @@ public class Client extends AbstractClient {
 
     private static KinveyHandlerThread kinveyHandlerThread;
     
-    private static Client _sharedInstance;
+    private static Client sharedInstance;
     
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
@@ -129,14 +129,38 @@ public class Client extends AbstractClient {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
         Logger.init(new AndroidLogger());
-        _sharedInstance = this;
+        sharedInstance = this;
         this.context = context;
         cacheManager = new RealmCacheManager(this);
         syncCacheManager = new RealmCacheManager("sync_", this);
     }
 
     public static Client sharedInstance(){
-    	return _sharedInstance;
+    	return sharedInstance;
+    }
+
+    /**
+     * @deprecated Renamed to {@link #setActiveUser(T)}
+     */
+    @Deprecated
+    public void setUser(T user) {
+        synchronized (lock) {
+            this.user = user;
+        }
+    }
+
+    @Override
+    public void setActiveUser(T user) {
+        synchronized (lock) {
+            this.user = user;
+        }
+    }
+
+    @Override
+    public T getActiveUser() {
+        synchronized (lock) {
+            return this.user;
+        }
     }
 
     @Override
@@ -768,10 +792,10 @@ public class Client extends AbstractClient {
 
             } catch (AndroidCredentialStoreException ex) {
                 Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                client.setUser(null);
+                client.setActiveUser(null);
             } catch (IOException ex) {
                 Logger.ERROR("Credential store failed to load");
-                client.setUser(null);
+                client.setActiveUser(null);
             }
 
 
@@ -818,7 +842,7 @@ public class Client extends AbstractClient {
 
 
         /**
-         * Sets a callback to be called after a client is intialized and User attributes is being retrieved.
+         * Sets a callback to be called after a client is intialized and BaseUser attributes is being retrieved.
          *
          * <p>
          * When a client is intialized after an initial login, the user's credentials are cached locally and used for the
@@ -836,7 +860,7 @@ public class Client extends AbstractClient {
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                 }
 
-                public void onSuccess(User u) {
+                public void onSuccess(BaseUser u) {
                     CharSequence text = "Retrieved up-to-date data for " + u.getUserName() + ".";
                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                 }
@@ -919,7 +943,7 @@ public class Client extends AbstractClient {
 
             Exception exception = null;
             try{
-                client.setUser(BaseUserStore.convenience(client));
+                client.setActiveUser(BaseUserStore.<User>convenience(client));
             }catch (Exception error){
                 exception = error;
                 if (error instanceof HttpResponseException) {
@@ -994,6 +1018,19 @@ public class Client extends AbstractClient {
     @Override
     protected ICacheManager getSyncCacheManager() {
         return syncCacheManager;
+    }
+
+    /**
+     * Terminates KinveyHandlerThread.
+     * Should be called if the Client instance is not used anymore to prevent from memory leaks.
+     * Currently this method is called from Instrumented tests, since each test has its own Client instance.
+     */
+    public void stopKinveyHandlerThread() {
+        if (kinveyHandlerThread != null) {
+            kinveyHandlerThread.stopHandlerThread();
+            kinveyHandlerThread.quit();
+            kinveyHandlerThread.interrupt();
+        }
     }
 }
 

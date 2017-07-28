@@ -13,14 +13,15 @@ import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
@@ -52,6 +54,33 @@ public class UserStoreTest {
         private Throwable error;
 
         private DefaultKinveyClientCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(User user) {
+            this.result = user;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class DefaultUserKinveyClientCallback implements KinveyClientCallback<User> {
+
+        private CountDownLatch latch;
+        private User result;
+        private Throwable error;
+
+        private DefaultUserKinveyClientCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -297,6 +326,7 @@ public class UserStoreTest {
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).setUserClass(TestUser.class).build();
+        client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         if (client.isUserLoggedIn()) {
             new Thread(new Runnable() {
@@ -1042,8 +1072,65 @@ public class UserStoreTest {
         assertNull(logout(client).error);
     }
 
+    @Test
+    public void testUpdate() throws InterruptedException {
+        DefaultKinveyClientCallback callback = login(client);
+        assertNotNull(callback.result);
+        assertTrue(client.isUserLoggedIn());
+        String oldUserName = client.getActiveUser().getUsername();
+        client.getActiveUser().setUsername("NewUserName2");
+        DefaultKinveyClientCallback userKinveyClientCallback = update(client);
+        assertNotNull(userKinveyClientCallback.result);
+        assertNotEquals(oldUserName, userKinveyClientCallback.result.getUsername());
+        assertNotNull(deleteUser(true, client));
+        assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testUpdateCustomUser() throws InterruptedException {
+        TestUser user = new TestUser();
+        user.setCompanyName("Test Company");
+        CustomKinveyClientCallback callback = signUp(user);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+
+        assertEquals(user.getCompanyName(), callback.result.getCompanyName(), client.getActiveUser().get("companyName"));
+
+        client.getActiveUser().set("companyName", "New Company");
+        DefaultKinveyClientCallback userKinveyClientCallback = update(client);
+        assertNotNull(userKinveyClientCallback.result);
+        assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getUsername());
+        assertNotNull(deleteUser(true, client));
+        assertNull(logout(client).error);
+    }
+
+    private DefaultKinveyClientCallback update(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                client.getActiveUser().update(callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
     private String createRandomUserName(String testName) {
         return testName + "_" +System.currentTimeMillis();
+    }
+
+    @After
+    public void tearDown() {
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
     }
 
 }

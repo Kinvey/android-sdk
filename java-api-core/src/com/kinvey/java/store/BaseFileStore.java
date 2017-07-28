@@ -20,6 +20,7 @@ import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closer;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
@@ -470,8 +471,15 @@ public class BaseFileStore {
         }
 
         metadata.setPath(f.getAbsolutePath());
-
-        FileUtils.copyStreams(is, new FileOutputStream(f));
+        Closer closer = Closer.create();
+        try {
+            OutputStream stream = closer.register(new FileOutputStream(f));
+            FileUtils.copyStreams(is, stream);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
 
         cache.save(metadata);
 

@@ -15,11 +15,11 @@
  */
 package com.kinvey.android.callback;
 
+import com.kinvey.android.model.User;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
 
 /**
- * This callback is typed for an array of {@link com.kinvey.java.dto.User} objects, use it for bulk operations on the User collection..
+ * This callback is typed for an array of {@link User} objects, use it for bulk operations on the User collection..
  *
  * @author edwardf
  * @since 2.0

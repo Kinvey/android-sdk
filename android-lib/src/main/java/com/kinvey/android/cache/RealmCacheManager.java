@@ -47,6 +47,7 @@ public class RealmCacheManager implements ICacheManager {
     private final AbstractClient client;
     private final Context context;
     private String prefix = "";
+    private RealmConfiguration realmConfiguration;
 
 
     private HashMap<String, RealmCache> mCacheMap = new HashMap<String, RealmCache>();
@@ -68,10 +69,10 @@ public class RealmCacheManager implements ICacheManager {
     public <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl) {
         synchronized (LOCK){
             DynamicRealm mRealm = getDynamicRealm();
-            String cacheKey = getClientHash() + File.separator + collection;
-            RealmCache<T> cache = (RealmCache<T>) mCacheMap.get(cacheKey);
-
+            RealmCache<T> cache;
             try {
+                String cacheKey = getClientHash() + File.separator + collection;
+                cache = (RealmCache<T>) mCacheMap.get(cacheKey);
                 if (cache == null) {
                     cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
                     if (!cache.getHash().equals(getTableHash(collection, mRealm))) {
@@ -196,9 +197,12 @@ public class RealmCacheManager implements ICacheManager {
     }
 
     private RealmConfiguration getRealmConfiguration() {
-        return new RealmConfiguration.Builder()
-                .name(prefix + "_" + getClientHash())
-                .build();
+        if (realmConfiguration == null) {
+            realmConfiguration = new RealmConfiguration.Builder()
+                    .name(prefix + "_" + getClientHash())
+                    .build();
+        }
+        return realmConfiguration;
     }
 
 }

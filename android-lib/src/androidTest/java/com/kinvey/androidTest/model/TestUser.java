@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.model;
 
 import com.google.api.client.util.Key;
-import com.kinvey.java.dto.User;
+import com.kinvey.android.model.User;
 
 public class TestUser extends User {
 

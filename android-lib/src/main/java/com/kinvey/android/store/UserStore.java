@@ -13,6 +13,7 @@ import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.callback.KinveyUserDeleteCallback;
 import com.kinvey.android.callback.KinveyUserListCallback;
 import com.kinvey.android.callback.KinveyUserManagementCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
@@ -20,12 +21,10 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
-import com.kinvey.java.store.requests.user.LogoutRequest;
 
 import java.io.IOException;
 
@@ -482,6 +481,12 @@ public class UserStore {
         new GetUser(userId, client, callback).execute();
     }
 
+    /**
+     * Asynchronous Update current user info
+     *
+     * @deprecated use {@link User#update(KinveyClientCallback)} ()} instead.
+     */
+    @Deprecated
     public void save(AbstractClient client,KinveyClientCallback<User> callback) {
         new Update(client, callback).execute();
     }
@@ -510,7 +515,7 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     User user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.update(new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
      public void onSuccess(User result) { ... }
@@ -534,7 +539,7 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     User user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.retrieve(new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
      public void onSuccess(User result) { ... }
@@ -558,7 +563,7 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     User user = kinveyClient.user();
+     User user = kinveyClient.getActiveUser();
      user.retrieve(new String[]{"myKinveyReferencedField"}, new KinveyUserCallback() {
      public void onFailure(Throwable e) { ... }
      public void onSuccess(User result) { ... }
@@ -583,7 +588,7 @@ public class UserStore {
      * </p>
      * <pre>
      * {@code
-    User user = kinveyClient.user();
+    User user = kinveyClient.getActiveUser();
     user.retrieve(Query query, new String[]{"myKinveyReferenceField"}, new KinveyUserListCallback() {
     public void onFailure(Throwable e) { ... }
     public void onSuccess(User[] result) { ... }
@@ -611,7 +616,7 @@ public class UserStore {
      * </p>
      * <pre>
      * {@code
-    User user = kinveyClient.user();
+    User user = kinveyClient.getActiveUser();
     user.retrieve(Query query, new KinveyUserListCallback() {
     public void onFailure(Throwable e) { ... }
     public void onSuccess(User[] result) { ... }

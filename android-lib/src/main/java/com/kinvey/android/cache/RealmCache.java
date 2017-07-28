@@ -155,8 +155,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<T> ret = new ArrayList<T>();
-        mRealm.beginTransaction();
         try {
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
                     .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                     .beginGroup();
@@ -175,8 +175,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
             }
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -188,15 +188,15 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         T ret;
-        mRealm.beginTransaction();
         try {
+            mRealm.beginTransaction();
             DynamicRealmObject obj = mRealm.where(mCollection)
                     .equalTo("_id", id)
                     .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
                     .findFirst();
              ret = obj == null ? null : ClassHash.realmToObject(obj, mCollectionItemClass);
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -209,8 +209,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<T> ret = new ArrayList<T>();
-        mRealm.beginTransaction();
         try {
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
                     .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
 
@@ -220,9 +220,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
             }
-
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -235,15 +234,15 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public List<T> save(Iterable<T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        mRealm.beginTransaction();
         List<T> ret = new ArrayList<T>();
         try{
+            mRealm.beginTransaction();
             for (T item : items){
                 item.put("_id", insertOrUpdate(item, mRealm));
                 ret.add(item);
             }
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -257,12 +256,12 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         String ret = null;
-        mRealm.beginTransaction();
-        try{
-            item.put("_id", insertOrUpdate(item, mRealm));
 
-        } finally {
+        try{
+            mRealm.beginTransaction();
+            item.put("_id", insertOrUpdate(item, mRealm));
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
        
@@ -272,26 +271,19 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     @Override
     public int delete(Query query) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-
-        RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
-        QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-
-        mRealm.beginTransaction();
-
         int ret = 0;
         try {
+            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
+            mRealm.beginTransaction();
             RealmResults result = realmQuery.findAll();
-
             ret = result.size();
             result.deleteAllFromRealm();
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
-        
-
         return ret;
-
     }
 
     @Override
@@ -300,8 +292,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         int ret = 0;
 
-        mRealm.beginTransaction();
         try{
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
@@ -317,8 +309,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             RealmResults result = query.findAll();
             ret = result.size();
             result.deleteAllFromRealm();
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -329,18 +321,18 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public int delete(String id) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        mRealm.beginTransaction();
 
         int ret = 0;
 
         try{
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
                     .equalTo("_id", id);
             RealmResults realmResults = query.findAll();
             ret = realmResults.size();
             realmResults.deleteAllFromRealm();
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         
@@ -354,13 +346,13 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public void clear(){
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        mRealm.beginTransaction();
         try {
+            mRealm.beginTransaction();
             mRealm.where(mCollection)
                     .findAll()
                     .deleteAllFromRealm();
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
     }
@@ -371,14 +363,14 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         T ret = null;
 
-        mRealm.beginTransaction();
         try{
+            mRealm.beginTransaction();
             DynamicRealmObject obj = mRealm.where(mCollection).findFirst();
             if (obj != null){
                 ret = ClassHash.realmToObject(obj, mCollectionItemClass);
             }
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
 
@@ -391,16 +383,16 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         T ret = null;
 
-        mRealm.beginTransaction();
         try{
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             DynamicRealmObject obj = query.findFirst();
             if (obj != null){
                 ret = ClassHash.realmToObject(obj, mCollectionItemClass);
             }
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
 
@@ -412,14 +404,13 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
 
-        mRealm.beginTransaction();
         try{
+            mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             ret = query.count();
-
-        } finally {
             mRealm.commitTransaction();
+        } finally {
             mRealm.close();
         }
         return ret;

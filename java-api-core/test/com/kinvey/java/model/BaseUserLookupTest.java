@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 /**
  * Created by edward on 7/31/15.
  */
-public class UserLookupTest extends TestCase {
+public class BaseUserLookupTest extends TestCase {
 
     public UserLookup ul;
 

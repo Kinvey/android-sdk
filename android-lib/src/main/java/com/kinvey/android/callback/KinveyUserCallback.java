@@ -15,8 +15,8 @@
  */
 package com.kinvey.android.callback;
 
+import com.kinvey.android.model.User;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**

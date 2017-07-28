@@ -19,10 +19,10 @@ import java.io.IOException;
 
 import com.google.common.base.Preconditions;
 import com.kinvey.android.callback.KinveyUserListCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.UserDiscovery;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.model.UserLookup;
 
 /**
@@ -193,7 +193,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
         }
 
         protected User[] executeAsync() throws IOException {
-            return AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
+            return (User[]) AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
         }
     }
 }
