@@ -311,7 +311,7 @@ public class LinkedNetworkManager<T extends LinkedGenericJson> extends NetworkMa
      */
     public class Get extends GetLinkedResourceClientRequest<List<T>> {
 
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/" +
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         private String[] attachments;

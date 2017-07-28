@@ -102,6 +102,10 @@ public abstract class AbstractQuery implements Serializable{
             jsonResult = writer.toString();
         } catch (Exception ex) {}
 
+        if (jsonResult.equals("{}")) {
+            return null;
+        }
+
         // TODO:  Put exception here?
 
         return jsonResult;
