@@ -22,7 +22,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyMockUnitTest;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.Delete;
 import com.kinvey.java.store.requests.user.EmailVerification;
@@ -37,7 +37,7 @@ import com.kinvey.java.testing.MockKinveyAuthRequest;
  * @author mjsalinger
  * @since 2.0
  */
-public class UserTest extends KinveyMockUnitTest {
+public class BaseUserTest extends KinveyMockUnitTest {
 
     private UserStoreRequestManager requestManager;
     private static final String X_KINVEY_CUSTOM_REQUEST_PROPERTIES = "X-Kinvey-Custom-Request-Properties";
@@ -48,7 +48,7 @@ public class UserTest extends KinveyMockUnitTest {
         requestManager = new UserStoreRequestManager(getClient(), new MockKinveyAuthRequest.MockBuilder(getClient().getRequestFactory().getTransport(),
                 getClient().getJsonFactory(), "mockAppKey","mockAppSecret", null));
         if (isNeedCreateUser) {
-            requestManager.getClient().setUser(new User());
+            requestManager.getClient().setActiveUser(new BaseUser());
         }
     }
 
@@ -121,8 +121,8 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testDeleteHardDeleteTrue() throws IOException {
         initializeRequestManager(true);
-        User user = requestManager.getClient().getActiveUser();
-        user.setId("testUser");
+        BaseUser baseUser = requestManager.getClient().getActiveUser();
+        baseUser.setId("testUser");
         Delete del = requestManager.deleteBlocking(true);
         assertEquals(requestManager.getClient().getActiveUser().getId(), del.get(USER_ID).toString());
         assertEquals(true, del.get("hard"));
@@ -179,8 +179,8 @@ public class UserTest extends KinveyMockUnitTest {
 
     public void testResetPassword() throws IOException {
         initializeRequestManager(true);
-        User user = requestManager.getClient().getActiveUser();
-        user.setId("testUser");
+        BaseUser baseUser = requestManager.getClient().getActiveUser();
+        baseUser.setId("testUser");
         requestManager.getClient().getActiveUser().setUsername("test");
         ResetPassword pwd = requestManager.resetPasswordBlocking(requestManager.getClient().getActiveUser().getUsername());
         assertEquals(requestManager.getClient().getActiveUser().getUsername(),pwd.get(USER_ID).toString());
@@ -301,9 +301,9 @@ public class UserTest extends KinveyMockUnitTest {
 /*        if (getClient().isUserLoggedIn()) {
             requestManager.logout().execute();
         }*/
-        User ret = requestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
+        BaseUser ret = requestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
 
-        getClient().setUser(ret);
+        getClient().setActiveUser(ret);
 
         assertEquals(true, getClient().isUserLoggedIn());
     }

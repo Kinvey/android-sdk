@@ -11,12 +11,12 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncCustomEndpoints;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyJsonResponseException;
-import com.kinvey.java.dto.User;
 
 import org.junit.After;
 import org.junit.Before;

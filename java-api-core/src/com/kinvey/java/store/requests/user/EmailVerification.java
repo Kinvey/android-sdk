@@ -21,7 +21,7 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
- * EmailVerification Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request
+ * EmailVerification Request Class, extends AbstractKinveyJsonClientRequest<BaseUser>.  Constructs the HTTP request
  * object for EmailVerification requests.
  */
 public final class EmailVerification extends AbstractKinveyJsonClientRequest<Void> {

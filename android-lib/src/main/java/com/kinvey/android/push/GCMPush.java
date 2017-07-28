@@ -15,10 +15,6 @@
  */
 package com.kinvey.android.push;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +28,15 @@ import com.google.api.client.util.Key;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
+
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 
 
 /**

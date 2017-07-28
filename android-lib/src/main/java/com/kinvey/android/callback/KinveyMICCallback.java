@@ -16,7 +16,7 @@
 
 package com.kinvey.android.callback;
 
-import com.kinvey.java.dto.User;
+import com.kinvey.android.model.User;
 
 /**
  * This Callback implementation provides the `onReadyToRender` method, which is called when the login page URL is ready to be displayed to the end user.

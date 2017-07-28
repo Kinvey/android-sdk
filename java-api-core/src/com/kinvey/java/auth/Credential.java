@@ -18,9 +18,7 @@ package com.kinvey.java.auth;
 
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyRequestInitializer;
-import com.kinvey.java.dto.User;
-
-import java.io.IOException;
+import com.kinvey.java.dto.BaseUser;
 
 /**
  * @author m0rganic
@@ -66,8 +64,8 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
         return new Credential(response.getUserId(), response.getAuthToken(), null);
     }
 
-    public static Credential from(User user){
-        return new Credential(user.getId(), user.get("authToken").toString(), null);
+    public static Credential from(BaseUser baseUser){
+        return new Credential(baseUser.getId(), baseUser.get("authToken").toString(), null);
     }
 
     public String getUserId() {

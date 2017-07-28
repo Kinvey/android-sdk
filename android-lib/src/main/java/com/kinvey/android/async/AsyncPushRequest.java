@@ -16,19 +16,16 @@
 
 package com.kinvey.android.async;
 
-import com.google.api.client.util.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketTimeoutException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;

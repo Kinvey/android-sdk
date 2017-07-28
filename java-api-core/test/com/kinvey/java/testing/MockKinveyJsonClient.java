@@ -31,6 +31,7 @@ import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 
 /**
 * @author m0rganic
@@ -85,6 +86,16 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public void setActiveUser(BaseUser user) {
+
+    }
+
+    @Override
+    public BaseUser getActiveUser() {
+        return null;
+    }
 
     @Override
     public CustomEndpoints customEndpoints(Class myClass) {

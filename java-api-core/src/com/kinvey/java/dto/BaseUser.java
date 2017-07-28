@@ -22,7 +22,7 @@ import com.google.api.client.util.Key;
 /**
  * Created by Prots on 2/12/16.
  */
-public class User extends GenericJson {
+public class BaseUser extends GenericJson {
     @Key("_id")
     private String id;
 
