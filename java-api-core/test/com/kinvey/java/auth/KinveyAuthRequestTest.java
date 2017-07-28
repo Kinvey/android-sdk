@@ -2,7 +2,6 @@ package com.kinvey.java.auth;
 
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.KinveyMockUnitTest;
-import com.kinvey.java.dto.User;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.testing.MockKinveyAuthRequest;
 

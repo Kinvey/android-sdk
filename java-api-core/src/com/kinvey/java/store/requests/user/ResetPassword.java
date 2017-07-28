@@ -22,8 +22,8 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 /**
- * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<User>.  Constructs the HTTP request object
- * for ResetPassword User requests.
+ * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<BaseUser>.  Constructs the HTTP request object
+ * for ResetPassword BaseUser requests.
  */
 public final class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
     private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate";

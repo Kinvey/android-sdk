@@ -33,6 +33,7 @@ import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.InMemoryCredentialStore;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
@@ -186,6 +187,16 @@ public class Client extends AbstractClient {
     }
 
     @Override
+    public void setActiveUser(BaseUser user) {
+
+    }
+
+    @Override
+    public BaseUser getActiveUser() {
+        return null;
+    }
+
+    @Override
     public CustomEndpoints customEndpoints(Class myClass) {
         return null;
     }
@@ -313,7 +324,7 @@ public class Client extends AbstractClient {
                 }
             } catch (IOException ex) {
             	Logger.INFO("KINVEY" +  "Credential store failed to load" + ex);
-                client.setUser(null);
+                client.setActiveUser(null);
             }
 
 
@@ -349,7 +360,7 @@ public class Client extends AbstractClient {
             }
 
             try{
-            client.setUser(UserStore.retrieve(client));
+            client.setActiveUser(UserStore.retrieve(client));
             }catch (IOException ex){
             	Logger.INFO("KINVEY" +  "Unable to login!" + ex);
             }

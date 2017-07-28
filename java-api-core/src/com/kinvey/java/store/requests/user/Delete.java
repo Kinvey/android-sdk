@@ -25,7 +25,7 @@ import java.io.IOException;
 
 /**
  * Delete Request Class, extends AbstractKinveyJsonClientRequest<Void>.  Constructs the HTTP request object for
- * Delete User requests.
+ * Delete BaseUser requests.
  */
 public final class Delete extends AbstractKinveyJsonClientRequest<Void> {
     private static final String REST_PATH = "user/{appKey}/{userID}?hard={hard}";

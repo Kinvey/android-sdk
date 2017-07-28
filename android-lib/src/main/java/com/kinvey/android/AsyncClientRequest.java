@@ -18,9 +18,6 @@ package com.kinvey.android;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.util.Log;
 
 import com.kinvey.java.KinveyException;
@@ -28,7 +25,6 @@ import com.kinvey.java.Logger;
 import com.kinvey.java.core.AsyncExecutor;
 import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.dto.User;
 
 /**
  * <p>Abstract AsyncClientRequest class - used for Kinvey Callbacks.</p>

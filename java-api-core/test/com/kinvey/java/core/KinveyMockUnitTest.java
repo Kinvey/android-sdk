@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -108,6 +109,20 @@ public abstract class KinveyMockUnitTest extends TestCase {
                     // TODO Auto-generated method stub
                 }
 			};
+        }
+
+        @Override
+        public void setActiveUser(BaseUser user) {
+            synchronized (lock) {
+                this.user = user;
+            }
+        }
+
+        @Override
+        public BaseUser getActiveUser() {
+            synchronized (lock) {
+                return this.user;
+            }
         }
 
         @Override

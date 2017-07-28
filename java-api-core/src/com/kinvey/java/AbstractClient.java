@@ -38,7 +38,7 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
-import com.kinvey.java.dto.User;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseFileStore;
@@ -50,7 +50,7 @@ import com.kinvey.java.sync.SyncManager;
  *
  * All factory methods for retrieving instances of a Service API are threadsafe, however the builder is not.
  */
-public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonClient {
+public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJsonClient {
 
     /**
      * The default encoded root URL of the service.
@@ -70,8 +70,8 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
     /** List of extensions, if they need to be locked down **/
     private ArrayList<ClientExtension> extensions;
 
-    /** Class to use for representing a User **/
-    private Class userModelClass = User.class;
+    /** Class to use for representing a BaseUser **/
+    private Class userModelClass = BaseUser.class;
     
     private String clientAppVersion = null;
     
@@ -82,7 +82,9 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
      */
     private boolean useDeltaCache;
 
-    private T user;
+    protected T user;
+
+    private static AbstractClient sharedInstance;
 
     /**
      * The hostname to use for MIC authentication
@@ -170,10 +172,14 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
 
         super(transport, httpRequestInitializer, rootUrl, servicePath,
                 objectParser, kinveyRequestInitializer, requestPolicy);
+        sharedInstance = this;
         this.user = null;
         this.store = store;
     }
 
+    public static AbstractClient sharedInstance(){
+        return sharedInstance;
+    }
 
     public Query query() {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
@@ -204,17 +210,9 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
         return true;
     }
 
-    public void setUser(T user) {
-        synchronized (lock) {
-           this.user = user;
-        }
-    }
+    public abstract void setActiveUser(T user);
 
-    public T getActiveUser() {
-        synchronized (lock) {
-            return this.user;
-        }
-    }
+    public abstract T getActiveUser();
 
     public CredentialStore getStore() {
         return store;
@@ -222,7 +220,7 @@ public abstract class AbstractClient<T extends User> extends AbstractKinveyJsonC
 
     /**
      * Checks to see if the credential exists for the given UserID, and initializes the KinveyClientRequestInitializer
-     * and the User if it is.
+     * and the BaseUser if it is.
      *
      * @param userID the ID for the given user.
      * @return true if user credential exists, false if not.
