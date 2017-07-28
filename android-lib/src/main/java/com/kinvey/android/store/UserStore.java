@@ -631,6 +631,17 @@ public class UserStore {
     }
 
 
+    /***
+     *
+     * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
+     *
+     * @param client
+     * @param redirectURI
+     * @param callback
+     */
+    public static void loginWithAuthorizationCodeLoginPage(Client client, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
+        loginWithAuthorizationCodeLoginPage(client, null, redirectURI, callback);
+    }
 
     /***
      *
@@ -704,6 +715,17 @@ public class UserStore {
      */
     public static void getMICAccessToken(String token, AbstractClient client){
         new PostForAccessToken(client, MICRedirectURI, token, (KinveyClientCallback) MICCallback).execute();
+    }
+
+    /***
+     * Initiate the MIC login flow with an Activity containing a Webview
+     *
+     * @param client
+     * @param redirectURI
+     * @param callback
+     */
+    public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback<User> callback){
+        presentMICLoginActivity(client, null, redirectURI, callback);
     }
 
     /***
