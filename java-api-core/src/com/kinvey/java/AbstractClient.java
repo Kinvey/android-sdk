@@ -86,8 +86,6 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     private static AbstractClient sharedInstance;
 
-    private String clientId;
-
     /**
      * The hostname to use for MIC authentication
      */
@@ -538,11 +536,4 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         this.userModelClass = userClass;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
 }

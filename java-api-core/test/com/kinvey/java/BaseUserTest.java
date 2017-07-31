@@ -285,7 +285,7 @@ public class BaseUserTest extends KinveyMockUnitTest {
 
 
 
-    	GetMICAccessToken getToken = requestManager.getMICToken("myCODE");
+    	GetMICAccessToken getToken = requestManager.getMICToken("myCODE", null);
     	assertEquals("https://www.google.com/oauth/token", getToken.buildHttpRequest().getUrl().toString());
     }
 
@@ -294,7 +294,7 @@ public class BaseUserTest extends KinveyMockUnitTest {
     	requestManager = new UserStoreRequestManager(getClient(new MockHttpForMIC()), new KinveyAuthRequest.Builder(new MockHttpForMIC(),
                 new GsonFactory(),"https://baas.kinvey.com",  "mockAppKey","mockAppSecret",null));
 
-    	GetMICAccessToken token = requestManager.getMICToken("MyToken");
+    	GetMICAccessToken token = requestManager.getMICToken("MyToken", null);
     	GenericJson result =  (GenericJson) token.execute();
 
         //check

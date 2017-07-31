@@ -30,10 +30,12 @@ import java.io.IOException;
 public final class LoginToTempURL extends AbstractKinveyClientRequest<GenericJson> {
 
     private UserStoreRequestManager userStoreRequestManager;
+    private String clientId;
 
-    public LoginToTempURL(UserStoreRequestManager userStoreRequestManager, String tempURL, HttpContent content) {
+    public LoginToTempURL(UserStoreRequestManager userStoreRequestManager, String clientId, String tempURL, HttpContent content) {
         super(userStoreRequestManager.getClient(), tempURL, "POST", "", content, GenericJson.class);
         this.userStoreRequestManager = userStoreRequestManager;
+        this.clientId = clientId;
         this.setOverrideRedirect(true);
     }
 
@@ -47,7 +49,7 @@ public final class LoginToTempURL extends AbstractKinveyClientRequest<GenericJso
 
         String accesstoken = newLocation.substring(codeIndex + 5, newLocation.length());
 
-        return userStoreRequestManager.getMICToken(accesstoken).execute();
+        return userStoreRequestManager.getMICToken(accesstoken, clientId).execute();
 
 
     }
