@@ -48,6 +48,10 @@ public class MICLoginTest {
     private static final String APP_KEY = "YOUR_APP_KEY_HERE";
     private static final String APP_SECRET = "YOUR_APP_SECRET_HERE";
     private static final String CLIENT_ID = "CLIENT_ID";
+    private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String AUTH_TOKEN = "auth_token";
+    private static final String REDIRECT_URI = "http://test.redirect";
+    private static final String CLIENT_ID_FIELD = "client_id";
 
 
     @Before
@@ -59,8 +63,7 @@ public class MICLoginTest {
     // Check clientId in auth link for MICLoginPage
     @Test
     public void testMIC_LoginWithAuthorizationCodeLoginPageWithClientId() throws InterruptedException {
-        String redirectURI = "http://test.redirect";
-        DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, redirectURI, client);
+        DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
         assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + ":" + CLIENT_ID));
@@ -69,8 +72,7 @@ public class MICLoginTest {
     // Check clientId (should be absent second part of client_id) in auth link for MICLoginPage
     @Test
     public void testMIC_LoginWithAuthorizationCodeLoginPage() throws InterruptedException {
-        String redirectURI = "http://test.redirect";
-        DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, redirectURI, client);
+        DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
         assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + "&"));
@@ -93,45 +95,47 @@ public class MICLoginTest {
     // Check clientId for getting Temp Link
     @Test
     public void testGetMICTempURLWithClientId() throws IOException {
-        String redirectURI = "http://test.redirect";
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
-        requestManager.setMICRedirectURI(redirectURI);
+        requestManager.setMICRedirectURI(REDIRECT_URI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL(CLIENT_ID);
-        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get("client_id"));
+        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
     }
 
     // Check clientId (should be absent second part of client_id) for getting Temp Link
     @Test
     public void testGetMICTempURL() throws IOException {
-
-        String redirectURI = "http://test.redirect";
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
-        requestManager.setMICRedirectURI(redirectURI);
+        requestManager.setMICRedirectURI(REDIRECT_URI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL(null);
-        assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get("client_id"));
+        assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
     }
 
-/*    // Check clientId for using refresh token
+    // Check clientId for using refresh token
     @Test
     public void testMICLoginUseRefreshTokenWithClientId() throws IOException {
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
-        Credential credential = client.getStore().load(client.getActiveUser().getId());
+        User user = new User();
+        user.setId("userId");
+        client.setActiveUser(user);
+        Credential credential = new Credential(client.getActiveUser().getId(), AUTH_TOKEN, REFRESH_TOKEN);
         credential.setClientId(CLIENT_ID);
         client.getStore().store(client.getActiveUser().getId(), credential);
-        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken("refresh_token");
-        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get("client_id"));
-    }*/
+        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken(REFRESH_TOKEN);
+        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
+    }
 
-/*    // Check clientId (should be absent second part of client_id) for using refresh token
+    // Check clientId (should be absent second part of client_id) for using refresh token
     @Test
     public void testMICLoginUseRefreshToken() throws IOException {
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
-        Credential credential = new Credential(client.getActiveUser().getId(), "auth_token", "refresh_token");
-        credential.setClientId(CLIENT_ID);
+        User user = new User();
+        user.setId("userId");
+        client.setActiveUser(user);
+        Credential credential = new Credential(client.getActiveUser().getId(), AUTH_TOKEN, REFRESH_TOKEN);
         client.getStore().store(client.getActiveUser().getId(), credential);
-        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken("refresh_token");
-        assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get("client_id"));
-    }*/
+        GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken(REFRESH_TOKEN);
+        assertEquals(APP_KEY, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
+    }
 
     private KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
         return new KinveyAuthRequest.Builder(client.getRequestFactory().getTransport(),
