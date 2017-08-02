@@ -13,3 +13,4 @@ android:
     - extra-android-m2repository
 
 script: ./gradlew release
+after_failure: "cat /home/travis/build/Kinvey/java-library/android-lib/build/reports/tests/testDebugUnitTest/index.html"
