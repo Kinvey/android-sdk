@@ -875,11 +875,11 @@ public class UserStore {
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
-        private Login(String accessToken, String clientID, String refresh, String id, AbstractClient client, KinveyClientCallback callback){
+        private Login(String accessToken, String clientId, String refresh, String id, AbstractClient client, KinveyClientCallback callback){
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refresh;
-            this.client_id = clientID;
+            this.client_id = clientId;
             this.id = id;
 
             this.client = client;
