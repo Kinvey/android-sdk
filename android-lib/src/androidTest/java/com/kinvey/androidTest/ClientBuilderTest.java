@@ -122,19 +122,19 @@ public class ClientBuilderTest {
     }
 
     @Test
-    public void testBuilderConstructorsFours() throws IOException {
+    public void testBuilderConstructorsFourth() throws IOException {
         client = new Client.Builder(TEST_APP_KEY, TEST_APP_SECRET, mContext, new MockHttpTransport()).build();
         assertNotNull(client);
     }
 
     @Test
-    public void testBuilderConstructorsFives() throws IOException {
+    public void testBuilderConstructorsFifth() throws IOException {
         client = new Client.Builder(mContext.getAssets().open(KINVEY_PROPERTIES), mContext).build();
         assertNotNull(client);
     }
 
     @Test
-    public void testBuilderConstructorsFivesCheckException() throws IOException {
+    public void testBuilderConstructorsFifthCheckException() throws IOException {
         try {
             client = new Client.Builder(null, mContext).build();
             assertTrue(false);
@@ -145,13 +145,13 @@ public class ClientBuilderTest {
     }
 
     @Test
-    public void testBuilderConstructorsSixes() throws IOException {
+    public void testBuilderConstructorsSixth() throws IOException {
         client = new Client.Builder(mContext.getAssets().open(KINVEY_PROPERTIES), new MockHttpTransport(),  mContext).build();
         assertNotNull(client);
     }
 
     @Test
-    public void testBuilderConstructorsSixesCheckException() throws IOException {
+    public void testBuilderConstructorsSixthCheckException() throws IOException {
         try {
             client = new Client.Builder(mContext.getAssets().open(KINVEY_PROPERTIES +"_not exist"), new MockHttpTransport(), mContext).build();
             assertTrue(false);
