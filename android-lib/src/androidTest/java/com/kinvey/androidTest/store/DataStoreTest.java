@@ -1195,6 +1195,23 @@ public class DataStoreTest {
         }
     }
 
+    @Test
+    public void testSyncCount() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSycManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        assertNotNull(saveCallback.result.getId());
+        assertTrue(store.syncCount() == 1);
+        sync(store, DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 0);
+        delete(store, saveCallback.result.getId(), DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 1);
+        sync(store, DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 0);
+    }
 
     @After
     public void tearDown() {

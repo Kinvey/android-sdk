@@ -757,6 +757,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
     }
 
+    /**
+     * This methods gets a count of entities modified locally and pending a push to the backend
+     * @return the count of sync objects for given collection
+     */
+    public long syncCount() {
+        return client.getSycManager().getCount(getCollectionName());
+    }
+
     private class SaveRequest extends AsyncClientRequest<T> {
         T entity;
 
