@@ -40,6 +40,15 @@ android {
     exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
     exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
   }
+
+    testOptions {
+        unitTests.all {
+            testLogging {
+                events "failed"
+                exceptionFormat "full"
+            }
+        }
+    }
 }
 
 configurations {
