@@ -44,8 +44,8 @@ public class UserStoreTest {
     private Client client = null;
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
-    private static final String APP_KEY = "YOUR_APP_KEY_HERE";
-    private static final String APP_SECRET = "YOUR_APP_SECRET_HERE";
+    private static final String APP_KEY = "kid_BJZQvUh8-";
+    private static final String APP_SECRET = "829e910da4b54577bb97fe8105722f3c";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
