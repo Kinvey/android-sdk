@@ -92,7 +92,7 @@ public class ClientBuilderTest {
             client = new Client.Builder(mContext).setBaseUrl(url).build();
             assertTrue(false);
         } catch (KinveyException e) {
-            assertNotNull(e);
+            assertNotNull(e.getMessage().contains("Kinvey requires `https` as the protocol when setting a base URL"));
         }
         assertNull(client);
     }
