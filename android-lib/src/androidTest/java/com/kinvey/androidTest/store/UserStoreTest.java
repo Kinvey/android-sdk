@@ -1118,6 +1118,44 @@ public class UserStoreTest {
         return callback;
     }
 
+    @Test
+    public void testRetrieve() throws InterruptedException {
+        DefaultKinveyClientCallback loginCallback = login("test", "test");
+        assertNull(loginCallback.error);
+        assertNotNull(loginCallback.result);
+        DefaultKinveyClientCallback retrieveCallback = retrieve(client);
+        assertNull(retrieveCallback.error);
+        assertNotNull(retrieveCallback.result);
+        assertTrue(client.isUserLoggedIn());
+    }
+
+    @Test
+    public void testRetrieveCustomUser() throws InterruptedException {
+        TestUser user = new TestUser();
+        CustomKinveyClientCallback callback = signUp(user);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        DefaultKinveyClientCallback retrieveCallback = retrieve(client);
+        assertNotNull(deleteUser(true, client));
+        assertNull(retrieveCallback.error);
+        assertNotNull(retrieveCallback.result);
+        assertNull(logout(client).error);
+    }
+
+    private DefaultKinveyClientCallback retrieve(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                UserStore.retrieve(client, callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
     private String createRandomUserName(String testName) {
         return testName + "_" +System.currentTimeMillis();
     }
