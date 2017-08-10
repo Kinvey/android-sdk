@@ -9,6 +9,8 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class BaseUserStore <T extends BaseUser> {
 
@@ -108,8 +110,8 @@ public abstract class BaseUserStore <T extends BaseUser> {
         return (T) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking().execute();
     }
 
-    public static <T extends BaseUser> T[] retrieve(Query query, AbstractClient client) throws IOException {
-        return (T[]) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query).execute();
+    public static <T> List<T> retrieve(Query query, AbstractClient client) throws IOException {
+        return (List<T>) Arrays.asList(new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query).execute());
     }
 
     public static <T extends BaseUser> T retrieve(String[] resolves, AbstractClient client) throws IOException {
