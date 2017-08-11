@@ -415,7 +415,7 @@ public class UserStoreTest {
 
     @Test
     public void testLogin() throws InterruptedException {
-        DefaultKinveyClientCallback callback = login("test", "test");
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
         assertNull(logout(client).error);
@@ -1181,7 +1181,7 @@ public class UserStoreTest {
 
     @Test
     public void testRetrieve() throws InterruptedException {
-        DefaultKinveyClientCallback loginCallback = login("test", "test");
+        DefaultKinveyClientCallback loginCallback = login(USERNAME, PASSWORD);
         assertNull(loginCallback.error);
         assertNotNull(loginCallback.result);
         DefaultKinveyClientCallback retrieveCallback = retrieve(client);
@@ -1218,14 +1218,24 @@ public class UserStoreTest {
     }
 
     @Test
-    public void testRetrieveUsersArray() throws InterruptedException {
-        DefaultKinveyClientCallback loginCallback = login("test", "test");
+    public void testRetrieveUsers() throws InterruptedException {
+        DefaultKinveyClientCallback loginCallback = login(USERNAME, PASSWORD);
         assertNull(loginCallback.error);
         assertNotNull(loginCallback.result);
-        DefaultKinveyUserListCallback retrieveCallback = retrieveUsers(client);
+        DefaultKinveyListCallback retrieveCallback = retrieveUsers(client);
         assertNull(retrieveCallback.error);
         assertNotNull(retrieveCallback.result);
         assertTrue(client.isUserLoggedIn());
+    }
+
+    @Test
+    public void testRetrieveUsersArrayDeprecated() throws InterruptedException {
+        DefaultKinveyClientCallback loginCallback = login(USERNAME, PASSWORD);
+        assertNull(loginCallback.error);
+        assertNotNull(loginCallback.result);
+        DefaultKinveyUserListCallback retrieveCallback = retrieveUsersDeprecated(client);
+        assertNull(retrieveCallback.error);
+        assertNotNull(retrieveCallback.result);
     }
 
     @Test
@@ -1234,21 +1244,35 @@ public class UserStoreTest {
         CustomKinveyClientCallback callback = signUp(user);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        DefaultKinveyUserListCallback retrieveCallback = retrieveUsers(client);
+        DefaultKinveyListCallback retrieveCallback = retrieveUsers(client);
         assertNotNull(deleteUser(true, client));
         assertNull(retrieveCallback.error);
         assertNotNull(retrieveCallback.result);
-        assertNull(logout(client).error);
     }
 
-    private DefaultKinveyUserListCallback retrieveUsers(final Client client) throws InterruptedException {
+    private DefaultKinveyListCallback retrieveUsers(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                Query query = new Query();
+                UserStore.retrieve(query, new String[]{USERNAME, PASSWORD} ,client, callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
+    private DefaultKinveyUserListCallback retrieveUsersDeprecated(final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyUserListCallback callback = new DefaultKinveyUserListCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
                 Query query = new Query();
-                UserStore.retrieve(query, new String[]{"test", "test"} ,client, callback);
+                UserStore.retrieve(query, new String[]{USERNAME, PASSWORD} ,client, callback);
                 Looper.loop();
             }
         }).start();
@@ -1258,7 +1282,7 @@ public class UserStoreTest {
 
     @Test
     public void testRetrieveUsersList() throws InterruptedException {
-        DefaultKinveyClientCallback loginCallback = login("test", "test");
+        DefaultKinveyClientCallback loginCallback = login(USERNAME, PASSWORD);
         assertNull(loginCallback.error);
         assertNotNull(loginCallback.result);
         DefaultKinveyListCallback retrieveUsersList = retrieveUsersList(client);
