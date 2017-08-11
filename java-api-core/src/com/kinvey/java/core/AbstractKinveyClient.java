@@ -255,7 +255,13 @@ public abstract class AbstractKinveyClient {
         	
             this.baseUrl = normalizeRootUrl(baseUrl);
             if (!this.baseUrl.toUpperCase().startsWith("HTTPS")){
-            	throw new KinveyException("Kinvey requires `https` as the protocol when setting a base URL, instead found: " + this.baseUrl.substring(0, this.baseUrl.indexOf(":/")) + " in baseURL: " + this.baseUrl);
+                String exceptionMessage;
+                if (baseUrl.contains("://")) {
+                    exceptionMessage = "Kinvey requires `https` as the protocol when setting a base URL, instead found: " + this.baseUrl.substring(0, this.baseUrl.indexOf("://")) + " in baseURL: " + this.baseUrl;
+                } else {
+                    exceptionMessage = "Kinvey requires `https` as the protocol when setting a base URL " + "in baseURL: " + this.baseUrl;
+                }
+                throw new KinveyException(exceptionMessage);
             }
             return this;
         }

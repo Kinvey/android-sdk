@@ -24,6 +24,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.GenericData;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -524,12 +525,30 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     protected abstract ICacheManager getSyncCacheManager();
 
+    /**
+     * @return SyncManager object
+     *
+     * @deprecated use {@link #getSyncManager()}
+     */
+    @Deprecated
     public SyncManager getSycManager(){
+        return new SyncManager(getSyncCacheManager());
+    }
+
+    /**
+     *
+     * @return SyncManager object
+     */
+    public SyncManager getSyncManager(){
         return new SyncManager(getSyncCacheManager());
     }
 
     public Class getUserClass(){
         return this.userModelClass;
+    }
+
+    public Class getUserArrayClass(){
+        return Array.newInstance(userModelClass, 0).getClass();
     }
 
     public void setUserClass(Class userClass){

@@ -584,8 +584,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void push(KinveyPushCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSycManager();
-        new AsyncPushRequest(getCollectionName(), client.getSycManager(), client, storeType, callback).execute();
+        SyncManager syncManager = client.getSyncManager();
+        new AsyncPushRequest(getCollectionName(), client.getSyncManager(), client, storeType, callback).execute();
     }
 
     /**
@@ -615,7 +615,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSycManager();
+        SyncManager syncManager = client.getSyncManager();
         new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
@@ -643,7 +643,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSycManager();
+        SyncManager syncManager = client.getSyncManager();
         new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
@@ -671,7 +671,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void purge(KinveyPurgeCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSycManager();
+        SyncManager syncManager = client.getSyncManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
     }
 
@@ -755,6 +755,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     public Query query() {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+    }
+
+    /**
+     * This methods gets a count of entities modified locally and pending a push to the backend
+     * @return the count of sync objects for given collection
+     */
+    public long syncCount() {
+        return client.getSyncManager().getCount(getCollectionName());
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {
