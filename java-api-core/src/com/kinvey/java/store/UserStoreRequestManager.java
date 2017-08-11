@@ -429,10 +429,10 @@ public class UserStoreRequestManager<T extends BaseUser> {
      * @return Retrieve Request
      * @throws IOException
      */
-    public Retrieve retrieveBlocking() throws IOException{
+    public Retrieve<T> retrieveBlocking() throws IOException{
         Preconditions.checkNotNull(client.getActiveUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getActiveUser().getId(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, client.getActiveUser().getId());
+        Retrieve retrieve = new Retrieve<T>(this, client.getActiveUser().getId());
         client.initializeRequest(retrieve);
         return retrieve;
     }
@@ -456,10 +456,10 @@ public class UserStoreRequestManager<T extends BaseUser> {
      * @return a Retrieve Request ready to be executed
      * @throws IOException
      */
-    public Retrieve retrieveBlocking(String[] resolves) throws IOException{
+    public Retrieve<T> retrieveBlocking(String[] resolves) throws IOException{
         Preconditions.checkNotNull(client.getActiveUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getActiveUser(), "currentUser ID must not be null");
-        Retrieve retrieve = new Retrieve(this, client.getActiveUser().getId(), resolves, 1, true);
+        Retrieve retrieve = new Retrieve<T>(this, client.getActiveUser().getId(), resolves, 1, true);
         client.initializeRequest(retrieve);
         return retrieve;
     }

@@ -21,12 +21,14 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
 
 import java.io.IOException;
+import java.util.List;
 
 public class UserStore {
 
@@ -539,22 +541,22 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     User user = kinveyClient.getActiveUser();
-     user.retrieve(new KinveyUserCallback() {
+     UserStore.retrieve(kinveyClient, new KinveyClientCallback<User> callback() {
      public void onFailure(Throwable e) { ... }
      public void onSuccess(User result) { ... }
      });
      }
      * </pre>
      *
-     * @param callback {@link KinveyUserCallback} containing a refreshed User instance.
+     * @param callback {@link KinveyClientCallback<User>} containing a refreshed User instance.
+     * @param client {@link Client} an instance of the client
      */
-    public static void retrieve(AbstractClient client, KinveyClientCallback callback) {
+    public static void retrieve(AbstractClient client, KinveyClientCallback<User> callback) {
         new Retrieve(client, callback).execute();
     }
 
     /**
-     * Asynchronous call to retrive (refresh) the current user, and resolve KinveyReferences
+     * Asynchronous call to retrieve (refresh) the current user, and resolve KinveyReferences
      * <p>
      * Constructs an asynchronous request to refresh current user's data via the Kinvey back-end.
      * </p>
@@ -563,8 +565,7 @@ public class UserStore {
      * </p>
      * <pre>
      {@code
-     User user = kinveyClient.getActiveUser();
-     user.retrieve(new String[]{"myKinveyReferencedField"}, new KinveyUserCallback() {
+     UserStore.retrieve(new String[]{"myKinveyReferencedField"}, kinveyClient, new KinveyClientCallback<User> callback() {
      public void onFailure(Throwable e) { ... }
      public void onSuccess(User result) { ... }
      });
@@ -572,6 +573,7 @@ public class UserStore {
      * </pre>
      *
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
+     * @param client {@link Client} an instance of the client
      * @param callback {@link KinveyUserCallback} containing refreshed user instance
      */
     public static void retrieve(String[] resolves, AbstractClient client, KinveyClientCallback<User> callback){
@@ -579,7 +581,7 @@ public class UserStore {
     }
 
     /**
-     * Asynchronous call to retrive (refresh) the users by query, and resolve KinveyReferences
+     * Asynchronous call to retrieve (refresh) the users by query, and resolve KinveyReferences
      * <p>
      * Constructs an asynchronous request to retrieve User objects via a Query.
      * </p>
@@ -588,8 +590,7 @@ public class UserStore {
      * </p>
      * <pre>
      * {@code
-    User user = kinveyClient.getActiveUser();
-    user.retrieve(Query query, new String[]{"myKinveyReferenceField"}, new KinveyUserListCallback() {
+    UserStore.retrieve(query, new String[]{"myKinveyReferenceField"}, kinveyClient, new KinveyListCallback<User>() {
     public void onFailure(Throwable e) { ... }
     public void onSuccess(User[] result) { ... }
     });
@@ -598,12 +599,13 @@ public class UserStore {
      *
      *
      *
-     * @param query the query to execute defining users to return
+     * @param query {@link Query} the query to execute defining users to return
      * @param resolves an array of json keys maintaining KinveyReferences to be resolved
-     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
+     * @param client {@link Client} an instance of the client
+     * @param callback {@link com.kinvey.android.callback.KinveyListCallback<User>} containing an array of queried users
      */
-    public static void retrieve(Query query, String[] resolves, AbstractClient client, KinveyUserListCallback callback){
-        new RetrieveUserList(query, resolves, client, callback).execute();
+    public static void retrieve(Query query, String[] resolves, AbstractClient client, KinveyListCallback<User> callback){
+        new RetrieveUserList<User>(query, resolves, client, callback).execute();
     }
 
     /**
@@ -616,20 +618,50 @@ public class UserStore {
      * </p>
      * <pre>
      * {@code
-    User user = kinveyClient.getActiveUser();
-    user.retrieve(Query query, new KinveyUserListCallback() {
+    UserStore.retrieve(query, kinveyClient, new KinveyListCallback<User>() {
+    public void onFailure(Throwable e) { ... }
+    public void onSuccess(List<User> result) { ... }
+    });
+    }
+     * </pre>
+     * @param q {@link Query} the query to execute defining users to return
+     *  @param client {@link Client} an instance of the client
+     * @param callback {@link com.kinvey.android.callback.KinveyListCallback<User>} for retrieved users
+     */
+    public static void retrieve(Query q, AbstractClient client, KinveyListCallback<User> callback) {
+        new RetrieveUserList<User>(q, client, callback).execute();
+    }
+
+    /**
+     * Asynchronous call to retrieve (refresh) the users by query, and resolve KinveyReferences
+     * <p>
+     * Constructs an asynchronous request to retrieve User objects via a Query.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * </p>
+     * <pre>
+     * {@code
+    UserStore.retrieve(query, new String[]{"myKinveyReferenceField"}, kinveyClient, new KinveyUserListCallback() {
     public void onFailure(Throwable e) { ... }
     public void onSuccess(User[] result) { ... }
     });
     }
      * </pre>
      *
-     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} for retrieved users
+     *
+     *
+     * @param query {@link Query} the query to execute defining users to return
+     * @param resolves an array of json keys maintaining KinveyReferences to be resolved
+     * @param client {@link Client} an instance of the client
+     * @param callback {@link com.kinvey.android.callback.KinveyUserListCallback} containing an array of queried users
+     *
+     * @deprecated use {@link UserStore#retrieve(Query, String[], AbstractClient, KinveyListCallback)}
      */
-    public static void retrieve(Query q, AbstractClient client, KinveyListCallback callback) {
-        new RetrieveUserList(q, client, callback).execute();
+    @Deprecated
+    public static void retrieve(Query query, String[] resolves, AbstractClient client, KinveyUserListCallback callback){
+        new RetrieveUserArray(query, resolves, client, callback).execute();
     }
-
 
 
     /***
@@ -1005,35 +1037,52 @@ public class UserStore {
         }
     }
 
-    private static class RetrieveUserList extends AsyncClientRequest<User[]> {
+    private static class RetrieveUserList<T extends BaseUser> extends AsyncClientRequest<List<T>> {
+
+        private Query query = null;
+        private final AbstractClient client;
+        private String[] resolves = null;
+
+        private RetrieveUserList(Query query, AbstractClient client, KinveyListCallback<T> callback){
+            super(callback);
+            this.query = query;
+            this.client = client;
+        }
+
+        private RetrieveUserList(Query query, String[] resolves, AbstractClient client, KinveyListCallback<T> callback){
+            super(callback);
+            this.query = query;
+            this.resolves = resolves;
+            this.client = client;
+        }
+
+        @Override
+        public List<T> executeAsync() throws IOException {
+            if(resolves == null) {
+                return BaseUserStore.retrieve(query, client);
+            } else {
+                return BaseUserStore.retrieve(query, resolves, client);
+            }
+        }
+    }
+
+    private static class RetrieveUserArray extends AsyncClientRequest<User[]> {
 
         private Query query = null;
         private String[] resolves = null;
         private final AbstractClient client;
 
-
-        private RetrieveUserList(Query query, AbstractClient client,KinveyClientCallback<User[]> callback){
-            super(callback);
-            this.query = query;
-            this.client = client;
-
-        }
-
-        private RetrieveUserList(Query query, String[] resolves, AbstractClient client, KinveyClientCallback<User[]> callback){
+        private RetrieveUserArray(Query query, String[] resolves, AbstractClient client, KinveyClientCallback<User[]> callback){
             super(callback);
             this.query = query;
             this.resolves = resolves;
             this.client = client;
-
         }
 
         @Override
         public User[] executeAsync() throws IOException {
-            if (resolves == null){
-                return BaseUserStore.retrieve(query, client);
-            }else{
-                return BaseUserStore.retrieve(query, resolves, client);
-            }
+            List<User> users = BaseUserStore.retrieve(query, resolves, client);
+            return users.toArray(new User[users.size()]);
         }
     }
 
