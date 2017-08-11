@@ -598,7 +598,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         return forgotUsername;
     }
 
-    public GetMICAccessToken getMICToken(String code) throws IOException{
+    public GetMICAccessToken getMICToken(String code, String clientId) throws IOException{
 
 //        grant_type: "authorization_code" - this is always set to this value
 //        code: use the 'code' returned in the callback
@@ -609,7 +609,11 @@ public class UserStoreRequestManager<T extends BaseUser> {
         data.put("grant_type", "authorization_code");
         data.put("code", code);
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (clientId != null) {
+            fullClientIdField = fullClientIdField + ":" + clientId;
+        }
+        data.put("client_id",  fullClientIdField);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
@@ -628,7 +632,12 @@ public class UserStoreRequestManager<T extends BaseUser> {
         data.put("grant_type", "refresh_token");
         data.put("refresh_token", refreshToken);
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        String clientId = client.getStore().load(client.getActiveUser().getId()).getClientId();
+        if (clientId != null) {
+            fullClientIdField = fullClientIdField + ":" + clientId;
+        }
+        data.put("client_id",  fullClientIdField);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
@@ -637,7 +646,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         return getToken;
     }
 
-    public GetMICTempURL getMICTempURL() throws IOException{
+    public GetMICTempURL getMICTempURL(String clientId) throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -646,7 +655,11 @@ public class UserStoreRequestManager<T extends BaseUser> {
         Map<String, String> data = new HashMap<String, String>();
         data.put("response_type", "code");
         data.put("redirect_uri", MICRedirectURI);
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (clientId != null) {
+            fullClientIdField = fullClientIdField + ":" + clientId;
+        }
+        data.put("client_id",  fullClientIdField);
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICTempURL getTemp = new GetMICTempURL(client, content);
@@ -657,7 +670,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
     }
 
 
-    public LoginToTempURL MICLoginToTempURL(String username, String password, String tempURL) throws IOException{
+    public LoginToTempURL MICLoginToTempURL(String username, String password, String clientId, String tempURL) throws IOException{
 
 //    	client_id:  this is the app’s appKey (the KID)
 //    	redirect_uri:  the uri that the grant will redirect to on authentication, as set in the console. Note, this much exactly match one of the redirect URIs configured in the console.
@@ -667,14 +680,18 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
 
         Map<String, String> data = new HashMap<String, String>();
-        data.put("client_id", ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey());
+        String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (clientId != null) {
+            fullClientIdField = fullClientIdField + ":" + clientId;
+        }
+        data.put("client_id",  fullClientIdField);
         data.put("redirect_uri", MICRedirectURI);
         data.put("response_type", "code");
         data.put("username", username);
         data.put("password", password);
 
-        HttpContent content = new UrlEncodedContent(data) ;
-        LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, content);
+        HttpContent content = new UrlEncodedContent(data);
+        LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, clientId, content);
         loginTemp.setRequireAppCredentials(true);
         client.initializeRequest(loginTemp);
         return loginTemp;

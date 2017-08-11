@@ -35,6 +35,7 @@ public class UserStore {
     private static boolean clearStorage = true;
     private static KinveyUserCallback MICCallback;
     private static String MICRedirectURI;
+    private static String MICClientId;
 
     /**
      * Asynchronous request to signUp.
@@ -668,10 +669,23 @@ public class UserStore {
      *
      * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
      *
-     * @param redirectURI
-     * @param callback
+     * @param client Client object
+     * @param redirectURI redirectURI
+     * @param callback KinveyMICCallback
+     * @deprecated Use {@link #loginWithAuthorizationCodeLoginPage(Client, String, String, KinveyMICCallback)}
      */
     public static void loginWithAuthorizationCodeLoginPage(Client client, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
+        loginWithAuthorizationCodeLoginPage(client, null, redirectURI, callback);
+    }
+
+    /***
+     *
+     * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
+     *
+     * @param redirectURI redirectURI
+     * @param callback KinveyMICCallback
+     */
+    public static void loginWithAuthorizationCodeLoginPage(Client client, String clientId, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
         //return URL for login pagef
         //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
         String appkey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
@@ -680,7 +694,11 @@ public class UserStore {
         if (apiVersion != null && apiVersion.length() > 0){
             host = client.getMICHostName() + apiVersion + "/";
         }
-        String myURLToRender = host + "oauth/auth?client_id=" + appkey + "&redirect_uri=" + redirectURI + "&response_type=code";
+        String myURLToRender = host + "oauth/auth?client_id=" + appkey;
+        if (clientId != null) {
+            myURLToRender = myURLToRender + ":" + clientId;
+        }
+        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code";
         //keep a reference to the callback and redirect uri for later
 
         MICCallback = callback;
@@ -696,8 +714,10 @@ public class UserStore {
      * Used by the MIC login flow, this method should be called after a successful login in the onNewItent Method of your activity.  See the MIC guide for more information.
      *
      * @param intent The intent provided to the application from the redirect
+     * @param clientId ClientId
+     * @param client Client object
      */
-    public static void onOAuthCallbackRecieved(Intent intent, AbstractClient client){
+    public static void onOAuthCallbackReceived(Intent intent, String clientId, AbstractClient client){
         if (intent == null || intent.getData() == null){
             return;
         }
@@ -706,46 +726,100 @@ public class UserStore {
         if (accessToken == null){
             return;
         }
-        getMICAccessToken(accessToken, client);
+        getMICAccessToken(accessToken, clientId, client);
+    }
+
+    /**
+     * Used by the MIC login flow, this method should be called after a successful login in the onNewItent Method of your activity.  See the MIC guide for more information.
+     *
+     * @param intent The intent provided to the application from the redirect
+     * @deprecated Use {@link #onOAuthCallbackReceived(Intent, String, AbstractClient)}
+     */
+    @Deprecated
+    public static void onOAuthCallbackRecieved(Intent intent, AbstractClient client){
+        onOAuthCallbackReceived(intent, null, client);
     }
 
     /***
      *
      * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
      *
-     * @param username
-     * @param password
-     * @param redirectURI
-     * @param callback
+     * @param username {@link String} the userName of Kinvey user
+     * @param password {@link String} the password of Kinvey user.
+     * @param redirectURI redirectURI
+     * @param callback {@link KinveyUserCallback}
+     * @deprecated Use {@link #loginWithAuthorizationCodeAPI(AbstractClient, String, String, String, String, KinveyUserCallback)}
      */
     public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String redirectURI, KinveyUserCallback<User> callback){
+        loginWithAuthorizationCodeAPI(client, username, password, null, redirectURI, callback);
+    }
+
+    /***
+     *
+     * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
+     *
+     * @param username {@link String} the userName of Kinvey user
+     * @param password {@link String} the password of Kinvey user.
+     * @param redirectURI redirectURI
+     * @param callback {@link KinveyUserCallback}
+     */
+    public static void loginWithAuthorizationCodeAPI(AbstractClient client, String username, String password, String clientId, String redirectURI, KinveyUserCallback<User> callback){
         MICCallback = callback;
 
-        new PostForTempURL(client, redirectURI, username, password, callback).execute();
+        new PostForTempURL(client, clientId, redirectURI, username, password, callback).execute();
     }
 
     /**
      * Posts for a MIC login Access token
      *
      * @param token the access code returned from the MIC Auth service
+     * @param clientId clientId
+     * @param client Client object
      */
+    public static void getMICAccessToken(String token, String clientId, AbstractClient client){
+        new PostForAccessToken(client, MICRedirectURI, token, clientId, (KinveyClientCallback) MICCallback).execute();
+    }
+
+    /**
+     * Posts for a MIC login Access token
+     *
+     * @param token the access code returned from the MIC Auth service
+     * @param client Client object
+     * @deprecated use {@link #getMICAccessToken(String, String, AbstractClient)} ()} instead.
+     */
+    @Deprecated
     public static void getMICAccessToken(String token, AbstractClient client){
-        new PostForAccessToken(client, MICRedirectURI, token, (KinveyClientCallback) MICCallback).execute();
+        getMICAccessToken(token, null, client);
     }
 
     /***
      * Initiate the MIC login flow with an Activity containing a Webview
      *
-     * @param redirectURI
-     * @param callback
+     * @param client Client object
+     * @param redirectURI redirectURI
+     * @param callback callback
+     * @deprecated use {@link #presentMICLoginActivity(Client, String, String, KinveyUserCallback)} ()} instead.
      */
     public static void presentMICLoginActivity(final Client client, String redirectURI, final KinveyUserCallback<User> callback){
+        presentMICLoginActivity(client, null, redirectURI, callback);
+    }
 
-        loginWithAuthorizationCodeLoginPage(client, redirectURI, new KinveyMICCallback() {
+    /***
+     * Initiate the MIC login flow with an Activity containing a Webview
+     *
+     * @param client Client object
+     * @param clientId clientId
+     * @param redirectURI redirectURI
+     * @param callback callback
+     */
+    public static void presentMICLoginActivity(final Client client, final String clientId, String redirectURI, final KinveyUserCallback<User> callback){
+
+        loginWithAuthorizationCodeLoginPage(client, clientId, redirectURI, new KinveyMICCallback() {
             @Override
             public void onReadyToRender(String myURLToRender) {
                 Intent i = new Intent(client.getContext(), MICLoginActivity.class);
                 i.putExtra(MICLoginActivity.KEY_LOGIN_URL, myURLToRender);
+                i.putExtra(MICLoginActivity.KEY_CLIENT_ID, clientId);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK  | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 client.getContext().startActivity(i);
             }
@@ -834,11 +908,11 @@ public class UserStore {
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
-        private Login(String accessToken, String clientID, String refresh, String id, AbstractClient client, KinveyClientCallback callback){
+        private Login(String accessToken, String clientId, String refresh, String id, AbstractClient client, KinveyClientCallback callback){
             super(callback);
             this.accessToken = accessToken;
             this.refreshToken = refresh;
-            this.client_id = clientID;
+            this.client_id = clientId;
             this.id = id;
 
             this.client = client;
@@ -947,25 +1021,28 @@ public class UserStore {
         private final AbstractClient client;
         private final String redirectURI;
         private String token;
+        private String clientId;
 
-        public PostForAccessToken(AbstractClient client, String redirectURI, String token, KinveyClientCallback<User> callback) {
+        public PostForAccessToken(AbstractClient client, String redirectURI, String token, String clientId, KinveyClientCallback<User> callback) {
             super(callback);
             this.client = client;
             this.redirectURI = redirectURI;
 
             this.token = token;
+            this.clientId = clientId;
         }
 
         @Override
         protected User executeAsync() throws IOException {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
-            GenericJson result = requestManager.getMICToken(token).execute();
+            GenericJson result = requestManager.getMICToken(token, clientId).execute();
 
             User ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(result.get("refresh_token").toString());
+            currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
             return ret;
@@ -975,13 +1052,15 @@ public class UserStore {
     private static class PostForTempURL extends AsyncClientRequest<User>{
 
         private final AbstractClient client;
+        private String clientId;
         private final String redirectURI;
         String username;
         String password;
 
-        public PostForTempURL(AbstractClient client, String redirectURI, String username, String password, KinveyUserCallback<User> callback) {
+        public PostForTempURL(AbstractClient client, String clientId, String redirectURI, String username, String password, KinveyUserCallback<User> callback) {
             super(callback);
             this.client = client;
+            this.clientId = clientId;
             this.redirectURI = redirectURI;
             this.username=username;
             this.password=password;
@@ -992,11 +1071,11 @@ public class UserStore {
 
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
-            GetMICTempURL micTempURL = requestManager.getMICTempURL();
+            GetMICTempURL micTempURL = requestManager.getMICTempURL(clientId);
             GenericJson tempResult = micTempURL.execute();
 
             String tempURL = tempResult.get("temp_login_uri").toString();
-            LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, tempURL);
+            LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, clientId, tempURL);
             GenericJson accessResult = loginToTempURL.execute();
 
             User user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
@@ -1004,6 +1083,7 @@ public class UserStore {
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
             currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
+            currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
             return user;
