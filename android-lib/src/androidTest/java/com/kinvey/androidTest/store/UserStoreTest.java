@@ -134,34 +134,6 @@ public class UserStoreTest {
         }
     }
 
-
-    private static class DefaultUserKinveyClientCallback implements KinveyClientCallback<User> {
-
-        private CountDownLatch latch;
-        private User result;
-        private Throwable error;
-
-        private DefaultUserKinveyClientCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(User user) {
-            this.result = user;
-            finish();
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        private void finish() {
-            latch.countDown();
-        }
-    }
-
     private static class CustomKinveyClientCallback implements KinveyClientCallback<TestUser> {
 
         private CountDownLatch latch;
@@ -386,7 +358,7 @@ public class UserStoreTest {
     @Before
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(mMockContext).setUserClass(TestUser.class).build();
+        client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         if (client.isUserLoggedIn()) {
@@ -423,6 +395,7 @@ public class UserStoreTest {
 
     @Test
     public void testCustomSignUp() throws InterruptedException {
+        client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         user.setCompanyName("Test Company");
         CustomKinveyClientCallback callback = signUp(user);
@@ -443,6 +416,7 @@ public class UserStoreTest {
 
     @Test
     public void testCustomDestroy() throws InterruptedException {
+        client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         user.setCompanyName("Test Company");
         CustomKinveyClientCallback callback = signUp(user);
@@ -1149,6 +1123,7 @@ public class UserStoreTest {
 
     @Test
     public void testUpdateCustomUser() throws InterruptedException {
+        client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         user.setCompanyName("Test Company");
         CustomKinveyClientCallback callback = signUp(user);
@@ -1158,9 +1133,9 @@ public class UserStoreTest {
         assertEquals(user.getCompanyName(), callback.result.getCompanyName(), client.getActiveUser().get("companyName"));
 
         client.getActiveUser().set("companyName", "New Company");
-        DefaultKinveyClientCallback userKinveyClientCallback = update(client);
+        CustomKinveyClientCallback userKinveyClientCallback = updateCustomUser(client);
         assertNotNull(userKinveyClientCallback.result);
-        assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getUsername());
+        assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getCompanyName());
         assertNotNull(deleteUser(true, client));
         assertNull(logout(client).error);
     }
@@ -1168,6 +1143,20 @@ public class UserStoreTest {
     private DefaultKinveyClientCallback update(final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        new Thread(new Runnable() {
+            public void run() {
+                Looper.prepare();
+                client.getActiveUser().update(callback);
+                Looper.loop();
+            }
+        }).start();
+        latch.await();
+        return callback;
+    }
+
+    private CustomKinveyClientCallback updateCustomUser(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyClientCallback callback = new CustomKinveyClientCallback(latch);
         new Thread(new Runnable() {
             public void run() {
                 Looper.prepare();
@@ -1192,6 +1181,7 @@ public class UserStoreTest {
 
     @Test
     public void testRetrieveCustomUser() throws InterruptedException {
+        client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         CustomKinveyClientCallback callback = signUp(user);
         assertNull(callback.error);
@@ -1240,6 +1230,7 @@ public class UserStoreTest {
 
     @Test
     public void testRetrieveCustomUsers() throws InterruptedException {
+        client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         CustomKinveyClientCallback callback = signUp(user);
         assertNull(callback.error);
