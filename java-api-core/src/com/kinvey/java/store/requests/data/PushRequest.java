@@ -36,7 +36,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
     public PushRequest(String collectionName, AbstractClient client){
 
         this.collectionName = collectionName;
-        this.syncManager = client.getSycManager();
+        this.syncManager = client.getSyncManager();
         this.client = client;
     }
 
