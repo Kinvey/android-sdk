@@ -524,7 +524,21 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     protected abstract ICacheManager getSyncCacheManager();
 
+    /**
+     * @return SyncManager object
+     *
+     * @deprecated use {@link #getSyncManager()}
+     */
+    @Deprecated
     public SyncManager getSycManager(){
+        return new SyncManager(getSyncCacheManager());
+    }
+
+    /**
+     *
+     * @return SyncManager object
+     */
+    public SyncManager getSyncManager(){
         return new SyncManager(getSyncCacheManager());
     }
 

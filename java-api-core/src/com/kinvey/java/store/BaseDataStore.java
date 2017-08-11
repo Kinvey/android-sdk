@@ -218,7 +218,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
-        return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSycManager()).execute();
+        return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
     }
 
 
@@ -232,7 +232,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
-        return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSycManager()).execute();
+        return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSyncManager()).execute();
     }
 
     /**
@@ -245,7 +245,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
-        return new DeleteSingleRequest<T>(cache, networkManager, this.storeType.writePolicy, id, client.getSycManager()).execute();
+        return new DeleteSingleRequest<T>(cache, networkManager, this.storeType.writePolicy, id, client.getSyncManager()).execute();
     }
 
     /**
@@ -258,7 +258,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
-        return new DeleteQueryRequest<T>(cache, networkManager, this.storeType.writePolicy, query, client.getSycManager()).execute();
+        return new DeleteQueryRequest<T>(cache, networkManager, this.storeType.writePolicy, query, client.getSyncManager()).execute();
     }
 
     /**
@@ -271,7 +271,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        return new DeleteIdsRequest<T>(cache, networkManager, this.storeType.writePolicy, ids, client.getSycManager()).execute();
+        return new DeleteIdsRequest<T>(cache, networkManager, this.storeType.writePolicy, ids, client.getSyncManager()).execute();
     }
 
     /**
@@ -293,7 +293,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        Preconditions.checkArgument(client.getSycManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         List<T> networkData = null;
         query = query == null ? client.query() : query;
         networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
@@ -315,7 +315,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        client.getSycManager().clear(collectionName);
+        client.getSyncManager().clear(collectionName);
         pullBlocking(null);
     }
 

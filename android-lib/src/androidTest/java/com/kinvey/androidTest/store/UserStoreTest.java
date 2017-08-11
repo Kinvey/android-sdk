@@ -790,7 +790,7 @@ public class UserStoreTest {
         save(userStore, p2);
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     private DefaultPersonKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
@@ -812,7 +812,7 @@ public class UserStoreTest {
         login(USERNAME, PASSWORD, client);
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
@@ -821,7 +821,7 @@ public class UserStoreTest {
         DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
@@ -831,7 +831,7 @@ public class UserStoreTest {
         save(personStore, new Person());
         assertNull(logout(client).error);
         assertTrue(!client.isUserLoggedIn());
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
