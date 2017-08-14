@@ -31,6 +31,7 @@ android {
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      testCoverageEnabled true
     }
   }
 
@@ -45,8 +46,12 @@ android {
     testOptions {
         unitTests.all {
             testLogging {
-                events "failed"
+                events "passed", "skipped", "failed", "standardOut", "standardError"
                 exceptionFormat "full"
+                showCauses true
+                showExceptions true
+                showStackTraces true
+                showStandardStreams true
             }
 //            setIgnoreFailures(true)
         }
