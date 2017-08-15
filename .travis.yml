@@ -12,6 +12,7 @@ cache:
     - $HOME/.android/build-cache
 env:
  global:
+  - TERM=dumb
   - ANDROID_API=23
   - EMULATOR_API_LEVEL=21
   - ANDROID_BUILD_TOOLS=25.0.0
@@ -53,13 +54,3 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t f75e0e13-72a2-40f6-adee-d04e9cf62137
-
-after_failure:
-  # Customize this line, 'android' is the specific app module name of this project. Shows log.
-  - export MY_MOD="android-lib"
-  - export MY_LOG_DIR="$(pwd)/${MY_MOD}/build/reports/androidTests/connected/"
-  - pwd && cd "${MY_LOG_DIR:-.}" && pwd && ls -al
-  - sudo apt-get install -qq lynx && lynx --dump index.html > myIndex.log
-  - lynx --dump com.android.builder.testing.ConnectedDevice.html > myConnectedDevice.log
-  - lynx --dump com.android.builder.testing.html > myTesting.log
-  - for file in *.log; do echo "$file"; echo "====================="; cat "$file"; done || true
