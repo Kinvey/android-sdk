@@ -295,10 +295,10 @@ public class FileStoreTest {
         downloadFile(StoreType.NETWORK);
     }
 
-/*    @Test
+    @Test
     public void testDownloadFileCache() throws InterruptedException, IOException {
         downloadFile(StoreType.CACHE);
-    }*/
+    }
 
     @Test
     public void testDownloadFileSync() throws InterruptedException, IOException {
@@ -925,6 +925,7 @@ public class FileStoreTest {
 
     @After
     public void tearDown() {
+        client.performLockDown();
         if (client.getKinveyHandlerThread() != null) {
             try {
                 client.stopKinveyHandlerThread();

@@ -46,6 +46,8 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import io.realm.Realm;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1198,6 +1200,7 @@ public class DataStoreTest {
 
     @After
     public void tearDown() {
+        client.performLockDown();
         if (client.getKinveyHandlerThread() != null) {
             try {
                 client.stopKinveyHandlerThread();

@@ -1124,6 +1124,7 @@ public class UserStoreTest {
 
     @After
     public void tearDown() {
+        client.performLockDown();
         if (client.getKinveyHandlerThread() != null) {
             try {
                 client.stopKinveyHandlerThread();
