@@ -2,7 +2,7 @@ package com.kinvey.androidTest.store;
 
 
 import android.content.Context;
-import android.os.Looper;
+import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
@@ -23,6 +23,7 @@ import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
+import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -45,8 +46,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import io.realm.Realm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -73,7 +72,7 @@ public class DataStoreTest {
         mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
-        if (!client.isUserLoggedIn()) {
+/*        if (!client.isUserLoggedIn()) {
             new Thread(new Runnable() {
                 public void run() {
                     Looper.prepare();
@@ -100,7 +99,39 @@ public class DataStoreTest {
         } else {
             latch.countDown();
         }
+        latch.await();*/
+        LooperThread looperThread = null;
+        if (!client.isUserLoggedIn()) {
+            looperThread = new LooperThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        UserStore.login(client, new KinveyClientCallback<User>() {
+                            @Override
+                            public void onSuccess(User result) {
+                                assertNotNull(result);
+                                latch.countDown();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+                                assertNull(error);
+                                latch.countDown();
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            looperThread.start();
+        } else {
+            latch.countDown();
+        }
         latch.await();
+        if (looperThread != null) {
+            looperThread.mHandler.sendMessage(new Message());
+        }
     }
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<Person> {
@@ -327,14 +358,15 @@ public class DataStoreTest {
     private DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.save(person, callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -409,14 +441,15 @@ public class DataStoreTest {
     private DefaultKinveyClientCallback find(final DataStore<Person> store, final String id, int seconds, final KinveyCachedClientCallback<Person> cachedClientCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.find(id, callback, cachedClientCallback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -482,14 +515,15 @@ public class DataStoreTest {
     private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.find(query, callback, null);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -528,14 +562,15 @@ public class DataStoreTest {
     private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.delete(id, callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -600,14 +635,15 @@ public class DataStoreTest {
     private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Iterable<String> entityIDs) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.delete(entityIDs, callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(120, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -682,14 +718,15 @@ public class DataStoreTest {
     private DefaultKinveyPurgeCallback purge(final DataStore<Person> store) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPurgeCallback callback = new DefaultKinveyPurgeCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.purge(callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -742,14 +779,15 @@ public class DataStoreTest {
     private DefaultKinveySyncCallback sync(final DataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.sync(callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -815,14 +853,15 @@ public class DataStoreTest {
     private DefaultKinveyPushCallback push(final DataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.push(callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
@@ -868,32 +907,34 @@ public class DataStoreTest {
     private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 if (query != null) {
                     store.pull(query, callback);
                 } else {
                     store.pull(callback);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
     private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 store.delete(query, callback);
-                Looper.loop();
             }
-        }).start();
-        latch.await();
+        });
+        looperThread.start();
+        latch.await(120, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 

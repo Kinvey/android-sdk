@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.store;
 
 import android.content.Context;
-import android.os.Looper;
+import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
@@ -12,7 +12,9 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.AsyncDownloaderProgressListener;
 import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
+import com.kinvey.androidTest.LooperThread;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -24,7 +26,6 @@ import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -184,32 +185,38 @@ public class FileStoreTest {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
-            new Thread(new Runnable() {
+            looperThread = new LooperThread(new Runnable() {
+                @Override
                 public void run() {
-                    Looper.prepare();
                     try {
-                        UserStore.login(USER, PASSWORD, client, new KinveyClientCallback() {
+                        UserStore.login(client, new KinveyClientCallback<User>() {
                             @Override
-                            public void onSuccess(Object result) {
+                            public void onSuccess(User result) {
+                                assertNotNull(result);
                                 latch.countDown();
                             }
 
                             @Override
                             public void onFailure(Throwable error) {
+                                assertNull(error);
                                 latch.countDown();
                             }
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Looper.loop();
                 }
-            }).start();
+            });
+            looperThread.start();
         } else {
             latch.countDown();
         }
         latch.await();
+        if (looperThread != null) {
+            looperThread.mHandler.sendMessage(new Message());
+        }
     }
 
 
@@ -243,19 +250,20 @@ public class FileStoreTest {
     public DefaultUploadProgressListener uploadFileWithMetadata(final StoreType storeType, final File f, final FileMetaData metaData) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).upload(f, metaData, listener);
                 } catch (IOException e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -336,9 +344,9 @@ public class FileStoreTest {
     private DefaultDownloadProgressListener downloadFile(final StoreType storeType, final FileMetaData metaFile) throws InterruptedException, IOException {
         final CountDownLatch downloadLatch = new CountDownLatch(1);
         final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
@@ -346,10 +354,11 @@ public class FileStoreTest {
                 } catch (IOException e) {
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         downloadLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -381,18 +390,19 @@ public class FileStoreTest {
     private DefaultDeleteListener removeFile(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException, IOException {
         final CountDownLatch deleteLatch = new CountDownLatch(1);
         final DefaultDeleteListener deleteListener = new DefaultDeleteListener(deleteLatch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).remove(fileMetaData, deleteListener);
                 } catch (IOException e) {
                     deleteListener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         deleteLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return deleteListener;
     }
 
@@ -422,9 +432,9 @@ public class FileStoreTest {
 
     private void refresh(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).refresh(fileMetaData, new KinveyClientCallback<FileMetaData>() {
                         @Override
@@ -447,10 +457,11 @@ public class FileStoreTest {
                     e.printStackTrace();
                     latch.countDown();
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         assertTrue(success);
     }
 
@@ -480,9 +491,9 @@ public class FileStoreTest {
 
     private void find(final StoreType storeType, final FileMetaData fileMetaData, final boolean isCacheCleaning) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 Query query = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals(ID, fileMetaData.getId());
                 client.getFileStore(storeType).find(query, new KinveyClientCallback<FileMetaData[]>() {
                     @Override
@@ -508,11 +519,11 @@ public class FileStoreTest {
                         latch.countDown();
                     }
                 }, storeType == StoreType.CACHE ? createArrayCachedClientCallback() : null);
-
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         assertTrue(success);
         if (!isCacheCleaning) {
             storeTypeResult = storeType;
@@ -594,19 +605,20 @@ public class FileStoreTest {
     private DefaultUploadProgressListener uploadInputStreamWithMetadata(final StoreType storeType, final InputStream is, final FileMetaData metaData) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).upload(is, metaData, listener);
                 } catch (IOException e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -638,19 +650,20 @@ public class FileStoreTest {
     private DefaultUploadProgressListener uploadFileWithOutMetadata(final StoreType storeType, final File f) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).upload(f, listener);
                 } catch (IOException e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -681,19 +694,20 @@ public class FileStoreTest {
     private DefaultUploadProgressListener uploadInputStreamWithFilename(final StoreType storeType, final InputStream is, final String fileName) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).upload(fileName, is, listener);
                 } catch (IOException e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -724,9 +738,9 @@ public class FileStoreTest {
     private DefaultUploadProgressListener cancelFileUploading(final StoreType storeType, final File f) throws InterruptedException, IOException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     client.getFileStore(storeType).upload(f, listener);
                     listener.isCancelled = true;
@@ -735,10 +749,11 @@ public class FileStoreTest {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
@@ -771,9 +786,9 @@ public class FileStoreTest {
     private DefaultDownloadProgressListener cancelFileDownloading(final StoreType storeType, final FileMetaData metaFile) throws InterruptedException, IOException {
         final CountDownLatch downloadLatch = new CountDownLatch(1);
         final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
             public void run() {
-                Looper.prepare();
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
@@ -783,10 +798,11 @@ public class FileStoreTest {
                 } catch (IOException e) {
                     listener.onFailure(e);
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         downloadLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return listener;
     }
 
