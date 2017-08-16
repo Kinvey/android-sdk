@@ -3,22 +3,9 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '3.0.2'
+  version = '3.0.3'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
   ext.kinveyApiVersion = '4'
-}
-
-if (System.env.TRAVIS == 'true') {
-  allprojects {
-    tasks.withType(GroovyCompile) {
-      groovyOptions.fork = false
-    }
-    tasks.withType(Test) {
-      // containers (currently) have 2 dedicated cores and 4GB of memory
-      maxParallelForks = 2
-      minHeapSize = '128m'
-    }
-  }
 }
 
 subprojects {

@@ -18,7 +18,6 @@ android {
 
   dexOptions {
     javaMaxHeapSize "6g"
-    preDexLibraries = false
   }
 
   defaultConfig {
@@ -45,19 +44,6 @@ android {
     exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
   }
 
-    testOptions {
-        unitTests.all {
-            testLogging {
-                events "passed", "skipped", "failed", "standardOut", "standardError"
-                exceptionFormat "full"
-                showCauses true
-                showExceptions true
-                showStackTraces true
-                showStandardStreams true
-            }
-//            setIgnoreFailures(true)
-        }
-    }
 }
 
 configurations {

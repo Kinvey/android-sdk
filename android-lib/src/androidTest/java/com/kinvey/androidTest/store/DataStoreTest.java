@@ -66,40 +66,12 @@ public class DataStoreTest {
     private static final int LONG_TIMEOUT = 6*DEFAULT_TIMEOUT;
 
     private Client client;
-    private Context mMockContext;
+
     @Before
     public void setUp() throws InterruptedException, IOException {
-        mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
-/*        if (!client.isUserLoggedIn()) {
-            new Thread(new Runnable() {
-                public void run() {
-                    Looper.prepare();
-                    try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
-                            @Override
-                            public void onSuccess(User result) {
-                                assertNotNull(result);
-                                latch.countDown();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable error) {
-                                assertNull(error);
-                                latch.countDown();
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Looper.loop();
-                }
-            }).start();
-        } else {
-            latch.countDown();
-        }
-        latch.await();*/
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
             looperThread = new LooperThread(new Runnable() {
