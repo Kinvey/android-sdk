@@ -42,18 +42,24 @@ before_install:
 before_script:
   - chmod +x gradlew
   - android list targets
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -c 1000 -t android-21 --abi armeabi-v7a
   - emulator -memory 2048 -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
   - ./gradlew --stop
-  # - free -m
-  # - ulimit -a
-  # - ulimit -s 82768
-  # - ulimit -a
-
+  - adb -e logcat *:W | tee logcat.log > /dev/null 2>&1 &
 script: 
-  - TERM=dumb ./gradlew clean connectedAndroidTest release --no-daemon
+  - TERM=dumb ./gradlew clean connectedAndroidTest -PdisablePreDex --stacktrace release --no-daemon
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t f75e0e13-72a2-40f6-adee-d04e9cf62137
+
+after_failure:
+  - sudo apt-get install -qq lynx
+  - export MY_MOD="android-lib"
+  - export MY_LOG_DIR="$(pwd)/${MY_MOD}/build/reports/androidTests/connected/"
+  - pwd && cd "${MY_LOG_DIR:-.}" && pwd && ls -al
+  - sudo apt-get install -qq lynx && lynx --dump index.html > myIndex.log
+  - lynx --dump com.android.builder.testing.ConnectedDevice.html > myConnectedDevice.log
+  - lynx --dump com.android.builder.testing.html > myTesting.log
+  - for file in *.log; do echo "$file"; echo "====================="; cat "$file"; done || true
