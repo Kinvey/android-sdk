@@ -2,14 +2,14 @@ language: android
 jdk: oraclejdk8
 sudo: true
 
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-    - $HOME/.android/build-cache
+# before_cache:
+  # - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  # - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+# cache:
+  # directories:
+    # - $HOME/.gradle/caches/
+    # - $HOME/.gradle/wrapper/
+    # - $HOME/.android/build-cache
 env:
  global:
   - TERM=dumb
@@ -51,17 +51,17 @@ before_script:
   - adb -e logcat *:W | tee logcat.log > /dev/null 2>&1 &
 
 script: 
-  - TERM=dumb ./gradlew clean connectedAndroidTest -PdisablePreDex --stacktrace release --no-daemon
+  - TERM=dumb ./gradlew clean connectedAndroidTest release --no-daemon
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t f75e0e13-72a2-40f6-adee-d04e9cf62137
 
-after_failure:
-  - sudo apt-get install -qq lynx
-  - export MY_MOD="android-lib"
-  - export MY_LOG_DIR="$(pwd)/${MY_MOD}/build/reports/androidTests/connected/"
-  - pwd && cd "${MY_LOG_DIR:-.}" && pwd && ls -al
-  - sudo apt-get install -qq lynx && lynx --dump index.html > myIndex.log
-  - lynx --dump com.android.builder.testing.ConnectedDevice.html > myConnectedDevice.log
-  - lynx --dump com.android.builder.testing.html > myTesting.log
-  - for file in *.log; do echo "$file"; echo "====================="; cat "$file"; done || true
+# after_failure:
+#   - sudo apt-get install -qq lynx
+#   - export MY_MOD="android-lib"
+#   - export MY_LOG_DIR="$(pwd)/${MY_MOD}/build/reports/androidTests/connected/"
+#   - pwd && cd "${MY_LOG_DIR:-.}" && pwd && ls -al
+#   - sudo apt-get install -qq lynx && lynx --dump index.html > myIndex.log
+#   - lynx --dump com.android.builder.testing.ConnectedDevice.html > myConnectedDevice.log
+#   - lynx --dump com.android.builder.testing.html > myTesting.log
+#   - for file in *.log; do echo "$file"; echo "====================="; cat "$file"; done || true
