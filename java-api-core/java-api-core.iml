@@ -21,15 +21,14 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" scope="RUNTIME" name="D__Softteco_Kinvey_java_library_java_api_core_build_gen_buildconfig_classes_main" level="project" />
     <orderEntry type="library" exported="" name="guava-18.0" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-jackson-1.19.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.1" level="project" />
@@ -47,5 +46,9 @@
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-all-1.9.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.1" level="project" />
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
   </component>
 </module>
