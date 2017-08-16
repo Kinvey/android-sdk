@@ -387,7 +387,7 @@ public class DataStoreTest {
 
     private void testSave(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         DefaultKinveyClientCallback callback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
@@ -412,7 +412,7 @@ public class DataStoreTest {
 
     private void testUpdate(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback callback = save(store, person);
         assertNotNull(callback.result);
@@ -430,7 +430,7 @@ public class DataStoreTest {
     @Test
     public void testSaveItemLongCollectionNameNetwork() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.LONG_NAME, Person.class, StoreType.NETWORK, client);
-        client.getSycManager().clear(Person.LONG_NAME);
+        client.getSyncManager().clear(Person.LONG_NAME);
         DefaultKinveyClientCallback callback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
@@ -544,7 +544,7 @@ public class DataStoreTest {
 
     private void testFindByQuery(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -591,7 +591,7 @@ public class DataStoreTest {
 
     private void testDelete(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -621,7 +621,7 @@ public class DataStoreTest {
     
     private void testDeleteNullId(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -664,7 +664,7 @@ public class DataStoreTest {
 
     private void testDeleteArray(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result);
@@ -733,23 +733,23 @@ public class DataStoreTest {
     @Test
     public void testPurge() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
         assertNull(purgeCallback.error);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
     public void testPurgeInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveyPurgeCallback purgeCallback = purge(store);
         assertNotNull(purgeCallback.error);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
@@ -794,27 +794,27 @@ public class DataStoreTest {
     @Test
     public void testSync() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNull(syncCallback.error);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
     public void testSyncInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNotNull(syncCallback.error);
         assertNull(syncCallback.kinveyPushResponse);
         assertNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
@@ -828,7 +828,7 @@ public class DataStoreTest {
         client = new Client.Builder(client.getContext())
                 .setHttpRequestInitializer(initializer)
                 .build();
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
@@ -840,14 +840,14 @@ public class DataStoreTest {
     @Test
     public void testSyncNoCompletionHandler() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveySyncCallback syncCallback = sync(store, DEFAULT_TIMEOUT);
         assertFalse(syncCallback.error == null && syncCallback.kinveyPullResponse == null && syncCallback.kinveyPushResponse == null);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     private DefaultKinveyPushCallback push(final DataStore<Person> store, int seconds) throws InterruptedException {
@@ -868,40 +868,40 @@ public class DataStoreTest {
     @Test
     public void testPush() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
     public void testPushInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertTrue(pushCallback.error != null || pushCallback.result.getListOfExceptions() != null);
         assertNull(pushCallback.result);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     @Test
     public void testPushNoCompletionHandler() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
         DefaultKinveyPushCallback pushCallback = push(store, DEFAULT_TIMEOUT);
         assertFalse(pushCallback.error == null && pushCallback.result == null);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
-        assertTrue(client.getSycManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
     private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query) throws InterruptedException {
@@ -993,7 +993,7 @@ public class DataStoreTest {
         }
 
         assertTrue(true);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
     }
 
     /**
@@ -1003,7 +1003,7 @@ public class DataStoreTest {
     @Test
     public void testPull() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -1086,7 +1086,7 @@ public class DataStoreTest {
     @Test
     public void testPullPendingSyncItems() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson("TestPullPendingSyncItems"));
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.result);
@@ -1096,7 +1096,7 @@ public class DataStoreTest {
     @Test
     public void testPullInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
 
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.result);
@@ -1107,7 +1107,7 @@ public class DataStoreTest {
     public void testExpiredTTL() throws InterruptedException {
         StoreType.SYNC.ttl = 1;
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSycManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(Person.COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result);
@@ -1238,6 +1238,23 @@ public class DataStoreTest {
         }
     }
 
+    @Test
+    public void testSyncCount() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        assertNotNull(saveCallback.result.getId());
+        assertTrue(store.syncCount() == 1);
+        sync(store, DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 0);
+        delete(store, saveCallback.result.getId(), DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 1);
+        sync(store, DEFAULT_TIMEOUT);
+        assertTrue(store.syncCount() == 0);
+    }
 
     @After
     public void tearDown() {

@@ -982,8 +982,9 @@ public class Client<T extends User> extends AbstractClient<T> {
         }
 
         /** Set the setting for delta set cache **/
-        public void setDeltaSetCache(boolean deltaSetCache) {
+        public Client.Builder setDeltaSetCache(boolean deltaSetCache) {
             this.deltaSetCache = deltaSetCache;
+            return this;
         }
 
         private class Build extends AsyncClientRequest<Client> {

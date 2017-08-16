@@ -9,6 +9,9 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class BaseUserStore <T extends BaseUser> {
 
@@ -108,16 +111,16 @@ public abstract class BaseUserStore <T extends BaseUser> {
         return (T) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking().execute();
     }
 
-    public static <T extends BaseUser> T[] retrieve(Query query, AbstractClient client) throws IOException {
-        return (T[]) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query).execute();
+    public static <T extends BaseUser> List<T> retrieve(Query query, AbstractClient client) throws IOException {
+        return new ArrayList<T>(Arrays.asList((T[]) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query).execute()));
     }
 
     public static <T extends BaseUser> T retrieve(String[] resolves, AbstractClient client) throws IOException {
         return (T) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(resolves).execute();
     }
 
-    public static <T extends BaseUser> T[] retrieve(Query query, String[] resolves, AbstractClient client) throws IOException {
-        return (T[]) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query, resolves).execute();
+    public static <T extends BaseUser> List<T> retrieve(Query query, String[] resolves, AbstractClient client) throws IOException {
+        return new ArrayList<T>(Arrays.asList((T[]) new UserStoreRequestManager(client, createBuilder(client)).retrieveBlocking(query, resolves).execute()));
     }
 
     public static void forgotUsername(AbstractClient client, String email) throws IOException {

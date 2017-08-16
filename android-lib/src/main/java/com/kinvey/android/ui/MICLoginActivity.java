@@ -31,8 +31,10 @@ import com.kinvey.android.store.UserStore;
 public class MICLoginActivity extends Activity {
 
     public static final String KEY_LOGIN_URL = "loginURL";
+    public static final String KEY_CLIENT_ID = "clientId";
 
     private WebView micView;
+    private String clientId;
 
     @Override
     public void onCreate(Bundle savedInstance){
@@ -41,7 +43,8 @@ public class MICLoginActivity extends Activity {
 
         Intent i = getIntent();
         String loginURL = i.getStringExtra(KEY_LOGIN_URL);
-        
+        clientId = i.getStringExtra(KEY_CLIENT_ID);
+
         if (loginURL == null){
         	onNewIntent(this.getIntent());
         	return;
@@ -62,7 +65,11 @@ public class MICLoginActivity extends Activity {
     public void onNewIntent(Intent intent){
 
         super.onNewIntent(intent);
-        UserStore.onOAuthCallbackRecieved(intent, Client.sharedInstance());
+        if (clientId != null && !clientId.isEmpty()) {
+            UserStore.onOAuthCallbackReceived(intent, clientId, Client.sharedInstance());
+        } else {
+            UserStore.onOAuthCallbackReceived(intent, null, Client.sharedInstance());
+        }
         this.finish();
     }
 }
