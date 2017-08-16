@@ -46,6 +46,7 @@ before_script:
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
   - ./gradlew --stop
+  - adb -e logcat *:W | tee logcat.log > /dev/null 2>&1 &
   # - free -m
   # - ulimit -a
   # - ulimit -s 82768
@@ -56,3 +57,13 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t f75e0e13-72a2-40f6-adee-d04e9cf62137
+
+after_failure:
+  - sudo apt-get install -qq lynx
+  - export MY_MOD="android-lib"
+  - export MY_LOG_DIR="$(pwd)/${MY_MOD}/build/reports/androidTests/connected/"
+  - pwd && cd "${MY_LOG_DIR:-.}" && pwd && ls -al
+  - sudo apt-get install -qq lynx && lynx --dump index.html > myIndex.log
+  - lynx --dump com.android.builder.testing.ConnectedDevice.html > myConnectedDevice.log
+  - lynx --dump com.android.builder.testing.html > myTesting.log
+  - for file in *.log; do echo "$file"; echo "====================="; cat "$file"; done || true
