@@ -1233,7 +1233,7 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testUpdateLmd() throws InterruptedException, IOException {
+    public void testUpdateLmt() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_TEMP_USERNAME);
