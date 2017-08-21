@@ -217,12 +217,24 @@ public abstract class ClassHash {
         if (obj.containsKey("_kmd")){
             Map kmd = (Map)obj.get("_kmd");
             if (kmd != null) {
-                kmd.put("lmt", String.format("%tFT%<tTZ",
-                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-                if (!kmd.containsKey("ect") || kmd.get("ect") == null) {
-                    kmd.put("ect", String.format("%tFT%<tTZ",
+                KinveyMetaData metadata = new KinveyMetaData();
+                if (!kmd.containsKey("lmt") || kmd.get("lmt") == null) {
+                    metadata.put("lmt", String.format("%tFT%<tTZ",
                             Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                } else {
+                    metadata.put("lmt", kmd.get("lmt"));
                 }
+                if (!kmd.containsKey("ect") || kmd.get("ect") == null) {
+                    metadata.put("ect", String.format("%tFT%<tTZ",
+                            Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                } else {
+                    metadata.put("ect", kmd.get("ect"));
+                }
+                DynamicRealmObject innerObject = saveData(name + "__kmd",
+                        realm,
+                        KinveyMetaData.class,
+                        metadata);
+                object.setObject("_kmd", innerObject);
             }
         }
 
