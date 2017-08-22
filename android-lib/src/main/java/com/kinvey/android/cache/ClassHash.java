@@ -50,12 +50,12 @@ import io.realm.RealmObjectSchema;
  */
 public abstract class ClassHash {
 
-    public static String TTL_FIELD = "__ttl__";
-    private static String ID_FIELD = "_id";
+    public static String TTL = "__ttl__";
+    private static String ID = "_id";
 
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
-            add(TTL_FIELD);
+            add(TTL);
         }
     };
 
@@ -113,7 +113,7 @@ public abstract class ClassHash {
             }  else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
-                        if (!fieldInfo.getName().equals(ID_FIELD) && !fieldInfo.getName().equals(TTL_FIELD)){
+                        if (!fieldInfo.getName().equals(ID) && !fieldInfo.getName().equals(TTL)){
                             sb.append(fieldInfo.getName()).append(":").append(c.getName()).append(";");
                         }
 
@@ -122,8 +122,8 @@ public abstract class ClassHash {
                 }
             }
         }
-        sb.append(ID_FIELD).append(":").append(String.class.getName()).append(";");
-        sb.append(TTL_FIELD).append(":").append(Long.class.getName()).append(";");
+        sb.append(ID).append(":").append(String.class.getName()).append(";");
+        sb.append(TTL).append(":").append(Long.class.getName()).append(";");
 
 
         String hashtext = null;
@@ -172,7 +172,7 @@ public abstract class ClassHash {
             } else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
-                        if (!fieldInfo.getName().equals(ID_FIELD)){
+                        if (!fieldInfo.getName().equals(ID)){
                             schema.addField(fieldInfo.getName(), fieldInfo.getType());
                         }
 
@@ -181,16 +181,16 @@ public abstract class ClassHash {
                 }
             }
         }
-        if (!schema.hasField(ID_FIELD)){
-            schema.addField(ID_FIELD, String.class, FieldAttribute.PRIMARY_KEY);
+        if (!schema.hasField(ID)){
+            schema.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
         }
         if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
             RealmObjectSchema innerScheme = createScheme(name + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
 
-        if (!schema.hasField(TTL_FIELD)){
-            schema.addField(TTL_FIELD, Long.class);
+        if (!schema.hasField(TTL)){
+            schema.addField(TTL, Long.class);
         }
 
         return schema;
@@ -203,16 +203,16 @@ public abstract class ClassHash {
 
         DynamicRealmObject object = null;
 
-        if (obj.containsKey(ID_FIELD) && obj.get(ID_FIELD) != null) {
+        if (obj.containsKey(ID) && obj.get(ID) != null) {
             object = realm.where(name)
-                    .equalTo(ID_FIELD, (String) obj.get(ID_FIELD))
+                    .equalTo(ID, (String) obj.get(ID))
                     .findFirst();
         } else {
-            obj.put(ID_FIELD, UUID.randomUUID().toString());
+            obj.put(ID, UUID.randomUUID().toString());
         }
 
         if (object == null){
-            object = realm.createObject(name, obj.get(ID_FIELD));
+            object = realm.createObject(name, obj.get(ID));
         }
 
         if (obj.containsKey(KinveyMetaData.KMD)){
@@ -264,7 +264,7 @@ public abstract class ClassHash {
                         (GenericJson) obj.get(fieldInfo.getName()));
                 object.setObject(fieldInfo.getName(), innerObject);
             } else {
-                if (!fieldInfo.getName().equals(ID_FIELD)) {
+                if (!fieldInfo.getName().equals(ID)) {
                     for (Class c : ALLOWED) {
                         if (fieldInfo.getType().equals(c)) {
                             object.set(fieldInfo.getName(), fieldInfo.getValue(obj));
@@ -275,8 +275,8 @@ public abstract class ClassHash {
             }
         }
         //set dynamic fields
-        if (object.get(TTL_FIELD) != obj.get(TTL_FIELD)){
-            object.set(TTL_FIELD, obj.get(TTL_FIELD));
+        if (object.get(TTL) != obj.get(TTL)){
+            object.set(TTL, obj.get(TTL));
         }
 
 

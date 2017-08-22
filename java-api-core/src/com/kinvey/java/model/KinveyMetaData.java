@@ -62,14 +62,12 @@ public class KinveyMetaData extends GenericJson{
             if (!kmd.containsKey(LMT) || kmd.get(LMT) == null) {
                 metaData.put(LMT, String.format("%tFT%<tTZ",
                         Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-                System.out.println("LMT_TEST_TEST_TEST");
             } else {
                 metaData.put(LMT, kmd.get(LMT));
             }
             if (!kmd.containsKey(ECT) || kmd.get(ECT) == null) {
                 metaData.put(ECT, String.format("%tFT%<tTZ",
                         Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-                System.out.println("ECT_TEST_TEST_TEST");
             } else {
                 metaData.put(ECT, kmd.get(ECT));
             }
