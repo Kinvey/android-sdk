@@ -20,6 +20,9 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.TimeZone;
 
 
 /**
@@ -33,12 +36,14 @@ import java.util.ArrayList;
  */
 public class KinveyMetaData extends GenericJson{
 
-    public static final String JSON_FIELD_NAME = "_kmd";
+    public static final String KMD = "_kmd";
+    public static final String LMT = "lmt";
+    public static final String ECT = "ect";
 
-    @Key("lmt")
+    @Key(LMT)
     private String lastModifiedTime;
 
-    @Key("ect")
+    @Key(ECT)
     private String entityCreationTime;
 
     public KinveyMetaData(){}
@@ -51,6 +56,26 @@ public class KinveyMetaData extends GenericJson{
         return entityCreationTime;
     }
 
+    public static KinveyMetaData fromMap(Map kmd) {
+        KinveyMetaData metaData = new KinveyMetaData();
+        if (kmd != null) {
+            if (!kmd.containsKey(LMT) || kmd.get(LMT) == null) {
+                metaData.put(LMT, String.format("%tFT%<tTZ",
+                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                System.out.println("LMT_TEST_TEST_TEST");
+            } else {
+                metaData.put(LMT, kmd.get(LMT));
+            }
+            if (!kmd.containsKey(ECT) || kmd.get(ECT) == null) {
+                metaData.put(ECT, String.format("%tFT%<tTZ",
+                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                System.out.println("ECT_TEST_TEST_TEST");
+            } else {
+                metaData.put(ECT, kmd.get(ECT));
+            }
+        }
+        return metaData;
+    }
 
     public static class AccessControlList extends GenericJson{
 

@@ -21,7 +21,6 @@ import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
 import com.google.api.client.util.FieldInfo;
 import com.kinvey.java.model.KinveyMetaData;
-import com.kinvey.java.store.BaseFileStore;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -52,6 +51,8 @@ import io.realm.RealmObjectSchema;
 public abstract class ClassHash {
 
     public static String TTL_FIELD = "__ttl__";
+    private static String ID_FIELD = "_id";
+
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
             add(TTL_FIELD);
@@ -112,7 +113,7 @@ public abstract class ClassHash {
             }  else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
-                        if (!fieldInfo.getName().equals("_id") && !fieldInfo.getName().equals(TTL_FIELD)){
+                        if (!fieldInfo.getName().equals(ID_FIELD) && !fieldInfo.getName().equals(TTL_FIELD)){
                             sb.append(fieldInfo.getName()).append(":").append(c.getName()).append(";");
                         }
 
@@ -121,7 +122,7 @@ public abstract class ClassHash {
                 }
             }
         }
-        sb.append("_id").append(":").append(String.class.getName()).append(";");
+        sb.append(ID_FIELD).append(":").append(String.class.getName()).append(";");
         sb.append(TTL_FIELD).append(":").append(Long.class.getName()).append(";");
 
 
@@ -171,7 +172,7 @@ public abstract class ClassHash {
             } else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
-                        if (!fieldInfo.getName().equals("_id")){
+                        if (!fieldInfo.getName().equals(ID_FIELD)){
                             schema.addField(fieldInfo.getName(), fieldInfo.getType());
                         }
 
@@ -180,12 +181,12 @@ public abstract class ClassHash {
                 }
             }
         }
-        if (!schema.hasField("_id")){
-            schema.addField("_id", String.class, FieldAttribute.PRIMARY_KEY);
+        if (!schema.hasField(ID_FIELD)){
+            schema.addField(ID_FIELD, String.class, FieldAttribute.PRIMARY_KEY);
         }
-        if (!schema.hasField("_kmd") && !name.endsWith("__kmd")){
-            RealmObjectSchema innerScheme = createScheme(name + "__kmd" , realm, KinveyMetaData.class);
-            schema.addRealmObjectField("_kmd", innerScheme);
+        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
+            RealmObjectSchema innerScheme = createScheme(name + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
+            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
 
         if (!schema.hasField(TTL_FIELD)){
@@ -202,39 +203,27 @@ public abstract class ClassHash {
 
         DynamicRealmObject object = null;
 
-        if (obj.containsKey("_id") && obj.get("_id") != null) {
+        if (obj.containsKey(ID_FIELD) && obj.get(ID_FIELD) != null) {
             object = realm.where(name)
-                    .equalTo("_id", (String) obj.get("_id"))
+                    .equalTo(ID_FIELD, (String) obj.get(ID_FIELD))
                     .findFirst();
         } else {
-            obj.put("_id", UUID.randomUUID().toString());
+            obj.put(ID_FIELD, UUID.randomUUID().toString());
         }
 
         if (object == null){
-            object = realm.createObject(name, obj.get("_id"));
+            object = realm.createObject(name, obj.get(ID_FIELD));
         }
 
-        if (obj.containsKey("_kmd")){
-            Map kmd = (Map)obj.get("_kmd");
+        if (obj.containsKey(KinveyMetaData.KMD)){
+            Map kmd = (Map)obj.get(KinveyMetaData.KMD);
             if (kmd != null) {
-                KinveyMetaData metadata = new KinveyMetaData();
-                if (!kmd.containsKey("lmt") || kmd.get("lmt") == null) {
-                    metadata.put("lmt", String.format("%tFT%<tTZ",
-                            Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-                } else {
-                    metadata.put("lmt", kmd.get("lmt"));
-                }
-                if (!kmd.containsKey("ect") || kmd.get("ect") == null) {
-                    metadata.put("ect", String.format("%tFT%<tTZ",
-                            Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-                } else {
-                    metadata.put("ect", kmd.get("ect"));
-                }
-                DynamicRealmObject innerObject = saveData(name + "__kmd",
+                KinveyMetaData metadata = KinveyMetaData.fromMap(kmd);
+                DynamicRealmObject innerObject = saveData(name + "_" + KinveyMetaData.KMD,
                         realm,
                         KinveyMetaData.class,
                         metadata);
-                object.setObject("_kmd", innerObject);
+                object.setObject(KinveyMetaData.KMD, innerObject);
             }
         }
 
@@ -275,7 +264,7 @@ public abstract class ClassHash {
                         (GenericJson) obj.get(fieldInfo.getName()));
                 object.setObject(fieldInfo.getName(), innerObject);
             } else {
-                if (!fieldInfo.getName().equals("_id")) {
+                if (!fieldInfo.getName().equals(ID_FIELD)) {
                     for (Class c : ALLOWED) {
                         if (fieldInfo.getType().equals(c)) {
                             object.set(fieldInfo.getName(), fieldInfo.getValue(obj));
@@ -291,18 +280,18 @@ public abstract class ClassHash {
         }
 
 
-        if (!obj.containsKey("_kmd") && !name.endsWith("__kmd")){
+        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
             KinveyMetaData metadata = new KinveyMetaData();
             metadata.set("lmt", String.format("%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));
             metadata.set("ect", String.format("%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));
 
-            DynamicRealmObject innerObject = saveData(name + "__kmd",
+            DynamicRealmObject innerObject = saveData(name + "_" + KinveyMetaData.KMD,
                     realm,
                     KinveyMetaData.class,
                     metadata);
-            object.setObject("_kmd", innerObject);
+            object.setObject(KinveyMetaData.KMD, innerObject);
         }
 
         return object;
@@ -381,8 +370,8 @@ public abstract class ClassHash {
                 }
 
             }
-            if (!ret.containsKey("_kmd") && dynamic.hasField("_kmd")){
-                ret.put("_kmd", realmToObject(dynamic.getObject("_kmd"), KinveyMetaData.class));
+            if (!ret.containsKey(KinveyMetaData.KMD) && dynamic.hasField(KinveyMetaData.KMD)){
+                ret.put(KinveyMetaData.KMD, realmToObject(dynamic.getObject(KinveyMetaData.KMD), KinveyMetaData.class));
             }
         } catch (InstantiationException e) {
             e.printStackTrace();
