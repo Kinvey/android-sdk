@@ -532,8 +532,15 @@ public class Client<T extends User> extends AbstractClient<T> {
             Preconditions.checkNotNull(properties, "Builder cannot find properties file kinvey.properties in your assets.  Ensure this file exists, containing app.key and app.secret!");
             loadProperties(properties);
 
-            String key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
-            String secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
+            String key;
+            String secret;
+            if (Boolean.valueOf(System.getenv("CI"))) {
+                key = System.getenv("KINVEY_APP_KEY");
+                secret = System.getenv("KINVEY_APP_SECRET");
+            } else {
+                key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
+                secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
+            }
 
             KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(key, secret, new KinveyHeaders(context));
             this.setKinveyClientRequestInitializer(initializer);
@@ -662,8 +669,15 @@ public class Client<T extends User> extends AbstractClient<T> {
             Preconditions.checkNotNull(properties, "properties must be not null");
             loadProperties(properties);
 
-            String key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must not be null");
-            String secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must not be null");
+            String key;
+            String secret;
+            if (Boolean.valueOf(System.getenv("CI"))) {
+                key = System.getenv("KINVEY_APP_KEY");
+                secret = System.getenv("KINVEY_APP_SECRET");
+            } else {
+                key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must not be null");
+                secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must not be null");
+            }
 
             KinveyClientRequestInitializer initializer = new KinveyClientRequestInitializer(key, secret, new KinveyHeaders(context));
             this.setKinveyClientRequestInitializer(initializer);

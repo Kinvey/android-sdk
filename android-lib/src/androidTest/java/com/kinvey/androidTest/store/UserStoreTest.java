@@ -50,8 +50,6 @@ public class UserStoreTest {
     private Client client = null;
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
-    private static final String APP_KEY = "kid_BJZQvUh8-";
-    private static final String APP_SECRET = "829e910da4b54577bb97fe8105722f3c";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
@@ -806,7 +804,7 @@ public class UserStoreTest {
         String redirectURI = "kinveyAuthDemo://";
         String clientId = "clientId";
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(APP_KEY, APP_SECRET, mMockContext).build();
+        client = new Client.Builder(mMockContext).build();
         if (client.isUserLoggedIn()) {
             logout(client);
         }
