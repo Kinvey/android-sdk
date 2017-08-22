@@ -534,9 +534,9 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             String key;
             String secret;
-            if (Boolean.valueOf(System.getenv("CI"))) {
-                key = System.getenv("KINVEY_APP_KEY");
-                secret = System.getenv("KINVEY_APP_SECRET");
+            if (BuildConfig.TRAVIS) {
+                key = BuildConfig.KINVEY_APP_KEY;
+                secret = BuildConfig.KINVEY_APP_SECRET;
             } else {
                 key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
                 secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
@@ -671,9 +671,9 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             String key;
             String secret;
-            if (Boolean.valueOf(System.getenv("CI"))) {
-                key = System.getenv("KINVEY_APP_KEY");
-                secret = System.getenv("KINVEY_APP_SECRET");
+            if (BuildConfig.TRAVIS) {
+                key = BuildConfig.KINVEY_APP_KEY;
+                secret = BuildConfig.KINVEY_APP_SECRET;
             } else {
                 key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must not be null");
                 secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must not be null");
