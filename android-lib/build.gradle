@@ -30,13 +30,13 @@ android {
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ?: "false"
+        buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ? "true" : "false"
         buildConfigField "String", "KINVEY_APP_KEY", System.getenv("KINVEY_APP_KEY") != null ? '"'+System.getenv("KINVEY_APP_KEY")+'"' : ""
         buildConfigField "String", "KINVEY_APP_SECRET", System.getenv("KINVEY_APP_SECRET") != null ? '"'+System.getenv("KINVEY_APP_SECRET")+'"' : ""
     }
     debug {
       testCoverageEnabled true
-      buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ?: "false"
+      buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ? "true" : "false"
       buildConfigField "String", "KINVEY_APP_KEY", System.getenv("KINVEY_APP_KEY") != null ? '"'+System.getenv("KINVEY_APP_KEY")+'"' : ""
       buildConfigField "String", "KINVEY_APP_SECRET", System.getenv("KINVEY_APP_SECRET") != null ? '"'+System.getenv("KINVEY_APP_SECRET")+'"' : ""
     }
