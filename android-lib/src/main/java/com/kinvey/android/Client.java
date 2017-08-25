@@ -107,7 +107,8 @@ public class Client<T extends User> extends AbstractClient<T> {
     private static KinveyHandlerThread kinveyHandlerThread;
     
     private static Client sharedInstance;
-    
+    private byte[] encryptionKey;
+
     /**
      * Protected constructor.  Public AbstractClient.Builder class is used to construct the AbstractClient, so this method shouldn't be
      * called directly.
@@ -125,14 +126,15 @@ public class Client<T extends User> extends AbstractClient<T> {
     protected Client(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl,
                      String servicePath, JsonObjectParser objectParser,
                      KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
-                     BackOffPolicy requestPolicy, Context context) {
+                     BackOffPolicy requestPolicy, byte[] encryptionKey, Context context) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store,
                 requestPolicy);
         Logger.init(new AndroidLogger());
         sharedInstance = this;
         this.context = context;
-        cacheManager = new RealmCacheManager(this);
-        syncCacheManager = new RealmCacheManager("sync_", this);
+        cacheManager = new RealmCacheManager(encryptionKey, this);
+        syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
+        this.encryptionKey = encryptionKey;
     }
 
     public static Client sharedInstance(){
@@ -170,8 +172,8 @@ public class Client<T extends User> extends AbstractClient<T> {
         //clear sync cache
         syncCacheManager.clear();
 
-        cacheManager = new RealmCacheManager(this);
-        syncCacheManager = new RealmCacheManager("sync_", this);
+        cacheManager = new RealmCacheManager(encryptionKey, this);
+        syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
 
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
@@ -444,6 +446,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         private String MICBaseURL;
         private boolean deltaSetCache = false;
         private Class userClass = User.class;
+        private byte[] encryptionKey;
 
         /**
          * creating new HttpTransport with fix for 401 error that rais an exception
@@ -746,20 +749,25 @@ public class Client<T extends User> extends AbstractClient<T> {
             return this;
         }
 
+        public Builder setEncryptionKey(byte[] encryptionKey){
+            this.encryptionKey = encryptionKey;
+            return this;
+        }
+
         /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
          */
         @Override
         public Client build(){
-
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
             Realm.init(context);
             final Client client = new Client(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
-                    getRequestBackoffPolicy(), this.context);
+                    getRequestBackoffPolicy(), this.encryptionKey, this.context);
+
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
             client.setUserClass(userClass);

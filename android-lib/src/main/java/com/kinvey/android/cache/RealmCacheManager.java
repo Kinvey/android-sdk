@@ -44,6 +44,7 @@ import io.realm.RealmSchema;
 public class RealmCacheManager implements ICacheManager {
 
     private static final String TABLE_HASH_NAME = "__KinveyTables__";
+    private byte[] encryptionKey;
     private final AbstractClient client;
     private final Context context;
     private String prefix = "";
@@ -54,12 +55,14 @@ public class RealmCacheManager implements ICacheManager {
     private static final Object LOCK = new Object();
 
 
-    public RealmCacheManager(Client client){
+    public RealmCacheManager(byte[] encryptionKey, Client client){
+        this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(String prefix, Client client){
+    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client){
+        this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
@@ -198,9 +201,16 @@ public class RealmCacheManager implements ICacheManager {
 
     private RealmConfiguration getRealmConfiguration() {
         if (realmConfiguration == null) {
-            realmConfiguration = new RealmConfiguration.Builder()
-                    .name(prefix + "_" + getClientHash())
-                    .build();
+            if (encryptionKey != null) {
+                realmConfiguration = new RealmConfiguration.Builder()
+                        .name(prefix + "_" + getClientHash())
+                        .encryptionKey(encryptionKey)
+                        .build();
+            } else {
+                realmConfiguration = new RealmConfiguration.Builder()
+                        .name(prefix + "_" + getClientHash())
+                        .build();
+            }
         }
         return realmConfiguration;
     }
