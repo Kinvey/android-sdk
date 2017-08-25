@@ -67,6 +67,16 @@ public class RealmCacheManager implements ICacheManager {
         this.context = client.getContext();
     }
 
+    public RealmCacheManager(Client client){
+        this.client = client;
+        this.context = client.getContext();
+    }
+
+    public RealmCacheManager(String prefix, Client client){
+        this.client = client;
+        this.context = client.getContext();
+    }
+
 
     @Override
     public <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl) {
