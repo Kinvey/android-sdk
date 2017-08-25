@@ -37,6 +37,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
+import io.realm.exceptions.RealmFileException;
 
 /**
  * Created by Prots on 1/26/16.
@@ -203,7 +204,12 @@ public class RealmCacheManager implements ICacheManager {
     DynamicRealm getDynamicRealm(){
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
-            DynamicRealm realm = DynamicRealm.getInstance(getRealmConfiguration());
+            DynamicRealm realm;
+            try {
+                realm = DynamicRealm.getInstance(getRealmConfiguration());
+            } catch (RealmFileException exception) {
+                throw new KinveyException("Access Error", "Use correct encryption key", "You are using wrong encryption key");
+            }
             init(realm);
             return realm;
         }

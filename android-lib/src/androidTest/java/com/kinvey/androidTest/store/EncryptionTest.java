@@ -12,6 +12,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.store.StoreType;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.realm.exceptions.RealmFileException;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -154,14 +156,14 @@ public class EncryptionTest {
         assertNull(saveCallback.error);
 
         Client clientWithoutEncryption = new Client.Builder(mContext).build();
-        RealmFileException fileException = null;
+        KinveyException fileException = null;
         try {
             DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, clientWithoutEncryption);
-        } catch (RealmFileException exception) {
+        } catch (KinveyException exception) {
             fileException = exception;
         }
         assertNotNull(fileException);
-
+        assertEquals(fileException.getReason(), "Access Error");
     }
 
     private UserKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
