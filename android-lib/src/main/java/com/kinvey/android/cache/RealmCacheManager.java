@@ -200,7 +200,6 @@ public class RealmCacheManager implements ICacheManager {
     /**
      * get Prepared DynamicRealm since realm object can not be shared between threads
      */
-
     DynamicRealm getDynamicRealm(){
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
@@ -208,7 +207,11 @@ public class RealmCacheManager implements ICacheManager {
             try {
                 realm = DynamicRealm.getInstance(getRealmConfiguration());
             } catch (RealmFileException exception) {
-                throw new KinveyException("Access Error", "Use correct encryption key", "You are using wrong encryption key");
+                if (exception.getKind() != null && exception.getKind().name().equals("ACCESS_ERROR")) {
+                    throw new KinveyException("Access Error", "Use correct encryption key", "You are using wrong encryption key");
+                } else {
+                   throw exception;
+                }
             }
             init(realm);
             return realm;
