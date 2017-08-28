@@ -13,7 +13,6 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.store.StoreType;
 
@@ -26,14 +25,9 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import io.realm.exceptions.RealmFileException;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -46,7 +40,8 @@ public class EncryptionTest {
 
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
-    
+    private static final String ACCESS_ERROR = "Access Error";
+
     private Client client;
     private Context mContext;
 
@@ -163,7 +158,34 @@ public class EncryptionTest {
             fileException = exception;
         }
         assertNotNull(fileException);
-        assertEquals(fileException.getReason(), "Access Error");
+        assertEquals(fileException.getReason(), ACCESS_ERROR);
+    }
+
+    @Test
+    public void testClientsWithAndWithoutEncryptionSimultaneously() throws InterruptedException {
+        byte[] key = new byte[64];
+        new SecureRandom().nextBytes(key);
+        client = new Client.Builder(mContext).setEncryptionKey(key).build();
+        UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person = createPerson(USERNAME);
+        PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
+        Assert.assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Client clientWithoutEncryption = new Client.Builder(mContext).build();
+        KinveyException fileException = null;
+        DataStore<Person> otherStore = null;
+        try {
+            otherStore = DataStore.collection(Person.COLLECTION + "_OTHER", Person.class, StoreType.SYNC, clientWithoutEncryption);
+        } catch (KinveyException exception) {
+            fileException = exception;
+        }
+        assertNull(otherStore);
+        assertNotNull(fileException);
+        assertEquals(fileException.getReason(), ACCESS_ERROR);
     }
 
     private UserKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
