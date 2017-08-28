@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.store;
 
 import android.content.Context;
-import android.os.Looper;
+import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
@@ -11,6 +11,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
+import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -191,9 +192,8 @@ public class EncryptionTest {
     private UserKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final UserKinveyClientCallback callback = new UserKinveyClientCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
             public void run() {
-                Looper.prepare();
                 if (!client.isUserLoggedIn()) {
                     try {
                         UserStore.login(userName, password, client, callback);
@@ -203,38 +203,39 @@ public class EncryptionTest {
                 } else {
                     callback.onSuccess(client.getActiveUser());
                 }
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
     private PersonKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final PersonKinveyClientCallback callback = new PersonKinveyClientCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
             public void run() {
-                Looper.prepare();
                 store.save(person, callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
     private PersonKinveyClientCallback find(final DataStore<Person> store, final String id) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final PersonKinveyClientCallback callback = new PersonKinveyClientCallback(latch);
-        new Thread(new Runnable() {
+        LooperThread looperThread = new LooperThread(new Runnable() {
             public void run() {
-                Looper.prepare();
                 store.find(id, callback);
-                Looper.loop();
             }
-        }).start();
+        });
+        looperThread.start();
         latch.await();
+        looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
 
