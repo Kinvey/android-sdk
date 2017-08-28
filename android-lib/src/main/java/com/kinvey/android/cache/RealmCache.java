@@ -58,7 +58,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         List<T> ret = new ArrayList<T>();
         try {
             RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
-                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
+                    .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
             QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
             RealmResults<DynamicRealmObject> objects = null;
@@ -158,7 +158,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
-                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
+                    .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
             if (iterator.hasNext()) {
@@ -192,7 +192,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             mRealm.beginTransaction();
             DynamicRealmObject obj = mRealm.where(mCollection)
                     .equalTo("_id", id)
-                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis())
+                    .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .findFirst();
              ret = obj == null ? null : ClassHash.realmToObject(obj, mCollectionItemClass);
             mRealm.commitTransaction();
@@ -212,7 +212,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
-                    .greaterThanOrEqualTo(ClassHash.TTL_FIELD, Calendar.getInstance().getTimeInMillis());
+                    .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
 
             RealmResults<DynamicRealmObject> objects = query
                     .findAll();
@@ -431,7 +431,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     private String insertOrUpdate(T item, DynamicRealm mRealm){
 
         T clone = (T)item.clone();
-        clone.put(ClassHash.TTL_FIELD, getItemExpireTime());
+        clone.put(ClassHash.TTL, getItemExpireTime());
 
         ClassHash.saveData(mCollection, mRealm, mCollectionItemClass, clone);
 
