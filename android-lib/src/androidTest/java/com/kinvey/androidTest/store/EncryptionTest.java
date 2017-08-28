@@ -10,6 +10,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
+import com.kinvey.android.store.FileStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
@@ -127,7 +128,6 @@ public class EncryptionTest {
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
-
         Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
         DataStore<Person> notEncryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, secondClient);
         PersonKinveyClientCallback findCallback = find(notEncryptedStore, saveCallback.result.getId());
@@ -150,7 +150,6 @@ public class EncryptionTest {
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
-
         Client clientWithoutEncryption = new Client.Builder(mContext).build();
         KinveyException fileException = null;
         try {
@@ -163,7 +162,7 @@ public class EncryptionTest {
     }
 
     @Test
-    public void testClientsWithAndWithoutEncryptionSimultaneously() throws InterruptedException {
+    public void testDataStoresWithAndWithoutEncryptionInOneClient() throws InterruptedException {
         byte[] key = new byte[64];
         new SecureRandom().nextBytes(key);
         client = new Client.Builder(mContext).setEncryptionKey(key).build();
@@ -175,18 +174,73 @@ public class EncryptionTest {
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
-
         Client clientWithoutEncryption = new Client.Builder(mContext).build();
-        KinveyException fileException = null;
+        KinveyException kinveyException = null;
         DataStore<Person> otherStore = null;
         try {
             otherStore = DataStore.collection(Person.COLLECTION + "_OTHER", Person.class, StoreType.SYNC, clientWithoutEncryption);
         } catch (KinveyException exception) {
-            fileException = exception;
+            kinveyException = exception;
         }
         assertNull(otherStore);
-        assertNotNull(fileException);
-        assertEquals(fileException.getReason(), ACCESS_ERROR);
+        assertNotNull(kinveyException);
+        assertEquals(kinveyException.getReason(), ACCESS_ERROR);
+    }
+
+    @Test
+    public void testDataStoresDecryption() throws InterruptedException {
+        byte[] key = new byte[64];
+        new SecureRandom().nextBytes(key);
+        client = new Client.Builder(mContext).setEncryptionKey(key).build();
+        UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person = createPerson(USERNAME);
+        PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
+        Assert.assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
+        DataStore<Person> otherStore = DataStore.collection(Person.COLLECTION + "_OTHER", Person.class, StoreType.SYNC, secondClient);
+        assertNotNull(otherStore);
+    }
+
+    @Test
+    public void testFileStoreCreatingWithEncryption() {
+        byte[] key = new byte[64];
+        new SecureRandom().nextBytes(key);
+        client = new Client.Builder(mContext).setEncryptionKey(key).build();
+        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        assertNotNull(fileStore);
+    }
+
+    @Test
+    public void testFileStoresWithAndWithoutEncryptionInOneClient() {
+        byte[] key = new byte[64];
+        new SecureRandom().nextBytes(key);
+        client = new Client.Builder(mContext).setEncryptionKey(key).build();
+        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        assertNotNull(fileStore);
+        Client clientWithoutEncryption = new Client.Builder(mContext).build();
+        KinveyException kinveyException = null;
+        try {
+            clientWithoutEncryption.getFileStore(StoreType.SYNC);
+        } catch (KinveyException exception) {
+            kinveyException = exception;
+        }
+        assertNotNull(kinveyException);
+    }
+
+    @Test
+    public void testFileStoresDecryption() throws InterruptedException {
+        byte[] key = new byte[64];
+        new SecureRandom().nextBytes(key);
+        client = new Client.Builder(mContext).setEncryptionKey(key).build();
+        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        assertNotNull(fileStore);
+        Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
+        FileStore secondFileStore = secondClient.getFileStore(StoreType.SYNC);
+        assertNotNull(secondFileStore);
     }
 
     private UserKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
