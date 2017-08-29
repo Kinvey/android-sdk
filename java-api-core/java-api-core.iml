@@ -46,9 +46,9 @@
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-all-1.9.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.1" level="project" />
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
+    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
     <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
   </component>
 </module>

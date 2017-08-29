@@ -7,7 +7,6 @@ build/
 .classpath
 .metadata/
 .recommenders/
-gradle.properties
 release/zipped
 .idea
 .gradle/
