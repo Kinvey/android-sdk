@@ -40,6 +40,7 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -470,7 +471,36 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
         new SaveRequest(entity, callback).execute();
+    }
 
+    /**
+     * Asynchronous request to save or update an list of entities to a collection.
+     * <p>
+     * Constructs an asynchronous request to save a list of entities <T> to a collection.
+     * Creates the entity if it doesn't exist, updates it if it does exist.
+     * If an "_id" property is not present, the Kinvey backend will generate one.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     *     myAppData.save(entities, new KinveyClientCallback<List<EventEntity>> {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(List<EventEntity> entities) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param entities The list of entities to save
+     * @param callback KinveyClientCallback<List<T>>
+     */
+    public void save(List<T> entities, KinveyClientCallback<List<T>> callback)  {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(entities, "Entity cannot be null.");
+        new SaveListRequest(entities, callback).execute();
     }
 
     /**
@@ -776,6 +806,20 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         @Override
         protected T executeAsync() throws IOException {
             return (DataStore.super.save(entity));
+        }
+    }
+
+    private class SaveListRequest extends AsyncClientRequest<List<T>> {
+        List<T> entities;
+
+        SaveListRequest(List<T> entities, KinveyClientCallback<List<T>> callback) {
+            super(callback);
+            this.entities = entities;
+        }
+
+        @Override
+        protected List<T> executeAsync() throws IOException {
+            return (DataStore.super.save(entities));
         }
     }
 

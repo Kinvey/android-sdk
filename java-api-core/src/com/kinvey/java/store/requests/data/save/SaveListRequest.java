@@ -52,10 +52,18 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
     @Override
     public List<T> execute() throws IOException {
         List<T> ret = new ArrayList<T>();
-        for (T obj : objects){
-            SaveRequest<T> save = new SaveRequest<T>(
-                    cache, networkManager , writePolicy, obj, syncManager);
-            ret.add(save.execute());
+        if (writePolicy == WritePolicy.FORCE_LOCAL) {
+            ret = cache.save(objects);
+            for (T obj : ret){
+                syncManager.enqueueRequest(networkManager.getCollectionName(),
+                        networkManager.saveBlocking(obj));
+            }
+        } else {
+            for (T obj : objects){
+                SaveRequest<T> save = new SaveRequest<T>(
+                        cache, networkManager , writePolicy, obj, syncManager);
+                ret.add(save.execute());
+            }
         }
         return ret;
     }
