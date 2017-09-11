@@ -81,7 +81,7 @@ public class KinveyMetaData extends GenericJson{
 
         @Key
         private String creator;
-        @Key("gr")
+ /*       @Key("gr")
         private boolean globallyReadable;
         @Key("gw")
         private boolean globallyWriteable;
@@ -119,7 +119,7 @@ public class KinveyMetaData extends GenericJson{
         }
 
 
-        public AccessControlList(){}
+
 
         public boolean isGloballyReadable() {
             return globallyReadable;
@@ -159,7 +159,9 @@ public class KinveyMetaData extends GenericJson{
 
         public void setGroups(ArrayList<AclGroups> groups) {
             this.groups = groups;
-        }
+        }*/
+
+        public AccessControlList(){}
 
         public String getCreator() {
             return creator;

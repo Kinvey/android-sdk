@@ -918,9 +918,9 @@ public class DataStoreTest {
     private void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNull(syncCallback.error);
-        Query query = client.query();
-        query = query.notEqual("age", "100500");
-        DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
+//        Query query = client.query();
+//        query = query.notEqual("age", "100500");
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, new Query().notEqual("age", "100500"));
         assertNull(deleteCallback.error);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);

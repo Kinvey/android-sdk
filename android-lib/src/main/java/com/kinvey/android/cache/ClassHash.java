@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
 import com.google.api.client.util.FieldInfo;
+import com.kinvey.android.Client;
 import com.kinvey.java.model.KinveyMetaData;
 
 import java.lang.reflect.Array;
@@ -149,25 +150,31 @@ public abstract class ClassHash {
 
 
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
+        RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz);
+        if (!schema.hasField(KinveyMetaData.AccessControlList.JSON_FIELD_NAME) && !name.endsWith("_" + KinveyMetaData.AccessControlList.JSON_FIELD_NAME)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + KinveyMetaData.AccessControlList.JSON_FIELD_NAME , realm, KinveyMetaData.AccessControlList.class);
+            schema.addRealmObjectField(KinveyMetaData.AccessControlList.JSON_FIELD_NAME, innerScheme);
+        }
+        return schema;
+    }
+
+
+    private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
         RealmObjectSchema schema = realm.getSchema().create(name);
-
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
-
         for (Field f : fields){
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
                 continue;
             }
             if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())){
-
                 Class underlying = getUnderlying(f);
-
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
+                    RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
                     schema.addRealmListField(fieldInfo.getName(), innerScheme);
                 }
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
-                RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
+                RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
                 schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
             } else {
                 for (Class c : ALLOWED) {
@@ -181,21 +188,23 @@ public abstract class ClassHash {
                 }
             }
         }
+
         if (!schema.hasField(ID)){
             schema.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
-        }
-        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
-            RealmObjectSchema innerScheme = createScheme(name + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
-            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
 
         if (!schema.hasField(TTL)){
             schema.addField(TTL, Long.class);
         }
 
-        return schema;
+        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
+            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
+        }
 
+        return schema;
     }
+
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
 
