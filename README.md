@@ -49,6 +49,19 @@ After these steps .zip with generated .aar and .jar files should be in the direc
 ```
 ./gradlew test jacocoTestReport
 ```
+
+### Test
+Before running the tests:
+
+ * Connect android device or start emulator with min SDK version 15
+ * Add app.key and app.secret to android-lib/src/androidTest/assets/kinvey.properties
+ * Create User with username: test password: test in your console app
+ * Custom endpoints tests and Social networks tests should be configured additionally 
+
+```
+./gradlew connectedAndroidTest --info
+```
+
 ### Regenerate Javadocs
 
 ```
@@ -124,3 +137,5 @@ Push to origin master
     See the License for the specific language governing permissions and
     limitations under the License.
 
+## Contribute
+See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIBUTING.md) for details on reporting bugs and making contributions.
