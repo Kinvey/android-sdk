@@ -14,9 +14,6 @@ import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
-import com.kinvey.android.sync.KinveyPullResponse;
-import com.kinvey.android.sync.KinveyPushResponse;
-import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
@@ -25,6 +22,7 @@ import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,7 +41,6 @@ public class QueryWithRealDataTest {
 
     private static final String TEST_USERNAME = "Test_UserName";
     private static final String TEST_TEMP_USERNAME = "Temp_UserName";
-    private static final String USERNAME = "username";
 
     private Client client;
 
@@ -101,54 +98,7 @@ public class QueryWithRealDataTest {
         }
     }
 
-    private static class DefaultKinveySyncCallback implements KinveySyncCallback<Person> {
 
-        private CountDownLatch latch;
-        KinveyPushResponse kinveyPushResponse;
-        KinveyPullResponse<Person> kinveyPullResponse;
-        Throwable error;
-
-        DefaultKinveySyncCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<Person> kinveyPullResponse) {
-            this.kinveyPushResponse = kinveyPushResponse;
-            this.kinveyPullResponse = kinveyPullResponse;
-            finish();
-        }
-
-        @Override
-        public void onPullStarted() {
-
-        }
-
-        @Override
-        public void onPushStarted() {
-
-        }
-
-        @Override
-        public void onPullSuccess(KinveyPullResponse<Person> kinveyPullResponse) {
-            this.kinveyPullResponse = kinveyPullResponse;
-        }
-
-        @Override
-        public void onPushSuccess(KinveyPushResponse kinveyPushResponse) {
-            this.kinveyPushResponse = kinveyPushResponse;
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        void finish() {
-            latch.countDown();
-        }
-    }
 
     @Before
     public void setUp() throws InterruptedException, IOException {
@@ -189,18 +139,75 @@ public class QueryWithRealDataTest {
         }
     }
 
+
     @Test
-    public void testACLIn() throws InterruptedException, IOException {
+    @Ignore
+    public void testACLInNETWORK() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        Person person = createPerson(TEST_TEMP_USERNAME);
         for (int i = 0; i < 3; i++) {
-            store.save(person);
+            store.save(createPerson(TEST_TEMP_USERNAME));
         }
         Query query = new Query();
         query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
-
         DefaultKinveyListCallback findCallback = find(store, query);
+        delete(store, client.query().notEqual("name", "no_exist_field"));
+        assertTrue(findCallback.result.size() == 3);
+    }
+
+    @Test
+    public void testACLInSYNC() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        for (int i = 0; i < 3; i++) {
+            store.save(createPerson(TEST_TEMP_USERNAME));
+        }
+        Query query = new Query();
+        query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
+        DefaultKinveyListCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.size() == 3);
+    }
+
+    @Test
+    public void testACLInOneParameterForQuery() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        for (int i = 0; i < 3; i++) {
+            store.save(createPerson(TEST_TEMP_USERNAME));
+        }
+        store.save(createPerson(TEST_USERNAME));
+        Query query = new Query();
+        query.in("username", new String[]{TEST_TEMP_USERNAME});
+        DefaultKinveyListCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.size() == 3);
+    }
+
+    @Test
+    public void testACLInTwoParametersForQuery() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        for (int i = 0; i < 3; i++) {
+            store.save(createPerson(TEST_TEMP_USERNAME));
+        }
+        store.save(createPerson(TEST_USERNAME));
+        Query query = new Query();
+        query.in("username", new String[]{TEST_TEMP_USERNAME, TEST_USERNAME});
+        DefaultKinveyListCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.size() == 4);
+    }
+
+    @Test
+    @Ignore
+    public void testACLInCACHE() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        for (int i = 0; i < 3; i++) {
+            store.save(createPerson(TEST_TEMP_USERNAME));
+        }
+        Query query = new Query();
+        query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
+        DefaultKinveyListCallback findCallback = find(store, query);
+        delete(store, client.query().notEqual("name", "no_exist_field"));
         assertTrue(findCallback.result.size() == 3);
     }
 
@@ -208,21 +215,6 @@ public class QueryWithRealDataTest {
         Person person = new Person();
         person.setUsername(name);
         return person;
-    }
-
-    private DefaultKinveySyncCallback sync(final DataStore<Person> store, int seconds) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
-        LooperThread looperThread = new LooperThread(new Runnable() {
-            @Override
-            public void run() {
-                store.sync(callback);
-            }
-        });
-        looperThread.start();
-        latch.await(seconds, TimeUnit.SECONDS);
-        looperThread.mHandler.sendMessage(new Message());
-        return callback;
     }
 
     private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
@@ -240,20 +232,21 @@ public class QueryWithRealDataTest {
         return callback;
     }
 
-    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final String id, int seconds) throws InterruptedException {
+    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.delete(id, callback);
+                store.delete(query, callback);
             }
         });
         looperThread.start();
-        latch.await(seconds, TimeUnit.SECONDS);
+        latch.await(120, TimeUnit.SECONDS);
         looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
+
 
     @After
     public void tearDown() {
