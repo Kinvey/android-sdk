@@ -18,6 +18,7 @@ package com.kinvey.java.model;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.java.AbstractClient;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,28 +79,34 @@ public class KinveyMetaData extends GenericJson{
     public static class AccessControlList extends GenericJson{
 
         public static final String JSON_FIELD_NAME = "_acl";
+        public static final String ACL = "_acl";
+        private static final String CREATOR = "creator";
+        private static final String GR = "gr";
+        private static final String GW = "gw";
+        private static final String R = "r";
+        private static final String W = "w";
+        private static final String GROUPS = "groups";
 
-        @Key
+        @Key(CREATOR)
         private String creator;
-        @Key("gr")
+        @Key(GR)
         private boolean globallyReadable;
-        @Key("gw")
+        @Key(GW)
         private boolean globallyWriteable;
-        @Key("r")
+        @Key(R)
         private ArrayList<String> read;
-        @Key("w")
+        @Key(W)
         private ArrayList<String> write;
-        @Key("groups")
+        @Key(GROUPS)
         private ArrayList<AclGroups> groups;
 
         public static class AclGroups extends GenericJson {
-            @Key("r")
+            @Key(R)
             String read;
-            @Key("w")
+            @Key(W)
             String write;
 
             public AclGroups(){}
-
 
             public String getRead() {
                 return read;
@@ -118,8 +125,32 @@ public class KinveyMetaData extends GenericJson{
             }
         }
 
-
-        public AccessControlList(){}
+        public static AccessControlList fromMap(Map acl) {
+            AccessControlList accessControlList = new AccessControlList();
+            if (acl != null) {
+                if (!acl.containsKey(CREATOR) || acl.get(CREATOR) == null) {
+                    accessControlList.put(CREATOR, AbstractClient.sharedInstance().getActiveUser().getId());
+                } else {
+                    accessControlList.put(CREATOR, acl.get(CREATOR));
+                }
+                if (acl.containsKey(GR) && acl.get(GR) != null) {
+                    accessControlList.put(GR, acl.get(GR));
+                }
+                if (acl.containsKey(GW) && acl.get(GW) != null) {
+                    accessControlList.put(GW, acl.get(GW));
+                }
+                if (acl.containsKey(R) && acl.get(R) != null) {
+                    accessControlList.put(R, acl.get(R));
+                }
+                if (acl.containsKey(W) && acl.get(W) != null) {
+                    accessControlList.put(W, acl.get(W));
+                }
+                if (acl.containsKey(GROUPS) && acl.get(GROUPS) != null) {
+                    accessControlList.put(GROUPS, acl.get(GROUPS));
+                }
+            }
+            return accessControlList;
+        }
 
         public boolean isGloballyReadable() {
             return globallyReadable;
@@ -160,6 +191,8 @@ public class KinveyMetaData extends GenericJson{
         public void setGroups(ArrayList<AclGroups> groups) {
             this.groups = groups;
         }
+
+        public AccessControlList(){}
 
         public String getCreator() {
             return creator;
