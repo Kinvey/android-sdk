@@ -3,6 +3,7 @@ package com.kinvey.androidTest.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
+import java.util.List;
 
 public class Person extends GenericJson{
 
@@ -21,6 +22,9 @@ public class Person extends GenericJson{
 
     @Key("username")
     private String username;
+
+    @Key("phones")
+    private List<String> phones;
 
     public String getAge() {
         return age;
@@ -44,5 +48,13 @@ public class Person extends GenericJson{
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public List<String> getPhones() {
+        return phones;
+    }
+
+    public void setPhones(List<String> phones) {
+        this.phones = phones;
     }
 }
