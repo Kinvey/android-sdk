@@ -17,6 +17,8 @@
 package com.kinvey.android.cache;
 
 
+import android.util.Log;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -30,6 +32,8 @@ import io.realm.RealmQuery;
 public abstract class QueryHelper {
 
     public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Map<String, Object> queryMap){
+        Log.d(QueryHelper.class.getName(), queryMap.toString());
+        Log.d(QueryHelper.class.getName(), realmQuery.toString());
         for (Map.Entry<String, Object> entity : queryMap.entrySet()){
             String field = entity.getKey();
             Object params = entity.getValue();
@@ -61,7 +65,7 @@ public abstract class QueryHelper {
                         in(realmQuery, field, paramMap.getValue());
                     } else if (operation.equalsIgnoreCase("$nin")) {
                         realmQuery.beginGroup().not();
-                        in(realmQuery, field, paramMap.getValue());
+                        newIn(realmQuery, field, paramMap.getValue());
                         realmQuery.endGroup();
                     } else if (operation.equalsIgnoreCase("$gt")){
                         gt(realmQuery, field, paramMap.getValue());
@@ -116,6 +120,19 @@ public abstract class QueryHelper {
             }
             query.endGroup();
         }
+    }
+
+    private static void newIn(RealmQuery query,  String field, Object params){
+        query.beginGroup();
+        if (params.getClass().isArray()) {
+            String[] components = (String[]) params;
+            if (components.length > 0) {
+                query.beginGroup();
+                query.in(field, components);
+                query.endGroup();
+            }
+        }
+        query.endGroup();
     }
 
     private static void gt(RealmQuery query, String field, Object param){

@@ -16,6 +16,8 @@
 
 package com.kinvey.android.cache;
 
+import android.util.Log;
+
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
@@ -162,10 +164,22 @@ public abstract class ClassHash {
 
                 Class underlying = getUnderlying(f);
 
+                Log.d("ClassHash", "underlying " + underlying.toString());
+                Log.d("ClassHash", "underlying != null: " + (underlying != null));
+                Log.d("ClassHash", "GenericJson.class.isAssignableFrom(underlying): " + GenericJson.class.isAssignableFrom(underlying));
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
                     RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
                     schema.addRealmListField(fieldInfo.getName(), innerScheme);
+                } else {
+                    for (Class c : ALLOWED) {
+                        if (underlying.equals(c)) {
+                            RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
+                            schema.addRealmListField(fieldInfo.getName(), innerScheme);
+                            break;
+                        }
+                    }
                 }
+
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
                 RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
                 schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
@@ -233,9 +247,18 @@ public abstract class ClassHash {
             if (fieldInfo == null){
                 continue;
             }
-            if (isArrayOrCollection(f.getType()) && fieldInfo.getValue(obj) != null){
+
+            Log.d(ClassHash.class.getName(), "isArrayOrCollection: " + isArrayOrCollection(f.getType()));
+
+            Log.d(ClassHash.class.getName(), "fieldInfo.getValue(obj) != null: " + (fieldInfo.getValue(obj) != null)); //it was
+            Log.d(ClassHash.class.getName(), "obj.get(fieldInfo.getName()) != null: " + (obj.get(fieldInfo.getName()) != null)); // 1th variant
+
+
+            if (isArrayOrCollection(f.getType()) && fieldInfo.getValue(obj) != null) {
                 Class underlying = getUnderlying(f);
-                if (GenericJson.class.isAssignableFrom(underlying)){
+                Log.d(ClassHash.class.getName(), "underlying: " + underlying);
+                Log.d(ClassHash.class.getName(), "f: " + f);
+                if (GenericJson.class.isAssignableFrom(underlying)) {
                     RealmList list = new RealmList();
                     Object collection = fieldInfo.getValue(obj);
                     if (f.getType().isArray()){
