@@ -128,9 +128,10 @@ public class CacheRealDataTest {
         phones2.add("567483912");
         person2.setPhones(phones2);
 
-        DefaultKinveyClientCallback callback = testManager.save(store, person);
-        assertNotNull(callback.getResult());
-        assertNotNull(callback.getResult().getPhones());
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult().getPhones());
         Query query = new Query().in(PHONES_FIELD, new String[]{TEST_PHONE});
         DefaultKinveyListCallback findCallback = testManager.find(store, query);
         assertNotNull(findCallback.getResult());
