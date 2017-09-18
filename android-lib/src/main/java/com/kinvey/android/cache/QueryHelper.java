@@ -65,7 +65,7 @@ public abstract class QueryHelper {
                         in(realmQuery, field, paramMap.getValue());
                     } else if (operation.equalsIgnoreCase("$nin")) {
                         realmQuery.beginGroup().not();
-                        newIn(realmQuery, field, paramMap.getValue());
+                        in(realmQuery, field, paramMap.getValue());
                         realmQuery.endGroup();
                     } else if (operation.equalsIgnoreCase("$gt")){
                         gt(realmQuery, field, paramMap.getValue());

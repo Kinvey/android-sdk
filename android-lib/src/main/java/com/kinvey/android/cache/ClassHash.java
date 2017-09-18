@@ -16,8 +16,6 @@
 
 package com.kinvey.android.cache;
 
-import android.util.Log;
-
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.Data;
@@ -54,6 +52,7 @@ public abstract class ClassHash {
 
     public static String TTL = "__ttl__";
     private static String ID = "_id";
+    private static String ITEMS = "_items";
 
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
@@ -164,16 +163,17 @@ public abstract class ClassHash {
 
                 Class underlying = getUnderlying(f);
 
-                Log.d("ClassHash", "underlying " + underlying.toString());
-                Log.d("ClassHash", "underlying != null: " + (underlying != null));
-                Log.d("ClassHash", "GenericJson.class.isAssignableFrom(underlying): " + GenericJson.class.isAssignableFrom(underlying));
-                if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
+                if (GenericJson.class.isAssignableFrom(underlying)){
                     RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
                     schema.addRealmListField(fieldInfo.getName(), innerScheme);
                 } else {
                     for (Class c : ALLOWED) {
                         if (underlying.equals(c)) {
-                            RealmObjectSchema innerScheme = createScheme(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
+                            RealmObjectSchema innerScheme = realm.getSchema().create(name + "_" + fieldInfo.getName());
+                            if (!innerScheme.hasField(ID)){
+                                innerScheme.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
+                            }
+                            innerScheme.addField(fieldInfo.getName() + ITEMS, underlying);
                             schema.addRealmListField(fieldInfo.getName(), innerScheme);
                             break;
                         }
@@ -248,17 +248,9 @@ public abstract class ClassHash {
                 continue;
             }
 
-            Log.d(ClassHash.class.getName(), "isArrayOrCollection: " + isArrayOrCollection(f.getType()));
-
-            Log.d(ClassHash.class.getName(), "fieldInfo.getValue(obj) != null: " + (fieldInfo.getValue(obj) != null)); //it was
-            Log.d(ClassHash.class.getName(), "obj.get(fieldInfo.getName()) != null: " + (obj.get(fieldInfo.getName()) != null)); // 1th variant
-
 
             if (isArrayOrCollection(f.getType()) && fieldInfo.getValue(obj) != null) {
                 Class underlying = getUnderlying(f);
-                Log.d(ClassHash.class.getName(), "underlying: " + underlying);
-                Log.d(ClassHash.class.getName(), "f: " + f);
-                if (GenericJson.class.isAssignableFrom(underlying)) {
                     RealmList list = new RealmList();
                     Object collection = fieldInfo.getValue(obj);
                     if (f.getType().isArray()){
@@ -269,16 +261,32 @@ public abstract class ClassHash {
                                     (GenericJson) Array.get(collection, i)));
                         }
                     } else {
-                        for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
-                            list.add(saveData(name + "_" + fieldInfo.getName(),
-                                    realm,
-                                    (Class<? extends GenericJson>) underlying,
-                                    genericJson));
+                        if (GenericJson.class.isAssignableFrom(underlying)) {
+                            for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
+                                list.add(saveData(name + "_" + fieldInfo.getName(),
+                                        realm,
+                                        (Class<? extends GenericJson>) underlying,
+                                        genericJson));
+                            }
+                        } else {
+                            DynamicRealmObject dynamicRealmObject = null;
+                            for (Object o : (Collection)collection) {
+                                dynamicRealmObject = realm.createObject(name + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
+
+                                for (Class c : ALLOWED) {
+                                    if (underlying.equals(c)) {
+
+                                        dynamicRealmObject.set(fieldInfo.getName() + ITEMS,  o);
+                                        break;
+                                    }
+                                }
+
+                                list.add(dynamicRealmObject);
+                            }
                         }
                     }
                     object.setList(fieldInfo.getName(), list);
 
-                }
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) && fieldInfo.getValue(obj) != null){
 
                 DynamicRealmObject innerObject = saveData(name + "_" + fieldInfo.getName(),
@@ -370,9 +378,9 @@ public abstract class ClassHash {
                             (Class<? extends GenericJson>)info.getType()));
                 } else if (isArrayOrCollection(info.getType())){
                     Class underlying = getUnderlying(info.getField());
-                    if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
+                    if (underlying != null){
                         RealmList<DynamicRealmObject> list = dynamic.getList(info.getName());
-                        if (info.getType().isArray()){
+                        if (underlying.isArray() && GenericJson.class.isAssignableFrom(underlying)){
                             GenericJson[] array = (GenericJson[])Array.newInstance(underlying, list.size());
                             for (int i = 0 ; i < list.size(); i++){
                                 array[i] = realmToObject(list.get(i), underlying);
@@ -380,13 +388,18 @@ public abstract class ClassHash {
                             ret.put(info.getName(), array);
                         } else {
                             Collection<Object> c = Data.newCollectionInstance(info.getType());
-                            for (int i = 0 ; i < list.size(); i++){
-                                c.add(realmToObject(list.get(i), underlying));
+                            if (GenericJson.class.isAssignableFrom(underlying)) {
+                                for (int i = 0; i < list.size(); i++) {
+                                    c.add(realmToObject(list.get(i), underlying));
+                                }
+                            } else {
+                                for (int i = 0; i < list.size(); i++) {
+                                    Object object = list.get(i).get(info.getName() + ITEMS);
+                                    c.add(object);
+                                }
                             }
                             ret.put(info.getName(), c);
-
                         }
-
                     }
                 } else {
                     ret.put(info.getName(), o);
