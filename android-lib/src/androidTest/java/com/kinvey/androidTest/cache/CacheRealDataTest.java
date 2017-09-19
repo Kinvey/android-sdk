@@ -36,7 +36,8 @@ import static junit.framework.Assert.assertTrue;
 @SmallTest
 public class CacheRealDataTest {
 
-    private static final String TEST_PHONE = "123456789";
+    private static final String TEST_PHONE_STRING = "123456789";
+    private static final Integer TEST_PHONE_INTEGER = 123456789;
     private static final String PHONES_FIELD = "phones";
 
     private Client client;
@@ -55,9 +56,9 @@ public class CacheRealDataTest {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = testManager.createPerson();
         ArrayList<String> phones = new ArrayList<>();
-        phones.add(TEST_PHONE);
+        phones.add(TEST_PHONE_STRING);
         phones.add("987654321");
-        person.setPhones(phones);
+//        person.setPhones(phones);
         DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
         assertNotNull(saveCallback.getResult());
         assertNotNull(saveCallback.getResult().getPhones());
@@ -69,9 +70,9 @@ public class CacheRealDataTest {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         Person person = testManager.createPerson();
         ArrayList<String> phones = new ArrayList<>();
-        phones.add(TEST_PHONE);
+        phones.add(TEST_PHONE_STRING);
         phones.add("987654321");
-        person.setPhones(phones);
+//        person.setPhones(phones);
         DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
         assertNotNull(saveCallback.getResult());
         assertNotNull(saveCallback.getResult().getPhones());
@@ -85,7 +86,7 @@ public class CacheRealDataTest {
         ArrayList<String> phones = new ArrayList<>();
         phones.add("123456789");
         phones.add("987654321");
-        person.setPhones(phones);
+//        person.setPhones(phones);
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback.getResult());
         assertNotNull(callback.getResult().getPhones());
@@ -103,7 +104,7 @@ public class CacheRealDataTest {
         ArrayList<String> phones = new ArrayList<>();
         phones.add("123456789");
         phones.add("987654321");
-        person.setPhones(phones);
+//        person.setPhones(phones);
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback.getResult());
         assertNotNull(callback.getResult().getPhones());
@@ -114,30 +115,69 @@ public class CacheRealDataTest {
     }
 
     @Test
-    @Ignore // TODO: 18.09.2017 not implemented yet
     public void testInQueryInListField() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = testManager.createPerson();
-        ArrayList<String> phones = new ArrayList<>();
-        phones.add(TEST_PHONE);
-        phones.add("987654321");
+        ArrayList<Integer> phones = new ArrayList<>();
+        phones.add(TEST_PHONE_INTEGER);
+        phones.add(987654321);
         person.setPhones(phones);
+
         Person person2 = testManager.createPerson();
-        ArrayList<String> phones2 = new ArrayList<>();
-        phones2.add(TEST_PHONE);
-        phones2.add("567483912");
+        ArrayList<Integer> phones2 = new ArrayList<>();
+        phones2.add(TEST_PHONE_INTEGER);
+        phones2.add(567483912);
         person2.setPhones(phones2);
 
         DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
         assertNotNull(saveCallback.getResult());
         saveCallback = testManager.save(store, person2);
-        assertNotNull(saveCallback.getResult().getPhones());
-        Query query = new Query().in(PHONES_FIELD, new String[]{TEST_PHONE});
-        DefaultKinveyListCallback findCallback = testManager.find(store, query);
+        assertNotNull(saveCallback.getResult());
+        DefaultKinveyListCallback findCallback;
+        Query query;
+
+        query = new Query().in(PHONES_FIELD, new Integer[]{TEST_PHONE_INTEGER});
+        findCallback = testManager.find(store, query);
         assertNotNull(findCallback.getResult());
         assertTrue(findCallback.getResult().size() == 2);
 
-        query = new Query().in(PHONES_FIELD, new String[]{"987654321"});
+        query = new Query().in(PHONES_FIELD, new Integer[]{987654321});
+        findCallback = testManager.find(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 1);
+    }
+
+    @Test
+    public void testInWithOtherOperators() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person = testManager.createPerson();
+        ArrayList<Integer> phones = new ArrayList<>();
+        phones.add(TEST_PHONE_INTEGER);
+        phones.add(987654321);
+        person.setPhones(phones);
+
+        Person person2 = testManager.createPerson();
+        ArrayList<Integer> phones2 = new ArrayList<>();
+        phones2.add(TEST_PHONE_INTEGER);
+        phones2.add(567483912);
+        person2.setPhones(phones2);
+
+        Person person3 = testManager.createPerson("NEW_PERSON");
+        ArrayList<Integer> phones3 = new ArrayList<>();
+        phones3.add(TEST_PHONE_INTEGER);
+        phones3.add(567483912);
+        person3.setPhones(phones3);
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+        DefaultKinveyListCallback findCallback;
+        Query query;
+
+        query = new Query().in(PHONES_FIELD, new Integer[]{TEST_PHONE_INTEGER}).equals("username", "NEW_PERSON");
         findCallback = testManager.find(store, query);
         assertNotNull(findCallback.getResult());
         assertTrue(findCallback.getResult().size() == 1);
@@ -149,7 +189,7 @@ public class CacheRealDataTest {
     public void testMissingLeftHandSideOfOR() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
 
-        Query query = new Query().in(PHONES_FIELD, new String[]{TEST_PHONE});
+        Query query = new Query().in(PHONES_FIELD, new String[]{TEST_PHONE_STRING});
         DefaultKinveyPullCallback pullCallback = testManager.pull(store, query);
         assertNotNull(pullCallback.getResult());
 

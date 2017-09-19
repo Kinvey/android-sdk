@@ -24,7 +24,7 @@ public class Person extends GenericJson{
     private String username;
 
     @Key("phones")
-    private List<String> phones;
+    private List<Integer> phones;
 
     public String getAge() {
         return age;
@@ -50,11 +50,11 @@ public class Person extends GenericJson{
         this.username = username;
     }
 
-    public List<String> getPhones() {
+    public List<Integer> getPhones() {
         return phones;
     }
 
-    public void setPhones(List<String> phones) {
+    public void setPhones(List<Integer> phones) {
         this.phones = phones;
     }
 }

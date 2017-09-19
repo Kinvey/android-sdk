@@ -22,6 +22,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -74,6 +75,101 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
                 DynamicRealmObject obj = iterator.next();
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+            }
+
+
+            //helper for ".in() operator", because Realm isn't support it
+            for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
+                Object params = entity.getValue();
+                String field = entity.getKey();
+                if (params instanceof Map) {
+                    for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
+                        String operation = paramMap.getKey();
+                        if (operation.equalsIgnoreCase("$in")) {
+                            ArrayList<T> retCopy = new ArrayList<T>(ret);
+                            for (T t: retCopy) {
+                                if (t.get(field) instanceof ArrayList) {
+
+                                    ArrayList arrayList = ((ArrayList) t.get(field));
+                                    Object[] operatorParams = (Object[]) paramMap.getValue();
+
+                                            if (arrayList.size() > 0 && operatorParams.length > 0) {
+                                                Class clazz = ((Object[]) paramMap.getValue())[0].getClass();
+                                                Types types = Types.getType(clazz);
+                                                boolean isExist = false;
+                                                switch (types) {
+                                                    case LONG:
+                                                        ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
+                                                        for (Long lValue : listOfLong) {
+                                                            for (Long l : (Long[])operatorParams) {
+                                                                isExist = l.compareTo(lValue) == 0;
+                                                                if (isExist) {
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if (isExist)
+                                                                break;
+                                                        }
+                                                        if (!isExist) {
+                                                            ret.remove(t);
+                                                        }
+                                                        break;
+                                                    case STRING:
+                                                        if (!arrayList.contains(operatorParams[0])) {
+                                                            ret.remove(t);
+                                                        }
+                                                        for (int i = 1; i < operatorParams.length; i++) {
+                                                            if (!arrayList.contains(operatorParams[i])) {
+                                                                ret.remove(t);
+                                                            }
+                                                        }
+                                                        break;
+                                                    case INTEGER:
+                                                        ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
+                                                        for (Long lValue : listOfInteger) {
+                                                            for (Integer l : (Integer[])operatorParams) {
+                                                                isExist = lValue.compareTo(Long.valueOf(l)) == 0;
+                                                                if (isExist) {
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if (isExist)
+                                                                break;
+                                                        }
+                                                        if (!isExist) {
+                                                            ret.remove(t);
+                                                        }
+                                                        break;
+                                                  /*  case BOOLEAN:
+                                                        ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
+                                                        for (Boolean bValue : listOfBoolean) {
+                                                            for (Boolean l : (Boolean[])operatorParams) {
+                                                                isExist = bValue.compareTo(Bo.valueOf(l)) == 0;
+                                                                if (isExist) {
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if (isExist)
+                                                                break;
+                                                        }
+                                                        if (!isExist) {
+                                                            ret.remove(t);
+                                                        }
+                                                        break;*/
+                                                    default:
+                                                        //todo add some logic
+                                                        break;
+
+                                                }
+
+                                        }
+                                }
+
+                            }
+
+                        }
+                    }
+                }
             }
 
             //own sorting implementation
@@ -454,4 +550,27 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         long currentTime = Calendar.getInstance().getTimeInMillis();
         return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
+
+    private enum Types{
+        STRING,
+        INTEGER,
+        LONG,
+        BOOLEAN,
+        FLOAT,
+        OBJECT; //// TODO: 19.09.2017 check it type 
+
+        private static final String ALL_TYPES_STRING = Arrays.toString(Types.values());
+
+        public static Types getType(Class<?> clazz) {
+            String className = clazz.getSimpleName().toUpperCase();
+            if (ALL_TYPES_STRING.contains(className)) {
+                return Types.valueOf(className);
+            } else {
+                return Types.OBJECT;
+            }
+        }
+    }
+
+
+
 }
