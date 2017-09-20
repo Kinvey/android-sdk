@@ -77,100 +77,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
             }
 
-
-            //helper for ".in() operator", because Realm isn't support it
-            for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
-                Object params = entity.getValue();
-                String field = entity.getKey();
-                if (params instanceof Map) {
-                    for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
-                        String operation = paramMap.getKey();
-                        if (operation.equalsIgnoreCase("$in")) {
-                            ArrayList<T> retCopy = new ArrayList<T>(ret);
-                            for (T t: retCopy) {
-                                if (t.get(field) instanceof ArrayList) {
-
-                                    ArrayList arrayList = ((ArrayList) t.get(field));
-                                    Object[] operatorParams = (Object[]) paramMap.getValue();
-
-                                            if (arrayList.size() > 0 && operatorParams.length > 0) {
-                                                Class clazz = ((Object[]) paramMap.getValue())[0].getClass();
-                                                Types types = Types.getType(clazz);
-                                                boolean isExist = false;
-                                                switch (types) {
-                                                    case LONG:
-                                                        ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
-                                                        for (Long lValue : listOfLong) {
-                                                            for (Long l : (Long[])operatorParams) {
-                                                                isExist = l.compareTo(lValue) == 0;
-                                                                if (isExist) {
-                                                                    break;
-                                                                }
-                                                            }
-                                                            if (isExist)
-                                                                break;
-                                                        }
-                                                        if (!isExist) {
-                                                            ret.remove(t);
-                                                        }
-                                                        break;
-                                                    case STRING:
-                                                        if (!arrayList.contains(operatorParams[0])) {
-                                                            ret.remove(t);
-                                                        }
-                                                        for (int i = 1; i < operatorParams.length; i++) {
-                                                            if (!arrayList.contains(operatorParams[i])) {
-                                                                ret.remove(t);
-                                                            }
-                                                        }
-                                                        break;
-                                                    case INTEGER:
-                                                        ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
-                                                        for (Long lValue : listOfInteger) {
-                                                            for (Integer l : (Integer[])operatorParams) {
-                                                                isExist = lValue.compareTo(Long.valueOf(l)) == 0;
-                                                                if (isExist) {
-                                                                    break;
-                                                                }
-                                                            }
-                                                            if (isExist)
-                                                                break;
-                                                        }
-                                                        if (!isExist) {
-                                                            ret.remove(t);
-                                                        }
-                                                        break;
-                                                  /*  case BOOLEAN:
-                                                        ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
-                                                        for (Boolean bValue : listOfBoolean) {
-                                                            for (Boolean l : (Boolean[])operatorParams) {
-                                                                isExist = bValue.compareTo(Bo.valueOf(l)) == 0;
-                                                                if (isExist) {
-                                                                    break;
-                                                                }
-                                                            }
-                                                            if (isExist)
-                                                                break;
-                                                        }
-                                                        if (!isExist) {
-                                                            ret.remove(t);
-                                                        }
-                                                        break;*/
-                                                    default:
-                                                        //todo add some logic
-                                                        break;
-
-                                                }
-
-                                        }
-                                }
-
-                            }
-
-                        }
-                    }
-                }
-            }
+            checkCustomInQuery(query, ret);
 
             //own sorting implementation
             if (sortingOrders != null && sortingOrders.size() > 0) {
@@ -551,13 +458,115 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
 
-    private enum Types{
+    private List<T> checkCustomInQuery(Query query, List<T> ret) {
+        //helper for ".in()" operator in List of primitives fields, because Realm doesn't support it
+        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
+            Object params = entity.getValue();
+            String field = entity.getKey();
+            if (params instanceof Map) {
+                Class clazz;
+                Types types;
+                for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
+                    String operation = paramMap.getKey();
+                    Object[] operatorParams = (Object[]) paramMap.getValue();
+                    clazz = ((Object[]) paramMap.getValue())[0].getClass();
+                    types = Types.getType(clazz);
+                    //check that it's list of primitives but not objects
+                    if (types == Types.OBJECT) {
+                        return ret;
+                    }
+                    if (operation.equalsIgnoreCase("$in")) {
+                        ArrayList<T> retCopy = new ArrayList<T>(ret);
+                        for (T t: retCopy) {
+                            if (t.get(field) instanceof ArrayList) {
+
+                                ArrayList arrayList = ((ArrayList) t.get(field));
+                                if (arrayList.size() > 0 && operatorParams.length > 0) {
+
+                                    boolean isExist = false;
+                                    switch (types) {
+                                        case LONG:
+                                            ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
+                                            for (Long lValue : listOfLong) {
+                                                for (Long l : (Long[])operatorParams) {
+                                                    isExist = l.compareTo(lValue) == 0;
+                                                    if (isExist) {
+                                                        break;
+                                                    }
+                                                }
+                                                if (isExist)
+                                                    break;
+                                            }
+                                            if (!isExist) {
+                                                ret.remove(t);
+                                            }
+                                            break;
+                                        case STRING:
+                                        case BOOLEAN:
+                                            if (!arrayList.contains(operatorParams[0])) {
+                                                ret.remove(t);
+                                            }
+                                            for (int i = 1; i < operatorParams.length; i++) {
+                                                if (!arrayList.contains(operatorParams[i])) {
+                                                    ret.remove(t);
+                                                }
+                                            }
+                                            break;
+                                        case INTEGER:
+                                            ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
+                                            for (Long lValue : listOfInteger) {
+                                                for (Integer l : (Integer[])operatorParams) {
+                                                    isExist = lValue.compareTo(Long.valueOf(l)) == 0;
+                                                    if (isExist) {
+                                                        break;
+                                                    }
+                                                }
+                                                if (isExist)
+                                                    break;
+                                            }
+                                            if (!isExist) {
+                                                ret.remove(t);
+                                            }
+                                            break;
+                                        case FLOAT:
+                                            ArrayList<Float> listOfFloat = new ArrayList<Float>(arrayList);
+                                            for (Float lValue : listOfFloat) {
+                                                for (Float l : (Float[])operatorParams) {
+                                                    isExist = lValue.compareTo(l) == 0;
+                                                    if (isExist) {
+                                                        break;
+                                                    }
+                                                }
+                                                if (isExist)
+                                                    break;
+                                            }
+                                            if (!isExist) {
+                                                ret.remove(t);
+                                            }
+                                            break;
+
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
+
+    public enum Types{
         STRING,
         INTEGER,
         LONG,
         BOOLEAN,
         FLOAT,
-        OBJECT; //// TODO: 19.09.2017 check it type 
+        OBJECT;
 
         private static final String ALL_TYPES_STRING = Arrays.toString(Types.values());
 

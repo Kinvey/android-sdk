@@ -14,17 +14,18 @@ public class Person extends GenericJson{
     public Person() {
     }
 
+    public Person(String username) {
+        this.username = username;
+    }
+
     @Key
-    private String age;
+    protected String age;
 
     @Key("_id")
-    private String id;
+    protected String id;
 
     @Key("username")
-    private String username;
-
-    @Key("phones")
-    private List<Integer> phones;
+    protected String username;
 
     public String getAge() {
         return age;
@@ -48,13 +49,5 @@ public class Person extends GenericJson{
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public List<Integer> getPhones() {
-        return phones;
-    }
-
-    public void setPhones(List<Integer> phones) {
-        this.phones = phones;
     }
 }
