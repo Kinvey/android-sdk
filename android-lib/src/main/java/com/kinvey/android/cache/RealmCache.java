@@ -276,13 +276,26 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         int ret = 0;
         try {
-            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
-            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-            mRealm.beginTransaction();
-            RealmResults result = realmQuery.findAll();
-            ret = result.size();
-            result.deleteAllFromRealm();
-            mRealm.commitTransaction();
+            if (!isQueryContainsInOperatorForListOfPrimitivesType(query)) {
+                mRealm.beginTransaction();
+                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+                QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
+
+                RealmResults result = realmQuery.findAll();
+                ret = result.size();
+                result.deleteAllFromRealm();
+                mRealm.commitTransaction();
+            } else {
+                List<T> list = get(query);
+                ret = list.size();
+                List<String> ids = new ArrayList<>();
+                for (T id : list) {
+                    ids.add((String)id.get("_id"));
+                }
+                delete(ids);
+                return ret;
+            }
+
         } finally {
             mRealm.close();
         }
@@ -298,6 +311,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try{
             mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+                    .greaterThanOrEqualTo(ClassHash.TTL, Long.MAX_VALUE)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
             if (iterator.hasNext()){
@@ -316,7 +330,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-        
+
         return ret;
     }
 
@@ -385,20 +399,23 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         T ret = null;
-
-        try{
+        try {
+        if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
             mRealm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             DynamicRealmObject obj = query.findFirst();
-            if (obj != null){
+            if (obj != null) {
                 ret = ClassHash.realmToObject(obj, mCollectionItemClass);
             }
             mRealm.commitTransaction();
+        } else {
+            List<T> list = get(q);
+            ret = list.get(0);
+        }
         } finally {
             mRealm.close();
         }
-
         return ret;
     }
 
@@ -406,13 +423,17 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public long count(Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
-
-        try{
-            mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
-            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-            ret = query.count();
-            mRealm.commitTransaction();
+        try {
+            if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
+                mRealm.beginTransaction();
+                RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+                QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+                ret = query.count();
+                mRealm.commitTransaction();
+            } else {
+                List<T> list = get(q);
+                ret = list.size();
+            }
         } finally {
             mRealm.close();
         }
@@ -458,6 +479,30 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
 
+    private boolean isQueryContainsInOperatorForListOfPrimitivesType(Query query) {
+        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()) {
+            Object params = entity.getValue();
+            if (params instanceof Map) {
+                Class clazz;
+                Types types;
+                for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
+                    if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
+                        return false;
+                    }
+                    clazz = ((Object[]) paramMap.getValue())[0].getClass();
+                    types = Types.getType(clazz);
+                    //check that it's list of primitives but not objects
+                    if (types == Types.OBJECT) {
+                        continue;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private List<T> checkCustomInQuery(Query query, List<T> ret) {
         //helper for ".in()" operator in List of primitives fields, because Realm doesn't support it
         for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
@@ -468,6 +513,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 Types types;
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
                     String operation = paramMap.getKey();
+                    if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
+                        return ret;
+                    }
                     Object[] operatorParams = (Object[]) paramMap.getValue();
                     clazz = ((Object[]) paramMap.getValue())[0].getClass();
                     types = Types.getType(clazz);

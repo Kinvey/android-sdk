@@ -15,20 +15,26 @@ import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.model.BooleanPrimitiveListInPerson;
 import com.kinvey.androidTest.model.FloatPrimitiveListInPerson;
 import com.kinvey.androidTest.model.IntegerPrimitiveListInPerson;
+import com.kinvey.androidTest.model.ObjectListInPerson;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.androidTest.model.StringGenericJson;
 import com.kinvey.androidTest.model.StringPrimitiveListInPerson;
 import com.kinvey.java.Query;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
+import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -47,6 +53,7 @@ public class CacheRealDataTest {
     private static final String FLOAT_LIST_FIELD = "floatList";
     private static final String INTEGER_LIST_FIELD = "integerList";
     private static final String BOOLEAN_LIST_FIELD = "booleanList";
+    private static final String STRING_GENERIC_JSON_LIST_FIELD = "stringGenericJsons";
 
     private Client client;
 
@@ -59,7 +66,7 @@ public class CacheRealDataTest {
     @Test
     public void testSaveStringArrayToRealmLocally() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
         StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<String> phones = new ArrayList<>();
@@ -75,7 +82,7 @@ public class CacheRealDataTest {
     @Test
     public void testSaveBooleanArrayToRealmLocally() throws InterruptedException {
         TestManager<BooleanPrimitiveListInPerson> testManager = new TestManager<BooleanPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<BooleanPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, BooleanPrimitiveListInPerson.class, StoreType.SYNC, client);
         BooleanPrimitiveListInPerson person = new BooleanPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<Boolean> booleanArrayList = new ArrayList<>();
@@ -91,7 +98,7 @@ public class CacheRealDataTest {
     @Test
     public void testSaveStringArrayToServer() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.NETWORK, client);
         StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<String> stringList = new ArrayList<>();
@@ -107,7 +114,7 @@ public class CacheRealDataTest {
     @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfString() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
         StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<String> stringList = new ArrayList<>();
@@ -141,7 +148,7 @@ public class CacheRealDataTest {
     @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfInteger() throws InterruptedException {
         TestManager<IntegerPrimitiveListInPerson> testManager = new TestManager<IntegerPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<IntegerPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, IntegerPrimitiveListInPerson.class, StoreType.SYNC, client);
         IntegerPrimitiveListInPerson person = new IntegerPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<Integer> integerArrayList = new ArrayList<>();
@@ -175,7 +182,7 @@ public class CacheRealDataTest {
     @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfBoolean() throws InterruptedException {
         TestManager<BooleanPrimitiveListInPerson> testManager = new TestManager<BooleanPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<BooleanPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, BooleanPrimitiveListInPerson.class, StoreType.SYNC, client);
         BooleanPrimitiveListInPerson person = new BooleanPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<Boolean> booleanArrayList = new ArrayList<>();
@@ -209,7 +216,7 @@ public class CacheRealDataTest {
     @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfFloat() throws InterruptedException {
         TestManager<FloatPrimitiveListInPerson> testManager = new TestManager<FloatPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         DataStore<FloatPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, FloatPrimitiveListInPerson.class, StoreType.SYNC, client);
         FloatPrimitiveListInPerson person = new FloatPrimitiveListInPerson(TEST_USERNAME);
         ArrayList<Float> floatArrayList = new ArrayList<>();
@@ -243,7 +250,7 @@ public class CacheRealDataTest {
     @Test
     public void testInWithOtherOperators() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
 
         DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
         StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
@@ -280,18 +287,302 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult());
 
         CustomKinveyListCallback findCallback;
-        Query query;
-        query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
         assertTrue(findCallback.getResult().size() == 1);
     }
 
+    @Test
+    public void testGetFirstMethodWithInOperator() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
 
-    @Test // TODO: 20.09.2017 should work after implementing custom "in" logic for RealmCache#delete
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("567483912");
+        person2.setStringList(stringList2);
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add(TEST_STRING);
+        stringList3.add("567483912");
+        person3.setStringList(stringList3);
+
+        StringPrimitiveListInPerson person4 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList4 = new ArrayList<>();
+        stringList4.add("567483912");
+        stringList4.add("567483912");
+        person4.setStringList(stringList4);
+
+        StringPrimitiveListInPerson person5 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList5 = new ArrayList<>();
+        stringList5.add(TEST_STRING);
+        stringList5.add("567483912");
+        person3.setStringList(stringList5);
+
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person4);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person5);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+
+        StringPrimitiveListInPerson firstPerson;
+        firstPerson = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).getFirst(query);
+
+        assertNotNull(firstPerson);
+        assertTrue(firstPerson.getId().equals(person3.getId()));
+    }
+
+    @Test
+    public void testDeleteMethodWithInOperator() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("567483912");
+        person2.setStringList(stringList2);
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add(TEST_STRING);
+        stringList3.add("567483912");
+        person3.setStringList(stringList3);
+
+        StringPrimitiveListInPerson person4 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList4 = new ArrayList<>();
+        stringList4.add("567483912");
+        stringList4.add("567483912");
+        person3.setStringList(stringList4);
+
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        int i = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).delete(query);
+        assertTrue(i == 1);
+    }
+
+    @Test
+    public void testCountMethodWithInOperator() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("567483912");
+        person2.setStringList(stringList2);
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add(TEST_STRING);
+        stringList3.add("567483912");
+        person3.setStringList(stringList3);
+
+        StringPrimitiveListInPerson person4 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList4 = new ArrayList<>();
+        stringList4.add("567483912");
+        stringList4.add("567483912");
+        person3.setStringList(stringList4);
+
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        long i = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).count(query);
+        assertTrue(i == 1);
+    }
+
+    @Test
+    public void testGetMethodWithInOperator() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("567483912");
+        person2.setStringList(stringList2);
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add(TEST_STRING);
+        stringList3.add("567483912");
+        person3.setStringList(stringList3);
+
+        StringPrimitiveListInPerson person4 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList4 = new ArrayList<>();
+        stringList4.add("567483912");
+        stringList4.add("567483912");
+        person4.setStringList(stringList4);
+
+        StringPrimitiveListInPerson person5 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList5 = new ArrayList<>();
+        stringList5.add(TEST_STRING);
+        stringList5.add("567483912");
+        person3.setStringList(stringList5);
+
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person4);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person5);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        List<StringPrimitiveListInPerson> persons = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).get(query);
+        assertNotNull(persons);
+        assertTrue(persons.size() == 2);
+    }
+
+    @Test
+    @Ignore // TODO: 21.09.2017 not updated yet for list of primitives field
+    public void testGetMethodWithNotInOperator() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("567483912");
+        person2.setStringList(stringList2);
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add(TEST_STRING);
+        stringList3.add("567483912");
+        person3.setStringList(stringList3);
+
+        StringPrimitiveListInPerson person4 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList4 = new ArrayList<>();
+        stringList4.add("567483912");
+        stringList4.add("567483912");
+        person4.setStringList(stringList4);
+
+        StringPrimitiveListInPerson person5 = new StringPrimitiveListInPerson("NEW_PERSON");
+        ArrayList<String> stringList5 = new ArrayList<>();
+        stringList5.add(TEST_STRING);
+        stringList5.add("567483912");
+        person3.setStringList(stringList5);
+
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person4);
+        assertNotNull(saveCallback.getResult());
+        saveCallback = testManager.saveCustom(store, person5);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().notIn(STRING_LIST_FIELD, new String[]{TEST_STRING});
+        List<StringPrimitiveListInPerson> persons = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).get(query);
+        assertNotNull(persons);
+        assertTrue(persons.size() == 1);
+    }
+
+
+    @Test
+    public void testSaveObjectsArrayToRealmLocally() throws InterruptedException {
+        TestManager<ObjectListInPerson> testManager = new TestManager<ObjectListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<ObjectListInPerson> store = DataStore.collection(Person.COLLECTION, ObjectListInPerson.class, StoreType.SYNC, client);
+        ObjectListInPerson person = new ObjectListInPerson(TEST_USERNAME);
+        ArrayList<StringGenericJson> stringGenericJsons = new ArrayList<>();
+        stringGenericJsons.add(new StringGenericJson(TEST_STRING));
+        stringGenericJsons.add(new StringGenericJson("987654321"));
+        person.setStringGenericJsons(stringGenericJsons);
+
+        ObjectListInPerson person2 = new ObjectListInPerson(TEST_USERNAME);
+        ArrayList<StringGenericJson> stringGenericJsons2 = new ArrayList<>();
+        stringGenericJsons2.add(new StringGenericJson("987654321"));
+        stringGenericJsons2.add(new StringGenericJson("9876543211111"));
+        person2.setStringGenericJsons(stringGenericJsons2);
+
+        CustomKinveyClientCallback<ObjectListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringGenericJsons());
+        assertTrue(saveCallback.getResult().getStringGenericJsons().size() == 2);
+
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringGenericJsons());
+        assertTrue(saveCallback.getResult().getStringGenericJsons().size() == 2);
+
+        Query query = new Query().in("stringGenericJsons.string", new String[]{TEST_STRING});
+        CustomKinveyListCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 1);
+    }
+
+
+    @Test
     public void testMissingLeftHandSideOfOR() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
-        testManager.login("test", "test", client);
+        testManager.login(USERNAME, PASSWORD, client);
         testSaveStringArrayToServer();
         DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
         Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING});

@@ -29,6 +29,8 @@ import static org.junit.Assert.assertNull;
 public class TestManager<T extends Person> {
 
     public static final String TEST_USERNAME = "Test_UserName";
+    public static final String USERNAME = "test";
+    public static final String PASSWORD = "test";
 
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
