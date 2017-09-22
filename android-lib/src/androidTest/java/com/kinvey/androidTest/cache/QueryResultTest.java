@@ -11,6 +11,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCache;
 import com.kinvey.android.cache.RealmCacheManager;
+import com.kinvey.android.model.User;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
@@ -50,6 +51,10 @@ public class QueryResultTest {
 
         cache = cacheManager.getCache(TEST_TABLE, SampleGsonObject2.class, Long.MAX_VALUE);
         cache.clear();
+
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
     }
 
     @Test

@@ -8,6 +8,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCacheManager;
+import com.kinvey.android.model.User;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 
@@ -40,6 +41,9 @@ public class CacheTTLTest {
     public void setup(){
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
     }
 
     @Test
