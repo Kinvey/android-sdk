@@ -79,7 +79,7 @@ public class CacheRealDataTest {
     }
 
     @Test
-    public void testSaveArrayOfStringToRealmLocally() throws InterruptedException {
+    public void testSaveArrayOfStringToRealmLocallyAndCheckWithQueryEquals() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = testManager.createPerson();
         ArrayList<String> phones = new ArrayList<>();
