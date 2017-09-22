@@ -696,7 +696,7 @@ public class UserStore {
         }
         String myURLToRender = host + "oauth/auth?client_id=" + appkey;
         if (clientId != null) {
-            myURLToRender = myURLToRender + ":" + clientId;
+            myURLToRender = myURLToRender + "." + clientId;
         }
         myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code";
         //keep a reference to the callback and redirect uri for later
