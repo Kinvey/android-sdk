@@ -551,11 +551,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                                             break;
                                         case STRING:
                                         case BOOLEAN:
-                                            if (!arrayList.contains(operatorParams[0])) {
-                                                ret.remove(t);
-                                            }
-                                            for (int i = 1; i < operatorParams.length; i++) {
-                                                if (!arrayList.contains(operatorParams[i])) {
+                                            for (Object operatorParam : operatorParams) {
+                                                if (!arrayList.contains(operatorParam)) {
                                                     ret.remove(t);
                                                 }
                                             }
