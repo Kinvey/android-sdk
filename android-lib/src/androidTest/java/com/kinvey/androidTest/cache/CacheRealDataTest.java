@@ -388,9 +388,14 @@ public class CacheRealDataTest {
         saveCallback = testManager.saveCustom(store, person4);
         assertNotNull(saveCallback.getResult());
 
+        int allItems = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItems == 4);
+
         Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
-        int i = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).delete(query);
-        assertTrue(i == 1);
+        int deletedItems = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).delete(query);
+        assertTrue(deletedItems == 1);
+        allItems = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItems == 3);
     }
 
     @Test
