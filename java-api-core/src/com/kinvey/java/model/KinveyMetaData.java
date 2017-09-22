@@ -92,12 +92,14 @@ public class KinveyMetaData extends GenericJson{
         @Key(GR)
         private boolean globallyReadable;
         @Key(GW)
-        private boolean globallyWriteable;
-        @Key(R)
-        private ArrayList<String> read;
-        @Key(W)
-        private ArrayList<String> write;
-        @Key(GROUPS)
+        private boolean globallyWritable;
+
+//        @Key(R)
+//        private ArrayList<String> read;
+//        @Key(W)
+//        private ArrayList<String> write;
+
+/*        @Key(GROUPS)
         private ArrayList<AclGroups> groups;
 
         public static class AclGroups extends GenericJson {
@@ -123,7 +125,7 @@ public class KinveyMetaData extends GenericJson{
             public void setWrite(String write) {
                 this.write = write;
             }
-        }
+        }*/
 
         public static AccessControlList fromMap(Map acl) {
             AccessControlList accessControlList = new AccessControlList();
@@ -133,21 +135,39 @@ public class KinveyMetaData extends GenericJson{
                 } else {
                     accessControlList.put(CREATOR, acl.get(CREATOR));
                 }
+
+
                 if (acl.containsKey(GR) && acl.get(GR) != null) {
                     accessControlList.put(GR, acl.get(GR));
                 }
                 if (acl.containsKey(GW) && acl.get(GW) != null) {
                     accessControlList.put(GW, acl.get(GW));
                 }
-                if (acl.containsKey(R) && acl.get(R) != null) {
-                    accessControlList.put(R, acl.get(R));
-                }
-                if (acl.containsKey(W) && acl.get(W) != null) {
-                    accessControlList.put(W, acl.get(W));
-                }
+//                if (acl.containsKey(R) && acl.get(R) != null) {
+//                    accessControlList.put(R, acl.get(R));
+//                }
+//                if (acl.containsKey(W) && acl.get(W) != null) {
+//                    accessControlList.put(W, acl.get(W));
+//                }
+
+
+                /*ArrayList<AclGroups> aclGroupses = new ArrayList<>();
                 if (acl.containsKey(GROUPS) && acl.get(GROUPS) != null) {
-                    accessControlList.put(GROUPS, acl.get(GROUPS));
+                    for (AclGroups groups : (ArrayList<AclGroups>)acl.get(GROUPS)) {
+                        AclGroups aclGroups = new AclGroups();
+                        if (groups.containsKey(R) && groups.get(R) != null) {
+                            aclGroups.put(R, acl.get(R));
+                        }
+                        if (groups.containsKey(W) && groups.get(W) != null) {
+                            aclGroups.put(W, acl.get(W));
+                        }
+                        aclGroupses.add(aclGroups);
+                    }
+                } else {
+                    aclGroupses.add(new AclGroups());
                 }
+                accessControlList.put(GROUPS, aclGroupses);*/
+
             }
             return accessControlList;
         }
@@ -160,37 +180,37 @@ public class KinveyMetaData extends GenericJson{
             this.globallyReadable = globallyReadable;
         }
 
-        public boolean isGloballyWriteable() {
-            return globallyWriteable;
+        public boolean isGloballyWritable() {
+            return globallyWritable;
         }
 
-        public void setGloballyWriteable(boolean globallyWriteable) {
-            this.globallyWriteable = globallyWriteable;
+        public void setGloballyWritable(boolean globallyWritable) {
+            this.globallyWritable = globallyWritable;
         }
 
-        public ArrayList<String> getRead() {
-            return read;
-        }
+//        public ArrayList<String> getRead() {
+//            return read;
+//        }
+//
+//        public void setRead(ArrayList<String> read) {
+//            this.read = read;
+//        }
+//
+//        public ArrayList<String> getWrite() {
+//            return write;
+//        }
+//
+//        public void setWrite(ArrayList<String> write) {
+//            this.write = write;
+//        }
 
-        public void setRead(ArrayList<String> read) {
-            this.read = read;
-        }
-
-        public ArrayList<String> getWrite() {
-            return write;
-        }
-
-        public void setWrite(ArrayList<String> write) {
-            this.write = write;
-        }
-
-        public ArrayList<AclGroups> getGroups() {
+/*        public ArrayList<AclGroups> getGroups() {
             return groups;
         }
 
         public void setGroups(ArrayList<AclGroups> groups) {
             this.groups = groups;
-        }
+        }*/
 
         public AccessControlList(){}
 

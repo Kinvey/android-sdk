@@ -478,7 +478,7 @@ public abstract class ClassHash {
         return allowed;
     }
 
-    private static boolean isArrayOrCollection(Class clazz){
+    static boolean isArrayOrCollection(Class clazz){
         return clazz.isArray() || Collection.class.isAssignableFrom(clazz);
     }
 

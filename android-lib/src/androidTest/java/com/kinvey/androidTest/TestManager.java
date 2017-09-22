@@ -6,9 +6,11 @@ import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
+import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
+import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyListCallback;
-import com.kinvey.androidTest.callback.DefaultKinveyPullCallback;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
@@ -24,9 +26,11 @@ import static org.junit.Assert.assertNull;
  * Created by yuliya on 09/14/17.
  */
 
-public class TestManager {
+public class TestManager<T extends Person> {
 
     public static final String TEST_USERNAME = "Test_UserName";
+    public static final String USERNAME = "test";
+    public static final String PASSWORD = "test";
 
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -64,21 +68,24 @@ public class TestManager {
         }
     }
 
-    public Person createPerson(String name) {
-        Person person = new Person();
-        person.setUsername(name);
-        return person;
-    }
-
-    public Person createPerson() {
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        return person;
-    }
-
-    public DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
+    public DefaultKinveyClientCallback save(final DataStore<Person> store, final T person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.save(person, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyClientCallback<T> saveCustom(final DataStore<T> store, final T person) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyClientCallback<T> callback = new CustomKinveyClientCallback<T>(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -106,9 +113,24 @@ public class TestManager {
         return callback;
     }
 
-    public DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query) throws InterruptedException {
+    public CustomKinveyListCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
+        final CustomKinveyListCallback<T> callback = new CustomKinveyListCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
