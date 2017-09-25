@@ -399,19 +399,19 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         T ret = null;
         try {
-        if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
-            mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
-            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-            DynamicRealmObject obj = query.findFirst();
-            if (obj != null) {
-                ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+            if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
+                mRealm.beginTransaction();
+                RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+                QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+                DynamicRealmObject obj = query.findFirst();
+                if (obj != null) {
+                    ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+                }
+                mRealm.commitTransaction();
+            } else {
+                List<T> list = get(q);
+                ret = list.get(0);
             }
-            mRealm.commitTransaction();
-        } else {
-            List<T> list = get(q);
-            ret = list.get(0);
-        }
         } finally {
             mRealm.close();
         }
@@ -489,6 +489,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 Class clazz;
                 Types types;
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
+                    if (!paramMap.getKey().equalsIgnoreCase("$in")) {
+                        return false;
+                    }
                     if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
                         return false;
                     }
@@ -533,97 +536,159 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     if (operation.equalsIgnoreCase("$in")) {
                         ArrayList<T> retCopy = new ArrayList<T>(ret);
                         for (T t: retCopy) {
-                            if (t.get(field) instanceof ArrayList) {
+/*                            //check that search field is List (not primitives or object)
+                            if (t.get(field) instanceof ArrayList) {*/
+                            boolean isArray = t.get(field) instanceof ArrayList;
+                            boolean isExist = false;
 
-                                ArrayList arrayList = ((ArrayList) t.get(field));
-                                if (arrayList.size() > 0 && operatorParams.length > 0) {
+                            ArrayList arrayList = null;
+                            if (isArray) {
+                                arrayList = ((ArrayList) t.get(field));
+                            } else {
+                                switch (types) {
+                                    case LONG:
+                                        for (Long l : (Long[])operatorParams) {
+                                            isExist = l.compareTo((Long)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case STRING:
+                                        for (String s : (String[])operatorParams) {
+                                            isExist = s.compareTo((String)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case BOOLEAN:
+                                        for (Boolean b : (Boolean[])operatorParams) {
+                                            isExist = b.compareTo((Boolean)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case INTEGER:
+                                        for (Integer i : (Integer[])operatorParams) {
+                                            isExist = i.compareTo((Integer)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case FLOAT:
+                                        for (Float i : (Float[])operatorParams) {
+                                            isExist = i.compareTo((Float)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                }
+                            }
 
-                                    boolean isExist = false;
-                                    switch (types) {
-                                        case LONG:
-                                            ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
-                                            for (Long lValue : listOfLong) {
-                                                for (Long l : (Long[])operatorParams) {
-                                                    isExist = l.compareTo(lValue) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
-                                                }
-                                                if (isExist)
+                            if (isArray && arrayList.size() > 0 && operatorParams.length > 0) {
+                                switch (types) {
+                                    case LONG:
+                                        ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
+                                        for (Long lValue : listOfLong) {
+                                            for (Long l : (Long[])operatorParams) {
+                                                isExist = l.compareTo(lValue) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case STRING:
-                                            ArrayList<String> listOfString = new ArrayList<String>(arrayList);
-                                            for (String sValue : listOfString) {
-                                                for (String s : (String[])operatorParams) {
-                                                    isExist = sValue.compareTo(String.valueOf(s)) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
                                                 }
-                                                if (isExist)
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case STRING:
+                                        ArrayList<String> listOfString = new ArrayList<String>(arrayList);
+                                        for (String sValue : listOfString) {
+                                            for (String s : (String[])operatorParams) {
+                                                isExist = sValue.compareTo(String.valueOf(s)) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case BOOLEAN:
-                                            ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
-                                            for (Boolean bValue : listOfBoolean) {
-                                                for (Boolean b : (Boolean[])operatorParams) {
-                                                    isExist = bValue.compareTo(b) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
                                                 }
-                                                if (isExist)
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case BOOLEAN:
+                                        ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
+                                        for (Boolean bValue : listOfBoolean) {
+                                            for (Boolean b : (Boolean[])operatorParams) {
+                                                isExist = bValue.compareTo(b) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case INTEGER:
-                                            ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
-                                            for (Long lValue : listOfInteger) {
-                                                for (Integer l : (Integer[])operatorParams) {
-                                                    isExist = lValue.compareTo(Long.valueOf(l)) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
                                                 }
-                                                if (isExist)
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case INTEGER:
+                                        ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
+                                        for (Long lValue : listOfInteger) {
+                                            for (Integer l : (Integer[])operatorParams) {
+                                                isExist = lValue.compareTo(Long.valueOf(l)) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case FLOAT:
-                                            ArrayList<Float> listOfFloat = new ArrayList<Float>(arrayList);
-                                            for (Float lValue : listOfFloat) {
-                                                for (Float l : (Float[])operatorParams) {
-                                                    isExist = lValue.compareTo(l) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
                                                 }
-                                                if (isExist)
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case FLOAT:
+                                        ArrayList<Float> listOfFloat = new ArrayList<Float>(arrayList);
+                                        for (Float lValue : listOfFloat) {
+                                            for (Float l : (Float[])operatorParams) {
+                                                isExist = lValue.compareTo(l) == 0;
+                                                if (isExist) {
                                                     break;
+                                                }
                                             }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-
-                                    }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
 
                                 }
+
                             }
 
                         }
