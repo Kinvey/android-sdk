@@ -60,8 +60,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
-            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-
+            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isQueryContainsInOperatorForListOfPrimitivesType(query));
             RealmResults<DynamicRealmObject> objects = null;
 
             final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
@@ -482,6 +481,10 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     private boolean isQueryContainsInOperatorForListOfPrimitivesType(Query query) {
         for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()) {
             Object params = entity.getValue();
+            // if field(entity.getKey()) contains "." then user do search in field of object, for this case realm works correct
+            if (entity.getKey().contains(".")) {
+                return false;
+            }
             if (params instanceof Map) {
                 Class clazz;
                 Types types;
@@ -508,6 +511,10 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
             Object params = entity.getValue();
             String field = entity.getKey();
+            // if field contains "." then user do search in field of object, for this case realm works correct
+            if (field.contains(".")) {
+                return ret;
+            }
             if (params instanceof Map) {
                 Class clazz;
                 Types types;
@@ -550,11 +557,35 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                                             }
                                             break;
                                         case STRING:
-                                        case BOOLEAN:
-                                            for (Object operatorParam : operatorParams) {
-                                                if (!arrayList.contains(operatorParam)) {
-                                                    ret.remove(t);
+                                            ArrayList<String> listOfString = new ArrayList<String>(arrayList);
+                                            for (String sValue : listOfString) {
+                                                for (String s : (String[])operatorParams) {
+                                                    isExist = sValue.compareTo(String.valueOf(s)) == 0;
+                                                    if (isExist) {
+                                                        break;
+                                                    }
                                                 }
+                                                if (isExist)
+                                                    break;
+                                            }
+                                            if (!isExist) {
+                                                ret.remove(t);
+                                            }
+                                            break;
+                                        case BOOLEAN:
+                                            ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
+                                            for (Boolean bValue : listOfBoolean) {
+                                                for (Boolean b : (Boolean[])operatorParams) {
+                                                    isExist = bValue.compareTo(b) == 0;
+                                                    if (isExist) {
+                                                        break;
+                                                    }
+                                                }
+                                                if (isExist)
+                                                    break;
+                                            }
+                                            if (!isExist) {
+                                                ret.remove(t);
                                             }
                                             break;
                                         case INTEGER:

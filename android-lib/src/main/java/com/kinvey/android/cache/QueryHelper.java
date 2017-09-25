@@ -29,7 +29,7 @@ import io.realm.RealmQuery;
  */
 public abstract class QueryHelper {
 
-    public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Map<String, Object> queryMap){
+    public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Map<String, Object> queryMap, boolean isIgnoreIn){
         for (Map.Entry<String, Object> entity : queryMap.entrySet()){
             String field = entity.getKey();
             Object params = entity.getValue();
@@ -58,7 +58,9 @@ public abstract class QueryHelper {
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()){
                     String operation = paramMap.getKey();
                     if (operation.equalsIgnoreCase("$in")){
-                        in(realmQuery, field, paramMap.getValue());
+                        if (!isIgnoreIn) {
+                            in(realmQuery, field, paramMap.getValue());
+                        }
                     } else if (operation.equalsIgnoreCase("$nin")) {
                         realmQuery.beginGroup().not();
                         in(realmQuery, field, paramMap.getValue());
@@ -83,6 +85,10 @@ public abstract class QueryHelper {
             }
         }
         return realmQuery;
+    }
+
+    public static RealmQuery<DynamicRealmObject>  prepareRealmQuery(RealmQuery<DynamicRealmObject> realmQuery, Map<String, Object> queryMap){
+        return prepareRealmQuery(realmQuery, queryMap, false);
     }
 
     private static void and(RealmQuery query, Object params){
