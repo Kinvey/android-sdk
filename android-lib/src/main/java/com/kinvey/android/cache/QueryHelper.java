@@ -41,25 +41,29 @@ public abstract class QueryHelper {
                     Map<String, Object>[] components = (Map<String, Object>[])params;
                     if (components != null && components.length > 0) {
                         realmQuery.beginGroup();
-                        prepareRealmQuery(realmQuery, components[0]);
+                        prepareRealmQuery(realmQuery, components[0], isIgnoreIn);
                         realmQuery.endGroup();
                         for (int i = 1 ; i < components.length; i++) {
                             realmQuery.or();
                             realmQuery.beginGroup();
-                            prepareRealmQuery(realmQuery, components[i]);
+                            prepareRealmQuery(realmQuery, components[i], isIgnoreIn);
                             realmQuery.endGroup();
                         }
                     }
                 }
                 realmQuery.endGroup();
             } else  if (field.equalsIgnoreCase("$and")) {
-                and(realmQuery, params);
+                and(realmQuery, params, isIgnoreIn);
             } else if (params instanceof Map){
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()){
                     String operation = paramMap.getKey();
                     if (operation.equalsIgnoreCase("$in")){
                         if (!isIgnoreIn) {
                             in(realmQuery, field, paramMap.getValue());
+                        } else {
+                            realmQuery.beginGroup();
+                            realmQuery.isNotEmpty("_id");
+                            realmQuery.endGroup();
                         }
                     } else if (operation.equalsIgnoreCase("$nin")) {
                         realmQuery.beginGroup().not();
@@ -91,17 +95,17 @@ public abstract class QueryHelper {
         return prepareRealmQuery(realmQuery, queryMap, false);
     }
 
-    private static void and(RealmQuery query, Object params){
+    private static void and(RealmQuery query, Object params, boolean isIgnoreIn){
         query.beginGroup();
         if (params.getClass().isArray()) {
             Map<String, Object>[] components = (Map<String, Object>[]) params;
             if (components != null && components.length > 0) {
                 query.beginGroup();
-                prepareRealmQuery(query, components[0]);
+                prepareRealmQuery(query, components[0], isIgnoreIn);
                 query.endGroup();
                 for (int i = 1; i < components.length; i++) {
                     query.beginGroup();
-                    prepareRealmQuery(query, components[i]);
+                    prepareRealmQuery(query, components[i], isIgnoreIn);
                     query.endGroup();
                 }
             }

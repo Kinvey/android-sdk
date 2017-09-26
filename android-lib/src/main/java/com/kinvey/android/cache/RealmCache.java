@@ -60,7 +60,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
-            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isQueryContainsInOperatorForListOfPrimitivesType(query));
+            boolean isIgnoreIn = isQueryContainsInOperator(query.getQueryFilterMap());
+            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isIgnoreIn);
             RealmResults<DynamicRealmObject> objects = null;
 
             final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
@@ -69,14 +70,14 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
             objects = realmQuery.findAll();
 
-            
-
             for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
                 DynamicRealmObject obj = iterator.next();
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
             }
 
-            checkCustomInQuery(query, ret);
+            if (isIgnoreIn) {
+                checkCustomInQuery(query.getQueryFilterMap(), ret);
+            }
 
             //own sorting implementation
             if (sortingOrders != null && sortingOrders.size() > 0) {
@@ -275,7 +276,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         int ret = 0;
         try {
-            if (!isQueryContainsInOperatorForListOfPrimitivesType(query)) {
+            if (!isQueryContainsInOperator(query.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
@@ -399,7 +400,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         T ret = null;
         try {
-            if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
+            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
@@ -423,7 +424,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
         try {
-            if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
+            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
@@ -478,29 +479,30 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
 
-    private boolean isQueryContainsInOperatorForListOfPrimitivesType(Query query) {
-        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()) {
+    private boolean isQueryContainsInOperator(Map<String, Object> queryMap) {
+        for (Map.Entry<String, Object> entity : queryMap.entrySet()) {
             Object params = entity.getValue();
-            // if field(entity.getKey()) contains "." then user do search in field of object, for this case realm works correct
-            if (entity.getKey().contains(".")) {
+            String field = entity.getKey();
+
+            if (field.equalsIgnoreCase("$or") || field.equalsIgnoreCase("$and")) {
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+
+                        for (Map<String, Object> component : components) {
+                            if (isQueryContainsInOperator(component)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (field.contains(".")) {
                 return false;
             }
             if (params instanceof Map) {
-                Class clazz;
-                Types types;
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
-                    if (!paramMap.getKey().equalsIgnoreCase("$in")) {
-                        return false;
-                    }
-                    if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
-                        return false;
-                    }
-                    clazz = ((Object[]) paramMap.getValue())[0].getClass();
-                    types = Types.getType(clazz);
-                    //check that it's list of primitives but not objects
-                    if (types == Types.OBJECT) {
-                        continue;
-                    } else {
+                    if (paramMap.getKey().equalsIgnoreCase("$in")) {
                         return true;
                     }
                 }
@@ -509,42 +511,99 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return false;
     }
 
-    private List<T> checkCustomInQuery(Query query, List<T> ret) {
+
+    private List<T> checkCustomInQuery(Map<String, Object> queryMap, List<T> ret) {
         //helper for ".in()" operator in List of primitives fields, because Realm doesn't support it
-        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
+        for (Map.Entry<String, Object> entity : queryMap.entrySet()){
             Object params = entity.getValue();
             String field = entity.getKey();
-            // if field contains "." then user do search in field of object, for this case realm works correct
-            if (field.contains(".")) {
-                return ret;
+
+            if (field.equalsIgnoreCase("$or")) {
+                DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+                RealmResults<DynamicRealmObject> objects;
+                //get all objects from realm. It need for make manual search in elements with "in" operator
+                try {
+                    objects = mRealm.where(mCollection)
+                            .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
+                            .findAll();
+
+                } finally {
+                    mRealm.close();
+                }
+
+                List<T> allItems = new ArrayList<>();
+                for (DynamicRealmObject obj : objects) {
+                    allItems.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+                }
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+                        List<T> newItems = new ArrayList<T>();
+
+                        //get items from both sides of "or"
+                        for (Map<String, Object> component : components) {
+                            if (isQueryContainsInOperator(component)) {
+                                newItems = checkCustomInQuery(component, allItems);
+                            }
+                        }
+                        //merge items from left and right parts of "or"
+                        if (newItems != null && ret != null) {
+                            // "ret" - it's items from search with was made exclude "in" operator
+                            // "newItems" - it's items from manual search with "in" operator
+                            ArrayList<T> retCopy = new ArrayList<T>(ret);
+                            boolean isItemExist;
+                            for (T item : newItems) {
+                                isItemExist = false;
+                                for(T oldItem : retCopy) {
+                                    if ((oldItem.get("_id")).equals(item.get("_id"))) {
+                                        isItemExist = true;
+                                        break;
+                                    }
+                                }
+                                if (!isItemExist) {
+                                    ret.add(item);
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+            } else if (field.equalsIgnoreCase("$and")) {
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+                        for (Map<String, Object> component : components) {
+                            ret = checkCustomInQuery(component, ret);
+                        }
+                    }
+                }
             }
+
             if (params instanceof Map) {
                 Class clazz;
                 Types types;
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
                     String operation = paramMap.getKey();
+                    //paramMap.getValue() - contains operator's parameters
                     if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
                         return ret;
                     }
                     Object[] operatorParams = (Object[]) paramMap.getValue();
                     clazz = ((Object[]) paramMap.getValue())[0].getClass();
                     types = Types.getType(clazz);
-                    //check that it's list of primitives but not objects
-                    if (types == Types.OBJECT) {
-                        return ret;
-                    }
                     if (operation.equalsIgnoreCase("$in")) {
                         ArrayList<T> retCopy = new ArrayList<T>(ret);
                         for (T t: retCopy) {
-/*                            //check that search field is List (not primitives or object)
-                            if (t.get(field) instanceof ArrayList) {*/
                             boolean isArray = t.get(field) instanceof ArrayList;
                             boolean isExist = false;
-
+/*                            //check that search field is List (not primitives or object)
+                            if (t.get(field) instanceof ArrayList) {*/
                             ArrayList arrayList = null;
                             if (isArray) {
                                 arrayList = ((ArrayList) t.get(field));
                             } else {
+                                // if search field is not LIST
                                 switch (types) {
                                     case LONG:
                                         for (Long l : (Long[])operatorParams) {
@@ -603,7 +662,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                                         break;
                                 }
                             }
-
+                            // if search field is LIST
                             if (isArray && arrayList.size() > 0 && operatorParams.length > 0) {
                                 switch (types) {
                                     case LONG:
