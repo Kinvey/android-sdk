@@ -3,6 +3,7 @@ package com.kinvey.androidTest.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
+import java.util.List;
 
 public class Person extends GenericJson{
 
@@ -13,14 +14,18 @@ public class Person extends GenericJson{
     public Person() {
     }
 
+    public Person(String username) {
+        this.username = username;
+    }
+
     @Key
-    private String age;
+    protected String age;
 
     @Key("_id")
-    private String id;
+    protected String id;
 
     @Key("username")
-    private String username;
+    protected String username;
 
     public String getAge() {
         return age;

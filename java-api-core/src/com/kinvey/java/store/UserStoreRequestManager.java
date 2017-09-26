@@ -611,7 +611,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         data.put("redirect_uri", MICRedirectURI);
         String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         if (clientId != null) {
-            fullClientIdField = fullClientIdField + ":" + clientId;
+            fullClientIdField = fullClientIdField + "." + clientId;
         }
         data.put("client_id",  fullClientIdField);
 
@@ -635,7 +635,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         String clientId = client.getStore().load(client.getActiveUser().getId()).getClientId();
         if (clientId != null) {
-            fullClientIdField = fullClientIdField + ":" + clientId;
+            fullClientIdField = fullClientIdField + "." + clientId;
         }
         data.put("client_id",  fullClientIdField);
 
@@ -657,7 +657,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         data.put("redirect_uri", MICRedirectURI);
         String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         if (clientId != null) {
-            fullClientIdField = fullClientIdField + ":" + clientId;
+            fullClientIdField = fullClientIdField + "." + clientId;
         }
         data.put("client_id",  fullClientIdField);
 
@@ -682,7 +682,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         Map<String, String> data = new HashMap<String, String>();
         String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         if (clientId != null) {
-            fullClientIdField = fullClientIdField + ":" + clientId;
+            fullClientIdField = fullClientIdField + "." + clientId;
         }
         data.put("client_id",  fullClientIdField);
         data.put("redirect_uri", MICRedirectURI);

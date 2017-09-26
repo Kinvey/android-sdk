@@ -66,7 +66,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + ":" + CLIENT_ID));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
     }
 
     // Check clientId (should be absent second part of client_id) in auth link for MICLoginPage
@@ -98,7 +98,7 @@ public class MICLoginTest {
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
         requestManager.setMICRedirectURI(REDIRECT_URI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL(CLIENT_ID);
-        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
+        assertEquals(APP_KEY + "." + CLIENT_ID, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
     }
 
     // Check clientId (should be absent second part of client_id) for getting Temp Link
@@ -121,7 +121,7 @@ public class MICLoginTest {
         credential.setClientId(CLIENT_ID);
         client.getStore().store(client.getActiveUser().getId(), credential);
         GetMICAccessToken getMICAccessToken = requestManager.useRefreshToken(REFRESH_TOKEN);
-        assertEquals(APP_KEY + ":" + CLIENT_ID, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
+        assertEquals(APP_KEY + "." + CLIENT_ID, ((HashMap) ((UrlEncodedContent) getMICAccessToken.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
     }
 
     // Check clientId (should be absent second part of client_id) for using refresh token
