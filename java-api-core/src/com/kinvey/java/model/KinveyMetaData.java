@@ -81,18 +81,18 @@ public class KinveyMetaData extends GenericJson{
         public static final String JSON_FIELD_NAME = "_acl";
         public static final String ACL = "_acl";
         private static final String CREATOR = "creator";
-        private static final String GR = "gr";
+/*        private static final String GR = "gr";
         private static final String GW = "gw";
         private static final String R = "r";
         private static final String W = "w";
-        private static final String GROUPS = "groups";
+        private static final String GROUPS = "groups";*/
 
         @Key(CREATOR)
         private String creator;
-        @Key(GR)
+/*         @Key(GR)
         private boolean globallyReadable;
         @Key(GW)
-        private boolean globallyWritable;
+        private boolean globallyWritable;*/
 
 //        @Key(R)
 //        private ArrayList<String> read;
@@ -137,12 +137,12 @@ public class KinveyMetaData extends GenericJson{
                 }
 
 
-                if (acl.containsKey(GR) && acl.get(GR) != null) {
+/*                if (acl.containsKey(GR) && acl.get(GR) != null) {
                     accessControlList.put(GR, acl.get(GR));
                 }
                 if (acl.containsKey(GW) && acl.get(GW) != null) {
                     accessControlList.put(GW, acl.get(GW));
-                }
+                }*/
 //                if (acl.containsKey(R) && acl.get(R) != null) {
 //                    accessControlList.put(R, acl.get(R));
 //                }
@@ -172,7 +172,7 @@ public class KinveyMetaData extends GenericJson{
             return accessControlList;
         }
 
-        public boolean isGloballyReadable() {
+/*        public boolean isGloballyReadable() {
             return globallyReadable;
         }
 
@@ -186,7 +186,7 @@ public class KinveyMetaData extends GenericJson{
 
         public void setGloballyWritable(boolean globallyWritable) {
             this.globallyWritable = globallyWritable;
-        }
+        }*/
 
 //        public ArrayList<String> getRead() {
 //            return read;

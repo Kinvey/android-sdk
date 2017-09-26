@@ -60,8 +60,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
-            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-
+            boolean isIgnoreIn = isQueryContainsInOperator(query.getQueryFilterMap());
+            QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isIgnoreIn);
             RealmResults<DynamicRealmObject> objects = null;
 
             final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
@@ -70,14 +70,14 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
             objects = realmQuery.findAll();
 
-            
-
             for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
                 DynamicRealmObject obj = iterator.next();
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
             }
 
-            checkCustomInQuery(query, ret);
+            if (isIgnoreIn) {
+                checkCustomInQuery(query.getQueryFilterMap(), ret);
+            }
 
             //own sorting implementation
             if (sortingOrders != null && sortingOrders.size() > 0) {
@@ -276,7 +276,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         int ret = 0;
         try {
-            if (!isQueryContainsInOperatorForListOfPrimitivesType(query)) {
+            if (!isQueryContainsInOperator(query.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
@@ -400,19 +400,19 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         T ret = null;
         try {
-        if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
-            mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
-            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
-            DynamicRealmObject obj = query.findFirst();
-            if (obj != null) {
-                ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
+                mRealm.beginTransaction();
+                RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+                QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+                DynamicRealmObject obj = query.findFirst();
+                if (obj != null) {
+                    ret = ClassHash.realmToObject(obj, mCollectionItemClass);
+                }
+                mRealm.commitTransaction();
+            } else {
+                List<T> list = get(q);
+                ret = list.get(0);
             }
-            mRealm.commitTransaction();
-        } else {
-            List<T> list = get(q);
-            ret = list.get(0);
-        }
         } finally {
             mRealm.close();
         }
@@ -424,7 +424,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
         try {
-            if (!isQueryContainsInOperatorForListOfPrimitivesType(q)) {
+            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
@@ -479,22 +479,30 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return currentTime + ttl < 0 ? Long.MAX_VALUE : currentTime + ttl;
     }
 
-    private boolean isQueryContainsInOperatorForListOfPrimitivesType(Query query) {
-        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()) {
+    private boolean isQueryContainsInOperator(Map<String, Object> queryMap) {
+        for (Map.Entry<String, Object> entity : queryMap.entrySet()) {
             Object params = entity.getValue();
-            if (params instanceof Map) {
-                Class clazz;
-                Types types;
-                for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
-                    if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
-                        return false;
+            String field = entity.getKey();
+
+            if (field.equalsIgnoreCase("$or") || field.equalsIgnoreCase("$and")) {
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+
+                        for (Map<String, Object> component : components) {
+                            if (isQueryContainsInOperator(component)) {
+                                return true;
+                            }
+                        }
                     }
-                    clazz = ((Object[]) paramMap.getValue())[0].getClass();
-                    types = Types.getType(clazz);
-                    //check that it's list of primitives but not objects
-                    if (types == Types.OBJECT) {
-                        continue;
-                    } else {
+                }
+            }
+            if (field.contains(".")) {
+                return false;
+            }
+            if (params instanceof Map) {
+                for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
+                    if (paramMap.getKey().equalsIgnoreCase("$in")) {
                         return true;
                     }
                 }
@@ -503,96 +511,243 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return false;
     }
 
-    private List<T> checkCustomInQuery(Query query, List<T> ret) {
+
+    private List<T> checkCustomInQuery(Map<String, Object> queryMap, List<T> ret) {
         //helper for ".in()" operator in List of primitives fields, because Realm doesn't support it
-        for (Map.Entry<String, Object> entity : query.getQueryFilterMap().entrySet()){
+        for (Map.Entry<String, Object> entity : queryMap.entrySet()){
             Object params = entity.getValue();
             String field = entity.getKey();
+
+            if (field.equalsIgnoreCase("$or")) {
+                DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+                RealmResults<DynamicRealmObject> objects;
+                //get all objects from realm. It need for make manual search in elements with "in" operator
+                try {
+                    objects = mRealm.where(mCollection)
+                            .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
+                            .findAll();
+
+                } finally {
+                    mRealm.close();
+                }
+
+                List<T> allItems = new ArrayList<>();
+                for (DynamicRealmObject obj : objects) {
+                    allItems.add(ClassHash.realmToObject(obj, mCollectionItemClass));
+                }
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+                        List<T> newItems = new ArrayList<T>();
+
+                        //get items from both sides of "or"
+                        for (Map<String, Object> component : components) {
+                            if (isQueryContainsInOperator(component)) {
+                                newItems = checkCustomInQuery(component, allItems);
+                            }
+                        }
+                        //merge items from left and right parts of "or"
+                        if (newItems != null && ret != null) {
+                            // "ret" - it's items from search with was made exclude "in" operator
+                            // "newItems" - it's items from manual search with "in" operator
+                            ArrayList<T> retCopy = new ArrayList<T>(ret);
+                            boolean isItemExist;
+                            for (T item : newItems) {
+                                isItemExist = false;
+                                for(T oldItem : retCopy) {
+                                    if ((oldItem.get("_id")).equals(item.get("_id"))) {
+                                        isItemExist = true;
+                                        break;
+                                    }
+                                }
+                                if (!isItemExist) {
+                                    ret.add(item);
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+            } else if (field.equalsIgnoreCase("$and")) {
+                if (params.getClass().isArray()){
+                    Map<String, Object>[] components = (Map<String, Object>[])params;
+                    if (components.length > 0) {
+                        for (Map<String, Object> component : components) {
+                            ret = checkCustomInQuery(component, ret);
+                        }
+                    }
+                }
+            }
+
             if (params instanceof Map) {
                 Class clazz;
                 Types types;
                 for (Map.Entry<String, Object> paramMap : ((Map<String, Object>) params).entrySet()) {
                     String operation = paramMap.getKey();
+                    //paramMap.getValue() - contains operator's parameters
                     if (!ClassHash.isArrayOrCollection(paramMap.getValue().getClass())) {
                         return ret;
                     }
                     Object[] operatorParams = (Object[]) paramMap.getValue();
                     clazz = ((Object[]) paramMap.getValue())[0].getClass();
                     types = Types.getType(clazz);
-                    //check that it's list of primitives but not objects
-                    if (types == Types.OBJECT) {
-                        return ret;
-                    }
                     if (operation.equalsIgnoreCase("$in")) {
                         ArrayList<T> retCopy = new ArrayList<T>(ret);
                         for (T t: retCopy) {
-                            if (t.get(field) instanceof ArrayList) {
-
-                                ArrayList arrayList = ((ArrayList) t.get(field));
-                                if (arrayList.size() > 0 && operatorParams.length > 0) {
-
-                                    boolean isExist = false;
-                                    switch (types) {
-                                        case LONG:
-                                            ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
-                                            for (Long lValue : listOfLong) {
-                                                for (Long l : (Long[])operatorParams) {
-                                                    isExist = l.compareTo(lValue) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
-                                                }
-                                                if (isExist)
+                            boolean isArray = t.get(field) instanceof ArrayList;
+                            boolean isExist = false;
+/*                            //check that search field is List (not primitives or object)
+                            if (t.get(field) instanceof ArrayList) {*/
+                            ArrayList arrayList = null;
+                            if (isArray) {
+                                arrayList = ((ArrayList) t.get(field));
+                            } else {
+                                // if search field is not LIST
+                                switch (types) {
+                                    case LONG:
+                                        for (Long l : (Long[])operatorParams) {
+                                            isExist = l.compareTo((Long)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case STRING:
+                                        for (String s : (String[])operatorParams) {
+                                            isExist = s.compareTo((String)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case BOOLEAN:
+                                        for (Boolean b : (Boolean[])operatorParams) {
+                                            isExist = b.compareTo((Boolean)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case INTEGER:
+                                        for (Integer i : (Integer[])operatorParams) {
+                                            isExist = i.compareTo((Integer)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case FLOAT:
+                                        for (Float i : (Float[])operatorParams) {
+                                            isExist = i.compareTo((Float)t.get(field)) == 0;
+                                            if (isExist) {
+                                                break;
+                                            }
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                }
+                            }
+                            // if search field is LIST
+                            if (isArray && arrayList.size() > 0 && operatorParams.length > 0) {
+                                switch (types) {
+                                    case LONG:
+                                        ArrayList<Long> listOfLong = new ArrayList<Long>(arrayList);
+                                        for (Long lValue : listOfLong) {
+                                            for (Long l : (Long[])operatorParams) {
+                                                isExist = l.compareTo(lValue) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case STRING:
-                                        case BOOLEAN:
-                                            for (Object operatorParam : operatorParams) {
-                                                if (!arrayList.contains(operatorParam)) {
-                                                    ret.remove(t);
                                                 }
                                             }
-                                            break;
-                                        case INTEGER:
-                                            ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
-                                            for (Long lValue : listOfInteger) {
-                                                for (Integer l : (Integer[])operatorParams) {
-                                                    isExist = lValue.compareTo(Long.valueOf(l)) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
-                                                }
-                                                if (isExist)
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case STRING:
+                                        ArrayList<String> listOfString = new ArrayList<String>(arrayList);
+                                        for (String sValue : listOfString) {
+                                            for (String s : (String[])operatorParams) {
+                                                isExist = sValue.compareTo(String.valueOf(s)) == 0;
+                                                if (isExist) {
                                                     break;
-                                            }
-                                            if (!isExist) {
-                                                ret.remove(t);
-                                            }
-                                            break;
-                                        case FLOAT:
-                                            ArrayList<Float> listOfFloat = new ArrayList<Float>(arrayList);
-                                            for (Float lValue : listOfFloat) {
-                                                for (Float l : (Float[])operatorParams) {
-                                                    isExist = lValue.compareTo(l) == 0;
-                                                    if (isExist) {
-                                                        break;
-                                                    }
                                                 }
-                                                if (isExist)
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case BOOLEAN:
+                                        ArrayList<Boolean> listOfBoolean = new ArrayList<Boolean>(arrayList);
+                                        for (Boolean bValue : listOfBoolean) {
+                                            for (Boolean b : (Boolean[])operatorParams) {
+                                                isExist = bValue.compareTo(b) == 0;
+                                                if (isExist) {
                                                     break;
+                                                }
                                             }
-                                            if (!isExist) {
-                                                ret.remove(t);
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case INTEGER:
+                                        ArrayList<Long> listOfInteger = new ArrayList<Long>(arrayList);
+                                        for (Long lValue : listOfInteger) {
+                                            for (Integer l : (Integer[])operatorParams) {
+                                                isExist = lValue.compareTo(Long.valueOf(l)) == 0;
+                                                if (isExist) {
+                                                    break;
+                                                }
                                             }
-                                            break;
-
-                                    }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
+                                    case FLOAT:
+                                        ArrayList<Float> listOfFloat = new ArrayList<Float>(arrayList);
+                                        for (Float lValue : listOfFloat) {
+                                            for (Float l : (Float[])operatorParams) {
+                                                isExist = lValue.compareTo(l) == 0;
+                                                if (isExist) {
+                                                    break;
+                                                }
+                                            }
+                                            if (isExist)
+                                                break;
+                                        }
+                                        if (!isExist) {
+                                            ret.remove(t);
+                                        }
+                                        break;
 
                                 }
+
                             }
 
                         }

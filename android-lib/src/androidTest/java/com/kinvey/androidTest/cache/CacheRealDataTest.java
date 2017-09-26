@@ -146,6 +146,47 @@ public class CacheRealDataTest {
     }
 
     @Test
+    public void testInQueryOperatorOnFindMethodLocallyInListOfStringWithTwoParameters() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        stringList2.add(TEST_STRING);
+        stringList2.add("11111");
+        person2.setStringList(stringList2);
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add("2222");
+        stringList3.add("11111");
+        person3.setStringList(stringList3);
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        Query query;
+        CustomKinveyListCallback<StringPrimitiveListInPerson> findCallback;
+
+        query = new Query().in(STRING_LIST_FIELD, new String[]{"987654321", TEST_STRING});
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 2);
+    }
+
+    @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfInteger() throws InterruptedException {
         TestManager<IntegerPrimitiveListInPerson> testManager = new TestManager<IntegerPrimitiveListInPerson>();
         testManager.login(USERNAME, PASSWORD, client);
@@ -287,7 +328,14 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult());
 
         CustomKinveyListCallback findCallback;
-        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        Query query;
+
+        query = new Query().equals("username", "NEW_PERSON");
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 2);
+
+        query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
         assertTrue(findCallback.getResult().size() == 1);
@@ -496,7 +544,7 @@ public class CacheRealDataTest {
     }
 
     @Test
-    @Ignore // TODO: 21.09.2017 not updated yet for list of primitives field
+    @Ignore // TODO: 21.09.2017 "NOTIN" not updated yet for list of primitives field
     public void testGetMethodWithNotInOperator() throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
         testManager.login(USERNAME, PASSWORD, client);
@@ -596,6 +644,75 @@ public class CacheRealDataTest {
         CustomKinveyListCallback listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
     }
+
+    @Test
+    public void testInQueryOperatorOnFindMethodLocallyComplexSearch() throws InterruptedException {
+        TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<StringPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, StringPrimitiveListInPerson.class, StoreType.SYNC, client);
+        StringPrimitiveListInPerson person = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(TEST_STRING);
+        stringList.add("987654321");
+        person.setStringList(stringList);
+        CustomKinveyClientCallback<StringPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        StringPrimitiveListInPerson person2 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList2 = new ArrayList<>();
+        person2.setAge("25");
+        stringList2.add(TEST_STRING);
+        stringList2.add("11111");
+        person2.setStringList(stringList2);
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        StringPrimitiveListInPerson person3 = new StringPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<String> stringList3 = new ArrayList<>();
+        stringList3.add("7654321");
+        stringList3.add("1234567");
+        person3.setStringList(stringList3);
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringList());
+
+        Query query;
+        CustomKinveyListCallback<StringPrimitiveListInPerson> findCallback;
+
+        query = (new Query().equals("_acl.creator", client.getActiveUser().getId()));
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 3);
+
+        query = new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"});
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 2);
+
+        query = (new Query().equals("_acl.creator", client.getActiveUser().getId())).and(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 2);
+
+        query = (new Query().equals("_acl.creator", client.getActiveUser().getId())).or(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 3);
+
+        query = (new Query().equals("age", "25")).or(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 3);
+
+        query = (new Query().equals("age", "25")).and(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 1);
+
+    }
+
 
     @After
     public void tearDown() {
