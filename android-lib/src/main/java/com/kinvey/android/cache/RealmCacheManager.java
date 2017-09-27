@@ -37,6 +37,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
+import io.realm.exceptions.RealmFileException;
 
 /**
  * Created by Prots on 1/26/16.
@@ -44,6 +45,7 @@ import io.realm.RealmSchema;
 public class RealmCacheManager implements ICacheManager {
 
     private static final String TABLE_HASH_NAME = "__KinveyTables__";
+    private byte[] encryptionKey;
     private final AbstractClient client;
     private final Context context;
     private String prefix = "";
@@ -53,6 +55,18 @@ public class RealmCacheManager implements ICacheManager {
     private HashMap<String, RealmCache> mCacheMap = new HashMap<String, RealmCache>();
     private static final Object LOCK = new Object();
 
+
+    public RealmCacheManager(byte[] encryptionKey, Client client){
+        this.encryptionKey = encryptionKey;
+        this.client = client;
+        this.context = client.getContext();
+    }
+
+    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client){
+        this.encryptionKey = encryptionKey;
+        this.client = client;
+        this.context = client.getContext();
+    }
 
     public RealmCacheManager(Client client){
         this.client = client;
@@ -186,11 +200,19 @@ public class RealmCacheManager implements ICacheManager {
     /**
      * get Prepared DynamicRealm since realm object can not be shared between threads
      */
-
     DynamicRealm getDynamicRealm(){
         synchronized (LOCK){
             Uri server = Uri.parse(client.getBaseUrl());
-            DynamicRealm realm = DynamicRealm.getInstance(getRealmConfiguration());
+            DynamicRealm realm;
+            try {
+                realm = DynamicRealm.getInstance(getRealmConfiguration());
+            } catch (RealmFileException exception) {
+                if (exception.getKind() != null && exception.getKind().name().equals("ACCESS_ERROR")) {
+                    throw new KinveyException("Access Error", "Use correct encryption key", "You are using wrong encryption key");
+                } else {
+                   throw exception;
+                }
+            }
             init(realm);
             return realm;
         }
@@ -198,9 +220,16 @@ public class RealmCacheManager implements ICacheManager {
 
     private RealmConfiguration getRealmConfiguration() {
         if (realmConfiguration == null) {
-            realmConfiguration = new RealmConfiguration.Builder()
-                    .name(prefix + "_" + getClientHash())
-                    .build();
+            if (encryptionKey != null) {
+                realmConfiguration = new RealmConfiguration.Builder()
+                        .name(prefix + "_" + getClientHash())
+                        .encryptionKey(encryptionKey)
+                        .build();
+            } else {
+                realmConfiguration = new RealmConfiguration.Builder()
+                        .name(prefix + "_" + getClientHash())
+                        .build();
+            }
         }
         return realmConfiguration;
     }
