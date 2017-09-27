@@ -40,7 +40,6 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -645,7 +644,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSyncManager();
         new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
@@ -673,7 +671,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSyncManager();
         new AsyncPullRequest<T>(this, null, callback).execute();
     }
 
@@ -701,7 +698,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void purge(KinveyPurgeCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSyncManager();
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
     }
 

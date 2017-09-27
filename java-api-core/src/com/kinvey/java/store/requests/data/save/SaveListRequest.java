@@ -17,7 +17,6 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
@@ -54,10 +53,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
         List<T> ret = new ArrayList<T>();
         if (writePolicy == WritePolicy.FORCE_LOCAL) {
             ret = cache.save(objects);
-            for (T obj : ret){
-                syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager.saveBlocking(obj));
-            }
+            syncManager.enqueueRequests(networkManager.getCollectionName(), networkManager, ret);
         } else {
             for (T obj : objects){
                 SaveRequest<T> save = new SaveRequest<T>(
