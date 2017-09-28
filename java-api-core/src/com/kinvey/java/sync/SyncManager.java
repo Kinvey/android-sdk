@@ -24,6 +24,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
@@ -86,11 +87,21 @@ public class SyncManager {
         return requests;
     }
 
-
-
-
     public void enqueueRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
+        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        requestCache.save(createSyncRequest(collectionName, clientRequest));
+    }
 
+    public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager,  List<T> ret) throws IOException {
+        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        List<SyncRequest> syncRequests = new ArrayList<>();
+        for (T t : ret) {
+            syncRequests.add(createSyncRequest(collectionName, networkManager.saveBlocking(t)));
+        }
+        requestCache.save(syncRequests);
+    }
+
+    private SyncRequest createSyncRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
         HttpRequest httpRequest = clientRequest.buildHttpRequest();
         SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
 
@@ -109,14 +120,11 @@ public class SyncManager {
         entityID.customerVersion = clientRequest.getCustomerAppVersion();
         entityID.customheader = clientRequest.getCustomRequestProperties();
 
-        SyncRequest request = new SyncRequest(
+        return new SyncRequest(
                 SyncRequest.HttpVerb.valueOf(clientRequest.getRequestMethod().toUpperCase()),
                 entityID, httpRequest.getUrl(),
                 collectionName
         );
-        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
-        requestCache.save(request);
-
     }
 
     public void enqueueRequest(SyncRequest request) {
