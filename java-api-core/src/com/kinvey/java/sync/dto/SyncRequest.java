@@ -21,6 +21,8 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.google.api.client.util.Value;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.sync.RequestMethod;
+import com.kinvey.java.sync.SyncManager;
 
 import org.apache.tools.ant.taskdefs.condition.Http;
 
@@ -73,8 +75,16 @@ public class SyncRequest extends GenericJson implements Serializable {
     @Key("url")
     private String url;
 
+    @Key("requestMethod")
+    private String requestMethod;
 
-    public SyncRequest(){};
+    public SyncRequest(){}
+
+    public SyncRequest(RequestMethod requestMethod, SyncMetaData entityID, String collectionName) {
+        this.requestMethod = requestMethod.name();
+        this.id = entityID;
+        this.collectionName = collectionName;
+    }
 
     public SyncRequest(HttpVerb httpVerb, SyncMetaData entityID, GenericUrl url, String collectionName) {
         this.verb = httpVerb.name();
@@ -122,6 +132,10 @@ public class SyncRequest extends GenericJson implements Serializable {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
     }
 
     /**

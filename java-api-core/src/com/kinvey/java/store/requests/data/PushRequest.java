@@ -18,6 +18,9 @@ package com.kinvey.java.store.requests.data;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.cache.ICache;
+import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
@@ -30,12 +33,15 @@ import java.util.List;
 public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
 
     private final String collectionName;
+    private ICache<T> cache;
+    private NetworkManager<T> networkManager;
     private final SyncManager syncManager;
     private AbstractClient client;
 
-    public PushRequest(String collectionName, AbstractClient client){
-
+    public PushRequest(String collectionName, ICache<T> cache, NetworkManager<T> networkManager, AbstractClient client){
         this.collectionName = collectionName;
+        this.cache = cache;
+        this.networkManager = networkManager;
         this.syncManager = client.getSyncManager();
         this.client = client;
     }
@@ -44,7 +50,16 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
     public Void execute() throws IOException {
         List<SyncRequest> requestList = syncManager.popSingleQueue(collectionName);
         for (SyncRequest syncRequest: requestList) {
+            switch (RequestMethod.fromString(syncRequest.getRequestMethod())) {
+                case SAVE:
+                    syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(cache.get(syncRequest.getEntityID().id)));
+                    break;
+                case DELETE:
+                    syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(syncRequest.getEntityID().id));
+                    break;
+            }
             syncManager.executeRequest(client, syncRequest);
+            syncManager.deleteCachedItem(syncRequest.getEntityID().id);
         }
         return null;
     }

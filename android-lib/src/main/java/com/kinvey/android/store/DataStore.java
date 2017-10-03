@@ -40,7 +40,6 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -613,8 +612,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void push(KinveyPushCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSyncManager();
-        new AsyncPushRequest(getCollectionName(), client.getSyncManager(), client, storeType, callback).execute();
+        new AsyncPushRequest<T>(getCollectionName(), client.getSyncManager(), client, storeType, networkManager, getCurrentClass(), callback).execute();
     }
 
     /**

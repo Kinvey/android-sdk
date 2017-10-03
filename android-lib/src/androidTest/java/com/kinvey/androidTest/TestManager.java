@@ -17,6 +17,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertNotNull;
@@ -90,6 +91,21 @@ public class TestManager<T extends Person> {
             @Override
             public void run() {
                 store.save(person, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyListCallback<T> saveCustomList(final DataStore<T> store, final List<T> persons) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyListCallback<T> callback = new CustomKinveyListCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.save(persons, callback);
             }
         });
         looperThread.start();

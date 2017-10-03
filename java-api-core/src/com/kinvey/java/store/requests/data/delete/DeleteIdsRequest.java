@@ -18,19 +18,15 @@ package com.kinvey.java.store.requests.data.delete;
 
 import com.google.api.client.json.GenericJson;
 import com.google.common.collect.Iterables;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
-import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.WritePolicy;
+import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Prots on 2/15/16.
@@ -54,5 +50,10 @@ public class DeleteIdsRequest<T extends GenericJson> extends AbstractDeleteReque
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.in("_id", Iterables.toArray(ids, String.class));
         return networkManager.deleteBlocking(q);
+    }
+
+    @Override
+    protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException {
+        syncManager.enqueueRequests(collectionName, networkManager, RequestMethod.DELETE, ids);
     }
 }
