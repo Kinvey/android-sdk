@@ -22,6 +22,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
@@ -48,18 +49,29 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
 
     @Override
     public Void execute() throws IOException {
-        List<SyncRequest> requestList = syncManager.popSingleQueue(collectionName);
-        for (SyncRequest syncRequest: requestList) {
-            switch (RequestMethod.fromString(syncRequest.getRequestMethod())) {
-                case SAVE:
-                    syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(cache.get(syncRequest.getEntityID().id)));
-                    break;
-                case DELETE:
-                    syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(syncRequest.getEntityID().id));
-                    break;
-            }
+        List<SyncRequest> requests = syncManager.popSingleQueue(collection);
+        for (SyncRequest syncRequest : requests) {
             syncManager.executeRequest(client, syncRequest);
-            syncManager.deleteCachedItem(syncRequest.getEntityID().id);
+        }
+
+        List<SyncItem> syncItems = syncManager.popSingleItemQueue(collectionName);
+        SyncRequest syncRequest = null;
+
+        if (syncItems != null) {
+            for (SyncItem syncItem : syncItems) {
+                if (syncItem.getRequestMethod() != null) {
+                    switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
+                        case SAVE:
+                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(cache.get(syncItem.getEntityID().id)));
+                            break;
+                        case DELETE:
+                            syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(syncItem.getEntityID().id));
+                            break;
+                    }
+                }
+                syncManager.executeRequest(client, syncRequest);
+                syncManager.deleteCachedItem((String) syncItem.get("_id"));
+            }
         }
         return null;
     }

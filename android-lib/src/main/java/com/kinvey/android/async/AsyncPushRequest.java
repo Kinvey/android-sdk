@@ -26,6 +26,7 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -77,35 +78,55 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
         KinveyPushResponse pushResponse = new KinveyPushResponse();
         List<Exception> errors = new ArrayList<>();
         List<SyncRequest> requests = manager.popSingleQueue(collection);
+        List<SyncItem> syncItems = manager.popSingleItemQueue(collection);
+
         int progress = 0;
+        int fullCount = requests != null ? requests.size() : 0;
+        fullCount += syncItems != null ? syncItems.size() : 0;
+        if (requests != null) {
+            for (SyncRequest syncRequest : requests) {
+                try {
+                    manager.executeRequest(client, syncRequest);
+                    pushResponse.setSuccessCount(++progress);
+                } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                    errors.add(e);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+
+                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
+            }
+        }
+
         String id;
-        String syncId;
         T t;
-        for (SyncRequest syncRequest : requests) {
+        SyncRequest syncRequest = null;
+        if (syncItems != null) {
+            for (SyncItem syncItem : syncItems) {
 
-            id = syncRequest.getEntityID().id;
-            syncId = (String) syncRequest.get("_id");
-            t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
+                id = syncItem.getEntityID().id;
+                t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
 
-            switch (RequestMethod.fromString(syncRequest.getRequestMethod())) {
-                case SAVE:
-                    syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
-                    break;
-                case DELETE:
-                    syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id));
-                    break;
+                switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
+                    case SAVE:
+                        syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
+                        break;
+                    case DELETE:
+                        syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id));
+                        break;
+                }
+
+                try {
+                    manager.executeRequest(client, syncRequest);
+                    pushResponse.setSuccessCount(++progress);
+                    manager.deleteCachedItem((String) syncItem.get("_id"));
+                } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                    errors.add(e);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
             }
-
-            try {
-                manager.executeRequest(client, syncRequest);
-                pushResponse.setSuccessCount(++progress);
-                manager.deleteCachedItem(syncId);
-            } catch (AccessControlException | KinveyException e) { //TODO check Exception
-                errors.add(e);
-            } catch (Exception e) {
-                callback.onFailure(e);
-            }
-            callback.onProgress(pushResponse.getSuccessCount(), requests.size());
         }
 
         pushResponse.setListOfExceptions(errors);
