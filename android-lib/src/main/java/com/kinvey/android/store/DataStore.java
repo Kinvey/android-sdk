@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
+import com.kinvey.android.AsyncPagedPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
@@ -644,7 +645,12 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, query, callback).execute();
+
+        if (isAutoPaginationEnabled()) {
+            new AsyncPagedPullRequest<T>(this, query, callback).execute();
+        } else {
+            new AsyncPullRequest<T>(this, query, callback).execute();
+        }
     }
 
     /**

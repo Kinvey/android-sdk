@@ -57,6 +57,22 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
+    /**
+     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
+     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
+     * a developer would have to provide skip and limit modifiers to page through all the results.
+     * Setting this value to true will automatically fetch all the pages necessary.
+     * Default value is false.
+     */
+    private boolean autoPagination = false;
+
+    public boolean isAutoPaginationEnabled() {
+        return this.autoPagination;
+    }
+
+    public void setAutoPagination(boolean paginate) {
+        this.autoPagination = paginate;
+    }
 
     /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
