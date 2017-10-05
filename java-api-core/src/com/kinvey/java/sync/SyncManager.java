@@ -114,6 +114,11 @@ public class SyncManager {
         return requestCache.delete(id);
     }
 
+    public int deleteCachedItems(Query q) {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        return requestCache.delete(q);
+    }
+
     /**
      * use {@link #enqueueRequest(String, NetworkManager, RequestMethod, String)}
      */
@@ -311,5 +316,9 @@ public class SyncManager {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
                 .equals("collection", collectionName);
         return requestCache.delete(q) + requestItemCache.delete(q);
+    }
+
+    public ICacheManager getCacheManager() {
+        return cacheManager;
     }
 }

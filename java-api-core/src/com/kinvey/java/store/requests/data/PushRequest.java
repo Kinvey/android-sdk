@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.data;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.RequestMethod;
@@ -58,10 +59,17 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
         SyncRequest syncRequest = null;
 
         if (syncItems != null) {
+            T t;
             for (SyncItem syncItem : syncItems) {
                 if (syncItem.getRequestMethod() != null) {
                     switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
                         case SAVE:
+                            t = cache.get(syncItem.getEntityID().id);
+                            if (t == null) {
+                                // check that item wasn't deleted before
+                                syncManager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
+                                continue;
+                            }
                             syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(cache.get(syncItem.getEntityID().id)));
                             break;
                         case DELETE:

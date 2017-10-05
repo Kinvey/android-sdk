@@ -22,6 +22,7 @@ import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Query;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.RequestMethod;
@@ -105,10 +106,16 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
             for (SyncItem syncItem : syncItems) {
 
                 id = syncItem.getEntityID().id;
-                t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
 
                 switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
                     case SAVE:
+                        t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
+                        if (t == null) {
+                            // check that item wasn't deleted before
+//                            manager.deleteCachedItem((String) syncItem.get("_id"));
+                            manager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
+                            continue;
+                        }
                         syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
                         break;
                     case DELETE:
