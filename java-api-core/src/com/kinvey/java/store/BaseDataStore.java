@@ -27,6 +27,7 @@ import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
@@ -224,6 +225,18 @@ public class BaseDataStore<T extends GenericJson> {
         return find((KinveyCachedClientCallback<List<T>>)null);
     }
 
+    public Integer findCount() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
+    }
+
+    public Integer findCountNetwork() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
+    }
+
     /**
      * Save multiple objects for collections
      * @param objects list of objects to be saved
@@ -318,6 +331,9 @@ public class BaseDataStore<T extends GenericJson> {
         return networkData;
     }
 
+    public void getCountBlocking() throws IOException {
+        networkManager.getCountBlocking();
+    }
     /**
      * Run sync operation to sync local and network storages
      * @param query query to pull the objects

@@ -298,7 +298,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                         ids.add((String)id.get("_id"));
                     }
                     mRealm.commitTransaction();
-                    this.delete(ids);
+                    if (ids.size() > 0) {
+                        this.delete(ids);
+                    }
                 } else if (skip > 0) {
                     // only skip modifier has been applied, so take a subset of the Realm result set
                     if (skip < result.size()) {

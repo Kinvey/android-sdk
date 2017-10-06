@@ -16,10 +16,15 @@
 
 package com.kinvey.android;
 
+import com.google.api.client.json.GenericJson;
+
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.BaseDataStore;
+import com.kinvey.java.store.ReadPolicy;
+import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +62,11 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
         int pageSize = 10000;
 
         // First, get the count of all the items to pull
-        int totalItemCount = 0; // TODO implement _count call to KCS
+        int totalItemCount = store.findCountNetwork();
+
+        if (query == null) {
+            query = new Query();
+        }
 
         List<T> totalPullResults = new ArrayList<>();
         do {
