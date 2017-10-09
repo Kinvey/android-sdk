@@ -179,7 +179,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
             tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
 
-            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("findCount"));
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("count"));
 
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
@@ -447,7 +447,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
-    public void findCount(KinveyCountCallback callback) {
+    public void count(KinveyCountCallback callback) {
         new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback).execute();
     }
 

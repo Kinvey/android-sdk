@@ -599,7 +599,7 @@ public class DataStoreTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.findCount(callback);
+                store.count(callback);
             }
         });
         looperThread.start();

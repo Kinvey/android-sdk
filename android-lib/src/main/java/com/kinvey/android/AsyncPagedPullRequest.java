@@ -62,7 +62,7 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
         int pageSize = 10000;
 
         // First, get the count of all the items to pull
-        int totalItemCount = store.findCountNetwork();
+        int totalItemCount = store.countNetwork();
 
         if (query == null) {
             query = new Query();
