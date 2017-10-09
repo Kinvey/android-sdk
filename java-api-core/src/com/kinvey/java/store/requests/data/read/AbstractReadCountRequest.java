@@ -65,7 +65,7 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
                 break;
             case BOTH:
                 PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
-                        networkManager.getClient());
+                        cache, networkManager, networkManager.getClient());
                 try {
                     pushRequest.execute();
                 } catch (Throwable t){
