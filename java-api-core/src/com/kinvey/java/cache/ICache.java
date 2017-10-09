@@ -17,8 +17,10 @@
 package com.kinvey.java.cache;
 
 import com.google.api.client.json.GenericJson;
-import com.google.gson.Gson;
 import com.kinvey.java.Query;
+import com.kinvey.java.model.Aggregation;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,4 +122,48 @@ public interface ICache<T extends GenericJson> {
      * @param ttl ttl value to be set in milliseconds
      */
     void setTtl(long ttl);
+
+    /**
+     * Get the sum of elements from the sumField from the cache
+     * @param fields  fields for group by
+     * @param sumField field for sum
+     * @param q query to filter results
+     * @return the sum of elements from the sumField from the cache
+     */
+    List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q);
+
+    /**
+     * Get the min of elements from the minField from the cache
+     * @param fields  fields for group by
+     * @param minField field for searching min value
+     * @param q query to filter results
+     * @return the min of elements from the minField from the cache
+     */
+    List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query q);
+
+    /**
+     * Get the max of elements from the maxField from the cache
+     * @param fields  fields for group by
+     * @param maxField field for searching max value
+     * @param q query to filter results
+     * @return the max of elements from the maxField from the cache
+     */
+    List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query q);
+
+    /**
+     * Get the average of elements from the averageField from the cache
+     * @param fields fields for group by
+     * @param averageField field for calculating average value
+     * @param q query to filter results
+     * @return the average of elements from the averageField from the cache
+     */
+    List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query q);
+
+    /**
+     * Get the count of elements from the countField from the cache
+     * @param fields fields for group by
+     * @param q query to filter results
+     * @return the count of elements from the countField from the cache
+     */
+    List<Aggregation.Result> count(ArrayList<String> fields, Query q);
 }

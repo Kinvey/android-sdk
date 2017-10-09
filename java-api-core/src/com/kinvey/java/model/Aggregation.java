@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class wraps the response of an Aggregation Request.
@@ -30,11 +31,11 @@ import java.util.ArrayList;
  */
 public class Aggregation {
 
-    public Result[] results;
+    public List<Result> results;
 
-    public Aggregation(Result[] res){
+    public Aggregation(List<Result> res){
         if (res == null){
-            res = new Result[0];
+            res = new ArrayList<>();
         }
         this.results = res;
     }
