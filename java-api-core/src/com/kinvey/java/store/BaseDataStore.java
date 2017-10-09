@@ -47,7 +47,7 @@ public class BaseDataStore<T extends GenericJson> {
     protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
-    NetworkManager<T> networkManager;
+    protected NetworkManager<T> networkManager;
     private String collectionName;
 
     /**
@@ -311,7 +311,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new PushRequest<T>(collection, client).execute();
+        new PushRequest<T>(collection, cache, networkManager, client).execute();
     }
 
     /**

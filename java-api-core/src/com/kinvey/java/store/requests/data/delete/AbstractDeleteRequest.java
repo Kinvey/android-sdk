@@ -35,7 +35,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
     protected final ICache<T> cache;
     private final WritePolicy writePolicy;
     protected NetworkManager<T> networkManager;
-    private SyncManager syncManager;
+    protected SyncManager syncManager;
 
     public AbstractDeleteRequest(ICache<T> cache, WritePolicy writePolicy, NetworkManager<T> networkManager,
                                  SyncManager syncManager) {
@@ -58,26 +58,25 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
 
         switch (writePolicy){
             case FORCE_LOCAL:
+                enqueueRequest(networkManager.getCollectionName(), networkManager);
                 ret = deleteCached();
-                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
                 break;
             case LOCAL_THEN_NETWORK:
                 PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
-                        networkManager.getClient());
+                        cache, networkManager, networkManager.getClient());
                 try {
                     pushRequest.execute();
                 } catch (Throwable t){
                     // silent fall, will be synced next time
                 }
 
-                ret = deleteCached();
                 try{
                     ret = request.execute().getCount();
                 } catch (IOException e) {
-                    syncManager.enqueueRequest(networkManager.getCollectionName(),
-                            request);
+                    enqueueRequest(networkManager.getCollectionName(), networkManager);
                     throw e;
                 }
+                deleteCached();
                 break;
             case FORCE_NETWORK:
                 KinveyDeleteResponse response = request.execute();
@@ -93,6 +92,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
     }
 
     abstract protected Integer deleteCached();
+    abstract protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException;
     abstract protected AbstractKinveyJsonClientRequest<KinveyDeleteResponse> deleteNetwork() throws IOException;
 
 }

@@ -19,10 +19,7 @@ package com.kinvey.java.sync.dto;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.google.api.client.util.Value;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-
-import org.apache.tools.ant.taskdefs.condition.Http;
 
 import java.io.Serializable;
 
@@ -65,16 +62,16 @@ public class SyncRequest extends GenericJson implements Serializable {
 
     //The id of the entity, or the query string
     @Key("meta")
-    private SyncMetaData id;
+    protected SyncMetaData id;
 
     @Key("collection")
-    private String collectionName;
+    protected String collectionName;
 
     @Key("url")
     private String url;
 
 
-    public SyncRequest(){};
+    public SyncRequest(){}
 
     public SyncRequest(HttpVerb httpVerb, SyncMetaData entityID, GenericUrl url, String collectionName) {
         this.verb = httpVerb.name();

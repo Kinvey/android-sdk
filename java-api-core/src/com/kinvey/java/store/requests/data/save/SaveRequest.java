@@ -22,6 +22,7 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
+import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -49,15 +50,14 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
     @Override
     public T execute() throws IOException {
         T ret = null;
-        NetworkManager<T>.Save save = networkManager.saveBlocking(object);
         switch (writePolicy){
             case FORCE_LOCAL:
                 ret = cache.save(object);
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        save);
+                        networkManager, RequestMethod.SAVE, (String)object.get("_id"));
                 break;
             case LOCAL_THEN_NETWORK:
-                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
+                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(), cache, networkManager,
                         networkManager.getClient());
                 try {
                     pushRequest.execute();
@@ -67,16 +67,16 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
 
                 ret = cache.save(object);
                 try{
-                    ret = save.execute();
+                    ret = networkManager.saveBlocking(object).execute();
                 } catch (IOException e) {
                     syncManager.enqueueRequest(networkManager.getCollectionName(),
-                            save);
+                            networkManager, RequestMethod.SAVE, (String)object.get("_id"));
                     throw e;
                 }
                 cache.save(ret);
                 break;
             case FORCE_NETWORK:
-                ret = save.execute();
+                ret = networkManager.saveBlocking(object).execute();
                 break;
         }
         return ret;

@@ -74,7 +74,15 @@ public class NetworkManager<T extends GenericJson> {
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
     }
-    
+
+    public String getClientAppVersion() {
+        return clientAppVersion;
+    }
+
+    public GenericData getCustomRequestProperties() {
+        return customRequestProperties;
+    }
+
     public void setClientAppVersion(int major, int minor, int patch){
     	setClientAppVersion(major + "." + minor + "." + patch);
     }
@@ -728,6 +736,7 @@ public class NetworkManager<T extends GenericJson> {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
             this.entityID = entityID;
+
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );

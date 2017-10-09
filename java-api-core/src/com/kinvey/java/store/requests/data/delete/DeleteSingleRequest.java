@@ -24,6 +24,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.WritePolicy;
+import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
@@ -49,5 +50,10 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
     @Override
     protected NetworkManager.Delete deleteNetwork() throws IOException {
         return networkManager.deleteBlocking(id);
+    }
+
+    @Override
+    protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException {
+        syncManager.enqueueRequest(collectionName, networkManager, RequestMethod.DELETE, id);
     }
 }
