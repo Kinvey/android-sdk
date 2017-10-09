@@ -34,6 +34,7 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
@@ -400,9 +401,9 @@ public class NetworkManager<T extends GenericJson> {
      * @return Aggregate object
      * @throws IOException
      */
-    public Aggregate countBlocking(ArrayList<String> fields, Query query) throws IOException {
+    public Aggregate countBlocking(ArrayList<String> fields, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
-        return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, query);
+        return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, myClass, query);
     }
 
     /**
@@ -414,10 +415,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Query query) throws IOException {
+    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Class<T> myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(sumField);
-        return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, query);
+        return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, myClass, query);
     }
 
     /**
@@ -429,10 +430,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Query query) throws IOException {
+    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Class<T> myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(maxField);
-        return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField, query);
+        return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField,  myClass, query);
     }
 
     /**
@@ -444,10 +445,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate minBlocking(ArrayList<String> fields, String minField, Query query) throws IOException {
+    public Aggregate minBlocking(ArrayList<String> fields, String minField, Class<T> myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(minField);
-        return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, query);
+        return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, myClass, query);
     }
 
     /**
@@ -459,14 +460,14 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Query query) throws IOException {
+    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Class<T> myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(averageField);
-        return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, query);
+        return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, myClass, query);
     }
 
     /**
-     * public helper method to create AggregateEntity and return an intialize Aggregate Request Object
+     * public helper method to create AggregateEntity and return an initialize Aggregate Request Object
      * @param fields fields to group by
      * @param type Type of aggregation
      * @param aggregateField Field to aggregate on
@@ -475,7 +476,7 @@ public class NetworkManager<T extends GenericJson> {
      * @throws IOException
      */
     public Aggregate aggregate(ArrayList<String> fields, AggregateEntity.AggregateType type, String aggregateField,
-                                   Query query) throws IOException {
+                               Class myClass, Query query) throws IOException {
         AggregateEntity entity = new AggregateEntity(fields, type, aggregateField, query, client);
         Aggregate aggregate = new Aggregate(entity, myClass);
         client.initializeRequest(aggregate);
@@ -842,7 +843,7 @@ public class NetworkManager<T extends GenericJson> {
         @Key
         private String collectionName;
 
-        Aggregate(AggregateEntity entity, Class<T> myClass) {
+        Aggregate(AggregateEntity entity, Class myClass) {
             super(client, "POST", REST_PATH, entity, myClass);
             this.collectionName = NetworkManager.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
