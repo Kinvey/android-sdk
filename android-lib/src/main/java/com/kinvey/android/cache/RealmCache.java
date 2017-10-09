@@ -282,9 +282,46 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
                 RealmResults result = realmQuery.findAll();
+
                 ret = result.size();
-                result.deleteAllFromRealm();
-                mRealm.commitTransaction();
+                int limit = query.getLimit();
+                int skip = query.getSkip();
+
+                if (limit > 0)
+                {
+                    // limit modifier has been applied, so take a subset of the Realm result set
+                    int endIndex = Math.min(ret, (skip+limit));
+                    List<DynamicRealmObject> subresult = result.subList(skip, endIndex);
+                    List<String> ids = new ArrayList<String>();
+                    ret = subresult.size();
+                    for (DynamicRealmObject id : subresult) {
+                        ids.add((String)id.get("_id"));
+                    }
+                    mRealm.commitTransaction();
+                    if (ids.size() > 0) {
+                        this.delete(ids);
+                    }
+                } else if (skip > 0) {
+                    // only skip modifier has been applied, so take a subset of the Realm result set
+                    if (skip < result.size()) {
+                        List<DynamicRealmObject> subresult = result.subList(skip, result.size());
+                        List<String> ids = new ArrayList<String>();
+                        ret = subresult.size();
+                        for (DynamicRealmObject id : subresult) {
+                            ids.add((String) id.get("_id"));
+                        }
+                        mRealm.commitTransaction();
+                        this.delete(ids);
+                    }
+                    else {
+                        ret = 0;
+                    }
+                } else {
+                    // no skip or limit applied to query, so delete all results from Realm
+                    result.deleteAllFromRealm();
+                    mRealm.commitTransaction();
+                }
+
             } else {
                 List<T> list = get(query);
                 ret = list.size();
@@ -419,19 +456,26 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
+
     @Override
     public long count(Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
         try {
-            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
+            if (q != null && !isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 ret = query.count();
                 mRealm.commitTransaction();
             } else {
-                List<T> list = get(q);
+                List<T> list;
+                if (q != null) {
+                    list = get(q);
+                }
+                else {
+                    list = get();
+                }
                 ret = list.size();
             }
         } finally {

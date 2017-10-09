@@ -20,9 +20,11 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
+import com.kinvey.android.AsyncPagedPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
+import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
@@ -110,6 +112,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
     private static final String KEY_GET_BY_IDS = "KEY_GET_BY_IDS";
 
+    private static final String KEY_GET_COUNT = "KEY_GET_COUNT";
+
     private static final String KEY_DELETE_BY_ID = "KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
@@ -174,6 +178,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class, KinveyCachedClientCallback.class));
             tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
             tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
+
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("count"));
 
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
@@ -410,7 +416,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         find(callback, null);
     }
 
-
     /**
      * Asynchronous request to fetch an list of all Entities in a collection.
      * <p>
@@ -442,6 +447,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
+    public void count(KinveyCountCallback callback) {
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback).execute();
+    }
 
     /**
      * Asynchronous request to save or update an entity to a collection.
@@ -644,7 +652,12 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, query, callback).execute();
+
+        if (isAutoPaginationEnabled()) {
+            new AsyncPagedPullRequest<T>(this, query, callback).execute();
+        } else {
+            new AsyncPullRequest<T>(this, query, callback).execute();
+        }
     }
 
     /**
@@ -671,7 +684,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, null, callback).execute();
+        if (isAutoPaginationEnabled()) {
+            new AsyncPagedPullRequest<T>(this, null, callback).execute();
+        } else {
+            new AsyncPullRequest<T>(this, null, callback).execute();
+        }
     }
 
     /**
