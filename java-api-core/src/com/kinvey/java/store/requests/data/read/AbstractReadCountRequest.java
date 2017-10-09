@@ -55,31 +55,31 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
         }
 
         switch (readPolicy){
-//            case FORCE_LOCAL:
-//                ret = countCached();
-//                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
-//                break;
-//            case LOCAL_THEN_NETWORK:
-//                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
-//                        networkManager.getClient());
-//                try {
-//                    pushRequest.execute();
-//                } catch (Throwable t){
-//                    // silent fall, will be synced next time
-//                }
-//
-//                ret = countCached();
-//                try{
-//                    ret = request.execute().getCount();
-//                } catch (IOException e) {
-//                    syncManager.enqueueRequest(networkManager.getCollectionName(),
-//                            request);
-//                    throw e;
-//                }
-//                break;
+            case FORCE_LOCAL:
+                ret = countCached();
+                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
+                break;
             case FORCE_NETWORK:
                 KinveyCountResponse response = request.execute();
                 ret = response.getCount();
+                break;
+            case BOTH:
+                PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
+                        networkManager.getClient());
+                try {
+                    pushRequest.execute();
+                } catch (Throwable t){
+                    // silent fall, will be synced next time
+                }
+
+                ret = countCached();
+                try{
+                    ret = request.execute().getCount();
+                } catch (IOException e) {
+                    syncManager.enqueueRequest(networkManager.getCollectionName(),
+                            request);
+                    throw e;
+                }
                 break;
         }
         return ret;

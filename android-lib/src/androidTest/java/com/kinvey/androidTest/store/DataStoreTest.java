@@ -560,13 +560,11 @@ public class DataStoreTest {
     }
 
     @Test
-    @Ignore
     public void testFindCountSync() throws InterruptedException, IOException {
         testFindCount(StoreType.SYNC);
     }
 
     @Test
-    @Ignore
     public void testFindCountCache() throws InterruptedException, IOException {
         testFindCount(StoreType.CACHE);
     }
@@ -578,7 +576,11 @@ public class DataStoreTest {
 
     private void testFindCount(StoreType storeType) throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        if (storeType != StoreType.NETWORK) {
+            client.getSyncManager().clear(Person.COLLECTION);
+        }
+
+        clearBackend(store);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -589,7 +591,6 @@ public class DataStoreTest {
         assertNull(countCallback.error);
         assertNotNull(countCallback.result);
         assertTrue(countCallback.result == 1);
-
     }
 
     private DefaultKinveyCountCallback findCount(final DataStore<Person> store, int seconds) throws InterruptedException, IOException {
@@ -998,6 +999,12 @@ public class DataStoreTest {
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         Log.d("testPull", " : clearing backend store successful");
+    }
+
+    private void clearBackend(DataStore<Person> store) throws InterruptedException {
+        Query query = client.query();
+        query = query.notEqual("age", "100500");
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
     }
 
     //use for Person.COLLECTION and for Person.class

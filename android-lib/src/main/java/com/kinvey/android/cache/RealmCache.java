@@ -456,19 +456,26 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
+
     @Override
     public long count(Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
         try {
-            if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
+            if (q != null && !isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 ret = query.count();
                 mRealm.commitTransaction();
             } else {
-                List<T> list = get(q);
+                List<T> list;
+                if (q != null) {
+                    list = get(q);
+                }
+                else {
+                    list = get();
+                }
                 ret = list.size();
             }
         } finally {
