@@ -9,6 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
@@ -395,6 +396,242 @@ public class CacheRealDataTest {
 
         assertNotNull(firstPerson);
         assertTrue(firstPerson.getId().equals(person3.getId()));
+    }
+
+    @Test
+    public void testDeleteMethod() throws InterruptedException {
+        // Arrange
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person1 = new Person("Person1");
+        person1.setAge("1");
+        Person person2 = new Person("Person2");
+        person2.setAge("2");
+        Person person3 = new Person("Person3");
+        person3.setAge("3");
+        Person person4 = new Person("Person4");
+        person4.setAge("4");
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person1);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        int allItemsBefore = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItemsBefore == 4);
+
+        // Act
+        Query query = new Query().equals("username", "Person2");
+        int deletedPersonCount = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).delete(query);
+        int allItemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        List<Person> itemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get();
+
+        // Assert
+        assertTrue(deletedPersonCount == 1);
+        assertTrue(allItemsAfter == 3);
+        assertNotNull(itemsAfter);
+        String username1 = itemsAfter.get(0).getUsername();
+        String username2 = itemsAfter.get(1).getUsername();
+        String username3 = itemsAfter.get(2).getUsername();
+        assertTrue(username1.equalsIgnoreCase("Person1") || username1.equalsIgnoreCase("Person3") || username1.equalsIgnoreCase("Person4"));
+        assertTrue(username2.equalsIgnoreCase("Person1") || username2.equalsIgnoreCase("Person3") || username2.equalsIgnoreCase("Person4"));
+        assertTrue(username3.equalsIgnoreCase("Person1") || username3.equalsIgnoreCase("Person3") || username3.equalsIgnoreCase("Person4"));
+    }
+
+    @Test
+    public void testDeleteMethodSkip1() throws InterruptedException {
+        // Arrange
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person1 = new Person("Person1");
+        person1.setAge("1");
+        Person person2 = new Person("Person2");
+        person2.setAge("2");
+        Person person3 = new Person("Person3");
+        person3.setAge("3");
+        Person person4 = new Person("Person4");
+        person4.setAge("4");
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person1);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        int allItemsBefore = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItemsBefore == 4);
+
+        // Act
+        Query query = new Query().setSkip(1);
+        int deletedPersonCount = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).delete(query);
+        int allItemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        List<Person> itemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get();
+
+        // Assert
+        assertTrue(deletedPersonCount == 3);
+        assertTrue(allItemsAfter == 1);
+        assertNotNull(itemsAfter);
+    }
+
+    @Test
+    public void testDeleteMethodSkip1Limit2() throws InterruptedException {
+        // Arrange
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person1 = new Person("Person1");
+        person1.setAge("1");
+        Person person2 = new Person("Person2");
+        person2.setAge("2");
+        Person person3 = new Person("Person3");
+        person3.setAge("3");
+        Person person4 = new Person("Person4");
+        person4.setAge("4");
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person1);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        int allItemsBefore = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItemsBefore == 4);
+
+        // Act
+        Query query = new Query().setSkip(1).setLimit(2);
+        int deletedPersonCount = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).delete(query);
+        int allItemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        List<Person> itemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get();
+
+        // Assert
+        assertTrue(deletedPersonCount == 2);
+        assertTrue(allItemsAfter == 2);
+        assertNotNull(itemsAfter);
+    }
+
+    @Test
+    public void testDeleteMethodSkip1LimitExceedsSize() throws InterruptedException {
+        // Arrange
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person1 = new Person("Person1");
+        person1.setAge("1");
+        Person person2 = new Person("Person2");
+        person2.setAge("2");
+        Person person3 = new Person("Person3");
+        person3.setAge("3");
+        Person person4 = new Person("Person4");
+        person4.setAge("4");
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person1);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        int allItemsBefore = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItemsBefore == 4);
+
+        // Act
+        Query query = new Query().setSkip(1).setLimit(5);
+        int deletedPersonCount = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).delete(query);
+        int allItemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        List<Person> itemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get();
+
+        // Assert
+        assertTrue(deletedPersonCount == 3);
+        assertTrue(allItemsAfter == 1);
+        assertNotNull(itemsAfter);
+    }
+
+    @Test
+    public void testDeleteMethodSkipExceedsSize() throws InterruptedException {
+        // Arrange
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person1 = new Person("Person1");
+        person1.setAge("1");
+        Person person2 = new Person("Person2");
+        person2.setAge("2");
+        Person person3 = new Person("Person3");
+        person3.setAge("3");
+        Person person4 = new Person("Person4");
+        person4.setAge("4");
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(store, person1);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person2);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person3);
+        assertNotNull(saveCallback.getResult());
+
+        saveCallback = null;
+        saveCallback = testManager.save(store, person4);
+        assertNotNull(saveCallback.getResult());
+
+        int allItemsBefore = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        assertTrue(allItemsBefore == 4);
+
+        // Act
+        Query query = new Query().setSkip(4);
+        int deletedPersonCount = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).delete(query);
+        int allItemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get().size();
+        List<Person> itemsAfter = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE).get();
+
+        // Assert
+        assertTrue(deletedPersonCount == 0);
+        assertTrue(allItemsAfter == 4);
+        assertNotNull(itemsAfter);
     }
 
     @Test

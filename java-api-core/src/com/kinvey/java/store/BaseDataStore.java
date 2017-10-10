@@ -31,6 +31,7 @@ import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
@@ -51,7 +52,7 @@ public class BaseDataStore<T extends GenericJson> {
     protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
-    NetworkManager<T> networkManager;
+    protected NetworkManager<T> networkManager;
     private String collectionName;
 
     /**
@@ -62,6 +63,22 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
+    /**
+     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
+     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
+     * a developer would have to provide skip and limit modifiers to page through all the results.
+     * Setting this value to true will automatically fetch all the pages necessary.
+     * Default value is false.
+     */
+    private boolean autoPagination = false;
+
+    public boolean isAutoPaginationEnabled() {
+        return this.autoPagination;
+    }
+
+    public void setAutoPagination(boolean paginate) {
+        this.autoPagination = paginate;
+    }
 
     /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
@@ -213,6 +230,18 @@ public class BaseDataStore<T extends GenericJson> {
         return find((KinveyCachedClientCallback<List<T>>)null);
     }
 
+    public Integer count() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
+    }
+
+    public Integer countNetwork() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
+    }
+
     /**
      * Save multiple objects for collections
      * @param objects list of objects to be saved
@@ -287,7 +316,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new PushRequest<T>(collection, client).execute();
+        new PushRequest<T>(collection, cache, networkManager, client).execute();
     }
 
     /**
