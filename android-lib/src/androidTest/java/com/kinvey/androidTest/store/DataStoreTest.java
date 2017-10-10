@@ -48,6 +48,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -561,6 +562,18 @@ public class DataStoreTest {
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() > 0);
+    }
+
+    @Test
+    public void testMongoQueryStringBuilder() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        Query myQuery = client.query();
+        String hospitalCode = "H1";
+        myQuery.equals("hospitalCode", hospitalCode).and(client.query().equals("archived", null));
+        AbstractMap<String, Object> filterMap = myQuery.getQueryFilterMap();
+        String expectedMongoQuery = "{\"$and\":[{\"hospitalCode\":\"H1\"},{\"archived\":null}]}";
+        String mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
     }
 
     @Test

@@ -22,6 +22,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonGenerator;
 import com.google.common.base.Preconditions;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.AbstractMap;
@@ -97,10 +98,15 @@ public abstract class AbstractQuery implements Serializable{
         String jsonResult = "";
         try {
             JsonGenerator generator = factory.createJsonGenerator(writer);
-            generator.serialize(getQueryFilterMap());
+            AbstractMap<String, Object> filterMap = getQueryFilterMap();
+            buildQueryString(generator, filterMap);
+//            generator.serialize(getQueryFilterMap());
             generator.flush();
             jsonResult = writer.toString();
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            // TODO add exception handling here instead of supporessing exception
+            ex.getMessage();
+        }
 
         if (jsonResult.equals("{}")) {
             return null;
@@ -109,6 +115,42 @@ public abstract class AbstractQuery implements Serializable{
         // TODO:  Put exception here?
 
         return jsonResult;
+    }
+
+    private void buildQueryString(JsonGenerator generator, AbstractMap<String, Object> filterMap) throws IOException {
+        try {
+            for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
+                if (entry.getValue() == null) {
+                    generator.writeStartObject();
+                    generator.writeFieldName(entry.getKey());
+                    generator.writeNull();
+                    generator.writeEndObject();
+                }
+                else {
+                    Class valueClass = entry.getValue().getClass();
+                    if (valueClass.equals(String.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeString((String)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.getComponentType().equals(LinkedHashMap.class) &&
+                            valueClass.isArray()) {
+                        // Value is a map, so this is a nested query. Recursively call into it.
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        LinkedHashMap[] valueMap = (LinkedHashMap<String, Object>[])entry.getValue();
+                        for (LinkedHashMap map : valueMap) {
+                            buildQueryString(generator, map);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
     /**
