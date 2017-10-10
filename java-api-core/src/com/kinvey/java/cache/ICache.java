@@ -130,7 +130,7 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the sum of elements from the sumField from the cache
      */
-    List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q);
+    Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q);
 
     /**
      * Get the min of elements from the minField from the cache
@@ -139,7 +139,7 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the min of elements from the minField from the cache
      */
-    List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query q);
+    Aggregation.Result[] min(ArrayList<String> fields, String minField, Query q);
 
     /**
      * Get the max of elements from the maxField from the cache
@@ -148,7 +148,7 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the max of elements from the maxField from the cache
      */
-    List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query q);
+    Aggregation.Result[] max(ArrayList<String> fields, String maxField, Query q);
 
     /**
      * Get the average of elements from the averageField from the cache
@@ -157,7 +157,7 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the average of elements from the averageField from the cache
      */
-    List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query q);
+    Aggregation.Result[] average(ArrayList<String> fields, String averageField, Query q);
 
     /**
      * Get the count of elements from the countField from the cache
@@ -165,5 +165,5 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the count of elements from the countField from the cache
      */
-    List<Aggregation.Result> count(ArrayList<String> fields, Query q);
+    Aggregation.Result[] count(ArrayList<String> fields, Query q);
 }

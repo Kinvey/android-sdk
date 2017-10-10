@@ -66,7 +66,7 @@ public class CalculationMethodTest {
         query = query.notEqual("age", "100200300");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("height");
-        List<Aggregation.Result> results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.count(fields, query);
 
         assertNotNull(results);
     }
@@ -85,7 +85,7 @@ public class CalculationMethodTest {
         query = query.notEqual("age", "100200300");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("height");
-        List<Aggregation.Result> results = store.count(fields, query, null);
+        Aggregation results = store.count(fields, query, null);
         assertNotNull(results);
     }
 
@@ -104,8 +104,9 @@ public class CalculationMethodTest {
         query = query.equals("username", "Test_UserName");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("weight");
-        List<Aggregation.Result> results = store.count(fields, query, null);
+        Aggregation results = store.count(fields, query, null);
         assertNotNull(results);
+        assertNotNull(results.getResultsFor("weight", "50"));
     }
 
 

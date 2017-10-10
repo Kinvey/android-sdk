@@ -51,7 +51,7 @@ public class Aggregation {
         ArrayList<Number> ret = new ArrayList<Number>();
         for (Result a : results){
             if (a.containsKey(key)){
-                if (a.get(key).equals(value)){
+                if (a.get(key).toString().equals(value)){
                     ret.add(a.result);
                 }
             }

@@ -770,7 +770,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
-    private List<Aggregation.Result> calculation(AggregateEntity.AggregateType type, String operationField, ArrayList<String> fields, Query q) {
+    private Aggregation.Result[] calculation(AggregateEntity.AggregateType type, String operationField, ArrayList<String> fields, Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<Aggregation.Result> results = new ArrayList<>();
@@ -850,31 +850,33 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             mRealm.close();
         }
 
-        return results;
+        Aggregation.Result[] resultsArray = new Aggregation.Result[results.size()];
+
+        return results.toArray(resultsArray);
     }
 
     @Override
-    public List<Aggregation.Result> count(ArrayList<String> fields, Query q) {
+    public Aggregation.Result[] count(ArrayList<String> fields, Query q) {
         return calculation(COUNT, null, fields, q);
     }
 
     @Override
-    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query q) {
+    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q) {
         return calculation(SUM, sumField, fields, q);
     }
 
     @Override
-    public List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query q) {
+    public Aggregation.Result[] min(ArrayList<String> fields, String minField, Query q) {
         return calculation(MIN, minField, fields, q);
     }
 
     @Override
-    public List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query q) {
+    public Aggregation.Result[] max(ArrayList<String> fields, String maxField, Query q) {
         return calculation(MAX, maxField, fields, q);
     }
 
     @Override
-    public List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query q) {
+    public Aggregation.Result[] average(ArrayList<String> fields, String averageField, Query q) {
         return calculation(AVERAGE, averageField, fields, q);
     }
 

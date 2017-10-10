@@ -67,9 +67,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.count(fields, query);
 
-        assertTrue(results.get(0).result.intValue() == 2);
+        assertTrue(results[0].result.intValue() == 2);
     }
 
     @Test
@@ -92,9 +92,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("height", 170f);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.count(fields, query);
 
-        assertTrue(results.get(0).result.intValue() == 1);
+        assertTrue(results[0].result.intValue() == 1);
     }
 
     @Test
@@ -117,9 +117,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("weight", 170L);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.count(fields, query);
 
-        assertTrue(results.get(0).result.intValue() == 1);
+        assertTrue(results[0].result.intValue() == 1);
     }
 
     @Test
@@ -142,9 +142,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("carNumber", 1);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.count(fields, query);
 
-        assertTrue(results.get(0).result.intValue() == 1);
+        assertTrue(results[0].result.intValue() == 1);
     }
 
     @Test
@@ -167,9 +167,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.min(fields, "height", query);
+        Aggregation.Result[] results = cache.min(fields, "height", query);
 
-        assertTrue(results.get(0).result.intValue() == 170);
+        assertTrue(results[0].result.intValue() == 170);
     }
 
     @Test
@@ -192,9 +192,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.max(fields, "height", query);
+        Aggregation.Result[] results = cache.max(fields, "height", query);
 
-        assertTrue(results.get(0).result.intValue() == 180);
+        assertTrue(results[0].result.intValue() == 180);
     }
 
     @Test
@@ -217,9 +217,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.average(fields, "height", query);
+        Aggregation.Result[] results = cache.average(fields, "height", query);
 
-        assertTrue(results.get(0).result.intValue() == 175);
+        assertTrue(results[0].result.intValue() == 175);
     }
 
     @Test
@@ -242,9 +242,9 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        List<Aggregation.Result> results = cache.sum(fields, "height", query);
+        Aggregation.Result[] results = cache.sum(fields, "height", query);
 
-        assertTrue(results.get(0).result.intValue() == 350);
+        assertTrue(results[0].result.intValue() == 350);
     }
 
     @After
