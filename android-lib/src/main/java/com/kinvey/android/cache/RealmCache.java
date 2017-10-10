@@ -790,7 +790,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     query = realmObjects.where();
                     for (String fieldToQuery : fields) {
                         fieldType = d.getFieldType(fieldToQuery);
-                        System.out.println(fieldType);
                         switch (fieldType) {
                             case STRING:
                                 query = query.equalTo(fieldToQuery, String.valueOf(d.get(fieldToQuery)));

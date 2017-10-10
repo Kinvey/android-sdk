@@ -23,19 +23,12 @@ import java.util.Arrays;
 /**
  * @author edwardf
  */
-public abstract class KinveyAggregateCallback implements KinveyClientCallback<Aggregation.Result[]> {
+public abstract class KinveyAggregateCallback implements KinveyClientCallback<Aggregation> {
 
     @Override
-    public void onSuccess(Aggregation.Result[] result) {
-
-        Aggregation response = new Aggregation(Arrays.asList(result));
-        onSuccess(response);
-
-    }
-
-
     public abstract void onFailure(Throwable error);
 
+    @Override
     public abstract void onSuccess(Aggregation response);
 
 }
