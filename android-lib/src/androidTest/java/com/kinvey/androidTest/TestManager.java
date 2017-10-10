@@ -8,15 +8,23 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
+import com.kinvey.java.core.KinveyAggregateCallback;
+import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.Aggregation;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertNotNull;
@@ -75,6 +83,36 @@ public class TestManager<T extends Person> {
             @Override
             public void run() {
                 store.save(person, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final String id) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(id, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(query, callback);
             }
         });
         looperThread.start();
@@ -160,5 +198,45 @@ public class TestManager<T extends Person> {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    public DefaultKinveyAggregateCallback calculation(final DataStore<T> store, final AggregateEntity.AggregateType aggregateType,
+                                                      final ArrayList<String> fields, final String sumField, final Query query,
+                                                      final KinveyCachedAggregateCallback cachedCallback) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyAggregateCallback callback = new DefaultKinveyAggregateCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (aggregateType) {
+                    case COUNT:
+                        store.count(fields, query, callback, cachedCallback);
+                        break;
+                    case MIN:
+                        store.min(fields, sumField, query, callback, cachedCallback);
+                        break;
+                    case MAX:
+                        store.max(fields, sumField, query, callback, cachedCallback);
+                        break;
+                    case AVERAGE:
+                        store.average(fields, sumField, query, callback, cachedCallback);
+                        break;
+                    case SUM:
+                        store.sum(fields, sumField, query, callback, cachedCallback);
+                        break;
+
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    //cleaning backend store (can be improved)
+    public void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, new Query().notEqual("age", "100500"));
+        assertNull(deleteCallback.getError());
     }
 }

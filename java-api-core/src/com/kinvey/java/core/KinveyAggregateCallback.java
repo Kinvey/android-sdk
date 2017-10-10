@@ -18,8 +18,6 @@ package com.kinvey.java.core;
 
 import com.kinvey.java.model.Aggregation;
 
-import java.util.Arrays;
-
 /**
  * @author edwardf
  */

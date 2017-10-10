@@ -10,10 +10,9 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
-import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -23,12 +22,14 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static com.kinvey.java.model.AggregateEntity.AggregateType;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by yuliya on 10/06/17.
@@ -47,30 +48,6 @@ public class CalculationMethodTest {
     }
 
     @Test
-    public void testSaveStringArrayToRealmLocally() throws InterruptedException, IOException {
-        TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
-
-        Person person = new Person(TEST_USERNAME);
-        person.setHeight(170);
-
-        Person person2 = new Person(TEST_USERNAME);
-        person2.setHeight(180);
-
-        testManager.saveCustom(store, person);
-        testManager.saveCustom(store, person2);
-
-        Query query = client.query();
-        query = query.notEqual("age", "100200300");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("height");
-        Aggregation.Result[] results = cache.count(fields, query);
-
-        assertNotNull(results);
-    }
-    @Test
     public void testCountLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
@@ -78,15 +55,22 @@ public class CalculationMethodTest {
 
         Person person = new Person(TEST_USERNAME);
         person.setHeight(170);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setHeight(170);
 
         CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
-        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
         Query query = client.query();
         query = query.notEqual("age", "100200300");
         ArrayList<String> fields = new ArrayList<>();
-        fields.add("height");
-        Aggregation results = store.count(fields, query, null);
-        assertNotNull(results);
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.COUNT, fields, null, query, null);
+        assertNotNull(callback);
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
     }
 
     @Test
@@ -95,21 +79,270 @@ public class CalculationMethodTest {
         testManager.login(USERNAME, PASSWORD, client);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
 
+        testManager.cleanBackendDataStore(store);
+
         Person person = new Person(TEST_USERNAME);
-        person.setWeight(50L);
+        person.setHeight(170);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setHeight(170);
 
         CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
-        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
         Query query = client.query();
-        query = query.equals("username", "Test_UserName");
+        query = query.notEqual("age", "100200300");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("weight");
-        Aggregation results = store.count(fields, query, null);
-        assertNotNull(results);
-        assertNotNull(results.getResultsFor("weight", "50"));
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.COUNT, fields, null, query, null);
+        assertNotNull(callback);
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));// TODO: 10.10.2017
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
+    }
+
+    @Test
+    public void testMinLocally() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.MIN, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 1);
+    }
+
+    @Test
+    public void testMinNetwork() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.MIN, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 1);
     }
 
 
+    @Test
+    public void testMaxLocally() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.MAX, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
+    }
+
+    @Test
+    public void testMaxNetwork() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.MAX, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
+    }
+
+    @Test
+    public void testAverageLocally() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+        Person person3 = new Person(TEST_USERNAME + "_2");
+        person3.setCarNumber(3);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person3.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.AVERAGE, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
+    }
+
+    @Test
+    public void testAverageNetwork() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+        Person person3 = new Person(TEST_USERNAME + "_2");
+        person3.setCarNumber(3);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person3.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.AVERAGE, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 2);
+    }
+
+
+    @Test
+    public void testSumLocally() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+        Person person3 = new Person(TEST_USERNAME + "_2");
+        person3.setCarNumber(3);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person3.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.SUM, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 6);
+    }
+
+    @Test
+    public void testSumNetwork() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setCarNumber(1);
+        Person person2 = new Person(TEST_USERNAME + "_1");
+        person2.setCarNumber(2);
+        Person person3 = new Person(TEST_USERNAME + "_2");
+        person3.setCarNumber(3);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+        saveCallback = testManager.saveCustom(store, person3);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person3.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("weight");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.SUM, fields, "carNumber", query, null);
+        assertNotNull(callback);
+        assertNull(callback.getError());
+        assertNotNull(callback.getResult().getResultsFor("weight", "0"));
+        assertTrue(callback.getResult().getResultsFor("weight", "0").get(0).intValue() == 6);
+    }
 
     @After
     public void tearDown() {
