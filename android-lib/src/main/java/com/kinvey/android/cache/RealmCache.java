@@ -41,11 +41,11 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
-import static com.kinvey.java.model.AggregateEntity.AggregateType.AVERAGE;
-import static com.kinvey.java.model.AggregateEntity.AggregateType.COUNT;
-import static com.kinvey.java.model.AggregateEntity.AggregateType.MAX;
-import static com.kinvey.java.model.AggregateEntity.AggregateType.MIN;
-import static com.kinvey.java.model.AggregateEntity.AggregateType.SUM;
+import com.kinvey.java.model.AggregateEntity.AggregateType;
+import com.kinvey.java.model.AggregateEntity.AggregateType;
+import com.kinvey.java.model.AggregateEntity.AggregateType;
+import com.kinvey.java.model.AggregateEntity.AggregateType;
+import com.kinvey.java.model.AggregateEntity.AggregateType;
 
 /**
  * Created by Prots on 1/26/16.
@@ -856,27 +856,27 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     @Override
     public Aggregation.Result[] count(ArrayList<String> fields, Query q) {
-        return calculation(COUNT, null, fields, q);
+        return calculation(AggregateType.COUNT, null, fields, q);
     }
 
     @Override
     public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q) {
-        return calculation(SUM, sumField, fields, q);
+        return calculation(AggregateType.SUM, sumField, fields, q);
     }
 
     @Override
     public Aggregation.Result[] min(ArrayList<String> fields, String minField, Query q) {
-        return calculation(MIN, minField, fields, q);
+        return calculation(AggregateType.MIN, minField, fields, q);
     }
 
     @Override
     public Aggregation.Result[] max(ArrayList<String> fields, String maxField, Query q) {
-        return calculation(MAX, maxField, fields, q);
+        return calculation(AggregateType.MAX, maxField, fields, q);
     }
 
     @Override
     public Aggregation.Result[] average(ArrayList<String> fields, String averageField, Query q) {
-        return calculation(AVERAGE, averageField, fields, q);
+        return calculation(AggregateType.AVERAGE, averageField, fields, q);
     }
 
 
