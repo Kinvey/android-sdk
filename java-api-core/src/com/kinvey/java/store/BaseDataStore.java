@@ -324,7 +324,7 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(null);
     }
 
-    public List<Aggregation.Result> count(ArrayList<String> fields, Query query,
+    public Aggregation count(ArrayList<String> fields, Query query,
                                           KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -332,7 +332,7 @@ public class BaseDataStore<T extends GenericJson> {
         return calculation(AggregateEntity.AggregateType.COUNT, fields, null, query, cachedCallback);
     }
 
-    public List<Aggregation.Result> sum(ArrayList<String> fields, String sumField, Query query,
+    public Aggregation sum(ArrayList<String> fields, String sumField, Query query,
                                         KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -340,7 +340,7 @@ public class BaseDataStore<T extends GenericJson> {
         return calculation(AggregateEntity.AggregateType.SUM, fields, sumField, query, cachedCallback);
     }
 
-    public List<Aggregation.Result> min(ArrayList<String> fields, String minField, Query query,
+    public Aggregation min(ArrayList<String> fields, String minField, Query query,
                                         KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -348,7 +348,7 @@ public class BaseDataStore<T extends GenericJson> {
         return calculation(AggregateEntity.AggregateType.MIN, fields, minField, query, cachedCallback);
     }
 
-    public List<Aggregation.Result> max(ArrayList<String> fields, String maxField, Query query,
+    public Aggregation max(ArrayList<String> fields, String maxField, Query query,
                                         KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -356,7 +356,7 @@ public class BaseDataStore<T extends GenericJson> {
         return calculation(AggregateEntity.AggregateType.MAX, fields, maxField, query, cachedCallback);
     }
 
-    public List<Aggregation.Result> average(ArrayList<String> fields, String averageField, Query query,
+    public Aggregation average(ArrayList<String> fields, String averageField, Query query,
                                             KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -367,18 +367,18 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Used for aggregate fields
      */
-    private List<Aggregation.Result> calculation(AggregateEntity.AggregateType type, ArrayList<String> fields,
+    private Aggregation calculation(AggregateEntity.AggregateType type, ArrayList<String> fields,
                                                  String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
-        List<Aggregation.Result> ret = null;
+        Aggregation ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             try {
-                ret = new CalculationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute();
+                ret = new Aggregation(Arrays.asList(new CalculationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute()));
             } catch (IOException e) {
                 cachedCallback.onFailure(e);
             }
             cachedCallback.onSuccess(ret);
         }
-        ret = new CalculationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute();
+        ret = new Aggregation(Arrays.asList(new CalculationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()));
         return ret;
     }
 

@@ -18,6 +18,8 @@ package com.kinvey.java.core;
 
 import com.kinvey.java.model.Aggregation;
 
+import java.util.Arrays;
+
 /**
  * @author edwardf
  */
@@ -26,7 +28,7 @@ public abstract class KinveyAggregateCallback implements KinveyClientCallback<Ag
     @Override
     public void onSuccess(Aggregation.Result[] result) {
 
-        Aggregation response = new Aggregation(result);
+        Aggregation response = new Aggregation(Arrays.asList(result));
         onSuccess(response);
 
     }

@@ -12,7 +12,7 @@ import java.util.List;
  * Created by yuliya on 10/06/17.
  */
 
-public abstract class AbstractCalculationRequest<T extends GenericJson> implements IRequest<List<T>> {
+public abstract class AbstractCalculationRequest<T extends GenericJson> implements IRequest<T[]> {
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
     protected NetworkManager<T> networkManager;
@@ -25,8 +25,8 @@ public abstract class AbstractCalculationRequest<T extends GenericJson> implemen
     }
 
     @Override
-    public List<T> execute() throws IOException {
-        List<T> ret = null;
+    public T[] execute() throws IOException {
+        T[] ret = null;
         switch (readPolicy) {
             case FORCE_LOCAL:
                 ret = getCached();
@@ -44,8 +44,8 @@ public abstract class AbstractCalculationRequest<T extends GenericJson> implemen
 
     }
 
-    abstract protected List<T> getCached();
+    abstract protected T[] getCached();
 
-    abstract protected List<T> getNetwork() throws IOException;
+    abstract protected T[] getNetwork() throws IOException;
 
 }

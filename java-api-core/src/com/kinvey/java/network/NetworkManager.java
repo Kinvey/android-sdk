@@ -415,7 +415,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Class<T> myClass, Query query) throws IOException {
+    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(sumField);
         return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, myClass, query);
@@ -430,7 +430,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Class<T> myClass, Query query) throws IOException {
+    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(maxField);
         return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField,  myClass, query);
@@ -445,7 +445,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate minBlocking(ArrayList<String> fields, String minField, Class<T> myClass, Query query) throws IOException {
+    public Aggregate minBlocking(ArrayList<String> fields, String minField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(minField);
         return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, myClass, query);
@@ -460,7 +460,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Class<T> myClass, Query query) throws IOException {
+    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(averageField);
         return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, myClass, query);
@@ -838,7 +838,7 @@ public class NetworkManager<T extends GenericJson> {
      * Aggregate requests.
      *
      */
-    public class Aggregate extends AbstractKinveyJsonClientRequest<T> {
+    public class Aggregate extends AbstractKinveyJsonClientRequest<T[]> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_group";
         @Key
         private String collectionName;

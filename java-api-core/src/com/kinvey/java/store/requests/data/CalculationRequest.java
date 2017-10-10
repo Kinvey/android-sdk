@@ -43,36 +43,36 @@ public class CalculationRequest extends AbstractCalculationRequest<Aggregation.R
     }
 
     @Override
-    protected List<Aggregation.Result> getCached() {
+    protected Aggregation.Result[] getCached() {
         switch (type) {
             case COUNT:
                 return cache.count(fields, query);
-            case SUM:
-                return cache.sum(fields, field, query);
-            case MIN:
-                return cache.min(fields, field, query);
-            case MAX:
-                return cache.max(fields, field, query);
-            case AVERAGE:
-                return cache.average(fields, field, query);
+//            case SUM:
+//                return cache.sum(fields, field, query);
+//            case MIN:
+//                return cache.min(fields, field, query);
+//            case MAX:
+//                return cache.max(fields, field, query);
+//            case AVERAGE:
+//                return cache.average(fields, field, query);
             default:
                 throw new KinveyException(type.name() + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.");
         }
     }
 
     @Override
-    protected List<Aggregation.Result> getNetwork() throws IOException {
+    protected Aggregation.Result[] getNetwork() throws IOException {
         switch (type) {
             case COUNT:
-                return Arrays.asList(networkManager.countBlocking(fields, Aggregation.Result.class, query).execute());
+                return networkManager.countBlocking(fields, Aggregation.Result[].class, query).execute();
             case SUM:
-                return Arrays.asList(networkManager.sumBlocking(fields, field, Aggregation.Result.class, query).execute());
-            case MIN:
-                return Arrays.asList(networkManager.minBlocking(fields, field, Aggregation.Result.class, query).execute());
-            case MAX:
-                return Arrays.asList(networkManager.maxBlocking(fields, field, Aggregation.Result.class, query).execute());
-            case AVERAGE:
-                return Arrays.asList(networkManager.averageBlocking(fields, field, Aggregation.Result.class, query).execute());
+//                return Arrays.asList(networkManager.sumBlocking(fields, field, Aggregation.Result[].class, query).execute());
+//            case MIN:
+//                return Arrays.asList(networkManager.minBlocking(fields, field, Aggregation.Result[].class, query).execute());
+//            case MAX:
+//                return Arrays.asList(networkManager.maxBlocking(fields, field, Aggregation.Result[].class, query).execute());
+//            case AVERAGE:
+//                return Arrays.asList(networkManager.averageBlocking(fields, field, Aggregation.Result[].class, query).execute());
             default:
                 throw new KinveyException(type.name() + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.");
         }

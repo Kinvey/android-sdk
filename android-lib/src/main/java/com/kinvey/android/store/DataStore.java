@@ -803,27 +803,27 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     public void count(ArrayList<String> fields, Query query,
                       KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_COUNT), callback, fields, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_COUNT), callback, fields, query, cachedCallback).execute();
     }
 
     public void sum(ArrayList<String> fields, String sumField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
     }
 
     public void min(ArrayList<String> fields, String minField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MIN), callback, fields, minField, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_MIN), callback, fields, minField, query, cachedCallback).execute();
     }
 
     public void max(ArrayList<String> fields, String maxField, Query query,
                     KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_MAX), callback, fields, maxField, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_MAX), callback, fields, maxField, query, cachedCallback).execute();
     }
 
     public void average(ArrayList<String> fields, String averageField, Query query,
                         KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<List<Aggregation.Result>>(this, methodMap.get(KEY_AVERAGE), callback, fields, averageField, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation.Result[]>(this, methodMap.get(KEY_AVERAGE), callback, fields, averageField, query, cachedCallback).execute();
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {
