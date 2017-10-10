@@ -98,7 +98,7 @@ public class CalculationMethodTest {
         fields.add("username");
         DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.COUNT, fields, null, query, null);
         assertNotNull(callback);
-        assertNotNull(callback.getResult().getResultsFor("username", TEST_USERNAME));// TODO: 10.10.2017
+        assertNotNull(callback.getResult().getResultsFor("username", TEST_USERNAME));
         assertTrue(callback.getResult().getResultsFor("username", TEST_USERNAME).get(0).intValue() == 2);
     }
 
