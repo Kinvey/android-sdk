@@ -31,7 +31,7 @@ public class Person extends GenericJson{
     private long weight ;
 
     @Key
-    private int carNumber ;
+    private Integer carNumber ;
 
     @Key("username")
     protected String username;
