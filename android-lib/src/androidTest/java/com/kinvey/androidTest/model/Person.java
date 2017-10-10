@@ -76,11 +76,11 @@ public class Person extends GenericJson{
         this.weight = weight;
     }
 
-    public int getCarNumber() {
+    public Integer getCarNumber() {
         return carNumber;
     }
 
-    public void setCarNumber(int carNumber) {
+    public void setCarNumber(Integer carNumber) {
         this.carNumber = carNumber;
     }
 }
