@@ -133,7 +133,33 @@ public abstract class AbstractQuery implements Serializable{
                         generator.writeFieldName(entry.getKey());
                         generator.writeString((String)entry.getValue());
                         generator.writeEndObject();
-                    } else if (valueClass.getComponentType().equals(LinkedHashMap.class) &&
+                    } else if (valueClass.equals(Boolean.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeBoolean((boolean) entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Integer.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((int)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Long.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((long)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Double.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((double)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Float.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((float)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.getComponentType() != null &&
+                            valueClass.getComponentType().equals(LinkedHashMap.class) &&
                             valueClass.isArray()) {
                         // Value is a map, so this is a nested query. Recursively call into it.
                         generator.writeStartObject();
