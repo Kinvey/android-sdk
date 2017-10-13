@@ -18,6 +18,7 @@ package com.kinvey.java.cache;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 
 import java.util.ArrayList;
@@ -124,46 +125,13 @@ public interface ICache<T extends GenericJson> {
     void setTtl(long ttl);
 
     /**
-     * Get the sum of elements from the sumField from the cache
-     * @param fields  fields for group by
-     * @param sumField field for sum
-     * @param q query to filter results
-     * @return the sum of elements from the sumField from the cache
-     */
-    Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q);
-
-    /**
-     * Get the min of elements from the minField from the cache
-     * @param fields  fields for group by
-     * @param minField field for searching min value
-     * @param q query to filter results
-     * @return the min of elements from the minField from the cache
-     */
-    Aggregation.Result[] min(ArrayList<String> fields, String minField, Query q);
-
-    /**
-     * Get the max of elements from the maxField from the cache
-     * @param fields  fields for group by
-     * @param maxField field for searching max value
-     * @param q query to filter results
-     * @return the max of elements from the maxField from the cache
-     */
-    Aggregation.Result[] max(ArrayList<String> fields, String maxField, Query q);
-
-    /**
-     * Get the average of elements from the averageField from the cache
+     * Grouping allows you to collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType}
      * @param fields fields for group by
-     * @param averageField field for calculating average value
+     * @param reduceField field for apply reduce function
      * @param q query to filter results
-     * @return the average of elements from the averageField from the cache
+     * @return the array of groups containing the result of the reduce function
      */
-    Aggregation.Result[] average(ArrayList<String> fields, String averageField, Query q);
-
-    /**
-     * Get the count of elements from the countField from the cache
-     * @param fields fields for group by
-     * @param q query to filter results
-     * @return the count of elements from the countField from the cache
-     */
-    Aggregation.Result[] count(ArrayList<String> fields, Query q);
+    Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q);
 }

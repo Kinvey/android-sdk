@@ -9,14 +9,14 @@ import java.util.ArrayList;
 /**
  * Created by edward on 7/31/15.
  */
-public class AggregrateEntityTest extends TestCase {
+public class AggregateEntityTest extends TestCase {
 
     AggregateEntity ae;
 
     public void testConstructor(){
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("key");
-        ae = new AggregateEntity(fields, AggregateEntity.AggregateType.COUNT, "field", new Query(), null);
+        ae = new AggregateEntity(fields, AggregateType.COUNT, "field", new Query(), null);
 
 
 //        public AggregateEntity(ArrayList<String> fields, AggregateType type, String aggregateField, Query query,
@@ -36,6 +36,6 @@ public class AggregrateEntityTest extends TestCase {
     }
 
     public void testEnums(){
-        assertEquals(AggregateEntity.AggregateType.COUNT, AggregateEntity.AggregateType.valueOf("COUNT"));
+        assertEquals(AggregateType.COUNT, AggregateType.valueOf("COUNT"));
     }
 }

@@ -21,6 +21,7 @@ import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
 
@@ -40,12 +41,6 @@ import io.realm.RealmFieldType;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
-
-import com.kinvey.java.model.AggregateEntity.AggregateType;
-import com.kinvey.java.model.AggregateEntity.AggregateType;
-import com.kinvey.java.model.AggregateEntity.AggregateType;
-import com.kinvey.java.model.AggregateEntity.AggregateType;
-import com.kinvey.java.model.AggregateEntity.AggregateType;
 
 /**
  * Created by Prots on 1/26/16.
@@ -814,7 +809,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
-    private Aggregation.Result[] calculation(AggregateEntity.AggregateType type, String operationField, ArrayList<String> fields, Query q) {
+    private Aggregation.Result[] calculation(AggregateType type, ArrayList<String> fields, String reduceField, Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<Aggregation.Result> results = new ArrayList<>();
@@ -863,16 +858,16 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
                     switch (type) {
                         case SUM:
-                            ret = query.sum(operationField);
+                            ret = query.sum(reduceField);
                             break;
                         case MIN:
-                            ret = query.min(operationField);
+                            ret = query.min(reduceField);
                             break;
                         case MAX:
-                            ret = query.max(operationField);
+                            ret = query.max(reduceField);
                             break;
                         case AVERAGE:
-                            ret = query.average(operationField);
+                            ret = query.average(reduceField);
                             break;
                         case COUNT:
                             ret = query.count();
@@ -899,30 +894,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public Aggregation.Result[] count(ArrayList<String> fields, Query q) {
-        return calculation(AggregateType.COUNT, null, fields, q);
+    public Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q) {
+        return calculation(aggregateType, fields, reduceField, q);
     }
-
-    @Override
-    public Aggregation.Result[] sum(ArrayList<String> fields, String sumField, Query q) {
-        return calculation(AggregateType.SUM, sumField, fields, q);
-    }
-
-    @Override
-    public Aggregation.Result[] min(ArrayList<String> fields, String minField, Query q) {
-        return calculation(AggregateType.MIN, minField, fields, q);
-    }
-
-    @Override
-    public Aggregation.Result[] max(ArrayList<String> fields, String maxField, Query q) {
-        return calculation(AggregateType.MAX, maxField, fields, q);
-    }
-
-    @Override
-    public Aggregation.Result[] average(ArrayList<String> fields, String averageField, Query q) {
-        return calculation(AggregateType.AVERAGE, averageField, fields, q);
-    }
-
 
     public enum Types{
         STRING,

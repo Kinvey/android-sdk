@@ -20,6 +20,7 @@ import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 
 import java.io.IOException;
@@ -215,7 +216,7 @@ public class TestManager<T extends Person> {
         return callback;
     }
 
-    public DefaultKinveyAggregateCallback calculation(final DataStore<T> store, final AggregateEntity.AggregateType aggregateType,
+    public DefaultKinveyAggregateCallback calculation(final DataStore<T> store, final AggregateType aggregateType,
                                                       final ArrayList<String> fields, final String sumField, final Query query,
                                                       final KinveyCachedAggregateCallback cachedCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -223,24 +224,7 @@ public class TestManager<T extends Person> {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                switch (aggregateType) {
-                    case COUNT:
-                        store.count(fields, query, callback, cachedCallback);
-                        break;
-                    case MIN:
-                        store.min(fields, sumField, query, callback, cachedCallback);
-                        break;
-                    case MAX:
-                        store.max(fields, sumField, query, callback, cachedCallback);
-                        break;
-                    case AVERAGE:
-                        store.average(fields, sumField, query, callback, cachedCallback);
-                        break;
-                    case SUM:
-                        store.sum(fields, sumField, query, callback, cachedCallback);
-                        break;
-
-                }
+                store.group(aggregateType, fields, sumField, query, callback, cachedCallback);
             }
         });
         looperThread.start();

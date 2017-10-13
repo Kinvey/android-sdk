@@ -13,6 +13,7 @@ import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
-import static com.kinvey.java.model.AggregateEntity.AggregateType;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -38,7 +38,7 @@ import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class CalculationMethodTest {
+public class AggregationTest {
 
     private Client client;
 

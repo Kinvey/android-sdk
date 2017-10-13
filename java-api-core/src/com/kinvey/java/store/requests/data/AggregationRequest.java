@@ -3,7 +3,7 @@ package com.kinvey.java.store.requests.data;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
@@ -16,24 +16,24 @@ import java.util.ArrayList;
  * Created by yuliya on 10/06/17.
  */
 
-public class CalculationRequest implements IRequest<Aggregation.Result[]> {
+public class AggregationRequest implements IRequest<Aggregation.Result[]> {
     private final Query query;
-    private final AggregateEntity.AggregateType type;
+    private final AggregateType type;
     private final ICache<Aggregation.Result> cache;
     private ReadPolicy readPolicy;
     private final NetworkManager<Aggregation.Result> networkManager;
     private ArrayList<String> fields;
-    private final String field;
+    private final String reduceField;
 
-    public CalculationRequest(AggregateEntity.AggregateType type, ICache cache, ReadPolicy readPolicy,
+    public AggregationRequest(AggregateType type, ICache cache, ReadPolicy readPolicy,
                               NetworkManager networkManager,
-                              ArrayList<String> fields, String field, Query query) {
+                              ArrayList<String> fields, String reduceField, Query query) {
         this.type = type;
         this.cache = cache;
         this.readPolicy = readPolicy;
         this.networkManager = networkManager;
         this.fields = fields;
-        this.field = field;
+        this.reduceField = reduceField;
         this.query = query;
     }
 
@@ -53,20 +53,7 @@ public class CalculationRequest implements IRequest<Aggregation.Result[]> {
     }
 
     protected Aggregation.Result[] getCached() {
-        switch (type) {
-            case COUNT:
-                return cache.count(fields, query);
-            case SUM:
-                return cache.sum(fields, field, query);
-            case MIN:
-                return cache.min(fields, field, query);
-            case MAX:
-                return cache.max(fields, field, query);
-            case AVERAGE:
-                return cache.average(fields, field, query);
-            default:
-                throw new KinveyException(type.name() + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.");
-        }
+        return cache.group(type, fields, reduceField, query);
     }
 
     protected Aggregation.Result[] getNetwork() throws IOException {
@@ -74,13 +61,13 @@ public class CalculationRequest implements IRequest<Aggregation.Result[]> {
             case COUNT:
                 return networkManager.countBlocking(fields, Aggregation.Result[].class, query).execute();
             case SUM:
-                return networkManager.sumBlocking(fields, field, Aggregation.Result[].class, query).execute();
+                return networkManager.sumBlocking(fields, reduceField, Aggregation.Result[].class, query).execute();
             case MIN:
-                return networkManager.minBlocking(fields, field, Aggregation.Result[].class, query).execute();
+                return networkManager.minBlocking(fields, reduceField, Aggregation.Result[].class, query).execute();
             case MAX:
-                return networkManager.maxBlocking(fields, field, Aggregation.Result[].class, query).execute();
+                return networkManager.maxBlocking(fields, reduceField, Aggregation.Result[].class, query).execute();
             case AVERAGE:
-                return networkManager.averageBlocking(fields, field, Aggregation.Result[].class, query).execute();
+                return networkManager.averageBlocking(fields, reduceField, Aggregation.Result[].class, query).execute();
             default:
                 throw new KinveyException(type.name() + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.");
         }

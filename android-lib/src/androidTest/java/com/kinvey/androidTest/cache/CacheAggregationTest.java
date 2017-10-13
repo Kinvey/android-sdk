@@ -13,6 +13,7 @@ import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.store.StoreType;
 
@@ -36,7 +37,7 @@ import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class CacheCalculationTest {
+public class CacheAggregationTest {
 
 
     private Client client;
@@ -67,7 +68,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
         assertTrue(results[0].result.intValue() == 2);
     }
@@ -92,7 +93,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("height", 170f);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
         assertTrue(results[0].result.intValue() == 1);
     }
@@ -117,7 +118,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("weight", 170L);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
         assertTrue(results[0].result.intValue() == 1);
     }
@@ -142,7 +143,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("carNumber", 1);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.count(fields, query);
+        Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
         assertTrue(results[0].result.intValue() == 1);
     }
@@ -167,7 +168,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.min(fields, "height", query);
+        Aggregation.Result[] results = cache.group(AggregateType.MIN, fields, "height", query);
 
         assertTrue(results[0].result.intValue() == 170);
     }
@@ -192,7 +193,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.max(fields, "height", query);
+        Aggregation.Result[] results = cache.group(AggregateType.MAX, fields, "height", query);
 
         assertTrue(results[0].result.intValue() == 180);
     }
@@ -217,7 +218,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.average(fields, "height", query);
+        Aggregation.Result[] results = cache.group(AggregateType.AVERAGE, fields, "height", query);
 
         assertTrue(results[0].result.intValue() == 175);
     }
@@ -242,7 +243,7 @@ public class CacheCalculationTest {
         Query query = client.query().equals("username", TEST_USERNAME);
         ArrayList<String> fields = new ArrayList<>();
         fields.add("username");
-        Aggregation.Result[] results = cache.sum(fields, "height", query);
+        Aggregation.Result[] results = cache.group(AggregateType.SUM, fields, "height", query);
 
         assertTrue(results[0].result.intValue() == 350);
     }

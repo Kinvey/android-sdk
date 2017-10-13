@@ -40,6 +40,7 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -130,11 +131,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";*/
 
 
-    private static final String KEY_COUNT = "KEY_COUNT";
-    private static final String KEY_SUM = "KEY_SUM";
-    private static final String KEY_MAX = "KEY_MAX";
-    private static final String KEY_MIN = "KEY_MIN";
-    private static final String KEY_AVERAGE = "KEY_AVERAGE";
+    private static final String KEY_GROUP = "KEY_GROUP";
 
     private static Map<String, Method> methodMap;
 
@@ -190,11 +187,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
-            tempMap.put(KEY_SUM, BaseDataStore.class.getMethod("sum", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-            tempMap.put(KEY_MIN, BaseDataStore.class.getMethod("min", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-            tempMap.put(KEY_MAX, BaseDataStore.class.getMethod("max", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-            tempMap.put(KEY_AVERAGE, BaseDataStore.class.getMethod("average", ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-            tempMap.put(KEY_COUNT, BaseDataStore.class.getMethod("count", ArrayList.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
@@ -816,29 +809,18 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         return client.getSyncManager().getCount(getCollectionName());
     }
 
-    public void count(ArrayList<String> fields, Query query,
+    /**
+     * Asynchronous request to collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType} (such as min, max, sum, count, average)
+     * @param fields fields for group by
+     * @param reduceField field for apply reduce function
+     * @param query query to filter results
+     * @return the array of groups containing the result of the reduce function
+     */
+    public void group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query query,
                       KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_COUNT), callback, fields, query, cachedCallback).execute();
-    }
-
-    public void sum(ArrayList<String> fields, String sumField, Query query,
-                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_SUM), callback, fields, sumField, query, cachedCallback).execute();
-    }
-
-    public void min(ArrayList<String> fields, String minField, Query query,
-                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_MIN), callback, fields, minField, query, cachedCallback).execute();
-    }
-
-    public void max(ArrayList<String> fields, String maxField, Query query,
-                    KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_MAX), callback, fields, maxField, query, cachedCallback).execute();
-    }
-
-    public void average(ArrayList<String> fields, String averageField, Query query,
-                        KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
-        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_AVERAGE), callback, fields, averageField, query, cachedCallback).execute();
+        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_GROUP), callback, aggregateType, fields, reduceField, query, cachedCallback).execute();
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {
