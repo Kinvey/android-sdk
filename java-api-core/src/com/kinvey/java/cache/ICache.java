@@ -17,8 +17,11 @@
 package com.kinvey.java.cache;
 
 import com.google.api.client.json.GenericJson;
-import com.google.gson.Gson;
 import com.kinvey.java.Query;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,4 +123,15 @@ public interface ICache<T extends GenericJson> {
      * @param ttl ttl value to be set in milliseconds
      */
     void setTtl(long ttl);
+
+    /**
+     * Grouping allows you to collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType}
+     * @param fields fields for group by
+     * @param reduceField field for apply reduce function
+     * @param q query to filter results
+     * @return the array of groups containing the result of the reduce function
+     */
+    Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q);
 }

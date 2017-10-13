@@ -24,6 +24,15 @@ public class Person extends GenericJson{
     @Key("_id")
     protected String id;
 
+    @Key
+    private float height;
+
+    @Key
+    private long weight ;
+
+    @Key
+    private Integer carNumber ;
+
     @Key("username")
     protected String username;
 
@@ -49,5 +58,29 @@ public class Person extends GenericJson{
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+    public void setHeight(float height) {
+        this.height = height;
+    }
+
+    public long getWeight() {
+        return weight;
+    }
+
+    public void setWeight(long weight) {
+        this.weight = weight;
+    }
+
+    public Integer getCarNumber() {
+        return carNumber;
+    }
+
+    public void setCarNumber(Integer carNumber) {
+        this.carNumber = carNumber;
     }
 }

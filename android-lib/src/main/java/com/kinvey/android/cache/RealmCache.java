@@ -17,8 +17,12 @@
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
@@ -26,12 +30,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
+import io.realm.RealmFieldType;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -803,6 +809,94 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
+    private Aggregation.Result[] calculation(AggregateType type, ArrayList<String> fields, String reduceField, Query q) {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+
+        List<Aggregation.Result> results = new ArrayList<>();
+
+
+        try {
+            mRealm.beginTransaction();
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+            RealmFieldType fieldType;
+            Number ret = null;
+            Aggregation.Result result;
+            for (String field : fields) {
+                RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
+                for (DynamicRealmObject d : realmObjects) {
+                    result = new Aggregation.Result();
+                    query = realmObjects.where();
+                    for (String fieldToQuery : fields) {
+                        fieldType = d.getFieldType(fieldToQuery);
+                        switch (fieldType) {
+                            case STRING:
+                                query = query.equalTo(fieldToQuery, String.valueOf(d.get(fieldToQuery)));
+                                break;
+                            case INTEGER:
+                                query = query.equalTo(fieldToQuery, (Long) (d.get(fieldToQuery)));
+                                break;
+                            case BOOLEAN:
+                                query = query.equalTo(field, (Boolean) (d.get(field)));
+                                break;
+                            case DATE:
+                                query = query.equalTo(field, (Date) (d.get(field)));
+                                break;
+                            case FLOAT:
+                                query = query.equalTo(field, (Float) (d.get(field)));
+                                break;
+                            case DOUBLE:
+                                query = query.equalTo(field, (Double) (d.get(field)));
+                                break;
+                            default:
+                                throw new KinveyException("Current fieldType doesn't support. Supported types: STRING, INTEGER, BOOLEAN, DATE, FLOAT, DOUBLE");
+
+                        }
+                        result.put(fieldToQuery, d.get(fieldToQuery));
+
+                    }
+
+                    switch (type) {
+                        case SUM:
+                            ret = query.sum(reduceField);
+                            break;
+                        case MIN:
+                            ret = query.min(reduceField);
+                            break;
+                        case MAX:
+                            ret = query.max(reduceField);
+                            break;
+                        case AVERAGE:
+                            ret = query.average(reduceField);
+                            break;
+                        case COUNT:
+                            ret = query.count();
+                            break;
+                    }
+
+                    if (ret != null) {
+                        result.put("_result", ret);
+                        if (results.contains(result)) {
+                            continue;
+                        }
+                        results.add(result);
+                    }
+                }
+            }
+            mRealm.commitTransaction();
+        } finally {
+            mRealm.close();
+        }
+
+        Aggregation.Result[] resultsArray = new Aggregation.Result[results.size()];
+
+        return results.toArray(resultsArray);
+    }
+
+    @Override
+    public Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q) {
+        return calculation(aggregateType, fields, reduceField, q);
+    }
 
     public enum Types{
         STRING,
