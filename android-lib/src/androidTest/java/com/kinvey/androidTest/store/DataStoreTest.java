@@ -596,6 +596,13 @@ public class DataStoreTest {
         mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
         assertEquals(expectedMongoQuery, mongoQuery);
 
+        int ttl = 120;
+        myQuery = client.query();
+        myQuery.equals("ttl_in_seconds", ttl);
+        expectedMongoQuery = "{\"ttl_in_seconds\":120}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
         // Test field long value
         myQuery = client.query();
         myQuery.equals("testlong", 34L);
@@ -621,6 +628,55 @@ public class DataStoreTest {
         myQuery = client.query();
         myQuery.equals("testnull", null);
         expectedMongoQuery = "{\"testnull\":null}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $ne operator
+        myQuery = client.query();
+        myQuery.notEqual("age", "100500");
+        expectedMongoQuery = "{\"age\":{\"$ne\":\"100500\"}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - string
+        myQuery = client.query();
+        myQuery.in("testIn", new String[]{"1","2","3"});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[\"1\",\"2\",\"3\"]}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - bool
+        myQuery = client.query();
+        myQuery.in("testIn", new Boolean[]{true,false,true});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[true,false,true]}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - int
+        myQuery = client.query();
+        myQuery.in("testIn", new Integer[]{1,2,3});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[1,2,3]}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - long
+        myQuery = client.query();
+        myQuery.in("testIn", new Long[]{1L,2L,3L});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[1,2,3]}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - float
+        myQuery = client.query();
+        myQuery.in("testIn", new Float[]{1.0f,2.0f,3.0f});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[1.0,2.0,3.0]}}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // Test $in operator - double
+        myQuery = client.query();
+        myQuery.in("testIn", new Double[]{1.1,2.2,3.3});
+        expectedMongoQuery = "{\"testIn\":{\"$in\":[1.1,2.2,3.3]}}";
         mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
         assertEquals(expectedMongoQuery, mongoQuery);
 
