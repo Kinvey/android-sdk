@@ -153,7 +153,7 @@ public abstract class ClassHash {
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
         RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz);
 
-        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
+        String shortName = TableNameManager.getShortName(name, realm);
 
         if (!schema.hasField(KinveyMetaData.AccessControlList.ACL) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
             RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
@@ -165,7 +165,7 @@ public abstract class ClassHash {
 
     private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
 
-        String shortName = TableNameManager.getInstance(realm).createShortName(name, realm);
+        String shortName = TableNameManager.createShortName(name, realm);
 
         RealmObjectSchema schema = realm.getSchema().create(shortName);
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
@@ -231,8 +231,7 @@ public abstract class ClassHash {
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
         DynamicRealmObject object = saveClassData(name, realm, clazz, obj);
 
-        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
-
+        String shortName = TableNameManager.getShortName(name, realm);
 
         if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
                 && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
@@ -250,7 +249,7 @@ public abstract class ClassHash {
 
     private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
 
-        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
+        String shortName = TableNameManager.getShortName(name, realm);
 
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 

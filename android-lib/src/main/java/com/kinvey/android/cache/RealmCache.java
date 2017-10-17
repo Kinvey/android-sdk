@@ -58,7 +58,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
         try {
-            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
             boolean isIgnoreIn = isQueryContainsInOperator(query.getQueryFilterMap());
             QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isIgnoreIn);
@@ -160,7 +160,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         List<T> ret = new ArrayList<T>();
         try {
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
@@ -193,7 +193,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         T ret;
         try {
             mRealm.beginTransaction();
-            DynamicRealmObject obj = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            DynamicRealmObject obj = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .equalTo("_id", id)
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .findFirst();
@@ -214,7 +214,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         List<T> ret = new ArrayList<T>();
         try {
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
 
             RealmResults<DynamicRealmObject> objects = query
@@ -279,7 +279,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             if (!isQueryContainsInOperator(query.getQueryFilterMap())) {
                 mRealm.beginTransaction();
                 
-                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm));
+                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
                 RealmResults result = realmQuery.findAll();
@@ -348,7 +348,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Long.MAX_VALUE)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
@@ -381,7 +381,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .equalTo("_id", id);
             RealmResults realmResults = query.findAll();
             ret = realmResults.size();
@@ -403,7 +403,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try {
             mRealm.beginTransaction();
-            mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+            mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .findAll()
                     .deleteAllFromRealm();
             mRealm.commitTransaction();
@@ -420,7 +420,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            DynamicRealmObject obj = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm)).findFirst();
+            DynamicRealmObject obj = mRealm.where(TableNameManager.getShortName(mCollection, mRealm)).findFirst();
             if (obj != null){
                 ret = ClassHash.realmToObject(obj, mCollectionItemClass);
             }
@@ -440,7 +440,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
-                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm));
+                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 DynamicRealmObject obj = query.findFirst();
                 if (obj != null) {
@@ -465,7 +465,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             if (q != null && !isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
-                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm));
+                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 ret = query.count();
                 mRealm.commitTransaction();
@@ -568,7 +568,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 RealmResults<DynamicRealmObject> objects;
                 //get all objects from realm. It need for make manual search in elements with "in" operator
                 try {
-                    objects = mRealm.where(TableNameManager.getInstance(mRealm).getShortName(mCollection, mRealm))
+                    objects = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                             .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                             .findAll();
 

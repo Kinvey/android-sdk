@@ -24,18 +24,7 @@ public class TableNameManager {
     private static final String SHORT_NAME_FIELD = "short";
     private static final String ID_FIELD = "_id";
 
-    /**
-     * realm contains fields 'originalName' and 'shortName'
-     */
-    private DynamicRealm realm;
-
-    private static TableNameManager tableNameManager;
-
-    private TableNameManager(DynamicRealm realm) {
-        initTable(realm);
-    }
-
-    private void initTable(DynamicRealm realm) {
+    private static void initTable(DynamicRealm realm) {
         RealmSchema schema = realm.getSchema();
         System.out.println("TEST_TEST: initTable");
         if (schema.get(COLLECTION_NAME) == null) {
@@ -47,7 +36,8 @@ public class TableNameManager {
         }
     }
 
-    public String createShortName(String originalName, DynamicRealm realm) {
+    public static String createShortName(String originalName, DynamicRealm realm) {
+        initTable(realm);
 
         DynamicRealmObject object = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         String shortName = null;
@@ -65,24 +55,19 @@ public class TableNameManager {
         return shortName;
     }
 
-    public String getShortName(String originalName, DynamicRealm realm) {
+    public static String getShortName(String originalName, DynamicRealm realm) {
+        initTable(realm);
         DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         return realmObject.getString(SHORT_NAME_FIELD);
     }
 
-    public String getOriginalName(String shortName, DynamicRealm realm) {
+    public static String getOriginalName(String shortName, DynamicRealm realm) {
+        initTable(realm);
         DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, shortName).findFirst();
         return realmObject.getString(ORIGINAL_NAME_FIELD);
     }
 
-    public static TableNameManager getInstance(DynamicRealm realm) {
-        if (tableNameManager == null) {
-            tableNameManager = new TableNameManager(realm);
-        }
-        return tableNameManager;
-    }
-
-    private String generateShortName() {
+    private static String generateShortName() {
         String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 13);
         return "uuid = " + uuid;
     }
