@@ -152,8 +152,11 @@ public abstract class ClassHash {
 
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
         RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz);
+
+        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
+
         if (!schema.hasField(KinveyMetaData.AccessControlList.ACL) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
             schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
         }
         return schema;
@@ -161,7 +164,10 @@ public abstract class ClassHash {
 
 
     private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
-        RealmObjectSchema schema = realm.getSchema().create(name);
+
+        String shortName = TableNameManager.getInstance(realm).createShortName(name, realm);
+
+        RealmObjectSchema schema = realm.getSchema().create(shortName);
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
         for (Field f : fields){
             FieldInfo fieldInfo = FieldInfo.of(f);
@@ -178,7 +184,7 @@ public abstract class ClassHash {
                 } else {
                     for (Class c : ALLOWED) {
                         if (underlying.equals(c)) {
-                            RealmObjectSchema innerScheme = realm.getSchema().create(name + "_" + fieldInfo.getName());
+                            RealmObjectSchema innerScheme = realm.getSchema().create(shortName + "_" + fieldInfo.getName());
                             if (!innerScheme.hasField(ID)){
                                 innerScheme.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
                             }
@@ -190,7 +196,7 @@ public abstract class ClassHash {
                 }
 
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
-                RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
+                RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
                 schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
             } else {
                 for (Class c : ALLOWED) {
@@ -214,7 +220,7 @@ public abstract class ClassHash {
         }
 
         if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
 
@@ -224,12 +230,16 @@ public abstract class ClassHash {
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
         DynamicRealmObject object = saveClassData(name, realm, clazz, obj);
+
+        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
+
+
         if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
                 && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
                 && realm.getSchema().contains(name + "_" + KinveyMetaData.AccessControlList.ACL)){
             KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
             acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-            DynamicRealmObject innerObject = saveClassData(name + "_" + KinveyMetaData.AccessControlList.ACL,
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
                     realm,
                     KinveyMetaData.AccessControlList.class,
                     acl);
@@ -240,12 +250,14 @@ public abstract class ClassHash {
 
     private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
 
+        String shortName = TableNameManager.getInstance(realm).getShortName(name, realm);
+
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 
         DynamicRealmObject object = null;
 
         if (obj.containsKey(ID) && obj.get(ID) != null) {
-            object = realm.where(name)
+            object = realm.where(shortName)
                     .equalTo(ID, (String) obj.get(ID))
                     .findFirst();
         } else {
@@ -253,14 +265,14 @@ public abstract class ClassHash {
         }
 
         if (object == null){
-            object = realm.createObject(name, obj.get(ID));
+            object = realm.createObject(shortName, obj.get(ID));
         }
 
         if (obj.containsKey(KinveyMetaData.KMD)){
             Map kmd = (Map)obj.get(KinveyMetaData.KMD);
             if (kmd != null) {
                 KinveyMetaData metadata = KinveyMetaData.fromMap(kmd);
-                DynamicRealmObject innerObject = saveClassData(name + "_" + KinveyMetaData.KMD,
+                DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
                         realm,
                         KinveyMetaData.class,
                         metadata);
@@ -273,7 +285,7 @@ public abstract class ClassHash {
             Map acl = (Map)obj.get(KinveyMetaData.AccessControlList.ACL);
             if (acl != null) {
                 KinveyMetaData.AccessControlList accessControlList = KinveyMetaData.AccessControlList.fromMap(acl);
-                DynamicRealmObject innerObject = saveClassData(name + "_" + KinveyMetaData.AccessControlList.ACL,
+                DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,
                         accessControlList);
@@ -294,7 +306,7 @@ public abstract class ClassHash {
                     Object collection = fieldInfo.getValue(obj);
                     if (f.getType().isArray()){
                         for (int i = 0 ; i < Array.getLength(collection); i++){
-                            list.add(saveClassData(name + "_" + fieldInfo.getName(),
+                            list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
                                     realm,
                                     (Class<? extends GenericJson>)underlying,
                                     (GenericJson) Array.get(collection, i)));
@@ -303,7 +315,7 @@ public abstract class ClassHash {
 
                         if (GenericJson.class.isAssignableFrom(underlying)) {
                             for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
-                                list.add(saveClassData(name + "_" + fieldInfo.getName(),
+                                list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
                                         realm,
                                         (Class<? extends GenericJson>) underlying,
                                         genericJson));
@@ -311,7 +323,7 @@ public abstract class ClassHash {
                         } else {
                             DynamicRealmObject dynamicRealmObject = null;
                             for (Object o : (Collection) collection) {
-                                dynamicRealmObject = realm.createObject(name + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
+                                dynamicRealmObject = realm.createObject(shortName + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
 
                                 for (Class c : ALLOWED) {
                                     if (underlying.equals(c)) {
@@ -330,7 +342,7 @@ public abstract class ClassHash {
                     }
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) && fieldInfo.getValue(obj) != null){
 
-                DynamicRealmObject innerObject = saveClassData(name + "_" + fieldInfo.getName(),
+                DynamicRealmObject innerObject = saveClassData(shortName + "_" + fieldInfo.getName(),
                         realm,
                         (Class<? extends GenericJson>) fieldInfo.getType(),
                         (GenericJson) obj.get(fieldInfo.getName()));
@@ -359,7 +371,7 @@ public abstract class ClassHash {
             metadata.set("ect", String.format("%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));
 
-            DynamicRealmObject innerObject = saveClassData(name + "_" + KinveyMetaData.KMD,
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
                     realm,
                     KinveyMetaData.class,
                     metadata);
