@@ -33,19 +33,13 @@ public class TableNameManager {
 
     static String createShortName(String originalName, DynamicRealm realm) {
         initTable(realm);
-        DynamicRealmObject object = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         String shortName = UUID.randomUUID().toString();
-        if (object == null) {
-            object = realm.createObject(COLLECTION_NAME, shortName);
-            object.set(ORIGINAL_NAME_FIELD, originalName);
-        } else {
-            //// TODO: 13.10.2017
-            throw new KinveyException("This name " + originalName + "already exists");
-        }
+        DynamicRealmObject object = realm.createObject(COLLECTION_NAME, shortName);
+        object.set(ORIGINAL_NAME_FIELD, originalName);
         return shortName;
     }
 
-    public static String getShortName(String originalName, DynamicRealm realm) {
+    static String getShortName(String originalName, DynamicRealm realm) {
         initTable(realm);
         DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         return realmObject.getString(SHORT_NAME_FIELD);

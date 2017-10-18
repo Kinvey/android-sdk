@@ -155,7 +155,9 @@ public abstract class ClassHash {
 
         String shortName = TableNameManager.getShortName(name, realm);
 
-        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
             RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
             schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
         }
@@ -219,7 +221,7 @@ public abstract class ClassHash {
             schema.addField(TTL, Long.class);
         }
 
-        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
+        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
             RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
@@ -235,6 +237,7 @@ public abstract class ClassHash {
 
         if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
                 && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
                 && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
             KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
             acl.set("creator", Client.sharedInstance().getActiveUser().getId());
@@ -363,7 +366,7 @@ public abstract class ClassHash {
         }
 
 
-        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD)){
+        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
             KinveyMetaData metadata = new KinveyMetaData();
             metadata.set("lmt", String.format("%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));

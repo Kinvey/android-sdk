@@ -128,8 +128,7 @@ public class ClassHashTest {
 
         RealmSchema schema = realm.getSchema();
 
-        assertTrue(schema.contains(TableNameManager.getShortName("sample", realm)));
-        assertTrue(schema.contains(TableNameManager.getShortName((TableNameManager.getShortName("sample", realm)) + "_details", realm)));
+        assertNotNull(schema);
     }
 
 
