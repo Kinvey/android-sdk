@@ -1342,6 +1342,37 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testPagedPullBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 3);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        // Act
+        store.setAutoPagination(true);
+        List<Person> pullResults = store.pullBlocking(null);
+
+        // Assert
+        assertNotNull(pullResults);
+        assertTrue(pullResults.size() == 3);
+        assertTrue(pullResults.size() == getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
     public void testPullInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
