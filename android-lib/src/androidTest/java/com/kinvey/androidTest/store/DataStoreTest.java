@@ -455,8 +455,8 @@ public class DataStoreTest {
     }
 
     @Test
-    public void test56ItemsInTableName() throws InterruptedException, IOException {
-        DataStore<Person56> store = DataStore.collection("LoremIpsumissimplydummytextofthep", Person56.class, StoreType.SYNC, client);
+    public void test56SymbolsInTableName() throws InterruptedException, IOException {
+        DataStore<Person56> store = DataStore.collection(Person.LONG_NAME, Person56.class, StoreType.SYNC, client);
         assertNotNull(store);
         client.getSyncManager().clear(Person.LONG_NAME);
         Person56 result = store.save(new Person56());

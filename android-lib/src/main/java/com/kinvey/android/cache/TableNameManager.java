@@ -20,38 +20,28 @@ import io.realm.internal.Table;
 public class TableNameManager {
 
     private static final String COLLECTION_NAME = "_tableManager";
-    private static final String ORIGINAL_NAME_FIELD = "original";
-    private static final String SHORT_NAME_FIELD = "short";
-    private static final String ID_FIELD = "_id";
+    private static final String ORIGINAL_NAME_FIELD = "originalName";
+    private static final String SHORT_NAME_FIELD = "optimizedName";
 
     private static void initTable(DynamicRealm realm) {
-        RealmSchema schema = realm.getSchema();
-        System.out.println("TEST_TEST: initTable");
-        if (schema.get(COLLECTION_NAME) == null) {
-            System.out.println("TEST_TEST: scheme created: " + COLLECTION_NAME);
-            RealmObjectSchema realmObjectSchema = schema.create(COLLECTION_NAME);
-            realmObjectSchema.addField(ID_FIELD, String.class, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED);
+        if (realm.getSchema().get(COLLECTION_NAME) == null) {
+            RealmObjectSchema realmObjectSchema = realm.getSchema().create(COLLECTION_NAME);
+            realmObjectSchema.addField(SHORT_NAME_FIELD, String.class, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED);
             realmObjectSchema.addField(ORIGINAL_NAME_FIELD, String.class, FieldAttribute.REQUIRED);
-            realmObjectSchema.addField(SHORT_NAME_FIELD, String.class, FieldAttribute.REQUIRED);
         }
     }
 
-    public static String createShortName(String originalName, DynamicRealm realm) {
+    static String createShortName(String originalName, DynamicRealm realm) {
         initTable(realm);
-
         DynamicRealmObject object = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
-        String shortName = null;
+        String shortName = UUID.randomUUID().toString();
         if (object == null) {
-            shortName = generateShortName();
-            object = realm.createObject(COLLECTION_NAME, UUID.randomUUID().toString());
+            object = realm.createObject(COLLECTION_NAME, shortName);
             object.set(ORIGINAL_NAME_FIELD, originalName);
-            object.set(SHORT_NAME_FIELD, shortName);
-
         } else {
             //// TODO: 13.10.2017
             throw new KinveyException("This name " + originalName + "already exists");
         }
-
         return shortName;
     }
 
@@ -59,17 +49,6 @@ public class TableNameManager {
         initTable(realm);
         DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         return realmObject.getString(SHORT_NAME_FIELD);
-    }
-
-    public static String getOriginalName(String shortName, DynamicRealm realm) {
-        initTable(realm);
-        DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, shortName).findFirst();
-        return realmObject.getString(ORIGINAL_NAME_FIELD);
-    }
-
-    private static String generateShortName() {
-        String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 13);
-        return "uuid = " + uuid;
     }
 
 }

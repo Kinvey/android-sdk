@@ -258,8 +258,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public T save(T item) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        String ret = null;
-
         try{
             mRealm.beginTransaction();
             item.put("_id", insertOrUpdate(item, mRealm));

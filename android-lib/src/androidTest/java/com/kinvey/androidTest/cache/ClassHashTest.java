@@ -13,6 +13,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.cache.ClassHash;
 import com.kinvey.android.cache.RealmCache;
 import com.kinvey.android.cache.RealmCacheManager;
+import com.kinvey.android.cache.TableNameManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -127,9 +128,8 @@ public class ClassHashTest {
 
         RealmSchema schema = realm.getSchema();
 
-        assertTrue(schema.contains("sample"));
-        assertTrue(schema.contains("sample_details"));
-
+        assertTrue(schema.contains(TableNameManager.getShortName("sample", realm)));
+        assertTrue(schema.contains(TableNameManager.getShortName((TableNameManager.getShortName("sample", realm)) + "_details", realm)));
     }
 
 

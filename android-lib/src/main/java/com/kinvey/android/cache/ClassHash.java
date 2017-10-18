@@ -178,7 +178,7 @@ public abstract class ClassHash {
                 Class underlying = getUnderlying(f);
 
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    RealmObjectSchema innerScheme = createSchemeFromClass(name + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
+                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
 
                     schema.addRealmListField(fieldInfo.getName(), innerScheme);
                 } else {
@@ -235,7 +235,7 @@ public abstract class ClassHash {
 
         if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
                 && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
-                && realm.getSchema().contains(name + "_" + KinveyMetaData.AccessControlList.ACL)){
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
             KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
             acl.set("creator", Client.sharedInstance().getActiveUser().getId());
             DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
@@ -280,7 +280,7 @@ public abstract class ClassHash {
         }
 
         if (obj.containsKey(KinveyMetaData.AccessControlList.ACL)
-                && realm.getSchema().contains(name + "_" + KinveyMetaData.AccessControlList.ACL)){
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
             Map acl = (Map)obj.get(KinveyMetaData.AccessControlList.ACL);
             if (acl != null) {
                 KinveyMetaData.AccessControlList accessControlList = KinveyMetaData.AccessControlList.fromMap(acl);
