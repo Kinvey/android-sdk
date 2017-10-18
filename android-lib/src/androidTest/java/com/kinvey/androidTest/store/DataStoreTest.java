@@ -28,6 +28,7 @@ import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
 import com.kinvey.java.Query;
@@ -460,6 +461,18 @@ public class DataStoreTest {
         assertNotNull(store);
         client.getSyncManager().clear(Person.LONG_NAME);
         Person56 result = store.save(new Person56());
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testCollectionWithLongClassName() throws InterruptedException, IOException {
+        DataStore<LongClassNameLongClassNameLongClassNameLongClassNameLongClassName> store = DataStore.collection(
+                "LongClassNameLongClassNameLongClassNameLongClassNameLongClassName",
+                LongClassNameLongClassNameLongClassNameLongClassNameLongClassName.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        client.getSyncManager().clear(Person.LONG_NAME);
+        LongClassNameLongClassNameLongClassNameLongClassNameLongClassName result =
+                store.save(new LongClassNameLongClassNameLongClassNameLongClassNameLongClassName());
         assertNotNull(result);
     }
 

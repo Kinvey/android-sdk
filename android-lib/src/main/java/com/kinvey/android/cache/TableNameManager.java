@@ -1,23 +1,17 @@
 package com.kinvey.android.cache;
 
 
-import com.kinvey.java.KinveyException;
-
-import java.util.HashMap;
 import java.util.UUID;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
-import io.realm.Realm;
 import io.realm.RealmObjectSchema;
-import io.realm.RealmSchema;
-import io.realm.internal.Table;
 
 /**
  * Created by yuliya on 10/12/17.
  */
-public class TableNameManager {
+class TableNameManager {
 
     private static final String COLLECTION_NAME = "_tableManager";
     private static final String ORIGINAL_NAME_FIELD = "originalName";
