@@ -816,7 +816,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try {
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
             QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
             RealmFieldType fieldType;
             Number ret = null;
