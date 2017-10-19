@@ -22,7 +22,11 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.core.KinveyCachedAggregateCallback;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
@@ -376,6 +380,40 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(null);
     }
 
+    /**
+     * Collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType} (such as min, max, sum, count, average)
+     * @param fields fields for group by
+     * @param reduceField field for apply reduce function
+     * @param query query to filter results
+     * @return the array of groups containing the result of the reduce function
+     */
+    public Aggregation group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query query,
+                           KinveyCachedAggregateCallback cachedCallback) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        return aggregation(aggregateType, fields, reduceField, query, cachedCallback);
+    }
+
+    /**
+     * Used for aggregate fields
+     */
+    private Aggregation aggregation(AggregateType type, ArrayList<String> fields,
+                                    String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
+        Aggregation ret = null;
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            try {
+                ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute()));
+            } catch (IOException e) {
+                cachedCallback.onFailure(e);
+            }
+            cachedCallback.onSuccess(ret);
+        }
+        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()));
+        return ret;
+    }
 
     /**
      * Set store type for current BaseDataStore

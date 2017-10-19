@@ -17,8 +17,12 @@
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
 
 import java.util.ArrayList;
@@ -26,12 +30,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
+import io.realm.RealmFieldType;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -58,7 +64,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
         try {
-            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection)
+            RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
             boolean isIgnoreIn = isQueryContainsInOperator(query.getQueryFilterMap());
             QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isIgnoreIn);
@@ -160,7 +166,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         List<T> ret = new ArrayList<T>();
         try {
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
@@ -193,7 +199,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         T ret;
         try {
             mRealm.beginTransaction();
-            DynamicRealmObject obj = mRealm.where(mCollection)
+            DynamicRealmObject obj = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .equalTo("_id", id)
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                     .findFirst();
@@ -214,7 +220,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         List<T> ret = new ArrayList<T>();
         try {
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
 
             RealmResults<DynamicRealmObject> objects = query
@@ -258,8 +264,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public T save(T item) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
-        String ret = null;
-
         try{
             mRealm.beginTransaction();
             item.put("_id", insertOrUpdate(item, mRealm));
@@ -278,7 +282,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             if (!isQueryContainsInOperator(query.getQueryFilterMap())) {
                 mRealm.beginTransaction();
-                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(mCollection);
+                
+                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
                 RealmResults result = realmQuery.findAll();
@@ -347,7 +352,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Long.MAX_VALUE)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
@@ -380,7 +385,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection)
+            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .equalTo("_id", id);
             RealmResults realmResults = query.findAll();
             ret = realmResults.size();
@@ -402,7 +407,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try {
             mRealm.beginTransaction();
-            mRealm.where(mCollection)
+            mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .findAll()
                     .deleteAllFromRealm();
             mRealm.commitTransaction();
@@ -419,7 +424,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         try{
             mRealm.beginTransaction();
-            DynamicRealmObject obj = mRealm.where(mCollection).findFirst();
+            DynamicRealmObject obj = mRealm.where(TableNameManager.getShortName(mCollection, mRealm)).findFirst();
             if (obj != null){
                 ret = ClassHash.realmToObject(obj, mCollectionItemClass);
             }
@@ -439,7 +444,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             if (!isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
-                RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 DynamicRealmObject obj = query.findFirst();
                 if (obj != null) {
@@ -464,7 +469,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try {
             if (q != null && !isQueryContainsInOperator(q.getQueryFilterMap())) {
                 mRealm.beginTransaction();
-                RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+                RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
                 QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
                 ret = query.count();
                 mRealm.commitTransaction();
@@ -567,7 +572,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 RealmResults<DynamicRealmObject> objects;
                 //get all objects from realm. It need for make manual search in elements with "in" operator
                 try {
-                    objects = mRealm.where(mCollection)
+                    objects = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                             .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
                             .findAll();
 
@@ -803,6 +808,94 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
+    private Aggregation.Result[] calculation(AggregateType type, ArrayList<String> fields, String reduceField, Query q) {
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+
+        List<Aggregation.Result> results = new ArrayList<>();
+
+
+        try {
+            mRealm.beginTransaction();
+            RealmQuery<DynamicRealmObject> query = mRealm.where(mCollection);
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+            RealmFieldType fieldType;
+            Number ret = null;
+            Aggregation.Result result;
+            for (String field : fields) {
+                RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
+                for (DynamicRealmObject d : realmObjects) {
+                    result = new Aggregation.Result();
+                    query = realmObjects.where();
+                    for (String fieldToQuery : fields) {
+                        fieldType = d.getFieldType(fieldToQuery);
+                        switch (fieldType) {
+                            case STRING:
+                                query = query.equalTo(fieldToQuery, String.valueOf(d.get(fieldToQuery)));
+                                break;
+                            case INTEGER:
+                                query = query.equalTo(fieldToQuery, (Long) (d.get(fieldToQuery)));
+                                break;
+                            case BOOLEAN:
+                                query = query.equalTo(field, (Boolean) (d.get(field)));
+                                break;
+                            case DATE:
+                                query = query.equalTo(field, (Date) (d.get(field)));
+                                break;
+                            case FLOAT:
+                                query = query.equalTo(field, (Float) (d.get(field)));
+                                break;
+                            case DOUBLE:
+                                query = query.equalTo(field, (Double) (d.get(field)));
+                                break;
+                            default:
+                                throw new KinveyException("Current fieldType doesn't support. Supported types: STRING, INTEGER, BOOLEAN, DATE, FLOAT, DOUBLE");
+
+                        }
+                        result.put(fieldToQuery, d.get(fieldToQuery));
+
+                    }
+
+                    switch (type) {
+                        case SUM:
+                            ret = query.sum(reduceField);
+                            break;
+                        case MIN:
+                            ret = query.min(reduceField);
+                            break;
+                        case MAX:
+                            ret = query.max(reduceField);
+                            break;
+                        case AVERAGE:
+                            ret = query.average(reduceField);
+                            break;
+                        case COUNT:
+                            ret = query.count();
+                            break;
+                    }
+
+                    if (ret != null) {
+                        result.put("_result", ret);
+                        if (results.contains(result)) {
+                            continue;
+                        }
+                        results.add(result);
+                    }
+                }
+            }
+            mRealm.commitTransaction();
+        } finally {
+            mRealm.close();
+        }
+
+        Aggregation.Result[] resultsArray = new Aggregation.Result[results.size()];
+
+        return results.toArray(resultsArray);
+    }
+
+    @Override
+    public Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q) {
+        return calculation(aggregateType, fields, reduceField, q);
+    }
 
     public enum Types{
         STRING,

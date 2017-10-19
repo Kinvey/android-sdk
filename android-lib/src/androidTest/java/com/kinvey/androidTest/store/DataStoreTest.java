@@ -28,7 +28,9 @@ import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.androidTest.model.Person56;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
@@ -441,6 +443,38 @@ public class DataStoreTest {
         assertNotNull(callback.result.getUsername());
         assertNull(callback.error);
         assertTrue(callback.result.getUsername().equals(TEST_USERNAME));
+    }
+
+    @Test
+    public void testSaveItemLongCollectionNameLocally() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.LONG_NAME, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.LONG_NAME);
+        DefaultKinveyClientCallback callback = save(store, createPerson(TEST_USERNAME));
+        assertNotNull(callback.result);
+        assertNotNull(callback.result.getUsername());
+        assertNull(callback.error);
+        assertTrue(callback.result.getUsername().equals(TEST_USERNAME));
+    }
+
+    @Test
+    public void test56SymbolsInTableName() throws InterruptedException, IOException {
+        DataStore<Person56> store = DataStore.collection(Person.LONG_NAME, Person56.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        client.getSyncManager().clear(Person.LONG_NAME);
+        Person56 result = store.save(new Person56());
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testCollectionWithLongClassName() throws InterruptedException, IOException {
+        DataStore<LongClassNameLongClassNameLongClassNameLongClassNameLongClassName> store = DataStore.collection(
+                "LongClassNameLongClassNameLongClassNameLongClassNameLongClassName",
+                LongClassNameLongClassNameLongClassNameLongClassNameLongClassName.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        client.getSyncManager().clear(Person.LONG_NAME);
+        LongClassNameLongClassNameLongClassNameLongClassNameLongClassName result =
+                store.save(new LongClassNameLongClassNameLongClassNameLongClassNameLongClassName());
+        assertNotNull(result);
     }
 
     private DefaultKinveyClientCallback find(final DataStore<Person> store, final String id, int seconds, final KinveyCachedClientCallback<Person> cachedClientCallback) throws InterruptedException {
@@ -1602,6 +1636,5 @@ public class DataStoreTest {
             }
         }
     }
-
 
 }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyJsonClient;
 
@@ -43,14 +42,6 @@ public class AggregateEntity extends GenericJson {
     private String reduce;
     @Key
     private LinkedHashMap<String,Object> condition;
-
-    public enum AggregateType {
-        COUNT,
-        SUM,
-        MIN,
-        MAX,
-        AVERAGE
-    }
 
     public AggregateEntity(ArrayList<String> fields, AggregateType type, String aggregateField, Query query,
                            AbstractKinveyJsonClient client) {
