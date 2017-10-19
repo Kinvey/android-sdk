@@ -29,6 +29,7 @@ import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 
 /**
@@ -103,15 +104,12 @@ public abstract class AbstractQuery implements Serializable{
             generator.flush();
             jsonResult = writer.toString();
         } catch (Exception ex) {
-            // TODO add exception handling here instead of suppressing exception
-            ex.getMessage();
+            throw new KinveyException("Exception thrown during building of query.", "Please inspect the QueryMap for errors: " + getQueryFilterMap(), ex.getMessage());
         }
 
         if (jsonResult.equals("{}") || jsonResult.equals("")) {
             return null;
         }
-
-        // TODO:  Put exception here?
 
         return jsonResult;
     }

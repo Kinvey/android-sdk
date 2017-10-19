@@ -76,6 +76,12 @@ public class BaseDataStore<T extends GenericJson> {
         this.autoPagination = paginate;
     }
 
+    private int pageSize = 10000; // default page size set to backend record retrieval limit
+
+    public void setAutoPaginationPageSize(int size) {
+        pageSize = size;
+    }
+
     /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
@@ -331,7 +337,7 @@ public class BaseDataStore<T extends GenericJson> {
 
         if (isAutoPaginationEnabled()) {
             int skipCount = 0;
-            int pageSize = 10000;
+            int pageSize = this.pageSize;
 
             // First, get the count of all the items to pull
             int totalItemCount = this.countNetwork();

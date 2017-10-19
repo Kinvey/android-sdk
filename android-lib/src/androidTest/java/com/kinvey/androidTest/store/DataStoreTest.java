@@ -1332,6 +1332,7 @@ public class DataStoreTest {
 
         // Act
         store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(2);
         DefaultKinveyPullCallback pullCallback = pull(store, null);
 
         // Assert
@@ -1364,6 +1365,7 @@ public class DataStoreTest {
 
         // Act
         store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(2);
         List<Person> pullResults = store.pullBlocking(null);
 
         // Assert

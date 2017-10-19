@@ -674,9 +674,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(KinveyPullCallback<T> callback) {
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, null, callback).execute();
+        this.pull(null, callback);
     }
 
     /**
