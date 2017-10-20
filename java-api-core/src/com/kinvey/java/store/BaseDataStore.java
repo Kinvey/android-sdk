@@ -80,6 +80,12 @@ public class BaseDataStore<T extends GenericJson> {
         this.autoPagination = paginate;
     }
 
+    private int pageSize = 10000; // default page size set to backend record retrieval limit
+
+    public void setAutoPaginationPageSize(int size) {
+        pageSize = size;
+    }
+
     /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
@@ -328,11 +334,32 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+
         List<T> networkData = null;
+
         query = query == null ? client.query() : query;
-        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
-        cache.delete(query);
-        cache.save(networkData);
+
+        if (isAutoPaginationEnabled()) {
+            int skipCount = 0;
+            int pageSize = this.pageSize;
+
+            // First, get the count of all the items to pull
+            int totalItemCount = this.countNetwork();
+
+            networkData = new ArrayList<>();
+            do {
+                query.setSkip(skipCount).setLimit(pageSize);
+                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                cache.delete(query);
+                cache.save(networkData);
+                skipCount += pageSize;
+            } while (skipCount < totalItemCount);
+        } else {
+            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
+            cache.delete(query);
+            cache.save(networkData);
+        }
+
         return networkData;
     }
 

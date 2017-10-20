@@ -20,7 +20,6 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
-import com.kinvey.android.AsyncPagedPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
@@ -653,12 +652,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void pull(Query query, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-
-        if (isAutoPaginationEnabled()) {
-            new AsyncPagedPullRequest<T>(this, query, callback).execute();
-        } else {
-            new AsyncPullRequest<T>(this, query, callback).execute();
-        }
+        new AsyncPullRequest<T>(this, query, callback).execute();
     }
 
     /**
@@ -683,13 +677,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(KinveyPullCallback<T> callback) {
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        if (isAutoPaginationEnabled()) {
-            new AsyncPagedPullRequest<T>(this, null, callback).execute();
-        } else {
-            new AsyncPullRequest<T>(this, null, callback).execute();
-        }
+        this.pull(null, callback);
     }
 
     /**
