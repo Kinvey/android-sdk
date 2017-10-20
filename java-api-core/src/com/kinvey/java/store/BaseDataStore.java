@@ -359,7 +359,6 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSyncManager().clear(collection);
-        pullBlocking(null);
     }
 
     /**
