@@ -273,9 +273,11 @@ public class BaseDataStore<T extends GenericJson> {
      * Clear the local cache storage
      */
     public void clear() {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(new Query());
-        client.getSyncManager().getCacheManager().getCache("sync", SyncRequest.class, Long.MAX_VALUE).delete(new Query());
-        client.getSyncManager().getCacheManager().getCache("syncitems", SyncItem.class, Long.MAX_VALUE).delete(new Query());
+        purge();
     }
 
     /**
@@ -354,7 +356,7 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(query);
     }
 
-    public void purge() throws IOException {
+    public void purge() {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
