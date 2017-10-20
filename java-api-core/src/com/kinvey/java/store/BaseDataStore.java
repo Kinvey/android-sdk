@@ -38,6 +38,8 @@ import com.kinvey.java.store.requests.data.save.SaveRequest;
 import com.kinvey.java.store.requests.data.read.ReadAllRequest;
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
+import com.kinvey.java.sync.dto.SyncItem;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +55,6 @@ public class BaseDataStore<T extends GenericJson> {
     private Class<T> storeItemType;
     private ICache<T> cache;
     protected NetworkManager<T> networkManager;
-    private String collectionName;
 
     /**
      * It is a parameter to enable mechanism to optimize the amount of data retrieved from the backend.
@@ -103,7 +104,6 @@ public class BaseDataStore<T extends GenericJson> {
             cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
         }
         this.networkManager = networkManager;
-        this.collectionName = collection;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
     }
 
@@ -270,6 +270,15 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
+     * Clear the local cache storage
+     */
+    public void clear() {
+        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(new Query());
+        client.getSyncManager().getCacheManager().getCache("sync", SyncRequest.class, Long.MAX_VALUE).delete(new Query());
+        client.getSyncManager().getCacheManager().getCache("syncitems", SyncItem.class, Long.MAX_VALUE).delete(new Query());
+    }
+
+    /**
      * Remove object from from given collection with given id
      * @param id id of object to be deleted
      * @return count of object that was deleted
@@ -349,7 +358,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        client.getSyncManager().clear(collectionName);
+        client.getSyncManager().clear(collection);
         pullBlocking(null);
     }
 
@@ -410,7 +419,7 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     public String getCollectionName() {
-        return collectionName;
+        return collection;
     }
 
     public boolean isDeltaSetCachingEnabled() {

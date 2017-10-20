@@ -57,7 +57,6 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
         switch (readPolicy){
             case FORCE_LOCAL:
                 ret = countCached();
-                syncManager.enqueueRequest(networkManager.getCollectionName(), request);
                 break;
             case FORCE_NETWORK:
                 KinveyCountResponse response = request.execute();
@@ -73,13 +72,7 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
                 }
 
                 ret = countCached();
-                try{
-                    ret = request.execute().getCount();
-                } catch (IOException e) {
-                    syncManager.enqueueRequest(networkManager.getCollectionName(),
-                            request);
-                    throw e;
-                }
+                ret = request.execute().getCount();
                 break;
         }
         return ret;

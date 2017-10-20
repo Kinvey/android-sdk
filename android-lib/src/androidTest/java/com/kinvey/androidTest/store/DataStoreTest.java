@@ -43,14 +43,12 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1587,9 +1585,38 @@ public class DataStoreTest {
         persons.add(new Person(TEST_USERNAME));
 
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
-        Assert.assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult());
         com.kinvey.androidTest.callback.DefaultKinveyPushCallback pushCallback = testManager.push(store);
-        Assert.assertNotNull(pushCallback.getResult());
+        assertNotNull(pushCallback.getResult());
+    }
+
+    @Test
+    public void testClear() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        store.clear();
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
     }
 
     @After
