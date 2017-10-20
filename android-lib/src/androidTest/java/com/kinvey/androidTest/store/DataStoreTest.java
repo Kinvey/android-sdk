@@ -992,30 +992,6 @@ public class DataStoreTest {
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
 
-    @Test
-    public void testPurgeTimeoutError() throws InterruptedException, IOException {
-        final ChangeTimeout changeTimeout = new ChangeTimeout();
-        HttpRequestInitializer initializer = new HttpRequestInitializer() {
-            public void initialize(HttpRequest request) throws SocketTimeoutException {
-                changeTimeout.initialize(request);
-            }
-        };
-
-        client = new Client.Builder(client.getContext())
-                .setHttpRequestInitializer(initializer)
-                .build();
-
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-
-        Person person = createPerson(TEST_USERNAME);
-        save(store, person);
-        save(store, person);
-
-        DefaultKinveyPurgeCallback purgeCallback = purge(store);
-        assertNotNull(purgeCallback.error);
-        assertTrue(purgeCallback.error.getClass() == SocketTimeoutException.class);
-    }
-
     private DefaultKinveySyncCallback sync(final DataStore<Person> store, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
