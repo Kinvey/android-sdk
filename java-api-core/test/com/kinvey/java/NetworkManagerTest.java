@@ -233,7 +233,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, Entity.class, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -256,7 +256,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.countBlocking(fields, Entity.class, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -281,7 +281,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", Entity.class, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -304,7 +304,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.sumBlocking(fields, "total", Entity.class, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -329,7 +329,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", Entity.class, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -352,7 +352,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.maxBlocking(fields, "total", Entity.class, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -377,7 +377,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", Entity.class, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -400,7 +400,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.minBlocking(fields, "total", Entity.class, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
@@ -425,7 +425,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         Entity entity = new Entity("myEntity","My Name");
         ArrayList<String> fields = new ArrayList<String>();
         fields.add("state");
-        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", null);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", Entity.class, null);
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);
 
@@ -450,7 +450,7 @@ public class NetworkManagerTest extends KinveyMockUnitTest {
         fields.add("state");
         MockQuery query = new MockQuery(new MockQueryFilter.MockBuilder());
 
-        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", query);
+        NetworkManager<Entity>.Aggregate myAggregate = appData.averageBlocking(fields, "total", Entity.class, query);
 
         HashMap<String,Boolean> expectedFields = new HashMap<String,Boolean>();
         expectedFields.put("state",true);

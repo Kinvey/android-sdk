@@ -22,12 +22,14 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonGenerator;
 import com.google.common.base.Preconditions;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.query.QueryFilter.QueryFilterBuilder;
 
 /**
@@ -97,18 +99,153 @@ public abstract class AbstractQuery implements Serializable{
         String jsonResult = "";
         try {
             JsonGenerator generator = factory.createJsonGenerator(writer);
-            generator.serialize(getQueryFilterMap());
+            AbstractMap<String, Object> filterMap = getQueryFilterMap();
+            buildQueryString(generator, filterMap);
             generator.flush();
             jsonResult = writer.toString();
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            throw new KinveyException("Exception thrown during building of query.", "Please inspect the QueryMap for errors: " + getQueryFilterMap(), ex.getMessage());
+        }
 
-        if (jsonResult.equals("{}")) {
+        if (jsonResult.equals("{}") || jsonResult.equals("")) {
             return null;
         }
 
-        // TODO:  Put exception here?
-
         return jsonResult;
+    }
+
+    private void buildQueryString(JsonGenerator generator, AbstractMap<String, Object> filterMap) throws IOException {
+        try {
+            for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
+                if (entry.getValue() == null) {
+                    generator.writeStartObject();
+                    generator.writeFieldName(entry.getKey());
+                    generator.writeNull();
+                    generator.writeEndObject();
+                }
+                else {
+                    Class valueClass = entry.getValue().getClass();
+                    if (valueClass.equals(String.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeString((String)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(String[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        String[] valueStr = (String[]) entry.getValue();
+                        for (String str : valueStr) {
+                            generator.writeString(str);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Boolean.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeBoolean((boolean) entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Boolean[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        Boolean[] valueBool = (Boolean[]) entry.getValue();
+                        for (boolean bool : valueBool) {
+                            generator.writeBoolean(bool);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Integer.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((int)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Integer[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        Integer[] valueInt = (Integer[]) entry.getValue();
+                        for (int integer : valueInt) {
+                            generator.writeNumber(integer);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Long.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((long)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Long[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        Long[] valueLong = (Long[]) entry.getValue();
+                        for (long longVal : valueLong) {
+                            generator.writeNumber(longVal);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Double.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((double)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Double[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        Double[] valueDouble = (Double[]) entry.getValue();
+                        for (double doubleVal : valueDouble) {
+                            generator.writeNumber(doubleVal);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Float.class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeNumber((float)entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(Float[].class)) {
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        generator.writeStartArray();
+                        Float[] valueFloat = (Float[]) entry.getValue();
+                        for (float floatVal : valueFloat) {
+                            generator.writeNumber(floatVal);
+                        }
+                        generator.writeEndArray();
+                        generator.writeEndObject();
+                    } else if (valueClass.equals(LinkedHashMap.class)) {
+                        // Value is an added filter
+                        generator.writeStartObject();
+                        generator.writeFieldName(entry.getKey());
+                        buildQueryString(generator, (LinkedHashMap) entry.getValue());
+                        generator.writeEndObject();
+                    } else if (valueClass.getComponentType() != null &&
+                               valueClass.getComponentType().equals(LinkedHashMap.class)) {
+                        if (valueClass.isArray()) {
+                            // Value is a map, so this is a nested query. Recursively call into it.
+                            generator.writeStartObject();
+                            generator.writeFieldName(entry.getKey());
+                            generator.writeStartArray();
+                            LinkedHashMap[] valueMap = (LinkedHashMap<String, Object>[]) entry.getValue();
+                            for (LinkedHashMap map : valueMap) {
+                                buildQueryString(generator, map);
+                            }
+                            generator.writeEndArray();
+                            generator.writeEndObject();
+                        } else {
+                            // Value is an added filter
+                            generator.writeStartObject();
+                            buildQueryString(generator, (LinkedHashMap) entry.getValue());
+                            generator.writeEndObject();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
     /**

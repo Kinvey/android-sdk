@@ -16,13 +16,18 @@
 
 package com.kinvey.android.async;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Query;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -33,13 +38,14 @@ import java.util.List;
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
-public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
+public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<KinveyPushResponse> {
 
     private final String collection;
     private final SyncManager manager;
-    private List<SyncRequest> requests = null;
     private final AbstractClient client;
     private StoreType storeType;
+    private NetworkManager<T> networkManager;
+    private Class<T> storeItemType;
     private KinveyPushCallback callback;
 
     /**
@@ -54,12 +60,16 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
                             SyncManager manager,
                             AbstractClient client,
                             StoreType storeType,
+                            NetworkManager<T> networkManager,
+                            Class<T> storeItemType,
                             KinveyPushCallback callback) {
         super(callback);
         this.collection = collection;
         this.manager = manager;
         this.client = client;
         this.storeType = storeType;
+        this.networkManager = networkManager;
+        this.storeItemType = storeItemType;
         this.callback = callback;
     }
 
@@ -68,23 +78,62 @@ public class AsyncPushRequest extends AsyncClientRequest<KinveyPushResponse> {
         com.google.common.base.Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         KinveyPushResponse pushResponse = new KinveyPushResponse();
         List<Exception> errors = new ArrayList<>();
-        requests = manager.popSingleQueue(collection);
+        List<SyncRequest> requests = manager.popSingleQueue(collection);
+        List<SyncItem> syncItems = manager.popSingleItemQueue(collection);
+
         int progress = 0;
+        int fullCount = requests != null ? requests.size() : 0;
+        fullCount += syncItems != null ? syncItems.size() : 0;
+        if (requests != null) {
+            for (SyncRequest syncRequest : requests) {
+                try {
+                    manager.executeRequest(client, syncRequest);
+                    pushResponse.setSuccessCount(++progress);
+                } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                    errors.add(e);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
 
-        for(SyncRequest syncRequest: requests){
-
-            try {
-                manager.executeRequest(client, syncRequest);
-                pushResponse.setSuccessCount(++progress);
-            } catch (AccessControlException | KinveyException e) { //TODO check Exception
-                errors.add(e);
-            } catch (Exception e) {
-                callback.onFailure(e);
+                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
             }
+        }
 
-//            notify(pushResponse);
-//            publishProgress(pushResponse);
-            callback.onProgress(pushResponse.getSuccessCount(), requests.size());
+        String id;
+        T t;
+        SyncRequest syncRequest = null;
+        if (syncItems != null) {
+            for (SyncItem syncItem : syncItems) {
+
+                id = syncItem.getEntityID().id;
+
+                switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
+                    case SAVE:
+                        t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
+                        if (t == null) {
+                            // check that item wasn't deleted before
+//                            manager.deleteCachedItem((String) syncItem.get("_id"));
+                            manager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
+                            continue;
+                        }
+                        syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
+                        break;
+                    case DELETE:
+                        syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id));
+                        break;
+                }
+
+                try {
+                    manager.executeRequest(client, syncRequest);
+                    pushResponse.setSuccessCount(++progress);
+                    manager.deleteCachedItem((String) syncItem.get("_id"));
+                } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                    errors.add(e);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
+            }
         }
 
         pushResponse.setListOfExceptions(errors);

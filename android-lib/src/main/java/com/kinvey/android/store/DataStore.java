@@ -23,6 +23,7 @@ import com.kinvey.android.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
+import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
@@ -35,15 +36,19 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.core.KinveyAggregateCallback;
+import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -110,6 +115,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_GET_ALL = "KEY_GET_ALL";
     private static final String KEY_GET_BY_IDS = "KEY_GET_BY_IDS";
 
+    private static final String KEY_GET_COUNT = "KEY_GET_COUNT";
+
     private static final String KEY_DELETE_BY_ID = "KEY_DELETE_BY_ID";
     private static final String KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY";
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
@@ -120,14 +127,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
-    private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";
-    
+    private static final String KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_QUERY_WITH_REFERENCES_WRAPPER";*/
 
-    private static final String KEY_COUNT = "KEY_COUNT";
-    private static final String KEY_SUM = "KEY_SUM";
-    private static final String KEY_MAX = "KEY_MAX";
-    private static final String KEY_MIN = "KEY_MIN";
-    private static final String KEY_AVERAGE = "KEY_AVERAGE";*/
+
+    private static final String KEY_GROUP = "KEY_GROUP";
 
     private static Map<String, Method> methodMap;
 
@@ -175,11 +178,15 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
             tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
 
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("count"));
+
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
             tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
+
+            tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
@@ -410,7 +417,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         find(callback, null);
     }
 
-
     /**
      * Asynchronous request to fetch an list of all Entities in a collection.
      * <p>
@@ -442,6 +448,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
+    public void count(KinveyCountCallback callback) {
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback).execute();
+    }
 
     /**
      * Asynchronous request to save or update an entity to a collection.
@@ -613,8 +622,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void push(KinveyPushCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        SyncManager syncManager = client.getSyncManager();
-        new AsyncPushRequest(getCollectionName(), client.getSyncManager(), client, storeType, callback).execute();
+        new AsyncPushRequest<T>(getCollectionName(), client.getSyncManager(), client, storeType, networkManager, getCurrentClass(), callback).execute();
     }
 
     /**
@@ -669,9 +677,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(KinveyPullCallback<T> callback) {
-        Preconditions.checkNotNull(client, "client must not be null");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, null, callback).execute();
+        this.pull(null, callback);
     }
 
     /**
@@ -789,6 +795,20 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      */
     public long syncCount() {
         return client.getSyncManager().getCount(getCollectionName());
+    }
+
+    /**
+     * Asynchronous request to collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType} (such as min, max, sum, count, average)
+     * @param fields fields for group by
+     * @param reduceField field for apply reduce function
+     * @param query query to filter results
+     * @return the array of groups containing the result of the reduce function
+     */
+    public void group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query query,
+                      KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+        new AsyncRequest<Aggregation>(this, methodMap.get(KEY_GROUP), callback, aggregateType, fields, reduceField, query, cachedCallback).execute();
     }
 
     private class SaveRequest extends AsyncClientRequest<T> {

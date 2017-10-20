@@ -14,43 +14,34 @@
  *
  */
 
-package com.kinvey.java.store.requests.data.delete;
+package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
-import com.kinvey.java.store.WritePolicy;
-import com.kinvey.java.sync.RequestMethod;
+import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 
-/**
- * Created by Prots on 2/15/16.
- */
-public class DeleteQueryRequest<T extends GenericJson> extends AbstractDeleteRequest<T> {
+public class ReadCountRequest<T extends GenericJson> extends AbstractReadCountRequest<T> {
 
     private final Query query;
 
-    public DeleteQueryRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy,
+    public ReadCountRequest(ICache<T> cache, NetworkManager<T> networkManager, ReadPolicy readPolicy,
                               Query query, SyncManager syncManager) {
-        super(cache, writePolicy, networkManager, syncManager);
+        super(cache, readPolicy, networkManager, syncManager);
         this.query = query;
     }
 
     @Override
-    protected Integer deleteCached() {
-        return cache.delete(query);
+    protected Integer countCached() {
+        return ((Long) cache.count(query)).intValue();
     }
 
     @Override
-    protected NetworkManager.Delete deleteNetwork() throws IOException {
-        return networkManager.deleteBlocking(query);
-    }
-
-    @Override
-    protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException {
-        syncManager.enqueueRequests(collectionName, networkManager, RequestMethod.DELETE, cache.get(query));
+    protected NetworkManager.GetCount countNetwork() throws IOException {
+        return networkManager.getCountBlocking(/*query*/);
     }
 }

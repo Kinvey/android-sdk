@@ -26,7 +26,7 @@ public interface ICacheManager {
     /**
      * Get cache object for given collection with given collectionItemClass
      * @param collection Name of the collection
-     * @param collectionItemClass Calss of single item object
+     * @param collectionItemClass Class of single item object
      * @param ttl time to live
      * @param <T> Collection item class that extends GSON object
      * @return Cache object instance that could be queried

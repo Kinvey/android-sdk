@@ -34,8 +34,12 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +76,15 @@ public class NetworkManager<T extends GenericJson> {
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
     }
-    
+
+    public String getClientAppVersion() {
+        return clientAppVersion;
+    }
+
+    public GenericData getCustomRequestProperties() {
+        return customRequestProperties;
+    }
+
     public void setClientAppVersion(int major, int minor, int patch){
     	setClientAppVersion(major + "." + minor + "." + patch);
     }
@@ -314,6 +326,13 @@ public class NetworkManager<T extends GenericJson> {
         return get;
     }
 
+    public GetCount getCountBlocking() throws IOException {
+//        Preconditions.checkNotNull();
+        GetCount getCount = new GetCount();
+        client.initializeRequest(getCount);
+        return getCount;
+    }
+
     /**
      * Save (create or update) an entity to a collection.
      *
@@ -400,9 +419,9 @@ public class NetworkManager<T extends GenericJson> {
      * @return Aggregate object
      * @throws IOException
      */
-    public Aggregate countBlocking(ArrayList<String> fields, Query query) throws IOException {
+    public Aggregate countBlocking(ArrayList<String> fields, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
-        return aggregate(fields, AggregateEntity.AggregateType.COUNT, null, query);
+        return aggregate(fields, AggregateType.COUNT, null, myClass, query);
     }
 
     /**
@@ -414,10 +433,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Query query) throws IOException {
+    public Aggregate sumBlocking(ArrayList<String> fields, String sumField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(sumField);
-        return aggregate(fields, AggregateEntity.AggregateType.SUM, sumField, query);
+        return aggregate(fields, AggregateType.SUM, sumField, myClass, query);
     }
 
     /**
@@ -429,10 +448,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Query query) throws IOException {
+    public Aggregate maxBlocking(ArrayList<String> fields, String maxField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(maxField);
-        return aggregate(fields, AggregateEntity.AggregateType.MAX, maxField, query);
+        return aggregate(fields, AggregateType.MAX, maxField,  myClass, query);
     }
 
     /**
@@ -444,10 +463,10 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate minBlocking(ArrayList<String> fields, String minField, Query query) throws IOException {
+    public Aggregate minBlocking(ArrayList<String> fields, String minField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(minField);
-        return aggregate(fields, AggregateEntity.AggregateType.MIN, minField, query);
+        return aggregate(fields, AggregateType.MIN, minField, myClass, query);
     }
 
     /**
@@ -459,14 +478,14 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Query query) throws IOException {
+    public Aggregate averageBlocking(ArrayList<String> fields, String averageField, Class myClass, Query query) throws IOException {
         Preconditions.checkNotNull(fields);
         Preconditions.checkNotNull(averageField);
-        return aggregate(fields, AggregateEntity.AggregateType.AVERAGE, averageField, query);
+        return aggregate(fields, AggregateType.AVERAGE, averageField, myClass, query);
     }
 
     /**
-     * public helper method to create AggregateEntity and return an intialize Aggregate Request Object
+     * public helper method to create AggregateEntity and return an initialize Aggregate Request Object
      * @param fields fields to group by
      * @param type Type of aggregation
      * @param aggregateField Field to aggregate on
@@ -474,8 +493,8 @@ public class NetworkManager<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    public Aggregate aggregate(ArrayList<String> fields, AggregateEntity.AggregateType type, String aggregateField,
-                                   Query query) throws IOException {
+    public Aggregate aggregate(ArrayList<String> fields, AggregateType type, String aggregateField,
+                               Class myClass, Query query) throws IOException {
         AggregateEntity entity = new AggregateEntity(fields, type, aggregateField, query, client);
         Aggregate aggregate = new Aggregate(entity, myClass);
         client.initializeRequest(aggregate);
@@ -719,6 +738,7 @@ public class NetworkManager<T extends GenericJson> {
             super(client, "GET", REST_PATH, null, myClass);
             this.collectionName= NetworkManager.this.collectionName;
             this.entityID = entityID;
+
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
@@ -744,6 +764,38 @@ public class NetworkManager<T extends GenericJson> {
             T myEntity = super.execute();
 
             return myEntity;
+        }
+    }
+
+    /**
+     * Generic Get class.  Constructs the HTTP request object for Get
+     * requests.
+     *
+     */
+    public class GetCount extends AbstractKinveyJsonClientRequest<KinveyCountResponse> {
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_count";
+
+        @Key
+        private String collectionName;
+
+//        GetCount(String queryString) {
+//            super(client, "GET", REST_PATH, null, myClass);
+//            this.collectionName= NetworkManager.this.collectionName;
+//            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+//            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+//                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+//            }
+//        }
+
+        GetCount() {
+            super (client, "GET", REST_PATH, null, KinveyCountResponse.class);
+            this.collectionName= NetworkManager.this.collectionName;
+
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
         }
     }
 
@@ -837,12 +889,12 @@ public class NetworkManager<T extends GenericJson> {
      * Aggregate requests.
      *
      */
-    public class Aggregate extends AbstractKinveyJsonClientRequest<T> {
+    public class Aggregate extends AbstractKinveyJsonClientRequest<T[]> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_group";
         @Key
         private String collectionName;
 
-        Aggregate(AggregateEntity entity, Class<T> myClass) {
+        Aggregate(AggregateEntity entity, Class myClass) {
             super(client, "POST", REST_PATH, entity, myClass);
             this.collectionName = NetworkManager.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);

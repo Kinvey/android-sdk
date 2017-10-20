@@ -22,19 +22,27 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.core.KinveyCachedAggregateCallback;
+import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
 import com.kinvey.java.store.requests.data.read.ReadAllRequest;
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
+import com.kinvey.java.sync.dto.SyncItem;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,8 +54,7 @@ public class BaseDataStore<T extends GenericJson> {
     protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
-    NetworkManager<T> networkManager;
-    private String collectionName;
+    protected NetworkManager<T> networkManager;
 
     /**
      * It is a parameter to enable mechanism to optimize the amount of data retrieved from the backend.
@@ -57,6 +64,28 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
+    /**
+     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
+     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
+     * a developer would have to provide skip and limit modifiers to page through all the results.
+     * Setting this value to true will automatically fetch all the pages necessary.
+     * Default value is false.
+     */
+    private boolean autoPagination = false;
+
+    public boolean isAutoPaginationEnabled() {
+        return this.autoPagination;
+    }
+
+    public void setAutoPagination(boolean paginate) {
+        this.autoPagination = paginate;
+    }
+
+    private int pageSize = 10000; // default page size set to backend record retrieval limit
+
+    public void setAutoPaginationPageSize(int size) {
+        pageSize = size;
+    }
 
     /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
@@ -81,7 +110,6 @@ public class BaseDataStore<T extends GenericJson> {
             cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
         }
         this.networkManager = networkManager;
-        this.collectionName = collection;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
     }
 
@@ -208,6 +236,18 @@ public class BaseDataStore<T extends GenericJson> {
         return find((KinveyCachedClientCallback<List<T>>)null);
     }
 
+    public Integer count() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
+    }
+
+    public Integer countNetwork() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
+    }
+
     /**
      * Save multiple objects for collections
      * @param objects list of objects to be saved
@@ -233,6 +273,17 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
         return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSyncManager()).execute();
+    }
+
+    /**
+     * Clear the local cache storage
+     */
+    public void clear() {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(new Query());
+        purge();
     }
 
     /**
@@ -282,7 +333,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new PushRequest<T>(collection, client).execute();
+        new PushRequest<T>(collection, cache, networkManager, client).execute();
     }
 
     /**
@@ -294,11 +345,32 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+
         List<T> networkData = null;
+
         query = query == null ? client.query() : query;
-        networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
-        cache.delete(query);
-        cache.save(networkData);
+
+        if (isAutoPaginationEnabled()) {
+            int skipCount = 0;
+            int pageSize = this.pageSize;
+
+            // First, get the count of all the items to pull
+            int totalItemCount = this.countNetwork();
+
+            networkData = new ArrayList<>();
+            do {
+                query.setSkip(skipCount).setLimit(pageSize);
+                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                cache.delete(query);
+                cache.save(networkData);
+                skipCount += pageSize;
+            } while (skipCount < totalItemCount);
+        } else {
+            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
+            cache.delete(query);
+            cache.save(networkData);
+        }
+
         return networkData;
     }
 
@@ -311,14 +383,47 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(query);
     }
 
-    public void purge() throws IOException {
+    public void purge() {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        client.getSyncManager().clear(collectionName);
-        pullBlocking(null);
+        client.getSyncManager().clear(collection);
     }
 
+    /**
+     * Collect all entities with the same value for fields,
+     * and then apply a reduce function (such as count or average) on all those items.
+     * @param aggregateType {@link AggregateType} (such as min, max, sum, count, average)
+     * @param fields fields for group by
+     * @param reduceField field for apply reduce function
+     * @param query query to filter results
+     * @return the array of groups containing the result of the reduce function
+     */
+    public Aggregation group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query query,
+                           KinveyCachedAggregateCallback cachedCallback) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        return aggregation(aggregateType, fields, reduceField, query, cachedCallback);
+    }
+
+    /**
+     * Used for aggregate fields
+     */
+    private Aggregation aggregation(AggregateType type, ArrayList<String> fields,
+                                    String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
+        Aggregation ret = null;
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            try {
+                ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute()));
+            } catch (IOException e) {
+                cachedCallback.onFailure(e);
+            }
+            cachedCallback.onSuccess(ret);
+        }
+        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()));
+        return ret;
+    }
 
     /**
      * Set store type for current BaseDataStore
@@ -342,7 +447,7 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     public String getCollectionName() {
-        return collectionName;
+        return collection;
     }
 
     public boolean isDeltaSetCachingEnabled() {

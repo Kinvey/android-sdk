@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2017, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -13,20 +13,23 @@
  * contents is a violation of applicable laws.
  *
  */
+package com.kinvey.android.callback;
 
-package com.kinvey.java.core;
+import com.kinvey.java.core.KinveyClientCallback;
 
-import com.kinvey.java.model.Aggregation;
+public interface KinveyCountCallback extends KinveyClientCallback<Integer> {
 
-/**
- * @author edwardf
- */
-public abstract class KinveyAggregateCallback implements KinveyClientCallback<Aggregation> {
+    /**
+     * Used to indicate successful execution of a request by the background service.
+     *
+     * @param result count of the number of entities in the collection
+     */
+    void onSuccess(Integer result);
 
-    @Override
-    public abstract void onFailure(Throwable error);
-
-    @Override
-    public abstract void onSuccess(Aggregation response);
-
+    /**
+     * Used to indicate the failed execution of a request by the background service.
+     *
+     * @param error error
+     */
+    void onFailure(Throwable error);
 }

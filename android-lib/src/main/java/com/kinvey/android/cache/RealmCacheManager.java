@@ -108,12 +108,12 @@ public class RealmCacheManager implements ICacheManager {
                             mRealm.commitTransaction();
                         }
 
-                        //split table remove and ceate
+                        //split table remove and create
                         mRealm.beginTransaction();
                         try {
                             //create table scheme
                             cache.createRealmTable(mRealm);
-                            //store table hash for futher usage
+                            //store table hash for further usage
                             setTableHash(collection, cache.getHash(), mRealm);
                         } finally {
                             mRealm.commitTransaction();

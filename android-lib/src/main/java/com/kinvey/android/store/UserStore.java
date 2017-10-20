@@ -903,7 +903,6 @@ public class UserStore {
             this.accessSecret = accessSecret;
             this.consumerKey = consumerKey;
             this.consumerSecret = consumerSecret;
-            this.client = client;
             this.type=type;
             this.client = client;
         }

@@ -104,7 +104,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
         NetworkFileManager.DownloadMetadataQuery download =
                 networkFileManagerApiUnderTest.prepDownloadWithTTLBlocking("testfilename.txt", 120);
         HttpRequest req = download.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?query";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
         assertEquals(expectedPath, req.getUrl().toString());
     }
 

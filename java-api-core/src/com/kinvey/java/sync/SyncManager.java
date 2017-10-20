@@ -29,6 +29,7 @@ import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.dto.SyncCollections;
+import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.ByteArrayOutputStream;
@@ -43,11 +44,12 @@ import java.util.List;
  */
 public class SyncManager {
 
+    private static final String SYNC_ITEM_TABLE_NAME = "syncitems";
+
     private ICacheManager cacheManager;
 
     public SyncManager(ICacheManager cacheManager){
         this.cacheManager = cacheManager;
-
     }
 
     public void removeEntity(String collectionName, String curEntityID) {
@@ -67,6 +69,10 @@ public class SyncManager {
         return ret;
     }
 
+    /**
+     * use {@link #popSingleItemQueue(String)}
+     */
+    @Deprecated
     public List<SyncRequest> popSingleQueue(String collectionName) {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
@@ -87,11 +93,50 @@ public class SyncManager {
         return requests;
     }
 
+    public List<SyncItem> popSingleItemQueue(String collectionName) {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
+                .equals("collection", collectionName);
+        return requestCache.get().size() !=0 ? requestCache.get(q) : null;
+    }
+
+    /**
+     * use {@link #deleteCachedItem(String)}
+     */
+    @Deprecated
+    public int deleteCachedRequest(String id) {
+        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        return requestCache.delete(id);
+    }
+
+    public int deleteCachedItem(String id) {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        return requestCache.delete(id);
+    }
+
+    public int deleteCachedItems(Query q) {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        return requestCache.delete(q);
+    }
+
+    /**
+     * use {@link #enqueueRequest(String, NetworkManager, RequestMethod, String)}
+     */
+    @Deprecated
     public void enqueueRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
         requestCache.save(createSyncRequest(collectionName, clientRequest));
     }
 
+    public <T extends GenericJson> void enqueueRequest(String collectionName, NetworkManager<T> networkManager, RequestMethod method, String id) throws IOException {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        requestCache.save(createSyncItem(collectionName, method, networkManager, id));
+    }
+
+    /**
+     * use {@link #enqueueRequests(String, NetworkManager, RequestMethod, List)}
+     */
+    @Deprecated
     public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager,  List<T> ret) throws IOException {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
         List<SyncRequest> syncRequests = new ArrayList<>();
@@ -101,7 +146,41 @@ public class SyncManager {
         requestCache.save(syncRequests);
     }
 
-    private SyncRequest createSyncRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
+    public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager, RequestMethod method, List<T> ret) throws IOException {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        List<SyncItem> syncRequests = new ArrayList<>();
+        for (T t : ret) {
+            syncRequests.add(createSyncItem(collectionName, method, networkManager, (String)t.get("_id")));
+        }
+        requestCache.save(syncRequests);
+    }
+
+    public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager, RequestMethod method, Iterable<String> ids) throws IOException {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        List<SyncItem> syncRequests = new ArrayList<>();
+        for (String id : ids) {
+            syncRequests.add(createSyncItem(collectionName, method, networkManager, id));
+        }
+        requestCache.save(syncRequests);
+    }
+
+    private <T extends GenericJson> SyncItem createSyncItem(String collectionName, RequestMethod requestMethod, NetworkManager networkManager, String id) throws IOException {
+        SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
+        if (id != null) {
+            entityID.id = id;
+        }
+        entityID.customerVersion = networkManager.getClientAppVersion();
+        entityID.customheader = networkManager.getCustomRequestProperties() != null ?
+                (String) networkManager.getCustomRequestProperties().get("X-Kinvey-Custom-Request-Properties") : null;
+
+        return new SyncItem(
+                requestMethod,
+                entityID,
+                collectionName
+        );
+    }
+
+    public SyncRequest createSyncRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
         HttpRequest httpRequest = clientRequest.buildHttpRequest();
         SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
 
@@ -130,9 +209,7 @@ public class SyncManager {
     public void enqueueRequest(SyncRequest request) {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
         requestCache.save(request);
-
     }
-
 
     /**
      * This methods gets the count of sync operation to be performed
@@ -141,10 +218,10 @@ public class SyncManager {
      */
     public long getCount(String collectionName){
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        ICache<SyncItem> requestItemCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
                 .equals("collection", collectionName);
-
-        return requestCache.count(q);
+        return requestCache.count(q) + requestItemCache.count(q);
     }
 
     /**
@@ -177,7 +254,7 @@ public class SyncManager {
 
             if (entity != null){
                 try {
-                    GenericJson ret = networkDataStore.save(entity);
+                    networkDataStore.save(entity);
                 } catch (Exception e){
                     enqueueRequest(request);
                     throw e;
@@ -235,9 +312,13 @@ public class SyncManager {
 
     public int clear(String collectionName) {
         ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        ICache<SyncItem> requestItemCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
                 .equals("collection", collectionName);
+        return requestCache.delete(q) + requestItemCache.delete(q);
+    }
 
-        return requestCache.delete(q);
+    public ICacheManager getCacheManager() {
+        return cacheManager;
     }
 }
