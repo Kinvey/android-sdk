@@ -17,6 +17,8 @@
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.android.Client;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -494,7 +496,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     public String getHash(){
-        return ClassHash.getClassHash(getCollectionItemClass());
+        return ClassHash.getClassHash(getCollectionItemClass(), Client.sharedInstance().getSelfReferenceCount());
     }
 
     public void createRealmTable(DynamicRealm realm){

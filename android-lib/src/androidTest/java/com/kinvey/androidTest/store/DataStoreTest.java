@@ -31,6 +31,7 @@ import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
+import com.kinvey.androidTest.model.SelfReferencePerson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
@@ -1626,6 +1627,14 @@ public class DataStoreTest {
 
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
+    }
+
+    @Test
+    public void testSelfReferenceClassUsing() throws InterruptedException {
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
     }
 
     @After

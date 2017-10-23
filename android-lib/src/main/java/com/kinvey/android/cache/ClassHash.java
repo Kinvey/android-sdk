@@ -88,7 +88,7 @@ public abstract class ClassHash {
     //supported fields
     // boolean, byte, short, ìnt, long, float, double, String, Date and byte[]
 
-    public static String getClassHash(Class<? extends GenericJson> clazz) {
+    public static String getClassHash(Class<? extends GenericJson> clazz, int selfReferenceCount) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -103,15 +103,25 @@ public abstract class ClassHash {
             if (isArrayOrCollection(fieldInfo.getType())){
                 Class underlying = getUnderlying(f);
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    String innerHash = getClassHash((Class<? extends GenericJson>) underlying);
+                    String innerHash = getClassHash((Class<? extends GenericJson>) underlying, selfReferenceCount);
 
                     sb.append("[").append(fieldInfo.getName()).append("]:")
                             .append(innerHash)
                             .append(";");
                 }
-            }else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
-                String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType());
-                sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
+
+                if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
+                    selfReferenceCount--;
+
+
+                    System.out.println("TEST_TEST field" + fieldInfo.getName());
+                    System.out.println("TEST_TEST clazz" + clazz.getSimpleName());
+                    System.out.println("TEST_TEST equals" + fieldInfo.getName().equals(clazz.getSimpleName()));
+
+                    String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceCount);
+                    sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
+                }
             }  else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
@@ -197,7 +207,9 @@ public abstract class ClassHash {
                     }
                 }
 
-            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) /*&& fieldInfo.getName().equals(clazz.getName())*/){
+                System.out.println("TEST_TEST" + fieldInfo.getName());
+                System.out.println("TEST_TEST" + clazz.getName());
                 RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
                 schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
             } else {
