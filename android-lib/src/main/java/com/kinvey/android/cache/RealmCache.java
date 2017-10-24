@@ -20,7 +20,6 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.query.AbstractQuery;
@@ -242,7 +241,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     @Override
     public List<T> save(Iterable<T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-
         List<T> ret = new ArrayList<T>();
         try{
             mRealm.beginTransaction();
@@ -254,7 +252,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-        
         return ret;
     }
 
@@ -263,7 +260,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     @Override
     public T save(T item) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-
         try{
             mRealm.beginTransaction();
             item.put("_id", insertOrUpdate(item, mRealm));
@@ -271,19 +267,30 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-       
         return item;
     }
 
     @Override
     public int delete(Query query) {
-        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-        int ret = 0;
+        DynamicRealm realm = mCacheManager.getDynamicRealm();
+        int i;
         try {
+            i = delete(realm, query, mCollection);
+            delete(realm, query, TableNameManager.getShortName(mCollection, realm) + "__acl");
+            delete(realm, query, TableNameManager.getShortName(mCollection, realm) + "__kmd");
+        } finally {
+            realm.close();
+        }
+        return i;
+    }
+
+    private int delete(DynamicRealm realm, Query query, String tableName) {
+
+        int ret;
             if (!isQueryContainsInOperator(query.getQueryFilterMap())) {
-                mRealm.beginTransaction();
-                
-                RealmQuery<DynamicRealmObject> realmQuery = mRealm.where(TableNameManager.getShortName(mCollection, mRealm));
+                realm.beginTransaction();
+
+                RealmQuery<DynamicRealmObject> realmQuery = realm.where(TableNameManager.getShortName(tableName, realm));
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
                 RealmResults result = realmQuery.findAll();
@@ -292,8 +299,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 int limit = query.getLimit();
                 int skip = query.getSkip();
 
-                if (limit > 0)
-                {
+                if (limit > 0) {
                     // limit modifier has been applied, so take a subset of the Realm result set
                     int endIndex = Math.min(ret, (skip+limit));
                     List<DynamicRealmObject> subresult = result.subList(skip, endIndex);
@@ -302,9 +308,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     for (DynamicRealmObject id : subresult) {
                         ids.add((String)id.get("_id"));
                     }
-                    mRealm.commitTransaction();
+                    realm.commitTransaction();
                     if (ids.size() > 0) {
-                        this.delete(ids);
+                        this.delete(realm, ids, mCollection);
                     }
                 } else if (skip > 0) {
                     // only skip modifier has been applied, so take a subset of the Realm result set
@@ -315,86 +321,94 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                         for (DynamicRealmObject id : subresult) {
                             ids.add((String) id.get("_id"));
                         }
-                        mRealm.commitTransaction();
-                        this.delete(ids);
-                    }
-                    else {
+                        realm.commitTransaction();
+                        this.delete(realm, ids, mCollection);
+                    } else {
+                        realm.commitTransaction();
                         ret = 0;
                     }
                 } else {
                     // no skip or limit applied to query, so delete all results from Realm
                     result.deleteAllFromRealm();
-                    mRealm.commitTransaction();
+                    realm.commitTransaction();
                 }
 
             } else {
                 List<T> list = get(query);
                 ret = list.size();
+                System.out.println("TEST_TEST list.size(): " + ret);
                 List<String> ids = new ArrayList<>();
                 for (T id : list) {
+                    System.out.println("TEST_TEST id: " + id);
                     ids.add((String)id.get("_id"));
                 }
-                delete(ids);
+                delete(realm, ids, mCollection);
                 return ret;
             }
 
-        } finally {
-            mRealm.close();
-        }
         return ret;
     }
 
     @Override
     public int delete(Iterable<String> ids) {
-        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
+        DynamicRealm realm = mCacheManager.getDynamicRealm();
+        int i;
+        try {
+             i = delete(realm, ids, mCollection);
+            delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + "__acl");
+            delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + "__kmd");
+        } finally {
+            realm.close();
+        }
+        return i;
+    }
 
+    private int delete(DynamicRealm realm, Iterable<String> ids, String tableName) {
         int ret = 0;
-
-        try{
-            mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
+        if (ids.iterator().hasNext()) {
+            realm.beginTransaction();
+            RealmQuery<DynamicRealmObject> query = realm.where(TableNameManager.getShortName(tableName, realm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Long.MAX_VALUE)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
-            if (iterator.hasNext()){
+            if (iterator.hasNext()) {
                 query.equalTo("_id", iterator.next());
-                for ( ; iterator.hasNext(); ){
+                for (; iterator.hasNext(); ) {
                     query.or().equalTo("_id", iterator.next());
                 }
-
             }
             query.endGroup();
-
             RealmResults result = query.findAll();
             ret = result.size();
             result.deleteAllFromRealm();
-            mRealm.commitTransaction();
-        } finally {
-            mRealm.close();
+            realm.commitTransaction();
         }
-
         return ret;
     }
 
     @Override
     public int delete(String id) {
-        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-
-
-        int ret = 0;
-
-        try{
-            mRealm.beginTransaction();
-            RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
-                    .equalTo("_id", id);
-            RealmResults realmResults = query.findAll();
-            ret = realmResults.size();
-            realmResults.deleteAllFromRealm();
-            mRealm.commitTransaction();
+        DynamicRealm realm = mCacheManager.getDynamicRealm();
+        int i;
+        try {
+            i = delete(realm, id, mCollection);
+            delete(realm, id, TableNameManager.getShortName(mCollection, realm) + "__acl");
+            delete(realm, id, TableNameManager.getShortName(mCollection, realm) + "__kmd");
         } finally {
-            mRealm.close();
+            realm.close();
         }
-        
+        return i;
+    }
+
+    private int delete(DynamicRealm realm, String id, String tableName) {
+        int ret = 0;
+        realm.beginTransaction();
+        RealmQuery<DynamicRealmObject> query = realm.where(TableNameManager.getShortName(tableName, realm))
+                .equalTo("_id", id);
+        RealmResults realmResults = query.findAll();
+        ret = realmResults.size();
+        realmResults.deleteAllFromRealm();
+        realm.commitTransaction();
         return ret;
     }
 
@@ -404,7 +418,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     public void clear(){
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-
         try {
             mRealm.beginTransaction();
             mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
