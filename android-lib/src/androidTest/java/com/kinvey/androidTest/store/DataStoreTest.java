@@ -1097,6 +1097,34 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testPushBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        save(store, person);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        store.pushBlocking();
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    @Test
+    public void testSyncBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        cleanBackendDataStore(store);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        save(store, person);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        store.pushBlocking();
+        person = createPerson(TEST_USERNAME_2);
+        save(store, person);
+        store.syncBlocking(new Query());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        assertTrue(countCallback.result == 2);
+    }
+
+    @Test
     public void testPushInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
