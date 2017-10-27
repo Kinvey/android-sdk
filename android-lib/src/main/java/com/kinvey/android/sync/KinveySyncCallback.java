@@ -16,7 +16,7 @@
 package com.kinvey.android.sync;
 
 
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyPullResponse;
 
 /**
  * This class provides callbacks from requests executed by the Sync API.

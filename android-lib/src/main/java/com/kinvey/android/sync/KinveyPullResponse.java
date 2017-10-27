@@ -1,8 +1,10 @@
 package com.kinvey.android.sync;
 
+import com.kinvey.java.model.KinveyAbstractResponse;
+
 import java.util.List;
 
-public class KinveyPullResponse<T> {
+public class KinveyPullResponse<T> extends KinveyAbstractResponse {
 
     private List<T> result;
 

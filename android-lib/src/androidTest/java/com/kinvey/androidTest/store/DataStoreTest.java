@@ -21,7 +21,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
@@ -38,8 +38,6 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1248,10 +1246,23 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.COLLECTION);
     }
 
-    /**
-     * Check that your collection has public permission console.kinvey.com
-     * Collections / Collection Name / Settings / Permissions - Public
-     */
+    @Test
+    public void testPullNotCorrectItem() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+
+        DefaultKinveyPullCallback pullCallback = pull(store, null);
+
+        //test pulling all data from backend        assertNull(pullCallback.error);
+        assertNotNull(pullCallback.result);
+    }
+
+        /**
+         * Check that your collection has public permission console.kinvey.com
+         * Collections / Collection Name / Settings / Permissions - Public
+         */
     @Test
     public void testPull() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);

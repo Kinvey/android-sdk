@@ -16,15 +16,10 @@
 
 package com.kinvey.android;
 
-import com.google.api.client.json.GenericJson;
-
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.BaseDataStore;
-import com.kinvey.java.store.ReadPolicy;
-import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

@@ -1,8 +1,7 @@
 package com.kinvey.androidTest.callback;
 
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
-import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.model.KinveyPullResponse;
 
 import java.util.concurrent.CountDownLatch;
 

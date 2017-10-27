@@ -360,13 +360,13 @@ public class BaseDataStore<T extends GenericJson> {
             networkData = new ArrayList<>();
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                networkData.addAll(Arrays.asList(networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
                 cache.delete(query);
                 cache.save(networkData);
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
         } else {
-            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
+            networkData = Arrays.asList(networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
             cache.delete(query);
             cache.save(networkData);
         }

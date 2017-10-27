@@ -1,11 +1,10 @@
 package com.kinvey.android.sync;
 
-import java.util.List;
+import com.kinvey.java.model.KinveyAbstractResponse;
 
-public class KinveyPushResponse {
+public class KinveyPushResponse extends KinveyAbstractResponse {
 
     private int successCount;
-    private List<Exception> listOfExceptions;
 
     public int getSuccessCount() {
         return successCount;
@@ -15,11 +14,4 @@ public class KinveyPushResponse {
         this.successCount = successSyncCount;
     }
 
-    public List<Exception> getListOfExceptions() {
-        return listOfExceptions;
-    }
-
-    public void setListOfExceptions(List<Exception> listOfExceptions) {
-        this.listOfExceptions = listOfExceptions;
-    }
 }
