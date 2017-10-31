@@ -25,7 +25,7 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyAbstractPullResponse;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
@@ -339,13 +339,13 @@ public class BaseDataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public KinveyAbstractPullResponse<T> pullBlocking(Query query) throws IOException {
+    public KinveyAbstractReadResponse<T> pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
 
-        KinveyAbstractPullResponse<T> response = new KinveyAbstractPullResponse<T>();
+        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
@@ -356,7 +356,7 @@ public class BaseDataStore<T extends GenericJson> {
 
             // First, get the count of all the items to pull
             int totalItemCount = this.countNetwork();
-            KinveyAbstractPullResponse<T> pullResponse;
+            KinveyAbstractReadResponse<T> pullResponse;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
                 pullResponse = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();

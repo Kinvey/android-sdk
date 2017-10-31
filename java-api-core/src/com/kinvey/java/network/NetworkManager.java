@@ -31,7 +31,7 @@ import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.KinveyAbstractPullResponse;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -678,7 +678,7 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
-        public KinveyAbstractPullResponse<T> execute() throws IOException {
+        public KinveyAbstractReadResponse<T> execute() throws IOException {
             return super.execute();
         }
     }
@@ -701,10 +701,10 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
-        public KinveyAbstractPullResponse<T> execute() throws IOException {
-            KinveyAbstractPullResponse<T> ret = null;
+        public KinveyAbstractReadResponse<T> execute() throws IOException {
+            KinveyAbstractReadResponse<T> ret = null;
             if (currentItems != null && !currentItems.isEmpty()) {
-                ret = new KinveyAbstractPullResponse<>();
+                ret = new KinveyAbstractReadResponse<>();
                 MetadataGet deltaRequest = new MetadataGet(new DeltaGet(query, this.myClass, currentItems));
                 client.initializeRequest(deltaRequest);
                 DeltaSetItem[] itemsArray = deltaRequest.execute();

@@ -11,7 +11,7 @@ import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.model.KinveyAbstractPullResponse;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.List;
  * Created by yuliya on 10/26/17.
  */
 
-public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyAbstractPullResponse> {
+public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyAbstractReadResponse> {
 
     private Class<T> responseClass;
 
@@ -41,14 +41,14 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
     }
 
     @Override
-    public KinveyAbstractPullResponse<T> execute() throws IOException {
+    public KinveyAbstractReadResponse<T> execute() throws IOException {
 
         HttpResponse response = executeUnparsed() ;
 
         List<T> results = new ArrayList<>();
         List<Exception> exceptions = new ArrayList<>();
 
-        KinveyAbstractPullResponse ret = new KinveyAbstractPullResponse();
+        KinveyAbstractReadResponse ret = new KinveyAbstractReadResponse();
 
         if (overrideRedirect){
             return onRedirect(response.getHeaders().getLocation());
