@@ -31,7 +31,7 @@ import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.KinveyAbstractResponse;
+import com.kinvey.java.model.KinveyAbstractPullResponse;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -306,11 +306,11 @@ public class NetworkManager<T extends GenericJson> {
         Preconditions.checkNotNull(query);
         Pull pull;
         if (deltaSetCachingEnabled) {
-            pull = new DeltaGet(query, Array.newInstance(myClass,0).getClass(), cachedItems);
+            pull = new DeltaPull(query, myClass, cachedItems);
         } else {
-            pull = new Pull(query, Array.newInstance(myClass,0).getClass());
+            pull = new Pull(query, myClass);
         }
-
+        client.initializeRequest(pull);
         return pull;
     }
 
@@ -638,7 +638,7 @@ public class NetworkManager<T extends GenericJson> {
      * requests.
      *
      */
-    public class Pull extends AbstractKinveyReadRequest<KinveyAbstractResponse> {
+    public class Pull extends AbstractKinveyReadRequest<T> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -663,7 +663,7 @@ public class NetworkManager<T extends GenericJson> {
 
         Pull(Query query, Class myClass) {
             super(client, "GET", REST_PATH, null, myClass);
-            this.collectionName= NetworkManager.this.collectionName;
+            this.collectionName = NetworkManager.this.collectionName;
             this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
             int queryLimit = query.getLimit();
             int querySkip = query.getSkip();
@@ -678,30 +678,34 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
-        public KinveyAbstractResponse execute() throws IOException {
+        public KinveyAbstractPullResponse<T> execute() throws IOException {
             return super.execute();
         }
     }
 
-    public class DeltaPull extends Pull {
+    private class DeltaPull extends Pull {
 
         private static final int IDS_PER_PAGE = 100;
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
         private List<T> currentItems;
+        private Query query;
+        private Class<T> myClass;
 
-        DeltaPull(Query query, Class myClass, List<T> currentItems) {
+        DeltaPull(Query query, Class<T> myClass, List<T> currentItems) {
             super(query, myClass);
+            this.query = query;
+            this.myClass = myClass;
             this.currentItems = currentItems;
         }
 
-
         @Override
-        public KinveyAbstractResponse execute() throws IOException {
-            T[] ret = null;
+        public KinveyAbstractPullResponse<T> execute() throws IOException {
+            KinveyAbstractPullResponse<T> ret = null;
             if (currentItems != null && !currentItems.isEmpty()) {
-                MetadataGet deltaRequest = new MetadataGet(this);
+                ret = new KinveyAbstractPullResponse<>();
+                MetadataGet deltaRequest = new MetadataGet(new DeltaGet(query, this.myClass, currentItems));
                 client.initializeRequest(deltaRequest);
                 DeltaSetItem[] itemsArray = deltaRequest.execute();
 
@@ -716,7 +720,7 @@ public class NetworkManager<T extends GenericJson> {
                     updatedOnline = fetchIdsWithPaging(ids);
                 }
 
-                ret = DeltaSetMerge.merge(items, currentItems, updatedOnline, client.getObjectParser(), myClass);
+                ret.setResult(Arrays.asList(DeltaSetMerge.merge(items, currentItems, updatedOnline, client.getObjectParser(), this.myClass)));
             }
             if (ret == null){
                 ret = super.execute();
@@ -728,7 +732,6 @@ public class NetworkManager<T extends GenericJson> {
         private List<T> fetchIdsWithPaging(List<String> ids) throws IOException {
 
             List<T> ret = new ArrayList<T>();
-            int pos = 0;
             while (ids.size() > 0){
                 int chunkSize = ids.size() < IDS_PER_PAGE ? ids.size() : IDS_PER_PAGE;
 
