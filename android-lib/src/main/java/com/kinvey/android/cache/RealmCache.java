@@ -315,7 +315,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     }
                     realm.commitTransaction();
                     if (ids.size() > 0) {
-                        this.delete(realm, ids, mCollection);
+                        this.delete(realm, ids, tableName);
                     }
                 } else if (skip > 0) {
                     // only skip modifier has been applied, so take a subset of the Realm result set
@@ -327,7 +327,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                             ids.add((String) id.get(ID));
                         }
                         realm.commitTransaction();
-                        this.delete(realm, ids, mCollection);
+                        this.delete(realm, ids, tableName);
                     } else {
                         realm.commitTransaction();
                         ret = 0;
@@ -345,7 +345,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 for (T id : list) {
                     ids.add((String)id.get(ID));
                 }
-                delete(realm, ids, mCollection);
+                delete(realm, ids, tableName);
                 return ret;
             }
 
@@ -357,7 +357,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
-             i = delete(realm, ids, mCollection);
+            i = delete(realm, ids, mCollection);
             delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + ACL);
             delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + KMD);
         } finally {
@@ -371,7 +371,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         if (ids.iterator().hasNext()) {
             realm.beginTransaction();
             RealmQuery<DynamicRealmObject> query = realm.where(TableNameManager.getShortName(tableName, realm))
-                    .greaterThanOrEqualTo(ClassHash.TTL, Long.MAX_VALUE)
                     .beginGroup();
             Iterator<String> iterator = ids.iterator();
             if (iterator.hasNext()) {
