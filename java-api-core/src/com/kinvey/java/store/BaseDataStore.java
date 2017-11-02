@@ -358,11 +358,19 @@ public class BaseDataStore<T extends GenericJson> {
             int totalItemCount = this.countNetwork();
 
             networkData = new ArrayList<>();
+            List<T> page = new ArrayList<>();
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                page = (Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                networkData.addAll(page);
+
+                List<String> ids = new ArrayList<String>();
+                for (T id : page) {
+                    ids.add((String) id.get("_id"));
+                }
+//                cache.delete(ids);
                 cache.delete(query);
-                cache.save(networkData);
+                cache.save(page);
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
         } else {

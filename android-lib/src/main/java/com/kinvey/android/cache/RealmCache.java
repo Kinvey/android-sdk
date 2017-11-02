@@ -280,13 +280,31 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
+            delete(realm, getACLIds(query), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getKMDIds(query), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, query, mCollection);
-            delete(realm, query, TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, query, TableNameManager.getShortName(mCollection, realm) + KMD);
         } finally {
             realm.close();
         }
         return i;
+    }
+
+    private List<String> getACLIds(Query query) {
+        List<T> items = get(query);
+        List<String> ACLIds = new ArrayList<>();
+        for (T item : items) {
+            ACLIds.add((String)((GenericJson) item.get("_acl")).get("_id"));
+        }
+        return ACLIds;
+    }
+
+    private List<String> getKMDIds(Query query) {
+        List<T> items = get(query);
+        List<String> ACLIds = new ArrayList<>();
+        for (T item : items) {
+            ACLIds.add((String)((GenericJson) item.get("_kmd")).get("_id"));
+        }
+        return ACLIds;
     }
 
     private int delete(DynamicRealm realm, Query query, String tableName) {
@@ -357,13 +375,31 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
+            delete(realm, getACLIds(ids), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getKMDIds(ids), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, ids, mCollection);
-            delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, ids, TableNameManager.getShortName(mCollection, realm) + KMD);
         } finally {
             realm.close();
         }
         return i;
+    }
+
+    private List<String> getACLIds(Iterable<String> ids) {
+        List<T> items = get(ids);
+        List<String> ACLIds = new ArrayList<>();
+        for (T item : items) {
+            ACLIds.add((String)((GenericJson) item.get("_acl")).get("_id"));
+        }
+        return ACLIds;
+    }
+
+    private List<String> getKMDIds(Iterable<String> ids) {
+        List<T> items = get(ids);
+        List<String> ACLIds = new ArrayList<>();
+        for (T item : items) {
+            ACLIds.add((String)((GenericJson) item.get("_kmd")).get("_id"));
+        }
+        return ACLIds;
     }
 
     private int delete(DynamicRealm realm, Iterable<String> ids, String tableName) {
@@ -393,13 +429,23 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
+            delete(realm, getACLId(id), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getKMDId(id), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, id, mCollection);
-            delete(realm, id, TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, id, TableNameManager.getShortName(mCollection, realm) + KMD);
         } finally {
             realm.close();
         }
         return i;
+    }
+
+    private String getACLId(String id) {
+        T item = get(id);
+        return (String)((GenericJson) item.get("_acl")).get("_id");
+    }
+
+    private String getKMDId(String id) {
+        T item = get(id);
+        return (String)((GenericJson) item.get("_kmd")).get("_id");
     }
 
     private int delete(DynamicRealm realm, String id, String tableName) {
