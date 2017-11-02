@@ -27,7 +27,9 @@ import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
@@ -38,8 +40,6 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,6 +83,7 @@ public class DataStoreTest {
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -187,6 +188,8 @@ public class DataStoreTest {
             this.kinveyPullResponse = kinveyPullResponse;
             finish();
         }
+
+
 
         @Override
         public void onPullStarted() {
@@ -1249,9 +1252,37 @@ public class DataStoreTest {
     }
 
     /**
-     * Check that your collection has public permission console.kinvey.com
-     * Collections / Collection Name / Settings / Permissions - Public
+     * Test checks that if you have some not correct value type in item's field at server,
+     * you will have exception in KinveyPullResponse#getListOfExceptions after #pull.
      */
+    @Test
+    public void testPullNotCorrectItem() throws InterruptedException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
+        assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
+        assertTrue(pullCallback.getResult().getResult().size() == 4);
+        testManager.cleanBackendDataStore(store);
+    }
+
+    @Test
+    public void testPagedPullNotCorrectItem() throws InterruptedException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
+        store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(2);
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
+        assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
+        assertTrue(pullCallback.getResult().getResult().size() == 4);
+        testManager.cleanBackendDataStore(store);
+    }
+
+        /**
+         * Check that your collection has public permission console.kinvey.com
+         * Collections / Collection Name / Settings / Permissions - Public
+         */
     @Test
     public void testPull() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
@@ -1402,7 +1433,7 @@ public class DataStoreTest {
         // Act
         store.setAutoPagination(true);
         store.setAutoPaginationPageSize(2);
-        List<Person> pullResults = store.pullBlocking(null);
+        List<Person> pullResults = store.pullBlocking(null).getResult();
 
         // Assert
         assertNotNull(pullResults);
