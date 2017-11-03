@@ -51,9 +51,9 @@ import io.realm.RealmObjectSchema;
  */
 public abstract class ClassHash {
 
-    public static String TTL = "__ttl__";
-    private static String ID = "_id";
-    private static String ITEMS = "_items";
+    public static final String TTL = "__ttl__";
+    private static final String ID = "_id";
+    private static final String ITEMS = "_items";
 
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
@@ -266,14 +266,27 @@ public abstract class ClassHash {
             obj.put(ID, UUID.randomUUID().toString());
         }
 
+        String kmdId = null;
+        String aclId = null;
+
         if (object == null){
             object = realm.createObject(shortName, obj.get(ID));
+        } else {
+            if (object.hasField(KinveyMetaData.KMD)
+                    && object.getObject(KinveyMetaData.KMD) != null) {
+                kmdId = object.getObject(KinveyMetaData.KMD).getString(ID);
+            }
+            if (object.hasField(KinveyMetaData.AccessControlList.ACL)
+                    && object.getObject(KinveyMetaData.AccessControlList.ACL) != null) {
+                aclId = object.getObject(KinveyMetaData.AccessControlList.ACL).getString(ID);
+            }
         }
 
         if (obj.containsKey(KinveyMetaData.KMD)){
             Map kmd = (Map)obj.get(KinveyMetaData.KMD);
             if (kmd != null) {
                 KinveyMetaData metadata = KinveyMetaData.fromMap(kmd);
+                metadata.set(ID, kmdId);
                 DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
                         realm,
                         KinveyMetaData.class,
@@ -287,6 +300,7 @@ public abstract class ClassHash {
             Map acl = (Map)obj.get(KinveyMetaData.AccessControlList.ACL);
             if (acl != null) {
                 KinveyMetaData.AccessControlList accessControlList = KinveyMetaData.AccessControlList.fromMap(acl);
+                accessControlList.set(ID, aclId);
                 DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,

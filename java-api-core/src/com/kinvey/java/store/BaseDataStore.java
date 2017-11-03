@@ -31,15 +31,13 @@ import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
+import com.kinvey.java.store.requests.data.read.ReadAllRequest;
 import com.kinvey.java.store.requests.data.read.ReadCountRequest;
+import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
+import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
-import com.kinvey.java.store.requests.data.read.ReadAllRequest;
-import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
-import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
-import com.kinvey.java.sync.dto.SyncItem;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -358,19 +356,11 @@ public class BaseDataStore<T extends GenericJson> {
             int totalItemCount = this.countNetwork();
 
             networkData = new ArrayList<>();
-            List<T> page = new ArrayList<>();
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                page = (Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
-                networkData.addAll(page);
-
-                List<String> ids = new ArrayList<String>();
-                for (T id : page) {
-                    ids.add((String) id.get("_id"));
-                }
-//                cache.delete(ids);
+                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
                 cache.delete(query);
-                cache.save(page);
+                cache.save(networkData);
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
         } else {
