@@ -299,9 +299,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     private List<String> getSupportIds(List<T> items, String field) {
         List<String> supportIds = new ArrayList<>();
         for (T item : items) {
-            if (item.get(field) != null) {
-                supportIds.add((String) ((GenericJson) item.get(field)).get(ID));
-            }
+            supportIds.add(getSupportId(item, field));
         }
         return supportIds;
     }
@@ -374,8 +372,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
-            delete(realm, getSupportIds(get(ids), ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getSupportIds(get(ids), KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
+            List<T> items = get(ids);
+            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, ids, mCollection);
         } finally {
             realm.close();
@@ -410,8 +409,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
-            delete(realm, getACLId(id), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getKMDId(id), TableNameManager.getShortName(mCollection, realm) + KMD);
+            T item = get(id);
+            delete(realm, getSupportId(item, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getSupportId(item, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, id, mCollection);
         } finally {
             realm.close();
@@ -419,14 +419,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return i;
     }
 
-    private String getACLId(String id) {
-        T item = get(id);
-        return (String)((GenericJson) item.get("_acl")).get("_id");
-    }
-
-    private String getKMDId(String id) {
-        T item = get(id);
-        return (String)((GenericJson) item.get("_kmd")).get("_id");
+    private String getSupportId(T item, String field) {
+        return item.get(field) != null ? ((String) ((GenericJson) item.get(field)).get(ID)) : null;
     }
 
     private int delete(DynamicRealm realm, String id, String tableName) {
