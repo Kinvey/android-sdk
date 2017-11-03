@@ -281,8 +281,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         int i;
         try {
             List<T> items = get(query);
-            delete(realm, getACLIds(items), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getKMDIds(items), TableNameManager.getShortName(mCollection, realm) + KMD);
+            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, query, mCollection);
         } finally {
             realm.close();
@@ -290,20 +290,20 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return i;
     }
 
-    private List<String> getACLIds(List<T> items) {
-        List<String> ACLIds = new ArrayList<>();
+    /**
+     * Method gets item ids in support tables (_acl and _kmd)
+     * @param items items for getting them ids
+     * @param field _acl or _kmd
+     * @return item ids in support tables
+     */
+    private List<String> getSupportIds(List<T> items, String field) {
+        List<String> supportIds = new ArrayList<>();
         for (T item : items) {
-            ACLIds.add((String)((GenericJson) item.get("_acl")).get("_id"));
+            if (item.get(field) != null) {
+                supportIds.add((String) ((GenericJson) item.get(field)).get(ID));
+            }
         }
-        return ACLIds;
-    }
-
-    private List<String> getKMDIds(List<T> items) {
-        List<String> ACLIds = new ArrayList<>();
-        for (T item : items) {
-            ACLIds.add((String)((GenericJson) item.get("_kmd")).get("_id"));
-        }
-        return ACLIds;
+        return supportIds;
     }
 
     private int delete(DynamicRealm realm, Query query, String tableName) {
@@ -374,31 +374,13 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
-            delete(realm, getACLIds(ids), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getKMDIds(ids), TableNameManager.getShortName(mCollection, realm) + KMD);
+            delete(realm, getSupportIds(get(ids), ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
+            delete(realm, getSupportIds(get(ids), KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
             i = delete(realm, ids, mCollection);
         } finally {
             realm.close();
         }
         return i;
-    }
-
-    private List<String> getACLIds(Iterable<String> ids) {
-        List<T> items = get(ids);
-        List<String> ACLIds = new ArrayList<>();
-        for (T item : items) {
-            ACLIds.add((String)((GenericJson) item.get("_acl")).get("_id"));
-        }
-        return ACLIds;
-    }
-
-    private List<String> getKMDIds(Iterable<String> ids) {
-        List<T> items = get(ids);
-        List<String> ACLIds = new ArrayList<>();
-        for (T item : items) {
-            ACLIds.add((String)((GenericJson) item.get("_kmd")).get("_id"));
-        }
-        return ACLIds;
     }
 
     private int delete(DynamicRealm realm, Iterable<String> ids, String tableName) {
