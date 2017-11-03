@@ -25,6 +25,7 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
@@ -338,38 +339,42 @@ public class BaseDataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public List<T> pullBlocking(Query query) throws IOException {
+    public KinveyAbstractReadResponse<T> pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
 
-        List<T> networkData = null;
-
+        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
+            List<T> networkData = new ArrayList<T>();
+            List<Exception> exceptions = new ArrayList<Exception>();
             int skipCount = 0;
             int pageSize = this.pageSize;
 
             // First, get the count of all the items to pull
             int totalItemCount = this.countNetwork();
-
-            networkData = new ArrayList<>();
+            KinveyAbstractReadResponse<T> pullResponse;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                networkData.addAll(Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute()));
+                pullResponse = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+                networkData.addAll(pullResponse.getResult());
+                exceptions.addAll(pullResponse.getListOfExceptions());
                 cache.delete(query);
                 cache.save(networkData);
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
+            response.setResult(networkData);
+            response.setListOfExceptions(exceptions);
         } else {
-            networkData = Arrays.asList(networkManager.getBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute());
+            response = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
-            cache.save(networkData);
+            cache.save(response.getResult());
         }
 
-        return networkData;
+        return response;
     }
 
     /**

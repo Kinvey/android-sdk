@@ -321,16 +321,21 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
                 if (limit > 0) {
                     // limit modifier has been applied, so take a subset of the Realm result set
-                    int endIndex = Math.min(ret, (skip+limit));
-                    List<DynamicRealmObject> subresult = result.subList(skip, endIndex);
-                    List<String> ids = new ArrayList<String>();
-                    ret = subresult.size();
-                    for (DynamicRealmObject id : subresult) {
-                        ids.add((String)id.get(ID));
-                    }
-                    realm.commitTransaction();
-                    if (ids.size() > 0) {
-                        this.delete(realm, ids, tableName);
+                    if (skip < result.size()) {
+                        int endIndex = Math.min(ret, (skip + limit));
+                        List<DynamicRealmObject> subresult = result.subList(skip, endIndex);
+                        List<String> ids = new ArrayList<String>();
+                        ret = subresult.size();
+                        for (DynamicRealmObject id : subresult) {
+                            ids.add((String) id.get(ID));
+                        }
+                        realm.commitTransaction();
+                        if (ids.size() > 0) {
+                            this.delete(realm, ids, mCollection);
+                        }
+                    } else {
+                        realm.commitTransaction();
+                        ret = 0;
                     }
                 } else if (skip > 0) {
                     // only skip modifier has been applied, so take a subset of the Realm result set
@@ -952,7 +957,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
         }
     }
-
 
 
 }
