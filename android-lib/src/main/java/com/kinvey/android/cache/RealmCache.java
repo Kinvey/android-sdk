@@ -46,8 +46,8 @@ import io.realm.Sort;
  */
 public class RealmCache<T extends GenericJson> implements ICache<T> {
 
-    private static final String ACL = "__acl";
-    private static final String KMD = "__kmd";
+    private static final String ACL = "_acl";
+    private static final String KMD = "_kmd";
     private static final String ID = "_id";
 
     private String mCollection;
@@ -281,8 +281,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         int i;
         try {
             List<T> items = get(query);
-            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
+            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + "_" + ACL);
+            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + "_" + KMD);
             i = delete(realm, query, mCollection);
         } finally {
             realm.close();
@@ -373,8 +373,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         int i;
         try {
             List<T> items = get(ids);
-            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
+            delete(realm, getSupportIds(items, ACL), TableNameManager.getShortName(mCollection, realm) + "_" + ACL);
+            delete(realm, getSupportIds(items, KMD), TableNameManager.getShortName(mCollection, realm) + "_" + KMD);
             i = delete(realm, ids, mCollection);
         } finally {
             realm.close();
@@ -410,8 +410,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         int i;
         try {
             T item = get(id);
-            delete(realm, getSupportId(item, ACL), TableNameManager.getShortName(mCollection, realm) + ACL);
-            delete(realm, getSupportId(item, KMD), TableNameManager.getShortName(mCollection, realm) + KMD);
+            delete(realm, getSupportId(item, ACL), TableNameManager.getShortName(mCollection, realm) + "_" + ACL);
+            delete(realm, getSupportId(item, KMD), TableNameManager.getShortName(mCollection, realm) + "_" + KMD);
             i = delete(realm, id, mCollection);
         } finally {
             realm.close();
