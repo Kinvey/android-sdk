@@ -89,7 +89,12 @@ public class RealmCacheManager implements ICacheManager {
                 cache = (RealmCache<T>) mCacheMap.get(cacheKey);
                 if (cache == null) {
                     cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
-                    if (!cache.getHash().equals(getTableHash(collection, mRealm))) {
+
+                    mRealm.beginTransaction();
+                    boolean isMigrationNeeded = TableNameManager.getShortName(collection, mRealm) == null && mRealm.getSchema().contains(collection);
+                    mRealm.commitTransaction();
+
+                    if (!cache.getHash().equals(getTableHash(collection, mRealm)))  {
                         //Recreate table
                         mRealm.beginTransaction();
                         try {
@@ -119,14 +124,19 @@ public class RealmCacheManager implements ICacheManager {
                             mRealm.commitTransaction();
                         }
 
+                    } else if (isMigrationNeeded) {
+                        mRealm.beginTransaction();
+                        cache.migration(mRealm);
+                        mRealm.commitTransaction();
                     }
+
                     mCacheMap.put(cacheKey, cache);
                 } else {
                     if (!collectionItemClass.isAssignableFrom(cache.getCollectionItemClass()) &&
                             !cache.getCollectionItemClass().isAssignableFrom(collectionItemClass)) {
                         throw new KinveyException("Class implementation for collection have been changed during runtime",
                                 "Please review the BaseDataStore usage, parameter should remain the same for same collection",
-                                "Seems like you have used different classes for same colledtion in AsyncAppDataCreaton");
+                                "Seems like you have used different classes for same collection in AsyncAppDataCreation");
                     }
                     //create new instance because ttl values differs for different store types and
                     cache = new RealmCache<T>(collection, this, collectionItemClass, ttl);
@@ -202,7 +212,6 @@ public class RealmCacheManager implements ICacheManager {
      */
     DynamicRealm getDynamicRealm(){
         synchronized (LOCK){
-            Uri server = Uri.parse(client.getBaseUrl());
             DynamicRealm realm;
             try {
                 realm = DynamicRealm.getInstance(getRealmConfiguration());

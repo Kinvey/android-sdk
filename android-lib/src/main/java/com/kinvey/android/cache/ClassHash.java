@@ -45,6 +45,7 @@ import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmList;
 import io.realm.RealmObjectSchema;
+import io.realm.RealmSchema;
 
 /**
  * Created by Prots on 1/27/16.
@@ -164,6 +165,62 @@ public abstract class ClassHash {
         return schema;
     }
 
+    /**
+     * Migrate from old table name to new table name
+     * @param name table name to rename
+     * @param realm Realm object
+     * @param clazz Class in table
+     */
+    static void migration(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
+        rename(name, null, realm, clazz);
+    }
+
+    /**
+     * Rename realm table
+     * @param oldName old table name
+     * @param newName new table name
+     * @param realm Realm object
+     * @param clazz Class in table
+     */
+    private static void rename(String oldName, String newName,  DynamicRealm realm, Class<? extends GenericJson> clazz) {
+        String shortName = newName != null ? newName : TableNameManager.createShortName(oldName, realm);
+        RealmSchema schema = realm.getSchema();
+        schema.rename(oldName, shortName);
+        List<Field> fields = getClassFieldsAndParentClassFields(clazz);
+        for (Field f : fields){
+            FieldInfo fieldInfo = FieldInfo.of(f);
+            if (fieldInfo == null){
+                continue;
+            }
+            if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())){
+                Class underlying = getUnderlying(f);
+                if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
+                    rename(oldName + "_" + fieldInfo.getName(), TableNameManager.createShortName(shortName + "_" + fieldInfo.getName(), realm), realm, (Class<? extends GenericJson>) fieldInfo.getType());
+                } else {
+                    for (Class c : ALLOWED) {
+                        if (underlying.equals(c)) {
+                            schema.rename(oldName, shortName);
+                            break;
+                        }
+                    }
+                }
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())/* && !oldName.equals("sync") && !oldName.equals("syncitems")*/) {
+                rename(oldName + "_" + fieldInfo.getName(), TableNameManager.createShortName(shortName + "_" + fieldInfo.getName(), realm), realm, (Class<? extends GenericJson>) fieldInfo.getType());
+            }
+        }
+        if (schema.contains(oldName + "_" + KinveyMetaData.AccessControlList.ACL)) {
+            schema.rename(oldName + "_" + KinveyMetaData.AccessControlList.ACL,
+                    TableNameManager.createShortName(TableNameManager.getShortName(oldName, realm) + "_" + KinveyMetaData.AccessControlList.ACL, realm));
+        } else {
+            RealmObjectSchema objectSchema = schema.get(shortName);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
+            objectSchema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
+        }
+        if (schema.contains(oldName + "_" + KinveyMetaData.KMD)) {
+            schema.rename(oldName + "_" + KinveyMetaData.KMD,
+                    TableNameManager.createShortName(shortName + "_" + KinveyMetaData.KMD, realm));
+        }
+    }
 
     private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
 
