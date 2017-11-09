@@ -522,6 +522,14 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         ClassHash.createScheme(mCollection, realm, mCollectionItemClass);
     }
 
+    /**
+     * Migrate from old table name to new table name
+     * @param realm Realm object
+     */
+    void migration(DynamicRealm realm){
+        ClassHash.migration(mCollection, realm, mCollectionItemClass);
+    }
+
     private String insertOrUpdate(T item, DynamicRealm mRealm){
 
         T clone = (T)item.clone();
