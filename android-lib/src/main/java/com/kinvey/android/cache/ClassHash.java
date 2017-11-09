@@ -204,7 +204,7 @@ public abstract class ClassHash {
                         }
                     }
                 }
-            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())/* && !oldName.equals("sync") && !oldName.equals("syncitems")*/) {
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
                 rename(oldName + "_" + fieldInfo.getName(), TableNameManager.createShortName(shortName + "_" + fieldInfo.getName(), realm), realm, (Class<? extends GenericJson>) fieldInfo.getType());
             }
         }
