@@ -793,7 +793,7 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.setUserClass(userClass);
             client.setSelfReferenceCount(selfReferenceCount);
 
-            //GCM explicitely enabled
+            //GCM explicitly enabled
             if (this.GCM_Enabled){
                 client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
             }
