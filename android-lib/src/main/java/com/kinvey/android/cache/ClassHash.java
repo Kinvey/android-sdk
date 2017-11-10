@@ -113,12 +113,6 @@ public abstract class ClassHash {
 
                 if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
                     selfReferenceCount--;
-
-
-                    System.out.println("TEST_TEST field" + fieldInfo.getName());
-                    System.out.println("TEST_TEST clazz" + clazz.getSimpleName());
-                    System.out.println("TEST_TEST equals" + fieldInfo.getName().equals(clazz.getSimpleName()));
-
                     String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceCount);
                     sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
                 }
@@ -190,12 +184,9 @@ public abstract class ClassHash {
                 Class underlying = getUnderlying(f);
 
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
-                        selfReferenceCount--;
-                        RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying, selfReferenceCount);
+                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying, selfReferenceCount);
 
-                        schema.addRealmListField(fieldInfo.getName(), innerScheme);
-                    }
+                    schema.addRealmListField(fieldInfo.getName(), innerScheme);
                 } else {
                     for (Class c : ALLOWED) {
                         if (underlying.equals(c)) {
@@ -213,8 +204,6 @@ public abstract class ClassHash {
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) /*&& fieldInfo.getName().equals(clazz.getName())*/){
                 if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
                     selfReferenceCount--;
-                    System.out.println("TEST_TEST" + fieldInfo.getName());
-                    System.out.println("TEST_TEST" + clazz.getName());
                     RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceCount);
                     schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
                 }
@@ -327,30 +316,24 @@ public abstract class ClassHash {
                     RealmList list = new RealmList();
                     Object collection = fieldInfo.getValue(obj);
                     if (f.getType().isArray()) {
-                        if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
-                            selfReferenceCount--;
 
-                            for (int i = 0; i < Array.getLength(collection); i++) {
-                                list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
-                                        realm,
-                                        (Class<? extends GenericJson>) underlying,
-                                        (GenericJson) Array.get(collection, i),
-                                        selfReferenceCount));
+                        for (int i = 0; i < Array.getLength(collection); i++) {
+                            list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
+                                    realm,
+                                    (Class<? extends GenericJson>) underlying,
+                                    (GenericJson) Array.get(collection, i),
+                                    selfReferenceCount));
 
-                            }
                         }
                     } else {
 
                         if (GenericJson.class.isAssignableFrom(underlying)) {
-                            if (fieldInfo.getName().equals(clazz.getSimpleName()) && selfReferenceCount  > 0) {
-                                selfReferenceCount--;
-                                for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
-                                    list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
-                                            realm,
-                                            (Class<? extends GenericJson>) underlying,
-                                            genericJson,
-                                            selfReferenceCount));
-                                }
+                            for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
+                                list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
+                                        realm,
+                                        (Class<? extends GenericJson>) underlying,
+                                        genericJson,
+                                        selfReferenceCount));
                             }
                         } else {
                             DynamicRealmObject dynamicRealmObject = null;

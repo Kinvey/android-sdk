@@ -446,7 +446,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         private String MICBaseURL;
         private boolean deltaSetCache = false;
         private Class userClass = User.class;
-        private int selfReferenceCount = 2; //// TODO: 23.10.2017 magic number?
+        private int selfReferenceCount = 5;
         private byte[] encryptionKey;
 
         /**
