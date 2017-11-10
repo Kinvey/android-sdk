@@ -1712,10 +1712,32 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testSelfReferenceClassUsing() throws InterruptedException {
+    public void testSelfReferenceClass() throws InterruptedException {
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+    }
+
+    @Test //// TODO: 10.11.2017 should be checked 
+    public void testSelfReferenceClassWithData() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).setSelfReferenceCount(1).build();
+        client.enableDebugLogging();
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        SelfReferencePerson person1 = new SelfReferencePerson();
+        SelfReferencePerson person2 = new SelfReferencePerson();
+        SelfReferencePerson person3 = new SelfReferencePerson();
+        SelfReferencePerson person4 = new SelfReferencePerson();
+        SelfReferencePerson person5 = new SelfReferencePerson();
+        person1.setPerson(person2);
+        person2.setPerson(person3);
+        person3.setPerson(person4);
+        person4.setPerson(person5);
+        CustomKinveyClientCallback<SelfReferencePerson> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
         assertNotNull(store);
     }
 
