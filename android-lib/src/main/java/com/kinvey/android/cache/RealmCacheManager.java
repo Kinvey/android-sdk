@@ -47,6 +47,9 @@ import io.realm.exceptions.RealmFileException;
 public class RealmCacheManager implements ICacheManager {
 
     private static final String TABLE_HASH_NAME = "__KinveyTables__";
+    private static final String SYNC_ITEMS_COLLECTION = "syncitems";
+    private static final String SYNC_COLLECTION = "sync";
+    
     private byte[] encryptionKey;
     private final AbstractClient client;
     private final Context context;
@@ -104,7 +107,7 @@ public class RealmCacheManager implements ICacheManager {
                             mRealm.commitTransaction();
                         }
 
-                        if (!collection.equals("syncitems") && !collection.equals("sync") && client.getSyncManager().getCount(collection) > 0) {
+                        if (!collection.equals(SYNC_ITEMS_COLLECTION) && !collection.equals(SYNC_COLLECTION) && client.getSyncManager().getCount(collection) > 0) {
                             client.getSyncManager().clear(collection);
                             new KinveyException("Not synced items were deleted from " + collection + " collection").printStackTrace();
                         }
