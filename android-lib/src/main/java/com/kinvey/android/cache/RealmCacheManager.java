@@ -106,6 +106,7 @@ public class RealmCacheManager implements ICacheManager {
 
                         if (!collection.equals("syncitems") && !collection.equals("sync") && client.getSyncManager().getCount(collection) > 0) {
                             client.getSyncManager().clear(collection);
+                            new KinveyException("Not synced items were deleted from " + collection + " collection").printStackTrace();
                         }
 
                         //split table remove and create
