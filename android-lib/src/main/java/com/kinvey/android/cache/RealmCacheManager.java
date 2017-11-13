@@ -27,7 +27,9 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import io.realm.DynamicRealm;
@@ -95,20 +97,9 @@ public class RealmCacheManager implements ICacheManager {
                     mRealm.commitTransaction();
 
                     if (!cache.getHash().equals(getTableHash(collection, mRealm)))  {
-                        //Recreate table
                         mRealm.beginTransaction();
                         try {
-                            //remove existing table if any
-                            RealmSchema currentSceme = mRealm.getSchema();
-                            for (RealmObjectSchema schema : currentSceme.getAll()) {
-                                if (schema.getClassName().equals(collection) || schema.getClassName().startsWith(collection + "_")) {
-                                    String className = schema.getClassName();
-                                    if (mRealm.getSchema().get(className).hasPrimaryKey()) {
-                                        mRealm.getSchema().get(className).removePrimaryKey();
-                                    }
-                                    currentSceme.remove(className);
-                                }
-                            }
+                            removeSchemas(prepareSchemasToRemove(collection, mRealm), mRealm);
                         } finally {
                             mRealm.commitTransaction();
                         }
@@ -151,8 +142,50 @@ public class RealmCacheManager implements ICacheManager {
         }
     }
 
+    /**
+     * Find all schemas (table names) to removing by collection name
+     * @param collection collection name
+     * @param realm Realm object
+     * @return list of schemas to removing
+     */
+    private List<String> prepareSchemasToRemove(String collection, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String originalName;
+        String className;
+        List<String> schemasToDelete = new ArrayList<>();
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            //search class
+            if (className.equals(TableNameManager.getShortName(collection, realm))) {
+                schemasToDelete.add(className);
+                //search sub-classes
+                for (RealmObjectSchema subClassSchema : schemas) {
+                    originalName = TableNameManager.getOriginalName(subClassSchema.getClassName(), realm);
+                    if (originalName != null && originalName.startsWith(className + "_")) {
+                        schemasToDelete.addAll(prepareSchemasToRemove(originalName, realm));
+                    }
+                }
+            }
+        }
+        return schemasToDelete;
+    }
 
-
+    /**
+     * Remove realm tables by names
+     * @param tableNames table names to removing
+     * @param realm Realm object
+     */
+    private void removeSchemas(List<String> tableNames, DynamicRealm realm) {
+        RealmSchema realmSchema = realm.getSchema();
+        for (String tableName : tableNames) {
+            if (realmSchema.get(tableName).hasPrimaryKey()) {
+                realmSchema.get(tableName).removePrimaryKey();
+            }
+            realmSchema.remove(tableName);
+            TableNameManager.removeShortName(tableName, realm);
+        }
+    }
 
     @Override
     public void clear() {

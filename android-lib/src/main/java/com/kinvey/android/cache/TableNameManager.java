@@ -33,10 +33,21 @@ class TableNameManager {
         return shortName;
     }
 
+    static void removeShortName(String originalName, DynamicRealm realm) {
+        initTable(realm);
+        realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, originalName).findFirst().deleteFromRealm();
+    }
+
     static String getShortName(String originalName, DynamicRealm realm) {
         initTable(realm);
         DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst();
         return realmObject != null ? realmObject.getString(SHORT_NAME_FIELD) : null;
+    }
+
+    static String getOriginalName(String shortName, DynamicRealm realm) {
+        initTable(realm);
+        DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, shortName).findFirst();
+        return realmObject != null ? realmObject.getString(ORIGINAL_NAME_FIELD) : null;
     }
 
 }
