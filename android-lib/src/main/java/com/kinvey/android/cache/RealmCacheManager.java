@@ -104,6 +104,10 @@ public class RealmCacheManager implements ICacheManager {
                             mRealm.commitTransaction();
                         }
 
+                        if (!collection.equals("syncitems") && !collection.equals("sync") && client.getSyncManager().getCount(collection) > 0) {
+                            client.getSyncManager().clear(collection);
+                        }
+
                         //split table remove and create
                         mRealm.beginTransaction();
                         try {
