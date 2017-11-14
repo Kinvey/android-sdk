@@ -11,6 +11,10 @@ public class SelfReferencePerson extends Person {
     @Key("SelfReferencePerson")
     private SelfReferencePerson SelfReferencePerson;
 
+    public SelfReferencePerson(String username) {
+        this.username = username;
+    }
+
     public SelfReferencePerson() {
     }
 

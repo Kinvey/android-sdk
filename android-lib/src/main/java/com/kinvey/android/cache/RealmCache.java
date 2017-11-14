@@ -537,7 +537,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     public String getHash(){
-        return ClassHash.getClassHash(getCollectionItemClass(), Client.sharedInstance().getSelfReferenceCount());
+        return ClassHash.getClassHash(getCollectionItemClass());
     }
 
     public void createRealmTable(DynamicRealm realm){

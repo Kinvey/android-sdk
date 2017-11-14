@@ -95,8 +95,6 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     private String MICApiVersion;
     private int requestTimeout;
 
-    protected int selfReferenceCount;
-
     public void setMICApiVersion(String version){
         if (!version.startsWith("v")){
             version = "v" + version;
@@ -547,11 +545,4 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         this.userModelClass = userClass;
     }
 
-    public int getSelfReferenceCount() {
-        return selfReferenceCount;
-    }
-
-    protected void setSelfReferenceCount(int selfReferenceCount) {
-        this.selfReferenceCount = selfReferenceCount;
-    }
 }

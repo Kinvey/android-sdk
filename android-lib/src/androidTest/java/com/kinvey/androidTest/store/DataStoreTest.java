@@ -1719,26 +1719,38 @@ public class DataStoreTest {
         assertNotNull(store);
     }
 
-    @Test //// TODO: 10.11.2017 should be checked 
+    @Test
     public void testSelfReferenceClassWithData() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(mMockContext).setSelfReferenceCount(1).build();
+        client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
-        SelfReferencePerson person1 = new SelfReferencePerson();
-        SelfReferencePerson person2 = new SelfReferencePerson();
-        SelfReferencePerson person3 = new SelfReferencePerson();
-        SelfReferencePerson person4 = new SelfReferencePerson();
-        SelfReferencePerson person5 = new SelfReferencePerson();
-        person1.setPerson(person2);
-        person2.setPerson(person3);
-        person3.setPerson(person4);
+        SelfReferencePerson person1 = new SelfReferencePerson("person1");
+        SelfReferencePerson person2 = new SelfReferencePerson("person2");
+        SelfReferencePerson person3 = new SelfReferencePerson("person3");
+        SelfReferencePerson person4 = new SelfReferencePerson("person4");
+        SelfReferencePerson person5 = new SelfReferencePerson("person5");
+
         person4.setPerson(person5);
+        person3.setPerson(person4);
+        person2.setPerson(person3);
+        person1.setPerson(person2);
+
         CustomKinveyClientCallback<SelfReferencePerson> callback = testManager.saveCustom(store, person1);
         assertNotNull(callback.getResult());
-        assertNotNull(store);
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+        SelfReferencePerson person = listCallback.getResult().get(0);
+        assertTrue(person.getUsername().equals("person1"));
+        assertTrue(person.getPerson().getUsername().equals("person2"));
+        assertTrue(person.getPerson().getPerson().getUsername().equals("person3"));
+        assertTrue(person.getPerson().getPerson().getPerson().getUsername().equals("person4"));
+        assertTrue(person.getPerson().getPerson().getPerson().getPerson().getUsername().equals("person5"));
     }
 
     @After

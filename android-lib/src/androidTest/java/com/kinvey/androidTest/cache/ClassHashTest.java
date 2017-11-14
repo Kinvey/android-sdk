@@ -43,36 +43,36 @@ public class ClassHashTest {
         ClassHash.getClassHash(new GenericJson(){
             @Key("_id")
             private String _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
         //Correct case
         ClassHash.getClassHash(new GenericJson(){
             @Key("_id")
             protected  String _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
         //Correct case
         ClassHash.getClassHash(new GenericJson(){
             @Key("_id")
             String _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
         //Correct case Object should be skipped
         ClassHash.getClassHash(new GenericJson() {
             @Key("_id")
             Object _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
         //Correct case Context should be skipped
         ClassHash.getClassHash(new GenericJson() {
             @Key("_id")
             Context _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
         //Correct case field without annotation should be skipped
         ClassHash.getClassHash(new GenericJson() {
             String _id;
-        }.getClass(), Client.sharedInstance().getSelfReferenceCount());
+        }.getClass());
 
 
     }
@@ -85,25 +85,25 @@ public class ClassHashTest {
                 ClassHash.getClassHash(new GenericJson() {
                     @Key("_id")
                     private String _id;
-                }.getClass(), Client.sharedInstance().getSelfReferenceCount()),
+                }.getClass()),
                 ClassHash.getClassHash(new GenericJson() {
                     @Key("_id")
                     protected String _id;
                     Object test;
-                }.getClass(), Client.sharedInstance().getSelfReferenceCount())
+                }.getClass())
         );
 
         assertNotEquals(
                 ClassHash.getClassHash(new GenericJson() {
                     @Key("_id")
                     private String _id;
-                }.getClass(), Client.sharedInstance().getSelfReferenceCount()),
+                }.getClass()),
                 ClassHash.getClassHash(new GenericJson() {
                     @Key("_id")
                     protected String _id;
                     @Key("_test")
                     String test;
-                }.getClass(), Client.sharedInstance().getSelfReferenceCount())
+                }.getClass())
         );
 
 

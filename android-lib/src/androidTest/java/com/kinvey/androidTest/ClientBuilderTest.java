@@ -73,18 +73,6 @@ public class ClientBuilderTest {
     }
 
     @Test
-    public void testSetSelfReferenceCount() throws IOException {
-        client = new Client.Builder(mContext).setSelfReferenceCount(20).build();
-        assertTrue(client.getSelfReferenceCount() == 20);
-    }
-
-//    @Test
-//    public void testSetSelfReferenceCountDefaultValue() throws IOException {
-//        client = new Client.Builder(mContext).build();
-//        assertTrue(client.getSelfReferenceCount() == 10);
-//    }
-
-    @Test
     public void testSetUserClassDefault() throws IOException {
         client = new Client.Builder(mContext).build();
         assertTrue(client.getUserClass() == User.class);

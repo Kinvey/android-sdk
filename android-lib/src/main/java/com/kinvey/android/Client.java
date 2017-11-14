@@ -446,7 +446,6 @@ public class Client<T extends User> extends AbstractClient<T> {
         private String MICBaseURL;
         private boolean deltaSetCache = false;
         private Class userClass = User.class;
-        private int selfReferenceCount = 5;
         private byte[] encryptionKey;
 
         /**
@@ -764,11 +763,6 @@ public class Client<T extends User> extends AbstractClient<T> {
             return this;
         }
 
-        public Builder setSelfReferenceCount(int selfReferenceCount){
-            this.selfReferenceCount = selfReferenceCount;
-            return this;
-        }
-
         public Builder setEncryptionKey(byte[] encryptionKey){
             this.encryptionKey = encryptionKey;
             return this;
@@ -791,7 +785,6 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
             client.setUserClass(userClass);
-            client.setSelfReferenceCount(selfReferenceCount);
 
             //GCM explicitly enabled
             if (this.GCM_Enabled){
