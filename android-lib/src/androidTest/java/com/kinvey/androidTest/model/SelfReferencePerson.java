@@ -8,7 +8,7 @@ import com.google.api.client.util.Key;
 
 public class SelfReferencePerson extends Person {
 
-    @Key("SelfReferencePerson")
+    @Key("selfReferencePerson")
     private SelfReferencePerson SelfReferencePerson;
 
     public SelfReferencePerson(String username) {

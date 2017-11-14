@@ -1753,6 +1753,39 @@ public class DataStoreTest {
         assertTrue(person.getPerson().getPerson().getPerson().getPerson().getUsername().equals("person5"));
     }
 
+    @Test
+    public void testQueryInSelfReferenceClass() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        for (int i = 0; i < 10; i++) {
+            SelfReferencePerson person1 = new SelfReferencePerson("person1");
+            SelfReferencePerson person2 = new SelfReferencePerson("person2");
+            SelfReferencePerson person3 = new SelfReferencePerson("person3");
+            SelfReferencePerson person4 = new SelfReferencePerson("person4");
+            SelfReferencePerson person5 = new SelfReferencePerson("person5");
+
+            person4.setPerson(person5);
+            person3.setPerson(person4);
+            person2.setPerson(person3);
+            person1.setPerson(person2);
+
+            CustomKinveyClientCallback<SelfReferencePerson> callback = testManager.saveCustom(store, person1);
+            assertNotNull(callback.getResult());
+            assertNull(callback.getError());
+        }
+
+        Query query = client.query().in("selfReferencePerson.selfReferencePerson.username", new String[] {"person3"});
+        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, query);
+
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+        assertTrue(listCallback.getResult().size() == 10);
+    }
+
     @After
     public void tearDown() {
         client.performLockDown();

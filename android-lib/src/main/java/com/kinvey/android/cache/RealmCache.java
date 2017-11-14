@@ -17,8 +17,6 @@
 package com.kinvey.android.cache;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.android.Client;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;

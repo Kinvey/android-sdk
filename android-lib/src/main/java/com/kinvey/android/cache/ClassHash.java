@@ -88,8 +88,7 @@ public abstract class ClassHash {
 
     private enum SelfReferenceState {
         DEFAULT,
-        CLASS,
-        SUBCLASS
+        SUB_CLASS
     }
 
     //supported fields
@@ -125,7 +124,7 @@ public abstract class ClassHash {
                     String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceState);
                     sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
                 } else if (selfReferenceState  == SelfReferenceState.DEFAULT) {
-                    String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.CLASS);
+                    String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUB_CLASS);
                     sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
                 }
             }  else {
@@ -264,9 +263,9 @@ public abstract class ClassHash {
                     RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceState);
                     schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
                 } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
-                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.CLASS);
+                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUB_CLASS);
                     schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
-                } else if (selfReferenceState == SelfReferenceState.CLASS) {
+                } else if (selfReferenceState == SelfReferenceState.SUB_CLASS) {
                     schema.addRealmObjectField(fieldInfo.getName(), schema);
                 }
             } else {
@@ -435,14 +434,14 @@ public abstract class ClassHash {
                             realm,
                             (Class<? extends GenericJson>) fieldInfo.getType(),
                             (GenericJson) obj.get(fieldInfo.getName()),
-                            SelfReferenceState.CLASS);
+                            SelfReferenceState.SUB_CLASS);
                     object.setObject(fieldInfo.getName(), innerObject);
-                } else if (selfReferenceState == SelfReferenceState.CLASS) {
+                } else if (selfReferenceState == SelfReferenceState.SUB_CLASS) {
                     DynamicRealmObject innerObject = saveClassData(name,
                             realm,
                             (Class<? extends GenericJson>) fieldInfo.getType(),
                             (GenericJson) obj.get(fieldInfo.getName()),
-                            SelfReferenceState.CLASS);
+                            SelfReferenceState.SUB_CLASS);
                     object.setObject(fieldInfo.getName(), innerObject);
                 }
             } else {
