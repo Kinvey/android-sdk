@@ -158,17 +158,7 @@ public abstract class ClassHash {
 
 
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
-        RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz, Client.sharedInstance().getSelfReferenceCount());
-
-        String shortName = TableNameManager.getShortName(name, realm);
-
-        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, Client.sharedInstance().getSelfReferenceCount());
-            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
-        }
-        return schema;
+        return createSchemeFromClass(name, realm, clazz, Client.sharedInstance().getSelfReferenceCount());
     }
 
     /**
@@ -295,28 +285,19 @@ public abstract class ClassHash {
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
 
+        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, Client.sharedInstance().getSelfReferenceCount());
+            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
+        }
+
         return schema;
     }
 
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
-        DynamicRealmObject object = saveClassData(name, realm, clazz, obj, Client.sharedInstance().getSelfReferenceCount());
-
-        String shortName = TableNameManager.getShortName(name, realm);
-
-        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
-            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
-                    realm,
-                    KinveyMetaData.AccessControlList.class,
-                    acl, Client.sharedInstance().getSelfReferenceCount());
-            object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
-        }
-        return object;
+        return saveClassData(name, realm, clazz, obj, Client.sharedInstance().getSelfReferenceCount());
     }
 
     private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj, int selfReferenceCount) {
@@ -478,6 +459,19 @@ public abstract class ClassHash {
                     metadata,
                     selfReferenceCount);
             object.setObject(KinveyMetaData.KMD, innerObject);
+        }
+
+        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
+            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
+            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
+                    realm,
+                    KinveyMetaData.AccessControlList.class,
+                    acl, Client.sharedInstance().getSelfReferenceCount());
+            object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
         }
 
         return object;
