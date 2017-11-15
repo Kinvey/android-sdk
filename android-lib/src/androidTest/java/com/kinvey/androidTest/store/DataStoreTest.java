@@ -1926,6 +1926,50 @@ public class DataStoreTest {
         assertNull(listCallback.getError());
     }
 
+    @Test
+    public void testSelfReferenceClassInClassWithList() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+
+        PersonList person2 = new PersonList("person2");
+
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+        PersonList person6 = new PersonList("person6");
+
+        List<PersonList> list = new ArrayList<>();
+        list.add(person3);
+        list.add(person4);
+        list.add(person5);
+        list.add(person6);
+        person2.setList(list);
+
+        person1.setPersonList(person2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+//        assertEquals(person.getList().get(1).getUsername(), "person3");
+//        assertEquals(person.getList().get(0).getUsername(), "person2");
+//        assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
+    }
+
     @After
     public void tearDown() {
         client.performLockDown();

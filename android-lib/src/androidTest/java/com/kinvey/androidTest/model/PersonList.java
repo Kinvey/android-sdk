@@ -9,6 +9,9 @@ public class PersonList extends Person{
     @Key("list")
     private List<PersonList> list;
 
+    @Key("personList")
+    private PersonList personList;
+
     public PersonList() {
     }
 
@@ -22,5 +25,13 @@ public class PersonList extends Person{
 
     public void setList(List<PersonList> list) {
         this.list = list;
+    }
+
+    public PersonList getPersonList() {
+        return personList;
+    }
+
+    public void setPersonList(PersonList personList) {
+        this.personList = personList;
     }
 }
