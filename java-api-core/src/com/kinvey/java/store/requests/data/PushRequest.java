@@ -34,14 +34,13 @@ import java.util.List;
  */
 public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
 
-    private final String collectionName;
     private ICache<T> cache;
     private NetworkManager<T> networkManager;
     private final SyncManager syncManager;
     private AbstractClient client;
 
     public PushRequest(String collectionName, ICache<T> cache, NetworkManager<T> networkManager, AbstractClient client){
-        this.collectionName = collectionName;
+        this.collection = collectionName;
         this.cache = cache;
         this.networkManager = networkManager;
         this.syncManager = client.getSyncManager();
@@ -55,7 +54,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
             syncManager.executeRequest(client, syncRequest);
         }
 
-        List<SyncItem> syncItems = syncManager.popSingleItemQueue(collectionName);
+        List<SyncItem> syncItems = syncManager.popSingleItemQueue(collection);
         SyncRequest syncRequest = null;
 
         if (syncItems != null) {

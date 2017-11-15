@@ -1,16 +1,8 @@
 package com.kinvey.android.sync;
 
-import java.util.List;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 
-public class KinveyPullResponse<T> {
+public class KinveyPullResponse<T> extends KinveyAbstractReadResponse<T> {
 
-    private List<T> result;
 
-    public List<T> getResult() {
-        return result;
-    }
-
-    public void setResult(List<T> result) {
-        this.result = result;
-    }
 }

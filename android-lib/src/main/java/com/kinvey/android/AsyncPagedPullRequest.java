@@ -16,15 +16,11 @@
 
 package com.kinvey.android;
 
-import com.google.api.client.json.GenericJson;
-
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.store.BaseDataStore;
-import com.kinvey.java.store.ReadPolicy;
-import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -68,14 +64,20 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
             query = new Query();
         }
 
-        List<T> totalPullResults = new ArrayList<>();
+        List<T> pullResults = new ArrayList<>();
+        List<Exception> pullExceptions = new ArrayList<>();
+        KinveyAbstractReadResponse<T> pullResponse;
+
         do {
             query.setSkip(skipCount).setLimit(pageSize);
-            totalPullResults.addAll(store.pullBlocking(query));
+            pullResponse = store.pullBlocking(query);
+            pullResults.addAll(pullResponse.getResult());
+            pullExceptions.addAll(pullResponse.getListOfExceptions());
             skipCount += pageSize;
         } while (skipCount < totalItemCount);
 
-        kinveyPullResponse.setResult(totalPullResults);
+        kinveyPullResponse.setResult(pullResults);
+        kinveyPullResponse.setListOfExceptions(pullExceptions);
 
         return kinveyPullResponse;
     }

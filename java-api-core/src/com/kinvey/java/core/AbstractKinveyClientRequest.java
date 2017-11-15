@@ -81,7 +81,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     /**
      * Response class to parse into *
      */
-    private final Class<T> responseClass;
+    final Class<T> responseClass;
 
     /**
      * NetworkFileManager downloader or {@code null} if none is set *
@@ -106,7 +106,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     /**
      * Should the request intercept redirects and route them to an override
      */
-    private boolean overrideRedirect = false;
+    boolean overrideRedirect = false;
 
     @Key
     private String appKey;
