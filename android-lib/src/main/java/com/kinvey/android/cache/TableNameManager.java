@@ -39,4 +39,10 @@ class TableNameManager {
         return realmObject != null ? realmObject.getString(SHORT_NAME_FIELD) : null;
     }
 
+    static String getOriginalName(String shortName, DynamicRealm realm) {
+        initTable(realm);
+        DynamicRealmObject realmObject = realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, shortName).findFirst();
+        return realmObject != null ? realmObject.getString(ORIGINAL_NAME_FIELD) : null;
+    }
+
 }

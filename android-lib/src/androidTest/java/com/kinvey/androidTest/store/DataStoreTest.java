@@ -33,6 +33,7 @@ import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
+import com.kinvey.androidTest.model.PersonList;
 import com.kinvey.androidTest.model.SelfReferencePerson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -1784,6 +1785,145 @@ public class DataStoreTest {
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
         assertTrue(listCallback.getResult().size() == 10);
+    }
+
+
+    @Test
+    public void testSelfReferenceClassInList() throws InterruptedException {
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+    }
+
+    @Test
+    public void testSelfReferenceClassInListWithData() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+        PersonList person2 = new PersonList("person2");
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+
+        PersonList person6 = new PersonList("person6");
+        PersonList person7 = new PersonList("person7");
+        PersonList person8 = new PersonList("person8");
+        PersonList person9 = new PersonList("person9");
+
+        List<PersonList> list = new ArrayList<>();
+        list.add(person6);
+        list.add(person7);
+        list.add(person8);
+        list.add(person9);
+        person2.setList(list);
+
+        List<PersonList> list2 = new ArrayList<>();
+        list2.add(person2);
+        list2.add(person3);
+        list2.add(person4);
+        list2.add(person5);
+        person1.setList(list2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getList().get(1).getUsername(), "person3");
+        assertEquals(person.getList().get(0).getUsername(), "person2");
+        assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
+    }
+
+    @Test
+    public void testQueryInSelfReferenceClassInList() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        for (int i = 0; i < 5; i++) {
+            PersonList person1 = new PersonList("person1_" + i);
+            PersonList person2 = new PersonList("person2_" + i);
+            PersonList person3 = new PersonList("person3_" + i);
+            PersonList person4 = new PersonList("person4_" + i);
+            PersonList person5 = new PersonList("person5_" + i);
+
+            PersonList person6 = new PersonList("person6_" + i);
+            PersonList person7 = new PersonList("person7_" + i);
+            PersonList person8 = new PersonList("person8_" + i);
+            PersonList person9 = new PersonList("person9_" + i);
+
+            List<PersonList> list = new ArrayList<>();
+            list.add(person6);
+            list.add(person7);
+            list.add(person8);
+            list.add(person9);
+            person2.setList(list);
+
+            List<PersonList> list2 = new ArrayList<>();
+            list2.add(person2);
+            list2.add(person3);
+            list2.add(person4);
+            list2.add(person5);
+            person1.setList(list2);
+
+            CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+            assertNotNull(callback.getResult());
+            assertNull(callback.getError());
+        }
+
+        Query query = client.query().in("username", new String[] {"person1_0"});
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertNull(listCallback.getError());
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1_0");
+
+        query = client.query().in("list.username", new String[] {"person2_0"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_0");
+        assertNull(listCallback.getError());
+
+        query = client.query().in("list.list.username", new String[] {"person6_1"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertNull(listCallback.getError());
+
+        query = client.query().in("list.list.username", new String[] {"person6_1", "person6_2"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 2);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertEquals(listCallback.getResult().get(1).getUsername(), "person1_2");
+        assertNull(listCallback.getError());
+
+        query = client.query().equals("list.list.username", "person6_1");
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertNull(listCallback.getError());
     }
 
     @After
