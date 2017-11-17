@@ -29,6 +29,9 @@ public class Person extends GenericJson{
     private float height;
 
     @Key
+    private Author author;
+
+    @Key
     private long weight ;
 
     @Key
@@ -83,5 +86,13 @@ public class Person extends GenericJson{
 
     public void setCarNumber(Integer carNumber) {
         this.carNumber = carNumber;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 }

@@ -11,7 +11,7 @@ import io.realm.RealmObjectSchema;
 /**
  * Created by yuliya on 10/12/17.
  */
-class TableNameManager {
+public class TableNameManager {
 
     private static final String COLLECTION_NAME = "_tableManager";
     private static final String ORIGINAL_NAME_FIELD = "originalName";
