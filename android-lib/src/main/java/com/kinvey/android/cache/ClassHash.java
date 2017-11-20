@@ -129,7 +129,7 @@ public abstract class ClassHash {
         sb.append(TTL).append(":").append(Long.class.getName()).append(";");
 
 
-        String hashtext = null;
+        String hashtext;
 
         try {
             MessageDigest m = MessageDigest.getInstance("MD5");
