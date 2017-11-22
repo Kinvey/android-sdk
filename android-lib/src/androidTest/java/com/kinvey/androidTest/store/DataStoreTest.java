@@ -27,12 +27,14 @@ import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
+import com.kinvey.androidTest.util.RealmUtil;
+import com.kinvey.androidTest.util.TableNameManagerUtil;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
@@ -55,6 +57,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import io.realm.DynamicRealm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1708,6 +1712,88 @@ public class DataStoreTest {
 
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
+    }
+
+    @Test
+    public void testDeleteInternalTables() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setAuthor(new Author("author_name"));
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmUtil.getRealm(client);
+        int resSize;
+        try {
+            realm.beginTransaction();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertEquals(1, resSize); // check that item in sub table was created
+
+        testManager.delete(store, saveCallback.getResult().getId());
+
+        realm = RealmUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertEquals(0, resSize); // check that item in sub table was deleted after call 'clear'
+        assertTrue(store.count() == 0);
+    }
+
+    @Test
+    public void testClearInternalTables() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setAuthor(new Author("author_name"));
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmUtil.getRealm(client);
+        int resSize;
+        try {
+            realm.beginTransaction();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertEquals(1, resSize); // check that item in sub table was created
+
+        store.clear();
+
+        realm = RealmUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertEquals(0, resSize); // check that item in sub table was deleted after call 'clear'
+        assertTrue(store.count() == 0);
     }
 
     @After
