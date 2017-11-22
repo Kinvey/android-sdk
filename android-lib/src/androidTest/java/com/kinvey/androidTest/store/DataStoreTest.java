@@ -1940,6 +1940,64 @@ public class DataStoreTest {
         }
     }
 
+    @Test
+    public void testSaveItemToInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setAuthor(new Author("Author_"));
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 1);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 1);
+
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
+    @Test
+    public void testInitializationInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 0);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 0);
+
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
     @After
     public void tearDown() {
         client.performLockDown();
