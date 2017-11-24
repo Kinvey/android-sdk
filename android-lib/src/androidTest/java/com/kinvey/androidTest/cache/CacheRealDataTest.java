@@ -13,6 +13,7 @@ import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.model.BooleanPrimitiveListInPerson;
 import com.kinvey.androidTest.model.FloatPrimitiveListInPerson;
 import com.kinvey.androidTest.model.IntegerPrimitiveListInPerson;
@@ -36,7 +37,9 @@ import java.util.List;
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -866,6 +869,53 @@ public class CacheRealDataTest {
         CustomKinveyListCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
         assertTrue(findCallback.getResult().size() == 1);
+    }
+
+    @Test
+    public void testDeleteObjectsArrayToRealmLocally() throws InterruptedException, IOException {
+        TestManager<ObjectListInPerson> testManager = new TestManager<ObjectListInPerson>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<ObjectListInPerson> store = DataStore.collection(Person.COLLECTION, ObjectListInPerson.class, StoreType.SYNC, client);
+        ObjectListInPerson person = new ObjectListInPerson(TEST_USERNAME);
+        ArrayList<StringGenericJson> stringGenericJsons = new ArrayList<>();
+        stringGenericJsons.add(new StringGenericJson(TEST_STRING));
+        stringGenericJsons.add(new StringGenericJson("987654321"));
+        person.setStringGenericJsons(stringGenericJsons);
+
+        ObjectListInPerson person2 = new ObjectListInPerson(TEST_USERNAME);
+        ArrayList<StringGenericJson> stringGenericJsons2 = new ArrayList<>();
+        stringGenericJsons2.add(new StringGenericJson("987654321"));
+        stringGenericJsons2.add(new StringGenericJson("9876543211111"));
+        person2.setStringGenericJsons(stringGenericJsons2);
+
+        CustomKinveyClientCallback<ObjectListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getStringGenericJsons());
+        assertTrue(saveCallback.getResult().getStringGenericJsons().size() == 2);
+
+        CustomKinveyClientCallback<ObjectListInPerson> saveCallback2 = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback2.getResult());
+        assertNotNull(saveCallback2.getResult().getStringGenericJsons());
+        assertTrue(saveCallback2.getResult().getStringGenericJsons().size() == 2);
+
+        Query query = new Query().in("stringGenericJsons.string", new String[]{TEST_STRING});
+        CustomKinveyListCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().size() == 1);
+
+        DefaultKinveyDeleteCallback callback = testManager.deleteCustom(store, query);
+        assertNotNull(callback);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        assertTrue(store.count() == 1);
+
+        callback = testManager.deleteCustom(store, saveCallback2.getResult().getId());
+        assertNotNull(callback);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        assertTrue(store.count() == 0);
     }
 
 
