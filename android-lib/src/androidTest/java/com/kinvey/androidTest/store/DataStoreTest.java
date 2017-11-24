@@ -30,10 +30,12 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.model.Address;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
 import com.kinvey.androidTest.model.PersonList;
+import com.kinvey.androidTest.model.PersonWithAddress;
 import com.kinvey.androidTest.model.SelfReferencePerson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -1969,6 +1971,27 @@ public class DataStoreTest {
 //        assertEquals(person.getList().get(0).getUsername(), "person2");
 //        assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
     }
+
+    @Test
+    public void testSelfReferenceBookAuthorBook() throws InterruptedException {
+        TestManager<PersonWithAddress> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonWithAddress> store = DataStore.collection(Person.COLLECTION, PersonWithAddress.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonWithAddress person = new PersonWithAddress("person");
+        Address address = new Address("test_address");
+        PersonWithAddress person2 = new PersonWithAddress("person_2");
+        address.setPerson(person2);
+        person.setAddress(address);
+
+
+        CustomKinveyClientCallback<PersonWithAddress> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+    }
+
 
     @After
     public void tearDown() {
