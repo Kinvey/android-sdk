@@ -480,12 +480,19 @@ public abstract class ClassHash {
                     Class underlying = getUnderlying(f);
                     if (underlying != null && GenericJson.class.isAssignableFrom(underlying)) {
                         RealmList<DynamicRealmObject> list = realmObject.getList(fieldInfo.getName());
+
+                        List<String> ids = new ArrayList<>();
                         for (DynamicRealmObject object : list) {
                             if (object.hasField(ID) && object.getString(ID) != null) {
-                                deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                        (Class<? extends GenericJson>) underlying, object.getString(ID));
+                                ids.add(object.getString(ID));
                             }
                         }
+
+                        for (String _id : ids) {
+                            deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
+                                    (Class<? extends GenericJson>) underlying, _id);
+                        }
+
                     }
                 } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
                     DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
