@@ -11,7 +11,7 @@ import io.realm.RealmObjectSchema;
 /**
  * Created by yuliya on 10/12/17.
  */
-class TableNameManager {
+public class TableNameManager {
 
     private static final String COLLECTION_NAME = "_tableManager";
     private static final String ORIGINAL_NAME_FIELD = "originalName";
@@ -31,6 +31,11 @@ class TableNameManager {
         DynamicRealmObject object = realm.createObject(COLLECTION_NAME, shortName);
         object.set(ORIGINAL_NAME_FIELD, originalName);
         return shortName;
+    }
+
+    static void removeShortName(String originalName, DynamicRealm realm) {
+        initTable(realm);
+        realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, originalName).findFirst().deleteFromRealm();
     }
 
     static String getShortName(String originalName, DynamicRealm realm) {
