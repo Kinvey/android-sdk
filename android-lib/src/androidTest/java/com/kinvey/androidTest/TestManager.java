@@ -2,6 +2,7 @@ package com.kinvey.androidTest;
 
 import android.os.Message;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
@@ -35,7 +36,7 @@ import static org.junit.Assert.assertNull;
  * Created by yuliya on 09/14/17.
  */
 
-public class TestManager<T extends Person> {
+public class TestManager<T extends GenericJson> {
 
     public static final String TEST_USERNAME = "Test_UserName";
     public static final String USERNAME = "test";
@@ -77,7 +78,7 @@ public class TestManager<T extends Person> {
         }
     }
 
-    public DefaultKinveyClientCallback save(final DataStore<Person> store, final T person) throws InterruptedException {
+    public DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {

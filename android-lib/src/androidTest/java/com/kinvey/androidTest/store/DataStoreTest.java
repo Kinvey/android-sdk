@@ -35,7 +35,12 @@ import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongC
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
 import com.kinvey.androidTest.model.PersonList;
+import com.kinvey.androidTest.model.PersonRoomAddressPerson;
+import com.kinvey.androidTest.model.PersonRoomPerson;
 import com.kinvey.androidTest.model.PersonWithAddress;
+import com.kinvey.androidTest.model.Room;
+import com.kinvey.androidTest.model.RoomAddress;
+import com.kinvey.androidTest.model.RoomPerson;
 import com.kinvey.androidTest.model.SelfReferencePerson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -1988,6 +1993,84 @@ public class DataStoreTest {
         CustomKinveyClientCallback<PersonWithAddress> callback = testManager.saveCustom(store, person);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
+    }
+
+    @Test //Model: PersonRoomAddressPerson - Room - Address - PersonRoomAddressPerson
+    public void testSelfReferencePersonRoomAddressPerson() throws InterruptedException {
+        TestManager<PersonRoomAddressPerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonRoomAddressPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomAddressPerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonRoomAddressPerson person = new PersonRoomAddressPerson();
+        person.setName("person_1");
+        Room room = new Room();
+        room.setName("room_name");
+        RoomAddress address = new RoomAddress();
+        address.setName("address_name");
+        PersonRoomAddressPerson person2 = new PersonRoomAddressPerson();
+        person2.setName("person_2");
+        address.setPerson(person2);
+        room.setRoomAddress(address);
+        person.setRoom(room);
+
+        CustomKinveyClientCallback<PersonRoomAddressPerson> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        PersonRoomAddressPerson result = callback.getResult();
+        assertEquals("person_1", result.getName());
+        assertNotNull(result.getRoom());
+        assertEquals("room_name", result.getRoom().getName());
+        assertNotNull(result.getRoom().getRoomAddress());
+        assertEquals("address_name", result.getRoom().getRoomAddress().getName());
+        assertNotNull(result.getRoom().getRoomAddress().getPerson());
+        assertEquals("person_2", result.getRoom().getRoomAddress().getPerson().getName());
+    }
+
+    @Test //Model: PersonRoomPerson - RoomPerson - PersonRoomPerson
+    public void testSelfReferencePersonRoomPerson() throws InterruptedException {
+        TestManager<PersonRoomPerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonRoomPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomPerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonRoomPerson person = new PersonRoomPerson();
+        PersonRoomPerson personForList = new PersonRoomPerson();
+        PersonRoomPerson personForList2 = new PersonRoomPerson();
+        person.setName("person_1");
+        personForList.setName("personForList_1");
+        personForList2.setName("personForList_2");
+        RoomPerson room = new RoomPerson();
+        room.setName("room_name");
+        PersonRoomPerson person2 = new PersonRoomPerson();
+        person2.setName("person_2");
+
+        List<PersonRoomPerson> personList = new ArrayList<>();
+        personList.add(personForList);
+        personList.add(personForList2);
+        person.setPersonList(personList);
+
+        person2.setPersonList(personList);
+        room.setPerson(person2);
+        person.setRoom(room);
+
+        CustomKinveyClientCallback<PersonRoomPerson> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        PersonRoomPerson result = callback.getResult();
+        assertEquals("person_1", result.getName());
+        assertEquals("personForList_1", result.getPersonList().get(0).getName());
+        assertEquals("personForList_2", result.getPersonList().get(1).getName());
+        assertNotNull(result.getRoom());
+        assertEquals("room_name", result.getRoom().getName());
+        assertNotNull(result.getRoom().getPerson());
+        assertEquals("person_2", result.getRoom().getPerson().getName());
+        assertEquals("personForList_1", result.getRoom().getPerson().getPersonList().get(0).getName());
+        assertEquals("personForList_2", result.getRoom().getPerson().getPersonList().get(1).getName());
     }
 
     @Test
