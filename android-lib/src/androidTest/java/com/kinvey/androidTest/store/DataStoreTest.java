@@ -1967,9 +1967,8 @@ public class DataStoreTest {
 
         PersonList person = listCallback.getResult().get(0);
         assertEquals(person.getUsername(), "person1");
-//        assertEquals(person.getList().get(1).getUsername(), "person3");
-//        assertEquals(person.getList().get(0).getUsername(), "person2");
-//        assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
+        assertEquals(person.getPersonList().getUsername(), "person2");
+        assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
     }
 
     @Test
@@ -1986,10 +1985,63 @@ public class DataStoreTest {
         address.setPerson(person2);
         person.setAddress(address);
 
-
         CustomKinveyClientCallback<PersonWithAddress> callback = testManager.saveCustom(store, person);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
+    }
+
+    @Test
+    public void testSelfReferenceClassComplex() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+        PersonList person2 = new PersonList("person2");
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+        PersonList person6 = new PersonList("person6");
+        PersonList person7 = new PersonList("person7");
+        PersonList person8 = new PersonList("person8");
+        PersonList person9 = new PersonList("person9");
+        PersonList person10 = new PersonList("person10");
+        List<PersonList> list = new ArrayList<>();
+        list.add(person3);
+        list.add(person4);
+        list.add(person5);
+        list.add(person6);
+        person2.setList(list);
+        person8.setPersonList(person7);
+        person9.setPersonList(person8);
+        person10.setPersonList(person9);
+        person2.setPersonList(person10);
+        person1.setPersonList(person2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getPersonList().getUsername(), "person2");
+        assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
+        assertEquals(person.getPersonList().getList().get(1).getUsername(), "person4");
+        assertEquals(person.getPersonList().getList().get(2).getUsername(), "person5");
+        assertEquals(person.getPersonList().getList().get(3).getUsername(), "person6");
+        assertEquals(person.getPersonList().getPersonList().getUsername(), "person10");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getUsername(), "person9");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getPersonList().getUsername(), "person8");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getPersonList().getPersonList().getUsername(), "person7");
     }
 
 

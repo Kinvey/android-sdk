@@ -89,8 +89,8 @@ public abstract class ClassHash {
     private enum SelfReferenceState {
         DEFAULT,
         LIST,
+        CLASS,
         SUBCLASS,
-        SUBCLASS_SECOND,
         SUBLIST
     }
 
@@ -250,11 +250,11 @@ public abstract class ClassHash {
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
                     if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
                         state = selfReferenceState;
-                    } else if (selfReferenceState  == SelfReferenceState.DEFAULT) {
+                    } else if (selfReferenceState  == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
                         state = SelfReferenceState.LIST;
                     } else if (selfReferenceState  == SelfReferenceState.LIST) {
-                        state = SelfReferenceState.SUBCLASS;
-                    } else if (selfReferenceState  == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.CLASS;
+                    } else if (selfReferenceState  == SelfReferenceState.CLASS) {
                         state = SelfReferenceState.SUBLIST;
                     } else if (selfReferenceState  == SelfReferenceState.SUBLIST) {
                         state = SelfReferenceState.SUBLIST;
@@ -425,11 +425,11 @@ public abstract class ClassHash {
                 if (f.getType().isArray()) {
                     if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
                        state = selfReferenceState;
-                    } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                    } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
                         state = SelfReferenceState.LIST;
                     } else if (selfReferenceState == SelfReferenceState.LIST) {
-                        state = SelfReferenceState.SUBCLASS;
-                    } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.CLASS;
+                    } else if (selfReferenceState == SelfReferenceState.CLASS) {
                         state = SelfReferenceState.SUBLIST;
                     } else if (selfReferenceState == SelfReferenceState.SUBLIST) {
                         state = SelfReferenceState.SUBLIST;
@@ -447,11 +447,11 @@ public abstract class ClassHash {
                     if (GenericJson.class.isAssignableFrom(underlying)) {
                         if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
                             state = selfReferenceState;
-                        } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                        } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
                             state = SelfReferenceState.LIST;
                         } else if (selfReferenceState == SelfReferenceState.LIST) {
-                            state = SelfReferenceState.SUBCLASS;
-                        } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                            state = SelfReferenceState.CLASS;
+                        } else if (selfReferenceState == SelfReferenceState.CLASS) {
                             state = SelfReferenceState.SUBLIST;
                         } else if (selfReferenceState == SelfReferenceState.SUBLIST) {
                             state = SelfReferenceState.SUBLIST;
@@ -496,8 +496,6 @@ public abstract class ClassHash {
                         selfRefClass = clazz;
                 }
                 if (state != null) {
-                    System.out.println("name: " + name);
-                    System.out.println("fieldInfo.getName(): " + fieldInfo.getName());
                     DynamicRealmObject innerObject = saveClassData(
                             selfReferenceState == SelfReferenceState.SUBCLASS &&
                                     selfRefClass != null && selfRefClass.getSimpleName().equals(clazz.getSimpleName()) ? name : shortName + "_" + fieldInfo.getName(),
