@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -313,6 +314,18 @@ public class FileStoreTest {
         downloadFile(StoreType.SYNC);
     }
 
+    private FileOutputStream createOutputStream() {
+        try {
+            return new FileOutputStream(createFile("new_file.txt"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private KinveyCachedClientCallback<FileMetaData> createCachedClientCallback() {
         return new KinveyCachedClientCallback<FileMetaData>() {
             @Override
@@ -350,6 +363,7 @@ public class FileStoreTest {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
+                            storeType == StoreType.CACHE ? createOutputStream() : null,
                             storeType == StoreType.CACHE ? createCachedClientCallback() : null);
                 } catch (IOException e) {
                     listener.onFailure(e);
@@ -792,6 +806,7 @@ public class FileStoreTest {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
+                            storeType == StoreType.CACHE ? createOutputStream() : null,
                             storeType == StoreType.CACHE ? createCachedClientCallback() : null);
                     listener.isCancelled = true;
                     client.getFileStore(storeType).cancelDownloading();
@@ -810,6 +825,14 @@ public class FileStoreTest {
         File file = createFile();
         RandomAccessFile f = new RandomAccessFile(createFile(), "rw");
         f.setLength(mb * MB);
+        return file;
+    }
+
+    private File createFile(String fileName) throws IOException {
+        File file = new File(client.getContext().getFilesDir(), fileName);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
         return file;
     }
 
