@@ -181,6 +181,44 @@ public class FileStoreTest {
         }
     }
 
+    private static class DefaultDownloadCachedListener implements KinveyCachedClientCallback<FileMetaData> {
+
+        private CountDownLatch latch;
+        private FileMetaData result;
+        private Throwable error;
+
+        public DefaultDownloadCachedListener() {
+        }
+
+        private DefaultDownloadCachedListener(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(FileMetaData result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     @Before
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
@@ -293,8 +331,31 @@ public class FileStoreTest {
         File file = createFile(DEFAULT_FILE_SIZE_MB);
         DefaultUploadProgressListener listener = uploadFileWithMetadata(type, file, testMetadata());
         assertNotNull(listener.fileMetaDataResult);
-        DefaultDownloadProgressListener downloadListener = downloadFile(type, listener.fileMetaDataResult);
+        final DefaultDownloadCachedListener cachedListener = new DefaultDownloadCachedListener();
+        DefaultDownloadProgressListener downloadListener = downloadFile(type, cachedListener, listener.fileMetaDataResult);
         assertNotNull(downloadListener.fileMetaDataResult);
+        if (type == StoreType.CACHE) {
+            assertNotNull(cachedListener.result);
+            assertNotNull(cachedListener.result.getPath());
+            assertNull(cachedListener.error);
+        }
+        assertNull(downloadListener.error);
+        file.delete();
+        removeFile(type, listener.fileMetaDataResult);
+    }
+
+    private void downloadCachedOutputStreamFile(StoreType type) throws InterruptedException, IOException {
+        File file = createFile(DEFAULT_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(type, file, testMetadata());
+        assertNotNull(listener.fileMetaDataResult);
+        final DefaultDownloadCachedListener cachedListener = new DefaultDownloadCachedListener();
+        DefaultDownloadProgressListener downloadListener = downloadCachedOutputStreamFile(type, cachedListener, listener.fileMetaDataResult);
+        assertNotNull(downloadListener.fileMetaDataResult);
+        if (type == StoreType.CACHE) {
+            assertNotNull(cachedListener.result);
+            assertNull(cachedListener.error);
+        }
+        assertNull(downloadListener.error);
         file.delete();
         removeFile(type, listener.fileMetaDataResult);
     }
@@ -311,6 +372,22 @@ public class FileStoreTest {
 
     @Test
     public void testDownloadFileSync() throws InterruptedException, IOException {
+        downloadCachedOutputStreamFile(StoreType.SYNC);
+    }
+
+
+    @Test
+    public void testDownloadFileWithCachedOutputStreamNetwork() throws InterruptedException, IOException {
+        downloadCachedOutputStreamFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testDownloadFileWithCachedOutputStreamCache() throws InterruptedException, IOException {
+        downloadCachedOutputStreamFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDownloadFileWithCachedOutputStreamSync() throws InterruptedException, IOException {
         downloadFile(StoreType.SYNC);
     }
 
@@ -363,8 +440,52 @@ public class FileStoreTest {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
-                            storeType == StoreType.CACHE ? createOutputStream() : null,
                             storeType == StoreType.CACHE ? createCachedClientCallback() : null);
+                } catch (IOException e) {
+                    listener.onFailure(e);
+                }
+            }
+        });
+        looperThread.start();
+        downloadLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return listener;
+    }
+
+    private DefaultDownloadProgressListener downloadFile(final StoreType storeType, final DefaultDownloadCachedListener cachedListener, final FileMetaData metaFile) throws InterruptedException, IOException {
+        final CountDownLatch downloadLatch = new CountDownLatch(storeType == StoreType.CACHE ? 2 : 1);
+        final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
+        cachedListener.setLatch(downloadLatch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final FileOutputStream fos = new FileOutputStream(createFile());
+                    client.getFileStore(storeType).download(metaFile, fos, listener,
+                            storeType == StoreType.CACHE ? cachedListener : null);
+                } catch (IOException e) {
+                    listener.onFailure(e);
+                }
+            }
+        });
+        looperThread.start();
+        downloadLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return listener;
+    }
+
+    private DefaultDownloadProgressListener downloadCachedOutputStreamFile(final StoreType storeType, final DefaultDownloadCachedListener cachedListener, final FileMetaData metaFile) throws InterruptedException, IOException {
+        final CountDownLatch downloadLatch = new CountDownLatch(storeType == StoreType.CACHE ? 2 : 1);
+        final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
+        cachedListener.setLatch(downloadLatch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final FileOutputStream fos = new FileOutputStream(createFile());
+                    client.getFileStore(storeType).download(metaFile, fos, listener,
+                            storeType == StoreType.CACHE ? createOutputStream() : null,
+                            storeType == StoreType.CACHE ? cachedListener : null);
                 } catch (IOException e) {
                     listener.onFailure(e);
                 }
