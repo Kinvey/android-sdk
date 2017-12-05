@@ -9,6 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.android.Client;
 import com.kinvey.android.cache.ClassHash;
 
 import org.junit.Before;
