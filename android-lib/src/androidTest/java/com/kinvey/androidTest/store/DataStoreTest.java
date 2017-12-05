@@ -755,6 +755,14 @@ public class DataStoreTest {
         expectedMongoQuery = "{\"$and\":[{\"isHospital\":false},{\"archived\":null}]}";
         mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
         assertEquals(expectedMongoQuery, mongoQuery);
+
+        // implicit $and equals query
+        myQuery = client.query();
+        myQuery.equals("city", "Boston");
+        myQuery.equals("age", "21");
+        expectedMongoQuery = "{\"city\":\"Boston\",\"age\":\"21\"}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
     }
 
     @Test
