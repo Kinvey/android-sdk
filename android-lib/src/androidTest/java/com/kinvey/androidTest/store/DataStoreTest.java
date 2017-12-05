@@ -35,6 +35,7 @@ import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
+import com.kinvey.androidTest.util.RealmCacheManagerUtil;
 import com.kinvey.androidTest.model.PersonList;
 import com.kinvey.androidTest.model.PersonRoomAddressPerson;
 import com.kinvey.androidTest.model.PersonRoomPerson;
@@ -43,7 +44,6 @@ import com.kinvey.androidTest.model.Room;
 import com.kinvey.androidTest.model.RoomAddress;
 import com.kinvey.androidTest.model.RoomPerson;
 import com.kinvey.androidTest.model.SelfReferencePerson;
-import com.kinvey.androidTest.util.RealmUtil;
 import com.kinvey.androidTest.util.TableNameManagerUtil;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -64,11 +64,14 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.DynamicRealm;
+import io.realm.RealmObjectSchema;
+import io.realm.RealmSchema;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -2157,7 +2160,7 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
-        DynamicRealm realm = RealmUtil.getRealm(client);
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         int resSize;
         try {
             realm.beginTransaction();
@@ -2170,7 +2173,7 @@ public class DataStoreTest {
 
         testManager.delete(store, saveCallback.getResult().getId());
 
-        realm = RealmUtil.getRealm(client);
+        realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
             resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
@@ -2198,7 +2201,7 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
-        DynamicRealm realm = RealmUtil.getRealm(client);
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         int resSize;
         try {
             realm.beginTransaction();
@@ -2211,7 +2214,7 @@ public class DataStoreTest {
 
         store.clear();
 
-        realm = RealmUtil.getRealm(client);
+        realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
             resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
@@ -2221,6 +2224,217 @@ public class DataStoreTest {
         }
         assertEquals(0, resSize); // check that item in sub table was deleted after call 'clear'
         assertTrue(store.count() == 0);
+    }
+
+    @Test
+    public void testClearCollectionIfModelClassChanged() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        Context mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_1");
+        client = new Client.Builder(mockContext).build();
+
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            RealmCacheManagerUtil.setTableHash(client, Person.COLLECTION, "hashTest", realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+
+        mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_2");
+        client = new Client.Builder(mockContext).build();
+
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        saveCallback = null;
+        person = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+        boolean isOneTable = false;
+        realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            isOneTable = isCollectionHasOneTable(Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertTrue(isOneTable);
+    }
+
+    private boolean isCollectionHasOneTable(String collection, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String className;
+        int schemaCounter = 0;
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            if (className.equals(TableNameManagerUtil.getShortName(collection, realm))) {
+                schemaCounter++;
+            }
+        }
+        return schemaCounter == 1;
+    }
+
+    @Test
+    public void testGrowCollectionExponentially() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.pullCustom(store, client.query());
+        testManager.cleanBackendDataStore(store);
+        testManager.push(store);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        for (int i = 0; i < 3; i++) {
+            Person person = new Person(TEST_USERNAME + i);
+            person.setAuthor(new Author("Author_" + i));
+            com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+            assertNotNull(saveCallback.getResult());
+            assertNull(saveCallback.getError());
+            assertTrue(store.syncCount() == i + 1);
+            assertTrue(store.count() == i + 1);
+        }
+        testManager.push(store);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+
+        testManager.pullCustom(store, client.query());
+        testManager.pullCustom(store, client.query());
+        testManager.pullCustom(store, client.query());
+
+        realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
+    /**
+     * Check that main and each internal tables have correct items count
+     * @param expectedItemsCount expected items count
+     */
+    private void checkInternalTablesHasItems(int expectedItemsCount, String collection, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String originalName;
+        String className;
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            //search class
+            if (className.equals(TableNameManagerUtil.getShortName(collection, realm))) {
+                assertTrue(realm.where(TableNameManagerUtil.getShortName(collection, realm)).count() == expectedItemsCount);
+                //search sub-classes
+                for (RealmObjectSchema subClassSchema : schemas) {
+                    originalName = TableNameManagerUtil.getOriginalName(subClassSchema.getClassName(), realm);
+                    if (originalName != null && originalName.startsWith(className + "_")) {
+                        checkInternalTablesHasItems(expectedItemsCount, originalName, realm);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSaveItemToInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setAuthor(new Author("Author_"));
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 1);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 1);
+
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
+    @Test
+    public void testInitializationInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 0);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 0);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName("sync", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName("syncitems", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__acl", realm)).count(), 0);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
     }
 
     @After
