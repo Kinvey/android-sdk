@@ -182,7 +182,6 @@ public abstract class ClassHash {
         } finally {
             hashtext = sb.toString();
         }
-        System.out.println("HASH: " + hashtext);
         return hashtext;
     }
 
