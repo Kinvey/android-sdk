@@ -590,12 +590,19 @@ public abstract class ClassHash {
      * @return count of deleted items (it should be "1" in correct case)
      */
     static int deleteClassData(String collection, DynamicRealm realm, Class<? extends GenericJson> clazz, String id) {
+        return deleteClassData(collection, realm, clazz, id, SelfReferenceState.DEFAULT, new ArrayList<String>());
+    }
+
+    private static int deleteClassData(String collection, DynamicRealm realm, Class<? extends GenericJson> clazz, String id, SelfReferenceState selfReferenceState, List<String> classes) {
         String shortName = TableNameManager.getShortName(collection, realm);
         List<DynamicRealmObject> results = realm.where(shortName).equalTo(ID, id).findAll();
         int size = results.size();
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
         for (DynamicRealmObject realmObject : results) {
+            SelfReferenceState state = null;
+            classes.add(clazz.getSimpleName());
             for (Field f : fields) {
+                List<String> classesList = new ArrayList<>(classes);
                 FieldInfo fieldInfo = FieldInfo.of(f);
                 if (fieldInfo == null) {
                     continue;
@@ -614,15 +621,26 @@ public abstract class ClassHash {
 
                         for (String _id : ids) {
                             deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                    (Class<? extends GenericJson>) underlying, _id);
+                                    (Class<? extends GenericJson>) underlying, _id, state, classesList);
                         }
 
                     }
                 } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
-                    DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
-                    if (object != null && object.hasField(ID) && object.getString(ID) != null) {
-                        deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                (Class<? extends GenericJson>) fieldInfo.getType(), object.getString(ID));
+                    if (!f.getType().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                        state = selfReferenceState;
+                    } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                        state = SelfReferenceState.SUBCLASS;
+
+                    } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.SUBCLASS;
+                    }
+                    if (state != null) {
+                        DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
+                        if (object != null && object.hasField(ID) && object.getString(ID) != null) {
+                            deleteClassData(selfReferenceState == SelfReferenceState.SUBCLASS &&
+                                            classes.contains(f.getType().getSimpleName()) ? collection : shortName + "_" + fieldInfo.getName(), realm,
+                                    (Class<? extends GenericJson>) fieldInfo.getType(), object.getString(ID), state, classesList);
+                        }
                     }
                 }
             }

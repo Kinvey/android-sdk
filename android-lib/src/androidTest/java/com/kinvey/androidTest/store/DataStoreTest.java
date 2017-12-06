@@ -1869,6 +1869,10 @@ public class DataStoreTest {
         assertEquals(person.getList().get(1).getUsername(), "person3");
         assertEquals(person.getList().get(0).getUsername(), "person2");
         assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
+
+        com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback deleteCallback = testManager.deleteCustom(store, client.query());
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
     }
 
     @Test
@@ -1991,6 +1995,10 @@ public class DataStoreTest {
         assertEquals(person.getUsername(), "person1");
         assertEquals(person.getPersonList().getUsername(), "person2");
         assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
+
+        com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback deleteCallback = testManager.deleteCustom(store, client.query());
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
     }
 
     @Test
@@ -2010,6 +2018,10 @@ public class DataStoreTest {
         CustomKinveyClientCallback<PersonWithAddress> callback = testManager.saveCustom(store, person);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
+
+        com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback deleteCallback = testManager.deleteCustom(store, client.query());
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
     }
 
     //Check person_person_list and person_list_person initialization
@@ -2061,6 +2073,44 @@ public class DataStoreTest {
 
         PersonWithPersonAndList person = new PersonWithPersonAndList("person");
         person.setPerson(new PersonWithPersonAndList("person_1"));
+        List<PersonWithPersonAndList> list = new ArrayList<>();
+        list.add(new PersonWithPersonAndList("person_2"));
+        person.setList(list);
+
+        CustomKinveyClientCallback<PersonWithPersonAndList> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback deleteCallback = testManager.deleteCustom(store, client.query());
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
+    }
+
+    @Test
+    public void testDeleteSelfReferenceManyObject() throws InterruptedException {
+        TestManager<PersonWithPersonAndList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonWithPersonAndList> store = DataStore.collection(Person.COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonWithPersonAndList person = new PersonWithPersonAndList("person");
+        PersonWithPersonAndList person1 = new PersonWithPersonAndList("person1");
+        PersonWithPersonAndList person2 = new PersonWithPersonAndList("person2");
+        PersonWithPersonAndList person3 = new PersonWithPersonAndList("person3");
+        PersonWithPersonAndList person4 = new PersonWithPersonAndList("person4");
+        PersonWithPersonAndList person5 = new PersonWithPersonAndList("person5");
+        PersonWithPersonAndList person6 = new PersonWithPersonAndList("person6");
+        PersonWithPersonAndList person7 = new PersonWithPersonAndList("person7");
+        PersonWithPersonAndList person8 = new PersonWithPersonAndList("person8");
+        person7.setPerson(person8);
+        person6.setPerson(person7);
+        person5.setPerson(person6);
+        person4.setPerson(person5);
+        person3.setPerson(person4);
+        person2.setPerson(person3);
+        person1.setPerson(person2);
+        person.setPerson(person1);
         List<PersonWithPersonAndList> list = new ArrayList<>();
         list.add(new PersonWithPersonAndList("person_2"));
         person.setList(list);
