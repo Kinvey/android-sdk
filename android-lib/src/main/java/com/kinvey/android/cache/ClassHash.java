@@ -35,7 +35,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -46,8 +45,6 @@ import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmList;
 import io.realm.RealmObjectSchema;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import io.realm.RealmSchema;
 
 /**
@@ -94,6 +91,7 @@ public abstract class ClassHash {
         LIST,
         CLASS,
         SUBCLASS,
+        CLASS_AND_LIST,
         SUBLIST
     }
 
@@ -319,12 +317,16 @@ public abstract class ClassHash {
                                 (Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceState, classesList);
                         schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
                     }
-                } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                } else if (selfReferenceState == SelfReferenceState.DEFAULT ) {
                     RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
                             (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUBCLASS, classesList);
                     schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
-                } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                } else if (selfReferenceState == SelfReferenceState.SUBCLASS || selfReferenceState == SelfReferenceState.CLASS_AND_LIST) {
                     schema.addRealmObjectField(fieldInfo.getName(), schema);
+                } else if (selfReferenceState == SelfReferenceState.LIST) {
+                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
+                            (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.CLASS_AND_LIST, classesList);
+                    schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
                 }
             } else {
                 for (Class c : ALLOWED) {
@@ -518,7 +520,6 @@ public abstract class ClassHash {
 
                 } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
                         state = SelfReferenceState.SUBCLASS;
-//                        selfRefClass = clazz;
                 }
                 if (state != null) {
                     DynamicRealmObject innerObject = saveClassData(
