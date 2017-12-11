@@ -332,6 +332,13 @@ public class SyncManager {
         return requestCache.delete(q) + requestItemCache.delete(q);
     }
 
+    public int clear(String collectionName, Query query) {
+        ICache<SyncRequest> requestCache = cacheManager.getCache("sync", SyncRequest.class, Long.MAX_VALUE);
+        ICache<SyncItem> requestItemCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        query = query.equals("collection", collectionName);
+        return requestCache.delete(query) + requestItemCache.delete(query);
+    }
+
     public ICacheManager getCacheManager() {
         return cacheManager;
     }

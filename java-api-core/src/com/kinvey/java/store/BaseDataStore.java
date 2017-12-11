@@ -286,6 +286,17 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
+     * Clear the local cache storage
+     */
+    public void clear(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        purge(query);
+        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(query);
+    }
+
+    /**
      * Remove object from from given collection with given id
      * @param id id of object to be deleted
      * @return count of object that was deleted
@@ -391,6 +402,17 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSyncManager().clear(collection);
+    }
+
+    public void purge(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        for (T item : cache.get(query)) {
+            if (item.get("_id") != null) {
+                client.getSyncManager().deleteCachedItems(new Query().equals("meta.id", item.get("_id")));
+            }
+        }
     }
 
     /**

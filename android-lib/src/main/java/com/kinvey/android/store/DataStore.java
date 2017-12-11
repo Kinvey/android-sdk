@@ -122,6 +122,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
 
     private static final String KEY_PURGE = "KEY_PURGE";
+    private static final String KEY_PURGE_BY_QUERY = "KEY_PURGE_BY_QUERY";
 
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
@@ -185,6 +186,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
 
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
+            tempMap.put(KEY_PURGE_BY_QUERY, BaseDataStore.class.getMethod("purge", Query.class));
 
             tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
@@ -681,7 +683,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     }
 
     /**
-     * Asynchronous request to clear cache from a collection of entity and pull all collection.
+     * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
      * Creates an asynchronous request to clear cache from a collection of entity and pull all collection.
      * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
@@ -705,6 +707,17 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
+    }
+
+    /**
+     * Asynchronous request to clear all the pending requests from the sync storage by query.
+     * @param query query to filter pending requests for deleting
+     * @param callback KinveyPurgeCallback
+     */
+    public void purge(Query query, KinveyPurgeCallback callback){
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE_BY_QUERY), callback, query).execute();
     }
 
 
