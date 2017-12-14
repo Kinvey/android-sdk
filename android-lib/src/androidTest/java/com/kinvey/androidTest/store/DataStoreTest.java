@@ -2437,6 +2437,21 @@ public class DataStoreTest {
         }
     }
 
+    @Test
+    public void testHashCode() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        clearBackend(store);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        store.syncBlocking(null);
+        List<Person> personList = store.find();
+        Person person1 = personList.get(0);
+        assertNotNull(person1.hashCode());
+    }
+
     @After
     public void tearDown() {
         client.performLockDown();

@@ -25,6 +25,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.model.KinveyMetaData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -126,6 +127,16 @@ public class RealmCacheManager implements ICacheManager {
                     } else if (isMigrationNeeded) {
                         mRealm.beginTransaction();
                         cache.migration(mRealm);
+                        mRealm.commitTransaction();
+                    } else {
+                        // check and remove unnecessary tables like ..._acl_kmd
+                        mRealm.beginTransaction();
+                        RealmSchema schema = mRealm.getSchema();
+                        if (schema.contains(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD)) {
+                            RealmObjectSchema objectSchema = schema.get(TableNameManager.getShortName(TableNameManager.getShortName(collection, mRealm) + "_" + KinveyMetaData.AccessControlList.ACL, mRealm));
+                            objectSchema.removeField(KinveyMetaData.KMD);
+                            schema.remove(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD);
+                        }
                         mRealm.commitTransaction();
                     }
 
