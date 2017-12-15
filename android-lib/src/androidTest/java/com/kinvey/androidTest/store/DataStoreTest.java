@@ -2437,6 +2437,18 @@ public class DataStoreTest {
         }
     }
 
+    @After
+    public void tearDown() {
+        client.performLockDown();
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
+    }
+
     @Test
     public void testDeltaCache() throws InterruptedException, IOException {
         client.setUseDeltaCache(true);
@@ -2477,18 +2489,6 @@ public class DataStoreTest {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.setUseDeltaCache(true);
         assertFalse(store.isDeltaSetCachingEnabled());
-    }
-
-    @After
-    public void tearDown() {
-        client.performLockDown();
-        if (client.getKinveyHandlerThread() != null) {
-            try {
-                client.stopKinveyHandlerThread();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        }
     }
 
 }
