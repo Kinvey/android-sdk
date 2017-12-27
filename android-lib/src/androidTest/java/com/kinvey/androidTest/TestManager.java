@@ -9,6 +9,7 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
@@ -23,6 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -264,9 +266,36 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     //cleaning backend store (can be improved)
+    @Deprecated
     public void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {
         DefaultKinveyDeleteCallback deleteCallback = delete(store, new Query().notEqual("age", "100500"));
         assertNull(deleteCallback.getError());
+    }
+
+    public void cleanBackend(DataStore<T> store, StoreType storeType) throws InterruptedException {
+        if (storeType != StoreType.NETWORK) {
+            sync(store, store.getClient().query());
+        }
+        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, store.getClient().query());
+        assertNull(deleteCallback.getError());
+        if (storeType == StoreType.SYNC) {
+            sync(store, store.getClient().query());
+        }
     }
 }
