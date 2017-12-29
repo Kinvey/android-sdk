@@ -116,22 +116,24 @@ public abstract class AbstractQuery implements Serializable{
 
     private void buildQueryString(JsonGenerator generator, AbstractMap<String, Object> filterMap) throws IOException {
         try {
+            int filterMapSize = filterMap.entrySet().size();
+            boolean hasMultipleFilters = false;
+            int i = 0;
+
             for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
-                if (entry.getValue() == null) {
+                if (!hasMultipleFilters) {
                     generator.writeStartObject();
+                }
+                if (entry.getValue() == null) {
                     generator.writeFieldName(entry.getKey());
                     generator.writeNull();
-                    generator.writeEndObject();
                 }
                 else {
                     Class valueClass = entry.getValue().getClass();
                     if (valueClass.equals(String.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeString((String)entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(String[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         String[] valueStr = (String[]) entry.getValue();
@@ -139,14 +141,10 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeString(str);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Boolean.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeBoolean((boolean) entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Boolean[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         Boolean[] valueBool = (Boolean[]) entry.getValue();
@@ -154,14 +152,10 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeBoolean(bool);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Integer.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeNumber((int)entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Integer[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         Integer[] valueInt = (Integer[]) entry.getValue();
@@ -169,14 +163,10 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeNumber(integer);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Long.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeNumber((long)entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Long[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         Long[] valueLong = (Long[]) entry.getValue();
@@ -184,14 +174,10 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeNumber(longVal);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Double.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeNumber((double)entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Double[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         Double[] valueDouble = (Double[]) entry.getValue();
@@ -199,14 +185,10 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeNumber(doubleVal);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Float.class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeNumber((float)entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.equals(Float[].class)) {
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         generator.writeStartArray();
                         Float[] valueFloat = (Float[]) entry.getValue();
@@ -214,18 +196,14 @@ public abstract class AbstractQuery implements Serializable{
                             generator.writeNumber(floatVal);
                         }
                         generator.writeEndArray();
-                        generator.writeEndObject();
                     } else if (valueClass.equals(LinkedHashMap.class)) {
                         // Value is an added filter
-                        generator.writeStartObject();
                         generator.writeFieldName(entry.getKey());
                         buildQueryString(generator, (LinkedHashMap) entry.getValue());
-                        generator.writeEndObject();
                     } else if (valueClass.getComponentType() != null &&
                                valueClass.getComponentType().equals(LinkedHashMap.class)) {
                         if (valueClass.isArray()) {
                             // Value is a map, so this is a nested query. Recursively call into it.
-                            generator.writeStartObject();
                             generator.writeFieldName(entry.getKey());
                             generator.writeStartArray();
                             LinkedHashMap[] valueMap = (LinkedHashMap<String, Object>[]) entry.getValue();
@@ -233,14 +211,19 @@ public abstract class AbstractQuery implements Serializable{
                                 buildQueryString(generator, map);
                             }
                             generator.writeEndArray();
-                            generator.writeEndObject();
                         } else {
                             // Value is an added filter
-                            generator.writeStartObject();
                             buildQueryString(generator, (LinkedHashMap) entry.getValue());
-                            generator.writeEndObject();
                         }
                     }
+                }
+
+                i++;
+                if (filterMapSize > 1 && i < filterMapSize) {
+                    // there are multiple filters and we have not reached the last one
+                    hasMultipleFilters = true;
+                } else {
+                    generator.writeEndObject();
                 }
             }
         } catch (Exception e) {

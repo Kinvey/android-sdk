@@ -32,4 +32,23 @@ public class TableNameManagerUtil {
         return s;
     }
 
+    public static String getOriginalName(String shortName, DynamicRealm realm) {
+        Method method = null;
+        try {
+            method = TableNameManager.class.getDeclaredMethod("getOriginalName", String.class, DynamicRealm.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        method.setAccessible(true);
+        String s = null;
+        try {
+            s = (String) method.invoke(null, shortName, realm);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
 }

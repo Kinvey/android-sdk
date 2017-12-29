@@ -89,16 +89,37 @@ public abstract class ClassHash {
             Byte[].class
     };
 
+    private enum SelfReferenceState {
+        DEFAULT,
+        LIST,
+        CLASS,
+        SUBCLASS,
+        SUBLIST
+    }
+
     //supported fields
     // boolean, byte, short, ìnt, long, float, double, String, Date and byte[]
 
     public static String getClassHash(Class<? extends GenericJson> clazz) {
+        return getClassHash(clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
+    }
+
+    private static String getClassHash(Class<? extends GenericJson> clazz, SelfReferenceState selfReferenceState, List<String> classes) {
 
         StringBuilder sb = new StringBuilder();
 
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 
+        if (classes.contains(clazz.getSimpleName())) {
+            return clazz.getName();
+        } else {
+            classes.add(clazz.getSimpleName());
+        }
+
         for (Field f : fields){
+
+            List<String> classesList = new ArrayList<>(classes);
+
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
                 continue;
@@ -107,16 +128,28 @@ public abstract class ClassHash {
             if (isArrayOrCollection(fieldInfo.getType())){
                 Class underlying = getUnderlying(f);
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    String innerHash = getClassHash((Class<? extends GenericJson>) underlying);
-
-                    sb.append("[").append(fieldInfo.getName()).append("]:")
-                            .append(innerHash)
-                            .append(";");
+                    if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                        if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                            String innerHash = getClassHash((Class<? extends GenericJson>) underlying, selfReferenceState, classesList);
+                            sb.append("[").append(fieldInfo.getName()).append("]:").append(innerHash).append(";");
+                        }
+                    } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                        classes.add(clazz.getSimpleName());
+                        String innerHash = getClassHash((Class<? extends GenericJson>) underlying, SelfReferenceState.SUBCLASS, classesList);
+                        sb.append("[").append(fieldInfo.getName()).append("]:").append(innerHash).append(";");
+                    }
                 }
-            }else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
-                String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType());
-                sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
-            }  else {
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
+                if (!f.getType().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                    if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                        String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceState, classesList);
+                        sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
+                    }
+                } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                    String innerHash = getClassHash((Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUBCLASS, classesList);
+                    sb.append(fieldInfo.getName()).append(":").append(innerHash).append(";");
+                }
+            } else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
                         if (!fieldInfo.getName().equals(ID) && !fieldInfo.getName().equals(TTL)){
@@ -149,23 +182,12 @@ public abstract class ClassHash {
         } finally {
             hashtext = sb.toString();
         }
-
         return hashtext;
     }
 
 
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
-        RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz);
-
-        String shortName = TableNameManager.getShortName(name, realm);
-
-        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
-            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
-        }
-        return schema;
+        return createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
     }
 
     /**
@@ -216,7 +238,7 @@ public abstract class ClassHash {
                     TableNameManager.createShortName(TableNameManager.getShortName(oldName, realm) + "_" + KinveyMetaData.AccessControlList.ACL, realm));
         } else {
             RealmObjectSchema objectSchema = schema.get(shortName);
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>()); // TODO: 24.11.2017 check
             objectSchema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
         }
         if (schema.contains(oldName + "_" + KinveyMetaData.KMD)) {
@@ -225,24 +247,49 @@ public abstract class ClassHash {
         }
     }
 
-    private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
+    private static RealmObjectSchema createSchemeFromClass(String name, DynamicRealm realm, Class<? extends GenericJson> clazz,
+                                                           SelfReferenceState selfReferenceState, List<String> classes) {
 
         String shortName = TableNameManager.createShortName(name, realm);
 
         RealmObjectSchema schema = realm.getSchema().create(shortName);
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
+        SelfReferenceState state;
+
+        classes.add(clazz.getSimpleName());
+
         for (Field f : fields){
+            state = null;
+            List<String> classesList = new ArrayList<>(classes);
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
                 continue;
             }
             if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())){
                 Class underlying = getUnderlying(f);
-
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
-                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) underlying);
+                    if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                        state = selfReferenceState;
+                    } else if (selfReferenceState  == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.LIST;
+                    } else if (selfReferenceState  == SelfReferenceState.LIST) {
+                        state = SelfReferenceState.CLASS;
+                    } else if (selfReferenceState  == SelfReferenceState.CLASS) {
+                        state = SelfReferenceState.SUBLIST;
+                    } else if (selfReferenceState  == SelfReferenceState.SUBLIST) {
+                        state = SelfReferenceState.SUBLIST;
+                    }
+                    if (state != null) {
+                        if (selfReferenceState  == SelfReferenceState.SUBLIST) {
+                            schema.addRealmObjectField(fieldInfo.getName(),
+                                    realm.getSchema().get(TableNameManager.getShortName(TableNameManager.getOriginalName(TableNameManager.getShortName(name, realm), realm), realm)));
+                        } else {
+                            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
+                                    (Class<? extends GenericJson>) underlying, state, classesList);
+                             schema.addRealmListField(fieldInfo.getName(), innerScheme);
+                        }
+                    }
 
-                    schema.addRealmListField(fieldInfo.getName(), innerScheme);
                 } else {
                     for (Class c : ALLOWED) {
                         if (underlying.equals(c)) {
@@ -258,8 +305,27 @@ public abstract class ClassHash {
                 }
 
             } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
-                RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm, (Class<? extends GenericJson>) fieldInfo.getType());
-                schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
+                if (!f.getType().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                    if (classes.contains((f.getType().getSimpleName()))) {
+                        if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
+                                    (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUBCLASS, classesList);
+                            schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
+                        } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                            schema.addRealmObjectField(fieldInfo.getName(), schema);
+                        }
+                    } else {
+                        RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
+                                (Class<? extends GenericJson>) fieldInfo.getType(), selfReferenceState, classesList);
+                        schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
+                    }
+                } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                    RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + fieldInfo.getName(), realm,
+                            (Class<? extends GenericJson>) fieldInfo.getType(), SelfReferenceState.SUBCLASS, classesList);
+                    schema.addRealmObjectField(fieldInfo.getName(), innerScheme);
+                } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                    schema.addRealmObjectField(fieldInfo.getName(), schema);
+                }
             } else {
                 for (Class c : ALLOWED) {
                     if (fieldInfo.getType().equals(c)) {
@@ -282,8 +348,15 @@ public abstract class ClassHash {
         }
 
         if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class, selfReferenceState, new ArrayList<String>());
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
+        }
+
+        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, selfReferenceState, new ArrayList<String>());
+            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
         }
 
         return schema;
@@ -291,26 +364,11 @@ public abstract class ClassHash {
 
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
-        DynamicRealmObject object = saveClassData(name, realm, clazz, obj);
-
-        String shortName = TableNameManager.getShortName(name, realm);
-
-        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
-            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
-                    realm,
-                    KinveyMetaData.AccessControlList.class,
-                    acl);
-            object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
-        }
-        return object;
+        return saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, new ArrayList<String>());
     }
 
-    private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
+    private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz,
+                                                    GenericJson obj, SelfReferenceState selfReferenceState, List<String> classes) {
 
         String shortName = TableNameManager.getShortName(name, realm);
 
@@ -350,7 +408,9 @@ public abstract class ClassHash {
                 DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
                         realm,
                         KinveyMetaData.class,
-                        metadata);
+                        metadata,
+                        selfReferenceState,
+                        new ArrayList<String>());
                 object.setObject(KinveyMetaData.KMD, innerObject);
             }
         }
@@ -364,65 +424,112 @@ public abstract class ClassHash {
                 DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,
-                        accessControlList);
+                        accessControlList,
+                        selfReferenceState, new ArrayList<String>());
                 object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
             }
         }
+        SelfReferenceState state;
+
+        classes.add(clazz.getSimpleName());
 
         for (Field f : fields){
+            List<String> classesList = new ArrayList<>(classes);
+
             FieldInfo fieldInfo = FieldInfo.of(f);
             if (fieldInfo == null){
                 continue;
             }
 
-
+            state = null;
             if (isArrayOrCollection(f.getType()) && fieldInfo.getValue(obj) != null) {
                 Class underlying = getUnderlying(f);
-                    RealmList list = new RealmList();
-                    Object collection = fieldInfo.getValue(obj);
-                    if (f.getType().isArray()){
-                        for (int i = 0 ; i < Array.getLength(collection); i++){
-                            list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
-                                    realm,
-                                    (Class<? extends GenericJson>)underlying,
-                                    (GenericJson) Array.get(collection, i)));
-                        }
-                    } else {
+                RealmList list = new RealmList();
+                Object collection = fieldInfo.getValue(obj);
 
-                        if (GenericJson.class.isAssignableFrom(underlying)) {
+                if (f.getType().isArray()) {
+                    if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                       state = selfReferenceState;
+                    } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.LIST;
+                    } else if (selfReferenceState == SelfReferenceState.LIST) {
+                        state = SelfReferenceState.CLASS;
+                    } else if (selfReferenceState == SelfReferenceState.CLASS) {
+                        state = SelfReferenceState.SUBLIST;
+                    } else if (selfReferenceState == SelfReferenceState.SUBLIST) {
+                        state = SelfReferenceState.SUBLIST;
+                    }
+                    if (state != null) {
+                        for (int i = 0; i < Array.getLength(collection); i++) {
+                            list.add(saveClassData(selfReferenceState == SelfReferenceState.SUBLIST ? name : shortName + "_" + fieldInfo.getName(),
+                                    realm,
+                                    (Class<? extends GenericJson>) underlying,
+                                    (GenericJson) Array.get(collection, i),
+                                    state, classesList));
+                        }
+                    }
+                } else {
+                    if (GenericJson.class.isAssignableFrom(underlying)) {
+                        if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                            state = selfReferenceState;
+                        } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState  == SelfReferenceState.SUBCLASS) {
+                            state = SelfReferenceState.LIST;
+                        } else if (selfReferenceState == SelfReferenceState.LIST) {
+                            state = SelfReferenceState.CLASS;
+                        } else if (selfReferenceState == SelfReferenceState.CLASS) {
+                            state = SelfReferenceState.SUBLIST;
+                        } else if (selfReferenceState == SelfReferenceState.SUBLIST) {
+                            state = SelfReferenceState.SUBLIST;
+                        }
+                        if (state != null) {
                             for (GenericJson genericJson : ((Collection<? extends GenericJson>) collection)) {
-                                list.add(saveClassData(shortName + "_" + fieldInfo.getName(),
+                                list.add(saveClassData(selfReferenceState == SelfReferenceState.SUBLIST ? name : shortName + "_" + fieldInfo.getName(),
                                         realm,
                                         (Class<? extends GenericJson>) underlying,
-                                        genericJson));
+                                        genericJson,
+                                        state, classesList));
                             }
-                        } else {
-                            DynamicRealmObject dynamicRealmObject = null;
-                            for (Object o : (Collection) collection) {
-                                dynamicRealmObject = realm.createObject(shortName + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
-
-                                for (Class c : ALLOWED) {
-                                    if (underlying.equals(c)) {
-
-                                        dynamicRealmObject.set(fieldInfo.getName() + ITEMS, o);
-                                        break;
-                                    }
-                                }
-
-                                list.add(dynamicRealmObject);
-                            }
-
                         }
-                        object.setList(fieldInfo.getName(), list);
+                    } else {
+                        DynamicRealmObject dynamicRealmObject = null;
+                        for (Object o : (Collection) collection) {
+                            dynamicRealmObject = realm.createObject(shortName + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
+
+                            for (Class c : ALLOWED) {
+                                if (underlying.equals(c)) {
+
+                                    dynamicRealmObject.set(fieldInfo.getName() + ITEMS, o);
+                                    break;
+                                }
+                            }
+
+                            list.add(dynamicRealmObject);
+                        }
 
                     }
-            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) && fieldInfo.getValue(obj) != null){
+                    object.setList(fieldInfo.getName(), list);
 
-                DynamicRealmObject innerObject = saveClassData(shortName + "_" + fieldInfo.getName(),
-                        realm,
-                        (Class<? extends GenericJson>) fieldInfo.getType(),
-                        (GenericJson) obj.get(fieldInfo.getName()));
-                object.setObject(fieldInfo.getName(), innerObject);
+                }
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) && fieldInfo.getValue(obj) != null){
+                if (!f.getType().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                    state = selfReferenceState;
+                } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
+                    state = SelfReferenceState.SUBCLASS;
+
+                } else if (selfReferenceState == SelfReferenceState.SUBCLASS) {
+                        state = SelfReferenceState.SUBCLASS;
+//                        selfRefClass = clazz;
+                }
+                if (state != null) {
+                    DynamicRealmObject innerObject = saveClassData(
+                            selfReferenceState == SelfReferenceState.SUBCLASS &&
+                                    classes.contains(f.getType().getSimpleName()) ? name : shortName + "_" + fieldInfo.getName(),
+                            realm,
+                            (Class<? extends GenericJson>) fieldInfo.getType(),
+                            (GenericJson) obj.get(fieldInfo.getName()),
+                            state, classesList);
+                    object.setObject(fieldInfo.getName(), innerObject);
+                }
             } else {
                 if (!fieldInfo.getName().equals(ID)) {
                     for (Class c : ALLOWED) {
@@ -450,8 +557,24 @@ public abstract class ClassHash {
             DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
                     realm,
                     KinveyMetaData.class,
-                    metadata);
+                    metadata,
+                    selfReferenceState,
+                    new ArrayList<String>());
             object.setObject(KinveyMetaData.KMD, innerObject);
+        }
+
+        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
+            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
+            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
+                    realm,
+                    KinveyMetaData.AccessControlList.class,
+                    acl, selfReferenceState,
+                    new ArrayList<String>());
+            object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
         }
 
         return object;
@@ -479,11 +602,20 @@ public abstract class ClassHash {
                 if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())) {
                     Class underlying = getUnderlying(f);
                     if (underlying != null && GenericJson.class.isAssignableFrom(underlying)) {
-                        DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
-                        if (object.hasField(ID) && object.getString(ID) != null) {
-                            deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                    (Class<? extends GenericJson>) underlying, object.getString(ID));
+                        RealmList<DynamicRealmObject> list = realmObject.getList(fieldInfo.getName());
+
+                        List<String> ids = new ArrayList<>();
+                        for (DynamicRealmObject object : list) {
+                            if (object.hasField(ID) && object.getString(ID) != null) {
+                                ids.add(object.getString(ID));
+                            }
                         }
+
+                        for (String _id : ids) {
+                            deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
+                                    (Class<? extends GenericJson>) underlying, _id);
+                        }
+
                     }
                 } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
                     DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());

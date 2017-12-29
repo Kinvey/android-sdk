@@ -2,12 +2,14 @@ package com.kinvey.androidTest;
 
 import android.os.Message;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
@@ -22,6 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ import static org.junit.Assert.assertNull;
  * Created by yuliya on 09/14/17.
  */
 
-public class TestManager<T extends Person> {
+public class TestManager<T extends GenericJson> {
 
     public static final String TEST_USERNAME = "Test_UserName";
     public static final String USERNAME = "test";
@@ -77,7 +80,7 @@ public class TestManager<T extends Person> {
         }
     }
 
-    public DefaultKinveyClientCallback save(final DataStore<Person> store, final T person) throws InterruptedException {
+    public DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
@@ -114,6 +117,36 @@ public class TestManager<T extends Person> {
             @Override
             public void run() {
                 store.delete(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public DefaultKinveyDeleteCallback deleteCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public DefaultKinveyDeleteCallback deleteCustom(final DataStore<T> store, final String id) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(id, callback);
             }
         });
         looperThread.start();
@@ -233,9 +266,45 @@ public class TestManager<T extends Person> {
         return callback;
     }
 
+    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     //cleaning backend store (can be improved)
+    @Deprecated
     public void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {
         DefaultKinveyDeleteCallback deleteCallback = delete(store, new Query().notEqual("age", "100500"));
         assertNull(deleteCallback.getError());
+    }
+
+    public void cleanBackend(DataStore<T> store, StoreType storeType) throws InterruptedException {
+        if (storeType != StoreType.NETWORK) {
+            sync(store, store.getClient().query());
+        }
+        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, store.getClient().query());
+        assertNull(deleteCallback.getError());
+        if (storeType == StoreType.SYNC) {
+            sync(store, store.getClient().query());
+        }
+    }
+
+    public void createPersons(DataStore<Person> store, int n) throws IOException {
+        for (int i = 0; i < n; i++) {
+            Person person = new Person();
+            person.setUsername(TEST_USERNAME + i);
+            Person savedPerson = store.save(person);
+            assertNotNull(savedPerson);
+        }
     }
 }

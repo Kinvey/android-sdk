@@ -49,12 +49,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
     @Override
     public Integer execute() throws IOException {
         Integer ret = 0;
-        AbstractKinveyJsonClientRequest<KinveyDeleteResponse> request = null;
-        try {
-            request = deleteNetwork();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        AbstractKinveyJsonClientRequest<KinveyDeleteResponse> request;
 
         switch (writePolicy){
             case FORCE_LOCAL:
@@ -71,6 +66,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
                 }
 
                 try{
+                    request = deleteNetwork();
                     ret = request.execute().getCount();
                 } catch (IOException e) {
                     enqueueRequest(networkManager.getCollectionName(), networkManager);
@@ -79,6 +75,7 @@ public abstract class AbstractDeleteRequest<T extends GenericJson> implements IR
                 deleteCached();
                 break;
             case FORCE_NETWORK:
+                request = deleteNetwork();
                 KinveyDeleteResponse response = request.execute();
                 ret = response.getCount();
                 break;

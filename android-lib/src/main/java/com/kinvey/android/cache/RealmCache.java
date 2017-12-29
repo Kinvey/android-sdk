@@ -250,8 +250,10 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         try{
             mRealm.beginTransaction();
             for (T item : items){
-                item.put(ID, insertOrUpdate(item, mRealm));
-                ret.add(item);
+                if (item != null) {
+                    item.put(ID, insertOrUpdate(item, mRealm));
+                    ret.add(item);
+                }
             }
             mRealm.commitTransaction();
         } finally {

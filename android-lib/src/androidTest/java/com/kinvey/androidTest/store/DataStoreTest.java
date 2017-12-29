@@ -27,13 +27,23 @@ import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.model.Address;
 import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
-import com.kinvey.androidTest.util.RealmUtil;
+import com.kinvey.androidTest.util.RealmCacheManagerUtil;
+import com.kinvey.androidTest.model.PersonList;
+import com.kinvey.androidTest.model.PersonRoomAddressPerson;
+import com.kinvey.androidTest.model.PersonRoomPerson;
+import com.kinvey.androidTest.model.PersonWithAddress;
+import com.kinvey.androidTest.model.Room;
+import com.kinvey.androidTest.model.RoomAddress;
+import com.kinvey.androidTest.model.RoomPerson;
+import com.kinvey.androidTest.model.SelfReferencePerson;
 import com.kinvey.androidTest.util.TableNameManagerUtil;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -54,11 +64,14 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.DynamicRealm;
+import io.realm.RealmObjectSchema;
+import io.realm.RealmSchema;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -753,6 +766,14 @@ public class DataStoreTest {
         Boolean isHospital = false;
         myQuery.equals("isHospital", isHospital).and(client.query().equals("archived", null));
         expectedMongoQuery = "{\"$and\":[{\"isHospital\":false},{\"archived\":null}]}";
+        mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
+        assertEquals(expectedMongoQuery, mongoQuery);
+
+        // implicit $and equals query
+        myQuery = client.query();
+        myQuery.equals("city", "Boston");
+        myQuery.equals("age", "21");
+        expectedMongoQuery = "{\"city\":\"Boston\",\"age\":\"21\"}";
         mongoQuery = myQuery.getQueryFilterJson(client.getJsonFactory());
         assertEquals(expectedMongoQuery, mongoQuery);
     }
@@ -1715,6 +1736,415 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSelfReferenceClass() throws InterruptedException {
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+    }
+
+    @Test
+    public void testSelfReferenceClassWithData() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        SelfReferencePerson person1 = new SelfReferencePerson("person1");
+        SelfReferencePerson person2 = new SelfReferencePerson("person2");
+        SelfReferencePerson person3 = new SelfReferencePerson("person3");
+        SelfReferencePerson person4 = new SelfReferencePerson("person4");
+        SelfReferencePerson person5 = new SelfReferencePerson("person5");
+
+        person4.setPerson(person5);
+        person3.setPerson(person4);
+        person2.setPerson(person3);
+        person1.setPerson(person2);
+
+        CustomKinveyClientCallback<SelfReferencePerson> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+        SelfReferencePerson person = listCallback.getResult().get(0);
+        assertTrue(person.getUsername().equals("person1"));
+        assertTrue(person.getPerson().getUsername().equals("person2"));
+        assertTrue(person.getPerson().getPerson().getUsername().equals("person3"));
+        assertTrue(person.getPerson().getPerson().getPerson().getUsername().equals("person4"));
+        assertTrue(person.getPerson().getPerson().getPerson().getPerson().getUsername().equals("person5"));
+    }
+
+    @Test
+    public void testQueryInSelfReferenceClass() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<SelfReferencePerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        for (int i = 0; i < 10; i++) {
+            SelfReferencePerson person1 = new SelfReferencePerson("person1");
+            SelfReferencePerson person2 = new SelfReferencePerson("person2");
+            SelfReferencePerson person3 = new SelfReferencePerson("person3");
+            SelfReferencePerson person4 = new SelfReferencePerson("person4");
+            SelfReferencePerson person5 = new SelfReferencePerson("person5");
+
+            person4.setPerson(person5);
+            person3.setPerson(person4);
+            person2.setPerson(person3);
+            person1.setPerson(person2);
+
+            CustomKinveyClientCallback<SelfReferencePerson> callback = testManager.saveCustom(store, person1);
+            assertNotNull(callback.getResult());
+            assertNull(callback.getError());
+        }
+
+        Query query = client.query().in("selfReferencePerson.selfReferencePerson.username", new String[] {"person3"});
+        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, query);
+
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+        assertTrue(listCallback.getResult().size() == 10);
+    }
+
+
+    @Test
+    public void testSelfReferenceClassInList() throws InterruptedException {
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+    }
+
+    @Test
+    public void testSelfReferenceClassInListWithData() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+        PersonList person2 = new PersonList("person2");
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+
+        PersonList person6 = new PersonList("person6");
+        PersonList person7 = new PersonList("person7");
+        PersonList person8 = new PersonList("person8");
+        PersonList person9 = new PersonList("person9");
+
+        List<PersonList> list = new ArrayList<>();
+        list.add(person6);
+        list.add(person7);
+        list.add(person8);
+        list.add(person9);
+        person2.setList(list);
+
+        List<PersonList> list2 = new ArrayList<>();
+        list2.add(person2);
+        list2.add(person3);
+        list2.add(person4);
+        list2.add(person5);
+        person1.setList(list2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getList().get(1).getUsername(), "person3");
+        assertEquals(person.getList().get(0).getUsername(), "person2");
+        assertEquals(person.getList().get(0).getList().get(0).getUsername(), "person6");
+    }
+
+    @Test
+    public void testQueryInSelfReferenceClassInList() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        for (int i = 0; i < 5; i++) {
+            PersonList person1 = new PersonList("person1_" + i);
+            PersonList person2 = new PersonList("person2_" + i);
+            PersonList person3 = new PersonList("person3_" + i);
+            PersonList person4 = new PersonList("person4_" + i);
+            PersonList person5 = new PersonList("person5_" + i);
+
+            PersonList person6 = new PersonList("person6_" + i);
+            PersonList person7 = new PersonList("person7_" + i);
+            PersonList person8 = new PersonList("person8_" + i);
+            PersonList person9 = new PersonList("person9_" + i);
+
+            List<PersonList> list = new ArrayList<>();
+            list.add(person6);
+            list.add(person7);
+            list.add(person8);
+            list.add(person9);
+            person2.setList(list);
+
+            List<PersonList> list2 = new ArrayList<>();
+            list2.add(person2);
+            list2.add(person3);
+            list2.add(person4);
+            list2.add(person5);
+            person1.setList(list2);
+
+            CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+            assertNotNull(callback.getResult());
+            assertNull(callback.getError());
+        }
+
+        Query query = client.query().in("username", new String[] {"person1_0"});
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertNull(listCallback.getError());
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1_0");
+
+        query = client.query().in("list.username", new String[] {"person2_0"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_0");
+        assertNull(listCallback.getError());
+
+        query = client.query().in("list.list.username", new String[] {"person6_1"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertNull(listCallback.getError());
+
+        query = client.query().in("list.list.username", new String[] {"person6_1", "person6_2"});
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 2);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertEquals(listCallback.getResult().get(1).getUsername(), "person1_2");
+        assertNull(listCallback.getError());
+
+        query = client.query().equals("list.list.username", "person6_1");
+        listCallback = testManager.findCustom(store, query);
+        assertNotNull(listCallback.getResult());
+        assertTrue(listCallback.getResult().size() == 1);
+        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertNull(listCallback.getError());
+    }
+
+    @Test
+    public void testSelfReferenceClassInClassWithList() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+
+        PersonList person2 = new PersonList("person2");
+
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+        PersonList person6 = new PersonList("person6");
+
+        List<PersonList> list = new ArrayList<>();
+        list.add(person3);
+        list.add(person4);
+        list.add(person5);
+        list.add(person6);
+        person2.setList(list);
+
+        person1.setPersonList(person2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getPersonList().getUsername(), "person2");
+        assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
+    }
+
+    @Test
+    public void testSelfReferenceBookAuthorBook() throws InterruptedException {
+        TestManager<PersonWithAddress> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonWithAddress> store = DataStore.collection(Person.COLLECTION, PersonWithAddress.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonWithAddress person = new PersonWithAddress("person");
+        Address address = new Address("test_address");
+        PersonWithAddress person2 = new PersonWithAddress("person_2");
+        address.setPerson(person2);
+        person.setAddress(address);
+
+        CustomKinveyClientCallback<PersonWithAddress> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+    }
+
+    @Test //Model: PersonRoomAddressPerson - Room - Address - PersonRoomAddressPerson
+    public void testSelfReferencePersonRoomAddressPerson() throws InterruptedException {
+        TestManager<PersonRoomAddressPerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonRoomAddressPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomAddressPerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonRoomAddressPerson person = new PersonRoomAddressPerson();
+        person.setName("person_1");
+        Room room = new Room();
+        room.setName("room_name");
+        RoomAddress address = new RoomAddress();
+        address.setName("address_name");
+        PersonRoomAddressPerson person2 = new PersonRoomAddressPerson();
+        person2.setName("person_2");
+        address.setPerson(person2);
+        room.setRoomAddress(address);
+        person.setRoom(room);
+
+        CustomKinveyClientCallback<PersonRoomAddressPerson> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        PersonRoomAddressPerson result = callback.getResult();
+        assertEquals("person_1", result.getName());
+        assertNotNull(result.getRoom());
+        assertEquals("room_name", result.getRoom().getName());
+        assertNotNull(result.getRoom().getRoomAddress());
+        assertEquals("address_name", result.getRoom().getRoomAddress().getName());
+        assertNotNull(result.getRoom().getRoomAddress().getPerson());
+        assertEquals("person_2", result.getRoom().getRoomAddress().getPerson().getName());
+    }
+
+    @Test //Model: PersonRoomPerson - RoomPerson - PersonRoomPerson
+    public void testSelfReferencePersonRoomPerson() throws InterruptedException {
+        TestManager<PersonRoomPerson> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonRoomPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomPerson.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonRoomPerson person = new PersonRoomPerson();
+        PersonRoomPerson personForList = new PersonRoomPerson();
+        PersonRoomPerson personForList2 = new PersonRoomPerson();
+        person.setName("person_1");
+        personForList.setName("personForList_1");
+        personForList2.setName("personForList_2");
+        RoomPerson room = new RoomPerson();
+        room.setName("room_name");
+        PersonRoomPerson person2 = new PersonRoomPerson();
+        person2.setName("person_2");
+
+        List<PersonRoomPerson> personList = new ArrayList<>();
+        personList.add(personForList);
+        personList.add(personForList2);
+        person.setPersonList(personList);
+
+        person2.setPersonList(personList);
+        room.setPerson(person2);
+        person.setRoom(room);
+
+        CustomKinveyClientCallback<PersonRoomPerson> callback = testManager.saveCustom(store, person);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        PersonRoomPerson result = callback.getResult();
+        assertEquals("person_1", result.getName());
+        assertEquals("personForList_1", result.getPersonList().get(0).getName());
+        assertEquals("personForList_2", result.getPersonList().get(1).getName());
+        assertNotNull(result.getRoom());
+        assertEquals("room_name", result.getRoom().getName());
+        assertNotNull(result.getRoom().getPerson());
+        assertEquals("person_2", result.getRoom().getPerson().getName());
+        assertEquals("personForList_1", result.getRoom().getPerson().getPersonList().get(0).getName());
+        assertEquals("personForList_2", result.getRoom().getPerson().getPersonList().get(1).getName());
+    }
+
+    @Test
+    public void testSelfReferenceClassComplex() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonList> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonList person1 = new PersonList("person1");
+        PersonList person2 = new PersonList("person2");
+        PersonList person3 = new PersonList("person3");
+        PersonList person4 = new PersonList("person4");
+        PersonList person5 = new PersonList("person5");
+        PersonList person6 = new PersonList("person6");
+        PersonList person7 = new PersonList("person7");
+        PersonList person8 = new PersonList("person8");
+        PersonList person9 = new PersonList("person9");
+        PersonList person10 = new PersonList("person10");
+        List<PersonList> list = new ArrayList<>();
+        list.add(person3);
+        list.add(person4);
+        list.add(person5);
+        list.add(person6);
+        person2.setList(list);
+        person8.setPersonList(person7);
+        person9.setPersonList(person8);
+        person10.setPersonList(person9);
+        person2.setPersonList(person10);
+        person1.setPersonList(person2);
+
+        CustomKinveyClientCallback<PersonList> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonList person = listCallback.getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getPersonList().getUsername(), "person2");
+        assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
+        assertEquals(person.getPersonList().getList().get(1).getUsername(), "person4");
+        assertEquals(person.getPersonList().getList().get(2).getUsername(), "person5");
+        assertEquals(person.getPersonList().getList().get(3).getUsername(), "person6");
+        assertEquals(person.getPersonList().getPersonList().getUsername(), "person10");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getUsername(), "person9");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getPersonList().getUsername(), "person8");
+        assertEquals(person.getPersonList().getPersonList().getPersonList().getPersonList().getPersonList().getUsername(), "person7");
+    }
+
+
+    @Test
     public void testDeleteInternalTables() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
@@ -1730,7 +2160,7 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
-        DynamicRealm realm = RealmUtil.getRealm(client);
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         int resSize;
         try {
             realm.beginTransaction();
@@ -1743,7 +2173,7 @@ public class DataStoreTest {
 
         testManager.delete(store, saveCallback.getResult().getId());
 
-        realm = RealmUtil.getRealm(client);
+        realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
             resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
@@ -1771,7 +2201,7 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
-        DynamicRealm realm = RealmUtil.getRealm(client);
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         int resSize;
         try {
             realm.beginTransaction();
@@ -1784,7 +2214,7 @@ public class DataStoreTest {
 
         store.clear();
 
-        realm = RealmUtil.getRealm(client);
+        realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
             resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
@@ -1794,6 +2224,217 @@ public class DataStoreTest {
         }
         assertEquals(0, resSize); // check that item in sub table was deleted after call 'clear'
         assertTrue(store.count() == 0);
+    }
+
+    @Test
+    public void testClearCollectionIfModelClassChanged() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        Context mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_1");
+        client = new Client.Builder(mockContext).build();
+
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            RealmCacheManagerUtil.setTableHash(client, Person.COLLECTION, "hashTest", realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+
+        mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_2");
+        client = new Client.Builder(mockContext).build();
+
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        saveCallback = null;
+        person = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+        boolean isOneTable = false;
+        realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            isOneTable = isCollectionHasOneTable(Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+        assertTrue(isOneTable);
+    }
+
+    private boolean isCollectionHasOneTable(String collection, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String className;
+        int schemaCounter = 0;
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            if (className.equals(TableNameManagerUtil.getShortName(collection, realm))) {
+                schemaCounter++;
+            }
+        }
+        return schemaCounter == 1;
+    }
+
+    @Test
+    public void testGrowCollectionExponentially() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.pullCustom(store, client.query());
+        testManager.cleanBackendDataStore(store);
+        testManager.push(store);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        for (int i = 0; i < 3; i++) {
+            Person person = new Person(TEST_USERNAME + i);
+            person.setAuthor(new Author("Author_" + i));
+            com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+            assertNotNull(saveCallback.getResult());
+            assertNull(saveCallback.getError());
+            assertTrue(store.syncCount() == i + 1);
+            assertTrue(store.count() == i + 1);
+        }
+        testManager.push(store);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+
+        testManager.pullCustom(store, client.query());
+        testManager.pullCustom(store, client.query());
+        testManager.pullCustom(store, client.query());
+
+        realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
+    /**
+     * Check that main and each internal tables have correct items count
+     * @param expectedItemsCount expected items count
+     */
+    private void checkInternalTablesHasItems(int expectedItemsCount, String collection, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String originalName;
+        String className;
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            //search class
+            if (className.equals(TableNameManagerUtil.getShortName(collection, realm))) {
+                assertTrue(realm.where(TableNameManagerUtil.getShortName(collection, realm)).count() == expectedItemsCount);
+                //search sub-classes
+                for (RealmObjectSchema subClassSchema : schemas) {
+                    originalName = TableNameManagerUtil.getOriginalName(subClassSchema.getClassName(), realm);
+                    if (originalName != null && originalName.startsWith(className + "_")) {
+                        checkInternalTablesHasItems(expectedItemsCount, originalName, realm);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSaveItemToInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setAuthor(new Author("Author_"));
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 1);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 1);
+
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
+    }
+
+    @Test
+    public void testInitializationInternalTable() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
+        try {
+            realm.beginTransaction();
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 0);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 0);
+
+            assertEquals(realm.where(TableNameManagerUtil.getShortName("sync", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName("syncitems", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
+//            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__acl", realm)).count(), 0);
+            realm.commitTransaction();
+        } finally {
+            realm.close();
+        }
     }
 
     @After
@@ -1806,6 +2447,48 @@ public class DataStoreTest {
                 throwable.printStackTrace();
             }
         }
+    }
+
+    @Test
+    public void testDeltaCache() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        client.getSyncManager().clear(Person.COLLECTION);
+        clearBackend(store);
+
+        Person person = new Person();
+        person.setUsername("name");
+        person.set("CustomField", "CustomValue");
+        store.save(person);
+
+        store.syncBlocking(null);
+        Person person2 = new Person();
+        person2.setUsername("changed name 1");
+        person2.set("CustomField", "CustomValueChanged ");
+        store.save(person2);
+
+        Person person3 = new Person();
+        person3.setUsername("changed name 2");
+        person3.set("CustomField", "CustomValueChanged 2");
+        store.save(person3);
+
+        DefaultKinveySyncCallback callback = sync(store, DEFAULT_TIMEOUT);
+        assertNull(callback.error);
+        assertNotNull(callback.kinveyPushResponse);
+        assertNotNull(callback.kinveyPullResponse);
+
+        List<Person> personList = store.find();
+        Person person1 = personList.get(0);
+        assertNotNull(person1);
+        assertNotNull(person1.getUsername());
+    }
+
+    @Test
+    public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.setUseDeltaCache(true);
+        assertFalse(store.isDeltaSetCachingEnabled());
     }
 
 }
