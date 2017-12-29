@@ -298,4 +298,13 @@ public class TestManager<T extends GenericJson> {
             sync(store, store.getClient().query());
         }
     }
+
+    public void createPersons(DataStore<Person> store, int n) throws IOException {
+        for (int i = 0; i < n; i++) {
+            Person person = new Person();
+            person.setUsername(TEST_USERNAME + i);
+            Person savedPerson = store.save(person);
+            assertNotNull(savedPerson);
+        }
+    }
 }

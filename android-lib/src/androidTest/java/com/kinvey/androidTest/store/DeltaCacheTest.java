@@ -9,6 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
+import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -72,21 +74,21 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
         assertNotNull(callback.getResult().getUsername());
-        assertEquals("DeltaCacheUserName", callback.getResult().getUsername());
+        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
         CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals("DeltaCacheUserName", syncCallback.getResult().getResult().get(0).getUsername());
+        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
     }
 
     @Test
@@ -97,16 +99,16 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         Person savedPerson = store.save(person);
         assertNotNull(savedPerson);
-        assertEquals("DeltaCacheUserName", savedPerson.getUsername());
+        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
         Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName", downloadedPerson.getUsername());
+        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
     }
 
     @Test
@@ -117,22 +119,22 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         Person savedPerson = store.save(person);
         assertNotNull(savedPerson);
-        assertEquals("DeltaCacheUserName", savedPerson.getUsername());
+        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
         Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName", downloadedPerson.getUsername());
+        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
 
         List<Person> personList = testManager.find(store, client.query()).getResult();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
-        assertEquals("DeltaCacheUserName", person1.getUsername());
+        assertEquals(TEST_USERNAME, person1.getUsername());
     }
 
     @Test
@@ -142,13 +144,7 @@ public class DeltaCacheTest {
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
-        for (int i = 0; i < 10; i++) {
-            Person person = new Person();
-            person.setUsername("DeltaCacheUserName_" + i);
-            Person savedPerson = store.save(person);
-            assertNotNull(savedPerson);
-            assertEquals("DeltaCacheUserName_" + i, savedPerson.getUsername());
-        }
+        testManager.createPersons(store, 10);
 
         store.pushBlocking();
         List<Person> pulledPersons = store.pullBlocking(client.query()).getResult();
@@ -158,7 +154,7 @@ public class DeltaCacheTest {
         Person person;
         for (int i = 0; i < 10; i++) {
             person = pulledPersons.get(i);
-            assertEquals("DeltaCacheUserName_" + i, person.getUsername());
+            assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
         pulledPersons = store.pullBlocking(client.query()).getResult();
@@ -167,7 +163,7 @@ public class DeltaCacheTest {
 
         for (int i = 0; i < 10; i++) {
             person = pulledPersons.get(i);
-            assertEquals("DeltaCacheUserName_" + i, person.getUsername());
+            assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
         List<Person> foundPersons = testManager.find(store, client.query()).getResult();
@@ -177,7 +173,48 @@ public class DeltaCacheTest {
         Person person1;
         for (int i = 0; i < 10; i++) {
             person1 = foundPersons.get(i);
-            assertEquals("DeltaCacheUserName_" + i, person1.getUsername());
+            assertEquals(TEST_USERNAME + i, person1.getUsername());
+        }
+    }
+
+    @Test
+    public void testReadALotOfItemsWithClearCache() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.createPersons(store, 10);
+        store.pushBlocking();
+
+        store.clear();
+
+        List<Person> pulledPersons = store.pullBlocking(client.query()).getResult();
+        assertNotNull(pulledPersons);
+        assertEquals(10, pulledPersons.size());
+
+        Person person;
+        for (int i = 0; i < 10; i++) {
+            person = pulledPersons.get(i);
+            assertEquals(TEST_USERNAME + i, person.getUsername());
+        }
+
+        pulledPersons = store.pullBlocking(client.query()).getResult();
+        assertNotNull(pulledPersons);
+        assertEquals(10, pulledPersons.size());
+
+        for (int i = 0; i < 10; i++) {
+            person = pulledPersons.get(i);
+            assertEquals(TEST_USERNAME + i, person.getUsername());
+        }
+
+        List<Person> foundPersons = testManager.find(store, client.query()).getResult();
+        assertNotNull(foundPersons);
+        assertEquals(10, foundPersons.size());
+
+        Person person1;
+        for (int i = 0; i < 10; i++) {
+            person1 = foundPersons.get(i);
+            assertEquals(TEST_USERNAME + i, person1.getUsername());
         }
     }
 
@@ -188,13 +225,7 @@ public class DeltaCacheTest {
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
-        for (int i = 0; i < 10; i++) {
-            Person person = new Person();
-            person.setUsername("DeltaCacheUserName_" + i);
-            Person savedPerson = store.save(person);
-            assertNotNull(savedPerson);
-            assertEquals("DeltaCacheUserName_" + i, savedPerson.getUsername());
-        }
+        testManager.createPersons(store, 10);
 
         for (int i = 0; i < 10; i++) {
             Person person = new Person();
@@ -233,22 +264,22 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         Person savedPerson = store.save(person);
         assertNotNull(savedPerson);
-        assertEquals("DeltaCacheUserName", savedPerson.getUsername());
+        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
         Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName", downloadedPerson.getUsername());
+        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
 
         List<Person> personList = store.find();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
-        assertEquals("DeltaCacheUserName", person1.getUsername());
+        assertEquals(TEST_USERNAME, person1.getUsername());
     }
 
     @Test
@@ -259,27 +290,27 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
         assertNotNull(callback.getResult().getUsername());
-        assertEquals("DeltaCacheUserName", callback.getResult().getUsername());
+        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
         CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals("DeltaCacheUserName", syncCallback.getResult().getResult().get(0).getUsername());
+        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
 
         List<Person> personList = testManager.find(store, client.query()).getResult();
         Person changedPerson = personList.get(0);
         assertNotNull(changedPerson);
         assertNotNull(changedPerson.getUsername());
-        assertEquals("DeltaCacheUserName", changedPerson.getUsername());
+        assertEquals(TEST_USERNAME, changedPerson.getUsername());
 
         changedPerson.setUsername("DeltaCacheUserName_changed");
         testManager.save(store, changedPerson);
@@ -312,22 +343,22 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         Person savedPerson = store.save(person);
         assertNotNull(savedPerson);
-        assertEquals("DeltaCacheUserName", savedPerson.getUsername());
+        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
         Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName", downloadedPerson.getUsername());
+        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
 
         List<Person> personList = store.find();
         Person changedPerson = personList.get(0);
         assertNotNull(changedPerson);
         assertNotNull(changedPerson.getUsername());
-        assertEquals("DeltaCacheUserName", changedPerson.getUsername());
+        assertEquals(TEST_USERNAME, changedPerson.getUsername());
 
         changedPerson.setUsername("DeltaCacheUserName_changed");
         store.save(changedPerson);
@@ -358,27 +389,27 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
         assertNotNull(callback.getResult().getUsername());
-        assertEquals("DeltaCacheUserName", callback.getResult().getUsername());
+        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
         CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals("DeltaCacheUserName", syncCallback.getResult().getResult().get(0).getUsername());
+        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
 
         List<Person> personList = testManager.find(store, client.query()).getResult();
         Person foundPerson = personList.get(0);
         assertNotNull(foundPerson);
         assertNotNull(foundPerson.getUsername());
-        assertEquals("DeltaCacheUserName", foundPerson.getUsername());
+        assertEquals(TEST_USERNAME, foundPerson.getUsername());
 
         DefaultKinveyDeleteCallback deleteCallback = testManager.delete(store, foundPerson.getId());
         assertNotNull(deleteCallback);
@@ -409,22 +440,22 @@ public class DeltaCacheTest {
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
-        person.setUsername("DeltaCacheUserName");
+        person.setUsername(TEST_USERNAME);
         person.set("CustomField", "CustomValue");
         Person savedPerson = store.save(person);
         assertNotNull(savedPerson);
-        assertEquals("DeltaCacheUserName", savedPerson.getUsername());
+        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
         Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName", downloadedPerson.getUsername());
+        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
 
         List<Person> personList = store.find();
         Person foundPerson = personList.get(0);
         assertNotNull(foundPerson);
         assertNotNull(foundPerson.getUsername());
-        assertEquals("DeltaCacheUserName", foundPerson.getUsername());
+        assertEquals(TEST_USERNAME, foundPerson.getUsername());
 
         int deletedItemsCount = store.delete(foundPerson.getId());
         assertEquals(1, deletedItemsCount);
@@ -442,6 +473,109 @@ public class DeltaCacheTest {
         assertEquals(0, personList.size());
         assertEquals(0, store.count().intValue());
         assertEquals(0, store.syncCount());
+    }
+
+    @Test
+    public void testDeleteWithTwoStorage() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        testManager.cleanBackend(store, StoreType.SYNC);
+
+        testManager.createPersons(store, 10);
+        testManager.sync(store, client.query());
+
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback);
+        assertNotNull(pullCallback.getResult());
+        assertNull(pullCallback.getError());
+        assertEquals(10, pullCallback.getResult().getResult().size());
+
+        DefaultKinveyDeleteCallback deleteCallback = testManager.delete(networkStore, client.query().equals("username", TEST_USERNAME + 0));
+        assertNotNull(deleteCallback);
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
+        assertEquals(1, deleteCallback.getResult().intValue());
+
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback);
+        assertNotNull(pullCallback.getResult());
+        assertNull(pullCallback.getError());
+        assertEquals(9, pullCallback.getResult().getResult().size());
+
+        List<Person> personList = testManager.find(store, client.query()).getResult();
+        assertEquals(9, personList.size());
+    }
+
+    @Test
+    public void testSaveWithTwoStorage() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        testManager.cleanBackend(store, StoreType.SYNC);
+
+        testManager.createPersons(store, 10);
+        testManager.sync(store, client.query());
+
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback);
+        assertNotNull(pullCallback.getResult());
+        assertNull(pullCallback.getError());
+        assertEquals(10, pullCallback.getResult().getResult().size());
+
+        DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, new Person(TEST_USERNAME + 10));
+        assertNotNull(saveCallback);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertEquals(TEST_USERNAME + 10, saveCallback.getResult().getUsername());
+
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback);
+        assertNotNull(pullCallback.getResult());
+        assertNull(pullCallback.getError());
+        assertEquals(11, pullCallback.getResult().getResult().size());
+
+        List<Person> personList = testManager.find(store, client.query()).getResult();
+        assertEquals(11, personList.size());
+    }
+
+    @Test
+    public void testUpdateWithTwoStorage() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        testManager.cleanBackend(store, StoreType.SYNC);
+
+        testManager.createPersons(store, 10);
+        testManager.sync(store, client.query());
+
+        Person personForUpdate = testManager.find(networkStore, client.query().equals("username", TEST_USERNAME + 0)).getResult().get(0);
+        personForUpdate.setUsername(TEST_USERNAME + 100);
+        DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, personForUpdate);
+        assertNotNull(saveCallback);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertEquals(TEST_USERNAME + 100, saveCallback.getResult().getUsername());
+
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback);
+        assertNotNull(pullCallback.getResult());
+        assertNull(pullCallback.getError());
+        assertEquals(10, pullCallback.getResult().getResult().size());
+        assertEquals(TEST_USERNAME + 100, pullCallback.getResult().getResult().get(0).getUsername());
+
+        List<Person> personList = testManager.find(store, client.query().equals("username", TEST_USERNAME + 100)).getResult();
+        assertEquals(1, personList.size());
+        assertEquals(TEST_USERNAME + 100, personList.get(0).getUsername());
     }
 
     @Test
