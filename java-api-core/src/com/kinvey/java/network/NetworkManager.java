@@ -686,9 +686,6 @@ public class NetworkManager<T extends GenericJson> {
     private class DeltaPull extends Pull {
 
         private static final int IDS_PER_PAGE = 100;
-
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
-                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
         private List<T> currentItems;
         private Query query;
         private Class<T> myClass;
@@ -740,7 +737,7 @@ public class NetworkManager<T extends GenericJson> {
 
                 Query query = query().in("_id", chunkItems.toArray((String[])Array.newInstance(String.class, chunkSize)));
                 Get pageGet = new Get(query,
-                        getResponseClass(),
+                        Array.newInstance(myClass,0).getClass(),
                         resolve != null ? resolve.split(",") : new String[]{},
                         resolve_depth != null ? Integer.parseInt(resolve_depth) : 0,
                         retainReferences != null && Boolean.parseBoolean(retainReferences));
@@ -748,7 +745,6 @@ public class NetworkManager<T extends GenericJson> {
                 client.initializeRequest(pageGet);
                 T[] pageGetResult = pageGet.execute();
                 ret.addAll(Arrays.asList(pageGetResult));
-
             }
 
             return ret;
