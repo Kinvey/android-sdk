@@ -48,6 +48,12 @@ import java.util.List;
 
 public class BaseDataStore<T extends GenericJson> {
 
+    protected static final String FIND = "find";
+    protected static final String DELETE = "delete";
+    protected static final String PURGE = "purge";
+    protected static final String GROUP = "group";
+    protected static final String COUNT = "count";
+
     protected final AbstractClient client;
     private final String collection;
     protected StoreType storeType;

@@ -174,21 +174,21 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private void loadMethodMap() {
         Map<String, Method> tempMap = new HashMap<String, Method>();
         try {
-            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod("find", String.class, KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class, KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod(FIND, String.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod(FIND, Query.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod(FIND, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod(FIND, Iterable.class, KinveyCachedClientCallback.class));
 
-            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("count"));
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod(COUNT));
 
-            tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
-            tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
-            tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
+            tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod(DELETE, String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod(DELETE, Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod(DELETE, Iterable.class));
 
-            tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
-            tempMap.put(KEY_PURGE_BY_QUERY, BaseDataStore.class.getMethod("purge", Query.class));
+            tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod(PURGE));
+            tempMap.put(KEY_PURGE_BY_QUERY, BaseDataStore.class.getMethod(PURGE, Query.class));
 
-            tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
+            tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod(GROUP, AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
