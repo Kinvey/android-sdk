@@ -172,7 +172,7 @@ public class SyncManager {
             List<SyncItem> itemsList = requestCache.get(entityQuery);
 
             if (itemsList.size() == 0) {
-                syncRequests.add(createSyncItem(collectionName, method, networkManager, (String) t.get(id)));
+                syncRequests.add(createSyncItem(collectionName, method, networkManager, (String) t.get(ID)));
             }
         }
         requestCache.save(syncRequests);
