@@ -18,8 +18,10 @@ package com.kinvey.java.store;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
@@ -35,6 +37,8 @@ import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.file.FileUtils;
+
+import org.apache.tools.ant.util.TeeOutputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -338,10 +342,38 @@ public class BaseFileStore {
         if (metadata.getResumeDownloadData() != null) {
             resultMetadata = metadata;
         } else {
-            resultMetadata =find(metadata.getId(), null);
+            resultMetadata = find(metadata.getId(), null);
         }
         sendMetadata(resultMetadata, progressListener);
-        return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedCallback);
+        return getFile(resultMetadata, os, storeType.readPolicy, progressListener, null, cachedCallback);
+    }
+
+    /**
+     * download file with given metadata to specified OutputStream
+     * @param metadata metadata of the file we want to download
+     * @param os OutputStream where file content should be streamed
+     * @param cachedOs OutputStream where cached file content should be streamed
+     * @param cachedCallback - callback to be executed if StoreType.CACHE is used
+     * @return metadata of the file we are downloading
+     * @throws IOException
+     */
+    public FileMetaData download(FileMetaData metadata,
+                                 OutputStream os,
+                                 OutputStream cachedOs,
+                                 KinveyCachedClientCallback<FileMetaData> cachedCallback,
+                                 DownloaderProgressListener progressListener) throws IOException {
+        Preconditions.checkNotNull(metadata, "metadata must not be null");
+        Preconditions.checkNotNull(metadata.getId(), "metadata.getId must not be null");
+        Preconditions.checkNotNull(progressListener, "listener must not be null");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        FileMetaData resultMetadata;
+        if (metadata.getResumeDownloadData() != null) {
+            resultMetadata = metadata;
+        } else {
+            resultMetadata = find(metadata.getId(), null);
+        }
+        sendMetadata(resultMetadata, progressListener);
+        return getFile(resultMetadata, os, storeType.readPolicy, progressListener, cachedOs, cachedCallback);
     }
 
     public boolean cancelDownloading() {
@@ -403,7 +435,9 @@ public class BaseFileStore {
         if (metadata.containsKey(CACHE_FILE_PATH)) {
             String cacheFilePath = metadata.get(CACHE_FILE_PATH).toString();
             ret = new File(cacheFilePath);
-
+        }
+        if (ret == null && metadata.containsKey("_id") && metadata.getId() != null) {
+            ret = new File(cacheStorage(), metadata.getId());
         }
         return ret == null || !ret.exists() ? null : ret;
     }
@@ -412,9 +446,10 @@ public class BaseFileStore {
                                  final OutputStream os,
                                  ReadPolicy readPolicy,
                                  final DownloaderProgressListener listener,
+                                 final OutputStream cachedOs,
                                  KinveyCachedClientCallback<FileMetaData> cachedCallback) throws IOException {
         Preconditions.checkArgument(cachedCallback == null || readPolicy == ReadPolicy.BOTH, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        File f/* = new File(cacheStorage(), metadata.getId())*/;
+        File f = null;
 
         switch (readPolicy) {
             case FORCE_LOCAL:
@@ -426,30 +461,32 @@ public class BaseFileStore {
                     return metadata;
                 }
             case BOTH:
-                f = getCachedFile(metadata);
-                if (f == null) {
+                File cachedFile = getCachedFile(metadata);
+                if (cachedFile == null) {
                     if (cachedCallback != null) {
                         cachedCallback.onFailure(new KinveyException("FileMissing", "File Missing in cache", ""));
                     }
                 } else {
-                    FileUtils.copyStreams(new FileInputStream(f), os);
                     if (cachedCallback != null) {
+                        if (cachedOs != null ) {
+                            FileUtils.copyStreams(new FileInputStream(cachedFile), cachedOs);
+                        } else {
+                            metadata.setPath(cachedFile.getAbsolutePath());
+                        }
                         cachedCallback.onSuccess(metadata);
                     }
                 }
                 FileMetaData fmd = getNetworkFile(metadata, os, listener);
                 if (fmd != null) {
-                    FileMetadataWithPath fmdWithPath = new FileMetadataWithPath();
-                    fmdWithPath.putAll(fmd);
-                    if (f == null) {
-                        f = new File(cacheStorage(), metadata.getId());
-                        if (!f.exists()) {
-                            f.createNewFile();
-                        }
+                    f = new File(cacheStorage(), metadata.getId());
+                    if (!f.exists()) {
+                        f.createNewFile();
                     }
-                    FileInputStream is = new FileInputStream(f);
-                    FileUtils.copyStreams(is, os);
-                    saveCacheFile(is, fmdWithPath);
+                    FileMetadataWithPath fmdWithPath = new FileMetadataWithPath();
+                    os.write(f.getAbsolutePath().getBytes());
+                    fmdWithPath.putAll(fmd);
+                    fmdWithPath.setPath(f.getAbsolutePath());
+                    cache.save(fmdWithPath);
                 }
                 return fmd;
             case FORCE_NETWORK:
