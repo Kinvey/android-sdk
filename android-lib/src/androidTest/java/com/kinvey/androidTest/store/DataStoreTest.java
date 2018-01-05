@@ -320,6 +320,39 @@ public class DataStoreTest {
         void finish() { latch.countDown(); }
     }
 
+    private static class DefaultKinveyCachedCallback<T> implements KinveyCachedClientCallback<Integer> {
+        private CountDownLatch latch;
+        Integer result;
+        Throwable error;
+
+        public DefaultKinveyCachedCallback() {
+        }
+
+        DefaultKinveyCachedCallback(CountDownLatch latch) { this.latch = latch; }
+
+        @Override
+        public void onSuccess(Integer result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() { latch.countDown(); }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     private static class DefaultKinveyDeleteCallback implements KinveyDeleteCallback {
 
         private CountDownLatch latch;
@@ -780,20 +813,25 @@ public class DataStoreTest {
 
     @Test
     public void testFindCountSync() throws InterruptedException, IOException {
-        testFindCount(StoreType.SYNC);
+        testFindCount(StoreType.SYNC, false);
     }
 
     @Test
     public void testFindCountCache() throws InterruptedException, IOException {
-        testFindCount(StoreType.CACHE);
+        testFindCount(StoreType.CACHE, false);
+    }
+
+    @Test
+    public void testFindCountCachedCallbackCache() throws InterruptedException, IOException {
+        testFindCount(StoreType.CACHE, true);
     }
 
     @Test
     public void testFindCountNetwork() throws InterruptedException, IOException {
-        testFindCount(StoreType.NETWORK);
+        testFindCount(StoreType.NETWORK, false);
     }
 
-    private void testFindCount(StoreType storeType) throws InterruptedException, IOException {
+    private void testFindCount(StoreType storeType, boolean isCachedCallbackUsed) throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         if (storeType != StoreType.NETWORK) {
             client.getSyncManager().clear(Person.COLLECTION);
@@ -806,19 +844,31 @@ public class DataStoreTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
 
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCachedCallback<Integer> cachedCallback = null;
+        if (storeType == StoreType.CACHE && isCachedCallbackUsed) {
+            cachedCallback = new DefaultKinveyCachedCallback<>();
+        }
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, cachedCallback);
         assertNull(countCallback.error);
         assertNotNull(countCallback.result);
+        if (storeType == StoreType.CACHE && isCachedCallbackUsed) {
+            assertNotNull(cachedCallback.result);
+            assertNotNull(cachedCallback.result == 1);
+            assertNull(cachedCallback.error);
+        }
         assertTrue(countCallback.result == 1);
     }
 
-    private DefaultKinveyCountCallback findCount(final DataStore<Person> store, int seconds) throws InterruptedException, IOException {
-        final CountDownLatch latch = new CountDownLatch(1);
+    private DefaultKinveyCountCallback findCount(final DataStore<Person> store, int seconds, final DefaultKinveyCachedCallback<Integer> cachedClientCallback) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(cachedClientCallback != null ? 2 : 1);
+        if (cachedClientCallback != null) {
+           cachedClientCallback.setLatch(latch);
+        }
         final DefaultKinveyCountCallback callback = new DefaultKinveyCountCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.count(callback);
+                store.count(callback, cachedClientCallback);
             }
         });
         looperThread.start();
@@ -1148,7 +1198,7 @@ public class DataStoreTest {
         save(store, person);
         store.syncBlocking(new Query());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
@@ -1171,7 +1221,7 @@ public class DataStoreTest {
         assertTrue(countAfter2ndSave == 2);
         store.syncBlocking(new Query());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
