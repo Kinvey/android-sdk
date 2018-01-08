@@ -2441,26 +2441,15 @@ public class DataStoreTest {
     public void testHashCode() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        cleanBackendDataStore(store);
-        store.syncBlocking(null);
+        clearBackend(store);
         Person person = createPerson(TEST_USERNAME);
-        person.setAuthor(new Author("author"));
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         store.syncBlocking(null);
         List<Person> personList = store.find();
         Person person1 = personList.get(0);
-        int hashcode = person1.hashCode();
-        assertNotNull(hashcode);
-
-        Person theSamePerson = store.find(client.query().equals("username", TEST_USERNAME)).get(0);
-        assertEquals(hashcode, theSamePerson.hashCode());
-
-        save(store, createPerson(TEST_USERNAME + 2));
-        Person theSamePerson2 = store.find(client.query().equals("author.name", "author")).get(0);
-        assertEquals(hashcode, theSamePerson2.hashCode());
-
+        assertNotNull(person1.hashCode());
     }
 
     @After
