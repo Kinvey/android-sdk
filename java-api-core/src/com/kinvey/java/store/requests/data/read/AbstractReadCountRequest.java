@@ -71,7 +71,6 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
                     // silent fall, will be synced next time
                 }
 
-                ret = countCached();
                 ret = request.execute().getCount();
                 break;
         }

@@ -180,6 +180,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod(FIND, Iterable.class, KinveyCachedClientCallback.class));
 
             tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod(COUNT));
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod(COUNT, KinveyCachedClientCallback.class));
 
             tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod(DELETE, String.class));
             tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod(DELETE, Query.class));
@@ -450,8 +451,26 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
+    /**
+     * Get items count in collection
+     * @param callback return items count in collection
+     */
     public void count(KinveyCountCallback callback) {
-        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback).execute();
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        count(callback, null);
+    }
+
+    /**
+     * Get items count in collection
+     * @param callback return items count in collection
+     * @param cachedCallback is using with StoreType.CACHE to get items count in collection
+     */
+    public void count(KinveyCountCallback callback, KinveyCachedClientCallback<Integer> cachedCallback) {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback, cachedCallback).execute();
     }
 
     /**
