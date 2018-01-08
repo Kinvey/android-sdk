@@ -62,6 +62,11 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      * The default encoded service path of the service.
      */
     public static final String DEFAULT_SERVICE_PATH = "";
+
+    /**
+     * The default request timeout is 60s.
+     */
+    public static final int DEFAULT_REQUEST_TIMEOUT = 60 * 1000;
     
     private CredentialStore store;
 
@@ -313,7 +318,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     public static abstract class Builder extends AbstractKinveyJsonClient.Builder {
         private CredentialStore store;
         private Properties props = new Properties();
-        private int requestTimeout;
+        protected int requestTimeout = DEFAULT_REQUEST_TIMEOUT;
         public boolean useDeltaCache;
 
         /**

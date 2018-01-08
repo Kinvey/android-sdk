@@ -795,6 +795,7 @@ public class Client<T extends User> extends AbstractClient<T> {
                 client.enableDebugLogging();
             }
 
+            client.setRequestTimeout(this.requestTimeout);
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
