@@ -450,6 +450,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
             return getProps().getProperty(opt.value, defaultValue);
         }
 
+        /**
+         * @param requestTimeout - the request timeout
+         */
         public Builder setRequestTimeout(int requestTimeout) {
             this.requestTimeout = requestTimeout;
             return this;
