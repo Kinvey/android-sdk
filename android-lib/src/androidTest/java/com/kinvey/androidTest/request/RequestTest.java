@@ -118,6 +118,7 @@ public class RequestTest {
 
         DefaultKinveyPushCallback pushCallback = testManager.push(store);
         assertNotNull(pushCallback);
+        assertNull(pushCallback.getResult());
         assertNotNull(pushCallback.getError());
         assertEquals("SocketTimeoutException", pushCallback.getError().getClass().getSimpleName());
     }
