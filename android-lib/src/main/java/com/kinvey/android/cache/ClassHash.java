@@ -320,9 +320,7 @@ public abstract class ClassHash {
                 List<DynamicRealmObject> results = realm.where(shortName).findAll();
                 //add "_acl" field to each item
                 for (DynamicRealmObject realmObject : results) {
-                    System.out.println("realmObject.get(\"_acl\") : " + realmObject.get("_acl"));
                     if (realmObject.get("_acl") == null) {
-                        System.out.println("realmObject.get(\"_acl\") : - creating new");
                         KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
                         acl.set("creator", Client.sharedInstance().getActiveUser().getId());
                         DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
@@ -332,7 +330,6 @@ public abstract class ClassHash {
                                 new ArrayList<String>());
                         realmObject.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
                     }
-                    System.out.println("realmObject.get(\"_acl\").toString : " + realmObject.get("_acl").toString());
                 }
             }
         }
