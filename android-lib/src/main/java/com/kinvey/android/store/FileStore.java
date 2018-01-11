@@ -16,6 +16,7 @@
 
 package com.kinvey.android.store;
 
+import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.async.AsyncDownloadRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.async.AsyncUploadRequest;
@@ -56,6 +57,7 @@ public class FileStore extends BaseFileStore {
         UPLOAD_STREAM_FILENAME,
         REMOVE_ID,
         DOWNLOAD_METADATA,
+        CACHED_DOWNLOAD_METADATA,
         REFRESH_FILE,
         FIND_QUERY
     }
@@ -90,6 +92,9 @@ public class FileStore extends BaseFileStore {
 
             asyncMethods.put(FileMethods.DOWNLOAD_METADATA,
                     BaseFileStore.class.getDeclaredMethod("download", FileMetaData.class, OutputStream.class, KinveyCachedClientCallback.class, DownloaderProgressListener.class));
+
+            asyncMethods.put(FileMethods.CACHED_DOWNLOAD_METADATA,
+                    BaseFileStore.class.getDeclaredMethod("download", FileMetaData.class, OutputStream.class, OutputStream.class, KinveyCachedClientCallback.class, DownloaderProgressListener.class));
 
             //REFRESH
             asyncMethods.put(FileMethods.REFRESH_FILE,
@@ -141,12 +146,18 @@ public class FileStore extends BaseFileStore {
     public void download(FileMetaData metadata, OutputStream os,
                               AsyncDownloaderProgressListener<FileMetaData> progressListener, KinveyCachedClientCallback<FileMetaData> cachedClientCallback) throws IOException {
         new AsyncDownloadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.DOWNLOAD_METADATA), progressListener,
-                metadata, os, cachedClientCallback).execute();
+                metadata, os, getWrappedCacheCallback(cachedClientCallback)).execute();
+    }
+
+    public void download(FileMetaData metadata, OutputStream os,
+                         AsyncDownloaderProgressListener<FileMetaData> progressListener, OutputStream cachedOs, KinveyCachedClientCallback<FileMetaData> cachedClientCallback) throws IOException {
+        new AsyncDownloadRequest<FileMetaData>(this, asyncMethods.get(FileMethods.CACHED_DOWNLOAD_METADATA), progressListener,
+                metadata, os, cachedOs, getWrappedCacheCallback(cachedClientCallback)).execute();
     }
 
     public void download(FileMetaData metadata, OutputStream os,
                          AsyncDownloaderProgressListener<FileMetaData> progressListener) throws IOException {
-        download(metadata, os, progressListener, null);
+        download(metadata, os, progressListener, null, null);
     }
 
     public void refresh(FileMetaData metadata,  KinveyClientCallback<FileMetaData> metaCallback, KinveyCachedClientCallback<FileMetaData> cachedClientCallback) throws IOException {
@@ -175,6 +186,37 @@ public class FileStore extends BaseFileStore {
             return null;
         }
         return cache.get(fileMetaData.getId());
+    }
+
+    private static <T> KinveyCachedClientCallback<T> getWrappedCacheCallback(KinveyCachedClientCallback<T> callback) {
+        KinveyCachedClientCallback<T> ret = null;
+        if (callback != null) {
+            ret = new ThreadedKinveyCachedClientCallback<T>(callback);
+        }
+        return ret;
+    }
+
+    private static class ThreadedKinveyCachedClientCallback<T> implements KinveyCachedClientCallback<T> {
+
+        private KinveyCachedClientCallback<T> callback;
+        KinveyCallbackHandler<T> handler;
+
+
+        ThreadedKinveyCachedClientCallback(KinveyCachedClientCallback<T> callback) {
+            handler = new KinveyCallbackHandler<T>();
+            this.callback = callback;
+        }
+
+        @Override
+        public void onSuccess(T result) {
+            handler.onResult(result, callback);
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            handler.onFailure(error, callback);
+
+        }
     }
 
     public void clearCache() {
