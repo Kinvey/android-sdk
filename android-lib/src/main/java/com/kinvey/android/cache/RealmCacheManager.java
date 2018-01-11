@@ -62,24 +62,24 @@ public class RealmCacheManager implements ICacheManager {
     private static final Object LOCK = new Object();
 
 
-    public RealmCacheManager(byte[] encryptionKey, Client client){
+    public RealmCacheManager(byte[] encryptionKey, Client client) {
         this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client){
+    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client) {
         this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(Client client){
+    public RealmCacheManager(Client client) {
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(String prefix, Client client){
+    public RealmCacheManager(String prefix, Client client) {
         this.client = client;
         this.context = client.getContext();
     }
@@ -133,9 +133,7 @@ public class RealmCacheManager implements ICacheManager {
                         mRealm.beginTransaction();
                         RealmSchema schema = mRealm.getSchema();
                         if (schema.contains(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD)) {
-                            RealmObjectSchema objectSchema = schema.get(TableNameManager.getShortName(TableNameManager.getShortName(collection, mRealm) + "_" + KinveyMetaData.AccessControlList.ACL, mRealm));
-                            objectSchema.removeField(KinveyMetaData.KMD);
-                            schema.remove(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD);
+                            cache.checkAclKmdFields(mRealm);
                         }
                         mRealm.commitTransaction();
                     }
