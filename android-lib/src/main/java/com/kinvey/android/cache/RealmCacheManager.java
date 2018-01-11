@@ -25,6 +25,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.model.KinveyMetaData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,24 +62,24 @@ public class RealmCacheManager implements ICacheManager {
     private static final Object LOCK = new Object();
 
 
-    public RealmCacheManager(byte[] encryptionKey, Client client){
+    public RealmCacheManager(byte[] encryptionKey, Client client) {
         this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client){
+    public RealmCacheManager(byte[] encryptionKey, String prefix, Client client) {
         this.encryptionKey = encryptionKey;
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(Client client){
+    public RealmCacheManager(Client client) {
         this.client = client;
         this.context = client.getContext();
     }
 
-    public RealmCacheManager(String prefix, Client client){
+    public RealmCacheManager(String prefix, Client client) {
         this.client = client;
         this.context = client.getContext();
     }
@@ -126,6 +127,14 @@ public class RealmCacheManager implements ICacheManager {
                     } else if (isMigrationNeeded) {
                         mRealm.beginTransaction();
                         cache.migration(mRealm);
+                        mRealm.commitTransaction();
+                    } else {
+                        // check and remove unnecessary tables like ..._acl_kmd
+                        mRealm.beginTransaction();
+                        RealmSchema schema = mRealm.getSchema();
+                        if (schema.contains(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD)) {
+                            cache.checkAclKmdFields(mRealm);
+                        }
                         mRealm.commitTransaction();
                     }
 

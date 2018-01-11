@@ -235,12 +235,36 @@ public class BaseDataStore<T extends GenericJson> {
         return find((KinveyCachedClientCallback<List<T>>)null);
     }
 
+    /**
+     * Get items count in collection
+     * @return items count in collection
+     */
     public Integer count() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return count(null);
+    }
+
+    /**
+     * Get items count in collection
+     * @param cachedCallback is using with StoreType.CACHE to get items count in collection
+     * @return items count in collection
+     */
+    public Integer count(KinveyCachedClientCallback<Integer> cachedCallback) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.getSyncManager()).execute();
+            cachedCallback.onSuccess(ret);
+        }
         return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
     }
 
+    /**
+     * Get items count in collection on the server
+     * @return items count in collection on the server
+     */
     public Integer countNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");

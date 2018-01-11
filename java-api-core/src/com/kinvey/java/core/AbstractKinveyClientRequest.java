@@ -268,6 +268,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 .buildRequest(requestMethod, buildHttpRequestUrl(), httpContent);
         httpRequest.setParser(getAbstractKinveyClient().getObjectParser());
         httpRequest.setSuppressUserAgentSuffix(true);
+        httpRequest.setConnectTimeout(client.getRequestTimeout());
+        httpRequest.setReadTimeout(client.getRequestTimeout());
         //httpRequest.setRetryOnExecuteIOException(true);
         //httpRequest.setBackOffPolicy(this.requestBackoffPolicy);
         // custom methods may use POST with no content but require a Content-Length header
