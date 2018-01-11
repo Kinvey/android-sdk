@@ -49,6 +49,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     private static final String ACL = "_acl";
     private static final String KMD = "_kmd";
     private static final String ID = "_id";
+    private static final String SORT_FIELD = "_kmd.ect";
 
     private String mCollection;
     private RealmCacheManager mCacheManager;
@@ -78,7 +79,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             int limit = query.getLimit();
             int skip = query.getSkip();
 
-            objects = realmQuery.findAll();
+            objects = realmQuery.findAllSorted(SORT_FIELD);
 
             for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
                 DynamicRealmObject obj = iterator.next();
@@ -183,7 +184,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
             query.endGroup();
 
-            RealmResults<DynamicRealmObject> objects = query.findAll();
+            RealmResults<DynamicRealmObject> objects = query.findAllSorted(SORT_FIELD);
 
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
@@ -228,7 +229,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
 
             RealmResults<DynamicRealmObject> objects = query
-                    .findAll();
+                    .findAllSorted(SORT_FIELD);
 
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
@@ -312,7 +313,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 RealmQuery<DynamicRealmObject> realmQuery = realm.where(TableNameManager.getShortName(tableName, realm));
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
 
-                RealmResults result = realmQuery.findAll();
+                RealmResults result = realmQuery.findAllSorted(SORT_FIELD);
 
                 ret = result.size();
                 int limit = query.getLimit();
@@ -602,7 +603,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 try {
                     objects = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                             .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
-                            .findAll();
+                            .findAllSorted(SORT_FIELD);
 
                 } finally {
                     mRealm.close();

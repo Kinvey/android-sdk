@@ -1085,6 +1085,21 @@ public class DataStoreTest {
         return callback;
     }
 
+    private DefaultKinveySyncCallback sync(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     @Test
     public void testSync() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
@@ -1537,6 +1552,190 @@ public class DataStoreTest {
         assertNotNull(pullResults);
         assertTrue(pullResults.size() == 3);
         assertTrue(pullResults.size() == getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInPullBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        List<Person> pullResults = null;
+        Query query = client.query();
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = store.pullBlocking(query).getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = store.pullBlocking(query).getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInPullAsync() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        List<Person> pullResults = null;
+        Query query = client.query();
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInSyncBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        Query query = client.query();
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            store.syncBlocking(query);
+
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            store.syncBlocking(query);
+
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInSyncAsync() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        Query query = client.query();
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            sync(store, query, 120);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            sync(store, query, 120);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
     }
 
     @Test
