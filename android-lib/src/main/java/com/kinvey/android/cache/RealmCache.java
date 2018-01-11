@@ -527,6 +527,14 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         ClassHash.migration(mCollection, realm, mCollectionItemClass);
     }
 
+    /**
+     * Fix to _acl_kmd tables
+     * @param realm Realm object
+     */
+    void checkAclKmdFields(DynamicRealm realm) {
+        ClassHash.checkAclKmdFields(mCollection, realm, mCollectionItemClass);
+    }
+
     private String insertOrUpdate(T item, DynamicRealm mRealm){
 
         T clone = (T)item.clone();
