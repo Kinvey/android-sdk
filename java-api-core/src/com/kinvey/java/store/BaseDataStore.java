@@ -477,8 +477,19 @@ public class BaseDataStore<T extends GenericJson> {
         return collection;
     }
 
+    /**
+     * Getter to check if delta set cache is enabled
+     * @return delta set get flag
+     */
     public boolean isDeltaSetCachingEnabled() {
         return deltaSetCachingEnabled;
     }
 
+    /**
+     * Setter for delta set get cache flag
+     * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
+     */
+    public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
+        this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
 }
