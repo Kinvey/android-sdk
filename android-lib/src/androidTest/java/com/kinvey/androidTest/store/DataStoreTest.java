@@ -1652,6 +1652,118 @@ public class DataStoreTest {
         assertEquals(5, getCacheSize(StoreType.CACHE));
     }
 
+    /**
+     * Check that SDK pulls the items in correct order from the server
+     * if skip limit is used in pull/sync query.
+     */
+    @Test
+    public void testPullOrderWithSkipLimitQuery() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+        sync(store, DEFAULT_TIMEOUT);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        List<Person> pullResults;
+        Query query = client.query();
+        query.setLimit(1);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(TEST_USERNAME + "_" + i, pullResults.get(0).getUsername());
+            assertEquals(i+1, getCacheSize(StoreType.SYNC));
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    /**
+     * Check that SDK finds the items in the cache in correct order
+     * if skip limit is used in find method.
+     */
+    @Test
+    public void testFindInCacheOrderWithSkipLimitQuery() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+
+        Query query = client.query();
+        DefaultKinveyListCallback findCallback;
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            findCallback = find(store, query, DEFAULT_TIMEOUT);
+            assertTrue(findCallback.result.size() == 1);
+            assertEquals(TEST_USERNAME + "_" + i, findCallback.result.get(0).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    /**
+     * Check that SDK removes the correct items from cache in pull/sync process
+     * if skip limit is used in pull/sync query.
+     */
+    @Test
+    public void testSyncUpdateCacheInCorrectWay() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+        sync(store, DEFAULT_TIMEOUT);
+        List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        List<Person> pullResults;
+        Query query = client.query();
+        query.setLimit(1);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        query = client.query();
+        int limit = 2;
+        int skip = 0;
+        query.setLimit(limit);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(skip);
+            skip += limit;
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
     @Test
     public void testSkipLimitInSyncBlocking() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
