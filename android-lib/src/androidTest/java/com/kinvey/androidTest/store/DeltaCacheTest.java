@@ -70,8 +70,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testCreate() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -95,8 +95,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testCreateSync() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -115,8 +115,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testRead() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -141,8 +141,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadALotOfItems() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -181,8 +181,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadALotOfItemsWithClearCache() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
         testManager.createPersons(store, TEN_ITEMS);
@@ -222,8 +222,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadALotOfItemsByQuery() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -260,8 +260,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadSync() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -286,8 +286,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testUpdate() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -339,8 +339,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testUpdateSync() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -385,8 +385,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testDelete() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -436,8 +436,8 @@ public class DeltaCacheTest {
 
     @Test
     public void testDeleteSync() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
@@ -479,12 +479,12 @@ public class DeltaCacheTest {
 
     @Test
     public void testDeleteWithTwoStorageTypes() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
 
         DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         assertTrue(store.isDeltaSetCachingEnabled());
-        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        assertFalse(networkStore.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
         testManager.createPersons(store, TEN_ITEMS);
@@ -514,12 +514,12 @@ public class DeltaCacheTest {
 
     @Test
     public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
 
         DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         assertTrue(store.isDeltaSetCachingEnabled());
-        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        assertFalse(networkStore.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
         testManager.createPersons(store, TEN_ITEMS);
@@ -549,12 +549,12 @@ public class DeltaCacheTest {
 
     @Test
     public void testUpdateWithTwoStorageTypes() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
 
         DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         assertTrue(store.isDeltaSetCachingEnabled());
-        assertTrue(networkStore.isDeltaSetCachingEnabled());
+        assertFalse(networkStore.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
         testManager.createPersons(store, TEN_ITEMS);
@@ -588,9 +588,17 @@ public class DeltaCacheTest {
 
     @Test
     public void testChangeDeltaCache() throws InterruptedException, IOException {
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        store.setDeltaSetCachingEnabled(false);
+        assertFalse(store.isDeltaSetCachingEnabled());
+    }
+
+    @Test
+    public void testDeprecatedWay() throws InterruptedException, IOException {
         client.setUseDeltaCache(true);
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.setUseDeltaCache(false);
         assertTrue(store.isDeltaSetCachingEnabled());
     }
 
