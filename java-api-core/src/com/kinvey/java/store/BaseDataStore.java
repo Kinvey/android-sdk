@@ -383,7 +383,7 @@ public class BaseDataStore<T extends GenericJson> {
             KinveyAbstractReadResponse<T> pullResponse;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                pullResponse = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+                pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
                 networkData.addAll(pullResponse.getResult());
                 exceptions.addAll(pullResponse.getListOfExceptions());
                 cache.delete(query);
@@ -393,7 +393,7 @@ public class BaseDataStore<T extends GenericJson> {
             response.setResult(networkData);
             response.setListOfExceptions(exceptions);
         } else {
-            response = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
             cache.save(response.getResult());
         }
