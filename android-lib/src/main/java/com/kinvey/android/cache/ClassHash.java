@@ -678,59 +678,57 @@ public abstract class ClassHash {
      */
     static int deleteClassData(String collection, DynamicRealm realm, Class<? extends GenericJson> clazz, String id) {
         String shortName = TableNameManager.getShortName(collection, realm);
-        List<DynamicRealmObject> results = realm.where(shortName).equalTo(ID, id).findAll();
-        int size = results.size();
+        DynamicRealmObject realmObject = realm.where(shortName).equalTo(ID, id).findFirst();
+        int size = realmObject != null ? 1 : 0;
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
-        for (DynamicRealmObject realmObject : results) {
-            for (Field f : fields) {
-                FieldInfo fieldInfo = FieldInfo.of(f);
-                if (fieldInfo == null) {
-                    continue;
-                }
-                if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())) {
-                    Class underlying = getUnderlying(f);
-                    if (underlying != null && GenericJson.class.isAssignableFrom(underlying)) {
-                        RealmList<DynamicRealmObject> list = realmObject.getList(fieldInfo.getName());
+        for (Field f : fields) {
+            FieldInfo fieldInfo = FieldInfo.of(f);
+            if (fieldInfo == null) {
+                continue;
+            }
+            if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())) {
+                Class underlying = getUnderlying(f);
+                if (underlying != null && GenericJson.class.isAssignableFrom(underlying)) {
+                    RealmList<DynamicRealmObject> list = realmObject.getList(fieldInfo.getName());
 
-                        List<String> ids = new ArrayList<>();
-                        for (DynamicRealmObject object : list) {
-                            if (object.hasField(ID) && object.getString(ID) != null) {
-                                ids.add(object.getString(ID));
-                            }
+                    List<String> ids = new ArrayList<>();
+                    for (DynamicRealmObject object : list) {
+                        if (object.hasField(ID) && object.getString(ID) != null) {
+                            ids.add(object.getString(ID));
                         }
-
-                        for (String _id : ids) {
-                            deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                    (Class<? extends GenericJson>) underlying, _id);
-                        }
-
                     }
-                } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
-                    DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
-                    if (object != null && object.hasField(ID) && object.getString(ID) != null) {
+
+                    for (String _id : ids) {
                         deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
-                                (Class<? extends GenericJson>) fieldInfo.getType(), object.getString(ID));
+                                (Class<? extends GenericJson>) underlying, _id);
                     }
+
+                }
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())) {
+                DynamicRealmObject object = realmObject.getObject(fieldInfo.getName());
+                if (object != null && object.hasField(ID) && object.getString(ID) != null) {
+                    deleteClassData(shortName + "_" + fieldInfo.getName(), realm,
+                            (Class<? extends GenericJson>) fieldInfo.getType(), object.getString(ID));
                 }
             }
-            if (realmObject.hasField(KinveyMetaData.AccessControlList.ACL)
-                    && !collection.endsWith("_" + KinveyMetaData.KMD)
-                    && !collection.endsWith("_" + KinveyMetaData.AccessControlList.ACL )
-                    && realmObject.getObject(KinveyMetaData.AccessControlList.ACL) != null
-                    && realmObject.getObject(KinveyMetaData.AccessControlList.ACL).hasField(ID)) {
-                deleteClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm,
-                        KinveyMetaData.AccessControlList.class, realmObject.getObject(KinveyMetaData.AccessControlList.ACL).getString(ID));
-            }
-            if (realmObject.hasField(KinveyMetaData.KMD)
-                    && !collection.endsWith("_" + KinveyMetaData.KMD)
-                    && !collection.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
-                    && realmObject.getObject(KinveyMetaData.KMD) != null
-                    && realmObject.getObject(KinveyMetaData.KMD).hasField(ID)) {
-                deleteClassData(shortName + "_" + KinveyMetaData.KMD, realm,
-                        KinveyMetaData.class, realmObject.getObject(KinveyMetaData.KMD).getString(ID));
-            }
-            realmObject.deleteFromRealm();
         }
+        if (realmObject.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !collection.endsWith("_" + KinveyMetaData.KMD)
+                && !collection.endsWith("_" + KinveyMetaData.AccessControlList.ACL )
+                && realmObject.getObject(KinveyMetaData.AccessControlList.ACL) != null
+                && realmObject.getObject(KinveyMetaData.AccessControlList.ACL).hasField(ID)) {
+            deleteClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm,
+                    KinveyMetaData.AccessControlList.class, realmObject.getObject(KinveyMetaData.AccessControlList.ACL).getString(ID));
+        }
+        if (realmObject.hasField(KinveyMetaData.KMD)
+                && !collection.endsWith("_" + KinveyMetaData.KMD)
+                && !collection.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
+                && realmObject.getObject(KinveyMetaData.KMD) != null
+                && realmObject.getObject(KinveyMetaData.KMD).hasField(ID)) {
+            deleteClassData(shortName + "_" + KinveyMetaData.KMD, realm,
+                    KinveyMetaData.class, realmObject.getObject(KinveyMetaData.KMD).getString(ID));
+        }
+        realmObject.deleteFromRealm();
         return size;
     }
 
