@@ -72,10 +72,10 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 return null;
 
             } else {
-                JsonParser jsonParser = new JsonParser();
                 InputStreamReader streamReader = new InputStreamReader(response.getContent(), "UTF-8");
-                JsonArray jsonArray = (JsonArray) jsonParser.parse(CharStreams.toString(streamReader));
+                JsonArray jsonArray = (JsonArray) new JsonParser().parse(CharStreams.toString(streamReader));
                 streamReader.close();
+                streamReader = null;
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
                 for (JsonElement element : jsonArray) {
                     try {
