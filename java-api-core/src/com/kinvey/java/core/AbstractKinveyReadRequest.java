@@ -69,7 +69,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 return null;
 
             } else {
-                String jsonString = convertStreamToString(response.getContent());
+                String jsonString = response.parseAsString();
                 JsonParser jsonParser = new JsonParser();
                 JsonArray jsonArray = (JsonArray) jsonParser.parse(jsonString);
                 for (JsonElement element : jsonArray) {
@@ -94,10 +94,5 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
         } catch (NullPointerException ex){
             return null;
         }
-    }
-
-    private String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
     }
 }
