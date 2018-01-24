@@ -1683,6 +1683,31 @@ public class DataStoreTest {
         assertEquals(5, getCacheSize(StoreType.SYNC));
     }
 
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTest() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            query.setLimit(1).addSort("_kmd.ect", AbstractQuery.SortOrder.ASC);
+            for (int i = 0; i < 5; i++) {
+                query.setSkip(i);
+                pullResults = pull(store, query).result.getResult();
+                assertNotNull(pullResults);
+                assertTrue(pullResults.size() == 1);
+                assertEquals(5, getCacheSize(StoreType.SYNC));
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
+    }
+
     /**
      * Check that SDK finds the items in the cache in correct order
      * if skip limit is used in find method.
