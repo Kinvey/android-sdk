@@ -1670,7 +1670,7 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query();
+        Query query = client.query().addSort("_kmd", AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
@@ -1695,13 +1695,14 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            query.setLimit(1).addSort("_kmd.ect", AbstractQuery.SortOrder.ASC);
+            query.setLimit(1).addSort("_kmd", AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
                 pullResults = pull(store, query).result.getResult();
                 assertNotNull(pullResults);
                 assertTrue(pullResults.size() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
+                assertEquals(pullResults.get(0).getUsername(), TEST_USERNAME + "_" + i);
             }
             System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
