@@ -243,7 +243,7 @@ public class DeltaCacheTest {
         }
 
         store.pushBlocking();
-        List<Person> pulledPersons = store.pullBlocking(client.query().equals("age", "30")).getResult();
+        List<Person> pulledPersons = store.pullBlocking(client.query().equals("age", "30").addSort("_kmd", AbstractQuery.SortOrder.ASC)).getResult();
         assertNotNull(pulledPersons);
         assertEquals(TEN_ITEMS, pulledPersons.size());
 
@@ -253,7 +253,7 @@ public class DeltaCacheTest {
             assertEquals("DeltaCacheUserNameQuery_" + i, person.getUsername());
         }
 
-        List<Person> foundPersons = testManager.find(store, client.query().equals("age", "30")).getResult();
+        List<Person> foundPersons = testManager.find(store, client.query().equals("age", "30").addSort("_kmd", AbstractQuery.SortOrder.ASC)).getResult();
 
         Person person1;
         for (int i = 0; i < TEN_ITEMS; i++) {
