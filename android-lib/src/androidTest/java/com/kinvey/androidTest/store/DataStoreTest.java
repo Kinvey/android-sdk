@@ -1709,6 +1709,31 @@ public class DataStoreTest {
         }
     }
 
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(1);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+            for (int i = 0; i < 5; i++) {
+                assertEquals(TEST_USERNAME + "_" + i, pullResults.get(i).getUsername());
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
+    }
+
     /**
      * Check that SDK finds the items in the cache in correct order
      * if skip limit is used in find method.
