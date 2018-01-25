@@ -374,9 +374,9 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
-/*            if (query.getSortString() == null || query.getSortString().isEmpty()) {
+            if (query.getSortString() == null || query.getSortString().isEmpty()) {
                 query.addSort("_kmd", AbstractQuery.SortOrder.ASC);
-            }*/
+            }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
             int skipCount = 0;
