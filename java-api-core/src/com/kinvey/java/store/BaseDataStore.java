@@ -26,6 +26,7 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
@@ -375,7 +376,7 @@ public class BaseDataStore<T extends GenericJson> {
 
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort("_kmd", AbstractQuery.SortOrder.ASC);
+                query.addSort(KinveyMetaData.KMD, AbstractQuery.SortOrder.ASC);
             }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();

@@ -1670,7 +1670,7 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query().addSort("_kmd", AbstractQuery.SortOrder.ASC);
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
@@ -1695,7 +1695,7 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            query.setLimit(1).addSort("_kmd", AbstractQuery.SortOrder.ASC);
+            query.setLimit(1).addSort(KMD, AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
                 pullResults = pull(store, query).result.getResult();
