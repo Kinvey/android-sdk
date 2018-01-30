@@ -376,7 +376,7 @@ public class BaseDataStore<T extends GenericJson> {
 
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(KinveyMetaData.KMD, AbstractQuery.SortOrder.ASC);
+                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
             }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
