@@ -26,7 +26,9 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
@@ -373,6 +375,9 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
+            if (query.getSortString() == null || query.getSortString().isEmpty()) {
+                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+            }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
             int skipCount = 0;
@@ -477,8 +482,19 @@ public class BaseDataStore<T extends GenericJson> {
         return collection;
     }
 
+    /**
+     * Getter to check if delta set cache is enabled
+     * @return delta set get flag
+     */
     public boolean isDeltaSetCachingEnabled() {
         return deltaSetCachingEnabled;
     }
 
+    /**
+     * Setter for delta set get cache flag
+     * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
+     */
+    public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
+        this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
 }

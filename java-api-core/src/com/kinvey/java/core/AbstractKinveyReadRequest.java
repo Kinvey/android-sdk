@@ -6,7 +6,6 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.Charsets;
-import com.google.common.io.CharStreams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -17,7 +16,6 @@ import com.kinvey.java.model.KinveyAbstractReadResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,10 +70,9 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 return null;
 
             } else {
-                InputStreamReader streamReader = new InputStreamReader(response.getContent(), "UTF-8");
-                JsonArray jsonArray = (JsonArray) new JsonParser().parse(CharStreams.toString(streamReader));
-                streamReader.close();
-                streamReader = null;
+                String jsonString = response.parseAsString();
+                JsonParser jsonParser = new JsonParser();
+                JsonArray jsonArray = (JsonArray) jsonParser.parse(jsonString);
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
                 for (JsonElement element : jsonArray) {
                     try {
