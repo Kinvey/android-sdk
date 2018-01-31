@@ -42,6 +42,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
@@ -289,7 +290,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     /**
      * Getter to check if delta set cache is enabled
      * @return delta set get flag
+     * @deprecated use {@link BaseDataStore#isDeltaSetCachingEnabled()} ()} instead.
      */
+    @Deprecated
     public boolean isUseDeltaCache() {
         return useDeltaCache;
     }
@@ -297,7 +300,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     /**
      * Setter for delta set get cache flag
      * @param useDeltaCache boolean representing if we should use delta set caching
+     * @deprecated use {@link BaseDataStore#setDeltaSetCachingEnabled(boolean)} ()} instead.
      */
+    @Deprecated
     public void setUseDeltaCache(boolean useDeltaCache) {
         this.useDeltaCache = useDeltaCache;
     }
