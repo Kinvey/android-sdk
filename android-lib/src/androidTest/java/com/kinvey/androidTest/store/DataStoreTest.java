@@ -1670,7 +1670,7 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
@@ -1681,6 +1681,57 @@ public class DataStoreTest {
             assertEquals(i+1, getCacheSize(StoreType.SYNC));
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTest() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            query.setLimit(1).addSort(KMD, AbstractQuery.SortOrder.ASC);
+            for (int i = 0; i < 5; i++) {
+                query.setSkip(i);
+                pullResults = pull(store, query).result.getResult();
+                assertNotNull(pullResults);
+                assertTrue(pullResults.size() == 1);
+                assertEquals(5, getCacheSize(StoreType.SYNC));
+                assertEquals(pullResults.get(0).getUsername(), TEST_USERNAME + "_" + i);
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
+    }
+
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(1);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+            for (int i = 0; i < 5; i++) {
+                assertEquals(TEST_USERNAME + "_" + i, pullResults.get(i).getUsername());
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
     }
 
     /**

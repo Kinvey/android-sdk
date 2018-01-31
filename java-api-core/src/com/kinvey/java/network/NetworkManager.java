@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
+import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
@@ -302,11 +303,36 @@ public class NetworkManager<T extends GenericJson> {
         return getBlocking(new Query());
     }
 
+    /**
+     * @deprecated use {@link #pullBlocking(Query, ICache, boolean)} ()} instead.
+     */
+    @Deprecated
     public Pull pullBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
         Pull pull;
         if (deltaSetCachingEnabled) {
             pull = new DeltaPull(query, myClass, cachedItems);
+        } else {
+            pull = new Pull(query, myClass);
+        }
+        client.initializeRequest(pull);
+        return pull;
+    }
+
+    /**
+     *  Method to create a Pull request
+     *
+     * @param query Query to get
+     * @param cache Cache
+     * @param deltaSetCachingEnabled Flag to show if Delta Set Caching is enable
+     * @return Pull request
+     * @throws IOException
+     */
+    public Pull pullBlocking(Query query, ICache<T> cache, boolean deltaSetCachingEnabled) throws IOException {
+        Preconditions.checkNotNull(query);
+        Pull pull;
+        if (deltaSetCachingEnabled) {
+            pull = new DeltaPull(query, myClass, cache.get(query));
         } else {
             pull = new Pull(query, myClass);
         }

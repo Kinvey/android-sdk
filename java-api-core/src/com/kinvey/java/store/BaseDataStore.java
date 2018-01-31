@@ -26,7 +26,9 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
@@ -373,6 +375,9 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
+            if (query.getSortString() == null || query.getSortString().isEmpty()) {
+                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+            }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
             int skipCount = 0;
@@ -383,7 +388,7 @@ public class BaseDataStore<T extends GenericJson> {
             KinveyAbstractReadResponse<T> pullResponse;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                pullResponse = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+                pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
                 networkData.addAll(pullResponse.getResult());
                 exceptions.addAll(pullResponse.getListOfExceptions());
                 cache.delete(query);
@@ -393,7 +398,7 @@ public class BaseDataStore<T extends GenericJson> {
             response.setResult(networkData);
             response.setListOfExceptions(exceptions);
         } else {
-            response = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
             cache.save(response.getResult());
         }
