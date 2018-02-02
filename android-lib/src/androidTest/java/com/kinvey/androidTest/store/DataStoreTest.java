@@ -2929,4 +2929,67 @@ public class DataStoreTest {
         assertFalse(store.isDeltaSetCachingEnabled());
     }
 
+    @Test
+    public void testUpdateInternalObject() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        Person person = new Person();
+        person.setUsername("person_name");
+        Author author = new Author("author_name");
+        person.setAuthor(author);
+        store.save(person);
+
+        Person newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        Author updatedAuthor = new Author("updated_author_name");
+        newPerson.setAuthor(updatedAuthor);
+        newPerson.setUsername("updated_person_name");
+        store.save(newPerson);
+
+        Person updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPerson);
+        assertEquals("updated_person_name", updatedPerson.getUsername());
+        assertEquals("updated_author_name", updatedPerson.getAuthor().getName());
+
+        updatedPerson.setAuthor(null);
+        store.save(updatedPerson);
+
+        Person updatedPersonWithoutAuthor = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPersonWithoutAuthor);
+        assertEquals("updated_person_name", updatedPersonWithoutAuthor.getUsername());
+        assertNull(updatedPersonWithoutAuthor.getAuthor());
+    }
+
+    @Test
+    public void testUpdateInternalList() throws InterruptedException, IOException {
+        DataStore<PersonList> store = DataStore.collection(PersonList.COLLECTION, PersonList.class, StoreType.SYNC, client);
+
+        PersonList person = new PersonList();
+        person.setUsername("person_name");
+        List<PersonList> list = new ArrayList<>();
+        list.add(new PersonList("person_name_in_list_1"));
+        list.add(null);
+        person.setList(list);
+        store.save(person);
+
+        PersonList newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        list = new ArrayList<>();
+        list.add(new PersonList("person_name_in_list_2"));
+        newPerson.setList(list);
+        newPerson.setUsername("updated_person_name");
+        store.save(newPerson);
+
+        PersonList updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPerson);
+        assertEquals("updated_person_name", updatedPerson.getUsername());
+        assertEquals("person_name_in_list_2", updatedPerson.getList().get(0).getUsername());
+        updatedPerson.getList().clear();
+        updatedPerson.setList(updatedPerson.getList());
+        store.save(updatedPerson);
+
+        PersonList updatedPersonWithoutList = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPersonWithoutList);
+        assertEquals("updated_person_name", updatedPersonWithoutList.getUsername());
+        assertEquals(0, updatedPersonWithoutList.getList().size());
+    }
+
 }
