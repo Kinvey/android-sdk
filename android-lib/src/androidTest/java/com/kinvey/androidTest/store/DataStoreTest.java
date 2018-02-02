@@ -2967,7 +2967,6 @@ public class DataStoreTest {
         person.setUsername("person_name");
         List<PersonList> list = new ArrayList<>();
         list.add(new PersonList("person_name_in_list_1"));
-        list.add(null);
         person.setList(list);
         store.save(person);
 
