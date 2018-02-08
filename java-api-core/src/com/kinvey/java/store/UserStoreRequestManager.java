@@ -42,6 +42,7 @@ import com.kinvey.java.store.requests.user.GetMICTempURL;
 import com.kinvey.java.store.requests.user.LockDownUser;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
 import com.kinvey.java.store.requests.user.LogoutRequest;
+import com.kinvey.java.store.requests.user.LogoutSoftRequest;
 import com.kinvey.java.store.requests.user.ResetPassword;
 import com.kinvey.java.store.requests.user.Retrieve;
 import com.kinvey.java.store.requests.user.RetrieveUsers;
@@ -381,6 +382,16 @@ public class UserStoreRequestManager<T extends BaseUser> {
      */
     public LogoutRequest logout() {
         return new LogoutRequest(client);
+    }
+
+    /**
+     * Logs the user out of the current app without removing the user credential. For internal use.
+     *
+     * @return LogoutRequest object
+     * @throws IOException
+     */
+    public LogoutSoftRequest logoutSoft() {
+        return new LogoutSoftRequest(client);
     }
 
     /**
