@@ -990,7 +990,6 @@ public class UserStoreTest {
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(false, client).error);
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyUserDeleteCallback deleteUser(final boolean isHard, final Client client) throws InterruptedException {
@@ -1014,7 +1013,6 @@ public class UserStoreTest {
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(true, client).error);
-        assertNull(logout(client).error);
     }
 
     @Test
@@ -1161,7 +1159,6 @@ public class UserStoreTest {
         assertNotNull(userKinveyClientCallback.result);
         assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getCompanyName());
         assertNotNull(deleteUser(true, client));
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyClientCallback update(final Client client) throws InterruptedException {
@@ -1214,7 +1211,6 @@ public class UserStoreTest {
         assertNotNull(deleteUser(true, client));
         assertNull(retrieveCallback.error);
         assertNotNull(retrieveCallback.result);
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyClientCallback retrieve(final Client client) throws InterruptedException {
