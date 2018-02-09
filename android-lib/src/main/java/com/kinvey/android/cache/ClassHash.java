@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -598,7 +599,7 @@ public abstract class ClassHash {
                     object.setList(fieldInfo.getName(), list);
 
                 }
-            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType()) && fieldInfo.getValue(obj) != null){
+            } else if (GenericJson.class.isAssignableFrom(fieldInfo.getType())){
                 if (!f.getType().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
                     state = selfReferenceState;
                 } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
@@ -609,14 +610,20 @@ public abstract class ClassHash {
 //                        selfRefClass = clazz;
                 }
                 if (state != null) {
-                    DynamicRealmObject innerObject = saveClassData(
-                            selfReferenceState == SelfReferenceState.SUBCLASS &&
-                                    classes.contains(f.getType().getSimpleName()) ? name : shortName + "_" + fieldInfo.getName(),
-                            realm,
-                            (Class<? extends GenericJson>) fieldInfo.getType(),
-                            (GenericJson) obj.get(fieldInfo.getName()),
-                            state, classesList);
-                    object.setObject(fieldInfo.getName(), innerObject);
+                    if (fieldInfo.getValue(obj) != null) {
+                        DynamicRealmObject innerObject = saveClassData(
+                                selfReferenceState == SelfReferenceState.SUBCLASS &&
+                                        classes.contains(f.getType().getSimpleName()) ? name : shortName + "_" + fieldInfo.getName(),
+                                realm,
+                                (Class<? extends GenericJson>) fieldInfo.getType(),
+                                (GenericJson) obj.get(fieldInfo.getName()),
+                                state, classesList);
+                        object.setObject(fieldInfo.getName(), innerObject);
+                    } else {
+                        if (object.hasField(fieldInfo.getName())) {
+                            object.setNull(fieldInfo.getName());
+                        }
+                    }
                 }
             } else {
                 if (!fieldInfo.getName().equals(ID)) {
@@ -637,9 +644,9 @@ public abstract class ClassHash {
 
         if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
             KinveyMetaData metadata = new KinveyMetaData();
-            metadata.set("lmt", String.format("%tFT%<tTZ",
+            metadata.set("lmt", String.format(Locale.US, "%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-            metadata.set("ect", String.format("%tFT%<tTZ",
+            metadata.set("ect", String.format(Locale.US, "%tFT%<tTZ",
                     Calendar.getInstance(TimeZone.getTimeZone("Z"))));
 
             DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
