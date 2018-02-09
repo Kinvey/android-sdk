@@ -1140,7 +1140,6 @@ public class UserStoreTest {
         assertNotNull(userKinveyClientCallback.result);
         assertNotEquals(oldUserName, userKinveyClientCallback.result.getUsername());
         assertNotNull(deleteUser(true, client));
-        assertNull(logout(client).error);
     }
 
     @Test
