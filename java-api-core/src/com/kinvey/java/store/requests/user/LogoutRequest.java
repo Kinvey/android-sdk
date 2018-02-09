@@ -18,24 +18,32 @@ package com.kinvey.java.store.requests.user;
 
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.CredentialManager;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+
+import java.io.IOException;
 
 /**
  * Logout Request Class.  Constructs the HTTP request object for Logout requests.
  */
-public final class LogoutRequest {
+public final class LogoutRequest extends AbstractKinveyJsonClientRequest<Void> {
+    private static final String REST_PATH = "/user/{appKey}/_logout";
 
     private AbstractClient client;
 
     public LogoutRequest(AbstractClient client) {
+        super(client, "POST", REST_PATH, null, Void.class);
         this.client = client;
     }
 
-    public void execute() {
+    public Void execute() throws IOException {
+        client.initializeRequest(this);
+        super.execute();
         client.performLockDown();
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setActiveUser(null);
         ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setCredential(null);
+        return null;
     }
 }
