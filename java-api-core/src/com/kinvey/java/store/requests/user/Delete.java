@@ -52,7 +52,7 @@ public final class Delete extends AbstractKinveyJsonClientRequest<Void> {
     public Void execute() throws IOException {
         super.execute();
         userStoreRequestManager.removeFromStore(userID);
-        userStoreRequestManager.logout();
+        userStoreRequestManager.logoutSoft().execute();
 
         return null;
     }

@@ -416,6 +416,7 @@ public class UserStoreTest {
         assertNotNull(callback.result);
         DefaultKinveyUserDeleteCallback deleteCallback = destroyUser();
         assertNull(deleteCallback.error);
+        assertFalse(client.isUserLoggedIn());
     }
 
     @Test
@@ -428,6 +429,7 @@ public class UserStoreTest {
         assertNotNull(callback.result);
         DefaultKinveyUserDeleteCallback deleteCallback = destroyUser();
         assertNull(deleteCallback.error);
+        assertFalse(client.isUserLoggedIn());
     }
 
     private DefaultKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
