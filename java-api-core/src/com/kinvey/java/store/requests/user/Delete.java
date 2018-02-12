@@ -19,6 +19,7 @@ package com.kinvey.java.store.requests.user;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.store.UserStoreRequestManager;
 
 import java.io.IOException;
@@ -53,7 +54,8 @@ public final class Delete extends AbstractKinveyJsonClientRequest<Void> {
         super.execute();
         userStoreRequestManager.removeFromStore(userID);
         userStoreRequestManager.logoutSoft().execute();
-
+        ((KinveyClientRequestInitializer) getAbstractKinveyClient().getKinveyRequestInitializer()).setCredential(null);
+        getAbstractKinveyClient().performLockDown();
         return null;
     }
 }
