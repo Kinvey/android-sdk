@@ -69,6 +69,7 @@ dependencies {
     }
     compile 'com.google.dexmaker:dexmaker:1.2'
     compile 'org.apache.ant:ant:1.8.0'
+    compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
 }
 
 task docgen(type: Javadoc) {
