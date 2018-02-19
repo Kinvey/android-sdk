@@ -27,7 +27,7 @@ class RealtimeRouter {
 
     }
 
-    protected static RealtimeRouter getInstance() {
+    static RealtimeRouter getInstance() {
         synchronized (lock) {
             if (realtimeRouter == null) {
                 realtimeRouter = new RealtimeRouter();
@@ -36,9 +36,9 @@ class RealtimeRouter {
         }
     }
 
-    protected void initialize(String channelGroup, String publishKey, String subscribeKey, String authKey, AbstractClient client) {
+    void initialize(String channelGroup, String publishKey, String subscribeKey, String authKey, AbstractClient client) {
         synchronized (lock) {
-            if (pubnubClient == null) {
+            if (!isInitialized()) {
                 this.channelGroup = channelGroup;
                 this.client = client;
                 PNConfiguration pnConfiguration = new PNConfiguration();
@@ -70,9 +70,9 @@ class RealtimeRouter {
 
     }
 
-    protected void unInitialize() {
+    void unInitialize() {
         synchronized (lock) {
-            if (pubnubClient != null) {
+            if (isInitialized()) {
                 pubnubClient.removeListener(subscribeCallback);
                 pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
                 pubnubClient.destroy();
@@ -82,6 +82,10 @@ class RealtimeRouter {
                 realtimeRouter = null;
             }
         }
+    }
+
+    boolean isInitialized() {
+        return pubnubClient != null;
     }
 
     private void subscribeCallback(String channel, String message) {
