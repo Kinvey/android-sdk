@@ -14,7 +14,7 @@ import java.util.Collections;
  * Created by yuliya on 2/15/17.
  */
 
-class RealtimeRouter {
+public class RealtimeRouter {
 
     private static final Object lock = new Object();
     private static RealtimeRouter realtimeRouter;
@@ -27,7 +27,7 @@ class RealtimeRouter {
 
     }
 
-    static RealtimeRouter getInstance() {
+    public static RealtimeRouter getInstance() {
         synchronized (lock) {
             if (realtimeRouter == null) {
                 realtimeRouter = new RealtimeRouter();
@@ -84,7 +84,7 @@ class RealtimeRouter {
         }
     }
 
-    boolean isInitialized() {
+    public boolean isInitialized() {
         return pubnubClient != null;
     }
 
