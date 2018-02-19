@@ -1064,5 +1064,10 @@ public class Client<T extends User> extends AbstractClient<T> {
             kinveyHandlerThread.interrupt();
         }
     }
+
+    @Override
+    public String getDeviceId() {
+        return new UdidFactory(context).getDeviceUuid().toString();
+    }
 }
 
