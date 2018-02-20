@@ -17,7 +17,7 @@ import java.util.Collections;
 class RealtimeRouter {
 
     private static final Object lock = new Object();
-    private static RealtimeRouter realtimeRouter;
+    private static volatile RealtimeRouter realtimeRouter;
     private PubNub pubnubClient;
     private String channelGroup;
     private AbstractClient client;
@@ -28,17 +28,19 @@ class RealtimeRouter {
     }
 
     static RealtimeRouter getInstance() {
-        synchronized (lock) {
-            if (realtimeRouter == null) {
-                realtimeRouter = new RealtimeRouter();
+        if (realtimeRouter == null) {
+            synchronized (lock) {
+                if (realtimeRouter == null) {
+                    realtimeRouter = new RealtimeRouter();
+                }
             }
-            return realtimeRouter;
         }
+        return realtimeRouter;
     }
 
     void initialize(String channelGroup, String publishKey, String subscribeKey, String authKey, AbstractClient client) {
-        synchronized (lock) {
-            if (!isInitialized()) {
+        if (!isInitialized()) {
+            synchronized (lock) {
                 this.channelGroup = channelGroup;
                 this.client = client;
                 PNConfiguration pnConfiguration = new PNConfiguration();
@@ -73,15 +75,15 @@ class RealtimeRouter {
     void unInitialize() {
         synchronized (lock) {
             if (isInitialized()) {
-                pubnubClient.removeListener(subscribeCallback);
-                pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
-                pubnubClient.destroy();
-                pubnubClient = null;
-                channelGroup = null;
-                client = null;
-                realtimeRouter = null;
-            }
+            pubnubClient.removeListener(subscribeCallback);
+            pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
+            pubnubClient.destroy();
+            pubnubClient = null;
+            channelGroup = null;
+            client = null;
+            realtimeRouter = null;
         }
+    }
     }
 
     boolean isInitialized() {
