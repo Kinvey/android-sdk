@@ -382,7 +382,7 @@ public abstract class ClassHash {
                 } else {
                     for (Class c : ALLOWED) {
                         if (underlying.equals(c)) {
-                            RealmObjectSchema innerScheme = realm.getSchema().create(shortName + "_" + fieldInfo.getName());
+                            RealmObjectSchema innerScheme = realm.getSchema().create(TableNameManager.createShortName(shortName + "_" + fieldInfo.getName(), realm));
                             if (!innerScheme.hasField(ID)){
                                 innerScheme.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
                             }
@@ -582,7 +582,7 @@ public abstract class ClassHash {
                     } else {
                         DynamicRealmObject dynamicRealmObject = null;
                         for (Object o : (Collection) collection) {
-                            dynamicRealmObject = realm.createObject(shortName + "_" + fieldInfo.getName(), UUID.randomUUID().toString());
+                            dynamicRealmObject = realm.createObject(TableNameManager.getShortName(shortName + "_" + fieldInfo.getName(), realm), UUID.randomUUID().toString());
 
                             for (Class c : ALLOWED) {
                                 if (underlying.equals(c)) {
@@ -695,7 +695,7 @@ public abstract class ClassHash {
             }
             if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())) {
                 Class underlying = getUnderlying(f);
-                if (underlying != null && GenericJson.class.isAssignableFrom(underlying)) {
+                if (underlying != null) {
                     RealmList<DynamicRealmObject> list = realmObject.getList(fieldInfo.getName());
 
                     List<String> ids = new ArrayList<>();
