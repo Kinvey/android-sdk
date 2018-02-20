@@ -173,7 +173,7 @@ public abstract class BaseUserStore <T extends BaseUser> {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
             throw new KinveyException("User object has to be the active user in order to register for realtime messages");
         }
-        RealtimeRouter.getInstance().unInitialize();
+        RealtimeRouter.getInstance().uninitialize();
 
         new UserStoreRequestManager(AbstractClient.sharedInstance(),
                 createBuilder(AbstractClient.sharedInstance()))

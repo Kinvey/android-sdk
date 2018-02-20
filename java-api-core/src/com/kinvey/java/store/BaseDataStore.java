@@ -65,6 +65,8 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
+    KinveyDataStoreRealtimeCallback<T> realtimeCallback;
+
     /**
      * It is a parameter to enable the auto-pagination of data retrieval from the backend.
      * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
@@ -496,5 +498,37 @@ public class BaseDataStore<T extends GenericJson> {
      */
     public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
+
+    public boolean subscribe(KinveyDataStoreRealtimeCallback<T> storeRealtimeCallback) throws IOException {
+        boolean success = false;
+        if (storeRealtimeCallback != null) {
+            realtimeCallback = storeRealtimeCallback;
+            networkManager.subscribe(client.getDeviceId()).execute();
+            KinveyRealtimeCallback<String> callback = new KinveyRealtimeCallback<String>() {
+                @Override
+                public void onNext(String next) {
+                    try {
+                        realtimeCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        realtimeCallback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    realtimeCallback.onError(e);
+                }
+
+                @Override
+                public void onStatus(KinveyRealtimeStatus status) {
+                    realtimeCallback.onStatus(status);
+                }
+            };
+            RealtimeRouter.getInstance().subscribeCollection(collection, callback);
+            success = true;
+        }
+        return success;
     }
 }

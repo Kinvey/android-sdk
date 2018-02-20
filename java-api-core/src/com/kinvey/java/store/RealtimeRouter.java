@@ -1,6 +1,8 @@
 package com.kinvey.java.store;
 
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -9,6 +11,8 @@ import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yuliya on 2/15/17.
@@ -22,6 +26,7 @@ public class RealtimeRouter {
     private String channelGroup;
     private AbstractClient client;
     private SubscribeCallback subscribeCallback;
+    private Map<String, KinveyRealtimeCallback<String>> mapChannelToCallback;
 
     private RealtimeRouter() {
 
@@ -41,6 +46,7 @@ public class RealtimeRouter {
             if (!isInitialized()) {
                 this.channelGroup = channelGroup;
                 this.client = client;
+                this.mapChannelToCallback = new HashMap<>();
                 PNConfiguration pnConfiguration = new PNConfiguration();
                 pnConfiguration.setSubscribeKey(subscribeKey);
                 pnConfiguration.setPublishKey(publishKey);
@@ -70,11 +76,12 @@ public class RealtimeRouter {
 
     }
 
-    void unInitialize() {
+    void uninitialize() {
         synchronized (lock) {
             if (isInitialized()) {
                 pubnubClient.removeListener(subscribeCallback);
                 pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
+                this.mapChannelToCallback = null;
                 pubnubClient.destroy();
                 pubnubClient = null;
                 channelGroup = null;
@@ -84,12 +91,35 @@ public class RealtimeRouter {
         }
     }
 
+    void subscribeCollection(String collectionName, KinveyRealtimeCallback<String> realtimeCallback) {
+        addChannel(getChannel(collectionName), realtimeCallback);
+    }
+
+    void unsubscribeCollection(String collectionName) {
+        removeChannel(getChannel(collectionName));
+    }
+
+    private String getChannel(String collectionName) {
+        String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        String channel = appKey + Constants.CHAR_PERIOD + Constants.STR_REALTIME_COLLECTION_CHANNEL_PREPEND + collectionName;
+        return channel;
+    }
+
+    private void addChannel(String channel, KinveyRealtimeCallback<String> realtimeCallback) {
+        mapChannelToCallback.put(channel, realtimeCallback);
+    }
+
+    private void removeChannel(String channel) {
+        mapChannelToCallback.remove(channel);
+    }
+
+
     public boolean isInitialized() {
         return pubnubClient != null;
     }
 
     private void subscribeCallback(String channel, String message) {
-
+        mapChannelToCallback.get(channel).onNext(message);
     }
 
     private void handleStatusMessage(PNStatus status) {
