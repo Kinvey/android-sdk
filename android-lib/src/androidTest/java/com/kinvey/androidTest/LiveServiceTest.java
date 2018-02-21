@@ -9,8 +9,12 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.model.LiveModel;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseUserStore;
+import com.kinvey.java.store.KinveyDataStoreRealtimeCallback;
+import com.kinvey.java.store.KinveyRealtimeStatus;
 import com.kinvey.java.store.RealtimeRouter;
+import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,7 +51,6 @@ public class LiveServiceTest {
         client.enableDebugLogging();
         testManager = new TestManager<>();
         testManager.login(USERNAME, PASSWORD, client);
-
     }
 
     @After
@@ -71,6 +74,38 @@ public class LiveServiceTest {
         BaseUserStore.unRegisterRealtime();
         assertFalse(RealtimeRouter.getInstance().isInitialized());
     }
+
+    @Test
+    public void testSubscribeUnsubscribeSync() throws InterruptedException, IOException {
+        assertTrue(client.isUserLoggedIn());
+        BaseUserStore.registerRealtime();
+        assertTrue(RealtimeRouter.getInstance().isInitialized());
+        store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
+        LiveModel model = new LiveModel();
+        model.setUsername("Live model name");
+        store.save(model);
+        store.pushBlocking();
+        store.subscribe(new KinveyDataStoreRealtimeCallback<LiveModel>() {
+            @Override
+            public void onNext(LiveModel next) {
+                System.out.println("TEST_TEST: " + next.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                System.out.println("TEST_TEST: " + e.toString());
+            }
+
+            @Override
+            public void onStatus(KinveyRealtimeStatus status) {
+                System.out.println("TEST_TEST: " + status.toString());
+            }
+        });
+        store.unsubscribe();
+        BaseUserStore.unRegisterRealtime();
+        assertFalse(RealtimeRouter.getInstance().isInitialized());
+    }
+
 
 
 }

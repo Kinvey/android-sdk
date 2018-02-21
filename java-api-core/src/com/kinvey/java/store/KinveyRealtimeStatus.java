@@ -3,7 +3,7 @@ package com.kinvey.java.store;
 /**
  * Created by yuliya on 2/20/17.
  */
-class KinveyRealtimeStatus {
+public class KinveyRealtimeStatus {
 
     private StatusType realtimeStatusType;
 
@@ -37,24 +37,48 @@ class KinveyRealtimeStatus {
         }
     }
 
+    public StatusType getRealtimeStatusType() {
+        return realtimeStatusType;
+    }
+
     public void setRealtimeStatusType(StatusType realtimeStatusType) {
         this.realtimeStatusType = realtimeStatusType;
+    }
+
+    public int getStatus() {
+        return status;
     }
 
     public void setStatus(int status) {
         this.status = status;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getTimeStamp() {
+        return timeStamp;
     }
 
     public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
     public void setChannel(String channel) {
         this.channel = channel;
+    }
+
+    public String getChannelGroup() {
+        return channelGroup;
     }
 
     public void setChannelGroup(String channelGroup) {

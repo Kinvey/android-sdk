@@ -5,7 +5,7 @@ import com.google.api.client.util.Key;
 
 public class LiveModel extends GenericJson{
 
-    public static final String COLLECTION = "Live Collection";
+    public static final String COLLECTION = "LiveCollection";
 
     public LiveModel() {
     }

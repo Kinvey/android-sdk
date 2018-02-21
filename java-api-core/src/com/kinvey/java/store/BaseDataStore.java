@@ -531,4 +531,9 @@ public class BaseDataStore<T extends GenericJson> {
         }
         return success;
     }
+
+    public void unsubscribe() throws IOException {
+        realtimeCallback = null;
+        RealtimeRouter.getInstance().unsubscribeCollection(collection);
+    }
 }
