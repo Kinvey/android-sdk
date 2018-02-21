@@ -14,28 +14,28 @@ import java.util.Collections;
  * Created by yuliya on 2/15/17.
  */
 
-class RealtimeRouter {
+class LiveServiceRouter {
 
     private static final Object lock = new Object();
-    private static volatile RealtimeRouter realtimeRouter;
+    private static volatile LiveServiceRouter liveServiceRouter;
     private PubNub pubnubClient;
     private String channelGroup;
     private AbstractClient client;
     private SubscribeCallback subscribeCallback;
 
-    private RealtimeRouter() {
+    private LiveServiceRouter() {
 
     }
 
-    static RealtimeRouter getInstance() {
-        if (realtimeRouter == null) {
+    static LiveServiceRouter getInstance() {
+        if (liveServiceRouter == null) {
             synchronized (lock) {
-                if (realtimeRouter == null) {
-                    realtimeRouter = new RealtimeRouter();
+                if (liveServiceRouter == null) {
+                    liveServiceRouter = new LiveServiceRouter();
                 }
             }
         }
-        return realtimeRouter;
+        return liveServiceRouter;
     }
 
     void initialize(String channelGroup, String publishKey, String subscribeKey, String authKey, AbstractClient client) {
@@ -81,7 +81,7 @@ class RealtimeRouter {
             pubnubClient = null;
             channelGroup = null;
             client = null;
-            realtimeRouter = null;
+            liveServiceRouter = null;
         }
     }
     }
