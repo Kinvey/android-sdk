@@ -1067,7 +1067,7 @@ public class Client<T extends User> extends AbstractClient<T> {
 
     @Override
     public String getDeviceId() {
-        return new UdidFactory(context).getDeviceUuid().toString();
+        return new UuidFactory(context).getDeviceUuid().toString();
     }
 }
 
