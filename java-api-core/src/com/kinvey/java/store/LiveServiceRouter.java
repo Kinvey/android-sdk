@@ -14,31 +14,33 @@ import java.util.Collections;
  * Created by yuliya on 2/15/17.
  */
 
-public class RealtimeRouter {
-
+class LiveServiceRouter {
     private static final Object lock = new Object();
-    private static RealtimeRouter realtimeRouter;
+    private static volatile LiveServiceRouter liveServiceRouter;
     private PubNub pubnubClient;
     private String channelGroup;
     private AbstractClient client;
     private SubscribeCallback subscribeCallback;
 
-    private RealtimeRouter() {
+    private LiveServiceRouter() {
 
     }
 
-    public static RealtimeRouter getInstance() {
-        synchronized (lock) {
-            if (realtimeRouter == null) {
-                realtimeRouter = new RealtimeRouter();
+
+    static LiveServiceRouter getInstance() {
+        if (liveServiceRouter == null) {
+            synchronized (lock) {
+                if (liveServiceRouter == null) {
+                    liveServiceRouter = new LiveServiceRouter();
+                }
             }
-            return realtimeRouter;
         }
+        return liveServiceRouter;
     }
 
     void initialize(String channelGroup, String publishKey, String subscribeKey, String authKey, AbstractClient client) {
-        synchronized (lock) {
-            if (!isInitialized()) {
+        if (!isInitialized()) {
+            synchronized (lock) {
                 this.channelGroup = channelGroup;
                 this.client = client;
                 PNConfiguration pnConfiguration = new PNConfiguration();
@@ -71,15 +73,15 @@ public class RealtimeRouter {
     }
 
     void unInitialize() {
-        synchronized (lock) {
-            if (isInitialized()) {
+        if (isInitialized()) {
+            synchronized (lock) {
                 pubnubClient.removeListener(subscribeCallback);
                 pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
                 pubnubClient.destroy();
                 pubnubClient = null;
                 channelGroup = null;
                 client = null;
-                realtimeRouter = null;
+                liveServiceRouter = null;
             }
         }
     }
