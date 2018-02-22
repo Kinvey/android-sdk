@@ -1,7 +1,6 @@
 package com.kinvey.android;
 
 import android.os.Handler;
-import android.os.Looper;
 
 import com.kinvey.java.core.KinveyCancellableCallback;
 import com.kinvey.java.core.KinveyClientCallback;

@@ -1,7 +1,5 @@
 package com.kinvey.java.store;
 
-import java.io.IOException;
-
 /**
  * Created by yuliya on 2/20/17.
  */
