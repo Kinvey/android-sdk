@@ -526,13 +526,13 @@ public class BaseDataStore<T extends GenericJson> {
                     realtimeCallback.onStatus(status);
                 }
             };
-            success = RealtimeRouter.getInstance().subscribeCollection(collection, callback);
+            success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
         }
         return success;
     }
 
     public void unsubscribe() throws IOException {
         realtimeCallback = null;
-        RealtimeRouter.getInstance().unsubscribeCollection(collection);
+        LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
 }
