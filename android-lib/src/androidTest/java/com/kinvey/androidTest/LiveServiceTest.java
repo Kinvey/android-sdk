@@ -10,7 +10,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.store.BaseUserStore;
-import com.kinvey.java.store.RealtimeRouter;
+import com.kinvey.java.store.LiveServiceRouter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +24,6 @@ import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-//import com.kinvey.java.store.RealtimeRouter;
 
 /**
  * Created by yuliya on 2/19/17.
@@ -67,9 +66,9 @@ public class LiveServiceTest {
     public void testRegisterSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
         BaseUserStore.registerRealtime();
-        assertTrue(RealtimeRouter.getInstance().isInitialized());
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
         BaseUserStore.unRegisterRealtime();
-        assertFalse(RealtimeRouter.getInstance().isInitialized());
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
 
