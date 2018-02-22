@@ -153,16 +153,18 @@ public abstract class BaseUserStore <T extends BaseUser> {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
             throw new KinveyException("User object has to be the active user in order to register for realtime messages");
         }
-        RealtimeRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
-                createBuilder(AbstractClient.sharedInstance()))
-                .realtimeRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
-                        AbstractClient.sharedInstance().getDeviceId()).execute();
-        RealtimeRouter.getInstance().initialize(
-                response.getUserChannelGroup(),
-                response.getPublishKey(),
-                response.getSubscribeKey(),
-                AbstractClient.sharedInstance().getActiveUser().getAuthToken(),
-                AbstractClient.sharedInstance());
+        if (!RealtimeRouter.getInstance().isInitialized()) {
+            RealtimeRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
+                    createBuilder(AbstractClient.sharedInstance()))
+                    .realtimeRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                            AbstractClient.sharedInstance().getDeviceId()).execute();
+            RealtimeRouter.getInstance().initialize(
+                    response.getUserChannelGroup(),
+                    response.getPublishKey(),
+                    response.getSubscribeKey(),
+                    AbstractClient.sharedInstance().getActiveUser().getAuthToken(),
+                    AbstractClient.sharedInstance());
+        }
     }
 
     /**
@@ -173,12 +175,13 @@ public abstract class BaseUserStore <T extends BaseUser> {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
             throw new KinveyException("User object has to be the active user in order to register for realtime messages");
         }
-        RealtimeRouter.getInstance().unInitialize();
-
-        new UserStoreRequestManager(AbstractClient.sharedInstance(),
-                createBuilder(AbstractClient.sharedInstance()))
-                .realtimeUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
-                        AbstractClient.sharedInstance().getDeviceId()).execute();
+        if (RealtimeRouter.getInstance().isInitialized()) {
+            RealtimeRouter.getInstance().unInitialize();
+            new UserStoreRequestManager(AbstractClient.sharedInstance(),
+                    createBuilder(AbstractClient.sharedInstance()))
+                    .realtimeUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                            AbstractClient.sharedInstance().getDeviceId()).execute();
+        }
     }
 
     private static KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
