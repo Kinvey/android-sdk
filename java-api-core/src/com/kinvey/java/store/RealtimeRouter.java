@@ -61,12 +61,12 @@ public class RealtimeRouter {
 
                     @Override
                     public void message(PubNub pubnub, PNMessageResult message) {
-                        subscribeCallback(message.getChannel(), message.getMessage().getAsString());
+                        subscribeCallback(message.getChannel(), message.getMessage().toString());
                     }
 
                     @Override
                     public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-                    /* presence not currently supported */
+                        /* presence not currently supported */
                     }
                 };
                 pubnubClient.addListener(subscribeCallback);
@@ -91,12 +91,22 @@ public class RealtimeRouter {
         }
     }
 
-    void subscribeCollection(String collectionName, KinveyRealtimeCallback<String> realtimeCallback) {
-        addChannel(getChannel(collectionName), realtimeCallback);
+    boolean subscribeCollection(String collectionName, KinveyRealtimeCallback<String> realtimeCallback) {
+        if (isInitialized()) {
+            synchronized (lock) {
+                addChannel(getChannel(collectionName), realtimeCallback);
+                return true;
+            }
+        }
+        return false;
     }
 
     void unsubscribeCollection(String collectionName) {
-        removeChannel(getChannel(collectionName));
+        if (isInitialized()) {
+            synchronized (lock) {
+                removeChannel(getChannel(collectionName));
+            }
+        }
     }
 
     private String getChannel(String collectionName) {

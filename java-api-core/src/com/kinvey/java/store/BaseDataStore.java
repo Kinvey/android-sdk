@@ -526,8 +526,7 @@ public class BaseDataStore<T extends GenericJson> {
                     realtimeCallback.onStatus(status);
                 }
             };
-            RealtimeRouter.getInstance().subscribeCollection(collection, callback);
-            success = true;
+            success = RealtimeRouter.getInstance().subscribeCollection(collection, callback);
         }
         return success;
     }
