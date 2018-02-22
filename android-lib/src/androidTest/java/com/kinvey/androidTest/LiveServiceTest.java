@@ -9,12 +9,11 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.model.LiveModel;
-import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.KinveyDataStoreRealtimeCallback;
 import com.kinvey.java.store.KinveyRealtimeStatus;
-import com.kinvey.java.store.RealtimeRouter;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.LiveServiceRouter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,13 +21,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-//import com.kinvey.java.store.RealtimeRouter;
 
 /**
  * Created by yuliya on 2/19/17.
@@ -67,19 +68,19 @@ public class LiveServiceTest {
 
 
     @Test
-    public void testRegisterSync() throws InterruptedException, IOException {
+    public void testRegisterUnregisterSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
         BaseUserStore.registerRealtime();
-        assertTrue(RealtimeRouter.getInstance().isInitialized());
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
         BaseUserStore.unRegisterRealtime();
-        assertFalse(RealtimeRouter.getInstance().isInitialized());
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
     @Test
     public void testSubscribeUnsubscribeSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
         BaseUserStore.registerRealtime();
-        assertTrue(RealtimeRouter.getInstance().isInitialized());
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
         store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
         LiveModel model = new LiveModel();
         model.setUsername("Live model name");
@@ -103,9 +104,20 @@ public class LiveServiceTest {
         });
         store.unsubscribe();
         BaseUserStore.unRegisterRealtime();
-        assertFalse(RealtimeRouter.getInstance().isInitialized());
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
+    @Test
+    public void testDeviceUuid() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> aClass = Class.forName("com.kinvey.android.UuidFactory");
+        Constructor<?> constructor = aClass.getDeclaredConstructor(Context.class);
+        constructor.setAccessible(true);
+        Object uuidFactory = constructor.newInstance(client.getContext());
+        String theFirstUiId = uuidFactory.getClass().getDeclaredMethod("getDeviceUuid").invoke(uuidFactory).toString();
+        Object uuidFactorySecond = constructor.newInstance(client.getContext());
+        String theSecondUiId = uuidFactorySecond.getClass().getDeclaredMethod("getDeviceUuid").invoke(uuidFactorySecond).toString();
+        assertEquals(theFirstUiId, theSecondUiId);
+    }
 
 
 }

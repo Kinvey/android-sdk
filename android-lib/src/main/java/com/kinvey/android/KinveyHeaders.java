@@ -32,7 +32,7 @@ class KinveyHeaders extends com.kinvey.java.core.KinveyHeaders {
     public KinveyHeaders(Context context) {
         super();
 
-        UdidFactory uuidFactory = new UdidFactory(context);
+        UuidFactory uuidFactory = new UuidFactory(context);
         deviceInfo = uuidFactory.getDeviceInfoHeader(context);
     }
 
