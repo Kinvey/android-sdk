@@ -63,7 +63,7 @@ public class LiveServiceTest {
 
 
     @Test
-    public void testRegisterSync() throws InterruptedException, IOException {
+    public void testRegisterUnregisterSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
         BaseUserStore.registerRealtime();
         assertTrue(LiveServiceRouter.getInstance().isInitialized());
