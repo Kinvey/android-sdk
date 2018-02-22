@@ -153,12 +153,12 @@ public abstract class BaseUserStore <T extends BaseUser> {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
             throw new KinveyException("User object has to be the active user in order to register for realtime messages");
         }
-        if (!RealtimeRouter.getInstance().isInitialized()) {
+        if (!LiveServiceRouter.getInstance().isInitialized()) {
             RealtimeRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
                     createBuilder(AbstractClient.sharedInstance()))
                     .realtimeRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
                             AbstractClient.sharedInstance().getDeviceId()).execute();
-            RealtimeRouter.getInstance().initialize(
+            LiveServiceRouter.getInstance().initialize(
                     response.getUserChannelGroup(),
                     response.getPublishKey(),
                     response.getSubscribeKey(),
@@ -175,8 +175,8 @@ public abstract class BaseUserStore <T extends BaseUser> {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
             throw new KinveyException("User object has to be the active user in order to register for realtime messages");
         }
-        if (RealtimeRouter.getInstance().isInitialized()) {
-            RealtimeRouter.getInstance().unInitialize();
+        if (LiveServiceRouter.getInstance().isInitialized()) {
+            LiveServiceRouter.getInstance().unInitialize();
             new UserStoreRequestManager(AbstractClient.sharedInstance(),
                     createBuilder(AbstractClient.sharedInstance()))
                     .realtimeUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
