@@ -18,9 +18,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -71,5 +74,16 @@ public class LiveServiceTest {
         assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
+    @Test
+    public void testDeviceUuid() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> aClass = Class.forName("com.kinvey.android.UuidFactory");
+        Constructor<?> constructor = aClass.getDeclaredConstructor(Context.class);
+        constructor.setAccessible(true);
+        Object uuidFactory = constructor.newInstance(client.getContext());
+        String theFirstUiId = uuidFactory.getClass().getDeclaredMethod("getDeviceUuid").invoke(uuidFactory).toString();
+        Object uuidFactorySecond = constructor.newInstance(client.getContext());
+        String theSecondUiId = uuidFactorySecond.getClass().getDeclaredMethod("getDeviceUuid").invoke(uuidFactorySecond).toString();
+        assertEquals(theFirstUiId, theSecondUiId);
+    }
 
 }
