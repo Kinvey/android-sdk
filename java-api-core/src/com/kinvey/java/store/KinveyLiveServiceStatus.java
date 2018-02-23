@@ -18,21 +18,21 @@ public class KinveyLiveServiceStatus {
     private String channelGroup;
 
 
-    public KinveyLiveServiceStatus(StatusType type, String[] messagess) {
+    public KinveyLiveServiceStatus(StatusType type, String[] messages) {
         this.liveServiceStatusType = type;
 
         switch (liveServiceStatusType) {
             case STATUS_CONNECT:
             case STATUS_DISCONNECT:
-                status = Integer.parseInt((messagess[0]));
-                message = messagess[1];
-                channelGroup = messagess[2];
+                status = Integer.parseInt((messages[0]));
+                message = messages[1];
+                channelGroup = messages[2];
                 break;
             case STATUS_PUBLISH:
-                status = Integer.parseInt((messagess[0]));
-                message = messagess[1];
-                timeStamp = messagess[2];
-                channelGroup = messagess[3];
+                status = Integer.parseInt((messages[0]));
+                message = messages[1];
+                timeStamp = messages[2];
+                channelGroup = messages[3];
                 break;
         }
     }
