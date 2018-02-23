@@ -14,8 +14,7 @@ import java.util.Collections;
  * Created by yuliya on 2/15/17.
  */
 
-class LiveServiceRouter {
-
+public class LiveServiceRouter {
     private static final Object lock = new Object();
     private static volatile LiveServiceRouter liveServiceRouter;
     private PubNub pubnubClient;
@@ -27,7 +26,8 @@ class LiveServiceRouter {
 
     }
 
-    static LiveServiceRouter getInstance() {
+
+    public static LiveServiceRouter getInstance() {
         if (liveServiceRouter == null) {
             synchronized (lock) {
                 if (liveServiceRouter == null) {
@@ -73,20 +73,20 @@ class LiveServiceRouter {
     }
 
     void unInitialize() {
-        synchronized (lock) {
-            if (isInitialized()) {
-            pubnubClient.removeListener(subscribeCallback);
-            pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
-            pubnubClient.destroy();
-            pubnubClient = null;
-            channelGroup = null;
-            client = null;
-            liveServiceRouter = null;
+        if (isInitialized()) {
+            synchronized (lock) {
+                pubnubClient.removeListener(subscribeCallback);
+                pubnubClient.unsubscribe().channelGroups(Collections.singletonList(channelGroup)).execute();
+                pubnubClient.destroy();
+                pubnubClient = null;
+                channelGroup = null;
+                client = null;
+                liveServiceRouter = null;
+            }
         }
     }
-    }
 
-    boolean isInitialized() {
+    public boolean isInitialized() {
         return pubnubClient != null;
     }
 

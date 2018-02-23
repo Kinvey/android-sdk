@@ -150,6 +150,11 @@ public abstract class KinveyMockUnitTest extends TestCase {
             return null;
         }
 
+        @Override
+        public String getDeviceId() {
+            return null;
+        }
+
 
         public static final class Builder extends AbstractClient.Builder {
 
