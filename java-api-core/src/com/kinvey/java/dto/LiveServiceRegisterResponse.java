@@ -8,7 +8,7 @@ import com.google.api.client.util.Key;
  */
 
 
-public class RealtimeRegisterResponse extends GenericJson {
+public class LiveServiceRegisterResponse extends GenericJson {
 
     @Key
     private String userChannelGroup;

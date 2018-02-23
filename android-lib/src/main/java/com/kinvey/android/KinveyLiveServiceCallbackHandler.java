@@ -2,12 +2,12 @@ package com.kinvey.android;
 
 import android.os.Handler;
 
-import com.kinvey.java.store.KinveyDataStoreRealtimeCallback;
-import com.kinvey.java.store.KinveyRealtimeStatus;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
 
 public class KinveyLiveServiceCallbackHandler<T> extends Handler {
 
-    public void onNext(final T t, final KinveyDataStoreRealtimeCallback<T> callback) {
+    public void onNext(final T t, final KinveyDataStoreLiveServiceCallback<T> callback) {
 
         this.post(new Runnable() {
             @Override
@@ -17,7 +17,7 @@ public class KinveyLiveServiceCallbackHandler<T> extends Handler {
         });
     }
 
-    public void onError(final Exception exception, final KinveyDataStoreRealtimeCallback<T> callback) {
+    public void onError(final Exception exception, final KinveyDataStoreLiveServiceCallback<T> callback) {
         this.post(new Runnable() {
             @Override
             public void run() {
@@ -26,7 +26,7 @@ public class KinveyLiveServiceCallbackHandler<T> extends Handler {
         });
     }
 
-    public void onStatus(final KinveyRealtimeStatus status, final KinveyDataStoreRealtimeCallback<T> callback) {
+    public void onStatus(final KinveyLiveServiceStatus status, final KinveyDataStoreLiveServiceCallback<T> callback) {
         this.post(new Runnable() {
             @Override
             public void run() {

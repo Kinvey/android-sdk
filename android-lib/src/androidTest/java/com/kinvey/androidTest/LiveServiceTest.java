@@ -10,8 +10,8 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.store.BaseUserStore;
-import com.kinvey.java.store.KinveyDataStoreRealtimeCallback;
-import com.kinvey.java.store.KinveyRealtimeStatus;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.LiveServiceRouter;
 
@@ -70,23 +70,23 @@ public class LiveServiceTest {
     @Test
     public void testRegisterUnregisterSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
-        BaseUserStore.registerRealtime();
+        BaseUserStore.registerLiveService();
         assertTrue(LiveServiceRouter.getInstance().isInitialized());
-        BaseUserStore.unRegisterRealtime();
+        BaseUserStore.unRegisterLiveService();
         assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
     @Test
     public void testSubscribeUnsubscribeSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
-        BaseUserStore.registerRealtime();
+        BaseUserStore.registerLiveService();
         assertTrue(LiveServiceRouter.getInstance().isInitialized());
         store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
         LiveModel model = new LiveModel();
         model.setUsername("Live model name");
         store.save(model);
         store.pushBlocking();
-        store.subscribe(new KinveyDataStoreRealtimeCallback<LiveModel>() {
+        store.subscribe(new KinveyDataStoreLiveServiceCallback<LiveModel>() {
             @Override
             public void onNext(LiveModel next) {
                 System.out.println("TEST_TEST: " + next.toString());
@@ -98,12 +98,12 @@ public class LiveServiceTest {
             }
 
             @Override
-            public void onStatus(KinveyRealtimeStatus status) {
+            public void onStatus(KinveyLiveServiceStatus status) {
                 System.out.println("TEST_TEST: " + status.toString());
             }
         });
         store.unsubscribe();
-        BaseUserStore.unRegisterRealtime();
+        BaseUserStore.unRegisterLiveService();
         assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 

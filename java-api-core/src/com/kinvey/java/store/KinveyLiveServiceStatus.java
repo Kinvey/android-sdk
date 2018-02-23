@@ -3,9 +3,9 @@ package com.kinvey.java.store;
 /**
  * Created by yuliya on 2/20/17.
  */
-public class KinveyRealtimeStatus {
+public class KinveyLiveServiceStatus {
 
-    private StatusType realtimeStatusType;
+    private StatusType liveServiceStatusType;
 
     private int status;
 
@@ -18,10 +18,10 @@ public class KinveyRealtimeStatus {
     private String channelGroup;
 
 
-    public KinveyRealtimeStatus(StatusType type, String[] messagess) {
-        this.realtimeStatusType = type;
+    public KinveyLiveServiceStatus(StatusType type, String[] messagess) {
+        this.liveServiceStatusType = type;
 
-        switch (realtimeStatusType) {
+        switch (liveServiceStatusType) {
             case STATUS_CONNECT:
             case STATUS_DISCONNECT:
                 status = Integer.parseInt((messagess[0]));
@@ -37,12 +37,12 @@ public class KinveyRealtimeStatus {
         }
     }
 
-    public StatusType getRealtimeStatusType() {
-        return realtimeStatusType;
+    public StatusType getLiveServiceStatusType() {
+        return liveServiceStatusType;
     }
 
-    public void setRealtimeStatusType(StatusType realtimeStatusType) {
-        this.realtimeStatusType = realtimeStatusType;
+    public void setLiveServiceStatusType(StatusType liveServiceStatusType) {
+        this.liveServiceStatusType = liveServiceStatusType;
     }
 
     public int getStatus() {
@@ -86,7 +86,7 @@ public class KinveyRealtimeStatus {
     }
 
     /**
-     * Enum representing all the types of status messages that can be received for realtime.
+     * Enum representing all the types of status messages that can be received for LiveService.
      */
     public enum StatusType {
 

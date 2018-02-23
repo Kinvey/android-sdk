@@ -65,7 +65,7 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
-    KinveyDataStoreRealtimeCallback<T> realtimeCallback;
+    KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
      * It is a parameter to enable the auto-pagination of data retrieval from the backend.
@@ -500,30 +500,30 @@ public class BaseDataStore<T extends GenericJson> {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
     }
 
-    public boolean subscribe(KinveyDataStoreRealtimeCallback<T> storeRealtimeCallback) throws IOException {
+    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
         boolean success = false;
-        if (storeRealtimeCallback != null) {
-            realtimeCallback = storeRealtimeCallback;
+        if (storeLiveServiceCallback != null) {
+            liveServiceCallback = storeLiveServiceCallback;
             networkManager.subscribe(client.getDeviceId()).execute();
-            KinveyRealtimeCallback<String> callback = new KinveyRealtimeCallback<String>() {
+            KinveyLiveServiceCallback<String> callback = new KinveyLiveServiceCallback<String>() {
                 @Override
                 public void onNext(String next) {
                     try {
-                        realtimeCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
+                        liveServiceCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
                     } catch (IOException e) {
                         e.printStackTrace();
-                        realtimeCallback.onError(e);
+                        liveServiceCallback.onError(e);
                     }
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    realtimeCallback.onError(e);
+                    liveServiceCallback.onError(e);
                 }
 
                 @Override
-                public void onStatus(KinveyRealtimeStatus status) {
-                    realtimeCallback.onStatus(status);
+                public void onStatus(KinveyLiveServiceStatus status) {
+                    liveServiceCallback.onStatus(status);
                 }
             };
             success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
@@ -532,7 +532,7 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     public void unsubscribe() throws IOException {
-        realtimeCallback = null;
+        liveServiceCallback = null;
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
 }

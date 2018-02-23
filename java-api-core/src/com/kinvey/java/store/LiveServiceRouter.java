@@ -25,7 +25,7 @@ public class LiveServiceRouter {
     private String channelGroup;
     private AbstractClient client;
     private SubscribeCallback subscribeCallback;
-    private Map<String, KinveyRealtimeCallback<String>> mapChannelToCallback;
+    private Map<String, KinveyLiveServiceCallback<String>> mapChannelToCallback;
 
     private LiveServiceRouter() {
 
@@ -94,10 +94,10 @@ public class LiveServiceRouter {
         }
     }
 
-    boolean subscribeCollection(String collectionName, KinveyRealtimeCallback<String> realtimeCallback) {
+    boolean subscribeCollection(String collectionName, KinveyLiveServiceCallback<String> liveServiceCallback) {
         if (isInitialized()) {
             synchronized (lock) {
-                addChannel(getChannel(collectionName), realtimeCallback);
+                addChannel(getChannel(collectionName), liveServiceCallback);
                 return true;
             }
         }
@@ -114,12 +114,12 @@ public class LiveServiceRouter {
 
     private String getChannel(String collectionName) {
         String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
-        String channel = appKey + Constants.CHAR_PERIOD + Constants.STR_REALTIME_COLLECTION_CHANNEL_PREPEND + collectionName;
+        String channel = appKey + Constants.CHAR_PERIOD + Constants.STR_LIVE_SERVICE_COLLECTION_CHANNEL_PREPEND + collectionName;
         return channel;
     }
 
-    private void addChannel(String channel, KinveyRealtimeCallback<String> realtimeCallback) {
-        mapChannelToCallback.put(channel, realtimeCallback);
+    private void addChannel(String channel, KinveyLiveServiceCallback<String> liveServiceCallback) {
+        mapChannelToCallback.put(channel, liveServiceCallback);
     }
 
     private void removeChannel(String channel) {

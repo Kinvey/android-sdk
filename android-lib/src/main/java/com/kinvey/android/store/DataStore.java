@@ -45,8 +45,8 @@ import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
-import com.kinvey.java.store.KinveyDataStoreRealtimeCallback;
-import com.kinvey.java.store.KinveyRealtimeStatus;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
@@ -192,7 +192,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
             tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-            tempMap.put(KEY_SUBSCRIBE, BaseDataStore.class.getMethod("subscribe", KinveyDataStoreRealtimeCallback.class));
+            tempMap.put(KEY_SUBSCRIBE, BaseDataStore.class.getMethod("subscribe", KinveyDataStoreLiveServiceCallback.class));
             tempMap.put(KEY_UNSUBSCRIBE, BaseDataStore.class.getMethod("unsubscribe"));
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
@@ -837,11 +837,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     /**
      * Subscribe the specified callback.
-     * @param storeRealtimeCallback {@link KinveyDataStoreRealtimeCallback}
+     * @param storeLiveServiceCallback {@link KinveyDataStoreLiveServiceCallback}
      * @param callback {@link KinveyClientCallback<Boolean>}
      */
-    public void subscribe(KinveyDataStoreRealtimeCallback<T> storeRealtimeCallback, KinveyClientCallback<Boolean> callback) {
-        new AsyncRequest<Boolean>(this, methodMap.get(KEY_SUBSCRIBE), callback, getWrappedRealTimeCallback(storeRealtimeCallback)).execute();
+    public void subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback, KinveyClientCallback<Boolean> callback) {
+        new AsyncRequest<Boolean>(this, methodMap.get(KEY_SUBSCRIBE), callback, getWrappedLiveServiceCallback(storeLiveServiceCallback)).execute();
     }
 
     /**
@@ -888,10 +888,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         return ret;
     }
 
-    private static <T> KinveyDataStoreRealtimeCallback<T> getWrappedRealTimeCallback(KinveyDataStoreRealtimeCallback<T> callback) {
-        ThreadedKinveyRealTime<T> ret = null;
+    private static <T> KinveyDataStoreLiveServiceCallback<T> getWrappedLiveServiceCallback(KinveyDataStoreLiveServiceCallback<T> callback) {
+        ThreadedKinveyLiveService<T> ret = null;
         if (callback != null) {
-            ret = new ThreadedKinveyRealTime<T>(callback);
+            ret = new ThreadedKinveyLiveService<T>(callback);
         }
         return ret;
     }
@@ -919,12 +919,12 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         }
     }
 
-    private static class ThreadedKinveyRealTime<T> implements KinveyDataStoreRealtimeCallback<T> {
+    private static class ThreadedKinveyLiveService<T> implements KinveyDataStoreLiveServiceCallback<T> {
 
-        private KinveyDataStoreRealtimeCallback<T> callback;
+        private KinveyDataStoreLiveServiceCallback<T> callback;
         KinveyLiveServiceCallbackHandler<T> handler;
 
-        ThreadedKinveyRealTime(KinveyDataStoreRealtimeCallback<T> callback) {
+        ThreadedKinveyLiveService(KinveyDataStoreLiveServiceCallback<T> callback) {
             handler = new KinveyLiveServiceCallbackHandler<T>();
             this.callback = callback;
         }
@@ -940,7 +940,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         }
 
         @Override
-        public void onStatus(KinveyRealtimeStatus status) {
+        public void onStatus(KinveyLiveServiceStatus status) {
             handler.onStatus(status, callback);
         }
     }

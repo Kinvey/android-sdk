@@ -20,17 +20,16 @@ import com.google.api.client.util.Key;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.DeviceId;
-import com.kinvey.java.dto.RealtimeRegisterResponse;
 
 
-public final class RealtimeUnregisterRequest extends AbstractKinveyJsonClientRequest<Void> {
+public final class LiveServiceUnregisterRequest extends AbstractKinveyJsonClientRequest<Void> {
 
     private static final String REST_PATH = "user/{appKey}/{userID}/unregister-realtime";
 
     @Key
     private String userID;
 
-    public RealtimeUnregisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
+    public LiveServiceUnregisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
         super(client, "POST", REST_PATH, deviceId, Void.class);
         this.userID = userId;
     }

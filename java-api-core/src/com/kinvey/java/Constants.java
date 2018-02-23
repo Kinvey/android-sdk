@@ -6,5 +6,5 @@ package com.kinvey.java;
 public final class Constants {
 
     public static final String CHAR_PERIOD = ".";
-    public static final String STR_REALTIME_COLLECTION_CHANNEL_PREPEND = "c-";
+    public static final String STR_LIVE_SERVICE_COLLECTION_CHANNEL_PREPEND = "c-";
 }
