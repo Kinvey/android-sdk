@@ -28,8 +28,6 @@ public class BaseUser extends GenericJson {
 
     @Key("username")
     private String username;
-
-    @Key("_kmd.authtoken")
     private String authToken;
 
     public String getId() {
