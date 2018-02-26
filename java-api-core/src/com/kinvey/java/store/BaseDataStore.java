@@ -71,6 +71,8 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private boolean deltaSetCachingEnabled = false;
 
+    KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
+
     /**
      * It is a parameter to enable the auto-pagination of data retrieval from the backend.
      * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
@@ -526,5 +528,41 @@ public class BaseDataStore<T extends GenericJson> {
      */
     public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
+
+    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
+        boolean success = false;
+        if (storeLiveServiceCallback != null) {
+            liveServiceCallback = storeLiveServiceCallback;
+            networkManager.subscribe(client.getDeviceId()).execute();
+            KinveyLiveServiceCallback<String> callback = new KinveyLiveServiceCallback<String>() {
+                @Override
+                public void onNext(String next) {
+                    try {
+                        liveServiceCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        liveServiceCallback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    liveServiceCallback.onError(e);
+                }
+
+                @Override
+                public void onStatus(KinveyLiveServiceStatus status) {
+                    liveServiceCallback.onStatus(status);
+                }
+            };
+            success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
+        }
+        return success;
+    }
+
+    public void unsubscribe() throws IOException {
+        liveServiceCallback = null;
+        LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
 }

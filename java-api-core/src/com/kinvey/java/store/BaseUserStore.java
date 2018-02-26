@@ -2,11 +2,13 @@ package com.kinvey.java.store;
 
 
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
+import com.kinvey.java.dto.LiveServiceRegisterResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,6 +143,45 @@ public abstract class BaseUserStore <T extends BaseUser> {
 
     public static <T extends BaseUser> T update() throws IOException {
         return (T) new UserStoreRequestManager(AbstractClient.sharedInstance(), createBuilder(AbstractClient.sharedInstance())).save().execute();
+    }
+
+    /**
+     * Register the active user for LiveService messaging.
+     * @throws IOException
+     */
+    public static void registerLiveService() throws IOException {
+        if (AbstractClient.sharedInstance().getActiveUser() == null) {
+            throw new KinveyException("User object has to be the active user in order to register for LiveService messages");
+        }
+        if (!LiveServiceRouter.getInstance().isInitialized()) {
+            LiveServiceRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
+                    createBuilder(AbstractClient.sharedInstance()))
+                    .liveServiceRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                            AbstractClient.sharedInstance().getDeviceId()).execute();
+            LiveServiceRouter.getInstance().initialize(
+                    response.getUserChannelGroup(),
+                    response.getPublishKey(),
+                    response.getSubscribeKey(),
+                    AbstractClient.sharedInstance().getActiveUser().getAuthToken(),
+                    AbstractClient.sharedInstance());
+        }
+    }
+
+    /**
+     * Unregister the active user from LiveService messaging.
+     * @throws IOException
+     */
+    public static void unRegisterLiveService() throws IOException {
+        if (AbstractClient.sharedInstance().getActiveUser() == null) {
+            throw new KinveyException("User object has to be the active user in order to register for LiveService messages");
+        }
+        if (LiveServiceRouter.getInstance().isInitialized()) {
+            LiveServiceRouter.getInstance().uninitialize();
+            new UserStoreRequestManager(AbstractClient.sharedInstance(),
+                    createBuilder(AbstractClient.sharedInstance()))
+                    .liveServiceUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                            AbstractClient.sharedInstance().getDeviceId()).execute();
+        }
     }
 
     private static KinveyAuthRequest.Builder createBuilder(AbstractClient client) {

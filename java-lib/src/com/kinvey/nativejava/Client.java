@@ -221,7 +221,10 @@ public class Client extends AbstractClient {
         return null;
     }
 
-
+    @Override
+    public String getDeviceId() {
+        return null;
+    }
 
 
     /**

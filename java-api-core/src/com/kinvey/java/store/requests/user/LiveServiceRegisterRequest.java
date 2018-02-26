@@ -13,27 +13,25 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android;
 
-import android.content.Context;
+package com.kinvey.java.store.requests.user;
 
 import com.google.api.client.util.Key;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.dto.DeviceId;
+import com.kinvey.java.dto.LiveServiceRegisterResponse;
 
-/**
- * Standard Kinvey specific headers are added to all requests.
- * @author m0rganic
- * @since 2.0
- */
-class KinveyHeaders extends com.kinvey.java.core.KinveyHeaders {
 
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
+public final class LiveServiceRegisterRequest extends AbstractKinveyJsonClientRequest<LiveServiceRegisterResponse> {
 
-    public KinveyHeaders(Context context) {
-        super();
+    private static final String REST_PATH = "user/{appKey}/{userID}/register-realtime";
 
-        UuidFactory uuidFactory = new UuidFactory(context);
-        deviceInfo = uuidFactory.getDeviceInfoHeader(context);
+    @Key
+    private String userID;
+
+    public LiveServiceRegisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
+        super(client, "POST", REST_PATH, deviceId, LiveServiceRegisterResponse.class);
+        this.userID = userId;
     }
-
 }

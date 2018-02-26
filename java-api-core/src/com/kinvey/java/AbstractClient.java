@@ -558,4 +558,6 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         this.userModelClass = userClass;
     }
 
+    public abstract String getDeviceId();
+
 }
