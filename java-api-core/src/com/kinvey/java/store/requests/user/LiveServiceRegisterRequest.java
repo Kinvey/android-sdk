@@ -20,19 +20,18 @@ import com.google.api.client.util.Key;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.DeviceId;
-import com.kinvey.java.dto.Email;
-import com.kinvey.java.dto.RealtimeRegisterResponse;
+import com.kinvey.java.dto.LiveServiceRegisterResponse;
 
 
-public final class RealtimeRegisterRequest extends AbstractKinveyJsonClientRequest<RealtimeRegisterResponse> {
+public final class LiveServiceRegisterRequest extends AbstractKinveyJsonClientRequest<LiveServiceRegisterResponse> {
 
     private static final String REST_PATH = "user/{appKey}/{userID}/register-realtime";
 
     @Key
     private String userID;
 
-    public  RealtimeRegisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
-        super(client, "POST", REST_PATH, deviceId, RealtimeRegisterResponse.class);
+    public LiveServiceRegisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
+        super(client, "POST", REST_PATH, deviceId, LiveServiceRegisterResponse.class);
         this.userID = userId;
     }
 }

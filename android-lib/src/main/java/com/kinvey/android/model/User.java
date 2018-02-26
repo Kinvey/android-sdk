@@ -17,8 +17,12 @@ public class User extends BaseUser {
         new Update(callback).execute();
     }
 
-    public void registerRealtime(KinveyClientCallback callback) {
-        new RegisterRealtime(callback).execute();
+    public void registerLiveService(KinveyClientCallback<Void> callback) {
+        new RegisterLiveService(callback).execute();
+    }
+
+    public void unregisterLiveService(KinveyClientCallback<Void> callback) {
+        new UnregisterLiveService(callback).execute();
     }
 
     private static class Update<T extends User> extends AsyncClientRequest<T> {
@@ -33,15 +37,28 @@ public class User extends BaseUser {
         }
     }
 
-    private static class RegisterRealtime extends AsyncClientRequest<Void> {
+    private static class RegisterLiveService extends AsyncClientRequest<Void> {
 
-        private RegisterRealtime(KinveyClientCallback<Void> callback) {
+        private RegisterLiveService(KinveyClientCallback<Void> callback) {
             super(callback);
         }
 
         @Override
         protected Void executeAsync() throws IOException {
-            BaseUserStore.registerRealtime();
+            BaseUserStore.registerLiveService();
+            return null;
+        }
+    }
+
+    private static class UnregisterLiveService extends AsyncClientRequest<Void> {
+
+        private UnregisterLiveService(KinveyClientCallback<Void> callback) {
+            super(callback);
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            BaseUserStore.unRegisterLiveService();
             return null;
         }
     }

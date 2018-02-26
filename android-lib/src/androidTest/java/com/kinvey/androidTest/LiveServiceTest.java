@@ -10,6 +10,9 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.store.BaseUserStore;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
+import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.LiveServiceRouter;
 
 import org.junit.After;
@@ -49,7 +52,6 @@ public class LiveServiceTest {
         client.enableDebugLogging();
         testManager = new TestManager<>();
         testManager.login(USERNAME, PASSWORD, client);
-
     }
 
     @After
@@ -68,9 +70,40 @@ public class LiveServiceTest {
     @Test
     public void testRegisterUnregisterSync() throws InterruptedException, IOException {
         assertTrue(client.isUserLoggedIn());
-        BaseUserStore.registerRealtime();
+        BaseUserStore.registerLiveService();
         assertTrue(LiveServiceRouter.getInstance().isInitialized());
-        BaseUserStore.unRegisterRealtime();
+        BaseUserStore.unRegisterLiveService();
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
+    }
+
+    @Test
+    public void testSubscribeUnsubscribeSync() throws InterruptedException, IOException {
+        assertTrue(client.isUserLoggedIn());
+        BaseUserStore.registerLiveService();
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
+        store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
+        LiveModel model = new LiveModel();
+        model.setUsername("Live model name");
+        store.save(model);
+        store.pushBlocking();
+        store.subscribe(new KinveyDataStoreLiveServiceCallback<LiveModel>() {
+            @Override
+            public void onNext(LiveModel next) {
+                System.out.println("TEST_TEST: " + next.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                System.out.println("TEST_TEST: " + e.toString());
+            }
+
+            @Override
+            public void onStatus(KinveyLiveServiceStatus status) {
+                System.out.println("TEST_TEST: " + status.toString());
+            }
+        });
+        store.unsubscribe();
+        BaseUserStore.unRegisterLiveService();
         assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
@@ -85,5 +118,6 @@ public class LiveServiceTest {
         String theSecondUiId = uuidFactorySecond.getClass().getDeclaredMethod("getDeviceUuid").invoke(uuidFactorySecond).toString();
         assertEquals(theFirstUiId, theSecondUiId);
     }
+
 
 }

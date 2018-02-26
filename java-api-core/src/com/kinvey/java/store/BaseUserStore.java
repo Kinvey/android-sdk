@@ -8,7 +8,7 @@ import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
-import com.kinvey.java.dto.RealtimeRegisterResponse;
+import com.kinvey.java.dto.LiveServiceRegisterResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -146,17 +146,17 @@ public abstract class BaseUserStore <T extends BaseUser> {
     }
 
     /**
-     * Register the active user for realtime messaging.
+     * Register the active user for LiveService messaging.
      * @throws IOException
      */
-    public static void registerRealtime() throws IOException {
+    public static void registerLiveService() throws IOException {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
-            throw new KinveyException("User object has to be the active user in order to register for realtime messages");
+            throw new KinveyException("User object has to be the active user in order to register for LiveService messages");
         }
         if (!LiveServiceRouter.getInstance().isInitialized()) {
-            RealtimeRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
+            LiveServiceRegisterResponse response = new UserStoreRequestManager(AbstractClient.sharedInstance(),
                     createBuilder(AbstractClient.sharedInstance()))
-                    .realtimeRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                    .liveServiceRegister(AbstractClient.sharedInstance().getActiveUser().getId(),
                             AbstractClient.sharedInstance().getDeviceId()).execute();
             LiveServiceRouter.getInstance().initialize(
                     response.getUserChannelGroup(),
@@ -168,18 +168,18 @@ public abstract class BaseUserStore <T extends BaseUser> {
     }
 
     /**
-     * Unregister the active user from realtime messaging.
+     * Unregister the active user from LiveService messaging.
      * @throws IOException
      */
-    public static void unRegisterRealtime() throws IOException {
+    public static void unRegisterLiveService() throws IOException {
         if (AbstractClient.sharedInstance().getActiveUser() == null) {
-            throw new KinveyException("User object has to be the active user in order to register for realtime messages");
+            throw new KinveyException("User object has to be the active user in order to register for LiveService messages");
         }
         if (LiveServiceRouter.getInstance().isInitialized()) {
-            LiveServiceRouter.getInstance().unInitialize();
+            LiveServiceRouter.getInstance().uninitialize();
             new UserStoreRequestManager(AbstractClient.sharedInstance(),
                     createBuilder(AbstractClient.sharedInstance()))
-                    .realtimeUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
+                    .liveServiceUnregister(AbstractClient.sharedInstance().getActiveUser().getId(),
                             AbstractClient.sharedInstance().getDeviceId()).execute();
         }
     }

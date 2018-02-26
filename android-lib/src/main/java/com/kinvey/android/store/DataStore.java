@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
+import com.kinvey.android.KinveyLiveServiceCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
@@ -44,6 +45,8 @@ import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
@@ -122,6 +125,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
 
     private static final String KEY_PURGE = "KEY_PURGE";
+    private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
+    private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
@@ -187,7 +192,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
 
             tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-
+            tempMap.put(KEY_SUBSCRIBE, BaseDataStore.class.getMethod("subscribe", KinveyDataStoreLiveServiceCallback.class));
+            tempMap.put(KEY_UNSUBSCRIBE, BaseDataStore.class.getMethod("unsubscribe"));
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
@@ -829,6 +835,23 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<Aggregation>(this, methodMap.get(KEY_GROUP), callback, aggregateType, fields, reduceField, query, cachedCallback).execute();
     }
 
+    /**
+     * Subscribe the specified callback.
+     * @param storeLiveServiceCallback {@link KinveyDataStoreLiveServiceCallback}
+     * @param callback {@link KinveyClientCallback<Boolean>}
+     */
+    public void subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback, KinveyClientCallback<Boolean> callback) {
+        new AsyncRequest<Boolean>(this, methodMap.get(KEY_SUBSCRIBE), callback, getWrappedLiveServiceCallback(storeLiveServiceCallback)).execute();
+    }
+
+    /**
+     * Unsubscribe this instance.
+     * @param callback {@link KinveyClientCallback<Void>}
+     */
+    public void unsubscribe(KinveyClientCallback<Void> callback) {
+        new AsyncRequest<Void>(this, methodMap.get(KEY_UNSUBSCRIBE), callback).execute();
+    }
+
     private class SaveRequest extends AsyncClientRequest<T> {
         T entity;
 
@@ -865,6 +888,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         return ret;
     }
 
+    private static <T> KinveyDataStoreLiveServiceCallback<T> getWrappedLiveServiceCallback(KinveyDataStoreLiveServiceCallback<T> callback) {
+        ThreadedKinveyLiveService<T> ret = null;
+        if (callback != null) {
+            ret = new ThreadedKinveyLiveService<T>(callback);
+        }
+        return ret;
+    }
+
     private static class ThreadedKinveyCachedClientCallback<T> implements KinveyCachedClientCallback<T> {
 
         private KinveyCachedClientCallback<T> callback;
@@ -885,6 +916,32 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         public void onFailure(Throwable error) {
             handler.onFailure(error, callback);
 
+        }
+    }
+
+    private static class ThreadedKinveyLiveService<T> implements KinveyDataStoreLiveServiceCallback<T> {
+
+        private KinveyDataStoreLiveServiceCallback<T> callback;
+        KinveyLiveServiceCallbackHandler<T> handler;
+
+        ThreadedKinveyLiveService(KinveyDataStoreLiveServiceCallback<T> callback) {
+            handler = new KinveyLiveServiceCallbackHandler<T>();
+            this.callback = callback;
+        }
+
+        @Override
+        public void onNext(T next) {
+            handler.onNext(next, callback);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            handler.onError(e, callback);
+        }
+
+        @Override
+        public void onStatus(KinveyLiveServiceStatus status) {
+            handler.onStatus(status, callback);
         }
     }
 

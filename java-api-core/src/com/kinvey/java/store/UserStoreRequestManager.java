@@ -44,8 +44,8 @@ import com.kinvey.java.store.requests.user.LockDownUser;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
 import com.kinvey.java.store.requests.user.LogoutRequest;
 import com.kinvey.java.store.requests.user.LogoutSoftRequest;
-import com.kinvey.java.store.requests.user.RealtimeRegisterRequest;
-import com.kinvey.java.store.requests.user.RealtimeUnregisterRequest;
+import com.kinvey.java.store.requests.user.LiveServiceRegisterRequest;
+import com.kinvey.java.store.requests.user.LiveServiceUnregisterRequest;
 import com.kinvey.java.store.requests.user.ResetPassword;
 import com.kinvey.java.store.requests.user.Retrieve;
 import com.kinvey.java.store.requests.user.RetrieveUsers;
@@ -777,23 +777,23 @@ public class UserStoreRequestManager<T extends BaseUser> {
         }
     }
 
-    RealtimeRegisterRequest realtimeRegister(String userId, String deviceId) throws IOException {
+    LiveServiceRegisterRequest liveServiceRegister(String userId, String deviceId) throws IOException {
         Preconditions.checkNotNull(deviceId, "deviceId must not be null");
         Preconditions.checkNotNull(userId, "userId must not be null");
         DeviceId deviceID= new DeviceId();
         deviceID.setDeviceId(deviceId);
-        RealtimeRegisterRequest realtimeRegisterRequest = new RealtimeRegisterRequest(client, userId, deviceID);
-        client.initializeRequest(realtimeRegisterRequest);
-        return realtimeRegisterRequest;
+        LiveServiceRegisterRequest liveServiceRegisterRequest = new LiveServiceRegisterRequest(client, userId, deviceID);
+        client.initializeRequest(liveServiceRegisterRequest);
+        return liveServiceRegisterRequest;
     }
 
-    RealtimeUnregisterRequest realtimeUnregister(String userId, String deviceId) throws IOException {
+    LiveServiceUnregisterRequest liveServiceUnregister(String userId, String deviceId) throws IOException {
         Preconditions.checkNotNull(deviceId, "deviceId must not be null");
         Preconditions.checkNotNull(userId, "userId must not be null");
         DeviceId deviceID= new DeviceId();
         deviceID.setDeviceId(deviceId);
-        RealtimeUnregisterRequest realtimeUnregisterRequest = new RealtimeUnregisterRequest(client, userId, deviceID);
-        client.initializeRequest(realtimeUnregisterRequest);
-        return realtimeUnregisterRequest;
+        LiveServiceUnregisterRequest liveServiceUnregisterRequest = new LiveServiceUnregisterRequest(client, userId, deviceID);
+        client.initializeRequest(liveServiceUnregisterRequest);
+        return liveServiceUnregisterRequest;
     }
 }
