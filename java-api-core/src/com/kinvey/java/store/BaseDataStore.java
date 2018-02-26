@@ -438,8 +438,10 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Object t;
         for (T item : cache.get(query)) {
-            if (item.get("_id") != null) {
+            t = item.get("_id");
+            if (t != null) {
                 client.getSyncManager().deleteCachedItems(new Query().equals("meta.id", item.get("_id")));
             }
         }
