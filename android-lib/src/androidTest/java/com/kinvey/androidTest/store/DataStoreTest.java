@@ -2177,6 +2177,81 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testQueryClear() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        saveCallback = testManager.save(store, new Person(TEST_USERNAME_2));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+
+        store.clear(client.query().equals("username", TEST_USERNAME));
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        Person deletePerson = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, deletePerson);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+    }
+
+    @Test
+    public void testQueryPurge() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        saveCallback = testManager.save(store, new Person(TEST_USERNAME_2));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+
+        store.purge(client.query().equals("username", TEST_USERNAME));
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 2);
+
+        store.purge(client.query());
+        assertTrue(store.syncCount() == 0);
+
+        Person deletePerson = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, deletePerson);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 3);
+    }
+
+    @Test
     public void testSelfReferenceClass() throws InterruptedException {
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
