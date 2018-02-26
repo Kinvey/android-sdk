@@ -12,8 +12,8 @@ import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
 import com.kinvey.java.store.KinveyLiveServiceStatus;
-import com.kinvey.java.store.StoreType;
 import com.kinvey.java.store.LiveServiceRouter;
+import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,7 +25,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
-import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -51,7 +50,7 @@ public class LiveServiceTest {
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         testManager = new TestManager<>();
-        testManager.login(USERNAME, PASSWORD, client);
+        testManager.login("livetest", PASSWORD, client);
     }
 
     @After
@@ -107,6 +106,41 @@ public class LiveServiceTest {
         assertFalse(LiveServiceRouter.getInstance().isInitialized());
     }
 
+/*
+    @Test
+    public void testSubscribe() throws InterruptedException, IOException {
+        assertTrue(client.isUserLoggedIn());
+        BaseUserStore.registerLiveService();
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
+        store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
+        DataStore<LiveModel> networkStore = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.NETWORK, client);
+        LiveModel model = new LiveModel();
+        model.setUsername("Live model name");
+        LiveModel savedModel = store.save(model);
+        store.pushBlocking();
+        testManager = new TestManager<>();
+
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        CustomKinveyLiveServiceCallback<LiveModel> liveServiceCallback = new CustomKinveyLiveServiceCallback<>(latch);
+        CustomKinveyClientCallback<Boolean> subscribeCallback = testManager.subscribe(store, liveServiceCallback);
+        assertTrue(subscribeCallback.getResult());
+        assertNull(subscribeCallback.getError());
+        savedModel.setUsername("Live model name - changed");
+        testManager.saveCustomInBackground(networkStore, savedModel);
+        System.out.println("stopped");
+        latch.await(20, TimeUnit.SECONDS);
+
+        assertNotNull(liveServiceCallback.getResult());
+        assertNull(liveServiceCallback.getError());
+        assertEquals("Live model name - changed", liveServiceCallback.getResult().getUsername());
+        store.unsubscribe();
+        BaseUserStore.unRegisterLiveService();
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
+        networkStore.delete(liveServiceCallback.getResult().getId());
+    }
+*/
+
     @Test
     public void testDeviceUuid() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class<?> aClass = Class.forName("com.kinvey.android.UuidFactory");
@@ -119,5 +153,32 @@ public class LiveServiceTest {
         assertEquals(theFirstUiId, theSecondUiId);
     }
 
+    @Test
+    public void testLogout() throws InterruptedException, IOException {
+        assertTrue(client.isUserLoggedIn());
+        BaseUserStore.registerLiveService();
+        assertTrue(LiveServiceRouter.getInstance().isInitialized());
+        store = DataStore.collection(LiveModel.COLLECTION, LiveModel.class, StoreType.SYNC, client);
+        store.subscribe(new KinveyDataStoreLiveServiceCallback<LiveModel>() {
+            @Override
+            public void onNext(LiveModel next) {
+                System.out.println("TEST_TEST: " + next.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                System.out.println("TEST_TEST: " + e.toString());
+            }
+
+            @Override
+            public void onStatus(KinveyLiveServiceStatus status) {
+                System.out.println("TEST_TEST: " + status.toString());
+            }
+        });
+
+        testManager = new TestManager<>();
+        BaseUserStore.logout(client);
+        assertFalse(LiveServiceRouter.getInstance().isInitialized());
+    }
 
 }

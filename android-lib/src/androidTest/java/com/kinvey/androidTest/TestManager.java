@@ -9,6 +9,7 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveyLiveServiceCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -170,6 +172,31 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public void saveCustomInBackground(final DataStore<T> store, final T person) throws InterruptedException {
+        final LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LooperThread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                store.save(person, new KinveyClientCallback<T>() {
+                    @Override
+                    public void onSuccess(T result) {
+                        System.out.println("saved " +result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        System.out.println(error.getMessage());
+                    }
+                });
+            }
+        });
+        looperThread.start();
+    }
+
     public CustomKinveyListCallback<T> saveCustomList(final DataStore<T> store, final List<T> persons) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final CustomKinveyListCallback<T> callback = new CustomKinveyListCallback<T>(latch);
@@ -306,5 +333,58 @@ public class TestManager<T extends GenericJson> {
             Person savedPerson = store.save(person);
             assertNotNull(savedPerson);
         }
+    }
+
+    public CustomKinveyClientCallback<Boolean> subscribe(final DataStore<T> store, final CustomKinveyLiveServiceCallback<T> liveServiceCallback) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyClientCallback<Boolean> callback = new CustomKinveyClientCallback<>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.subscribe(liveServiceCallback, callback);
+            }
+        });
+        looperThread.start();
+        latch.await(60, TimeUnit.SECONDS);
+//        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyLiveServiceCallback subscribeSync(final DataStore<T> store) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyLiveServiceCallback<T> callback = new CustomKinveyLiveServiceCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    store.subscribe(callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyLiveServiceCallback subscribeAsync(final DataStore<T> store) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyLiveServiceCallback<T> callback = new CustomKinveyLiveServiceCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    store.subscribe(callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
     }
 }

@@ -79,7 +79,7 @@ public class LiveServiceRouter {
     }
 
 
-    void uninitialize() {
+    public void uninitialize() {
         if (isInitialized()) {
             synchronized (lock) {
                 pubnubClient.removeListener(subscribeCallback);
@@ -132,7 +132,9 @@ public class LiveServiceRouter {
     }
 
     private void subscribeCallback(String channel, String message) {
-        mapChannelToCallback.get(channel).onNext(message);
+        if (mapChannelToCallback.get(channel) != null) {
+            mapChannelToCallback.get(channel).onNext(message);
+        }
     }
 
     private void handleStatusMessage(PNStatus status) {
