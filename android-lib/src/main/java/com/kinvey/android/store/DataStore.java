@@ -704,7 +704,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /**
      * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
-     * Creates an asynchronous request to clear cache from a collection of entity and pull all collection.
+     * Creates an asynchronous request to clear all the pending requests from the sync storage.
      * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
      * </p>
      * <p>
