@@ -17,6 +17,14 @@ public class User extends BaseUser {
         new Update(callback).execute();
     }
 
+    public void registerLiveService(KinveyClientCallback<Void> callback) {
+        new RegisterLiveService(callback).execute();
+    }
+
+    public void unregisterLiveService(KinveyClientCallback<Void> callback) {
+        new UnregisterLiveService(callback).execute();
+    }
+
     private static class Update<T extends User> extends AsyncClientRequest<T> {
 
         private Update(KinveyClientCallback<T> callback) {
@@ -26,6 +34,32 @@ public class User extends BaseUser {
         @Override
         protected T executeAsync() throws IOException {
             return BaseUserStore.update();
+        }
+    }
+
+    private static class RegisterLiveService extends AsyncClientRequest<Void> {
+
+        private RegisterLiveService(KinveyClientCallback<Void> callback) {
+            super(callback);
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            BaseUserStore.registerLiveService();
+            return null;
+        }
+    }
+
+    private static class UnregisterLiveService extends AsyncClientRequest<Void> {
+
+        private UnregisterLiveService(KinveyClientCallback<Void> callback) {
+            super(callback);
+        }
+
+        @Override
+        protected Void executeAsync() throws IOException {
+            BaseUserStore.unRegisterLiveService();
+            return null;
         }
     }
 }

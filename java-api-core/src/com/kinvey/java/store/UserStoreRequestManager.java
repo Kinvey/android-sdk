@@ -31,6 +31,7 @@ import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
+import com.kinvey.java.dto.DeviceId;
 import com.kinvey.java.dto.Email;
 import com.kinvey.java.dto.PasswordRequest;
 import com.kinvey.java.dto.Username;
@@ -43,6 +44,8 @@ import com.kinvey.java.store.requests.user.LockDownUser;
 import com.kinvey.java.store.requests.user.LoginToTempURL;
 import com.kinvey.java.store.requests.user.LogoutRequest;
 import com.kinvey.java.store.requests.user.LogoutSoftRequest;
+import com.kinvey.java.store.requests.user.LiveServiceRegisterRequest;
+import com.kinvey.java.store.requests.user.LiveServiceUnregisterRequest;
 import com.kinvey.java.store.requests.user.ResetPassword;
 import com.kinvey.java.store.requests.user.Retrieve;
 import com.kinvey.java.store.requests.user.RetrieveUsers;
@@ -774,5 +777,23 @@ public class UserStoreRequestManager<T extends BaseUser> {
         }
     }
 
+    LiveServiceRegisterRequest liveServiceRegister(String userId, String deviceId) throws IOException {
+        Preconditions.checkNotNull(deviceId, "deviceId must not be null");
+        Preconditions.checkNotNull(userId, "userId must not be null");
+        DeviceId deviceID= new DeviceId();
+        deviceID.setDeviceId(deviceId);
+        LiveServiceRegisterRequest liveServiceRegisterRequest = new LiveServiceRegisterRequest(client, userId, deviceID);
+        client.initializeRequest(liveServiceRegisterRequest);
+        return liveServiceRegisterRequest;
+    }
 
+    LiveServiceUnregisterRequest liveServiceUnregister(String userId, String deviceId) throws IOException {
+        Preconditions.checkNotNull(deviceId, "deviceId must not be null");
+        Preconditions.checkNotNull(userId, "userId must not be null");
+        DeviceId deviceID= new DeviceId();
+        deviceID.setDeviceId(deviceId);
+        LiveServiceUnregisterRequest liveServiceUnregisterRequest = new LiveServiceUnregisterRequest(client, userId, deviceID);
+        client.initializeRequest(liveServiceUnregisterRequest);
+        return liveServiceUnregisterRequest;
+    }
 }

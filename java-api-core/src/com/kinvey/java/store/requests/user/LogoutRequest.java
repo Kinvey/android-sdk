@@ -19,6 +19,7 @@ package com.kinvey.java.store.requests.user;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.store.LiveServiceRouter;
 
 /**
  * Logout Request Class.  Constructs the HTTP request object for Logout requests.
@@ -33,6 +34,9 @@ public final class LogoutRequest {
 
     public void execute() {
         client.performLockDown();
+        if (LiveServiceRouter.getInstance().isInitialized()) {
+            LiveServiceRouter.getInstance().uninitialize();
+        }
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setActiveUser(null);

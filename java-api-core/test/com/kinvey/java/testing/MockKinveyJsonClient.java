@@ -121,4 +121,9 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
     protected ICacheManager getSyncCacheManager() {
         return null;
     }
+
+    @Override
+    public String getDeviceId() {
+        return null;
+    }
 }

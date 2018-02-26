@@ -50,6 +50,12 @@ import java.util.List;
 
 public class BaseDataStore<T extends GenericJson> {
 
+    protected static final String FIND = "find";
+    protected static final String DELETE = "delete";
+    protected static final String PURGE = "purge";
+    protected static final String GROUP = "group";
+    protected static final String COUNT = "count";
+
     protected final AbstractClient client;
     private final String collection;
     protected StoreType storeType;
@@ -64,6 +70,8 @@ public class BaseDataStore<T extends GenericJson> {
      * Default value is false.
      */
     private boolean deltaSetCachingEnabled = false;
+
+    KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
      * It is a parameter to enable the auto-pagination of data retrieval from the backend.
@@ -312,6 +320,17 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
+     * Clear the local cache storage
+     */
+    public void clear(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        purge(query);
+        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(query);
+    }
+
+    /**
      * Remove object from from given collection with given id
      * @param id id of object to be deleted
      * @return count of object that was deleted
@@ -422,6 +441,19 @@ public class BaseDataStore<T extends GenericJson> {
         client.getSyncManager().clear(collection);
     }
 
+    public void purge(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Object t;
+        for (T item : cache.get(query)) {
+            t = item.get("_id");
+            if (t != null) {
+                client.getSyncManager().deleteCachedItems(new Query().equals("meta.id", item.get("_id")));
+            }
+        }
+    }
+
     /**
      * Collect all entities with the same value for fields,
      * and then apply a reduce function (such as count or average) on all those items.
@@ -496,5 +528,41 @@ public class BaseDataStore<T extends GenericJson> {
      */
     public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
+
+    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
+        boolean success = false;
+        if (storeLiveServiceCallback != null) {
+            liveServiceCallback = storeLiveServiceCallback;
+            networkManager.subscribe(client.getDeviceId()).execute();
+            KinveyLiveServiceCallback<String> callback = new KinveyLiveServiceCallback<String>() {
+                @Override
+                public void onNext(String next) {
+                    try {
+                        liveServiceCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        liveServiceCallback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    liveServiceCallback.onError(e);
+                }
+
+                @Override
+                public void onStatus(KinveyLiveServiceStatus status) {
+                    liveServiceCallback.onStatus(status);
+                }
+            };
+            success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
+        }
+        return success;
+    }
+
+    public void unsubscribe() throws IOException {
+        liveServiceCallback = null;
+        LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
 }

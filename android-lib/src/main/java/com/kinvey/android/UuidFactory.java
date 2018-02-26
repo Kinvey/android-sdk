@@ -30,7 +30,7 @@ import android.telephony.TelephonyManager;
  *       http://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id
  *     </a>
  */
-class UdidFactory {
+class UuidFactory {
 
     /** Constant <code>PREFS_FILE="device_id.xml"</code> */
     protected static final String PREFS_FILE = "device_id.xml";
@@ -41,14 +41,14 @@ class UdidFactory {
     protected static UUID uuid;
 
     /**
-     * <p>Constructor for UdidFactory.</p>
+     * <p>Constructor for UuidFactory.</p>
      *
      * @param context a {@link android.content.Context} object.
      */
-    public UdidFactory(Context context) {
+    public UuidFactory(Context context) {
 
         if (uuid == null) {
-            synchronized (UdidFactory.class) {
+            synchronized (UuidFactory.class) {
                 if (uuid == null) {
                     final SharedPreferences prefs = context
                             .getSharedPreferences(PREFS_FILE, 0);
