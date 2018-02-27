@@ -362,30 +362,34 @@ public class UserStoreTest {
         client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
-        if (client.isUserLoggedIn()) {
-            looperThread = new LooperThread(new Runnable() {
-                @Override
-                public void run() {
-                    UserStore.logout(client, new KinveyClientCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            latch.countDown();
-                        }
+        try {
+            if (client.isUserLoggedIn()) {
+                looperThread = new LooperThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        UserStore.logout(client, new KinveyClientCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                latch.countDown();
+                            }
 
-                        @Override
-                        public void onFailure(Throwable error) {
-                            latch.countDown();
-                        }
-                    });
-                }
-            });
-            looperThread.start();
-        } else {
-            latch.countDown();
-        }
-        latch.await();
-        if (looperThread != null) {
-            looperThread.mHandler.sendMessage(new Message());
+                            @Override
+                            public void onFailure(Throwable error) {
+                                assertNull(error);
+                                latch.countDown();
+                            }
+                        });
+                    }
+                });
+                looperThread.start();
+            } else {
+                latch.countDown();
+            }
+            latch.await();
+        } finally {
+            if (looperThread != null) {
+                looperThread.mHandler.sendMessage(new Message());
+            }
         }
     }
 
