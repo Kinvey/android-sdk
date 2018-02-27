@@ -20,6 +20,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.store.LiveServiceRouter;
 
 import java.io.IOException;
 
@@ -40,6 +41,9 @@ public final class LogoutRequest extends AbstractKinveyJsonClientRequest<Void> {
         client.initializeRequest(this);
         super.execute();
         client.performLockDown();
+        if (LiveServiceRouter.getInstance().isInitialized()) {
+            LiveServiceRouter.getInstance().uninitialize();
+        }
         CredentialManager manager = new CredentialManager(client.getStore());
         manager.removeCredential(client.getActiveUser().getId());
         client.setActiveUser(null);

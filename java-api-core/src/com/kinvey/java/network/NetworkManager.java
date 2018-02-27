@@ -25,10 +25,12 @@ import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
+import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
+import com.kinvey.java.dto.DeviceId;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
@@ -302,11 +304,36 @@ public class NetworkManager<T extends GenericJson> {
         return getBlocking(new Query());
     }
 
+    /**
+     * @deprecated use {@link #pullBlocking(Query, ICache, boolean)} ()} instead.
+     */
+    @Deprecated
     public Pull pullBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
         Pull pull;
         if (deltaSetCachingEnabled) {
             pull = new DeltaPull(query, myClass, cachedItems);
+        } else {
+            pull = new Pull(query, myClass);
+        }
+        client.initializeRequest(pull);
+        return pull;
+    }
+
+    /**
+     *  Method to create a Pull request
+     *
+     * @param query Query to get
+     * @param cache Cache
+     * @param deltaSetCachingEnabled Flag to show if Delta Set Caching is enable
+     * @return Pull request
+     * @throws IOException
+     */
+    public Pull pullBlocking(Query query, ICache<T> cache, boolean deltaSetCachingEnabled) throws IOException {
+        Preconditions.checkNotNull(query);
+        Pull pull;
+        if (deltaSetCachingEnabled) {
+            pull = new DeltaPull(query, myClass, cache.get(query));
         } else {
             pull = new Pull(query, myClass);
         }
@@ -509,8 +536,22 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(aggregate);
         return aggregate;
     }
-    
-    
+
+    /**
+     *
+     * @param deviceId Device id
+     * @return
+     * @throws IOException
+     */
+    public Subscribe subscribe(String deviceId) throws IOException {
+        Preconditions.checkNotNull(deviceId);
+        DeviceId deviceID = new DeviceId();
+        deviceID.setDeviceId(deviceId);
+        Subscribe subscribe = new Subscribe(deviceID);
+        client.initializeRequest(subscribe);
+        return subscribe;
+    }
+
     private class MetadataGet extends AbstractKinveyJsonClientRequest<DeltaSetItem[]>{
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
                 "{?query,fields,tls,sort,limit,skip,resolve,resolve_depth,retainReference}";
@@ -1023,6 +1064,27 @@ public class NetworkManager<T extends GenericJson> {
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
             	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
+        }
+    }
+
+    /**
+     * Generic Aggregate<T> class, constructs the HTTP request object for
+     * Aggregate requests.
+     *
+     */
+    public class Subscribe extends AbstractKinveyJsonClientRequest<GenericJson> {
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_subscribe";
+        @Key
+        private String collectionName;
+
+        Subscribe(DeviceId deviceId) {
+            super(client, "POST", REST_PATH, deviceId, GenericJson.class);
+            this.collectionName = NetworkManager.this.collectionName;
+
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
     }

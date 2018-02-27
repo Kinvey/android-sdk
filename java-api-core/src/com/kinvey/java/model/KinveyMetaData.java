@@ -22,6 +22,7 @@ import com.kinvey.java.AbstractClient;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -61,13 +62,13 @@ public class KinveyMetaData extends GenericJson{
         KinveyMetaData metaData = new KinveyMetaData();
         if (kmd != null) {
             if (!kmd.containsKey(LMT) || kmd.get(LMT) == null) {
-                metaData.put(LMT, String.format("%tFT%<tTZ",
+                metaData.put(LMT, String.format(Locale.US, "%tFT%<tTZ",
                         Calendar.getInstance(TimeZone.getTimeZone("Z"))));
             } else {
                 metaData.put(LMT, kmd.get(LMT));
             }
             if (!kmd.containsKey(ECT) || kmd.get(ECT) == null) {
-                metaData.put(ECT, String.format("%tFT%<tTZ",
+                metaData.put(ECT, String.format(Locale.US, "%tFT%<tTZ",
                         Calendar.getInstance(TimeZone.getTimeZone("Z"))));
             } else {
                 metaData.put(ECT, kmd.get(ECT));

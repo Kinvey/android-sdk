@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.Charsets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -69,12 +70,13 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 return null;
 
             } else {
-                String jsonString = convertStreamToString(response.getContent());
+                String jsonString = response.parseAsString();
                 JsonParser jsonParser = new JsonParser();
                 JsonArray jsonArray = (JsonArray) jsonParser.parse(jsonString);
+                JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
                 for (JsonElement element : jsonArray) {
                     try {
-                        results.add(getAbstractKinveyClient().getObjectParser().parseAndClose(new ByteArrayInputStream(element.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass));
+                        results.add(objectParser.parseAndClose(new ByteArrayInputStream(element.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass));
                     } catch (IllegalArgumentException e) {
                         Logger.ERROR("unable to parse response -> " + e.toString());
                         exceptions.add(new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()));
@@ -94,10 +96,5 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
         } catch (NullPointerException ex){
             return null;
         }
-    }
-
-    private String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
     }
 }
