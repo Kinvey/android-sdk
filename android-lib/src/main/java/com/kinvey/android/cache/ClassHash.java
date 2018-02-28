@@ -56,6 +56,8 @@ import io.realm.RealmSchema;
  */
 public abstract class ClassHash {
 
+    private static final String KMD = "_kmd";
+    private static final String ACL = "_acl";
     public static final String TTL = "__ttl__";
     private static final String ID = "_id";
     private static final String ITEMS = "_items";
@@ -63,6 +65,15 @@ public abstract class ClassHash {
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
             add(TTL);
+        }
+    };
+
+    private static final HashSet<String> EMBEDDED_OBJECT_PRIVATE_FIELDS = new HashSet<String>(){
+        {
+            add(TTL);
+            add(ACL);
+            add(KMD);
+            add(ID);
         }
     };
 
@@ -739,7 +750,11 @@ public abstract class ClassHash {
         return size;
     }
 
-    public static <T extends GenericJson> T realmToObject(DynamicRealmObject dynamic, Class<T> objectClass){
+    public static <T extends GenericJson> T realmToObject(DynamicRealmObject dynamic, Class<T> objectClass) {
+        return realmToObject(dynamic, objectClass, false);
+    }
+
+    private static <T extends GenericJson> T realmToObject(DynamicRealmObject dynamic, Class<T> objectClass, boolean isEmbedded) {
         if (dynamic == null){
             return null;
         }
@@ -747,22 +762,33 @@ public abstract class ClassHash {
         try {
             ret = objectClass.newInstance();
             ClassInfo classInfo = ClassInfo.of(objectClass);
-
+            FieldInfo info;
+            Object o;
             for (String field : dynamic.getFieldNames()){
 
-                FieldInfo info = classInfo.getFieldInfo(field);
+                info = classInfo.getFieldInfo(field);
 
-                Object o = dynamic.get(field);
-
+                o = dynamic.get(field);
                 if (info == null){
                     //prevent private fields like "__ttl__" to be published
-                    if (!PRIVATE_FIELDS.contains(field)){
-                        if (o instanceof DynamicRealmObject){
-                            ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class));
-                        } else {
-                            ret.put(field, o);
+                    if (isEmbedded) {
+                        if (!EMBEDDED_OBJECT_PRIVATE_FIELDS.contains(field)){
+                            if (o instanceof DynamicRealmObject){
+                                ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class, true));
+                            } else {
+                                ret.put(field, o);
+                            }
+                        }
+                    } else {
+                        if (!PRIVATE_FIELDS.contains(field)){
+                            if (o instanceof DynamicRealmObject){
+                                ret.put(field, realmToObject((DynamicRealmObject) o, GenericJson.class, true));
+                            } else {
+                                ret.put(field, o);
+                            }
                         }
                     }
+
                     continue;
                 }
 
@@ -784,7 +810,7 @@ public abstract class ClassHash {
 
                 } else if (GenericJson.class.isAssignableFrom(info.getType())) {
                     ret.put(info.getName(), realmToObject(dynamic.getObject(info.getName()),
-                            (Class<? extends GenericJson>)info.getType()));
+                            (Class<? extends GenericJson>)info.getType(), true));
                 } else if (isArrayOrCollection(info.getType())){
                     Class underlying = getUnderlying(info.getField());
                     if (underlying != null){
@@ -792,14 +818,14 @@ public abstract class ClassHash {
                         if (underlying.isArray() && GenericJson.class.isAssignableFrom(underlying)){
                             GenericJson[] array = (GenericJson[])Array.newInstance(underlying, list.size());
                             for (int i = 0 ; i < list.size(); i++){
-                                array[i] = realmToObject(list.get(i), underlying);
+                                array[i] = realmToObject(list.get(i), underlying, true);
                             }
                             ret.put(info.getName(), array);
                         } else {
                             Collection<Object> c = Data.newCollectionInstance(info.getType());
                             if (GenericJson.class.isAssignableFrom(underlying)) {
                                 for (int i = 0; i < list.size(); i++) {
-                                    c.add(realmToObject(list.get(i), underlying));
+                                    c.add(realmToObject(list.get(i), underlying, true));
                                 }
                             } else {
                                 for (int i = 0; i < list.size(); i++) {
@@ -815,8 +841,8 @@ public abstract class ClassHash {
                 }
 
             }
-            if (!ret.containsKey(KinveyMetaData.KMD) && dynamic.hasField(KinveyMetaData.KMD)){
-                ret.put(KinveyMetaData.KMD, realmToObject(dynamic.getObject(KinveyMetaData.KMD), KinveyMetaData.class));
+            if (!isEmbedded && !ret.containsKey(KinveyMetaData.KMD) && dynamic.hasField(KinveyMetaData.KMD)){
+                ret.put(KinveyMetaData.KMD, realmToObject(dynamic.getObject(KinveyMetaData.KMD), KinveyMetaData.class, true));
             }
         } catch (InstantiationException e) {
             e.printStackTrace();
