@@ -35,7 +35,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,8 +46,6 @@ import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmList;
 import io.realm.RealmObjectSchema;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import io.realm.RealmSchema;
 
 /**
@@ -199,7 +196,22 @@ public abstract class ClassHash {
 
 
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
-        return createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
+        RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
+        String shortName = TableNameManager.getShortName(name, realm);
+        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
+            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
+        }
+        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
+            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
+        }
+        if (!schema.hasField(TTL)){
+            schema.addField(TTL, Long.class);
+        }
+        return schema;
     }
 
     /**
@@ -443,28 +455,49 @@ public abstract class ClassHash {
             schema.addField(ID, String.class, FieldAttribute.PRIMARY_KEY);
         }
 
-        if (!schema.hasField(TTL)){
-            schema.addField(TTL, Long.class);
-        }
-
-        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.KMD , realm, KinveyMetaData.class, selfReferenceState, new ArrayList<String>());
-            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
-        }
-
-        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, selfReferenceState, new ArrayList<String>());
-            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
-        }
-
         return schema;
     }
 
 
     public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
-        return saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, new ArrayList<String>());
+
+        DynamicRealmObject realmObject = saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, new ArrayList<String>());
+        String shortName = TableNameManager.getShortName(name, realm);
+
+        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
+            KinveyMetaData metadata = new KinveyMetaData();
+            metadata.set("lmt", String.format(Locale.US, "%tFT%<tTZ",
+                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+            metadata.set("ect", String.format(Locale.US, "%tFT%<tTZ",
+                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
+                    realm,
+                    KinveyMetaData.class,
+                    metadata,
+                    SelfReferenceState.DEFAULT,
+                    new ArrayList<String>());
+            realmObject.setObject(KinveyMetaData.KMD, innerObject);
+        }
+
+        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith("_" + KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
+            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
+            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
+                    realm,
+                    KinveyMetaData.AccessControlList.class,
+                    acl, SelfReferenceState.DEFAULT,
+                    new ArrayList<String>());
+            realmObject.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
+        }
+        //set dynamic fields
+        if (realmObject.get(TTL) != obj.get(TTL)){
+            realmObject.set(TTL, obj.get(TTL));
+        }
+        return realmObject;
     }
 
     private static DynamicRealmObject saveClassData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz,
@@ -500,7 +533,8 @@ public abstract class ClassHash {
             }
         }
 
-        if (obj.containsKey(KinveyMetaData.KMD)){
+        if (obj.containsKey(KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.KMD, realm))){
             Map kmd = (Map)obj.get(KinveyMetaData.KMD);
             if (kmd != null) {
                 KinveyMetaData metadata = KinveyMetaData.fromMap(kmd);
@@ -647,42 +681,6 @@ public abstract class ClassHash {
                 }
             }
         }
-        //set dynamic fields
-        if (object.get(TTL) != obj.get(TTL)){
-            object.set(TTL, obj.get(TTL));
-        }
-
-
-        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.KMD) && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)){
-            KinveyMetaData metadata = new KinveyMetaData();
-            metadata.set("lmt", String.format(Locale.US, "%tFT%<tTZ",
-                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-            metadata.set("ect", String.format(Locale.US, "%tFT%<tTZ",
-                    Calendar.getInstance(TimeZone.getTimeZone("Z"))));
-
-            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.KMD,
-                    realm,
-                    KinveyMetaData.class,
-                    metadata,
-                    selfReferenceState,
-                    new ArrayList<String>());
-            object.setObject(KinveyMetaData.KMD, innerObject);
-        }
-
-        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.AccessControlList.ACL)
-                && !name.endsWith("_" + KinveyMetaData.KMD)
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + "_" + KinveyMetaData.AccessControlList.ACL, realm))){
-            KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-            DynamicRealmObject innerObject = saveClassData(shortName + "_" + KinveyMetaData.AccessControlList.ACL,
-                    realm,
-                    KinveyMetaData.AccessControlList.class,
-                    acl, selfReferenceState,
-                    new ArrayList<String>());
-            object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
-        }
-
         return object;
     }
 
