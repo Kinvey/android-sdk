@@ -211,6 +211,51 @@ public class RealmCacheManager implements ICacheManager {
         }
     }
 
+    @Override
+    public <T extends GenericJson> void clearCollection(String collection, Class<T> collectionItemClass, Long ttl) {
+        synchronized (LOCK) {
+            DynamicRealm realm = getDynamicRealm();
+            try {
+                realm.beginTransaction();
+                List<String> schemas = new ArrayList<>();
+                schemas.add(TableNameManager.getShortName(collection, realm));
+                schemas.addAll(getEmbeddedObjectSchemas(collection, realm));
+                removeSchemas(schemas, realm);
+                String cacheKey = getClientHash() + File.separator + collection;
+                RealmCache<T> cache = (RealmCache<T>) mCacheMap.get(cacheKey);
+                if (cache != null) {
+                    cache.createRealmTable(realm);
+                }
+            } finally {
+                realm.commitTransaction();
+            }
+        }
+    }
+
+    private List<String> getEmbeddedObjectSchemas(String tableName, DynamicRealm realm) {
+        RealmSchema currentSchema = realm.getSchema();
+        String originalName;
+        String className;
+        List<String> embeddedObjectSchemas = new ArrayList<>();
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            if (className.equals(TableNameManager.getShortName(tableName, realm))) {
+                for (RealmObjectSchema subClassSchema : schemas) {
+                    originalName = TableNameManager.getOriginalName(subClassSchema.getClassName(), realm);
+                    if (originalName == null) {
+                        continue;
+                    }
+                    if (originalName.startsWith(className + "_")) {
+                        embeddedObjectSchemas.add(subClassSchema.getClassName());
+                        embeddedObjectSchemas.addAll(getEmbeddedObjectSchemas(originalName, realm));
+                    }
+                }
+            }
+        }
+        return embeddedObjectSchemas;
+    }
+
     private void init(DynamicRealm mRealm){
         RealmSchema schema = mRealm.getSchema();
         RealmObjectSchema tableHashScheme = schema.get(TABLE_HASH_NAME);
