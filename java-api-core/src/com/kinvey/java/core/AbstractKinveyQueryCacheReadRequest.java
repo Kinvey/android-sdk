@@ -12,18 +12,20 @@ import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Headers;
+
 /**
- * Created by yuliya on 10/26/17.
+ * Created by yuliya on 03/05/17.
  */
 
-public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyAbstractReadResponse> {
+public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse> {
 
     private Class<T> responseClass;
 
@@ -36,20 +38,17 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      * @param responseClass            response class to parse into
      */
-    protected AbstractKinveyReadRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
+    protected AbstractKinveyQueryCacheReadRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
         super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null);
         this.responseClass = responseClass;
     }
 
     @Override
-    public KinveyAbstractReadResponse<T> execute() throws IOException {
+    public KinveyQueryCacheResponse execute() throws IOException {
 
         HttpResponse response = executeUnparsed() ;
 
-        List<T> results = new ArrayList<>();
-        List<Exception> exceptions = new ArrayList<>();
-
-        KinveyAbstractReadResponse ret = new KinveyAbstractReadResponse();
+        KinveyQueryCacheResponse ret;
 
         if (overrideRedirect){
             return onRedirect(response.getHeaders().getLocation());
@@ -74,22 +73,12 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 JsonParser jsonParser = new JsonParser();
                 JsonArray jsonArray = (JsonArray) jsonParser.parse(jsonString);
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
-                for (JsonElement element : jsonArray) {
-                    try {
-                        results.add(objectParser.parseAndClose(new ByteArrayInputStream(element.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass));
-                    } catch (IllegalArgumentException e) {
-                        Logger.ERROR("unable to parse response -> " + e.toString());
-                        exceptions.add(new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        exceptions.add(e);
-                    }
-                }
+
+
+                ret = objectParser.parseAndClose(new ByteArrayInputStream(jsonArray.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, KinveyQueryCacheResponse.class);
                 if (response.getHeaders().containsKey("X-Kinvey-Request-Start")){
-                    ret.setLastREquest((String) response.getHeaders().get("X-Kinvey-Request-Start"));
+                    ret.setRequestTime((String) response.getHeaders().get("X-Kinvey-Request-Start"));
                 }
-                ret.setResult(results);
-                ret.setListOfExceptions(exceptions);
                 return ret;
             }
 

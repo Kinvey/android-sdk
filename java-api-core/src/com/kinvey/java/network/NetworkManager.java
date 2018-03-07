@@ -27,6 +27,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
@@ -36,6 +37,7 @@ import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
@@ -361,6 +363,15 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(get);
         return get;
     }
+
+
+    public QueryCacheGet queryCachePullBlocking(Query query, String lastRequestTime) throws IOException {
+        Preconditions.checkNotNull(query);
+        QueryCacheGet pull = new QueryCacheGet(query, myClass, lastRequestTime);
+        client.initializeRequest(pull);
+        return pull;
+    }
+
 
     public GetCount getCountBlocking() throws IOException {
 //        Preconditions.checkNotNull();
@@ -871,6 +882,52 @@ public class NetworkManager<T extends GenericJson> {
 
         @Override
         public T[] execute() throws IOException {
+            return super.execute();
+        }
+    }
+
+    public class QueryCacheGet extends AbstractKinveyQueryCacheReadRequest<KinveyQueryCacheResponse<T>> {
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
+                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}/_deltaset{?since}";
+
+        @Key
+        protected String collectionName;
+        @Key("query")
+        protected String queryFilter;
+        @Key("sort")
+        protected String sortFilter;
+        @Key("limit")
+        protected String limit;
+        @Key("skip")
+        protected String skip;
+
+        @Key("resolve")
+        protected String resolve;
+        @Key("resolve_depth")
+        protected String resolve_depth;
+        @Key("since")
+        protected String since;
+
+        QueryCacheGet(Query query, Class myClass, String lastRequestTime) {
+            super(client, "GET", REST_PATH, null, myClass);
+            this.since = lastRequestTime;
+            this.collectionName = NetworkManager.this.collectionName;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            String sortString = query.getSortString();
+            this.sortFilter = !(sortString.equals("")) ? sortString : null;
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
+        }
+
+        @Override
+        public KinveyQueryCacheResponse<T> execute() throws IOException {
             return super.execute();
         }
     }

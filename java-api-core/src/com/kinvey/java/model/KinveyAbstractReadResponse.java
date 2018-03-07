@@ -8,6 +8,8 @@ import java.util.List;
 
 public class KinveyAbstractReadResponse<T> extends KinveyAbstractResponse {
 
+    private String lastREquest;
+
     private List<T> result;
 
     public List<T> getResult() {
@@ -18,4 +20,11 @@ public class KinveyAbstractReadResponse<T> extends KinveyAbstractResponse {
         this.result = result;
     }
 
+    public String getLastREquest() {
+        return lastREquest;
+    }
+
+    public void setLastREquest(String lastREquest) {
+        this.lastREquest = lastREquest;
+    }
 }

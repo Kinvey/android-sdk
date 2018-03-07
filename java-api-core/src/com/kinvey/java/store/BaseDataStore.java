@@ -27,6 +27,7 @@ import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
@@ -56,11 +57,14 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
 
+    public static final String QUERY_CACHE_COLLECTION = "_QueryCache";
+
     protected final AbstractClient client;
     private final String collection;
     protected StoreType storeType;
     private Class<T> storeItemType;
     private ICache<T> cache;
+    private ICache<QueryCacheItem> queryCache;
     protected NetworkManager<T> networkManager;
 
     /**
@@ -117,6 +121,7 @@ public class BaseDataStore<T extends GenericJson> {
         this.storeItemType = itemType;
         if (storeType != StoreType.NETWORK) {
             cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
+            queryCache = client.getCacheManager().getCache(QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
         }
         this.networkManager = networkManager;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
@@ -185,7 +190,7 @@ public class BaseDataStore<T extends GenericJson> {
      */
     public List<T> find(Iterable<String> ids) throws IOException {
         return find(ids, null);
-    };
+    }
 
 
     /**
@@ -424,6 +429,63 @@ public class BaseDataStore<T extends GenericJson> {
 
         return response;
     }
+
+
+    public KinveyAbstractReadResponse<T> queryCachePullBlocking(Query query) throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
+        query = query == null ? client.query() : query;
+        if (deltaSetCachingEnabled) {
+            if (isAutoPaginationEnabled()) {
+                // TODO: 6.3.18 Will be added later
+            } else {
+
+                List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.toString()));
+                if (queryCacheItems.size() == 1) {
+                    KinveyQueryCacheResponse queryCacheResponse = networkManager.queryCachePullBlocking(query, queryCacheItems.get(0).getLastRequest()).execute();
+                    cache.delete(queryCacheResponse.getDeleted());
+                    cache.save(queryCacheResponse.getChanged());
+                    response.setResult(cache.get());
+                } else {
+                    response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+                    cache.delete(query);
+                    cache.save(response.getResult());
+                    QueryCacheItem cacheItem = new QueryCacheItem(getCollectionName(), query.toString(), response.getLastREquest());
+                    queryCache.save(cacheItem);
+                }
+            }
+        } else {
+            return pullBlocking(query);
+        }
+        return response;
+    }
+
+
+    public List<T> queryCacheFindBlocking (Query query) throws IOException {
+        return deltaSyncFindBlocking(query, null);
+    }
+
+    public List<T> deltaSyncFindBlocking (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(query, "query must not be null.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        // perform request based on policy
+        List<T> ret = null;
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            ret = new ReadQueryRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
+            cachedCallback.onSuccess(ret);
+        }
+
+        // TODO: 6.3.18 must be the save as queryCachePullBlocking
+        ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
+        return ret;
+    }
+
+
 
     /**
      * Run sync operation to sync local and network storages

@@ -17,18 +17,13 @@
 package com.kinvey.java.store.requests.data.delete;
 
 import com.google.api.client.json.GenericJson;
-import com.google.common.collect.Iterables;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
-import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by Prots on 2/15/16.
