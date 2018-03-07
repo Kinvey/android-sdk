@@ -1223,7 +1223,7 @@ public class DataStoreTest {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
 
-        final int LIMIT = 5;
+        final int LIMIT = 25;
         for (int i = 0; i < LIMIT; i++) {
             Person person = createPerson(TEST_USERNAME);
             save(store, person);

@@ -89,7 +89,7 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
         List<SyncRequest> requests = manager.popSingleQueue(collection);
         List<SyncItem> syncItems = manager.popSingleItemQueue(collection);
 
-        int batchSize = 2; // batch size for concurrent push requests
+        int batchSize = 10; // batch size for concurrent push requests
 
         int progress = 0;
         int fullCount = requests != null ? requests.size() : 0;
