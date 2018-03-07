@@ -16,6 +16,8 @@
 
 package com.kinvey.android.async;
 
+import android.util.Log;
+
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
@@ -34,6 +36,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ExecutionException;
+
+import static com.kinvey.android.Client.TAG;
 
 /**
  * Class represents internal implementation of Async push request that is used to create push
@@ -81,58 +89,82 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
         List<SyncRequest> requests = manager.popSingleQueue(collection);
         List<SyncItem> syncItems = manager.popSingleItemQueue(collection);
 
+        int batchSize = 2; // batch size for concurrent push requests
+
         int progress = 0;
         int fullCount = requests != null ? requests.size() : 0;
         fullCount += syncItems != null ? syncItems.size() : 0;
         if (requests != null) {
             for (SyncRequest syncRequest : requests) {
-                try {
-                    manager.executeRequest(client, syncRequest);
-                    pushResponse.setSuccessCount(++progress);
-                } catch (AccessControlException | KinveyException e) { //TODO check Exception
-                    errors.add(e);
-                } catch (Exception e) {
-                    callback.onFailure(e);
-                }
+                  try {
+                      manager.executeRequest(client, syncRequest);
+                      pushResponse.setSuccessCount(++progress);
+                  } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                      errors.add(e);
+                  } catch (Exception e) {
+                      callback.onFailure(e);
+                  }
 
-                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
+                  callback.onProgress(pushResponse.getSuccessCount(), fullCount);
             }
         }
 
-        String id;
-        T t;
-        SyncRequest syncRequest = null;
         if (syncItems != null) {
-            for (SyncItem syncItem : syncItems) {
+            String id;
+            T t;
+            SyncRequest syncRequest = null;
+            int totalNumberOfPendingEntities = 0;
+            totalNumberOfPendingEntities = syncItems.size();
 
-                id = syncItem.getEntityID().id;
+            for (int i = 0; i < totalNumberOfPendingEntities; i+=batchSize) {
+                ExecutorService executor = Executors.newFixedThreadPool(batchSize);
+                List<FutureTask> tasks = new ArrayList<>();
+                long resultFuture = 0;
 
-                switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
-                    case SAVE:
-                        t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
-                        if (t == null) {
-                            // check that item wasn't deleted before
+                for (int j = 0; j < batchSize && j+i < totalNumberOfPendingEntities; j++) {
+                    SyncItem syncItem = syncItems.get(j+i);
+                    id = syncItem.getEntityID().id;
+
+                    switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
+                        case SAVE:
+                            t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
+                            if (t == null) {
+                                // check that item wasn't deleted before
 //                            manager.deleteCachedItem((String) syncItem.get("_id"));
-                            manager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
-                            continue;
-                        }
-                        syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
-                        break;
-                    case DELETE:
-                        syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id));
-                        break;
+                                manager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
+                                continue;
+                            }
+                            syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
+                            break;
+                        case DELETE:
+                            syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id));
+                            break;
+                    }
+
+                    try {
+                        FutureTask ft = new FutureTask(new CallableAsyncPushRequestHelper(client, manager, syncRequest, syncItem));
+                        tasks.add(ft);
+                        executor.execute(ft);
+                        pushResponse.setSuccessCount(++progress);
+                    } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                        errors.add(e);
+                    } catch (Exception e) {
+                        callback.onFailure(e);
+                    }
+                    callback.onProgress(pushResponse.getSuccessCount(), fullCount);
                 }
 
-                try {
-                    manager.executeRequest(client, syncRequest);
-                    pushResponse.setSuccessCount(++progress);
-                    manager.deleteCachedItem((String) syncItem.get("_id"));
-                } catch (AccessControlException | KinveyException e) { //TODO check Exception
-                    errors.add(e);
-                } catch (Exception e) {
-                    callback.onFailure(e);
+                for (FutureTask<CallableAsyncPushRequestHelper> task : tasks) {
+                    try {
+                        task.get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
                 }
-                callback.onProgress(pushResponse.getSuccessCount(), fullCount);
+
+                executor.shutdown();
             }
         }
 
@@ -140,3 +172,4 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
         return pushResponse;
     }
 }
+

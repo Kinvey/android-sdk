@@ -1219,6 +1219,26 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testPushBatching() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        final int LIMIT = 5;
+        for (int i = 0; i < LIMIT; i++) {
+            Person person = createPerson(TEST_USERNAME);
+            save(store, person);
+            Log.d("DataStoreTest", "id: " + person.getId());
+            assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == i+1);
+        }
+
+        DefaultKinveyPushCallback pushCallback = push(store, 120);
+        assertNull(pushCallback.error);
+        assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
+        assertNotNull(pushCallback.result);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    @Test
     public void testPushBlocking() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
