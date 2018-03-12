@@ -142,14 +142,14 @@ public class RealmCacheManager implements ICacheManager {
 
                     mRealm.beginTransaction();
                     // Check that ACL and KMD fields don't exist in embedded objects (like sync_meta_kmd)
-                    boolean isNeedDeleteEbbeddedSupportTables = mRealm.getSchema().contains(TableNameManager.getShortName(TableNameManager.getShortName(TableNameManager.getShortName(SYNC_COLLECTION, mRealm) + KinveyMetaData.META, mRealm) + Constants.UNDERSCORE + KinveyMetaData.KMD, mRealm));
+                    boolean isRemoveMetadata = mRealm.getSchema().contains(TableNameManager.getShortName(TableNameManager.getShortName(TableNameManager.getShortName(SYNC_COLLECTION, mRealm) + KinveyMetaData.META, mRealm) + Constants.UNDERSCORE + KinveyMetaData.KMD, mRealm));
                     mRealm.commitTransaction();
-                    if (isNeedDeleteEbbeddedSupportTables) {
+                    if (isRemoveMetadata) {
                         mRealm.beginTransaction();
                         RealmResults<DynamicRealmObject> collections = mRealm.where(TABLE_HASH_NAME).findAll();
                         List<String> tablesToRemove = new ArrayList<>();//ACL and KMD embedded table names
                         for (DynamicRealmObject realmObject : collections) {
-                            tablesToRemove.addAll(prepareACLAndKMDSchemasFromEmbeddedObjectToRemoving(String.valueOf(realmObject.get(Constants.COLLECTION)), mRealm, false));
+                            tablesToRemove.addAll(prepareToRemoveMetadataSchemasFromEmbeddedObjects(String.valueOf(realmObject.get(Constants.COLLECTION)), mRealm, false));
                         }
                         removeSchemas(tablesToRemove, mRealm);
                         mRealm.commitTransaction();
@@ -212,7 +212,7 @@ public class RealmCacheManager implements ICacheManager {
      * @param isEmbedded true if it's embedded object
      * @return list of schemas to removing
      */
-    private List<String> prepareACLAndKMDSchemasFromEmbeddedObjectToRemoving(String tableName, DynamicRealm realm, boolean isEmbedded) {
+    private List<String> prepareToRemoveMetadataSchemasFromEmbeddedObjects(String tableName, DynamicRealm realm, boolean isEmbedded) {
         RealmSchema currentSchema = realm.getSchema();
         String originalName;
         String className;
@@ -233,7 +233,7 @@ public class RealmCacheManager implements ICacheManager {
                         schema.removeField(KinveyMetaData.AccessControlList.ACL);
                         schemasToDelete.add(subClassSchema.getClassName());
                     } else if (originalName.startsWith(className + Constants.UNDERSCORE)) {
-                        schemasToDelete.addAll(prepareACLAndKMDSchemasFromEmbeddedObjectToRemoving(originalName, realm, true));
+                        schemasToDelete.addAll(prepareToRemoveMetadataSchemasFromEmbeddedObjects(originalName, realm, true));
                     }
                 }
             }
