@@ -195,7 +195,6 @@ public class RealmCacheManager implements ICacheManager {
      */
     private void removeSchemas(List<String> tableNames, DynamicRealm realm) {
         RealmSchema realmSchema = realm.getSchema();
-        System.out.println(tableNames);
         for (String tableName : tableNames) {
             if (realmSchema.get(tableName).hasPrimaryKey()) {
                 realmSchema.get(tableName).removePrimaryKey();
