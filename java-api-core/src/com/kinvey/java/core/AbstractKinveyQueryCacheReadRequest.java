@@ -8,6 +8,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.Charsets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
@@ -18,8 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import okhttp3.Headers;
 
 /**
  * Created by yuliya on 03/05/17.
@@ -44,23 +43,18 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
     }
 
     @Override
-    public KinveyQueryCacheResponse execute() throws IOException {
-
+    public KinveyQueryCacheResponse<T> execute() throws IOException {
         HttpResponse response = executeUnparsed() ;
-
-        KinveyQueryCacheResponse ret;
-
         if (overrideRedirect){
             return onRedirect(response.getHeaders().getLocation());
         }
-
         // special class to handle void or empty responses
-        if (Void.class.equals(responseClass) || response.getContent() == null) {
+        if (response.getContent() == null) {
             response.ignore();
             return null;
         }
-
-        try{
+        try {
+            KinveyQueryCacheResponse<T> ret = new KinveyQueryCacheResponse<>();
             int statusCode = response.getStatusCode();
             if (response.getRequest().getRequestMethod().equals(HttpMethods.HEAD) || statusCode / 100 == 1
                     || statusCode == HttpStatusCodes.STATUS_CODE_NO_CONTENT
@@ -69,15 +63,45 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 return null;
 
             } else {
+
                 String jsonString = response.parseAsString();
                 JsonParser jsonParser = new JsonParser();
-                JsonArray jsonArray = (JsonArray) jsonParser.parse(jsonString);
+                JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonString);
+                JsonArray jsonArrayChanged = jsonObject.getAsJsonArray("changed");
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
+                List<T> changed = new ArrayList<>();
+                List<Exception> exceptions = new ArrayList<>();
 
+                for (JsonElement element : jsonArrayChanged) {
+                    try {
+                        changed.add(objectParser.parseAndClose(new ByteArrayInputStream(element.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass));
+                    } catch (IllegalArgumentException e) {
+                        Logger.ERROR("unable to parse response -> " + e.toString());
+                        exceptions.add(new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        exceptions.add(e);
+                    }
+                }
+                ret.setChanged(changed);
 
-                ret = objectParser.parseAndClose(new ByteArrayInputStream(jsonArray.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, KinveyQueryCacheResponse.class);
-                if (response.getHeaders().containsKey("X-Kinvey-Request-Start")){
-                    ret.setRequestTime((String) response.getHeaders().get("X-Kinvey-Request-Start"));
+                JsonArray jsonArrayDeleted = jsonObject.getAsJsonArray("deleted");
+                List<T> deleted = new ArrayList<>();
+                for (JsonElement element : jsonArrayDeleted) {
+                    try {
+                        deleted.add(objectParser.parseAndClose(new ByteArrayInputStream(element.toString().getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass));
+                    } catch (IllegalArgumentException e) {
+                        Logger.ERROR("unable to parse response -> " + e.toString());
+                        exceptions.add(new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        exceptions.add(e);
+                    }
+                }
+                ret.setDeleted(deleted);
+                ret.setListOfExceptions(exceptions);
+                if (response.getHeaders().containsKey("x-kinvey-request-start")){
+                    ret.setRequestTime(response.getHeaders().getHeaderStringValues("x-kinvey-request-start").get(0));
                 }
                 return ret;
             }

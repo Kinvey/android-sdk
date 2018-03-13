@@ -38,4 +38,16 @@ public class QueryCacheItem extends GenericJson {
     public String getLastRequest() {
         return lastRequest;
     }
+
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public void setLastRequest(String lastRequest) {
+        this.lastRequest = lastRequest;
+    }
 }

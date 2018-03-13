@@ -13,6 +13,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -85,8 +86,8 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                         exceptions.add(e);
                     }
                 }
-                if (response.getHeaders().containsKey("X-Kinvey-Request-Start")){
-                    ret.setLastREquest((String) response.getHeaders().get("X-Kinvey-Request-Start"));
+                if (response.getHeaders().containsKey("x-kinvey-request-start")){
+                    ret.setLastRequest(response.getHeaders().getHeaderStringValues("x-kinvey-request-start").get(0));
                 }
                 ret.setResult(results);
                 ret.setListOfExceptions(exceptions);

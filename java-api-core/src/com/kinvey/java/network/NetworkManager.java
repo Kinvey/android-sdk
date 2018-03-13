@@ -886,10 +886,10 @@ public class NetworkManager<T extends GenericJson> {
         }
     }
 
-    public class QueryCacheGet extends AbstractKinveyQueryCacheReadRequest<KinveyQueryCacheResponse<T>> {
+    public class QueryCacheGet extends AbstractKinveyQueryCacheReadRequest<T> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
-                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}/_deltaset{?since}";
+                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}/_deltaset?since={since}";
 
         @Key
         protected String collectionName;
@@ -909,7 +909,7 @@ public class NetworkManager<T extends GenericJson> {
         @Key("since")
         protected String since;
 
-        QueryCacheGet(Query query, Class myClass, String lastRequestTime) {
+        QueryCacheGet(Query query, Class<T> myClass, String lastRequestTime) {
             super(client, "GET", REST_PATH, null, myClass);
             this.since = lastRequestTime;
             this.collectionName = NetworkManager.this.collectionName;

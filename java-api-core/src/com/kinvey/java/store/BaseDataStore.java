@@ -442,20 +442,33 @@ public class BaseDataStore<T extends GenericJson> {
             if (isAutoPaginationEnabled()) {
                 // TODO: 6.3.18 Will be added later
             } else {
-
-                List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.toString()));
+                List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
                 if (queryCacheItems.size() == 1) {
-                    KinveyQueryCacheResponse queryCacheResponse = networkManager.queryCachePullBlocking(query, queryCacheItems.get(0).getLastRequest()).execute();
-                    cache.delete(queryCacheResponse.getDeleted());
-                    cache.save(queryCacheResponse.getChanged());
+                    QueryCacheItem cacheItem = queryCacheItems.get(0);
+                    KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCachePullBlocking(query, cacheItem.getLastRequest()).execute();
+                    if (queryCacheResponse.getDeleted() != null) {
+                        List<String> ids = new ArrayList<>();
+                        for (GenericJson json : queryCacheResponse.getDeleted()) {
+                            ids.add((String)json.get("_id"));
+                        }
+                        cache.delete(ids);
+                    }
+                    if (queryCacheResponse.getChanged() != null) {
+                        cache.save(queryCacheResponse.getChanged());
+                    }
                     response.setResult(cache.get());
+                    cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+                    queryCache.save(cacheItem);
                 } else {
                     response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
                     cache.delete(query);
                     cache.save(response.getResult());
-                    QueryCacheItem cacheItem = new QueryCacheItem(getCollectionName(), query.toString(), response.getLastREquest());
-                    queryCache.save(cacheItem);
+                    queryCache.save(new QueryCacheItem(
+                            getCollectionName(),
+                            query.getQueryFilterMap().toString(),
+                            response.getLastRequest()));
                 }
+
             }
         } else {
             return pullBlocking(query);
