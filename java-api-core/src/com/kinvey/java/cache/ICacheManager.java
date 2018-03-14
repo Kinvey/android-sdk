@@ -34,7 +34,12 @@ public interface ICacheManager {
     <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl);
 
     /**
-     * clear all cached data
+     * Delete all collections
      */
     void clear();
+
+    /**
+     * Clear all cached data from the collection
+     */
+    <T extends GenericJson> void clearCollection(String collection, Class<T> collectionItemClass, Long ttl);
 }
