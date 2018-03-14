@@ -119,7 +119,6 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
             for (int i = 0; i < totalNumberOfPendingEntities; i+=batchSize) {
                 ExecutorService executor = Executors.newFixedThreadPool(batchSize);
                 List<FutureTask> tasks = new ArrayList<>();
-                long resultFuture = 0;
 
                 for (int j = 0; j < batchSize && j+i < totalNumberOfPendingEntities; j++) {
                     SyncItem syncItem = syncItems.get(j+i);
