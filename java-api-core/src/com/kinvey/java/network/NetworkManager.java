@@ -365,7 +365,14 @@ public class NetworkManager<T extends GenericJson> {
     }
 
 
-    public QueryCacheGet queryCachePullBlocking(Query query, String lastRequestTime) throws IOException {
+    /**
+     * Pull blocking with Delta Sync implementation
+     * @param query Query to get
+     * @param lastRequestTime Last request time
+     * @return
+     * @throws IOException
+     */
+    public QueryCacheGet pullBlocking(Query query, String lastRequestTime) throws IOException {
         Preconditions.checkNotNull(query);
         QueryCacheGet pull = new QueryCacheGet(query, myClass, lastRequestTime);
         client.initializeRequest(pull);

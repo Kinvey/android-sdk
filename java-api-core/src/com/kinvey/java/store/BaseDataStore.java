@@ -394,10 +394,16 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-
-        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         query = query == null ? client.query() : query;
+        if (deltaSetCachingEnabled && !autoPagination && query.getSkip() == 0 && query.getLimit() == 0) {
+            return pullBlockingDeltaSync(query);
+        } else {
+            return pullBlockingNoDeltaSync(query);
+        }
+    }
 
+    private KinveyAbstractReadResponse<T> pullBlockingNoDeltaSync(Query query) throws IOException {
+        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
                 query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
@@ -430,58 +436,50 @@ public class BaseDataStore<T extends GenericJson> {
         return response;
     }
 
-
-    public KinveyAbstractReadResponse<T> queryCachePullBlocking(Query query) throws IOException {
-        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
-        Preconditions.checkNotNull(client, "client must not be null.");
-        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+    /**
+     * Pull with Delta Sync is using if
+     * @param query
+     * @return
+     * @throws IOException
+     */
+    private KinveyAbstractReadResponse<T> pullBlockingDeltaSync(Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
-        query = query == null ? client.query() : query;
-        if (deltaSetCachingEnabled) {
-            if (isAutoPaginationEnabled()) {
-                // TODO: 6.3.18 Will be added later
-            } else {
-                List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
-                if (queryCacheItems.size() == 1) {
-                    QueryCacheItem cacheItem = queryCacheItems.get(0);
-                    KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCachePullBlocking(query, cacheItem.getLastRequest()).execute();
-                    if (queryCacheResponse.getDeleted() != null) {
-                        List<String> ids = new ArrayList<>();
-                        for (GenericJson json : queryCacheResponse.getDeleted()) {
-                            ids.add((String)json.get("_id"));
-                        }
-                        cache.delete(ids);
-                    }
-                    if (queryCacheResponse.getChanged() != null) {
-                        cache.save(queryCacheResponse.getChanged());
-                    }
-                    response.setResult(cache.get());
-                    cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
-                    queryCache.save(cacheItem);
-                } else {
-                    response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-                    cache.delete(query);
-                    cache.save(response.getResult());
-                    queryCache.save(new QueryCacheItem(
-                            getCollectionName(),
-                            query.getQueryFilterMap().toString(),
-                            response.getLastRequest()));
+        List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
+        if (queryCacheItems.size() == 1) {
+            QueryCacheItem cacheItem = queryCacheItems.get(0);
+            KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.pullBlocking(query, cacheItem.getLastRequest()).execute();
+            if (queryCacheResponse.getDeleted() != null) {
+                List<String> ids = new ArrayList<>();
+                for (GenericJson json : queryCacheResponse.getDeleted()) {
+                    ids.add((String)json.get("_id"));
                 }
-
+                cache.delete(ids);
             }
+            if (queryCacheResponse.getChanged() != null) {
+                cache.save(queryCacheResponse.getChanged());
+            }
+            response.setResult(cache.get());
+            cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+            queryCache.save(cacheItem);
         } else {
-            return pullBlocking(query);
+            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            cache.delete(query);
+            cache.save(response.getResult());
+            queryCache.save(new QueryCacheItem(
+                    getCollectionName(),
+                    query.getQueryFilterMap().toString(),
+                    response.getLastRequest()));
         }
+
         return response;
     }
 
 
-    public List<T> queryCacheFindBlocking (Query query) throws IOException {
-        return deltaSyncFindBlocking(query, null);
+    private List<T> findBlockingDeltaSync (Query query) throws IOException {
+        return findBlockingDeltaSync(query, null);
     }
 
-    public List<T> deltaSyncFindBlocking (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+    private List<T> findBlockingDeltaSync (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
