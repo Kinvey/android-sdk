@@ -359,33 +359,9 @@ public class UserStoreTest {
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        client.enableDebugLogging();
-        final CountDownLatch latch = new CountDownLatch(1);
-        LooperThread looperThread = null;
+//        client.enableDebugLogging();
         if (client.isUserLoggedIn()) {
-            looperThread = new LooperThread(new Runnable() {
-                @Override
-                public void run() {
-                    UserStore.logout(client, new KinveyClientCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            latch.countDown();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            latch.countDown();
-                        }
-                    });
-                }
-            });
-            looperThread.start();
-        } else {
-            latch.countDown();
-        }
-        latch.await();
-        if (looperThread != null) {
-            looperThread.mHandler.sendMessage(new Message());
+            logout(client);
         }
     }
 
@@ -416,6 +392,7 @@ public class UserStoreTest {
         assertNotNull(callback.result);
         DefaultKinveyUserDeleteCallback deleteCallback = destroyUser();
         assertNull(deleteCallback.error);
+        assertFalse(client.isUserLoggedIn());
     }
 
     @Test
@@ -428,6 +405,7 @@ public class UserStoreTest {
         assertNotNull(callback.result);
         DefaultKinveyUserDeleteCallback deleteCallback = destroyUser();
         assertNull(deleteCallback.error);
+        assertFalse(client.isUserLoggedIn());
     }
 
     private DefaultKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
@@ -990,7 +968,6 @@ public class UserStoreTest {
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(false, client).error);
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyUserDeleteCallback deleteUser(final boolean isHard, final Client client) throws InterruptedException {
@@ -1014,7 +991,6 @@ public class UserStoreTest {
         assertNotNull(user);
         assertNotNull(user.getId());
         assertNull(deleteUser(true, client).error);
-        assertNull(logout(client).error);
     }
 
     @Test
@@ -1142,7 +1118,6 @@ public class UserStoreTest {
         assertNotNull(userKinveyClientCallback.result);
         assertNotEquals(oldUserName, userKinveyClientCallback.result.getUsername());
         assertNotNull(deleteUser(true, client));
-        assertNull(logout(client).error);
     }
 
     @Test
@@ -1161,7 +1136,6 @@ public class UserStoreTest {
         assertNotNull(userKinveyClientCallback.result);
         assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getCompanyName());
         assertNotNull(deleteUser(true, client));
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyClientCallback update(final Client client) throws InterruptedException {
@@ -1214,7 +1188,6 @@ public class UserStoreTest {
         assertNotNull(deleteUser(true, client));
         assertNull(retrieveCallback.error);
         assertNotNull(retrieveCallback.result);
-        assertNull(logout(client).error);
     }
 
     private DefaultKinveyClientCallback retrieve(final Client client) throws InterruptedException {
