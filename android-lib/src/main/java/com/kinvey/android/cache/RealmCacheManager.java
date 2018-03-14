@@ -22,6 +22,7 @@ import android.net.Uri;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
@@ -39,6 +40,7 @@ import io.realm.FieldAttribute;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
+import io.realm.RealmResults;
 import io.realm.RealmSchema;
 import io.realm.exceptions.RealmFileException;
 
@@ -100,7 +102,7 @@ public class RealmCacheManager implements ICacheManager {
                     boolean isMigrationNeeded = TableNameManager.getShortName(collection, mRealm) == null && mRealm.getSchema().contains(collection);
                     mRealm.commitTransaction();
 
-                    if (!cache.getHash().equals(getTableHash(collection, mRealm)))  {
+                    if (!cache.getHash().equals(getTableHash(collection, mRealm))) {
                         mRealm.beginTransaction();
                         try {
                             removeSchemas(prepareSchemasToRemove(collection, mRealm), mRealm);
@@ -132,9 +134,24 @@ public class RealmCacheManager implements ICacheManager {
                         // check and remove unnecessary tables like ..._acl_kmd
                         mRealm.beginTransaction();
                         RealmSchema schema = mRealm.getSchema();
-                        if (schema.contains(collection + "_" + KinveyMetaData.AccessControlList.ACL + "_" + KinveyMetaData.KMD)) {
+                        if (schema.contains(collection + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
                             cache.checkAclKmdFields(mRealm);
                         }
+                        mRealm.commitTransaction();
+                    }
+
+                    mRealm.beginTransaction();
+                    // Check that ACL and KMD fields don't exist in embedded objects (like sync_meta_kmd)
+                    boolean isRemoveMetadata = mRealm.getSchema().contains(TableNameManager.getShortName(TableNameManager.getShortName(TableNameManager.getShortName(SYNC_COLLECTION, mRealm) + KinveyMetaData.META, mRealm) + Constants.UNDERSCORE + KinveyMetaData.KMD, mRealm));
+                    mRealm.commitTransaction();
+                    if (isRemoveMetadata) {
+                        mRealm.beginTransaction();
+                        RealmResults<DynamicRealmObject> collections = mRealm.where(TABLE_HASH_NAME).findAll();
+                        List<String> tablesToRemove = new ArrayList<>();//ACL and KMD embedded table names
+                        for (DynamicRealmObject realmObject : collections) {
+                            tablesToRemove.addAll(prepareToRemoveMetadataSchemasFromEmbeddedObjects(String.valueOf(realmObject.get(Constants.COLLECTION)), mRealm, false));
+                        }
+                        removeSchemas(tablesToRemove, mRealm);
                         mRealm.commitTransaction();
                     }
 
@@ -179,8 +196,44 @@ public class RealmCacheManager implements ICacheManager {
                 //search sub-classes
                 for (RealmObjectSchema subClassSchema : schemas) {
                     originalName = TableNameManager.getOriginalName(subClassSchema.getClassName(), realm);
-                    if (originalName != null && originalName.startsWith(className + "_")) {
+                    if (originalName != null && originalName.startsWith(className + Constants.UNDERSCORE)) {
                         schemasToDelete.addAll(prepareSchemasToRemove(originalName, realm));
+                    }
+                }
+            }
+        }
+        return schemasToDelete;
+    }
+
+    /**
+     * Get all schemas (table names) for _kmd and _acl fields in embedded objects to removing
+     * @param tableName name of the table (class) where searching
+     * @param realm Realm object
+     * @param isEmbedded true if it's embedded object
+     * @return list of schemas to removing
+     */
+    private List<String> prepareToRemoveMetadataSchemasFromEmbeddedObjects(String tableName, DynamicRealm realm, boolean isEmbedded) {
+        RealmSchema currentSchema = realm.getSchema();
+        String originalName;
+        String className;
+        List<String> schemasToDelete = new ArrayList<>();
+        Set<RealmObjectSchema> schemas = currentSchema.getAll();
+        for (RealmObjectSchema schema : schemas) {
+            className = schema.getClassName();
+            if (className.equals(TableNameManager.getShortName(tableName, realm))) {
+                for (RealmObjectSchema subClassSchema : schemas) {
+                    originalName = TableNameManager.getOriginalName(subClassSchema.getClassName(), realm);
+                    if (originalName == null) {
+                        continue;
+                    }
+                    if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.KMD))) {
+                        schema.removeField(KinveyMetaData.KMD);
+                        schemasToDelete.add(subClassSchema.getClassName());
+                    } else if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL))) {
+                        schema.removeField(KinveyMetaData.AccessControlList.ACL);
+                        schemasToDelete.add(subClassSchema.getClassName());
+                    } else if (originalName.startsWith(className + Constants.UNDERSCORE)) {
+                        schemasToDelete.addAll(prepareToRemoveMetadataSchemasFromEmbeddedObjects(originalName, realm, true));
                     }
                 }
             }
@@ -271,13 +324,13 @@ public class RealmCacheManager implements ICacheManager {
 
     private void createTableHashScheme(RealmSchema dbSchema){
         RealmObjectSchema tableHashScheme = dbSchema.create(TABLE_HASH_NAME);
-        tableHashScheme.addField("collection", String.class, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED);
+        tableHashScheme.addField(Constants.COLLECTION, String.class, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED);
         tableHashScheme.addField("hash", String.class, FieldAttribute.REQUIRED);
     }
 
     private String getTableHash(String collection, DynamicRealm mRealm){
         DynamicRealmObject res = mRealm.where(TABLE_HASH_NAME)
-                .equalTo("collection", collection)
+                .equalTo(Constants.COLLECTION, collection)
                 .findFirst();
         return res != null ? res.getString("hash") : "";
     }
@@ -290,7 +343,7 @@ public class RealmCacheManager implements ICacheManager {
      */
     private void setTableHash(String collection, String hash, DynamicRealm mRealm){
         DynamicRealmObject obj = mRealm.where(TABLE_HASH_NAME)
-                .equalTo("collection", collection).findFirst();
+                .equalTo(Constants.COLLECTION, collection).findFirst();
         if (obj == null){
             obj = mRealm.createObject(TABLE_HASH_NAME,collection);
         }
@@ -300,7 +353,7 @@ public class RealmCacheManager implements ICacheManager {
 
     private String getClientHash(){
         Uri server = Uri.parse(client.getBaseUrl());
-        return server.getHost()+"_"+server.getPort();
+        return server.getHost()+Constants.UNDERSCORE+server.getPort();
     }
 
     /**
@@ -327,12 +380,12 @@ public class RealmCacheManager implements ICacheManager {
         if (realmConfiguration == null) {
             if (encryptionKey != null) {
                 realmConfiguration = new RealmConfiguration.Builder()
-                        .name(prefix + "_" + getClientHash())
+                        .name(prefix + Constants.UNDERSCORE + getClientHash())
                         .encryptionKey(encryptionKey)
                         .build();
             } else {
                 realmConfiguration = new RealmConfiguration.Builder()
-                        .name(prefix + "_" + getClientHash())
+                        .name(prefix + Constants.UNDERSCORE + getClientHash())
                         .build();
             }
         }
