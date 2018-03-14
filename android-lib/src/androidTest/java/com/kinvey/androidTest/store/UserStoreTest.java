@@ -359,37 +359,9 @@ public class UserStoreTest {
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        client.enableDebugLogging();
-        final CountDownLatch latch = new CountDownLatch(1);
-        LooperThread looperThread = null;
-        try {
-            if (client.isUserLoggedIn()) {
-                looperThread = new LooperThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        UserStore.logout(client, new KinveyClientCallback<Void>() {
-                            @Override
-                            public void onSuccess(Void result) {
-                                latch.countDown();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable error) {
-                                assertNull(error);
-                                latch.countDown();
-                            }
-                        });
-                    }
-                });
-                looperThread.start();
-            } else {
-                latch.countDown();
-            }
-            latch.await();
-        } finally {
-            if (looperThread != null) {
-                looperThread.mHandler.sendMessage(new Message());
-            }
+//        client.enableDebugLogging();
+        if (client.isUserLoggedIn()) {
+            logout(client);
         }
     }
 

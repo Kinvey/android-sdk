@@ -19,6 +19,7 @@ import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -99,6 +100,7 @@ public class RequestTest {
     }
 
     @Test
+    @Ignore
     public void testSetCustomTimeoutAndCheckException() throws InterruptedException, IOException {
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
