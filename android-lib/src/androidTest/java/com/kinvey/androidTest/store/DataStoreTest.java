@@ -1629,7 +1629,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         List<Person> pullResults = null;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
@@ -1678,7 +1678,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         List<Person> pullResults = null;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
@@ -1830,7 +1830,7 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
@@ -1846,7 +1846,7 @@ public class DataStoreTest {
 
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        query = client.query();
+        query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         int limit = 2;
         int skip = 0;
         query.setLimit(limit);
@@ -1889,7 +1889,7 @@ public class DataStoreTest {
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
@@ -1933,7 +1933,7 @@ public class DataStoreTest {
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
@@ -2008,7 +2008,7 @@ public class DataStoreTest {
         int limit = 2;
 
         DefaultKinveyListCallback kinveyListCallback;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
             query.setLimit(limit);
