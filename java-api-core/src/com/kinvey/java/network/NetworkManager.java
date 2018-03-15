@@ -896,7 +896,7 @@ public class NetworkManager<T extends GenericJson> {
     public class QueryCacheGet extends AbstractKinveyQueryCacheReadRequest<T> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
-                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}/_deltaset?since={since}";
+                "/_deltaset{?since,query,sort,limit,skip,resolve,resolve_depth,retainReference}";
 
         @Key
         protected String collectionName;

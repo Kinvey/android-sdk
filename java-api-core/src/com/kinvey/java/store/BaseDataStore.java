@@ -395,7 +395,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         query = query == null ? client.query() : query;
-        if (deltaSetCachingEnabled && !autoPagination && query.getSkip() == 0 && query.getLimit() == 0) {
+        if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
             return pullBlockingDeltaSync(query);
         } else {
             return pullBlockingNoDeltaSync(query);
@@ -437,40 +437,89 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
-     * Pull with Delta Sync is using if
+     * Pull with Delta Sync
      * @param query
      * @return
      * @throws IOException
      */
     private KinveyAbstractReadResponse<T> pullBlockingDeltaSync(Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
-        List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
-        if (queryCacheItems.size() == 1) {
-            QueryCacheItem cacheItem = queryCacheItems.get(0);
-            KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.pullBlocking(query, cacheItem.getLastRequest()).execute();
-            if (queryCacheResponse.getDeleted() != null) {
-                List<String> ids = new ArrayList<>();
-                for (GenericJson json : queryCacheResponse.getDeleted()) {
-                    ids.add((String)json.get("_id"));
-                }
-                cache.delete(ids);
+        if (isAutoPaginationEnabled()) {
+            if (query.getSortString() == null || query.getSortString().isEmpty()) {
+                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
             }
-            if (queryCacheResponse.getChanged() != null) {
-                cache.save(queryCacheResponse.getChanged());
-            }
-            response.setResult(cache.get());
-            cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
-            queryCache.save(cacheItem);
-        } else {
-            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-            cache.delete(query);
-            cache.save(response.getResult());
-            queryCache.save(new QueryCacheItem(
-                    getCollectionName(),
-                    query.getQueryFilterMap().toString(),
-                    response.getLastRequest()));
-        }
+            List<Exception> exceptions = new ArrayList<>();
+            int skipCount = 0;
+            int pageSize = this.pageSize;
 
+            // First, get the count of all the items to pull
+            int totalItemCount = this.countNetwork();
+            KinveyQueryCacheResponse<T> queryCacheResponse;
+            List<QueryCacheItem> queryCacheItems;
+            String queryCacheString;
+            do {
+                query.setSkip(skipCount).setLimit(pageSize);
+                queryCacheString = query.getQueryFilterMap().toString() + "{skip=" + query.getSkip() + ",limit=" + query.getLimit() + ",sorting=" + "}" + query.getSortString();
+                queryCacheItems = queryCache.get(client.query().equals("query", queryCacheString));
+
+                if (queryCacheItems.size() == 1) {
+                    QueryCacheItem cacheItem = queryCacheItems.get(0);
+                    queryCacheResponse = networkManager.pullBlocking(query, cacheItem.getLastRequest()).execute();
+                    if (queryCacheResponse.getDeleted() != null) {
+                        List<String> ids = new ArrayList<>();
+                        for (GenericJson json : queryCacheResponse.getDeleted()) {
+                            ids.add((String) json.get("_id"));
+                        }
+                        cache.delete(ids);
+                    }
+                    if (queryCacheResponse.getChanged() != null) {
+                        cache.save(queryCacheResponse.getChanged());
+                    }
+                    cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+                    queryCache.save(cacheItem);
+                    exceptions.addAll(queryCacheResponse.getListOfExceptions());
+                } else {
+                    response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+                    cache.delete(query);
+                    cache.save(response.getResult());
+                    queryCache.save(new QueryCacheItem(
+                            getCollectionName(),
+                            queryCacheString,
+                            response.getLastRequest()));
+                    exceptions.addAll(response.getListOfExceptions());
+                }
+                skipCount += pageSize;
+            } while (skipCount < totalItemCount);
+            response.setResult(cache.get());
+            response.setListOfExceptions(exceptions);
+        } else {
+            List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
+            if (queryCacheItems.size() == 1) {
+                QueryCacheItem cacheItem = queryCacheItems.get(0);
+                KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.pullBlocking(query, cacheItem.getLastRequest()).execute();
+                if (queryCacheResponse.getDeleted() != null) {
+                    List<String> ids = new ArrayList<>();
+                    for (GenericJson json : queryCacheResponse.getDeleted()) {
+                        ids.add((String) json.get("_id"));
+                    }
+                    cache.delete(ids);
+                }
+                if (queryCacheResponse.getChanged() != null) {
+                    cache.save(queryCacheResponse.getChanged());
+                }
+                response.setResult(cache.get());
+                cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+                queryCache.save(cacheItem);
+            } else {
+                response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+                cache.delete(query);
+                cache.save(response.getResult());
+                queryCache.save(new QueryCacheItem(
+                        getCollectionName(),
+                        query.getQueryFilterMap().toString(),
+                        response.getLastRequest()));
+            }
+        }
         return response;
     }
 
