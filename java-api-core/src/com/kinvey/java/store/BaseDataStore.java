@@ -320,7 +320,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(new Query());
+        client.getCacheManager().clearCollection(getCollectionName(), storeItemType, Long.MAX_VALUE);
         purge();
     }
 

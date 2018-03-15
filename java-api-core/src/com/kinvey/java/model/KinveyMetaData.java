@@ -19,6 +19,7 @@ package com.kinvey.java.model;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,6 +41,7 @@ public class KinveyMetaData extends GenericJson{
 
     public static final String KMD = "_kmd";
     public static final String LMT = "lmt";
+    public static final String META = "_meta";
     public static final String ECT = "ect";
 
     @Key(LMT)
@@ -62,14 +64,14 @@ public class KinveyMetaData extends GenericJson{
         KinveyMetaData metaData = new KinveyMetaData();
         if (kmd != null) {
             if (!kmd.containsKey(LMT) || kmd.get(LMT) == null) {
-                metaData.put(LMT, String.format(Locale.US, "%tFT%<tTZ",
-                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                metaData.put(LMT, String.format(Locale.US, Constants.TIME_FORMAT,
+                        Calendar.getInstance(TimeZone.getTimeZone(Constants.Z))));
             } else {
                 metaData.put(LMT, kmd.get(LMT));
             }
             if (!kmd.containsKey(ECT) || kmd.get(ECT) == null) {
-                metaData.put(ECT, String.format(Locale.US, "%tFT%<tTZ",
-                        Calendar.getInstance(TimeZone.getTimeZone("Z"))));
+                metaData.put(ECT, String.format(Locale.US, Constants.TIME_FORMAT,
+                        Calendar.getInstance(TimeZone.getTimeZone(Constants.Z))));
             } else {
                 metaData.put(ECT, kmd.get(ECT));
             }
