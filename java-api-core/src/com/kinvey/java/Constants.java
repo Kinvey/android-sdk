@@ -16,5 +16,5 @@ public final class Constants {
     public static final String CHAR_PERIOD = ".";
     public static final String STR_LIVE_SERVICE_COLLECTION_CHANNEL_PREPEND = "c-";
 
-    public static final String DELTA_SYNC_QUERY_CACHE_FORMAT = "%s{skip=%d,limit= %d,sorting=}%s";
+    public static final String DELTA_SYNC_QUERY_CACHE_FORMAT = "%s{skip=%d,limit=%d,sorting=}%s";
 }

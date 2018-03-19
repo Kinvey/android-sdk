@@ -2995,7 +2995,7 @@ public class DataStoreTest {
     public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
-        assertFalse(store.isDeltaSetCachingEnabled());
+        assertTrue(store.isDeltaSetCachingEnabled());
     }
 
     @Test
