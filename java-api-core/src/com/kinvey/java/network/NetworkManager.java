@@ -307,7 +307,7 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     /**
-     * @deprecated use {@link #pullBlocking(Query, ICache, boolean)} ()} instead.
+     * @deprecated use {@link #pullBlocking(Query)} ()} instead.
      */
     @Deprecated
     public Pull pullBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
@@ -330,15 +330,26 @@ public class NetworkManager<T extends GenericJson> {
      * @param deltaSetCachingEnabled Flag to show if Delta Set Caching is enable
      * @return Pull request
      * @throws IOException
+     *
+     * @deprecated use {@link #pullBlocking(Query)} ()} instead.
      */
     public Pull pullBlocking(Query query, ICache<T> cache, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
-        Pull pull;
-        if (deltaSetCachingEnabled) {
-            pull = new DeltaPull(query, myClass, cache.get(query));
-        } else {
-            pull = new Pull(query, myClass);
-        }
+        Pull pull = new Pull(query, myClass);
+        client.initializeRequest(pull);
+        return pull;
+    }
+
+    /**
+     * Method to create a Pull request
+     *
+     * @param query Query to get
+     * @return Pull request
+     * @throws IOException
+     */
+    public Pull pullBlocking(Query query) throws IOException {
+        Preconditions.checkNotNull(query);
+        Pull pull = new Pull(query, myClass);
         client.initializeRequest(pull);
         return pull;
     }
@@ -366,13 +377,13 @@ public class NetworkManager<T extends GenericJson> {
 
 
     /**
-     * Pull blocking with Delta Sync implementation
+     * Get blocking with Delta Sync implementation
      * @param query Query to get
      * @param lastRequestTime Last request time
      * @return
      * @throws IOException
      */
-    public QueryCacheGet pullBlocking(Query query, String lastRequestTime) throws IOException {
+    public QueryCacheGet queryCacheGetBlocking(Query query, String lastRequestTime) throws IOException {
         Preconditions.checkNotNull(query);
         QueryCacheGet pull = new QueryCacheGet(query, myClass, lastRequestTime);
         client.initializeRequest(pull);

@@ -2992,44 +2992,9 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testDeltaCache() throws InterruptedException, IOException {
-        client.setUseDeltaCache(true);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        client.getSyncManager().clear(Person.COLLECTION);
-        clearBackend(store);
-
-        Person person = new Person();
-        person.setUsername("name");
-        person.set("CustomField", "CustomValue");
-        store.save(person);
-
-        store.syncBlocking(null);
-        Person person2 = new Person();
-        person2.setUsername("changed name 1");
-        person2.set("CustomField", "CustomValueChanged ");
-        store.save(person2);
-
-        Person person3 = new Person();
-        person3.setUsername("changed name 2");
-        person3.set("CustomField", "CustomValueChanged 2");
-        store.save(person3);
-
-        DefaultKinveySyncCallback callback = sync(store, DEFAULT_TIMEOUT);
-        assertNull(callback.error);
-        assertNotNull(callback.kinveyPushResponse);
-        assertNotNull(callback.kinveyPullResponse);
-
-        List<Person> personList = store.find();
-        Person person1 = personList.get(0);
-        assertNotNull(person1);
-        assertNotNull(person1.getUsername());
-    }
-
-    @Test
     public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.setUseDeltaCache(true);
+        store.setDeltaSetCachingEnabled(true);
         assertFalse(store.isDeltaSetCachingEnabled());
     }
 
