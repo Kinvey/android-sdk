@@ -190,4 +190,17 @@ public class DeltaCacheTest {
         assertTrue(store.isDeltaSetCachingEnabled());
     }
 
+    @Test
+    public void testErrorIfStoreTypeNetwork() throws InterruptedException, IOException {
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        try {
+            store.setDeltaSetCachingEnabled(true);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertNotNull(e);
+        }
+    }
+
+
+
 }

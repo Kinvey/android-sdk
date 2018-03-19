@@ -19,6 +19,7 @@ package com.kinvey.java.store;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 
 public class BaseDataStore<T extends GenericJson> {
@@ -453,7 +455,7 @@ public class BaseDataStore<T extends GenericJson> {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+                query.addSort(KinveyMetaData.KMD + Constants.DOT + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
             }
             List<Exception> exceptions = new ArrayList<>();
             int skipCount = 0;
@@ -468,16 +470,16 @@ public class BaseDataStore<T extends GenericJson> {
             String lastRequest;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                queryCacheString = query.getQueryFilterMap().toString() + "{skip=" + query.getSkip() + ",limit=" + query.getLimit() + ",sorting=" + "}" + query.getSortString();
-                queryCacheItems = queryCache.get(client.query().equals("query", queryCacheString));
+                queryCacheString =  String.format(Locale.US, Constants.DELTA_SYNC_QUERY_CACHE_FORMAT, query.getQueryFilterMap().toString(), query.getSkip(), query.getLimit(), query.getSortString());
+                queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, queryCacheString));
 
-                if (queryCacheItems.size() == 1) {
+                if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
                     cacheItem = queryCacheItems.get(0);
                     queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequest()).execute();
                     if (queryCacheResponse.getDeleted() != null) {
                         List<String> ids = new ArrayList<>();
                         for (GenericJson json : queryCacheResponse.getDeleted()) {
-                            ids.add((String) json.get("_id"));
+                            ids.add((String) json.get(Constants._ID));
                         }
                         cache.delete(ids);
                     }
@@ -505,14 +507,14 @@ public class BaseDataStore<T extends GenericJson> {
             response.setListOfExceptions(exceptions);
             response.setLastRequest(lastRequest);
         } else {
-            List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals("query", query.getQueryFilterMap().toString()));
-            if (queryCacheItems.size() == 1) {
+            List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, query.getQueryFilterMap().toString()));
+            if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
                 QueryCacheItem cacheItem = queryCacheItems.get(0);
                 KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequest()).execute();
                 if (queryCacheResponse.getDeleted() != null) {
                     List<String> ids = new ArrayList<>();
                     for (GenericJson json : queryCacheResponse.getDeleted()) {
-                        ids.add((String) json.get("_id"));
+                        ids.add((String) json.get(Constants._ID));
                     }
                     cache.delete(ids);
                 }
@@ -639,6 +641,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
      */
     public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "Delta Cache can't be used with StoreType.NETWORK");
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
     }
 
