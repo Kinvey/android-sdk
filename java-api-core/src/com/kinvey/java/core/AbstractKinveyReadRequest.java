@@ -10,6 +10,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
@@ -86,8 +87,8 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                         exceptions.add(e);
                     }
                 }
-                if (response.getHeaders().containsKey("x-kinvey-request-start")){
-                    ret.setLastRequest(response.getHeaders().getHeaderStringValues("x-kinvey-request-start").get(0));
+                if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
+                    ret.setLastRequest(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
                 }
                 ret.setResult(results);
                 ret.setListOfExceptions(exceptions);

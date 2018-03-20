@@ -80,7 +80,7 @@ public class DeltaCacheTest {
     }
 
     @Test
-    public void testDeltaSync() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public void testDeltaSyncPull() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Query query = client.query();
         String lastRequestTime = "Time";
 
@@ -118,7 +118,7 @@ public class DeltaCacheTest {
     }
 
     @Test
-    public void testDeltaSyncWithAutoPagination() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public void testDeltaSyncPullWithAutoPagination() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Query query = client.query();
         String lastRequestTime = "Time";
 
@@ -165,6 +165,84 @@ public class DeltaCacheTest {
         assertEquals(lastRequestTime, response.getLastRequest());
         assertEquals("name_1", response.getResult().get(0).getUsername());
         assertEquals("name_2", response.getResult().get(1).getUsername());
+    }
+
+    /**
+     * Check that Delta Sync Find works with StoreType.CACHE
+     */
+    @Test
+    public void testDeltaSyncFindByEmptyQuery() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query();
+        String lastRequestTime = "Time";
+
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_2"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
+
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
+        store.setDeltaSetCachingEnabled(true);
+
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+
+        List<Person> response = store.find(query);
+        assertNotNull(response);
+        assertEquals("name_1", response.get(0).getUsername());
+        assertEquals("name_2", response.get(1).getUsername());
+    }
+
+    /**
+     * Check Delta Sync Find by Query
+     */
+    @Test
+    public void testDeltaSyncFindByQuery() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query().equals("name", "name_1");
+        String lastRequestTime = "Time";
+
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_1"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
+
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
+        store.setDeltaSetCachingEnabled(true);
+
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+
+        List<Person> response = store.find(query);
+        assertNotNull(response);
+        assertEquals("name_1", response.get(0).getUsername());
+        assertEquals("name_1", response.get(1).getUsername());
     }
 
 

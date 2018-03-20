@@ -303,7 +303,7 @@ public class NetworkManager<T extends GenericJson> {
      */
 
     public Get getBlocking() throws IOException {
-        return getBlocking(new Query());
+        return getBlocking(client.query());
     }
 
     /**

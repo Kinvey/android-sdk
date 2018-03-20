@@ -18,6 +18,7 @@ package com.kinvey.java.store;
 
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
@@ -176,13 +177,19 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        List<T> ret = null;
-        if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadIdsRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute();
-            cachedCallback.onSuccess(ret);
+        if (storeType == StoreType.CACHE) {
+            if (cachedCallback != null) {
+                cachedCallback.onSuccess(new ReadIdsRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute());
+            }
+            if (deltaSetCachingEnabled) {
+                Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
+                return getBlockingDeltaSync(query).getResult();
+            } else {
+                return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            }
+        } else {
+            return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
         }
-        ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
-        return ret;
     }
 
     /**
@@ -207,13 +214,18 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(query, "query must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret = null;
-        if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadQueryRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
-            cachedCallback.onSuccess(ret);
+        if (storeType == StoreType.CACHE) {
+            if (cachedCallback != null) {
+                cachedCallback.onSuccess(new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute());
+            }
+            if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
+                return getBlockingDeltaSync(query).getResult();
+            } else {
+                return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            }
+        } else {
+            return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
         }
-        ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
-        return ret;
     }
 
     /**
@@ -226,7 +238,7 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
-     * get all objects for given collections
+     * Get all objects for given collections
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
@@ -235,13 +247,18 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret = null;
-        if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadAllRequest<T>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute();
-            cachedCallback.onSuccess(ret);
+        if (storeType == StoreType.CACHE) {
+            if (cachedCallback != null) {
+                cachedCallback.onSuccess(new ReadAllRequest<>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute());
+            }
+            if (deltaSetCachingEnabled) {
+                return getBlockingDeltaSync(client.query()).getResult();
+            } else {
+                return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+            }
+        } else {
+            return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
         }
-        ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
-        return ret;
     }
 
     /**
@@ -398,7 +415,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         query = query == null ? client.query() : query;
         if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
-            return pullBlockingDeltaSync(query);
+            return getBlockingDeltaSync(query);
         } else {
             return pullBlockingNoDeltaSync(query);
         }
@@ -446,12 +463,12 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
-     * Pull network data with given query into local storage using Delta Sync
+     * Get network data with given query into local storage using Delta Sync
      * @param query {@link Query}
      * @return
      * @throws IOException
      */
-    private KinveyAbstractReadResponse<T> pullBlockingDeltaSync(Query query) throws IOException {
+    private KinveyAbstractReadResponse<T> getBlockingDeltaSync(Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {

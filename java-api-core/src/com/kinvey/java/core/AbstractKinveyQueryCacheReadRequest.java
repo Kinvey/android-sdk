@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
@@ -67,7 +68,7 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 String jsonString = response.parseAsString();
                 JsonParser jsonParser = new JsonParser();
                 JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonString);
-                JsonArray jsonArrayChanged = jsonObject.getAsJsonArray("changed");
+                JsonArray jsonArrayChanged = jsonObject.getAsJsonArray(Constants.CHANGED);
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
                 List<T> changed = new ArrayList<>();
                 List<Exception> exceptions = new ArrayList<>();
@@ -85,7 +86,7 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 }
                 ret.setChanged(changed);
 
-                JsonArray jsonArrayDeleted = jsonObject.getAsJsonArray("deleted");
+                JsonArray jsonArrayDeleted = jsonObject.getAsJsonArray(Constants.DELETED);
                 List<T> deleted = new ArrayList<>();
                 for (JsonElement element : jsonArrayDeleted) {
                     try {
@@ -100,8 +101,8 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 }
                 ret.setDeleted(deleted);
                 ret.setListOfExceptions(exceptions);
-                if (response.getHeaders().containsKey("x-kinvey-request-start")){
-                    ret.setRequestTime(response.getHeaders().getHeaderStringValues("x-kinvey-request-start").get(0));
+                if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
+                    ret.setRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
                 }
                 return ret;
             }
