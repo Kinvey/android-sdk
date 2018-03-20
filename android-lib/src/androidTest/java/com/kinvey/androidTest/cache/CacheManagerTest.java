@@ -9,15 +9,20 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCache;
-import com.kinvey.android.cache.RealmCacheManager;
+import com.kinvey.android.store.DataStore;
+import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.*;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Prots on 1/27/16.
@@ -61,4 +66,13 @@ public class CacheManagerTest {
     public void getCacheShouldBeInstanceOfRealmCache(){
         assertTrue(manager.getCache("test", SampleGsonObject1.class, Long.MAX_VALUE) instanceof RealmCache);
     }
+
+    @Test
+    public void clearCollectionShouldNotFail() throws IOException, InterruptedException {
+        Client client = new Client.Builder(mMockContext).build();
+        DataStore dataStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        dataStore.clear();
+        client.performLockDown();
+    }
+
 }

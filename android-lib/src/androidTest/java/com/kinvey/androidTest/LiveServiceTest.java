@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
+import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -50,7 +51,7 @@ public class LiveServiceTest {
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         testManager = new TestManager<>();
-        testManager.login("livetest", PASSWORD, client);
+        testManager.login(USERNAME, PASSWORD, client);
     }
 
     @After

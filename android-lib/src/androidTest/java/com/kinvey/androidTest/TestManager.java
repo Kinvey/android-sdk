@@ -47,9 +47,9 @@ public class TestManager<T extends GenericJson> {
     public static final String PASSWORD = "test";
 
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            LooperThread looperThread = null;
             looperThread = new LooperThread(new Runnable() {
                 @Override
                 public void run() {
@@ -73,11 +73,7 @@ public class TestManager<T extends GenericJson> {
                 }
             });
             looperThread.start();
-        } else {
-            latch.countDown();
-        }
-        latch.await();
-        if (looperThread != null) {
+            latch.await();
             looperThread.mHandler.sendMessage(new Message());
         }
     }
