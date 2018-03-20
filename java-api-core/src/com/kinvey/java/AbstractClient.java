@@ -42,6 +42,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.query.MongoQueryFilter;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
@@ -62,6 +63,11 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      * The default encoded service path of the service.
      */
     public static final String DEFAULT_SERVICE_PATH = "";
+
+    /**
+     * The default request timeout is 60s.
+     */
+    public static final int DEFAULT_REQUEST_TIMEOUT = 60 * 1000;
     
     private CredentialStore store;
 
@@ -284,7 +290,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     /**
      * Getter to check if delta set cache is enabled
      * @return delta set get flag
+     * @deprecated use {@link BaseDataStore#isDeltaSetCachingEnabled()} ()} instead.
      */
+    @Deprecated
     public boolean isUseDeltaCache() {
         return useDeltaCache;
     }
@@ -292,7 +300,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     /**
      * Setter for delta set get cache flag
      * @param useDeltaCache boolean representing if we should use delta set caching
+     * @deprecated use {@link BaseDataStore#setDeltaSetCachingEnabled(boolean)} ()} instead.
      */
+    @Deprecated
     public void setUseDeltaCache(boolean useDeltaCache) {
         this.useDeltaCache = useDeltaCache;
     }
@@ -313,7 +323,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     public static abstract class Builder extends AbstractKinveyJsonClient.Builder {
         private CredentialStore store;
         private Properties props = new Properties();
-        private int requestTimeout;
+        protected int requestTimeout = DEFAULT_REQUEST_TIMEOUT;
         public boolean useDeltaCache;
 
         /**
@@ -445,6 +455,9 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
             return getProps().getProperty(opt.value, defaultValue);
         }
 
+        /**
+         * @param requestTimeout - the request timeout
+         */
         public Builder setRequestTimeout(int requestTimeout) {
             this.requestTimeout = requestTimeout;
             return this;
@@ -544,5 +557,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     public void setUserClass(Class userClass){
         this.userModelClass = userClass;
     }
+
+    public abstract String getDeviceId();
 
 }

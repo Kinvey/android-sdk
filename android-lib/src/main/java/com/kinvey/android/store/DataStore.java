@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
+import com.kinvey.android.KinveyLiveServiceCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
@@ -44,6 +45,8 @@ import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
+import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
+import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
@@ -122,6 +125,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS";
 
     private static final String KEY_PURGE = "KEY_PURGE";
+    private static final String KEY_PURGE_BY_QUERY = "KEY_PURGE_BY_QUERY";
+    private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
+    private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
@@ -173,21 +179,26 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private void loadMethodMap() {
         Map<String, Method> tempMap = new HashMap<String, Method>();
         try {
-            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod("find", String.class, KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod("find", Query.class, KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod("find", KinveyCachedClientCallback.class));
-            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod("find", Iterable.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_ID, BaseDataStore.class.getMethod(FIND, String.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_QUERY, BaseDataStore.class.getMethod(FIND, Query.class, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_ALL, BaseDataStore.class.getMethod(FIND, KinveyCachedClientCallback.class));
+            tempMap.put(KEY_GET_BY_IDS, BaseDataStore.class.getMethod(FIND, Iterable.class, KinveyCachedClientCallback.class));
 
-            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod("count"));
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod(COUNT));
+            tempMap.put(KEY_GET_COUNT, BaseDataStore.class.getMethod(COUNT, KinveyCachedClientCallback.class));
 
-            tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod("delete", String.class));
-            tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod("delete", Query.class));
-            tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod("delete", Iterable.class));
+            tempMap.put(KEY_DELETE_BY_ID, BaseDataStore.class.getMethod(DELETE, String.class));
+            tempMap.put(KEY_DELETE_BY_QUERY, BaseDataStore.class.getMethod(DELETE, Query.class));
+            tempMap.put(KEY_DELETE_BY_IDS, BaseDataStore.class.getMethod(DELETE, Iterable.class));
 
-            tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod("purge"));
+            tempMap.put(KEY_PURGE, BaseDataStore.class.getMethod(PURGE));
+            tempMap.put(KEY_PURGE_BY_QUERY, BaseDataStore.class.getMethod(PURGE, Query.class));
+
+            tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod(GROUP, AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
 
             tempMap.put(KEY_GROUP, BaseDataStore.class.getMethod("group", AggregateType.class, ArrayList.class, String.class, Query.class, KinveyCachedAggregateCallback.class));
-
+            tempMap.put(KEY_SUBSCRIBE, BaseDataStore.class.getMethod("subscribe", KinveyDataStoreLiveServiceCallback.class));
+            tempMap.put(KEY_UNSUBSCRIBE, BaseDataStore.class.getMethod("unsubscribe"));
 
             /*tempMap.put(KEY_GET_BY_ID_WITH_REFERENCES, NetworkManager.class.getMethod("getEntityBlocking", new Class[]{String.class, String[].class, int.class, boolean.class}));
             tempMap.put(KEY_GET_QUERY_WITH_REFERENCES, NetworkManager.class.getMethod("getBlocking", new Class[]{Query.class, String[].class, int.class, boolean.class}));
@@ -448,8 +459,26 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
+    /**
+     * Get items count in collection
+     * @param callback return items count in collection
+     */
     public void count(KinveyCountCallback callback) {
-        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback).execute();
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        count(callback, null);
+    }
+
+    /**
+     * Get items count in collection
+     * @param callback return items count in collection
+     * @param cachedCallback is using with StoreType.CACHE to get items count in collection
+     */
+    public void count(KinveyCountCallback callback, KinveyCachedClientCallback<Integer> cachedCallback) {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        new AsyncRequest<Integer>(this, methodMap.get(KEY_GET_COUNT), callback, cachedCallback).execute();
     }
 
     /**
@@ -681,9 +710,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     }
 
     /**
-     * Asynchronous request to clear cache from a collection of entity and pull all collection.
+     * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
-     * Creates an asynchronous request to clear cache from a collection of entity and pull all collection.
+     * Creates an asynchronous request to clear all the pending requests from the sync storage.
      * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
      * </p>
      * <p>
@@ -705,6 +734,17 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
+    }
+
+    /**
+     * Asynchronous request to clear all the pending requests from the sync storage by query.
+     * @param query query to filter pending requests for deleting
+     * @param callback KinveyPurgeCallback
+     */
+    public void purge(Query query, KinveyPurgeCallback callback){
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE_BY_QUERY), callback, query).execute();
     }
 
 
@@ -811,6 +851,23 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new AsyncRequest<Aggregation>(this, methodMap.get(KEY_GROUP), callback, aggregateType, fields, reduceField, query, cachedCallback).execute();
     }
 
+    /**
+     * Subscribe the specified callback.
+     * @param storeLiveServiceCallback {@link KinveyDataStoreLiveServiceCallback}
+     * @param callback {@link KinveyClientCallback<Boolean>}
+     */
+    public void subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback, KinveyClientCallback<Boolean> callback) {
+        new AsyncRequest<Boolean>(this, methodMap.get(KEY_SUBSCRIBE), callback, getWrappedLiveServiceCallback(storeLiveServiceCallback)).execute();
+    }
+
+    /**
+     * Unsubscribe this instance.
+     * @param callback {@link KinveyClientCallback<Void>}
+     */
+    public void unsubscribe(KinveyClientCallback<Void> callback) {
+        new AsyncRequest<Void>(this, methodMap.get(KEY_UNSUBSCRIBE), callback).execute();
+    }
+
     private class SaveRequest extends AsyncClientRequest<T> {
         T entity;
 
@@ -847,6 +904,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         return ret;
     }
 
+    private static <T> KinveyDataStoreLiveServiceCallback<T> getWrappedLiveServiceCallback(KinveyDataStoreLiveServiceCallback<T> callback) {
+        ThreadedKinveyLiveService<T> ret = null;
+        if (callback != null) {
+            ret = new ThreadedKinveyLiveService<T>(callback);
+        }
+        return ret;
+    }
+
     private static class ThreadedKinveyCachedClientCallback<T> implements KinveyCachedClientCallback<T> {
 
         private KinveyCachedClientCallback<T> callback;
@@ -867,6 +932,32 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         public void onFailure(Throwable error) {
             handler.onFailure(error, callback);
 
+        }
+    }
+
+    private static class ThreadedKinveyLiveService<T> implements KinveyDataStoreLiveServiceCallback<T> {
+
+        private KinveyDataStoreLiveServiceCallback<T> callback;
+        KinveyLiveServiceCallbackHandler<T> handler;
+
+        ThreadedKinveyLiveService(KinveyDataStoreLiveServiceCallback<T> callback) {
+            handler = new KinveyLiveServiceCallbackHandler<T>();
+            this.callback = callback;
+        }
+
+        @Override
+        public void onNext(T next) {
+            handler.onNext(next, callback);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            handler.onError(e, callback);
+        }
+
+        @Override
+        public void onStatus(KinveyLiveServiceStatus status) {
+            handler.onStatus(status, callback);
         }
     }
 

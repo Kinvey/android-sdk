@@ -268,6 +268,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 .buildRequest(requestMethod, buildHttpRequestUrl(), httpContent);
         httpRequest.setParser(getAbstractKinveyClient().getObjectParser());
         httpRequest.setSuppressUserAgentSuffix(true);
+        httpRequest.setConnectTimeout(client.getRequestTimeout());
+        httpRequest.setReadTimeout(client.getRequestTimeout());
         //httpRequest.setRetryOnExecuteIOException(true);
         //httpRequest.setBackOffPolicy(this.requestBackoffPolicy);
         // custom methods may use POST with no content but require a Content-Length header
@@ -330,7 +332,6 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             request.setFollowRedirects(false);
         }
 
-
         response = request.execute();
 
         lastResponseCode = response.getStatusCode();
@@ -342,18 +343,17 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         }
 
         //process refresh token needed
-        if (response.getStatusCode() == 401 && !hasRetryed){
-
-
+        if (response.getStatusCode() == 401 && !hasRetryed) {
             //get the refresh token
             Credential cred = client.getStore().load(client.getActiveUser().getId());
             String refreshToken = null;
-            if (cred != null){
+
+            if (cred != null) {
                 refreshToken = cred.getRefreshToken();
             }
 
-            if (refreshToken != null ){
-                //logout the current user
+            if (refreshToken != null) {
+                hasRetryed = true;
                 String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
                 String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
 
@@ -362,10 +362,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
 
                 UserStoreRequestManager userStoreRequestManager = new UserStoreRequestManager(client, builder);
 
-                userStoreRequestManager.logout().execute();
-
                 //use the refresh token for a new access token
                 GenericJson result = userStoreRequestManager.useRefreshToken(refreshToken).execute();
+
+                // soft logout the current user
+                userStoreRequestManager.logoutSoft().execute();
 
                 //login with the access token
                 userStoreRequestManager.loginMobileIdentityBlocking(result.get("access_token").toString()).execute();
@@ -374,7 +375,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
                 Credential currentCred = client.getStore().load(client.getActiveUser().getId());
                 currentCred.setRefreshToken(result.get("refresh_token").toString());
                 client.getStore().store(client.getActiveUser().getId(), currentCred);
-                hasRetryed = true;
+                currentCred.initialize(this);
                 return executeUnparsed();
             }
 

@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -159,6 +160,13 @@ public class ClientBuilderTest {
             assertNotNull(e);
         }
         assertNull(client);
+    }
+
+    @Test
+    public void testSetTimeoutRequest() throws IOException {
+        client = new Client.Builder(mContext).setRequestTimeout(120000).build();
+        assertNotNull(client);
+        assertEquals(120000, client.getRequestTimeout());
     }
 
 }

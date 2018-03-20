@@ -36,6 +36,8 @@ import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongC
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.Person56;
 import com.kinvey.androidTest.model.PersonWithPersonAndList;
+import com.kinvey.androidTest.model.PersonLongListName;
+import com.kinvey.androidTest.model.PersonOver63CharsInFieldName;
 import com.kinvey.androidTest.util.RealmCacheManagerUtil;
 import com.kinvey.androidTest.model.PersonList;
 import com.kinvey.androidTest.model.PersonRoomAddressPerson;
@@ -321,6 +323,39 @@ public class DataStoreTest {
         void finish() { latch.countDown(); }
     }
 
+    private static class DefaultKinveyCachedCallback<T> implements KinveyCachedClientCallback<Integer> {
+        private CountDownLatch latch;
+        Integer result;
+        Throwable error;
+
+        public DefaultKinveyCachedCallback() {
+        }
+
+        DefaultKinveyCachedCallback(CountDownLatch latch) { this.latch = latch; }
+
+        @Override
+        public void onSuccess(Integer result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() { latch.countDown(); }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     private static class DefaultKinveyDeleteCallback implements KinveyDeleteCallback {
 
         private CountDownLatch latch;
@@ -482,6 +517,33 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.LONG_NAME);
         Person56 result = store.save(new Person56());
         assertNotNull(result);
+    }
+
+    @Test
+    public void testALotSymbolsInListName() throws InterruptedException, IOException {
+        DataStore<PersonLongListName> store = DataStore.collection(PersonLongListName.LONG_NAME, PersonLongListName.class, StoreType.SYNC, client);
+        assertNotNull(store);
+        client.getSyncManager().clear(PersonLongListName.LONG_NAME);
+        PersonLongListName person = new PersonLongListName();
+        List<String> list = new ArrayList<>();
+        list.add("Test1");
+        list.add("Test2");
+        person.setList(list);
+        PersonLongListName result = store.save(person);
+        assertNotNull(result);
+        result = store.find(client.query().equals(ID, result.getId())).get(0);
+        assertNotNull(result);
+        assertEquals(1, store.delete(result.getId()).longValue());
+    }
+
+    @Test
+    public void testOver63SymbolsInListName() throws InterruptedException, IOException {
+        try {
+            DataStore.collection(PersonOver63CharsInFieldName.LONG_NAME, PersonOver63CharsInFieldName.class, StoreType.SYNC, client);
+            assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            assertNotNull(e.getMessage().contains("Column names are currently limited to max 63 characters."));
+        }
     }
 
     @Test
@@ -781,20 +843,25 @@ public class DataStoreTest {
 
     @Test
     public void testFindCountSync() throws InterruptedException, IOException {
-        testFindCount(StoreType.SYNC);
+        testFindCount(StoreType.SYNC, false);
     }
 
     @Test
     public void testFindCountCache() throws InterruptedException, IOException {
-        testFindCount(StoreType.CACHE);
+        testFindCount(StoreType.CACHE, false);
+    }
+
+    @Test
+    public void testFindCountCachedCallbackCache() throws InterruptedException, IOException {
+        testFindCount(StoreType.CACHE, true);
     }
 
     @Test
     public void testFindCountNetwork() throws InterruptedException, IOException {
-        testFindCount(StoreType.NETWORK);
+        testFindCount(StoreType.NETWORK, false);
     }
 
-    private void testFindCount(StoreType storeType) throws InterruptedException, IOException {
+    private void testFindCount(StoreType storeType, boolean isCachedCallbackUsed) throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         if (storeType != StoreType.NETWORK) {
             client.getSyncManager().clear(Person.COLLECTION);
@@ -807,19 +874,31 @@ public class DataStoreTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
 
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCachedCallback<Integer> cachedCallback = null;
+        if (storeType == StoreType.CACHE && isCachedCallbackUsed) {
+            cachedCallback = new DefaultKinveyCachedCallback<>();
+        }
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, cachedCallback);
         assertNull(countCallback.error);
         assertNotNull(countCallback.result);
+        if (storeType == StoreType.CACHE && isCachedCallbackUsed) {
+            assertNotNull(cachedCallback.result);
+            assertNotNull(cachedCallback.result == 1);
+            assertNull(cachedCallback.error);
+        }
         assertTrue(countCallback.result == 1);
     }
 
-    private DefaultKinveyCountCallback findCount(final DataStore<Person> store, int seconds) throws InterruptedException, IOException {
-        final CountDownLatch latch = new CountDownLatch(1);
+    private DefaultKinveyCountCallback findCount(final DataStore<Person> store, int seconds, final DefaultKinveyCachedCallback<Integer> cachedClientCallback) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(cachedClientCallback != null ? 2 : 1);
+        if (cachedClientCallback != null) {
+           cachedClientCallback.setLatch(latch);
+        }
         final DefaultKinveyCountCallback callback = new DefaultKinveyCountCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.count(callback);
+                store.count(callback, cachedClientCallback);
             }
         });
         looperThread.start();
@@ -1036,6 +1115,21 @@ public class DataStoreTest {
         return callback;
     }
 
+    private DefaultKinveySyncCallback sync(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveySyncCallback callback = new DefaultKinveySyncCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     @Test
     public void testSync() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
@@ -1149,7 +1243,7 @@ public class DataStoreTest {
         save(store, person);
         store.syncBlocking(new Query());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
@@ -1172,7 +1266,7 @@ public class DataStoreTest {
         assertTrue(countAfter2ndSave == 2);
         store.syncBlocking(new Query());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
@@ -1491,6 +1585,353 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSkipLimitInPullBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        List<Person> pullResults = null;
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = store.pullBlocking(query).getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = store.pullBlocking(query).getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInPullAsync() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        List<Person> pullResults = null;
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    /**
+     * Check that SDK pulls the items in correct order from the server
+     * if skip limit is used in pull/sync query.
+     */
+    @Test
+    public void testPullOrderWithSkipLimitQuery() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+        sync(store, DEFAULT_TIMEOUT);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        List<Person> pullResults;
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        query.setLimit(1);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+            assertTrue(pullResults.size() == 1);
+            assertEquals(TEST_USERNAME + "_" + i, pullResults.get(0).getUsername());
+            assertEquals(i+1, getCacheSize(StoreType.SYNC));
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTest() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            query.setLimit(1).addSort(KMD, AbstractQuery.SortOrder.ASC);
+            for (int i = 0; i < 5; i++) {
+                query.setSkip(i);
+                pullResults = pull(store, query).result.getResult();
+                assertNotNull(pullResults);
+                assertTrue(pullResults.size() == 1);
+                assertEquals(5, getCacheSize(StoreType.SYNC));
+                assertEquals(pullResults.get(0).getUsername(), TEST_USERNAME + "_" + i);
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
+    }
+
+    @Test
+    public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(1);
+        List<Person> pullResults;
+        for (int j = 0; j < 10; j++) {
+            cleanBackendDataStore(store);
+            for (int i = 0; i < 5; i++) {
+                save(store, createPerson(TEST_USERNAME + "_" + i));
+            }
+            sync(store, DEFAULT_TIMEOUT);
+            Query query = client.query();
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+            for (int i = 0; i < 5; i++) {
+                assertEquals(TEST_USERNAME + "_" + i, pullResults.get(i).getUsername());
+            }
+            System.out.println("TEST: number - " + j);
+            assertEquals(5, getCacheSize(StoreType.SYNC));
+        }
+    }
+
+    /**
+     * Check that SDK finds the items in the cache in correct order
+     * if skip limit is used in find method.
+     */
+    @Test
+    public void testFindInCacheOrderWithSkipLimitQuery() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+
+        Query query = client.query();
+        DefaultKinveyListCallback findCallback;
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            findCallback = find(store, query, DEFAULT_TIMEOUT);
+            assertTrue(findCallback.result.size() == 1);
+            assertEquals(TEST_USERNAME + "_" + i, findCallback.result.get(0).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    /**
+     * Check that SDK removes the correct items from cache in pull/sync process
+     * if skip limit is used in pull/sync query.
+     */
+    @Test
+    public void testSyncUpdateCacheInCorrectWay() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        for (int i = 0; i < 5; i++) {
+            save(store, createPerson(TEST_USERNAME + "_" + i));
+        }
+        sync(store, DEFAULT_TIMEOUT);
+        List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        List<Person> pullResults;
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        query.setLimit(1);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(i);
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+
+        query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        int limit = 2;
+        int skip = 0;
+        query.setLimit(limit);
+        for (int i = 0; i < 5; i++) {
+            query.setSkip(skip);
+            skip += limit;
+            pullResults = pull(store, query).result.getResult();
+            assertNotNull(pullResults);
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        for (int i = 0; i < 5; i++) {
+            assertEquals(TEST_USERNAME + "_" + i, findResult.get(i).getUsername());
+        }
+        assertEquals(5, getCacheSize(StoreType.SYNC));
+    }
+
+    @Test
+    public void testSkipLimitInSyncBlocking() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            store.syncBlocking(query);
+
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            store.syncBlocking(query);
+
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
+    public void testSkipLimitInSyncAsync() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        cleanBackendDataStore(store);
+
+        // Arrange
+        ArrayList<Person> persons = new ArrayList<>();
+        Person alvin = createPerson("Alvin");
+        Person simon = createPerson("Simon");
+        Person theodore = createPerson("Theodore");
+        Person anna = createPerson("Anna");
+        Person kate = createPerson("Kate");
+        save(store, alvin);
+        save(store, simon);
+        save(store, theodore);
+        save(store, anna);
+        save(store, kate);
+        long cacheSizeBefore = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBefore == 5);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        long cacheSizeBetween = getCacheSize(StoreType.CACHE);
+        assertTrue(cacheSizeBetween == 0);
+
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            sync(store, query, 120);
+            assertEquals(i+1, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+        for (int i = 0; i < 5; i++) {
+            query.setLimit(1);
+            query.setSkip(i);
+            sync(store, query, 120);
+            assertEquals(5, getCacheSize(StoreType.CACHE));
+        }
+        assertEquals(5, getCacheSize(StoreType.CACHE));
+    }
+
+    @Test
     public void testPullInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
@@ -1548,7 +1989,7 @@ public class DataStoreTest {
         int limit = 2;
 
         DefaultKinveyListCallback kinveyListCallback;
-        Query query = client.query();
+        Query query = client.query().addSort(KMD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
             query.setLimit(limit);
@@ -1734,6 +2175,81 @@ public class DataStoreTest {
 
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
+    }
+
+    @Test
+    public void testQueryClear() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        saveCallback = testManager.save(store, new Person(TEST_USERNAME_2));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+
+        store.clear(client.query().equals("username", TEST_USERNAME));
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        Person deletePerson = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, deletePerson);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+    }
+
+    @Test
+    public void testQueryPurge() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        assertTrue(store.syncCount() == 0);
+        assertTrue(store.count() == 0);
+
+        com.kinvey.androidTest.callback.DefaultKinveyClientCallback saveCallback = testManager.save(store, new Person(TEST_USERNAME));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 1);
+
+        saveCallback = testManager.save(store, new Person(TEST_USERNAME_2));
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+        assertTrue(store.syncCount() == 2);
+        assertTrue(store.count() == 2);
+
+        store.purge(client.query().equals("username", TEST_USERNAME));
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 2);
+
+        store.purge(client.query());
+        assertTrue(store.syncCount() == 0);
+
+        Person deletePerson = new Person(TEST_USERNAME);
+        saveCallback = testManager.save(store, deletePerson);
+        assertNotNull(saveCallback.getResult());
+        assertNull(saveCallback.getError());
+
+        assertTrue(store.syncCount() == 1);
+        assertTrue(store.count() == 3);
     }
 
     @Test
@@ -2504,8 +3020,9 @@ public class DataStoreTest {
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
 
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 1);
+
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm));
 
             realm.commitTransaction();
         } finally {
@@ -2529,25 +3046,53 @@ public class DataStoreTest {
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 0);
 
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm)).count(), 0);
+
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm));
 
             assertEquals(realm.where(TableNameManagerUtil.getShortName("sync", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__acl", realm));
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__kmd", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__acl", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName("syncitems", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__kmd", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__acl", realm)).count(), 0);
+
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__acl", realm));
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__kmd", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__acl", realm)).count(), 0);
             realm.commitTransaction();
         } finally {
             realm.close();
         }
+    }
+
+    @Test
+    public void testHashCode() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        cleanBackendDataStore(store);
+        store.syncBlocking(null);
+        Person person = createPerson(TEST_USERNAME);
+        person.setAuthor(new Author("author"));
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        store.syncBlocking(null);
+        List<Person> personList = store.find();
+        Person person1 = personList.get(0);
+        int hashcode = person1.hashCode();
+        assertNotNull(hashcode);
+
+        Person theSamePerson = store.find(client.query().equals("username", TEST_USERNAME)).get(0);
+        assertEquals(hashcode, theSamePerson.hashCode());
+
+        save(store, createPerson(TEST_USERNAME + 2));
+        Person theSamePerson2 = store.find(client.query().equals("author.name", "author")).get(0);
+        assertEquals(hashcode, theSamePerson2.hashCode());
+
     }
 
     @After
@@ -2560,6 +3105,110 @@ public class DataStoreTest {
                 throwable.printStackTrace();
             }
         }
+    }
+
+    @Test
+    public void testDeltaCache() throws InterruptedException, IOException {
+        client.setUseDeltaCache(true);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertTrue(store.isDeltaSetCachingEnabled());
+        client.getSyncManager().clear(Person.COLLECTION);
+        clearBackend(store);
+
+        Person person = new Person();
+        person.setUsername("name");
+        person.set("CustomField", "CustomValue");
+        store.save(person);
+
+        store.syncBlocking(null);
+        Person person2 = new Person();
+        person2.setUsername("changed name 1");
+        person2.set("CustomField", "CustomValueChanged ");
+        store.save(person2);
+
+        Person person3 = new Person();
+        person3.setUsername("changed name 2");
+        person3.set("CustomField", "CustomValueChanged 2");
+        store.save(person3);
+
+        DefaultKinveySyncCallback callback = sync(store, DEFAULT_TIMEOUT);
+        assertNull(callback.error);
+        assertNotNull(callback.kinveyPushResponse);
+        assertNotNull(callback.kinveyPullResponse);
+
+        List<Person> personList = store.find();
+        Person person1 = personList.get(0);
+        assertNotNull(person1);
+        assertNotNull(person1.getUsername());
+    }
+
+    @Test
+    public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.setUseDeltaCache(true);
+        assertFalse(store.isDeltaSetCachingEnabled());
+    }
+
+    @Test
+    public void testUpdateInternalObject() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+
+        Person person = new Person();
+        person.setUsername("person_name");
+        Author author = new Author("author_name");
+        person.setAuthor(author);
+        store.save(person);
+
+        Person newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        Author updatedAuthor = new Author("updated_author_name");
+        newPerson.setAuthor(updatedAuthor);
+        newPerson.setUsername("updated_person_name");
+        store.save(newPerson);
+
+        Person updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPerson);
+        assertEquals("updated_person_name", updatedPerson.getUsername());
+        assertEquals("updated_author_name", updatedPerson.getAuthor().getName());
+
+        updatedPerson.setAuthor(null);
+        store.save(updatedPerson);
+
+        Person updatedPersonWithoutAuthor = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPersonWithoutAuthor);
+        assertEquals("updated_person_name", updatedPersonWithoutAuthor.getUsername());
+        assertNull(updatedPersonWithoutAuthor.getAuthor());
+    }
+
+    @Test
+    public void testUpdateInternalList() throws InterruptedException, IOException {
+        DataStore<PersonList> store = DataStore.collection(PersonList.COLLECTION, PersonList.class, StoreType.SYNC, client);
+
+        PersonList person = new PersonList();
+        person.setUsername("person_name");
+        List<PersonList> list = new ArrayList<>();
+        list.add(new PersonList("person_name_in_list_1"));
+        person.setList(list);
+        store.save(person);
+
+        PersonList newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        list = new ArrayList<>();
+        list.add(new PersonList("person_name_in_list_2"));
+        newPerson.setList(list);
+        newPerson.setUsername("updated_person_name");
+        store.save(newPerson);
+
+        PersonList updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPerson);
+        assertEquals("updated_person_name", updatedPerson.getUsername());
+        assertEquals("person_name_in_list_2", updatedPerson.getList().get(0).getUsername());
+        updatedPerson.getList().clear();
+        updatedPerson.setList(updatedPerson.getList());
+        store.save(updatedPerson);
+
+        PersonList updatedPersonWithoutList = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        assertNotNull(updatedPersonWithoutList);
+        assertEquals("updated_person_name", updatedPersonWithoutList.getUsername());
+        assertEquals(0, updatedPersonWithoutList.getList().size());
     }
 
 }

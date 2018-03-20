@@ -117,7 +117,7 @@ public class GetLinkedResourceClientRequest<T> extends AbstractKinveyJsonClientR
                 FileMetaData meta = new FileMetaData();
                 if (((Map) entity.get(key)).containsKey("_id")){
                     meta.setId(((Map) entity.get(key)).get("_id").toString());
-                    store.download(meta, entity.getFile(key).getOutput(), null, download);
+                    store.download(meta, entity.getFile(key).getOutput(), null, null, download);
 
                 }/*else if(((Map) entity.get(key)).containsKey("_loc")){
                     meta.setFileName(((Map) entity.get(key)).get("_loc").toString());

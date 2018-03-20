@@ -26,7 +26,9 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
@@ -48,6 +50,12 @@ import java.util.List;
 
 public class BaseDataStore<T extends GenericJson> {
 
+    protected static final String FIND = "find";
+    protected static final String DELETE = "delete";
+    protected static final String PURGE = "purge";
+    protected static final String GROUP = "group";
+    protected static final String COUNT = "count";
+
     protected final AbstractClient client;
     private final String collection;
     protected StoreType storeType;
@@ -62,6 +70,8 @@ public class BaseDataStore<T extends GenericJson> {
      * Default value is false.
      */
     private boolean deltaSetCachingEnabled = false;
+
+    KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
      * It is a parameter to enable the auto-pagination of data retrieval from the backend.
@@ -235,12 +245,36 @@ public class BaseDataStore<T extends GenericJson> {
         return find((KinveyCachedClientCallback<List<T>>)null);
     }
 
+    /**
+     * Get items count in collection
+     * @return items count in collection
+     */
     public Integer count() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return count(null);
+    }
+
+    /**
+     * Get items count in collection
+     * @param cachedCallback is using with StoreType.CACHE to get items count in collection
+     * @return items count in collection
+     */
+    public Integer count(KinveyCachedClientCallback<Integer> cachedCallback) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.getSyncManager()).execute();
+            cachedCallback.onSuccess(ret);
+        }
         return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
     }
 
+    /**
+     * Get items count in collection on the server
+     * @return items count in collection on the server
+     */
     public Integer countNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -281,8 +315,19 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(new Query());
+        client.getCacheManager().clearCollection(getCollectionName(), storeItemType, Long.MAX_VALUE);
         purge();
+    }
+
+    /**
+     * Clear the local cache storage
+     */
+    public void clear(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        purge(query);
+        client.getCacheManager().getCache(getCollectionName(), storeItemType, Long.MAX_VALUE).delete(query);
     }
 
     /**
@@ -349,6 +394,9 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
 
         if (isAutoPaginationEnabled()) {
+            if (query.getSortString() == null || query.getSortString().isEmpty()) {
+                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+            }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
             int skipCount = 0;
@@ -359,7 +407,7 @@ public class BaseDataStore<T extends GenericJson> {
             KinveyAbstractReadResponse<T> pullResponse;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                pullResponse = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+                pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
                 networkData.addAll(pullResponse.getResult());
                 exceptions.addAll(pullResponse.getListOfExceptions());
                 cache.delete(query);
@@ -369,7 +417,7 @@ public class BaseDataStore<T extends GenericJson> {
             response.setResult(networkData);
             response.setListOfExceptions(exceptions);
         } else {
-            response = networkManager.pullBlocking(query, cache.get(query), isDeltaSetCachingEnabled()).execute();
+            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
             cache.save(response.getResult());
         }
@@ -391,6 +439,19 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getSyncManager().clear(collection);
+    }
+
+    public void purge(Query query) {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Object t;
+        for (T item : cache.get(query)) {
+            t = item.get("_id");
+            if (t != null) {
+                client.getSyncManager().deleteCachedItems(new Query().equals("meta.id", item.get("_id")));
+            }
+        }
     }
 
     /**
@@ -453,8 +514,55 @@ public class BaseDataStore<T extends GenericJson> {
         return collection;
     }
 
+    /**
+     * Getter to check if delta set cache is enabled
+     * @return delta set get flag
+     */
     public boolean isDeltaSetCachingEnabled() {
         return deltaSetCachingEnabled;
     }
 
+    /**
+     * Setter for delta set get cache flag
+     * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
+     */
+    public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
+        this.deltaSetCachingEnabled = deltaSetCachingEnabled;
+    }
+
+    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
+        boolean success = false;
+        if (storeLiveServiceCallback != null) {
+            liveServiceCallback = storeLiveServiceCallback;
+            networkManager.subscribe(client.getDeviceId()).execute();
+            KinveyLiveServiceCallback<String> callback = new KinveyLiveServiceCallback<String>() {
+                @Override
+                public void onNext(String next) {
+                    try {
+                        liveServiceCallback.onNext(client.getJsonFactory().createJsonParser(next).parse(getCurrentClass()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        liveServiceCallback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    liveServiceCallback.onError(e);
+                }
+
+                @Override
+                public void onStatus(KinveyLiveServiceStatus status) {
+                    liveServiceCallback.onStatus(status);
+                }
+            };
+            success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
+        }
+        return success;
+    }
+
+    public void unsubscribe() throws IOException {
+        liveServiceCallback = null;
+        LiveServiceRouter.getInstance().unsubscribeCollection(collection);
+    }
 }

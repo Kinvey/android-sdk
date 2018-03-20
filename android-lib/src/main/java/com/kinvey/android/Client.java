@@ -769,6 +769,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         }
 
         /**
+         * @param requestTimeout - the request timeout
+         */
+        public Builder setRequestTimeout(int requestTimeout) {
+            super.setRequestTimeout(requestTimeout);
+            return this;
+        }
+
+        /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
          */
@@ -795,6 +803,7 @@ public class Client<T extends User> extends AbstractClient<T> {
                 client.enableDebugLogging();
             }
 
+            client.setRequestTimeout(this.requestTimeout);
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
@@ -1054,6 +1063,11 @@ public class Client<T extends User> extends AbstractClient<T> {
             kinveyHandlerThread.quit();
             kinveyHandlerThread.interrupt();
         }
+    }
+
+    @Override
+    public String getDeviceId() {
+        return new UuidFactory(context).getDeviceUuid().toString();
     }
 }
 

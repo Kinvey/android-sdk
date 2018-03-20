@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -13,27 +13,25 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android;
 
-import android.content.Context;
+package com.kinvey.java.store.requests.user;
 
-import com.google.api.client.util.Key;
+import com.kinvey.java.AbstractClient;
 
 /**
- * Standard Kinvey specific headers are added to all requests.
- * @author m0rganic
- * @since 2.0
+ * Logout Request Class for soft logout.  Constructs the HTTP request object for soft logout
+ * requests. For internal SDK use only.
  */
-class KinveyHeaders extends com.kinvey.java.core.KinveyHeaders {
 
-    @Key("x-kinvey-device-information")
-    private String deviceInfo;
+public final class LogoutSoftRequest {
 
-    public KinveyHeaders(Context context) {
-        super();
+    private AbstractClient client;
 
-        UuidFactory uuidFactory = new UuidFactory(context);
-        deviceInfo = uuidFactory.getDeviceInfoHeader(context);
+    public LogoutSoftRequest(AbstractClient client) {
+        this.client = client;
     }
 
+    public void execute() {
+        client.setActiveUser(null);
+    }
 }
