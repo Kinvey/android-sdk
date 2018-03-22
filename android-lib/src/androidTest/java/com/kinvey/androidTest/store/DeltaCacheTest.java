@@ -10,6 +10,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
@@ -102,7 +103,7 @@ public class DeltaCacheTest {
 
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
-        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
                 Person.COLLECTION,
@@ -147,7 +148,7 @@ public class DeltaCacheTest {
 
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
-        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
                 Person.COLLECTION,
@@ -193,7 +194,7 @@ public class DeltaCacheTest {
 
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
-        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
                 Person.COLLECTION,
@@ -232,7 +233,7 @@ public class DeltaCacheTest {
 
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
-        ICache<QueryCacheItem> queryCache = (ICache<QueryCacheItem>) field.get(store);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
                 Person.COLLECTION,

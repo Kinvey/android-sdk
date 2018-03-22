@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -60,7 +61,6 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
 
-    public static final String QUERY_CACHE_COLLECTION = "_QueryCache";
 
     protected final AbstractClient client;
     private final String collection;
@@ -124,7 +124,6 @@ public class BaseDataStore<T extends GenericJson> {
         this.storeItemType = itemType;
         if (storeType != StoreType.NETWORK) {
             cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
-            queryCache = client.getCacheManager().getCache(QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
         }
         this.networkManager = networkManager;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
@@ -470,6 +469,9 @@ public class BaseDataStore<T extends GenericJson> {
      */
     private KinveyAbstractReadResponse<T> getBlockingDeltaSync(Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
+        if (queryCache == null) {
+            queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        }
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
                 query.addSort(KinveyMetaData.KMD + Constants.DOT + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);

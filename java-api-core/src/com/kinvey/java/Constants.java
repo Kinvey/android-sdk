@@ -21,4 +21,7 @@ public final class Constants {
     public static final String X_KINVEY_REQUEST_START = "x-kinvey-request-start";
     public static final String CHANGED = "changed";
     public static final String DELETED = "deleted";
+
+    //Tables
+    public static final String QUERY_CACHE_COLLECTION = "_QueryCache";
 }
