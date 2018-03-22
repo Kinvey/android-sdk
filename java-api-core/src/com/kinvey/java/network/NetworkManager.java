@@ -385,9 +385,9 @@ public class NetworkManager<T extends GenericJson> {
      */
     public QueryCacheGet queryCacheGetBlocking(Query query, String lastRequestTime) throws IOException {
         Preconditions.checkNotNull(query);
-        QueryCacheGet pull = new QueryCacheGet(query, myClass, lastRequestTime);
-        client.initializeRequest(pull);
-        return pull;
+        QueryCacheGet queryCacheGet = new QueryCacheGet(query, myClass, lastRequestTime);
+        client.initializeRequest(queryCacheGet);
+        return queryCacheGet;
     }
 
 

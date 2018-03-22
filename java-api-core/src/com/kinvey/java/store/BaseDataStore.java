@@ -417,7 +417,7 @@ public class BaseDataStore<T extends GenericJson> {
         if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
             return getBlockingDeltaSync(query);
         } else {
-            return pullBlockingNoDeltaSync(query);
+            return getBlockingNoDeltaSync(query);
         }
     }
 
@@ -427,7 +427,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    private KinveyAbstractReadResponse<T> pullBlockingNoDeltaSync(Query query) throws IOException {
+    private KinveyAbstractReadResponse<T> getBlockingNoDeltaSync(Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
