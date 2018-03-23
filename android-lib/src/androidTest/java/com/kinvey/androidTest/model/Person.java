@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Person extends GenericJson{
 
-    public static final String COLLECTION = "PersonsLocalTest";
+    public static final String COLLECTION = "Persons";
     public static final String COLLECTION_WITH_EXCEPTION = "CollectionWithException";
 
     public static final String LONG_NAME = "LoremIpsumissimplydummytextoftheprintingandtypesettingindustry";
