@@ -16,5 +16,5 @@ public final class Constants {
     public static final String HYPHEN = "-";
     public static final String PROTOCOL_HTTPS = "https://";
     public static final String HOSTNAME_API = "baas.kinvey.com";
-    public static String HOSTNAME_AUTH = "auth.kinvey.com";
+    public static final String HOSTNAME_AUTH = "auth.kinvey.com";
 }
