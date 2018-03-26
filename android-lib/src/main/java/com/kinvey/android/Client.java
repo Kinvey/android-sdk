@@ -30,6 +30,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
@@ -40,6 +41,7 @@ import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.FileStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
@@ -814,7 +816,9 @@ public class Client<T extends User> extends AbstractClient<T> {
             if(this.MICBaseURL != null){
                client.setMICHostName(this.MICBaseURL);
             }
-
+            if (!Strings.isNullOrEmpty(this.instanceID)) {
+                client.setMICHostName(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH);
+            }
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
