@@ -1845,9 +1845,7 @@ public class DataStoreTest {
         }
         sync(store, DEFAULT_TIMEOUT);
         List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
-        for (int i = 0; i < 5; i++) {
-            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, findResult.get(i).getUsername());
-        }
+        assertEquals(5, findResult.size());
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
@@ -1860,9 +1858,7 @@ public class DataStoreTest {
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
         findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
-        for (int i = 0; i < 5; i++) {
-            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, findResult.get(i).getUsername());
-        }
+        assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
 
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
@@ -1879,9 +1875,7 @@ public class DataStoreTest {
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
         findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
-        for (int i = 0; i < 5; i++) {
-            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, findResult.get(i).getUsername());
-        }
+        assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
     }
 
