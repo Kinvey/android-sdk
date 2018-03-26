@@ -779,6 +779,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         }
 
         /**
+         * @param instanceID
+         */
+        public Builder setInstanceID(String instanceID) {
+            super.setInstanceID(instanceID);
+            return this;
+        }
+
+        /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
          */
