@@ -192,6 +192,7 @@ public class DeltaCacheTest {
         BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
+
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
         ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
@@ -231,6 +232,7 @@ public class DeltaCacheTest {
         BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
+
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
         field.setAccessible(true);
         ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
@@ -245,7 +247,6 @@ public class DeltaCacheTest {
         assertEquals("name_1", response.get(0).getUsername());
         assertEquals("name_1", response.get(1).getUsername());
     }
-
 
     @Test
     public void testDefaultDeltaCacheValue() throws InterruptedException, IOException {

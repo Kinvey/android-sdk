@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
-import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -430,7 +429,7 @@ public class BaseDataStore<T extends GenericJson> {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+                query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
             }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();
