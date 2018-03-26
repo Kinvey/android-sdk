@@ -19,6 +19,7 @@ package com.kinvey.java.store;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -395,7 +396,7 @@ public class BaseDataStore<T extends GenericJson> {
 
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(KinveyMetaData.KMD + "." + KinveyMetaData.ECT, AbstractQuery.SortOrder.ASC);
+                query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
             }
             List<T> networkData = new ArrayList<T>();
             List<Exception> exceptions = new ArrayList<Exception>();

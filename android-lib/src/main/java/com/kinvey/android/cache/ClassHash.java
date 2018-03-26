@@ -465,7 +465,7 @@ public abstract class ClassHash {
     }
 
 
-    public static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
+    static DynamicRealmObject saveData(String name, DynamicRealm realm, Class<? extends GenericJson> clazz, GenericJson obj) {
 
         DynamicRealmObject realmObject = saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, new ArrayList<String>());
         String shortName = TableNameManager.getShortName(name, realm);
