@@ -1680,7 +1680,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         List<Person> pullResults = null;
-        Query query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
+        Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
@@ -1721,14 +1721,13 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
+        Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
             pullResults = pull(store, query).result.getResult();
             assertNotNull(pullResults);
             assertTrue(pullResults.size() == 1);
-            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, pullResults.get(0).getUsername());
             assertEquals(i+1, getCacheSize(StoreType.SYNC));
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
@@ -1746,14 +1745,13 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            query.setLimit(1).addSort("_id", AbstractQuery.SortOrder.ASC);
+            query.setLimit(1).addSort(ID, AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
                 pullResults = pull(store, query).result.getResult();
                 assertNotNull(pullResults);
                 assertTrue(pullResults.size() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
-//                assertEquals(pullResults.get(0).getUsername(), TEST_USERNAME + Constants.UNDERSCORE + i);
             }
             System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
@@ -1773,14 +1771,13 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            query.setLimit(1).addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
+            query.setLimit(1).addSort(ID, AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
                 pullResults = pull(store, query).result.getResult();
                 assertNotNull(pullResults);
                 assertTrue(pullResults.size() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
-                assertEquals(pullResults.get(0).getUsername(), TEST_USERNAME + Constants.UNDERSCORE + i);
             }
             System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
@@ -1803,11 +1800,6 @@ public class DataStoreTest {
             Query query = client.query();
             pullResults = pull(store, query).result.getResult();
             assertNotNull(pullResults);
-            assertEquals(5, getCacheSize(StoreType.SYNC));
-//            for (int i = 0; i < 5; i++) {
-//                assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, pullResults.get(i).getUsername());
-//            }
-            System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }
@@ -1859,7 +1851,7 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
-        Query query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
+        Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
@@ -1875,7 +1867,7 @@ public class DataStoreTest {
 
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
+        query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         int limit = 2;
         int skip = 0;
         query.setLimit(limit);
