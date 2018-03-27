@@ -808,10 +808,12 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
             client.setUseDeltaCache(this.deltaSetCache);
-            if (this.MICVersion != null){
+            if (this.MICVersion != null) {
                 client.setMICApiVersion(this.MICVersion);
+            } else {
+                client.setMICApiVersion(DEFAULT_MIC_API_VERSION);
             }
-            if(this.MICBaseURL != null){
+            if(this.MICBaseURL != null) {
                client.setMICHostName(this.MICBaseURL);
             }
 
