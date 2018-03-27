@@ -11,6 +11,7 @@ public final class Constants {
     public static final String Z = "Z";
 
     public static final String CHAR_PERIOD = ".";
+    public static final String _ID = "_id";
     public static final String STR_LIVE_SERVICE_COLLECTION_CHANNEL_PREPEND = "c-";
 
     public static final String HYPHEN = "-";
