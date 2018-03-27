@@ -1,7 +1,7 @@
 package com.kinvey.java;
 
 /**
- * Created by yuliya on 2/20/17.
+ * Created by yuliya on 2/20/18.
  */
 public final class Constants {
 
@@ -24,4 +24,9 @@ public final class Constants {
 
     //Tables
     public static final String QUERY_CACHE_COLLECTION = "_QueryCache";
+    public static final String HYPHEN = "-";
+    public static final String PROTOCOL_HTTPS = "https://";
+    public static final String HOSTNAME_API = "baas.kinvey.com";
+    public static final String HOSTNAME_AUTH = "auth.kinvey.com";
+
 }
