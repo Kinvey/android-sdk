@@ -758,7 +758,7 @@ public class UserStoreTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(redirectURI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id"));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id"));
     }
 
     private DefaultKinveyMICCallback loginWithAuthorizationCodeLoginPage(final String redirectUrl, final Client client) throws InterruptedException {

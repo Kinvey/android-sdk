@@ -66,7 +66,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
     }
 
     // Check clientId (should be absent second part of client_id) in auth link for MICLoginPage
@@ -75,7 +75,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + "oauth/auth?client_id=" + APP_KEY + "&"));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
     }
 
     private DefaultKinveyMICCallback loginWithAuthorizationCodeLoginPage(final String clientId, final String redirectUrl, final Client client) throws InterruptedException {
@@ -175,6 +175,17 @@ public class MICLoginTest {
             this.myURLToRender = myURLToRender;
             finish();
         }
+    }
+
+    @Test
+    public void testMICDefaultAPIVersion() throws IOException {
+        assertEquals("v3", client.getMICApiVersion());
+    }
+
+    @Test
+    public void testMICCustomAPIVersion() throws IOException {
+        client.setMICApiVersion("1");
+        assertEquals("v1", client.getMICApiVersion());
     }
 
 }
