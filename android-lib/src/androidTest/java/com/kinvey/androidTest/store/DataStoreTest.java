@@ -3246,4 +3246,30 @@ public class DataStoreTest {
         assertEquals(0, updatedPersonWithoutList.getList().size());
     }
 
+    @Test
+    public void testCreateUpdateDeleteSync() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback callback = save(store, person);
+        assertNotNull(callback.result);
+        assertNotNull(callback.result.getUsername());
+
+        person = find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.get(0);
+        person.setUsername(TEST_USERNAME_2);
+        callback = save(store, person);
+        assertNotNull(callback.result);
+        assertNotNull(callback.result.getUsername());
+        assertEquals(TEST_USERNAME_2, callback.result.getUsername());
+
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, callback.result.getId(), DEFAULT_TIMEOUT);
+        assertNotNull(deleteCallback.result);
+
+        sync(store, DEFAULT_TIMEOUT);
+
+        assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.size());
+    }
+
+
+
 }

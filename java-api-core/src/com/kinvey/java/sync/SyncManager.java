@@ -144,7 +144,7 @@ public class SyncManager {
         entityQuery.equals(META_DOT_ID, id);
         List<SyncItem> itemsList = requestCache.get(entityQuery);
 
-        if (itemsList.size() == 0) {
+        if (itemsList.size() == 0 || method == RequestMethod.DELETE) {
             requestCache.save(createSyncItem(collectionName, method, networkManager, id));
         }
     }
