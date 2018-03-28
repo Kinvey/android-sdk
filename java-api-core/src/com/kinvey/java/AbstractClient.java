@@ -68,11 +68,6 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      * The default request timeout is 60s.
      */
     public static final int DEFAULT_REQUEST_TIMEOUT = 60 * 1000;
-
-    /**
-     * The default MIC API version.
-     */
-    public static final String DEFAULT_MIC_API_VERSION = "3";
     
     private CredentialStore store;
 
