@@ -9,31 +9,41 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
-import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
-import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
-import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
-import com.kinvey.java.query.AbstractQuery;
+import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyCountResponse;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
+import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.store.BaseDataStore;
+import com.kinvey.java.store.QueryCacheItem;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
-import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by yuliya on 12/27/17.
@@ -43,19 +53,19 @@ import static junit.framework.Assert.assertTrue;
 @SmallTest
 public class DeltaCacheTest {
 
-    private static final int TEN_ITEMS = 10;
-
     private Client client;
     private TestManager<Person> testManager;
     private DataStore<Person> store;
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        testManager = new TestManager<Person>();
+        testManager = new TestManager<>();
         testManager.login(USERNAME, PASSWORD, client);
-
     }
 
     @After
@@ -71,517 +81,171 @@ public class DeltaCacheTest {
     }
 
     @Test
-    public void testCreate() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+    public void testDeltaSyncPull() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query();
+        String lastRequestTime = "Time";
+
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_2"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
+
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
 
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        DefaultKinveyClientCallback callback = testManager.save(store, person);
-        assertNotNull(callback);
-        assertNotNull(callback.getResult());
-        assertNull(callback.getError());
-        assertNotNull(callback.getResult().getUsername());
-        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
-        assertNotNull(syncCallback);
-        assertNotNull(syncCallback.getResult());
-        assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+
+        KinveyAbstractReadResponse<Person> response = store.pullBlocking(query);
+        assertNotNull(response.getResult());
+        assertEquals(0, response.getListOfExceptions().size());
+        assertEquals(lastRequestTime, response.getLastRequest());
+        assertEquals("name_1", response.getResult().get(0).getUsername());
+        assertEquals("name_2", response.getResult().get(1).getUsername());
     }
 
     @Test
-    public void testCreateSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+    public void testDeltaSyncPullWithAutoPagination() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query();
+        String lastRequestTime = "Time";
+
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        NetworkManager.GetCount mockGetCount = mock(NetworkManager.GetCount.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        KinveyCountResponse mockCountResponse = new KinveyCountResponse();
+        mockCountResponse.setCount(2);
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_2"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
+        when(mockGetCount.execute()).thenReturn(mockCountResponse);
+
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+        when(spyNetworkManager.getCountBlocking()).thenReturn(mockGetCount);
+
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
+        store.setAutoPagination(true);
+        store.setAutoPaginationPageSize(1);
 
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        Person savedPerson = store.save(person);
-        assertNotNull(savedPerson);
-        assertEquals(TEST_USERNAME, savedPerson.getUsername());
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
-        store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                "{}{skip=0,limit=1,sorting=}{\"_kmd.ect\" : 1}",
+                lastRequestTime));
+
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                "{}{skip=1,limit=1,sorting=}{\"_kmd.ect\" : 1}",
+                lastRequestTime));
+
+        KinveyAbstractReadResponse<Person> response = store.pullBlocking(query);
+        assertNotNull(response.getResult());
+        assertEquals(0, response.getListOfExceptions().size());
+        assertEquals(lastRequestTime, response.getLastRequest());
+        assertEquals("name_1", response.getResult().get(0).getUsername());
+        assertEquals("name_2", response.getResult().get(1).getUsername());
     }
 
+    /**
+     * Check that Delta Sync Find works with StoreType.CACHE
+     */
     @Test
-    public void testRead() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+    public void testDeltaSyncFindByEmptyQuery() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query();
+        String lastRequestTime = "Time";
+
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_2"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
+
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
 
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        Person savedPerson = store.save(person);
-        assertNotNull(savedPerson);
-        assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
-        store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
-        Person person1 = personList.get(0);
-        assertNotNull(person1);
-        assertNotNull(person1.getUsername());
-        assertEquals(TEST_USERNAME, person1.getUsername());
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+
+        List<Person> response = store.find(query);
+        assertNotNull(response);
+        assertEquals("name_1", response.get(0).getUsername());
+        assertEquals("name_2", response.get(1).getUsername());
     }
 
+    /**
+     * Check Delta Sync Find by Query
+     */
     @Test
-    public void testReadALotOfItems() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
+    public void testDeltaSyncFindByQuery() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        Query query = client.query().equals("name", "name_1");
+        String lastRequestTime = "Time";
 
-        testManager.createPersons(store, TEN_ITEMS);
+        NetworkManager.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyQueryCacheResponse<Person> mockResponse = new KinveyQueryCacheResponse<>();
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("name_1"));
+        people.add(new Person("name_1"));
+        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setChanged(people);
+        mockResponse.setListOfExceptions(new ArrayList<Exception>());
+        when(mockCacheGet.execute()).thenReturn(mockResponse);
 
-        store.pushBlocking();
-        Query query = client.query().addSort("_kmd", AbstractQuery.SortOrder.ASC);
-        List<Person> pulledPersons = store.pullBlocking(query).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
 
-        Person person;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person = pulledPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person.getUsername());
-        }
-
-        pulledPersons = store.pullBlocking(query).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
-
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person = pulledPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person.getUsername());
-        }
-
-        List<Person> foundPersons = testManager.find(store, query).getResult();
-        assertNotNull(foundPersons);
-        assertEquals(TEN_ITEMS, foundPersons.size());
-
-        Person person1;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person1 = foundPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person1.getUsername());
-        }
-    }
-
-    @Test
-    public void testReadALotOfItemsWithClearCache() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-        testManager.createPersons(store, TEN_ITEMS);
-        store.pushBlocking();
-
-        store.clear();
-
-        Query query = client.query().addSort("_kmd", AbstractQuery.SortOrder.ASC);
-        List<Person> pulledPersons = store.pullBlocking(query).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
-
-        Person person;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person = pulledPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person.getUsername());
-        }
-
-        pulledPersons = store.pullBlocking(query).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
-
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person = pulledPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person.getUsername());
-        }
-
-        List<Person> foundPersons = testManager.find(store, query).getResult();
-        assertNotNull(foundPersons);
-        assertEquals(TEN_ITEMS, foundPersons.size());
-
-        Person person1;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person1 = foundPersons.get(i);
-            assertEquals(TEST_USERNAME + i, person1.getUsername());
-        }
-    }
-
-    @Test
-    public void testReadALotOfItemsByQuery() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        testManager.createPersons(store, TEN_ITEMS);
-
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            Person person = new Person();
-            person.setUsername("DeltaCacheUserNameQuery_" + i);
-            person.setAge("30");
-            Person savedPerson = store.save(person);
-            assertNotNull(savedPerson);
-            assertEquals("DeltaCacheUserNameQuery_" + i, savedPerson.getUsername());
-        }
-
-        store.pushBlocking();
-        List<Person> pulledPersons = store.pullBlocking(client.query().equals("age", "30").addSort("_kmd", AbstractQuery.SortOrder.ASC)).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
-
-        Person person;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person = pulledPersons.get(i);
-            assertEquals("DeltaCacheUserNameQuery_" + i, person.getUsername());
-        }
-
-        List<Person> foundPersons = testManager.find(store, client.query().equals("age", "30").addSort("_kmd", AbstractQuery.SortOrder.ASC)).getResult();
-
-        Person person1;
-        for (int i = 0; i < TEN_ITEMS; i++) {
-            person1 = foundPersons.get(i);
-            assertEquals("DeltaCacheUserNameQuery_" + i, person1.getUsername());
-        }
-    }
-
-    @Test
-    public void testReadSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        Person savedPerson = store.save(person);
-        assertNotNull(savedPerson);
-        assertEquals(TEST_USERNAME, savedPerson.getUsername());
-
-        store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
-
-        List<Person> personList = store.find();
-        Person person1 = personList.get(0);
-        assertNotNull(person1);
-        assertNotNull(person1.getUsername());
-        assertEquals(TEST_USERNAME, person1.getUsername());
-    }
-
-    @Test
-    public void testUpdate() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        DefaultKinveyClientCallback callback = testManager.save(store, person);
-        assertNotNull(callback);
-        assertNotNull(callback.getResult());
-        assertNull(callback.getError());
-        assertNotNull(callback.getResult().getUsername());
-        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
-
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
-        assertNotNull(syncCallback);
-        assertNotNull(syncCallback.getResult());
-        assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
-
-        List<Person> personList = testManager.find(store, client.query()).getResult();
-        Person changedPerson = personList.get(0);
-        assertNotNull(changedPerson);
-        assertNotNull(changedPerson.getUsername());
-        assertEquals(TEST_USERNAME, changedPerson.getUsername());
-
-        changedPerson.setUsername("DeltaCacheUserName_changed");
-        testManager.save(store, changedPerson);
-
-        personList = testManager.find(store, client.query()).getResult();
-        Person changedPerson1 = personList.get(0);
-        assertNotNull(changedPerson1);
-        assertNotNull(changedPerson1.getUsername());
-        assertEquals("DeltaCacheUserName_changed", changedPerson1.getUsername());
-
-        syncCallback = testManager.sync(store, client.query());
-        assertNotNull(syncCallback);
-        assertNotNull(syncCallback.getResult());
-        assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals("DeltaCacheUserName_changed", syncCallback.getResult().getResult().get(0).getUsername());
-
-        personList = testManager.find(store, client.query()).getResult();
-        Person person1 = personList.get(0);
-        assertNotNull(person1);
-        assertNotNull(person1.getUsername());
-        assertEquals("DeltaCacheUserName_changed", person1.getUsername());
-    }
-
-    @Test
-    public void testUpdateSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        Person savedPerson = store.save(person);
-        assertNotNull(savedPerson);
-        assertEquals(TEST_USERNAME, savedPerson.getUsername());
-
-        store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
-
-        List<Person> personList = store.find();
-        Person changedPerson = personList.get(0);
-        assertNotNull(changedPerson);
-        assertNotNull(changedPerson.getUsername());
-        assertEquals(TEST_USERNAME, changedPerson.getUsername());
-
-        changedPerson.setUsername("DeltaCacheUserName_changed");
-        store.save(changedPerson);
-
-        personList = store.find();
-        Person changedPerson1 = personList.get(0);
-        assertNotNull(changedPerson1);
-        assertNotNull(changedPerson1.getUsername());
-        assertEquals("DeltaCacheUserName_changed", changedPerson1.getUsername());
-
-        store.pushBlocking();
-        downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals("DeltaCacheUserName_changed", downloadedPerson.getUsername());
-
-        personList = store.find();
-        changedPerson1 = personList.get(0);
-        assertNotNull(changedPerson1);
-        assertNotNull(changedPerson1.getUsername());
-        assertEquals("DeltaCacheUserName_changed", changedPerson1.getUsername());
-    }
-
-    @Test
-    public void testDelete() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        DefaultKinveyClientCallback callback = testManager.save(store, person);
-        assertNotNull(callback);
-        assertNotNull(callback.getResult());
-        assertNull(callback.getError());
-        assertNotNull(callback.getResult().getUsername());
-        assertEquals(TEST_USERNAME, callback.getResult().getUsername());
-
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
-        assertNotNull(syncCallback);
-        assertNotNull(syncCallback.getResult());
-        assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
-
-        List<Person> personList = testManager.find(store, client.query()).getResult();
-        Person foundPerson = personList.get(0);
-        assertNotNull(foundPerson);
-        assertNotNull(foundPerson.getUsername());
-        assertEquals(TEST_USERNAME, foundPerson.getUsername());
-
-        DefaultKinveyDeleteCallback deleteCallback = testManager.delete(store, foundPerson.getId());
-        assertNotNull(deleteCallback);
-        assertNotNull(deleteCallback.getResult());
-        assertNull(deleteCallback.getError());
-
-        personList = testManager.find(store, client.query()).getResult();
-        assertEquals(0, personList.size());
-        assertEquals(1, store.syncCount());
-
-        syncCallback = testManager.sync(store, client.query());
-        assertNotNull(syncCallback);
-        assertNotNull(syncCallback.getResult());
-        assertNull(syncCallback.getError());
-        assertEquals(0, syncCallback.getResult().getResult().size());
-
-        personList = testManager.find(store, client.query()).getResult();
-        assertEquals(0, personList.size());
-        assertEquals(0, store.count().intValue());
-        assertEquals(0, store.syncCount());
-    }
-
-    @Test
-    public void testDeleteSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        Person person = new Person();
-        person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
-        Person savedPerson = store.save(person);
-        assertNotNull(savedPerson);
-        assertEquals(TEST_USERNAME, savedPerson.getUsername());
-
-        store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
-
-        List<Person> personList = store.find();
-        Person foundPerson = personList.get(0);
-        assertNotNull(foundPerson);
-        assertNotNull(foundPerson.getUsername());
-        assertEquals(TEST_USERNAME, foundPerson.getUsername());
-
-        int deletedItemsCount = store.delete(foundPerson.getId());
-        assertEquals(1, deletedItemsCount);
-
-        personList = store.find();
-        assertEquals(0, personList.size());
-        assertEquals(1, store.syncCount());
-
-        store.pushBlocking();
-        List<Person> downloadedPersons = store.pullBlocking(client.query()).getResult();
-        assertNotNull(downloadedPersons);
-        assertEquals(0, downloadedPersons.size());
-
-        personList = store.find();
-        assertEquals(0, personList.size());
-        assertEquals(0, store.count().intValue());
-        assertEquals(0, store.syncCount());
-    }
-
-    @Test
-    public void testDeleteWithTwoStorageTypes() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        assertFalse(networkStore.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
 
-        testManager.createPersons(store, TEN_ITEMS);
-        testManager.sync(store, client.query());
+        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+        field.setAccessible(true);
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
-        assertNotNull(pullCallback);
-        assertNotNull(pullCallback.getResult());
-        assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
+        queryCache.save(new QueryCacheItem(
+                Person.COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
 
-        DefaultKinveyDeleteCallback deleteCallback = testManager.delete(networkStore, client.query().equals("username", TEST_USERNAME + 0));
-        assertNotNull(deleteCallback);
-        assertNotNull(deleteCallback.getResult());
-        assertNull(deleteCallback.getError());
-        assertEquals(1, deleteCallback.getResult().intValue());
-
-        pullCallback = testManager.pullCustom(store, client.query());
-        assertNotNull(pullCallback);
-        assertNotNull(pullCallback.getResult());
-        assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS - 1, pullCallback.getResult().getResult().size());
-
-        List<Person> personList = testManager.find(store, client.query()).getResult();
-        assertEquals(TEN_ITEMS - 1, personList.size());
-    }
-
-    @Test
-    public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        assertFalse(networkStore.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        testManager.createPersons(store, TEN_ITEMS);
-        testManager.sync(store, client.query());
-
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
-        assertNotNull(pullCallback);
-        assertNotNull(pullCallback.getResult());
-        assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
-
-        DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, new Person(TEST_USERNAME + TEN_ITEMS));
-        assertNotNull(saveCallback);
-        assertNotNull(saveCallback.getResult());
-        assertNull(saveCallback.getError());
-        assertEquals(TEST_USERNAME + TEN_ITEMS, saveCallback.getResult().getUsername());
-
-        pullCallback = testManager.pullCustom(store, client.query());
-        assertNotNull(pullCallback);
-        assertNotNull(pullCallback.getResult());
-        assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS + 1, pullCallback.getResult().getResult().size());
-
-        List<Person> personList = testManager.find(store, client.query()).getResult();
-        assertEquals(TEN_ITEMS + 1, personList.size());
-    }
-
-    @Test
-    public void testUpdateWithTwoStorageTypes() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        store.setDeltaSetCachingEnabled(true);
-
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        assertTrue(store.isDeltaSetCachingEnabled());
-        assertFalse(networkStore.isDeltaSetCachingEnabled());
-        testManager.cleanBackend(store, StoreType.SYNC);
-
-        testManager.createPersons(store, TEN_ITEMS);
-        testManager.sync(store, client.query());
-
-        Person personForUpdate = testManager.find(networkStore, client.query().equals("username", TEST_USERNAME + 0)).getResult().get(0);
-        personForUpdate.setUsername(TEST_USERNAME + 100);
-        DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, personForUpdate);
-        assertNotNull(saveCallback);
-        assertNotNull(saveCallback.getResult());
-        assertNull(saveCallback.getError());
-        assertEquals(TEST_USERNAME + 100, saveCallback.getResult().getUsername());
-
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query().addSort("_kmd", AbstractQuery.SortOrder.ASC));
-        assertNotNull(pullCallback);
-        assertNotNull(pullCallback.getResult());
-        assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
-        assertEquals(TEST_USERNAME + 100, pullCallback.getResult().getResult().get(9).getUsername());
-
-        List<Person> personList = testManager.find(store, client.query().equals("username", TEST_USERNAME + 100)).getResult();
-        assertEquals(1, personList.size());
-        assertEquals(TEST_USERNAME + 100, personList.get(0).getUsername());
+        List<Person> response = store.find(query);
+        assertNotNull(response);
+        assertEquals("name_1", response.get(0).getUsername());
+        assertEquals("name_1", response.get(1).getUsername());
     }
 
     @Test
@@ -605,5 +269,18 @@ public class DeltaCacheTest {
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.isDeltaSetCachingEnabled());
     }
+
+    @Test
+    public void testErrorIfStoreTypeNetwork() throws InterruptedException, IOException {
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        try {
+            store.setDeltaSetCachingEnabled(true);
+            assertTrue(false);
+        } catch (Exception e) {
+            assertNotNull(e);
+        }
+    }
+
+
 
 }

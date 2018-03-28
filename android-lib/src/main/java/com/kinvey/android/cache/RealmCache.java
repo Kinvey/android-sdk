@@ -46,10 +46,7 @@ import io.realm.Sort;
  */
 public class RealmCache<T extends GenericJson> implements ICache<T> {
 
-    private static final String ACL = "_acl";
-    private static final String KMD = "_kmd";
     private static final String ID = "_id";
-    private static final String SORT_FIELD = "_kmd.ect";
 
     private String mCollection;
     private RealmCacheManager mCacheManager;
@@ -64,6 +61,33 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         this.ttl = ttl > 0 ? ttl : 0;
     }
 
+    /**
+     * Get items from the realm with sorting it it exists
+     * @param realmQuery
+     * @param query
+     * @return
+     */
+    private RealmResults<DynamicRealmObject> get(RealmQuery<DynamicRealmObject> realmQuery, Query query) {
+        RealmResults<DynamicRealmObject> objects;
+        final Map<String, AbstractQuery.SortOrder> sortingOrders = query != null ? query.getSort() : null;
+        if (sortingOrders != null && sortingOrders.size() > 0) {
+            List<String> fields = new ArrayList<>();
+            List<Sort> sorts = new ArrayList<>();
+            for (Map.Entry<String, AbstractQuery.SortOrder> sortOrderEntry : sortingOrders.entrySet()) {
+                fields.add(sortOrderEntry.getKey());
+                if (sortOrderEntry.getValue().equals(AbstractQuery.SortOrder.ASC)) {
+                    sorts.add(Sort.ASCENDING);
+                } else {
+                    sorts.add(Sort.DESCENDING);
+                }
+            }
+            objects = realmQuery.findAllSorted(fields.toArray(new String[fields.size()]), sorts.toArray(new Sort[sorts.size()]));
+        } else {
+            objects = realmQuery.findAll();
+        }
+        return objects;
+    }
+
     @Override
     public List<T> get(Query query) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
@@ -73,13 +97,10 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
             boolean isIgnoreIn = isQueryContainsInOperator(query.getQueryFilterMap());
             QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap(), isIgnoreIn);
-            RealmResults<DynamicRealmObject> objects = null;
+            RealmResults<DynamicRealmObject> objects = get(realmQuery, query);
 
-            final Map<String, AbstractQuery.SortOrder> sortingOrders = query.getSort();
             int limit = query.getLimit();
             int skip = query.getSkip();
-
-            objects = realmQuery.findAllSorted(SORT_FIELD);
 
             for (Iterator<DynamicRealmObject> iterator = objects.iterator(); iterator.hasNext(); ) {
                 DynamicRealmObject obj = iterator.next();
@@ -89,58 +110,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             if (isIgnoreIn) {
                 checkCustomInQuery(query.getQueryFilterMap(), ret);
             }
-
-            //own sorting implementation
-            if (sortingOrders != null && sortingOrders.size() > 0) {
-                Collections.sort(ret, new Comparator<T>() {
-                    @Override
-                    public int compare(T lhs, T rhs) {
-                        int sortRet = 0;
-
-                        for (Map.Entry<String, AbstractQuery.SortOrder> sortOrderEntry : sortingOrders.entrySet()) {
-                            String fieldName = sortOrderEntry.getKey();
-                            String[] path = fieldName.split("\\.");
-                            int pathStep = 0;
-                            Map currentLhsPathObject = lhs;
-                            Map currentRhsPathObject = rhs;
-                            while (pathStep < path.length - 1) {
-                                if (currentLhsPathObject != null &&
-                                        currentLhsPathObject.containsKey(path[pathStep]) &&
-                                        Map.class.isAssignableFrom(currentLhsPathObject.get(path[pathStep]).getClass())) {
-                                    currentLhsPathObject = (Map) currentLhsPathObject.get(path[pathStep]);
-                                } else {
-                                    currentLhsPathObject = null;
-                                }
-
-                                if (currentRhsPathObject != null &&
-                                        currentRhsPathObject.containsKey(path[pathStep]) &&
-                                        Map.class.isAssignableFrom(currentRhsPathObject.get(path[pathStep]).getClass())) {
-                                    currentRhsPathObject = (Map) currentRhsPathObject.get(path[pathStep]);
-                                } else {
-                                    currentRhsPathObject = null;
-                                }
-                                pathStep++;
-                            }
-
-
-                            Object l = currentLhsPathObject != null ? currentLhsPathObject.get(path[path.length - 1]) : null;
-                            Object r = currentRhsPathObject != null ? currentRhsPathObject.get(path[path.length - 1]) : null;
-
-                            if (Comparable.class.isAssignableFrom(l.getClass())) {
-                                sortRet = (sortOrderEntry.getValue().equals(Sort.DESCENDING) ? 1 : -1) * ((Comparable) l).compareTo(r);
-                            }
-
-                            if (sortRet != 0) {
-                                break;
-                            }
-
-                        }
-
-                        return sortRet;
-                    }
-                });
-            }
-
 
             //own skipping implementation
             if (skip > 0) {
@@ -184,7 +153,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             }
             query.endGroup();
 
-            RealmResults<DynamicRealmObject> objects = query.findAllSorted(SORT_FIELD);
+            RealmResults<DynamicRealmObject> objects = get(query, null);
 
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
@@ -228,8 +197,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             RealmQuery<DynamicRealmObject> query = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                     .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis());
 
-            RealmResults<DynamicRealmObject> objects = query
-                    .findAllSorted(SORT_FIELD);
+            RealmResults<DynamicRealmObject> objects = get(query, null);
 
             for (DynamicRealmObject obj : objects) {
                 ret.add(ClassHash.realmToObject(obj, mCollectionItemClass));
@@ -248,7 +216,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public List<T> save(Iterable<T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
-        try{
+        try {
             mRealm.beginTransaction();
             for (T item : items){
                 if (item != null) {
@@ -312,8 +280,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
                 RealmQuery<DynamicRealmObject> realmQuery = realm.where(TableNameManager.getShortName(tableName, realm));
                 QueryHelper.prepareRealmQuery(realmQuery, query.getQueryFilterMap());
-
-                RealmResults result = realmQuery.findAllSorted(SORT_FIELD);
+                RealmResults result = get(realmQuery, query);
 
                 ret = result.size();
                 int limit = query.getLimit();
@@ -439,11 +406,11 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     @Override
     public T getFirst() {
-        DynamicRealm mRealm = mCacheManager.getDynamicRealm();;
+        DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         T ret = null;
 
-        try{
+        try {
             mRealm.beginTransaction();
             DynamicRealmObject obj = mRealm.where(TableNameManager.getShortName(mCollection, mRealm)).findFirst();
             if (obj != null){
@@ -611,7 +578,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 try {
                     objects = mRealm.where(TableNameManager.getShortName(mCollection, mRealm))
                             .greaterThanOrEqualTo(ClassHash.TTL, Calendar.getInstance().getTimeInMillis())
-                            .findAllSorted(SORT_FIELD);
+                            .findAll();
 
                 } finally {
                     mRealm.close();

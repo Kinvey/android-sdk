@@ -30,6 +30,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.callback.KinveyClientBuilderCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
@@ -40,6 +41,7 @@ import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.store.FileStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.auth.ClientUser;
 import com.kinvey.java.auth.Credential;
@@ -777,6 +779,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         }
 
         /**
+         * @param instanceID
+         */
+        public Builder setInstanceID(String instanceID) {
+            super.setInstanceID(instanceID);
+            return this;
+        }
+
+        /**
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
          */
@@ -808,13 +818,17 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.batchRate = this.batchRate;
             client.batchSize = this.batchSize;
             client.setUseDeltaCache(this.deltaSetCache);
-            if (this.MICVersion != null){
+            if (this.MICVersion != null) {
                 client.setMICApiVersion(this.MICVersion);
+            } else {
+                client.setMICApiVersion(DEFAULT_MIC_API_VERSION);
             }
-            if(this.MICBaseURL != null){
+            if(this.MICBaseURL != null) {
                client.setMICHostName(this.MICBaseURL);
             }
-
+            if (!Strings.isNullOrEmpty(this.instanceID)) {
+                client.setMICHostName(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH);
+            }
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {
