@@ -7,8 +7,10 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.kinvey.android.Client;
 import com.kinvey.android.cache.QueryHelper;
 import com.kinvey.java.Query;
+import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import org.junit.After;
@@ -25,7 +27,7 @@ import io.realm.RealmQuery;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -51,7 +53,7 @@ public class QueryTest {
             realm.commitTransaction();
         }
 
-        RealmQuery query = mock(RealmQuery.class);
+        RealmQuery query = spy(RealmQuery.class);
         doReturn(query).when(query).beginGroup();
         doReturn(query).when(query).equalTo(anyString(), anyString());
         doReturn(query).when(query).endGroup();

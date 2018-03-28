@@ -216,7 +216,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     public List<T> save(Iterable<T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
-        try {
+        try{
             mRealm.beginTransaction();
             for (T item : items){
                 if (item != null) {
