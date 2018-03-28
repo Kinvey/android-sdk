@@ -16,10 +16,12 @@
 
 package com.kinvey.java.store.requests.user;
 
+import com.google.api.client.http.HttpResponseException;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.LiveServiceRouter;
 
 import java.io.IOException;
