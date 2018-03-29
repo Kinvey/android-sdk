@@ -78,6 +78,15 @@ public class MICLoginTest {
         assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
     }
 
+    // Check that myURLToRender contains openId parameter
+    @Test
+    public void testOpenIdExists() throws InterruptedException {
+        DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, REDIRECT_URI, client);
+        assertNotNull(userCallback.myURLToRender);
+        assertTrue(!userCallback.myURLToRender.isEmpty());
+        assertTrue(userCallback.myURLToRender.endsWith("&response_type=code" + "&scope=openid"));
+    }
+
     private DefaultKinveyMICCallback loginWithAuthorizationCodeLoginPage(final String clientId, final String redirectUrl, final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyMICCallback callback = new DefaultKinveyMICCallback(latch);

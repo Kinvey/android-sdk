@@ -686,7 +686,7 @@ public class UserStore {
      * @param callback KinveyMICCallback
      */
     public static void loginWithAuthorizationCodeLoginPage(Client client, String clientId, /*Class userClass, */String redirectURI, KinveyMICCallback callback){
-        //return URL for login pagef
+        //return URL for login page
         //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
         String appkey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         String host = client.getMICHostName();
@@ -698,7 +698,7 @@ public class UserStore {
         if (clientId != null) {
             myURLToRender = myURLToRender + "." + clientId;
         }
-        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code";
+        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code" + "&scope=openid";
         //keep a reference to the callback and redirect uri for later
 
         MICCallback = callback;
@@ -711,7 +711,7 @@ public class UserStore {
     }
 
     /**
-     * Used by the MIC login flow, this method should be called after a successful login in the onNewItent Method of your activity.  See the MIC guide for more information.
+     * Used by the MIC login flow, this method should be called after a successful login in the onNewIntent Method of your activity.  See the MIC guide for more information.
      *
      * @param intent The intent provided to the application from the redirect
      * @param clientId ClientId
@@ -730,7 +730,7 @@ public class UserStore {
     }
 
     /**
-     * Used by the MIC login flow, this method should be called after a successful login in the onNewItent Method of your activity.  See the MIC guide for more information.
+     * Used by the MIC login flow, this method should be called after a successful login in the onNewIntent Method of your activity.  See the MIC guide for more information.
      *
      * @param intent The intent provided to the application from the redirect
      * @deprecated Use {@link #onOAuthCallbackReceived(Intent, String, AbstractClient)}
