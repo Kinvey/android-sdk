@@ -9,6 +9,7 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.androidTest.model.TestUser;
+import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 
 import org.junit.Before;
@@ -167,6 +168,13 @@ public class ClientBuilderTest {
         client = new Client.Builder(mContext).setRequestTimeout(120000).build();
         assertNotNull(client);
         assertEquals(120000, client.getRequestTimeout());
+    }
+
+    @Test
+    public void testSetInstanceId() throws IOException {
+        client = new Client.Builder(mContext).setInstanceID("TestInstanceId").build();
+        assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
+        assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
     }
 
 }

@@ -68,11 +68,6 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      * The default request timeout is 60s.
      */
     public static final int DEFAULT_REQUEST_TIMEOUT = 60 * 1000;
-
-    /**
-     * The default MIC API version.
-     */
-    public static final String DEFAULT_MIC_API_VERSION = "3";
     
     private CredentialStore store;
 
@@ -114,7 +109,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     }
 
     public void setMICHostName(String MICHostName) throws IllegalArgumentException {
-        if (!MICHostName.startsWith("https://")){
+        if (!MICHostName.startsWith(Constants.PROTOCOL_HTTPS)){
             throw new IllegalArgumentException("MIC url should be sercure url");
         }
         this.MICHostName = MICHostName.endsWith("/") ? MICHostName : MICHostName + "/";
@@ -326,6 +321,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      * This Builder is not thread safe.
      */
     public static abstract class Builder extends AbstractKinveyJsonClient.Builder {
+        protected String instanceID;
         private CredentialStore store;
         private Properties props = new Properties();
         protected int requestTimeout = DEFAULT_REQUEST_TIMEOUT;
@@ -465,6 +461,12 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
          */
         public Builder setRequestTimeout(int requestTimeout) {
             this.requestTimeout = requestTimeout;
+            return this;
+        }
+
+        public Builder setInstanceID(String instanceID) {
+            this.instanceID = instanceID;
+            setBaseUrl(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_API);
             return this;
         }
 
