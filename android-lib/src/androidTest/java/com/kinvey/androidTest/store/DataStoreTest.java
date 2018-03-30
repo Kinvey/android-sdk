@@ -2184,6 +2184,22 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSaveListWithStoreTypeCache() throws InterruptedException {
+        client.enableDebugLogging();
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        ArrayList<Person> persons = new ArrayList<>();
+        persons.add(new Person(TEST_USERNAME));
+        persons.add(new Person(TEST_USERNAME_2));
+        persons.add(new Person(TEST_TEMP_USERNAME));
+
+        CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
+        assertNotNull(saveCallback.getResult());
+        assertEquals(3, saveCallback.getResult().size());
+    }
+
+    @Test
     public void testClear() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);

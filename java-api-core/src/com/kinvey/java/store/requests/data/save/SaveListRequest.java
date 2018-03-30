@@ -17,10 +17,12 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.Constants;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 
@@ -51,16 +53,42 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
 
     @Override
     public List<T> execute() throws IOException {
-        List<T> ret = new ArrayList<T>();
+        List<T> ret = new ArrayList<>();
         switch (writePolicy) {
             case FORCE_LOCAL:
                 ret = cache.save(objects);
                 syncManager.enqueueRequests(networkManager.getCollectionName(), networkManager, RequestMethod.SAVE, ret);
                 break;
             case LOCAL_THEN_NETWORK:
+                PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(), cache, networkManager,
+                        networkManager.getClient());
+                try {
+                    pushRequest.execute();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    // silent fall, will be synced next time
+                }
+                List<T> notPushedObjects = new ArrayList<>();
+                IOException exception = null;
+                for (T object : objects) {
+                    try {
+                        ret.add(networkManager.saveBlocking(object).execute());
+                    } catch (IOException e) {
+                        syncManager.enqueueRequest(networkManager.getCollectionName(),
+                                networkManager, RequestMethod.SAVE, (String) object.get(Constants._ID));
+                        notPushedObjects.add(object);
+                        exception = e;
+                    }
+                }
+                cache.save(ret);
+                cache.save(notPushedObjects);
+                if (exception != null) {
+                    throw exception;
+                }
+                break;
             case FORCE_NETWORK:
                 for (T obj : objects){
-                    SaveRequest<T> save = new SaveRequest<T>(
+                    SaveRequest<T> save = new SaveRequest<>(
                             cache, networkManager , writePolicy, obj, syncManager);
                     ret.add(save.execute());
                 }
