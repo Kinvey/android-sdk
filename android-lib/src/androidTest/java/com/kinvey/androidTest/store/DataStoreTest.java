@@ -1337,6 +1337,25 @@ public class DataStoreTest {
         return callback;
     }
 
+    private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, pageSize, callback);
+                } else {
+                    store.pull(pageSize, callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
@@ -1428,7 +1447,7 @@ public class DataStoreTest {
         CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
         assertTrue(pullCallback.getResult().getResult().size() == 4);
-        testManager.cleanBackendDataStore(store);
+        testManager.cleanBackend(store, StoreType.SYNC);
     }
 
     @Test
@@ -1436,12 +1455,10 @@ public class DataStoreTest {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null, 2);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
         assertTrue(pullCallback.getResult().getResult().size() == 4);
-        testManager.cleanBackendDataStore(store);
+        testManager.cleanBackend(store, StoreType.SYNC);
     }
 
         /**
@@ -1563,9 +1580,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         // Act
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        DefaultKinveyPullCallback pullCallback = pull(store, null);
+        DefaultKinveyPullCallback pullCallback = pull(store, null, 2);
 
         // Assert
         assertNull(pullCallback.error);
@@ -1596,9 +1611,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         // Act
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        List<Person> pullResults = store.pullBlocking(null).getResult();
+        List<Person> pullResults = store.pullBlocking(null, 2).getResult();
 
         // Assert
         assertNotNull(pullResults);
@@ -1789,8 +1802,6 @@ public class DataStoreTest {
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(1);
         List<Person> pullResults;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
@@ -1799,7 +1810,7 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            pullResults = pull(store, query).result.getResult();
+            pullResults = pull(store, query,1).result.getResult();
             assertNotNull(pullResults);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
