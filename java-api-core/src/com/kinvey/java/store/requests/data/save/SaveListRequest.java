@@ -79,6 +79,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                         exception = e;
                     }
                 }
+                cache.save(ret);
                 if (exception != null) {
                     throw exception;
                 }
