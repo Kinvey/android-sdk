@@ -2197,6 +2197,8 @@ public class DataStoreTest {
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
         assertNotNull(saveCallback.getResult());
         assertEquals(3, saveCallback.getResult().size());
+        List<Person> cachedItems = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).get();
+        assertEquals(3, cachedItems.size());
     }
 
     @Test

@@ -68,20 +68,17 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                     t.printStackTrace();
                     // silent fall, will be synced next time
                 }
-                List<T> notPushedObjects = new ArrayList<>();
                 IOException exception = null;
+                cache.save(objects);
                 for (T object : objects) {
                     try {
                         ret.add(networkManager.saveBlocking(object).execute());
                     } catch (IOException e) {
                         syncManager.enqueueRequest(networkManager.getCollectionName(),
                                 networkManager, RequestMethod.SAVE, (String) object.get(Constants._ID));
-                        notPushedObjects.add(object);
                         exception = e;
                     }
                 }
-                cache.save(ret);
-                cache.save(notPushedObjects);
                 if (exception != null) {
                     throw exception;
                 }
