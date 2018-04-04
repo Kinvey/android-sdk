@@ -3254,6 +3254,7 @@ public class DataStoreTest {
         DefaultKinveyClientCallback callback = save(store, person);
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
+        sync(store, DEFAULT_TIMEOUT);
 
         person = find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.get(0);
         person.setUsername(TEST_USERNAME_2);
@@ -3268,6 +3269,7 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
 
         assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.size());
+        assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
     }
 
 
