@@ -17,7 +17,7 @@
 package com.kinvey.android;
 
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.Query;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.store.BaseDataStore;
@@ -28,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Class represents internal implementation of Async pull request that is used to create pull
  */
-public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
+public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
     private final BaseDataStore store;
     private Query query;
 
@@ -40,7 +40,7 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
      */
     public AsyncPullRequest(BaseDataStore store,
                             Query query,
-                            KinveyPullCallback<T> callback){
+                            KinveyPullCallback callback){
         super(callback);
         this.query = query;
         this.store = store;
@@ -48,11 +48,7 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
 
 
     @Override
-    protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
-        KinveyAbstractReadResponse<T> pullResponse = store.pullBlocking(query);
-        kinveyPullResponse.setListOfExceptions(pullResponse.getListOfExceptions());
-        kinveyPullResponse.setResult(pullResponse.getResult());
-        return kinveyPullResponse;
+    protected KinveyPullResponse executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+        return store.pullBlocking(query);
     }
 }

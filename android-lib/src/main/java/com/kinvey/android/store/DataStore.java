@@ -29,7 +29,7 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
@@ -657,7 +657,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /**
      * Asynchronous request to pull a collection of entites from backend.
      * <p>
-     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -678,16 +678,16 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback<T> callback) {
+    public void pull(Query query, KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, query, callback).execute();
+        new AsyncPullRequest(this, query, callback).execute();
     }
 
     /**
      * Asynchronous request to pull a collection of entites from backend.
      * <p>
-     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -705,7 +705,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPullCallback
      */
-    public void pull(KinveyPullCallback<T> callback) {
+    public void pull(KinveyPullCallback callback) {
         this.pull(null, callback);
     }
 
@@ -713,7 +713,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
      * Creates an asynchronous request to clear all the pending requests from the sync storage.
-     * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
+     * Uses KinveyPullCallback to return a {@link KinveyPurgeCallback}.
      * </p>
      * <p>
      * Sample Usage:
@@ -764,7 +764,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
      *     public void onSuccess(KinveyPushResponse kinveyPushResponse,
-     *         KinveyPullResponse<T> kinveyPullResponse) {...}
+     *         KinveyPullResponse kinveyPullResponse) {...}
      *         void onSuccess(){...};
      *         void onPullStarted(){...};
      *         void onPushStarted(){...};
@@ -787,10 +787,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                    public void onSuccess(KinveyPullResponse pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
                     }

@@ -238,9 +238,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {

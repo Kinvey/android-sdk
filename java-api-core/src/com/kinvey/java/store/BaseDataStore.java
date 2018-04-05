@@ -28,6 +28,7 @@ import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
@@ -385,42 +386,44 @@ public class BaseDataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public KinveyAbstractReadResponse<T> pullBlocking(Query query) throws IOException {
+    public KinveyPullResponse pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
 
-        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
+        KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
-
+        KinveyAbstractReadResponse<T> pullResponse;
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
                 query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
             }
-            List<T> networkData = new ArrayList<T>();
-            List<Exception> exceptions = new ArrayList<Exception>();
+            List<Exception> exceptions = new ArrayList<>();
             int skipCount = 0;
             int pageSize = this.pageSize;
 
             // First, get the count of all the items to pull
             int totalItemCount = this.countNetwork();
-            KinveyAbstractReadResponse<T> pullResponse;
+
+            int pulledItemCount = 0;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
                 pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-                networkData.addAll(pullResponse.getResult());
+                pulledItemCount += pullResponse.getResult().size();
                 exceptions.addAll(pullResponse.getListOfExceptions());
                 cache.delete(query);
-                cache.save(networkData);
+                cache.save(pullResponse.getResult());
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
-            response.setResult(networkData);
+            response.setCount(pulledItemCount);
             response.setListOfExceptions(exceptions);
         } else {
-            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
-            cache.save(response.getResult());
+            cache.save(pullResponse.getResult());
+            response.setCount(pullResponse.getResult().size());
+            response.setListOfExceptions(pullResponse.getListOfExceptions());
         }
 
         return response;
