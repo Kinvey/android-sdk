@@ -10,24 +10,26 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyLiveServiceCallback;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyListCallback;
-import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
-import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -49,7 +51,7 @@ public class TestManager<T extends GenericJson> {
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
         if (!client.isUserLoggedIn()) {
             final CountDownLatch latch = new CountDownLatch(1);
-            LooperThread looperThread = null;
+            LooperThread looperThread;
             looperThread = new LooperThread(new Runnable() {
                 @Override
                 public void run() {
@@ -382,5 +384,13 @@ public class TestManager<T extends GenericJson> {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    public BaseDataStore<T> mockBaseDataStore(AbstractClient client, String collectionName, Class className, StoreType storeType, NetworkManager networkManager) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        Class<?> aClass = Class.forName("com.kinvey.java.store.BaseDataStore");
+        Constructor<BaseDataStore> constructor = (Constructor<BaseDataStore>) aClass.getDeclaredConstructor(AbstractClient.class, String.class, Class.class, StoreType.class, NetworkManager.class);
+        constructor.setAccessible(true);
+        BaseDataStore baseDataStore = constructor.newInstance(client, collectionName, className, storeType, networkManager);
+        return baseDataStore;
     }
 }
