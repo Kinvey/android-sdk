@@ -820,6 +820,8 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.setUseDeltaCache(this.deltaSetCache);
             if (this.MICVersion != null){
                 client.setMICApiVersion(this.MICVersion);
+            } else {
+                client.setMICApiVersion(DEFAULT_MIC_API_VERSION);
             }
             if(this.MICBaseURL != null){
                client.setMICHostName(this.MICBaseURL);

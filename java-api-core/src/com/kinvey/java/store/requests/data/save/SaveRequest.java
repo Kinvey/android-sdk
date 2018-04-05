@@ -17,6 +17,7 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.Constants;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
@@ -54,7 +55,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
             case FORCE_LOCAL:
                 ret = cache.save(object);
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager, RequestMethod.SAVE, (String)object.get("_id"));
+                        networkManager, RequestMethod.SAVE, (String)object.get(Constants._ID));
                 break;
             case LOCAL_THEN_NETWORK:
                 PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(), cache, networkManager,
@@ -70,7 +71,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                     ret = networkManager.saveBlocking(object).execute();
                 } catch (IOException e) {
                     syncManager.enqueueRequest(networkManager.getCollectionName(),
-                            networkManager, RequestMethod.SAVE, (String)object.get("_id"));
+                            networkManager, RequestMethod.SAVE, (String)object.get(Constants._ID));
                     throw e;
                 }
                 cache.save(ret);
