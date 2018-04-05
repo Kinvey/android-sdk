@@ -35,6 +35,8 @@ import java.util.List;
  */
 public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
 
+    private static final String IGNORED_EXCEPTION = "EntityNotFound";
+
     private ICache<T> cache;
     private NetworkManager<T> networkManager;
     private final SyncManager syncManager;
@@ -77,8 +79,14 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                             break;
                     }
                 }
-                syncManager.executeRequest(client, syncRequest);
-                syncManager.deleteCachedItem((String) syncItem.get("_id"));
+                try {
+                    syncManager.executeRequest(client, syncRequest);
+                } catch (Exception e) {
+                    if (!e.getMessage().contains(IGNORED_EXCEPTION)) {
+                        throw e;
+                    }
+                }
+                syncManager.deleteCachedItem((String) syncItem.get(Constants._ID));
             }
         }
         return null;
