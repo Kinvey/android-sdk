@@ -780,7 +780,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final KinveySyncCallback<T> callback) {
+    public void sync(final Query query, final KinveySyncCallback callback) {
         callback.onPushStarted();
         push(new KinveyPushCallback() {
             @Override
@@ -821,7 +821,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final KinveySyncCallback<T> callback) {
+    public void sync(final KinveySyncCallback callback) {
         sync(null, callback);
     }
 

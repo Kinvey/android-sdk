@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
  * Created by yuliya on 12/27/17.
  */
 
-public class CustomKinveySyncCallback<T extends GenericJson> implements KinveySyncCallback<T> {
+public class CustomKinveySyncCallback implements KinveySyncCallback {
 
     private CountDownLatch latch;
     private KinveyPullResponse result;

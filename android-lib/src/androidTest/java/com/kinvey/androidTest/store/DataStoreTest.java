@@ -193,7 +193,7 @@ public class DataStoreTest {
         }
     }
 
-    private static class DefaultKinveySyncCallback implements KinveySyncCallback<Person> {
+    private static class DefaultKinveySyncCallback implements KinveySyncCallback {
 
         private CountDownLatch latch;
         KinveyPushResponse kinveyPushResponse;

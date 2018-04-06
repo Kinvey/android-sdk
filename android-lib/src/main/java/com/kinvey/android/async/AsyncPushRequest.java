@@ -16,8 +16,6 @@
 
 package com.kinvey.android.async;
 
-import android.util.Log;
-
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
@@ -31,17 +29,16 @@ import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ExecutionException;
-
-import static com.kinvey.android.Client.TAG;
 
 /**
  * Class represents internal implementation of Async push request that is used to create push
