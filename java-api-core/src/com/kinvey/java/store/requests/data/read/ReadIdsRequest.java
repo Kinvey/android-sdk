@@ -47,6 +47,6 @@ public class ReadIdsRequest<T extends GenericJson> extends AbstractReadRequest<T
 
     @Override
     protected List<T> getNetwork() throws IOException {
-        return Arrays.asList(getNetworkData().getBlocking(Iterables.toArray(ids, String.class)).execute());
+        return getNetworkData().getBlocking(Iterables.toArray(ids, String.class)).execute().getResult();
     }
 }

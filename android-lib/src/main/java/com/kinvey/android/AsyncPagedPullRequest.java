@@ -19,7 +19,7 @@ package com.kinvey.android;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
 
         List<T> pullResults = new ArrayList<>();
         List<Exception> pullExceptions = new ArrayList<>();
-        KinveyAbstractReadResponse<T> pullResponse;
+        KinveyReadResponse<T> pullResponse;
 
         do {
             query.setSkip(skipCount).setLimit(pageSize);

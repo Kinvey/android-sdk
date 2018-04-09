@@ -666,6 +666,7 @@ public class DataStoreTest {
 
     private void testFindByQuery(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        clearBackend(store);
         client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
@@ -679,6 +680,7 @@ public class DataStoreTest {
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.size() > 0);
+        delete(store, query);
     }
 
     @Test

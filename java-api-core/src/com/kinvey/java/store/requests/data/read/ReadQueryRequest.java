@@ -17,14 +17,12 @@
 package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,6 +45,6 @@ public class ReadQueryRequest<T extends GenericJson> extends AbstractReadRequest
 
     @Override
     protected List<T> getNetwork() throws IOException {
-        return Arrays.asList(getNetworkData().getBlocking(query).execute());
+        return getNetworkData().getBlocking(query).execute().getResult();
     }
 }

@@ -1,8 +1,8 @@
 package com.kinvey.android.sync;
 
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 
-public class KinveyPullResponse<T> extends KinveyAbstractReadResponse<T> {
+public class KinveyPullResponse<T> extends KinveyReadResponse<T> {
 
 
 }

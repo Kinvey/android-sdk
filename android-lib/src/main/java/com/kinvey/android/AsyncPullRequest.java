@@ -19,7 +19,7 @@ package com.kinvey.android;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
     @Override
     protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
-        KinveyAbstractReadResponse<T> pullResponse = store.pullBlocking(query);
+        KinveyReadResponse<T> pullResponse = store.pullBlocking(query);
         kinveyPullResponse.setListOfExceptions(pullResponse.getListOfExceptions());
         kinveyPullResponse.setResult(pullResponse.getResult());
         return kinveyPullResponse;

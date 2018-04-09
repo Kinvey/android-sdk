@@ -24,7 +24,6 @@ import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,12 +51,11 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
         List<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-//            case PREFER_LOCAL:
                 ret = cache.get(query);
                 break;
             case FORCE_NETWORK:
             case BOTH:
-                ret = Arrays.asList(networkManager.getBlocking(query).execute());
+                ret = networkManager.getBlocking(query).execute().getResult();
                 break;
         }
         return ret;

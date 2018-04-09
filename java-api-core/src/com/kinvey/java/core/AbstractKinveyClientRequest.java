@@ -434,6 +434,8 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
 
         }catch (NullPointerException ex){
+            System.out.println("TEST_TEST: " + ex.getMessage());
+            ex.fillInStackTrace();
             return null;
         }
     }
