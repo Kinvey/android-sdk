@@ -96,7 +96,7 @@ import java.util.Map;
  *     DataStore<EventEntity> dataStore = DataStore.collection("myCollection",EventEntity.class, StoreType.SYNC, myClient);
  *     dataStore.find(myClient.query(), new KinveyReadCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
- *         public void onSuccess({@link KinveyReadResponse}<EventEntity> readCallback) { ... }
+ *         public void onSuccess({@link KinveyReadResponse}<EventEntity> readResponse) { ... }
  *     });
  * }
  * </pre>
