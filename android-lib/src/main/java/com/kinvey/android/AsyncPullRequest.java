@@ -33,8 +33,7 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
 
     private final BaseDataStore<T> store;
     private Query query;
-    private int pageSize;
-    private boolean isAutoPagination = false;
+    private final int pageSize;
 
     /**
      * Async pull request constructor
@@ -48,6 +47,7 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
         super(callback);
         this.query = query;
         this.store = store;
+        this.pageSize = 0;
     }
 
     /**
@@ -64,7 +64,6 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
         super(callback);
         this.query = query;
         this.store = store;
-        this.isAutoPagination = true;
         this.pageSize = pageSize;
     }
 
@@ -73,7 +72,7 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
     protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
         KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<>();
         KinveyAbstractReadResponse<T> pullResponse;
-        if (isAutoPagination) {
+        if (pageSize > 0) {
             pullResponse = store.pullBlocking(query, pageSize);
         } else {
             pullResponse = store.pullBlocking(query);

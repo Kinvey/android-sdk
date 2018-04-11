@@ -1447,7 +1447,6 @@ public class DataStoreTest {
         CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
         assertTrue(pullCallback.getResult().getResult().size() == 4);
-        testManager.cleanBackend(store, StoreType.SYNC);
     }
 
     @Test
