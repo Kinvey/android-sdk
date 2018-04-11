@@ -19,8 +19,8 @@ package com.kinvey.java.store.requests.data;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
-import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
@@ -35,7 +35,8 @@ import java.util.List;
  */
 public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
 
-    private static final String IGNORED_EXCEPTION = "EntityNotFound";
+    private static final String IGNORED_EXCEPTION_MESSAGE = "EntityNotFound";
+    private static final int IGNORED_EXCEPTION_CODE = 404;
 
     private ICache<T> cache;
     private NetworkManager<T> networkManager;
@@ -81,8 +82,8 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                 }
                 try {
                     syncManager.executeRequest(client, syncRequest);
-                } catch (Exception e) {
-                    if (!e.getMessage().contains(IGNORED_EXCEPTION)) {
+                } catch (KinveyJsonResponseException e) {
+                    if (e.getStatusCode() != IGNORED_EXCEPTION_CODE && !e.getMessage().contains(IGNORED_EXCEPTION_MESSAGE)) {
                         throw e;
                     }
                 }
