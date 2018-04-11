@@ -86,7 +86,7 @@ import java.util.Map;
  * <p>
  * Methods in this API use either {@link KinveyReadCallback} for retrieving entity sets,
  * {@link KinveyDeleteCallback} for deleting appData, or  the general-purpose
- * {@link KinveyClientCallback} used for retrieving single entites or saving Entities.
+ * {@link KinveyClientCallback} used for retrieving single entities or saving Entities.
  * </p>
  * <p/>
  * <p>
@@ -96,7 +96,7 @@ import java.util.Map;
  *     DataStore<EventEntity> dataStore = DataStore.collection("myCollection",EventEntity.class, StoreType.SYNC, myClient);
  *     dataStore.find(myClient.query(), new KinveyReadCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
- *         public void onSuccess(KinveyReadCallback<EventEntity> readCallback) { ... }
+ *         public void onSuccess({@link KinveyReadResponse}<EventEntity> readCallback) { ... }
  *     });
  * }
  * </pre>
