@@ -16,18 +16,18 @@
 package com.kinvey.android.callback;
 
 import com.kinvey.java.core.KinveyClientCallback;
-import java.util.List;
+import com.kinvey.java.model.KinveyReadResponse;
 
 /** Use this for async callbacks when retrieving multiple entities
  *
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyListCallback<T> extends KinveyClientCallback<List<T>> {
+public interface KinveyReadCallback<T> extends KinveyClientCallback<KinveyReadResponse<T>> {
 
 
     @Override
-    public void onSuccess(List<T> result);
+    public void onSuccess(KinveyReadResponse<T> result);
 
     @Override
     public void onFailure(Throwable error);

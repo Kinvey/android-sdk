@@ -659,7 +659,7 @@ public class NetworkManager<T extends GenericJson> {
 
                 Query query = query().in("_id", chunkItems.toArray((String[])Array.newInstance(String.class, chunkSize)));
                 Get pageGet = new Get(query,
-                        Array.newInstance(myClass,0).getClass(),
+                        myClass,
                         resolve != null ? resolve.split(",") : new String[]{},
                         resolve_depth != null ? Integer.parseInt(resolve_depth) : 0,
                         retainReferences != null && Boolean.parseBoolean(retainReferences));

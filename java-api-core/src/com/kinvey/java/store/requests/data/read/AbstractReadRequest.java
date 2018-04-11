@@ -18,17 +18,17 @@ package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
-import com.kinvey.java.store.requests.data.AbstractKinveyDataListRequest;
+import com.kinvey.java.store.requests.data.AbstractKinveyReadRequest;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by Prots on 2/8/16.
  */
-public abstract class AbstractReadRequest<T extends GenericJson> extends AbstractKinveyDataListRequest<T> {
+public abstract class AbstractReadRequest<T extends GenericJson> extends AbstractKinveyReadRequest<T> {
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
     private NetworkManager<T> networkManager;
@@ -40,8 +40,8 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
     }
 
     @Override
-    public List<T> execute() throws IOException {
-        List<T> ret = null;
+    public KinveyReadResponse<T> execute() throws IOException {
+        KinveyReadResponse<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
                 ret = getCached();
@@ -51,7 +51,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
                 break;
             case BOTH:
                 ret = getNetwork();
-                cache.save(ret);
+                cache.save(ret.getResult());
                 break;
         }
         return ret;
@@ -66,7 +66,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
 
     }
 
-    abstract protected List<T> getCached();
-    abstract protected List<T> getNetwork() throws IOException;
+    abstract protected KinveyReadResponse<T> getCached();
+    abstract protected KinveyReadResponse<T> getNetwork() throws IOException;
 
 }

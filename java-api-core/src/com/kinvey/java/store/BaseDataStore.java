@@ -164,12 +164,12 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return List of object found for given ids
      */
-    public List<T> find(Iterable<String> ids, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException{
+    public KinveyReadResponse<T> find(Iterable<String> ids, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        List<T> ret;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadIdsRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute();
             cachedCallback.onSuccess(ret);
@@ -183,9 +183,9 @@ public class BaseDataStore<T extends GenericJson> {
      * @param ids collection of strings that identify a set of ids we have to look for
      * @return List of object found for given ids
      */
-    public List<T> find(Iterable<String> ids) throws IOException {
+    public KinveyReadResponse<T> find(Iterable<String> ids) throws IOException {
         return find(ids, null);
-    };
+    }
 
 
     /**
@@ -194,13 +194,13 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return list of objects that are found
      */
-    public List<T> find (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+    public KinveyReadResponse<T> find (Query query, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
             cachedCallback.onSuccess(ret);
@@ -214,7 +214,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query prepared query we have to look with
      * @return list of objects that are found
      */
-    public List<T> find (Query query) throws IOException {
+    public KinveyReadResponse<T> find (Query query) throws IOException {
         return find(query, null);
     }
 
@@ -223,12 +223,12 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
-    public List<T> find(KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+    public KinveyReadResponse<T> find(KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = new ReadAllRequest<>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute();
             cachedCallback.onSuccess(ret);
@@ -241,8 +241,8 @@ public class BaseDataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
-    public List<T> find() throws IOException {
-        return find((KinveyCachedClientCallback<List<T>>)null);
+    public KinveyReadResponse<T> find() throws IOException {
+        return find((KinveyCachedClientCallback<KinveyReadResponse<T>>)null);
     }
 
     /**
