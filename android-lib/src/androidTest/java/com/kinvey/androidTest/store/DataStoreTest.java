@@ -30,6 +30,7 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.model.Address;
 import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
@@ -1146,6 +1147,21 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSyncPaged() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        TestManager<Person> testManager = new TestManager<>();
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.createPersons(store, 10);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query(), 1);
+        assertNull(syncCallback.getError());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount() == 0);
+        assertNotNull(syncCallback.getResult());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+    }
+
+    @Test
     public void testSyncInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
@@ -1264,6 +1280,23 @@ public class DataStoreTest {
         person = createPerson(TEST_USERNAME_2);
         save(store, person);
         store.syncBlocking(new Query());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
+        assertTrue(countCallback.result == 2);
+    }
+
+    @Test
+    public void testSyncBlockingPaged() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        cleanBackendDataStore(store);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        save(store, person);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        store.pushBlocking();
+        person = createPerson(TEST_USERNAME_2);
+        save(store, person);
+        store.syncBlocking(client.query(), 1);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);

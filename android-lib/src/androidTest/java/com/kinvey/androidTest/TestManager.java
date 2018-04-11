@@ -323,6 +323,21 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, pageSize, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     //cleaning backend store (can be improved)
     @Deprecated
     public void cleanBackendDataStore(DataStore<Person> store) throws InterruptedException {

@@ -414,6 +414,16 @@ public class BaseDataStore<T extends GenericJson> {
         pullBlocking(query);
     }
 
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param pageSize page size for auto-pagination
+     */
+    public void syncBlocking(Query query, int pageSize) throws IOException {
+        pushBlocking();
+        pullBlocking(query, pageSize);
+    }
+
     public void purge() {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
