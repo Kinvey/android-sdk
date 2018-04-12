@@ -137,21 +137,6 @@ public class SyncManager {
         requestCache.save(createSyncRequest(collectionName, clientRequest));
     }
 
-    public <T extends GenericJson> void enqueueRequest(String collectionName, NetworkManager<T> networkManager, RequestMethod method, String id) throws IOException {
-        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
-
-        Query entityQuery = AbstractClient.sharedInstance().query();
-        entityQuery.equals(META_DOT_ID, id);
-        List<SyncItem> itemsList = requestCache.get(entityQuery);
-
-        if (itemsList.isEmpty()) {
-            requestCache.save(createSyncItem(collectionName, method, networkManager, id));
-        } else if (method == RequestMethod.DELETE) {
-            requestCache.delete(entityQuery);
-            requestCache.save(createSyncItem(collectionName, method, networkManager, id));
-        }
-    }
-
     /**
      * use {@link #enqueueRequests(String, NetworkManager, RequestMethod, List)}
      */
@@ -165,17 +150,33 @@ public class SyncManager {
         requestCache.save(syncRequests);
     }
 
+    /**
+     * Used to save sync requests that were not completed
+     * @param request Sync request to be saved
+     */
+    public void enqueueRequest(SyncRequest request) {
+        ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
+        requestCache.save(request);
+    }
+
+    public <T extends GenericJson> void enqueueRequest(String collectionName, NetworkManager<T> networkManager, RequestMethod method, String id) throws IOException {
+        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
+        SyncItem syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, method, id);
+        if (syncItem != null) {
+            requestCache.save(syncItem);
+        }
+    }
+
     public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager, RequestMethod method, List<T> ret) throws IOException {
         ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         List<SyncItem> syncRequests = new ArrayList<>();
+        String syncItemId;
+        SyncItem syncItem;
         for (T t : ret) {
-            Query entityQuery = AbstractClient.sharedInstance().query();
-            String id = (String) t.get(ID);
-            entityQuery.equals(META_DOT_ID, id);
-            List<SyncItem> itemsList = requestCache.get(entityQuery);
-
-            if (itemsList.size() == 0) {
-                syncRequests.add(createSyncItem(collectionName, method, networkManager, (String) t.get(ID)));
+            syncItemId = (String) t.get(ID);
+            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, method, syncItemId);
+            if (syncItem != null) {
+                syncRequests.add(syncItem);
             }
         }
         requestCache.save(syncRequests);
@@ -184,13 +185,34 @@ public class SyncManager {
     public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager, RequestMethod method, Iterable<String> ids) throws IOException {
         ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         List<SyncItem> syncRequests = new ArrayList<>();
-        for (String id : ids) {
-            syncRequests.add(createSyncItem(collectionName, method, networkManager, id));
+        SyncItem syncItem;
+        for (String syncItemId : ids) {
+            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, method, syncItemId);
+            if (syncItem != null) {
+                syncRequests.add(syncItem);
+            }
         }
         requestCache.save(syncRequests);
     }
 
-    private <T extends GenericJson> SyncItem createSyncItem(String collectionName, RequestMethod requestMethod, NetworkManager networkManager, String id) throws IOException {
+    private <T extends GenericJson> SyncItem prepareSyncItemRequest(ICache<SyncItem> requestCache,
+                                                                    String collectionName,
+                                                                    NetworkManager<T> networkManager,
+                                                                    RequestMethod method,
+                                                                    String syncItemId) throws IOException {
+        Query entityQuery = AbstractClient.sharedInstance().query();
+        entityQuery.equals(META_DOT_ID, syncItemId);
+        List<SyncItem> itemsList = requestCache.get(entityQuery);
+        if (itemsList.isEmpty()) {
+            return createSyncItem(collectionName, method, networkManager, syncItemId);
+        } else if (method == RequestMethod.DELETE) {
+            requestCache.delete(entityQuery);
+            return createSyncItem(collectionName, method, networkManager, syncItemId);
+        }
+        return null;
+    }
+
+    private SyncItem createSyncItem(String collectionName, RequestMethod requestMethod, NetworkManager networkManager, String id) throws IOException {
         SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
         if (id != null) {
             entityID.id = id;
@@ -198,12 +220,7 @@ public class SyncManager {
         entityID.customerVersion = networkManager.getClientAppVersion();
         entityID.customheader = networkManager.getCustomRequestProperties() != null ?
                 (String) networkManager.getCustomRequestProperties().get("X-Kinvey-Custom-Request-Properties") : null;
-
-        return new SyncItem(
-                requestMethod,
-                entityID,
-                collectionName
-        );
+        return new SyncItem(requestMethod, entityID, collectionName);
     }
 
     public SyncRequest createSyncRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
@@ -230,11 +247,6 @@ public class SyncManager {
                 entityID, httpRequest.getUrl(),
                 collectionName
         );
-    }
-
-    public void enqueueRequest(SyncRequest request) {
-        ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
-        requestCache.save(request);
     }
 
     /**
