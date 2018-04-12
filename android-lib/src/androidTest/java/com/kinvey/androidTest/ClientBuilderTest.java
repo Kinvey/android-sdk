@@ -179,7 +179,7 @@ public class ClientBuilderTest {
 
     @Test
     public void testSetInstanceIdAndSetBaseUrl() throws IOException {
-        client = new Client.Builder(mContext).setBaseUrl("BaseUrl").setInstanceID("TestInstanceId").build();
+        client = new Client.Builder(mContext).setBaseUrl("https://baseurl.com").setInstanceID("TestInstanceId").build();
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
     }
