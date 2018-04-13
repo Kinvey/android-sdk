@@ -9,9 +9,13 @@ public final class Constants {
     public static final String UNDERSCORE = "_";
     public static final String TIME_FORMAT = "%tFT%<tTZ";
     public static final String Z = "Z";
+    public static final String DOT = ".";
+    public static final String QUERY = "query";
+    public static final String _ID = "_id";
+    public static final String DELETE = "DELETE";
+    public static final String REQUEST_METHOD = "requestMethod";
 
     public static final String CHAR_PERIOD = ".";
-    public static final String _ID = "_id";
     public static final String STR_LIVE_SERVICE_COLLECTION_CHANNEL_PREPEND = "c-";
 
     public static final String HYPHEN = "-";
