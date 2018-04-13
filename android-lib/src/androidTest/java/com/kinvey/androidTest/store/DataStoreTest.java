@@ -1150,15 +1150,40 @@ public class DataStoreTest {
     public void testSyncPaged() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.SYNC);
         client.getSyncManager().clear(Person.COLLECTION);
         testManager.createPersons(store, 10);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query(), 1);
+        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, null, 1);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
-        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount() == 0);
+        assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
         assertNotNull(syncCallback.getResult());
+        assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
+        assertNotNull(syncCallback.getResult().getResult());
+        assertEquals(10, syncCallback.getResult().getResult().size());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertEquals(10, store.find().size());
+    }
+
+    @Test
+    public void testSyncPagedWithQuery() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.SYNC);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.createPersons(store, 10);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query().equals("username", TEST_USERNAME + 0).or(client.query().equals("username", TEST_USERNAME + 1)), 1);
+        assertNull(syncCallback.getError());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertNotNull(syncCallback.getResult());
+        assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
+        assertNotNull(syncCallback.getResult().getResult());
+        assertEquals(2, syncCallback.getResult().getResult().size());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertEquals(10, store.find().size());
     }
 
     @Test

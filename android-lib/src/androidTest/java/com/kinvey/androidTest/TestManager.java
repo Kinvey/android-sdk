@@ -329,7 +329,11 @@ public class TestManager<T extends GenericJson> {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.sync(query, pageSize, callback);
+                if (query != null) {
+                    store.sync(query, pageSize, callback);
+                } else {
+                    store.sync(pageSize, callback);
+                }
             }
         });
         looperThread.start();
