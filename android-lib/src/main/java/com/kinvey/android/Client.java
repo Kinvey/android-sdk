@@ -581,6 +581,10 @@ public class Client<T extends User> extends AbstractClient<T> {
                 this.setBaseUrl(super.getString(Option.BASE_URL));
             }
 
+            if (super.getString(Option.INSTANCE_ID) != null) {
+                this.setInstanceID(super.getString(Option.INSTANCE_ID));
+            }
+
             if (super.getString(Option.REQUEST_TIMEOUT) != null) {
                 try {
                     this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)));
