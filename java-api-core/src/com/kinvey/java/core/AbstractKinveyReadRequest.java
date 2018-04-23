@@ -14,7 +14,6 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
-import com.kinvey.java.model.KinveyQueryCacheResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,7 +87,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                     }
                 }
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
-                    ret.setLastRequest(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
+                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
                 }
                 ret.setResult(results);
                 ret.setListOfExceptions(exceptions);

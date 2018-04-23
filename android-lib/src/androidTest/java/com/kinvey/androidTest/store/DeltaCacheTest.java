@@ -113,7 +113,7 @@ public class DeltaCacheTest {
         KinveyAbstractReadResponse<Person> response = store.pullBlocking(query);
         assertNotNull(response.getResult());
         assertEquals(0, response.getListOfExceptions().size());
-        assertEquals(lastRequestTime, response.getLastRequest());
+        assertEquals(lastRequestTime, response.getLastRequestTime());
         assertEquals("name_1", response.getResult().get(0).getUsername());
         assertEquals("name_2", response.getResult().get(1).getUsername());
     }
@@ -163,7 +163,7 @@ public class DeltaCacheTest {
         KinveyAbstractReadResponse<Person> response = store.pullBlocking(query);
         assertNotNull(response.getResult());
         assertEquals(0, response.getListOfExceptions().size());
-        assertEquals(lastRequestTime, response.getLastRequest());
+        assertEquals(lastRequestTime, response.getLastRequestTime());
         assertEquals("name_1", response.getResult().get(0).getUsername());
         assertEquals("name_2", response.getResult().get(1).getUsername());
     }

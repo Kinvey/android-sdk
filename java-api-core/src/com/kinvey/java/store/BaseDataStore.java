@@ -450,7 +450,7 @@ public class BaseDataStore<T extends GenericJson> {
             } while (skipCount < totalItemCount);
             response.setResult(networkData);
             response.setListOfExceptions(exceptions);
-            response.setLastRequest(pullResponse.getLastRequest());
+            response.setLastRequestTime(pullResponse.getLastRequestTime());
         } else {
             response = networkManager.pullBlocking(query).execute();
             cache.delete(query);
@@ -493,7 +493,7 @@ public class BaseDataStore<T extends GenericJson> {
 
                 if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
                     cacheItem = queryCacheItems.get(0);
-                    queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequest()).execute();
+                    queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
                     if (queryCacheResponse.getDeleted() != null) {
                         List<String> ids = new ArrayList<>();
                         for (GenericJson json : queryCacheResponse.getDeleted()) {
@@ -504,7 +504,7 @@ public class BaseDataStore<T extends GenericJson> {
                     if (queryCacheResponse.getChanged() != null) {
                         cache.save(queryCacheResponse.getChanged());
                     }
-                    cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+                    cacheItem.setLastRequestTime(queryCacheResponse.getRequestTime());
                     queryCache.save(cacheItem);
                     exceptions.addAll(queryCacheResponse.getListOfExceptions());
                     lastRequest = queryCacheResponse.getRequestTime();
@@ -515,20 +515,20 @@ public class BaseDataStore<T extends GenericJson> {
                     queryCache.save(new QueryCacheItem(
                             getCollectionName(),
                             queryCacheString,
-                            response.getLastRequest()));
+                            response.getLastRequestTime()));
                     exceptions.addAll(response.getListOfExceptions());
-                    lastRequest = response.getLastRequest();
+                    lastRequest = response.getLastRequestTime();
                 }
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
             response.setResult(cache.get());
             response.setListOfExceptions(exceptions);
-            response.setLastRequest(lastRequest);
+            response.setLastRequestTime(lastRequest);
         } else {
             List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, query.getQueryFilterMap().toString()));
             if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
                 QueryCacheItem cacheItem = queryCacheItems.get(0);
-                KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequest()).execute();
+                KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
                 if (queryCacheResponse.getDeleted() != null) {
                     List<String> ids = new ArrayList<>();
                     for (GenericJson json : queryCacheResponse.getDeleted()) {
@@ -541,8 +541,8 @@ public class BaseDataStore<T extends GenericJson> {
                 }
                 response.setResult(cache.get());
                 response.setListOfExceptions(queryCacheResponse.getListOfExceptions());
-                response.setLastRequest(queryCacheResponse.getRequestTime());
-                cacheItem.setLastRequest(queryCacheResponse.getRequestTime());
+                response.setLastRequestTime(queryCacheResponse.getRequestTime());
+                cacheItem.setLastRequestTime(queryCacheResponse.getRequestTime());
                 queryCache.save(cacheItem);
             } else {
                 response = networkManager.pullBlocking(query).execute();
@@ -551,7 +551,7 @@ public class BaseDataStore<T extends GenericJson> {
                 queryCache.save(new QueryCacheItem(
                         getCollectionName(),
                         query.getQueryFilterMap().toString(),
-                        response.getLastRequest()));
+                        response.getLastRequestTime()));
             }
         }
         return response;

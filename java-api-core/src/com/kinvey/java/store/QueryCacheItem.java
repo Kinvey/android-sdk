@@ -16,15 +16,15 @@ public class QueryCacheItem extends GenericJson {
     private String query;
 
     @Key
-    private String lastRequest;
+    private String lastRequestTime;
 
     public QueryCacheItem() {
     }
 
-    public QueryCacheItem(String collectionName, String query, String lastRequest) {
+    public QueryCacheItem(String collectionName, String query, String lastRequestTime) {
         this.collectionName = collectionName;
         this.query = query;
-        this.lastRequest = lastRequest;
+        this.lastRequestTime = lastRequestTime;
     }
 
     public String getCollectionName() {
@@ -35,8 +35,8 @@ public class QueryCacheItem extends GenericJson {
         return query;
     }
 
-    public String getLastRequest() {
-        return lastRequest;
+    public String getLastRequestTime() {
+        return lastRequestTime;
     }
 
     public void setCollectionName(String collectionName) {
@@ -47,7 +47,7 @@ public class QueryCacheItem extends GenericJson {
         this.query = query;
     }
 
-    public void setLastRequest(String lastRequest) {
-        this.lastRequest = lastRequest;
+    public void setLastRequestTime(String lastRequestTime) {
+        this.lastRequestTime = lastRequestTime;
     }
 }
