@@ -48,7 +48,7 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
 
 
     @Override
-    protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected KinveyPullResponse<T> executeAsync() throws IOException {
         KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
         KinveyAbstractReadResponse<T> pullResponse = store.pullBlocking(query);
         kinveyPullResponse.setListOfExceptions(pullResponse.getListOfExceptions());

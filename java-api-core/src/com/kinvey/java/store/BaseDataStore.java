@@ -44,6 +44,7 @@ import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
+import com.sun.istack.internal.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -425,7 +426,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    private KinveyAbstractReadResponse<T> getBlockingNoDeltaSync(Query query) throws IOException {
+    private KinveyAbstractReadResponse<T> getBlockingNoDeltaSync(@NotNull Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
@@ -466,7 +467,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    private KinveyAbstractReadResponse<T> getBlockingDeltaSync(Query query) throws IOException {
+    private KinveyAbstractReadResponse<T> getBlockingDeltaSync(@NotNull Query query) throws IOException {
         KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
         if (queryCache == null) {
             queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
