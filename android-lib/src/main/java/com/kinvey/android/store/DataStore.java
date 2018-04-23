@@ -19,7 +19,7 @@ package com.kinvey.android.store;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
-import com.kinvey.android.AsyncPullRequest;
+import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.KinveyLiveServiceCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
@@ -678,10 +678,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback<T> callback) {
+    public void pull(Query query, int pageSize, KinveyPullCallback<T> callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<T>(this, query, callback).execute();
+        new AsyncPullRequest<>(this, query, pageSize, callback).execute();
     }
 
     /**
@@ -706,7 +706,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(KinveyPullCallback<T> callback) {
-        this.pull(null, callback);
+        this.pull(null, 0, callback);
     }
 
     /**
@@ -787,7 +787,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, 0, new KinveyPullCallback<T>() {
 
                     @Override
                     public void onSuccess(KinveyPullResponse<T> pullResult) {

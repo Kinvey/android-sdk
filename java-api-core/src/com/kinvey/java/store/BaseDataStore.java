@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -44,9 +45,14 @@ import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
 
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 
 public class BaseDataStore<T extends GenericJson> {
@@ -425,6 +431,74 @@ public class BaseDataStore<T extends GenericJson> {
 
         return response;
     }
+
+    /**
+     * Pull network data with given query into local storage
+     * should be used with {@link StoreType#SYNC}
+     */
+    public KinveyAbstractReadResponse<T> pullPaged(Query query, int pageSize) throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+
+        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<>();
+        query = query == null ? client.query() : query;
+
+        if (query.getSortString() == null || query.getSortString().isEmpty()) {
+            query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
+        }
+        List<Exception> exceptions = new ArrayList<>();
+        int skipCount = 0;
+
+        // First, get the count of all the items to pull
+        int totalItemNumber = countNetwork();
+        int pulledItemCount = 0;
+        int totalPagesNumber = Math.abs(totalItemNumber/pageSize) + 1;
+        int batchSize = 5; // batch size for concurrent push requests
+        ExecutorService executor;
+        List<FutureTask<PullTaskResponse>> tasks;
+        NetworkManager.Pull pullRequest;
+        FutureTask<PullTaskResponse> ft;
+        for (int i = 0; i < totalPagesNumber; i += batchSize) {
+            executor = Executors.newFixedThreadPool(batchSize);
+            tasks = new ArrayList<>();
+            for (int j = 0; j < batchSize && j + i < totalItemNumber; j++) {
+                do {
+                    query.setSkip(skipCount).setLimit(pageSize);
+                    pullRequest = networkManager.pullBlocking(query, cache, deltaSetCachingEnabled);
+                    skipCount += pageSize;
+                    try {
+                        ft = new FutureTask<PullTaskResponse>(new CallableAsyncPullRequestHelper(pullRequest, query));
+                        tasks.add(ft);
+                        executor.execute(ft);
+                    } catch (AccessControlException | KinveyException e) {
+                        e.printStackTrace();
+                        exceptions.add(e);
+                    } catch (Exception e) {
+                        throw e;
+                    }
+                } while (skipCount < totalItemNumber);
+
+                for (FutureTask<PullTaskResponse> task : tasks) {
+                    try {
+                        PullTaskResponse tempResponse = task.get();
+                        cache.delete(tempResponse.getQuery());
+                        cache.save(tempResponse.getKinveyAbstractReadResponse().getResult());
+                        pulledItemCount++;
+                        exceptions.addAll(tempResponse.getKinveyAbstractReadResponse().getListOfExceptions());
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            executor.shutdown();
+        }
+        response.setListOfExceptions(exceptions);
+//        pulledItemCount;
+        return response;
+    }
+
 
     /**
      * Run sync operation to sync local and network storages

@@ -14,8 +14,10 @@
  *
  */
 
-package com.kinvey.android;
+package com.kinvey.android.async;
 
+import com.google.api.client.json.GenericJson;
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
@@ -23,13 +25,13 @@ import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class represents internal implementation of Async pull request that is used to create pull
  */
-public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
+public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<KinveyPullResponse<T>> {
     private final BaseDataStore store;
+    private final int pageSize;
     private Query query;
 
     /**
@@ -40,17 +42,24 @@ public class AsyncPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T
      */
     public AsyncPullRequest(BaseDataStore store,
                             Query query,
+                            int pageSize,
                             KinveyPullCallback<T> callback){
         super(callback);
         this.query = query;
         this.store = store;
+        this.pageSize = pageSize;
     }
 
 
     @Override
-    protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
-        KinveyAbstractReadResponse<T> pullResponse = store.pullBlocking(query);
+    protected KinveyPullResponse<T> executeAsync() throws IOException {
+        KinveyPullResponse<T> kinveyPullResponse  = new KinveyPullResponse<>();
+        KinveyAbstractReadResponse<T> pullResponse;
+        if (pageSize > 0) {
+            pullResponse = store.pullPaged(query, pageSize);
+        } else {
+            pullResponse = store.pullBlocking(query);
+        }
         kinveyPullResponse.setListOfExceptions(pullResponse.getListOfExceptions());
         kinveyPullResponse.setResult(pullResponse.getResult());
         return kinveyPullResponse;
