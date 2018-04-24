@@ -257,6 +257,25 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, pageSize, callback);
+                } else {
+                    store.pull(pageSize, callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     public DefaultKinveyPushCallback push(final DataStore<Person> store) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
@@ -296,6 +315,25 @@ public class TestManager<T extends GenericJson> {
             @Override
             public void run() {
                 store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<>(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.sync(query, pageSize, callback);
+                } else {
+                    store.sync(pageSize, callback);
+                }
             }
         });
         looperThread.start();
