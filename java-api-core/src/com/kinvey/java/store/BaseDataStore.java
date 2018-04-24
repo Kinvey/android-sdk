@@ -57,6 +57,8 @@ import java.util.concurrent.FutureTask;
 
 public class BaseDataStore<T extends GenericJson> {
 
+    protected static final int BATCH_SIZE = 5;
+
     protected static final String FIND = "find";
     protected static final String DELETE = "delete";
     protected static final String PURGE = "purge";
@@ -434,7 +436,7 @@ public class BaseDataStore<T extends GenericJson> {
         int totalItemNumber = countNetwork();
         int pulledItemCount = 0;
         int totalPagesNumber = Math.abs(totalItemNumber/pageSize) + 1;
-        int batchSize = 5; // batch size for concurrent push requests
+        int batchSize = BATCH_SIZE; // batch size for concurrent push requests
         ExecutorService executor;
         List<FutureTask<PullTaskResponse>> tasks;
         NetworkManager.Pull pullRequest;
