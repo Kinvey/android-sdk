@@ -482,6 +482,8 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
          *
          */
         public enum Option {
+            /** Optional. Used to base url generating */
+            INSTANCE_ID("instance.id"),
             /** Optional. Usually the base url minus the port e.g. {@code http://api.kinvey.com} */
             BASE_URL("api.base.url"),
             /** Optional. Usually 80 and used to build the api base url */
