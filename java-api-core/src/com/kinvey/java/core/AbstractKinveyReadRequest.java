@@ -89,6 +89,8 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                 }
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
                     ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toLowerCase(Locale.US));
+                } else if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {
+                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE).get(0).toLowerCase(Locale.US));
                 }
                 ret.setResult(results);
                 ret.setListOfExceptions(exceptions);

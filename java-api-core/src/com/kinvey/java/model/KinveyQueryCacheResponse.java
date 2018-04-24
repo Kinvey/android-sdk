@@ -12,7 +12,7 @@ public class KinveyQueryCacheResponse<T> extends KinveyAbstractResponse {
 
     private List<T> changed;
 
-    private String requestTime;
+    private String lastRequestTime;
 
     public List<T> getDeleted() {
         return deleted;
@@ -30,11 +30,11 @@ public class KinveyQueryCacheResponse<T> extends KinveyAbstractResponse {
         this.changed = changed;
     }
 
-    public String getRequestTime() {
-        return requestTime;
+    public String getLastRequestTime() {
+        return lastRequestTime;
     }
 
-    public void setRequestTime(String requestTime) {
-        this.requestTime = requestTime;
+    public void setLastRequestTime(String lastRequestTime) {
+        this.lastRequestTime = lastRequestTime;
     }
 }

@@ -90,7 +90,7 @@ public class DeltaCacheTest {
         List<Person> people = new ArrayList<>();
         people.add(new Person("name_1"));
         people.add(new Person("name_2"));
-        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setLastRequestTime(lastRequestTime);
         mockResponse.setChanged(people);
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
@@ -131,7 +131,7 @@ public class DeltaCacheTest {
         List<Person> people = new ArrayList<>();
         people.add(new Person("name_1"));
         people.add(new Person("name_2"));
-        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setLastRequestTime(lastRequestTime);
         mockResponse.setChanged(people);
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
@@ -181,7 +181,7 @@ public class DeltaCacheTest {
         List<Person> people = new ArrayList<>();
         people.add(new Person("name_1"));
         people.add(new Person("name_2"));
-        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setLastRequestTime(lastRequestTime);
         mockResponse.setChanged(people);
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
@@ -221,7 +221,7 @@ public class DeltaCacheTest {
         List<Person> people = new ArrayList<>();
         people.add(new Person("name_1"));
         people.add(new Person("name_1"));
-        mockResponse.setRequestTime(lastRequestTime);
+        mockResponse.setLastRequestTime(lastRequestTime);
         mockResponse.setChanged(people);
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);

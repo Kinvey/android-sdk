@@ -103,7 +103,9 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 ret.setDeleted(deleted);
                 ret.setListOfExceptions(exceptions);
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
-                    ret.setRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toLowerCase(Locale.US));
+                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toLowerCase(Locale.US));
+                } else if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {
+                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE).get(0).toLowerCase(Locale.US));
                 }
                 return ret;
             }

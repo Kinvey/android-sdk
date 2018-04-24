@@ -506,10 +506,10 @@ public class BaseDataStore<T extends GenericJson> {
                     if (queryCacheResponse.getChanged() != null) {
                         cache.save(queryCacheResponse.getChanged());
                     }
-                    cacheItem.setLastRequestTime(queryCacheResponse.getRequestTime());
+                    cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
                     queryCache.save(cacheItem);
                     exceptions.addAll(queryCacheResponse.getListOfExceptions());
-                    lastRequest = queryCacheResponse.getRequestTime();
+                    lastRequest = queryCacheResponse.getLastRequestTime();
                 } else {
                     response = networkManager.pullBlocking(query).execute();
                     cache.delete(query);
@@ -543,8 +543,8 @@ public class BaseDataStore<T extends GenericJson> {
                 }
                 response.setResult(cache.get());
                 response.setListOfExceptions(queryCacheResponse.getListOfExceptions());
-                response.setLastRequestTime(queryCacheResponse.getRequestTime());
-                cacheItem.setLastRequestTime(queryCacheResponse.getRequestTime());
+                response.setLastRequestTime(queryCacheResponse.getLastRequestTime());
+                cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
                 queryCache.save(cacheItem);
             } else {
                 response = networkManager.pullBlocking(query).execute();

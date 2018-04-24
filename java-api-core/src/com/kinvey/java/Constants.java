@@ -21,6 +21,7 @@ public final class Constants {
     //Delta Sync
     public static final String DELTA_SYNC_QUERY_CACHE_FORMAT = "%s{skip=%d,limit=%d,sorting=}%s";
     public static final String X_KINVEY_REQUEST_START = "x-kinvey-request-start";
+    public static final String X_KINVEY_REQUEST_START_CAMEL_CASE = "X-Kinvey-Request-Start";
     public static final String CHANGED = "changed";
     public static final String DELETED = "deleted";
 
