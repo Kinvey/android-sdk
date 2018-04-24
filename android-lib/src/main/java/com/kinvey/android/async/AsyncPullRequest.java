@@ -30,7 +30,7 @@ import java.io.IOException;
  * Class represents internal implementation of Async pull request that is used to create pull
  */
 public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<KinveyPullResponse<T>> {
-    private final BaseDataStore store;
+    private final BaseDataStore<T> store;
     private final int pageSize;
     private Query query;
 
@@ -40,7 +40,23 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore store,
+    public AsyncPullRequest(BaseDataStore<T>  store,
+                            Query query,
+                            KinveyPullCallback<T> callback) {
+        super(callback);
+        this.query = query;
+        this.store = store;
+        this.pageSize = 0;
+    }
+
+    /**
+     * Async pull request constructor
+     * @param query Query that is used to fetch data from network
+     * @param pageSize Page size for auto-pagination
+     * @param store Kinvey data store instance to be used to execute network requests
+     * @param callback async callbacks to be invoked when job is done
+     */
+    public AsyncPullRequest(BaseDataStore<T> store,
                             Query query,
                             int pageSize,
                             KinveyPullCallback<T> callback){

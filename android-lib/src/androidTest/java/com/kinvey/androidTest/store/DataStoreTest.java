@@ -30,6 +30,7 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.model.Address;
 import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
@@ -1146,6 +1147,46 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSyncPaged() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.SYNC);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.createPersons(store, 10);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, null, 1);
+        assertNull(syncCallback.getError());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertNotNull(syncCallback.getResult());
+        assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
+        assertNotNull(syncCallback.getResult().getResult());
+        assertEquals(10, syncCallback.getResult().getResult().size());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertEquals(10, store.find().size());
+    }
+
+    @Test
+    public void testSyncPagedWithQuery() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.SYNC);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.createPersons(store, 10);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query().equals("username", TEST_USERNAME + 0).or(client.query().equals("username", TEST_USERNAME + 1)), 1);
+        assertNull(syncCallback.getError());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertNotNull(syncCallback.getResult());
+        assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
+        assertNotNull(syncCallback.getResult().getResult());
+        assertEquals(2, syncCallback.getResult().getResult().size());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertEquals(10, store.find().size());
+    }
+
+    @Test
     public void testSyncInvalidDataStoreType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         client.getSyncManager().clear(Person.COLLECTION);
@@ -1270,6 +1311,23 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSyncBlockingPaged() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        cleanBackendDataStore(store);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        save(store, person);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        store.pushBlocking();
+        person = createPerson(TEST_USERNAME_2);
+        save(store, person);
+        store.syncBlocking(client.query(), 1);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
+        assertTrue(countCallback.result == 2);
+    }
+
+    @Test
     public void testSyncBlocking2() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
@@ -1328,6 +1386,25 @@ public class DataStoreTest {
                     store.pull(query, callback);
                 } else {
                     store.pull(callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyPullCallback callback = new DefaultKinveyPullCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, pageSize, callback);
+                } else {
+                    store.pull(pageSize, callback);
                 }
             }
         });
@@ -1428,7 +1505,6 @@ public class DataStoreTest {
         CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
         assertTrue(pullCallback.getResult().getResult().size() == 4);
-        testManager.cleanBackendDataStore(store);
     }
 
     @Test
@@ -1436,12 +1512,10 @@ public class DataStoreTest {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
+        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null, 2);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
         assertTrue(pullCallback.getResult().getResult().size() == 4);
-        testManager.cleanBackendDataStore(store);
+        testManager.cleanBackend(store, StoreType.SYNC);
     }
 
         /**
@@ -1563,9 +1637,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         // Act
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        DefaultKinveyPullCallback pullCallback = pull(store, null);
+        DefaultKinveyPullCallback pullCallback = pull(store, null, 2);
 
         // Assert
         assertNull(pullCallback.error);
@@ -1596,9 +1668,7 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         // Act
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(2);
-        List<Person> pullResults = store.pullBlocking(null).getResult();
+        List<Person> pullResults = store.pullBlocking(null, 2).getResult();
 
         // Assert
         assertNotNull(pullResults);
@@ -1789,8 +1859,6 @@ public class DataStoreTest {
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        store.setAutoPagination(true);
-        store.setAutoPaginationPageSize(1);
         List<Person> pullResults;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
@@ -1799,7 +1867,7 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            pullResults = pull(store, query).result.getResult();
+            pullResults = pull(store, query,1).result.getResult();
             assertNotNull(pullResults);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
