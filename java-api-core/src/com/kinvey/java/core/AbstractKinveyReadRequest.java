@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by yuliya on 10/26/17.
@@ -87,7 +88,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
                     }
                 }
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
-                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
+                    ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toLowerCase(Locale.US));
                 }
                 ret.setResult(results);
                 ret.setListOfExceptions(exceptions);

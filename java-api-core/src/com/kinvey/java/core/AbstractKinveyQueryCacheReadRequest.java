@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by yuliya on 03/05/17.
@@ -102,7 +103,7 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
                 ret.setDeleted(deleted);
                 ret.setListOfExceptions(exceptions);
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
-                    ret.setRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0));
+                    ret.setRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toLowerCase(Locale.US));
                 }
                 return ret;
             }
