@@ -1758,7 +1758,6 @@ public class DataStoreTest {
                 assertTrue(pullResults.size() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
-            System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }
@@ -1784,7 +1783,6 @@ public class DataStoreTest {
                 assertTrue(pullResults.size() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
-            System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }

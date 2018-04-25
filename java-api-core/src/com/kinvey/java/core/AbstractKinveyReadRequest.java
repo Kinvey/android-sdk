@@ -94,7 +94,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
             Logger.ERROR("unable to parse response -> " + e.toString());
             throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
         } catch (NullPointerException ex){
-            ex.fillInStackTrace();
+            Logger.WARNING(ex.getMessage());
             return null;
         }
     }

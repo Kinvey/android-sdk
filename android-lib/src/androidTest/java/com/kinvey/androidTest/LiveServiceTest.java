@@ -5,6 +5,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
@@ -40,6 +41,7 @@ import static junit.framework.Assert.assertTrue;
 public class LiveServiceTest {
 
     private static final int DEFAULT_TIMEOUT = 60 * 1000;
+    private static final String TAG = "LiveServiceTest";
 
     private Client client;
     private TestManager<LiveModel> testManager;
@@ -89,17 +91,17 @@ public class LiveServiceTest {
         store.subscribe(new KinveyDataStoreLiveServiceCallback<LiveModel>() {
             @Override
             public void onNext(LiveModel next) {
-                System.out.println("TEST_TEST: " + next.toString());
+                Log.d(TAG,  next.toString());
             }
 
             @Override
             public void onError(Exception e) {
-                System.out.println("TEST_TEST: " + e.toString());
+                Log.d(TAG,  e.toString());
             }
 
             @Override
             public void onStatus(KinveyLiveServiceStatus status) {
-                System.out.println("TEST_TEST: " + status.toString());
+                Log.d(TAG,  status.toString());
             }
         });
         store.unsubscribe();
@@ -163,17 +165,17 @@ public class LiveServiceTest {
         store.subscribe(new KinveyDataStoreLiveServiceCallback<LiveModel>() {
             @Override
             public void onNext(LiveModel next) {
-                System.out.println("TEST_TEST: " + next.toString());
+                Log.d(TAG,  next.toString());
             }
 
             @Override
             public void onError(Exception e) {
-                System.out.println("TEST_TEST: " + e.toString());
+                Log.d(TAG,  e.toString());
             }
 
             @Override
             public void onStatus(KinveyLiveServiceStatus status) {
-                System.out.println("TEST_TEST: " + status.toString());
+                Log.d(TAG,  status.toString());
             }
         });
 
