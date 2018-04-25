@@ -394,7 +394,7 @@ public class BaseDataStore<T extends GenericJson> {
 
         KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
-        KinveyAbstractReadResponse<T> pullResponse;
+        KinveyAbstractReadResponse<T> readResponse  ;
         if (isAutoPaginationEnabled()) {
             if (query.getSortString() == null || query.getSortString().isEmpty()) {
                 query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
@@ -409,21 +409,19 @@ public class BaseDataStore<T extends GenericJson> {
             int pulledItemCount = 0;
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-                pulledItemCount += pullResponse.getResult().size();
-                exceptions.addAll(pullResponse.getListOfExceptions());
+                readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+                exceptions.addAll(readResponse.getListOfExceptions());
                 cache.delete(query);
-                cache.save(pullResponse.getResult());
+                pulledItemCount += cache.save(readResponse.getResult()).size();
                 skipCount += pageSize;
             } while (skipCount < totalItemCount);
             response.setCount(pulledItemCount);
             response.setListOfExceptions(exceptions);
         } else {
-            pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
-            cache.save(pullResponse.getResult());
-            response.setCount(pullResponse.getResult().size());
-            response.setListOfExceptions(pullResponse.getListOfExceptions());
+            response.setCount(cache.save(readResponse.getResult()).size());
+            response.setListOfExceptions(readResponse.getListOfExceptions());
         }
 
         return response;
