@@ -177,4 +177,11 @@ public class ClientBuilderTest {
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
     }
 
+    @Test
+    public void testSetInstanceIdAndSetBaseUrl() throws IOException {
+        client = new Client.Builder(mContext).setBaseUrl("https://baseurl.com").setInstanceID("TestInstanceId").build();
+        assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
+        assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
+    }
+
 }

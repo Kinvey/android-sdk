@@ -21,6 +21,7 @@ import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.network.NetworkManager;
@@ -126,8 +127,8 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                             t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
                             if (t == null) {
                                 // check that item wasn't deleted before
-//                            manager.deleteCachedItem((String) syncItem.get("_id"));
-                                manager.deleteCachedItems(new Query().equals("meta.id", syncItem.getEntityID().id));
+                                // if item wasn't found, it means that the item was deleted from the Cache by Delete request and the item will be deleted in case:DELETE
+                                manager.deleteCachedItems(client.query().equals("meta.id", syncItem.getEntityID().id).notEqual(Constants.REQUEST_METHOD, Constants.DELETE));
                                 continue;
                             }
                             syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));

@@ -76,29 +76,6 @@ public class BaseDataStore<T extends GenericJson> {
     KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
-     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
-     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
-     * a developer would have to provide skip and limit modifiers to page through all the results.
-     * Setting this value to true will automatically fetch all the pages necessary.
-     * Default value is false.
-     */
-    private boolean autoPagination = false;
-
-    public boolean isAutoPaginationEnabled() {
-        return this.autoPagination;
-    }
-
-    public void setAutoPagination(boolean paginate) {
-        this.autoPagination = paginate;
-    }
-
-    private int pageSize = 10000; // default page size set to backend record retrieval limit
-
-    public void setAutoPaginationPageSize(int size) {
-        pageSize = size;
-    }
-
-    /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
      * @param collection collection name
@@ -391,39 +368,43 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-
         KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
-        KinveyAbstractReadResponse<T> readResponse  ;
-        if (isAutoPaginationEnabled()) {
-            if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
-            }
-            List<Exception> exceptions = new ArrayList<>();
-            int skipCount = 0;
-            int pageSize = this.pageSize;
+        KinveyAbstractReadResponse<T> readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+        cache.delete(query);
+        response.setCount(cache.save(readResponse.getResult()).size());
+        response.setListOfExceptions(readResponse.getListOfExceptions());
+        return response;
+    }
 
-            // First, get the count of all the items to pull
-            int totalItemCount = this.countNetwork();
-
-            int pulledItemCount = 0;
-            do {
-                query.setSkip(skipCount).setLimit(pageSize);
-                readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-                exceptions.addAll(readResponse.getListOfExceptions());
-                cache.delete(query);
-                pulledItemCount += cache.save(readResponse.getResult()).size();
-                skipCount += pageSize;
-            } while (skipCount < totalItemCount);
-            response.setCount(pulledItemCount);
-            response.setListOfExceptions(exceptions);
-        } else {
-            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-            cache.delete(query);
-            response.setCount(cache.save(readResponse.getResult()).size());
-            response.setListOfExceptions(readResponse.getListOfExceptions());
+    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
+        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        KinveyPullResponse response = new KinveyPullResponse();
+        KinveyAbstractReadResponse<T> readResponse;
+        query = query == null ? client.query() : query;
+        if (query.getSortString() == null || query.getSortString().isEmpty()) {
+            query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
         }
+        List<Exception> exceptions = new ArrayList<>();
+        int skipCount = 0;
+        // First, get the count of all the items to pull
+        int totalItemCount = this.countNetwork();
 
+        int pulledItemCount = 0;
+        do {
+            query.setSkip(skipCount).setLimit(pageSize);
+            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            exceptions.addAll(readResponse.getListOfExceptions());
+            cache.delete(query);
+            pulledItemCount += cache.save(readResponse.getResult()).size();
+            skipCount += pageSize;
+        } while (skipCount < totalItemCount);
+        response.setCount(pulledItemCount);
+        response.setListOfExceptions(exceptions);
         return response;
     }
 
@@ -434,6 +415,16 @@ public class BaseDataStore<T extends GenericJson> {
     public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param pageSize page size for auto-pagination
+     */
+    public void syncBlocking(Query query, int pageSize) throws IOException {
+        pushBlocking();
+        pullBlocking(query, pageSize);
     }
 
     public void purge() {
