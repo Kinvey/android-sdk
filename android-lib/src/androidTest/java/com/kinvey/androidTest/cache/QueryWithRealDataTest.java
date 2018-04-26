@@ -10,7 +10,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
@@ -18,6 +18,7 @@ import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -71,18 +72,18 @@ public class QueryWithRealDataTest {
         }
     }
 
-    private static class DefaultKinveyListCallback implements KinveyListCallback<Person> {
+    private static class DefaultKinveyReadCallback implements KinveyReadCallback<Person> {
 
         private CountDownLatch latch;
-        List<Person> result;
+        KinveyReadResponse<Person> result;
         Throwable error;
 
-        DefaultKinveyListCallback(CountDownLatch latch) {
+        DefaultKinveyReadCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
         @Override
-        public void onSuccess(List<Person> result) {
+        public void onSuccess(KinveyReadResponse<Person> result) {
             this.result = result;
             finish();
         }
@@ -150,9 +151,9 @@ public class QueryWithRealDataTest {
         }
         Query query = new Query();
         query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
-        DefaultKinveyListCallback findCallback = find(store, query);
+        DefaultKinveyReadCallback findCallback = find(store, query);
         delete(store, client.query().notEqual("name", "no_exist_field"));
-        assertTrue(findCallback.result.size() == 3);
+        assertTrue(findCallback.result.getResult().size() == 3);
     }
 
     @Test
@@ -164,8 +165,8 @@ public class QueryWithRealDataTest {
         }
         Query query = new Query();
         query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
-        DefaultKinveyListCallback findCallback = find(store, query);
-        assertTrue(findCallback.result.size() == 3);
+        DefaultKinveyReadCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.getResult().size() == 3);
     }
 
     @Test
@@ -178,8 +179,8 @@ public class QueryWithRealDataTest {
         store.save(createPerson(TEST_USERNAME));
         Query query = new Query();
         query.in("username", new String[]{TEST_TEMP_USERNAME});
-        DefaultKinveyListCallback findCallback = find(store, query);
-        assertTrue(findCallback.result.size() == 3);
+        DefaultKinveyReadCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.getResult().size() == 3);
     }
 
     @Test
@@ -192,8 +193,8 @@ public class QueryWithRealDataTest {
         store.save(createPerson(TEST_USERNAME));
         Query query = new Query();
         query.in("username", new String[]{TEST_TEMP_USERNAME, TEST_USERNAME});
-        DefaultKinveyListCallback findCallback = find(store, query);
-        assertTrue(findCallback.result.size() == 4);
+        DefaultKinveyReadCallback findCallback = find(store, query);
+        assertTrue(findCallback.result.getResult().size() == 4);
     }
 
     @Test
@@ -206,9 +207,9 @@ public class QueryWithRealDataTest {
         }
         Query query = new Query();
         query.in("_acl.creator", new String[]{client.getActiveUser().getId()});
-        DefaultKinveyListCallback findCallback = find(store, query);
+        DefaultKinveyReadCallback findCallback = find(store, query);
         delete(store, client.query().notEqual("name", "no_exist_field"));
-        assertTrue(findCallback.result.size() == 3);
+        assertTrue(findCallback.result.getResult().size() == 3);
     }
 
     private Person createPerson(String name) {
@@ -217,9 +218,9 @@ public class QueryWithRealDataTest {
         return person;
     }
 
-    private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
+    private DefaultKinveyReadCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {

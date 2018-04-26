@@ -9,9 +9,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
-import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.model.BooleanPrimitiveListInPerson;
@@ -139,14 +139,14 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getStringList());
 
         Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING});
-        CustomKinveyListCallback<StringPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<StringPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = new Query().in(STRING_LIST_FIELD, new String[]{"987654321"});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -182,12 +182,12 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getStringList());
 
         Query query;
-        CustomKinveyListCallback<StringPrimitiveListInPerson> findCallback;
+        CustomKinveyReadCallback<StringPrimitiveListInPerson> findCallback;
 
         query = new Query().in(STRING_LIST_FIELD, new String[]{"987654321", TEST_STRING});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
     }
 
     @Test
@@ -214,14 +214,14 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getIntegerList());
 
         Query query = new Query().in(INTEGER_LIST_FIELD, new Integer[]{TEST_INTEGER});
-        CustomKinveyListCallback<IntegerPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<IntegerPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = new Query().in(INTEGER_LIST_FIELD, new Integer[]{987654321});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -248,14 +248,14 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getBooleanList());
 
         Query query = new Query().in(BOOLEAN_LIST_FIELD, new Boolean[]{TEST_BOOLEAN});
-        CustomKinveyListCallback<BooleanPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<BooleanPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = new Query().in(BOOLEAN_LIST_FIELD, new Boolean[]{false});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -282,14 +282,14 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getFloatList());
 
         Query query = new Query().in(FLOAT_LIST_FIELD, new Float[]{TEST_FLOAT});
-        CustomKinveyListCallback<FloatPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<FloatPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = new Query().in(FLOAT_LIST_FIELD, new Float[]{987654321.1f});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -331,18 +331,18 @@ public class CacheRealDataTest {
         saveCallback = testManager.saveCustom(store, person4);
         assertNotNull(saveCallback.getResult());
 
-        CustomKinveyListCallback findCallback;
+        CustomKinveyReadCallback findCallback;
         Query query;
 
         query = new Query().equals("username", "NEW_PERSON");
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -866,9 +866,9 @@ public class CacheRealDataTest {
         assertTrue(saveCallback.getResult().getStringGenericJsons().size() == 2);
 
         Query query = new Query().in("stringGenericJsons.string", new String[]{TEST_STRING});
-        CustomKinveyListCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
     }
 
     @Test
@@ -899,9 +899,9 @@ public class CacheRealDataTest {
         assertTrue(saveCallback2.getResult().getStringGenericJsons().size() == 2);
 
         Query query = new Query().in("stringGenericJsons.string", new String[]{TEST_STRING});
-        CustomKinveyListCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<ObjectListInPerson> findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
 
         DefaultKinveyDeleteCallback callback = testManager.deleteCustom(store, query);
         assertNotNull(callback);
@@ -928,7 +928,7 @@ public class CacheRealDataTest {
         Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING});
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, query);
         assertNotNull(pullCallback.getResult());
-        CustomKinveyListCallback listCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
     }
 
@@ -966,37 +966,37 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult().getStringList());
 
         Query query;
-        CustomKinveyListCallback<StringPrimitiveListInPerson> findCallback;
+        CustomKinveyReadCallback<StringPrimitiveListInPerson> findCallback;
 
         query = (new Query().equals("_acl.creator", client.getActiveUser().getId()));
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 3);
+        assertTrue(findCallback.getResult().getResult().size() == 3);
 
         query = new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"});
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = (new Query().equals("_acl.creator", client.getActiveUser().getId())).and(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 2);
+        assertTrue(findCallback.getResult().getResult().size() == 2);
 
         query = (new Query().equals("_acl.creator", client.getActiveUser().getId())).or(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 3);
+        assertTrue(findCallback.getResult().getResult().size() == 3);
 
         query = (new Query().equals("age", "25")).or(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 3);
+        assertTrue(findCallback.getResult().getResult().size() == 3);
 
         query = (new Query().equals("age", "25")).and(new Query().in(STRING_LIST_FIELD, new String[]{"11111", "987654321"}));
         findCallback = testManager.findCustom(store, query);
         assertNotNull(findCallback.getResult());
-        assertTrue(findCallback.getResult().size() == 1);
+        assertTrue(findCallback.getResult().getResult().size() == 1);
 
     }
 

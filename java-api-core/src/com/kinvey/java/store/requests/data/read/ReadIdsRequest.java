@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
@@ -41,12 +42,14 @@ public class ReadIdsRequest<T extends GenericJson> extends AbstractReadRequest<T
     }
 
     @Override
-    protected List<T> getCached() {
-        return cache.get(ids);
+    protected KinveyReadResponse<T> getCached() {
+        KinveyReadResponse<T> response = new KinveyReadResponse<>();
+        response.setResult(cache.get(ids));
+        return response;
     }
 
     @Override
-    protected List<T> getNetwork() throws IOException {
-        return Arrays.asList(getNetworkData().getBlocking(Iterables.toArray(ids, String.class)).execute());
+    protected KinveyReadResponse<T> getNetwork() throws IOException {
+        return getNetworkData().getBlocking(Iterables.toArray(ids, String.class)).execute();
     }
 }

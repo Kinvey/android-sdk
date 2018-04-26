@@ -2,20 +2,20 @@ package com.kinvey.java.store;
 
 
 import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 
 class PullTaskResponse {
 
-    private KinveyAbstractReadResponse kinveyAbstractReadResponse;
+    private KinveyReadResponse kinveyReadResponse;
     private Query query;
 
-    PullTaskResponse(KinveyAbstractReadResponse kinveyAbstractReadResponse, Query query) {
-        this.kinveyAbstractReadResponse = kinveyAbstractReadResponse;
+    PullTaskResponse(KinveyReadResponse kinveyReadResponse, Query query) {
+        this.kinveyReadResponse = kinveyReadResponse;
         this.query = query;
     }
 
-    KinveyAbstractReadResponse getKinveyAbstractReadResponse() {
-        return kinveyAbstractReadResponse;
+    KinveyReadResponse getKinveyReadResponse() {
+        return kinveyReadResponse;
     }
 
     Query getQuery() {

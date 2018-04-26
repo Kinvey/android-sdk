@@ -26,10 +26,10 @@ import com.kinvey.android.async.AsyncPushRequest;
 import com.kinvey.android.async.AsyncRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
@@ -42,6 +42,7 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
@@ -83,7 +84,7 @@ import java.util.Map;
  * </pre>
  * </p>
  * <p>
- * Methods in this API use either {@link KinveyListCallback} for retrieving entity sets,
+ * Methods in this API use either {@link KinveyReadCallback} for retrieving entity sets,
  * {@link KinveyDeleteCallback} for deleting appData, or  the general-purpose
  * {@link KinveyClientCallback} used for retrieving single entities or saving Entities.
  * </p>
@@ -93,9 +94,9 @@ import java.util.Map;
  * <pre>
  * {@code
  *     DataStore<EventEntity> dataStore = DataStore.collection("myCollection",EventEntity.class, StoreType.SYNC, myClient);
- *     dataStore.find(myClient.query(), new KinveyListCallback<EventEntity> {
+ *     dataStore.find(myClient.query(), new KinveyReadCallback<EventEntity> {
  *         public void onFailure(Throwable t) { ... }
- *         public void onSuccess(List<EventEntity> entities) { ... }
+ *         public void onSuccess({@link KinveyReadResponse}<EventEntity> readResponse) { ... }
  *     });
  * }
  * </pre>
@@ -273,21 +274,21 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
-        new AsyncRequest<T>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, getWrappedCacheCallback(cachedCallback)).execute();
+        new AsyncRequest<>(this, methodMap.get(KEY_GET_BY_ID), callback, entityID, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
     /**
      * Asynchronous request to fetch an list of Entities using an list of _ids.
      * <p>
      * Constructs an asynchronous request to fetch an List of Entities, filtering by the provided list of _ids.  Uses
-     * KinveyListCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
+     * KinveyReadCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", StoreType.SYNC, EventEntity.class, myClient);
-     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
+     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
      *     });
@@ -298,7 +299,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Iterable<String> ids, KinveyListCallback<T> callback){
+    public void find(Iterable<String> ids, KinveyReadCallback<T> callback){
         find(ids, callback, null);
     }
 
@@ -306,14 +307,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to fetch an list of Entities using an list of _ids.
      * <p>
      * Constructs an asynchronous request to fetch an List of Entities, filtering by the provided list of _ids.  Uses
-     * KinveyListCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
+     * KinveyReadCallback<T> to return an List of type T.  This method uses a Query {@link Query}.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.CACHE, myClient);
-     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyListCallback<EventEntity> {
+     *     myAppData.find(Lists.asList(new String[]{"189472023", "10193583"}), new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
      *     }, new KinveyCachedListCallback<EventEntity>(){
@@ -328,11 +329,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(Iterable<String> ids, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
+    public void find(Iterable<String> ids, KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids,
+        new AsyncRequest<>(this, methodMap.get(KEY_GET_BY_IDS), callback, ids,
                 getWrappedCacheCallback(cachedCallback)).execute();
     }
 
@@ -341,7 +342,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to fetch an list of Entities using a Query object.
      * <p>
      * Constructs an asynchronous request to fetch an List of Entities, filtering by a Query object.  Uses
-     * KinveyListCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
+     * KinveyReadCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
      * An empty Query object will return all items in the collection.
      * </p>
      * <p>
@@ -351,7 +352,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
      *     Query myQuery = myAppData.query();
      *     myQuery.equals("age",21);
-     *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
+     *     myAppData.find(myQuery, new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
      *     });
@@ -362,7 +363,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Query query, KinveyListCallback<T> callback){
+    public void find(Query query, KinveyReadCallback<T> callback){
         find(query, callback, null);
     }
 
@@ -371,7 +372,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to fetch an list of Entities using a Query object.
      * <p>
      * Constructs an asynchronous request to fetch an List of Entities, filtering by a Query object.  Uses
-     * KinveyListCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
+     * KinveyReadCallback<T> to return an List of type T.  Queries can be constructed with {@link Query}.
      * An empty Query object will return all items in the collection.
      * </p>
      * <p>
@@ -381,7 +382,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.CACHE, myClient);
      *     Query myQuery = myAppData.query();
      *     myQuery.equals("age",21);
-     *     myAppData.find(myQuery, new KinveyListCallback<EventEntity> {
+     *     myAppData.find(myQuery, new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
      *     }, new KinveyCachedListCallback<EventEntity>(){
@@ -396,11 +397,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(Query query, KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback){
+    public void find(Query query, KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query,
+        new AsyncRequest<>(this, methodMap.get(KEY_GET_BY_QUERY), callback, query,
                 getWrappedCacheCallback(cachedCallback)).execute();
     }
 
@@ -408,14 +409,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to fetch an list of all Entities in a collection.
      * <p>
      * Constructs an asynchronous request to fetch an List of all entities in a collection.  Uses
-     * KinveyListCallback<T> to return an List of type T.
+     * KinveyReadCallback<T> to return an List of type T.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     myAppData.find(new KinveyListCallback<EventEntity> {
+     *     myAppData.find(new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(List<EventEntity> entities) { ... }
      *     });
@@ -425,7 +426,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(KinveyListCallback<T> callback) {
+    public void find(KinveyReadCallback<T> callback) {
         find(callback, null);
     }
 
@@ -433,14 +434,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to fetch an list of all Entities in a collection.
      * <p>
      * Constructs an asynchronous request to fetch an List of all entities in a collection.  Uses
-     * KinveyListCallback<T> to return an List of type T.
+     * KinveyReadCallback<T> to return an List of type T.
      * </p>
      * <p>
      * Sample Usage:
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     myAppData.find(new KinveyListCallback<EventEntity> {
+     *     myAppData.find(new KinveyReadCallback<EventEntity> {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(EventEntity[] entities) { ... }
      *     }, new KinveyCachedListCallback<EventEntity>(){
@@ -454,10 +455,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(KinveyListCallback<T> callback, KinveyCachedClientCallback<List<T>> cachedCallback) {
+    public void find(KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncRequest<List<T>>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
+        new AsyncRequest<>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
     }
 
     /**
@@ -658,7 +659,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /**
      * Asynchronous request to pull a collection of entities from backend.
      * <p>
-     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -676,14 +677,16 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPullCallback
      */
-    public void pull(KinveyPullCallback<T> callback) {
+    public void pull(KinveyPullCallback callback) {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, PAGINATION_IS_NOT_USED, callback);
     }
 
     /**
      * Asynchronous request to pull a collection of entities from backend using auto-pagination.
      * <p>
-     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -702,8 +705,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(int pageSize, KinveyPullCallback<T> callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+    public void pull(int pageSize, KinveyPullCallback callback) {
+        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, pageSize,  callback);
@@ -735,11 +738,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, int pageSize, KinveyPullCallback<T> callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+    public void pull(Query query, int pageSize, KinveyPullCallback callback) {
+        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<>(this, query, pageSize, callback).execute();
+        new AsyncPullRequest(this, query, pageSize, callback).execute();
     }
 
 
@@ -765,10 +768,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * </p>
      *
      * @param query {@link Query} to filter the results.
-     * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback<T> callback) {
+    public void pull(Query query, KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         pull(query, PAGINATION_IS_NOT_USED, callback);
@@ -778,7 +780,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
      * Creates an asynchronous request to clear all the pending requests from the sync storage.
-     * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
+     * Uses KinveyPullCallback to return a {@link KinveyPurgeCallback}.
      * </p>
      * <p>
      * Sample Usage:
@@ -829,7 +831,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
      *     public void onSuccess(KinveyPushResponse kinveyPushResponse,
-     *         KinveyPullResponse<T> kinveyPullResponse) {...}
+     *         KinveyPullResponse kinveyPullResponse) {...}
      *         void onSuccess(){...};
      *         void onPullStarted(){...};
      *         void onPushStarted(){...};
@@ -845,7 +847,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final KinveySyncCallback<T> callback) {
+    public void sync(final Query query, final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         callback.onPushStarted();
@@ -854,10 +856,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                    public void onSuccess(KinveyPullResponse pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
                     }
@@ -916,8 +918,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final int pageSize, final KinveySyncCallback<T> callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+    public void sync(final Query query, final int pageSize, final KinveySyncCallback callback) {
+        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         callback.onPushStarted();
@@ -926,10 +928,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, pageSize, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, pageSize, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                    public void onSuccess(KinveyPullResponse pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
                     }
@@ -959,7 +961,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final KinveySyncCallback<T> callback) {
+    public void sync(final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, callback);
@@ -971,7 +973,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final int pageSize, final KinveySyncCallback<T> callback) {
+    public void sync(final int pageSize, final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, pageSize, callback);

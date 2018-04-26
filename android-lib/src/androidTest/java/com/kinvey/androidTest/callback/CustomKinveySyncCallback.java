@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.callback;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
 
@@ -11,10 +11,10 @@ import java.util.concurrent.CountDownLatch;
  * Created by yuliya on 12/27/17.
  */
 
-public class CustomKinveySyncCallback<T extends GenericJson> implements KinveySyncCallback<T> {
+public class CustomKinveySyncCallback implements KinveySyncCallback {
 
     private CountDownLatch latch;
-    private KinveyPullResponse<T> result;
+    private KinveyPullResponse result;
     private KinveyPushResponse kinveyPushResponse;
     private Throwable error;
     public CustomKinveySyncCallback(CountDownLatch latch) {
@@ -22,7 +22,7 @@ public class CustomKinveySyncCallback<T extends GenericJson> implements KinveySy
     }
 
     @Override
-    public void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<T> kinveyPullResponse) {
+    public void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse kinveyPullResponse) {
         this.result = kinveyPullResponse;
         this.kinveyPushResponse = kinveyPushResponse;
         finish();
@@ -39,7 +39,7 @@ public class CustomKinveySyncCallback<T extends GenericJson> implements KinveySy
     }
 
     @Override
-    public void onPullSuccess(KinveyPullResponse<T> kinveyPullResponse) {
+    public void onPullSuccess(KinveyPullResponse kinveyPullResponse) {
 
     }
 
@@ -58,11 +58,11 @@ public class CustomKinveySyncCallback<T extends GenericJson> implements KinveySy
         latch.countDown();
     }
 
-    public KinveyPullResponse<T> getResult() {
+    public KinveyPullResponse getResult() {
         return result;
     }
 
-    public void setResult(KinveyPullResponse<T> result) {
+    public void setResult(KinveyPullResponse result) {
         this.result = result;
     }
 
