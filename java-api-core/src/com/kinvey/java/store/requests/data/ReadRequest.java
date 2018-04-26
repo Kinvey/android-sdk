@@ -19,18 +19,17 @@ package com.kinvey.java.store.requests.data;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.ReadPolicy;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Prots on 2/8/16.
  */
-public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRequest<T> {
+public class ReadRequest<T extends GenericJson> extends AbstractKinveyReadRequest<T> {
     private final ICache<T> cache;
     private final Query query;
     private final ReadPolicy readPolicy;
@@ -47,17 +46,18 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyDataListRe
     }
 
     @Override
-    public List<T> execute() throws IOException {
+    public KinveyReadResponse<T> execute() throws IOException {
         query.setLimit((int) maxValue);
-        List<T> ret = null;
+        KinveyReadResponse<T> ret = null;
         switch (readPolicy){
             case FORCE_LOCAL:
-//            case PREFER_LOCAL:
-                ret = cache.get(query);
+                KinveyReadResponse<T> response = new KinveyReadResponse<>();
+                response.setResult(cache.get(query));
+                ret = response;
                 break;
             case FORCE_NETWORK:
             case BOTH:
-                ret = Arrays.asList(networkManager.getBlocking(query).execute());
+                ret = networkManager.getBlocking(query).execute();
                 break;
         }
         return ret;

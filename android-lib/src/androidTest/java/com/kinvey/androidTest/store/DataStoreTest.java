@@ -15,7 +15,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
@@ -29,6 +29,7 @@ import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.model.Address;
@@ -55,6 +56,7 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
 
@@ -386,18 +388,18 @@ public class DataStoreTest {
         }
     }
 
-    private static class DefaultKinveyListCallback implements KinveyListCallback<Person> {
+    private static class DefaultKinveyReadCallback implements KinveyReadCallback<Person> {
 
         private CountDownLatch latch;
-        List<Person> result;
+        KinveyReadResponse<Person> result;
         Throwable error;
 
-        DefaultKinveyListCallback(CountDownLatch latch) {
+        DefaultKinveyReadCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
         @Override
-        public void onSuccess(List<Person> result) {
+        public void onSuccess(KinveyReadResponse<Person> result) {
             this.result = result;
             finish();
         }
@@ -534,7 +536,7 @@ public class DataStoreTest {
         person.setList(list);
         PersonLongListName result = store.save(person);
         assertNotNull(result);
-        result = store.find(client.query().equals(ID, result.getId())).get(0);
+        result = store.find(client.query().equals(ID, result.getId())).getResult().get(0);
         assertNotNull(result);
         assertEquals(1, store.delete(result.getId()).longValue());
     }
@@ -635,9 +637,9 @@ public class DataStoreTest {
         assertEquals(findCallback.result.getId(), personId);
     }
 
-    private DefaultKinveyListCallback find(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
+    private DefaultKinveyReadCallback find(final DataStore<Person> store, final Query query, int seconds) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -667,6 +669,7 @@ public class DataStoreTest {
 
     private void testFindByQuery(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        clearBackend(store);
         client.getSyncManager().clear(Person.COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
@@ -676,10 +679,11 @@ public class DataStoreTest {
         String userId = saveCallback.result.getId();
         Query query = client.query();
         query = query.equals(ID, userId);
-        DefaultKinveyListCallback kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
+        DefaultKinveyReadCallback kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() > 0);
+        assertTrue(kinveyListCallback.result.getResult().size() > 0);
+        delete(store, query);
     }
 
     @Test
@@ -1162,7 +1166,7 @@ public class DataStoreTest {
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
         assertEquals(10, syncCallback.getResult().getCount());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        assertEquals(10, store.find().size());
+        assertEquals(10, store.find().getResult().size());
     }
 
     @Test
@@ -1181,7 +1185,7 @@ public class DataStoreTest {
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
         assertEquals(2, syncCallback.getResult().getCount());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        assertEquals(10, store.find().size());
+        assertEquals(10, store.find().getResult().size());
     }
 
     @Test
@@ -1806,7 +1810,6 @@ public class DataStoreTest {
                 assertTrue(pullResponse.result.getCount() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
-            System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }
@@ -1832,7 +1835,6 @@ public class DataStoreTest {
                 assertTrue(pullResponse.getCount() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
-            System.out.println("TEST: number - " + j);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }
@@ -1869,13 +1871,13 @@ public class DataStoreTest {
         }
 
         Query query = client.query();
-        DefaultKinveyListCallback findCallback;
+        DefaultKinveyReadCallback findCallback;
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
             findCallback = find(store, query, DEFAULT_TIMEOUT);
-            assertTrue(findCallback.result.size() == 1);
-            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, findCallback.result.get(0).getUsername());
+            assertTrue(findCallback.result.getResult().size() == 1);
+            assertEquals(TEST_USERNAME + Constants.UNDERSCORE + i, findCallback.result.getResult().get(0).getUsername());
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
     }
@@ -1895,7 +1897,7 @@ public class DataStoreTest {
             save(store, createPerson(TEST_USERNAME + Constants.UNDERSCORE + i));
         }
         sync(store, DEFAULT_TIMEOUT);
-        List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result.getResult();
         assertEquals(5, findResult.size());
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
@@ -1909,7 +1911,7 @@ public class DataStoreTest {
             assertNotNull(resultCount);
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
-        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result.getResult();
         assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
 
@@ -1926,7 +1928,7 @@ public class DataStoreTest {
             assertNotNull(resultCount);
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
-        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
+        findResult = find(store, client.query(), DEFAULT_TIMEOUT).result.getResult();
         assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
     }
@@ -2044,10 +2046,10 @@ public class DataStoreTest {
         Query query = client.query();
         query = query.equals(ID, userId);
 
-        DefaultKinveyListCallback findCallback = find(store, query, 120);
+        DefaultKinveyReadCallback findCallback = find(store, query, 120);
         assertNull(findCallback.error);
         assertNotNull(findCallback.result);
-        assertTrue(findCallback.result.size() == 0);
+        assertTrue(findCallback.result.getResult().size() == 0);
         StoreType.SYNC.ttl = Long.MAX_VALUE;
     }
 
@@ -2074,7 +2076,7 @@ public class DataStoreTest {
         int skip = 0;
         int limit = 2;
 
-        DefaultKinveyListCallback kinveyListCallback;
+        DefaultKinveyReadCallback kinveyListCallback;
         Query query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
@@ -2082,8 +2084,8 @@ public class DataStoreTest {
             kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
             assertNull(kinveyListCallback.error);
             assertNotNull(kinveyListCallback.result);
-            assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_" + skip);
-            assertEquals(kinveyListCallback.result.get(1).getUsername(), "Person_" + (skip+1));
+            assertEquals(kinveyListCallback.result.getResult().get(0).getUsername(), "Person_" + skip);
+            assertEquals(kinveyListCallback.result.getResult().get(1).getUsername(), "Person_" + (skip+1));
             skip += limit;
         }
 
@@ -2092,9 +2094,9 @@ public class DataStoreTest {
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() == 5);
-        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_0");
-        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_4");
+        assertTrue(kinveyListCallback.result.getResult().size() == 5);
+        assertEquals(kinveyListCallback.result.getResult().get(0).getUsername(), "Person_0");
+        assertEquals(kinveyListCallback.result.getResult().get(kinveyListCallback.result.getResult().size()-1).getUsername(), "Person_4");
 
 
         query = client.query();
@@ -2102,9 +2104,9 @@ public class DataStoreTest {
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() == 5);
-        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_5");
-        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_9");
+        assertTrue(kinveyListCallback.result.getResult().size() == 5);
+        assertEquals(kinveyListCallback.result.getResult().get(0).getUsername(), "Person_5");
+        assertEquals(kinveyListCallback.result.getResult().get(kinveyListCallback.result.getResult().size()-1).getUsername(), "Person_9");
 
         query = client.query();
         query.setLimit(6);
@@ -2112,9 +2114,9 @@ public class DataStoreTest {
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() == 4);
-        assertEquals(kinveyListCallback.result.get(0).getUsername(), "Person_6");
-        assertEquals(kinveyListCallback.result.get(kinveyListCallback.result.size()-1).getUsername(), "Person_9");
+        assertTrue(kinveyListCallback.result.getResult().size() == 4);
+        assertEquals(kinveyListCallback.result.getResult().get(0).getUsername(), "Person_6");
+        assertEquals(kinveyListCallback.result.getResult().get(kinveyListCallback.result.getResult().size()-1).getUsername(), "Person_9");
 
 
         query = client.query();
@@ -2122,14 +2124,14 @@ public class DataStoreTest {
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() == 0);
+        assertTrue(kinveyListCallback.result.getResult().size() == 0);
 
         query = client.query();
         query.setSkip(11);
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
-        assertTrue(kinveyListCallback.result.size() == 0);
+        assertTrue(kinveyListCallback.result.getResult().size() == 0);
 
 
         DefaultKinveyPushCallback pushCallback = push(store, DEFAULT_TIMEOUT);
@@ -2384,10 +2386,10 @@ public class DataStoreTest {
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
 
-        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, client.query());
+        CustomKinveyReadCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, client.query());
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
-        SelfReferencePerson person = listCallback.getResult().get(0);
+        SelfReferencePerson person = listCallback.getResult().getResult().get(0);
         assertTrue(person.getUsername().equals("person1"));
         assertTrue(person.getPerson().getUsername().equals("person2"));
         assertTrue(person.getPerson().getPerson().getUsername().equals("person3"));
@@ -2421,11 +2423,11 @@ public class DataStoreTest {
         }
 
         Query query = client.query().in("selfReferencePerson.selfReferencePerson.username", new String[] {"person3"});
-        CustomKinveyListCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<SelfReferencePerson> listCallback = testManager.findCustom(store, query);
 
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
-        assertTrue(listCallback.getResult().size() == 10);
+        assertTrue(listCallback.getResult().getResult().size() == 10);
     }
 
 
@@ -2477,11 +2479,11 @@ public class DataStoreTest {
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
 
-        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        CustomKinveyReadCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
 
-        PersonList person = listCallback.getResult().get(0);
+        PersonList person = listCallback.getResult().getResult().get(0);
         assertEquals(person.getUsername(), "person1");
         assertEquals(person.getList().get(1).getUsername(), "person3");
         assertEquals(person.getList().get(0).getUsername(), "person2");
@@ -2534,40 +2536,40 @@ public class DataStoreTest {
         }
 
         Query query = client.query().in("username", new String[] {"person1_0"});
-        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, query);
+        CustomKinveyReadCallback<PersonList> listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
-        assertTrue(listCallback.getResult().size() == 1);
+        assertTrue(listCallback.getResult().getResult().size() == 1);
         assertNull(listCallback.getError());
-        PersonList person = listCallback.getResult().get(0);
+        PersonList person = listCallback.getResult().getResult().get(0);
         assertEquals(person.getUsername(), "person1_0");
 
         query = client.query().in("list.username", new String[] {"person2_0"});
         listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
-        assertTrue(listCallback.getResult().size() == 1);
-        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_0");
+        assertTrue(listCallback.getResult().getResult().size() == 1);
+        assertEquals(listCallback.getResult().getResult().get(0).getUsername(), "person1_0");
         assertNull(listCallback.getError());
 
         query = client.query().in("list.list.username", new String[] {"person6_1"});
         listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
-        assertTrue(listCallback.getResult().size() == 1);
-        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertTrue(listCallback.getResult().getResult().size() == 1);
+        assertEquals(listCallback.getResult().getResult().get(0).getUsername(), "person1_1");
         assertNull(listCallback.getError());
 
         query = client.query().in("list.list.username", new String[] {"person6_1", "person6_2"});
         listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
-        assertTrue(listCallback.getResult().size() == 2);
-        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
-        assertEquals(listCallback.getResult().get(1).getUsername(), "person1_2");
+        assertTrue(listCallback.getResult().getResult().size() == 2);
+        assertEquals(listCallback.getResult().getResult().get(0).getUsername(), "person1_1");
+        assertEquals(listCallback.getResult().getResult().get(1).getUsername(), "person1_2");
         assertNull(listCallback.getError());
 
         query = client.query().equals("list.list.username", "person6_1");
         listCallback = testManager.findCustom(store, query);
         assertNotNull(listCallback.getResult());
-        assertTrue(listCallback.getResult().size() == 1);
-        assertEquals(listCallback.getResult().get(0).getUsername(), "person1_1");
+        assertTrue(listCallback.getResult().getResult().size() == 1);
+        assertEquals(listCallback.getResult().getResult().get(0).getUsername(), "person1_1");
         assertNull(listCallback.getError());
     }
 
@@ -2604,11 +2606,11 @@ public class DataStoreTest {
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
 
-        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        CustomKinveyReadCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
 
-        PersonList person = listCallback.getResult().get(0);
+        PersonList person = listCallback.getResult().getResult().get(0);
         assertEquals(person.getUsername(), "person1");
         assertEquals(person.getPersonList().getUsername(), "person2");
         assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
@@ -2856,11 +2858,11 @@ public class DataStoreTest {
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
 
-        CustomKinveyListCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
+        CustomKinveyReadCallback<PersonList> listCallback = testManager.findCustom(store, client.query());
         assertNotNull(listCallback.getResult());
         assertNull(listCallback.getError());
 
-        PersonList person = listCallback.getResult().get(0);
+        PersonList person = listCallback.getResult().getResult().get(0);
         assertEquals(person.getUsername(), "person1");
         assertEquals(person.getPersonList().getUsername(), "person2");
         assertEquals(person.getPersonList().getList().get(0).getUsername(), "person3");
@@ -3182,16 +3184,16 @@ public class DataStoreTest {
         assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         store.syncBlocking(null);
-        List<Person> personList = store.find();
+        List<Person> personList = store.find().getResult();
         Person person1 = personList.get(0);
         int hashcode = person1.hashCode();
         assertNotNull(hashcode);
 
-        Person theSamePerson = store.find(client.query().equals("username", TEST_USERNAME)).get(0);
+        Person theSamePerson = store.find(client.query().equals("username", TEST_USERNAME)).getResult().get(0);
         assertEquals(hashcode, theSamePerson.hashCode());
 
         save(store, createPerson(TEST_USERNAME + 2));
-        Person theSamePerson2 = store.find(client.query().equals("author.name", "author")).get(0);
+        Person theSamePerson2 = store.find(client.query().equals("author.name", "author")).getResult().get(0);
         assertEquals(hashcode, theSamePerson2.hashCode());
 
     }
@@ -3237,7 +3239,7 @@ public class DataStoreTest {
         assertNotNull(callback.kinveyPushResponse);
         assertNotNull(callback.kinveyPullResponse);
 
-        List<Person> personList = store.find();
+        List<Person> personList = store.find().getResult();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
@@ -3260,13 +3262,13 @@ public class DataStoreTest {
         person.setAuthor(author);
         store.save(person);
 
-        Person newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        Person newPerson = store.find(client.query().equals("username", "person_name")).getResult().get(0);
         Author updatedAuthor = new Author("updated_author_name");
         newPerson.setAuthor(updatedAuthor);
         newPerson.setUsername("updated_person_name");
         store.save(newPerson);
 
-        Person updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        Person updatedPerson = store.find(client.query().equals("username", "updated_person_name")).getResult().get(0);
         assertNotNull(updatedPerson);
         assertEquals("updated_person_name", updatedPerson.getUsername());
         assertEquals("updated_author_name", updatedPerson.getAuthor().getName());
@@ -3274,7 +3276,7 @@ public class DataStoreTest {
         updatedPerson.setAuthor(null);
         store.save(updatedPerson);
 
-        Person updatedPersonWithoutAuthor = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        Person updatedPersonWithoutAuthor = store.find(client.query().equals("username", "updated_person_name")).getResult().get(0);
         assertNotNull(updatedPersonWithoutAuthor);
         assertEquals("updated_person_name", updatedPersonWithoutAuthor.getUsername());
         assertNull(updatedPersonWithoutAuthor.getAuthor());
@@ -3291,14 +3293,14 @@ public class DataStoreTest {
         person.setList(list);
         store.save(person);
 
-        PersonList newPerson = store.find(client.query().equals("username", "person_name")).get(0);
+        PersonList newPerson = store.find(client.query().equals("username", "person_name")).getResult().get(0);
         list = new ArrayList<>();
         list.add(new PersonList("person_name_in_list_2"));
         newPerson.setList(list);
         newPerson.setUsername("updated_person_name");
         store.save(newPerson);
 
-        PersonList updatedPerson = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        PersonList updatedPerson = store.find(client.query().equals("username", "updated_person_name")).getResult().get(0);
         assertNotNull(updatedPerson);
         assertEquals("updated_person_name", updatedPerson.getUsername());
         assertEquals("person_name_in_list_2", updatedPerson.getList().get(0).getUsername());
@@ -3306,7 +3308,7 @@ public class DataStoreTest {
         updatedPerson.setList(updatedPerson.getList());
         store.save(updatedPerson);
 
-        PersonList updatedPersonWithoutList = store.find(client.query().equals("username", "updated_person_name")).get(0);
+        PersonList updatedPersonWithoutList = store.find(client.query().equals("username", "updated_person_name")).getResult().get(0);
         assertNotNull(updatedPersonWithoutList);
         assertEquals("updated_person_name", updatedPersonWithoutList.getUsername());
         assertEquals(0, updatedPersonWithoutList.getList().size());
@@ -3322,7 +3324,7 @@ public class DataStoreTest {
         assertNotNull(callback.result.getUsername());
         sync(store, DEFAULT_TIMEOUT);
 
-        person = find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.get(0);
+        person = find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().get(0);
         person.setUsername(TEST_USERNAME_2);
         callback = save(store, person);
         assertNotNull(callback.result);
@@ -3334,7 +3336,7 @@ public class DataStoreTest {
 
         sync(store, DEFAULT_TIMEOUT);
 
-        assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.size());
+        assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
         assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
     }
 
@@ -3352,7 +3354,7 @@ public class DataStoreTest {
 
         sync(store, DEFAULT_TIMEOUT);
 
-        assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.size());
+        assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
         assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
     }
 

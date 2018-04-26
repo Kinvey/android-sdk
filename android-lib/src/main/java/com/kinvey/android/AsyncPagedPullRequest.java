@@ -22,7 +22,6 @@ import com.kinvey.java.Query;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,7 @@ import java.util.List;
  * Class represents internal implementation of async paged pull request that is used to automate
  * pull request pagination.
  */
-public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullResponse> {
+public class AsyncPagedPullRequest extends AsyncClientRequest<KinveyPullResponse> {
     private final BaseDataStore store;
     private Query query;
 
@@ -50,7 +49,7 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
 
 
     @Override
-    protected KinveyPullResponse executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
+    protected KinveyPullResponse executeAsync() throws IOException {
         KinveyPullResponse kinveyPullResponse = new KinveyPullResponse();
 
         int skipCount = 0;
@@ -66,7 +65,6 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
         int pulledItemsCount = 0;
         List<Exception> pullExceptions = new ArrayList<>();
         KinveyPullResponse pullResponse;
-
         do {
             query.setSkip(skipCount).setLimit(pageSize);
             pullResponse = store.pullBlocking(query);

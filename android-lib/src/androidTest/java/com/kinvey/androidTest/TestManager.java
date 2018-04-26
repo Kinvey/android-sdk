@@ -9,22 +9,20 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyLiveServiceCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
-import com.kinvey.androidTest.callback.DefaultKinveyListCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
-import com.kinvey.java.core.KinveyAggregateCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
@@ -208,9 +206,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public DefaultKinveyListCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
+    public DefaultKinveyReadCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -223,9 +221,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyListCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveyReadCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyListCallback<T> callback = new CustomKinveyListCallback<T>(latch);
+        final CustomKinveyReadCallback<T> callback = new CustomKinveyReadCallback<T>(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
