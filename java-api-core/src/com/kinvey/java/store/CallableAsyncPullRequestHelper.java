@@ -7,10 +7,10 @@ import java.util.concurrent.Callable;
 
 public class CallableAsyncPullRequestHelper implements Callable {
 
-    private final NetworkManager.Pull pullRequest;
+    private final NetworkManager.Get pullRequest;
     private final Query query;
 
-    CallableAsyncPullRequestHelper(NetworkManager.Pull pull, Query query) {
+    CallableAsyncPullRequestHelper(NetworkManager.Get pull, Query query) {
         this.pullRequest = pull;
         this.query = query;
     }
