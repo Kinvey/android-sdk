@@ -29,7 +29,7 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
@@ -658,7 +658,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /**
      * Asynchronous request to pull a collection of entities from backend.
      * <p>
-     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -679,16 +679,16 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback<T> callback) {
+    public void pull(Query query, KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<>(this, query, callback).execute();
+        new AsyncPullRequest(this, query, callback).execute();
     }
 
     /**
      * Asynchronous request to pull a collection of entities from backend.
      * <p>
-     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -706,7 +706,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPullCallback
      */
-    public void pull(KinveyPullCallback<T> callback) {
+    public void pull(KinveyPullCallback callback) {
         this.pull(null, callback);
     }
 
@@ -736,11 +736,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, int pageSize, KinveyPullCallback<T> callback) {
+    public void pull(Query query, int pageSize, KinveyPullCallback callback) {
         Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest<>(this, query, pageSize, callback).execute();
+        new AsyncPullRequest(this, query, pageSize, callback).execute();
     }
 
     /**
@@ -765,7 +765,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(int pageSize, KinveyPullCallback<T> callback) {
+    public void pull(int pageSize, KinveyPullCallback callback) {
         Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -776,7 +776,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Asynchronous request to clear all the pending requests from the sync storage
      * <p>
      * Creates an asynchronous request to clear all the pending requests from the sync storage.
-     * Uses KinveyPullCallback<T> to return a {@link KinveyPurgeCallback}.
+     * Uses KinveyPullCallback to return a {@link KinveyPurgeCallback}.
      * </p>
      * <p>
      * Sample Usage:
@@ -827,7 +827,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *     myQuery.equals("age",21);
      *     myAppData.sync(myQuery, new KinveySyncCallback {
      *     public void onSuccess(KinveyPushResponse kinveyPushResponse,
-     *         KinveyPullResponse<T> kinveyPullResponse) {...}
+     *         KinveyPullResponse kinveyPullResponse) {...}
      *         void onSuccess(){...};
      *         void onPullStarted(){...};
      *         void onPushStarted(){...};
@@ -843,7 +843,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final KinveySyncCallback<T> callback) {
+    public void sync(final Query query, final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         callback.onPushStarted();
@@ -852,10 +852,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                    public void onSuccess(KinveyPullResponse pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
                     }
@@ -914,7 +914,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final int pageSize, final KinveySyncCallback<T> callback) {
+    public void sync(final Query query, final int pageSize, final KinveySyncCallback callback) {
         Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -924,10 +924,10 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
             public void onSuccess(final KinveyPushResponse pushResult) {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
-                DataStore.this.pull(query, pageSize, new KinveyPullCallback<T>() {
+                DataStore.this.pull(query, pageSize, new KinveyPullCallback() {
 
                     @Override
-                    public void onSuccess(KinveyPullResponse<T> pullResult) {
+                    public void onSuccess(KinveyPullResponse pullResult) {
                         callback.onPullSuccess(pullResult);
                         callback.onSuccess(pushResult, pullResult);
                     }
@@ -957,7 +957,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final KinveySyncCallback<T> callback) {
+    public void sync(final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, callback);
@@ -969,7 +969,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final int pageSize, final KinveySyncCallback<T> callback) {
+    public void sync(final int pageSize, final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, pageSize, callback);

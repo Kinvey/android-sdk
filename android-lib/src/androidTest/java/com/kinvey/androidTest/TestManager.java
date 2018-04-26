@@ -236,9 +236,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -255,9 +255,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -306,9 +306,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<T>(latch);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -321,9 +321,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<>(latch);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {

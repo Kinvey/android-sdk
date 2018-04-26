@@ -17,13 +17,11 @@
 package com.kinvey.android;
 
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,7 @@ import java.util.List;
  * Class represents internal implementation of async paged pull request that is used to automate
  * pull request pagination.
  */
-public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullResponse<T>> {
+public class AsyncPagedPullRequest extends AsyncClientRequest<KinveyPullResponse> {
     private final BaseDataStore store;
     private Query query;
 
@@ -43,7 +41,7 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
      */
     public AsyncPagedPullRequest(BaseDataStore store,
                             Query query,
-                            KinveyPullCallback<T> callback){
+                            KinveyPullCallback callback){
         super(callback);
         this.query = query;
         this.store = store;
@@ -51,8 +49,8 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
 
 
     @Override
-    protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<T>();
+    protected KinveyPullResponse executeAsync() throws IOException {
+        KinveyPullResponse kinveyPullResponse = new KinveyPullResponse();
 
         int skipCount = 0;
         int pageSize = 10000;
@@ -64,19 +62,18 @@ public class AsyncPagedPullRequest<T> extends AsyncClientRequest<KinveyPullRespo
             query = new Query();
         }
 
-        List<T> pullResults = new ArrayList<>();
+        int pulledItemsCount = 0;
         List<Exception> pullExceptions = new ArrayList<>();
-        KinveyReadResponse<T> pullResponse;
-
+        KinveyPullResponse pullResponse;
         do {
             query.setSkip(skipCount).setLimit(pageSize);
             pullResponse = store.pullBlocking(query);
-            pullResults.addAll(pullResponse.getResult());
+            pulledItemsCount += pullResponse.getCount();
             pullExceptions.addAll(pullResponse.getListOfExceptions());
             skipCount += pageSize;
         } while (skipCount < totalItemCount);
 
-        kinveyPullResponse.setResult(pullResults);
+        kinveyPullResponse.setCount(pulledItemsCount);
         kinveyPullResponse.setListOfExceptions(pullExceptions);
 
         return kinveyPullResponse;
