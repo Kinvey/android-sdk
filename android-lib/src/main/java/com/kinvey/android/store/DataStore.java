@@ -111,6 +111,7 @@ import java.util.Map;
 public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     private static final int PAGINATION_IS_NOT_USED = 0;
+    private static final int MIN_PAGE_SIZE = 0;
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
     //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkManager.
@@ -706,7 +707,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(int pageSize, KinveyPullCallback callback) {
-        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, pageSize,  callback);
@@ -739,7 +740,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(Query query, int pageSize, KinveyPullCallback callback) {
-        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncPullRequest(this, query, pageSize, callback).execute();
@@ -919,7 +920,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void sync(final Query query, final int pageSize, final KinveySyncCallback callback) {
-        Preconditions.checkArgument(pageSize >= 0, "pageSize mustn't be less than 0");
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         callback.onPushStarted();
