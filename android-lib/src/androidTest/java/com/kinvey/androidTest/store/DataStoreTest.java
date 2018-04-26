@@ -21,7 +21,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.android.sync.KinveySyncCallback;
@@ -194,11 +194,11 @@ public class DataStoreTest {
         }
     }
 
-    private static class DefaultKinveySyncCallback implements KinveySyncCallback<Person> {
+    private static class DefaultKinveySyncCallback implements KinveySyncCallback {
 
         private CountDownLatch latch;
         KinveyPushResponse kinveyPushResponse;
-        KinveyPullResponse<Person> kinveyPullResponse;
+        KinveyPullResponse kinveyPullResponse;
         Throwable error;
 
         DefaultKinveySyncCallback(CountDownLatch latch) {
@@ -206,7 +206,7 @@ public class DataStoreTest {
         }
 
         @Override
-        public void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse<Person> kinveyPullResponse) {
+        public void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse kinveyPullResponse) {
             this.kinveyPushResponse = kinveyPushResponse;
             this.kinveyPullResponse = kinveyPullResponse;
             finish();
@@ -225,7 +225,7 @@ public class DataStoreTest {
         }
 
         @Override
-        public void onPullSuccess(KinveyPullResponse<Person> kinveyPullResponse) {
+        public void onPullSuccess(KinveyPullResponse kinveyPullResponse) {
             this.kinveyPullResponse = kinveyPullResponse;
         }
 
@@ -277,10 +277,10 @@ public class DataStoreTest {
         }
     }
 
-    private static class DefaultKinveyPullCallback implements KinveyPullCallback<Person> {
+    private static class DefaultKinveyPullCallback implements KinveyPullCallback {
 
         private CountDownLatch latch;
-        KinveyPullResponse<Person> result;
+        KinveyPullResponse result;
         Throwable error;
 
         DefaultKinveyPullCallback(CountDownLatch latch) {
@@ -288,7 +288,7 @@ public class DataStoreTest {
         }
 
         @Override
-        public void onSuccess(KinveyPullResponse<Person> result) {
+        public void onSuccess(KinveyPullResponse result) {
             this.result = result;
             finish();
         }
@@ -1154,14 +1154,13 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.COLLECTION);
         testManager.createPersons(store, 10);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, null, 1);
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, null, 1);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
         assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
         assertNotNull(syncCallback.getResult());
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
-        assertNotNull(syncCallback.getResult().getResult());
-        assertEquals(10, syncCallback.getResult().getResult().size());
+        assertEquals(10, syncCallback.getResult().getCount());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         assertEquals(10, store.find().size());
     }
@@ -1174,14 +1173,13 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.COLLECTION);
         testManager.createPersons(store, 10);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query().equals("username", TEST_USERNAME + 0).or(client.query().equals("username", TEST_USERNAME + 1)), 1);
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query().equals("username", TEST_USERNAME + 0).or(client.query().equals("username", TEST_USERNAME + 1)), 1);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
         assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
         assertNotNull(syncCallback.getResult());
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
-        assertNotNull(syncCallback.getResult().getResult());
-        assertEquals(2, syncCallback.getResult().getResult().size());
+        assertEquals(2, syncCallback.getResult().getCount());
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
         assertEquals(10, store.find().size());
     }
@@ -1502,9 +1500,10 @@ public class DataStoreTest {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, null);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
-        assertTrue(pullCallback.getResult().getResult().size() == 4);
+        assertTrue(pullCallback.getResult().getCount() == 4);
+        testManager.cleanBackendDataStore(store);
     }
 
     @Test
@@ -1512,9 +1511,9 @@ public class DataStoreTest {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, null, 2);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, null, 2);
         assertTrue(pullCallback.getResult().getListOfExceptions().size() == 1);
-        assertTrue(pullCallback.getResult().getResult().size() == 4);
+        assertTrue(pullCallback.getResult().getCount() == 4);
         testManager.cleanBackend(store, StoreType.SYNC);
     }
 
@@ -1548,8 +1547,8 @@ public class DataStoreTest {
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
-        assertTrue(pullCallback.result.getResult().size() == 3);
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
+        assertTrue(pullCallback.result.getCount() == 3);
+        assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.CACHE));
 
         //cleaning cache store
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
@@ -1560,9 +1559,8 @@ public class DataStoreTest {
         pullCallback = pull(store, query);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
-        assertTrue(pullCallback.result.getResult().size() == 1);
-        assertTrue(pullCallback.result.getResult().get(0).getUsername().equals(victor.getUsername()));
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getCount() == 1);
+        assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.SYNC));
 
         cleanBackendDataStore(store);
 
@@ -1580,8 +1578,8 @@ public class DataStoreTest {
         pullCallback = pull(store, query);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
-        assertTrue(pullCallback.result.getResult().size() == 0);
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.SYNC));
+        assertTrue(pullCallback.result.getCount() == 0);
+        assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.SYNC));
 
         cleanBackendDataStore(store);
 
@@ -1600,9 +1598,8 @@ public class DataStoreTest {
         pullCallback = pull(store, query);
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
-        assertTrue(pullCallback.result.getResult().size() == 1);
-        assertTrue(pullCallback.result.getResult().get(0).getUsername().equals(victor.getUsername()));
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
+        assertTrue(pullCallback.result.getCount() == 1);
+        assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.CACHE));
     }
 
     @Test
@@ -1642,8 +1639,8 @@ public class DataStoreTest {
         // Assert
         assertNull(pullCallback.error);
         assertNotNull(pullCallback.result);
-        assertTrue(pullCallback.result.getResult().size() == 3);
-        assertTrue(pullCallback.result.getResult().size() == getCacheSize(StoreType.CACHE));
+        assertTrue(pullCallback.result.getCount() == 3);
+        assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.CACHE));
     }
 
     @Test
@@ -1668,12 +1665,9 @@ public class DataStoreTest {
         assertTrue(cacheSizeBetween == 0);
 
         // Act
-        List<Person> pullResults = store.pullBlocking(null, 2).getResult();
-
-        // Assert
-        assertNotNull(pullResults);
-        assertTrue(pullResults.size() == 3);
-        assertTrue(pullResults.size() == getCacheSize(StoreType.CACHE));
+        KinveyPullResponse pullResponse = store.pullBlocking(null, 2);
+        assertEquals(3, pullResponse.getCount());
+        assertTrue(pullResponse.getCount() == getCacheSize(StoreType.CACHE));
     }
 
     @Test
@@ -1701,25 +1695,18 @@ public class DataStoreTest {
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
-        List<Person> pullResults = null;
         Query query = client.query().addSort(SORT_FIELD, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
-            pullResults = store.pullBlocking(query).getResult();
-
-            assertNotNull(pullResults);
-            assertTrue(pullResults.size() == 1);
+            assertEquals(1, store.pullBlocking(query).getCount());
             assertEquals(i+1, getCacheSize(StoreType.CACHE));
         }
         assertEquals(5, getCacheSize(StoreType.CACHE));
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
-            pullResults = store.pullBlocking(query).getResult();
-
-            assertNotNull(pullResults);
-            assertTrue(pullResults.size() == 1);
+            assertEquals(1, store.pullBlocking(query).getCount());
             assertEquals(5, getCacheSize(StoreType.CACHE));
         }
         assertEquals(5, getCacheSize(StoreType.CACHE));
@@ -1750,25 +1737,23 @@ public class DataStoreTest {
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
-        List<Person> pullResults = null;
+        int resultCount = 0;
         Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
-            pullResults = pull(store, query).result.getResult();
+            resultCount = pull(store, query).result.getCount();
 
-            assertNotNull(pullResults);
-            assertTrue(pullResults.size() == 1);
+            assertEquals(1, resultCount);
             assertEquals(i+1, getCacheSize(StoreType.CACHE));
         }
         assertEquals(5, getCacheSize(StoreType.CACHE));
         for (int i = 0; i < 5; i++) {
             query.setLimit(1);
             query.setSkip(i);
-            pullResults = pull(store, query).result.getResult();
+            resultCount = pull(store, query).result.getCount();
 
-            assertNotNull(pullResults);
-            assertTrue(pullResults.size() == 1);
+            assertEquals(1, resultCount);
             assertEquals(5, getCacheSize(StoreType.CACHE));
         }
         assertEquals(5, getCacheSize(StoreType.CACHE));
@@ -1791,14 +1776,11 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        List<Person> pullResults;
         Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
-            pullResults = pull(store, query).result.getResult();
-            assertNotNull(pullResults);
-            assertTrue(pullResults.size() == 1);
+            assertEquals(1, pull(store, query).result.getCount());
             assertEquals(i+1, getCacheSize(StoreType.SYNC));
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
@@ -1808,7 +1790,7 @@ public class DataStoreTest {
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestSortById() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        List<Person> pullResults;
+        DefaultKinveyPullCallback pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
             for (int i = 0; i < 5; i++) {
@@ -1819,9 +1801,9 @@ public class DataStoreTest {
             query.setLimit(1).addSort(ID, AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
-                pullResults = pull(store, query).result.getResult();
-                assertNotNull(pullResults);
-                assertTrue(pullResults.size() == 1);
+                pullResponse = pull(store, query);
+                assertNotNull(pullResponse);
+                assertTrue(pullResponse.result.getCount() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
             System.out.println("TEST: number - " + j);
@@ -1834,7 +1816,7 @@ public class DataStoreTest {
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTest() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        List<Person> pullResults;
+        KinveyPullResponse pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
             for (int i = 0; i < 5; i++) {
@@ -1845,9 +1827,9 @@ public class DataStoreTest {
             query.setLimit(1).addSort(ID, AbstractQuery.SortOrder.ASC);
             for (int i = 0; i < 5; i++) {
                 query.setSkip(i);
-                pullResults = pull(store, query).result.getResult();
-                assertNotNull(pullResults);
-                assertTrue(pullResults.size() == 1);
+                pullResponse = pull(store, query).result;
+                assertNotNull(pullResponse);
+                assertTrue(pullResponse.getCount() == 1);
                 assertEquals(5, getCacheSize(StoreType.SYNC));
             }
             System.out.println("TEST: number - " + j);
@@ -1859,7 +1841,7 @@ public class DataStoreTest {
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
-        List<Person> pullResults;
+        KinveyPullResponse pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
             for (int i = 0; i < 5; i++) {
@@ -1867,8 +1849,8 @@ public class DataStoreTest {
             }
             sync(store, DEFAULT_TIMEOUT);
             Query query = client.query();
-            pullResults = pull(store, query,1).result.getResult();
-            assertNotNull(pullResults);
+            pullResponse = pull(store, query, 1).result;
+            assertNotNull(pullResponse);
             assertEquals(5, getCacheSize(StoreType.SYNC));
         }
     }
@@ -1918,12 +1900,13 @@ public class DataStoreTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
+        int resultCount;
         Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
         for (int i = 0; i < 5; i++) {
             query.setSkip(i);
-            pullResults = pull(store, query).result.getResult();
-            assertNotNull(pullResults);
+            resultCount = pull(store, query).result.getCount();
+            assertNotNull(resultCount);
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
         findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
@@ -1939,8 +1922,8 @@ public class DataStoreTest {
         for (int i = 0; i < 5; i++) {
             query.setSkip(skip);
             skip += limit;
-            pullResults = pull(store, query).result.getResult();
-            assertNotNull(pullResults);
+            resultCount = pull(store, query).result.getCount();
+            assertNotNull(resultCount);
         }
         assertEquals(5, getCacheSize(StoreType.SYNC));
         findResult = find(store, client.query(), DEFAULT_TIMEOUT).result;
@@ -2165,10 +2148,7 @@ public class DataStoreTest {
             DefaultKinveyPullCallback pullCallback = pull(store, query);
             assertNull(pullCallback.error);
             assertNotNull(pullCallback.result);
-            assertTrue(pullCallback.result.getResult().size() == limit);
-            assertNotNull(pullCallback.result.getResult().get(0));
-            assertEquals(pullCallback.result.getResult().get(0).getUsername(), "Person_" + skip);
-            assertEquals(pullCallback.result.getResult().get(pullCallback.result.getResult().size()-1).getUsername(), "Person_" + (skip+1));
+            assertTrue(pullCallback.result.getCount() == limit);
             skip += limit;
         }
 

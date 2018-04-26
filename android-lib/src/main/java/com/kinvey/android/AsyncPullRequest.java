@@ -16,22 +16,18 @@
 
 package com.kinvey.android;
 
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
 import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.store.BaseDataStore;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class represents internal implementation of Async pull request that is used to create pull
  */
-public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<KinveyPullResponse<T>> {
-
-    private final BaseDataStore<T> store;
+public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
+    private final BaseDataStore store;
     private Query query;
     private final int pageSize;
 
@@ -41,9 +37,9 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore<T>  store,
+    public AsyncPullRequest(BaseDataStore  store,
                             Query query,
-                            KinveyPullCallback<T> callback) {
+                            KinveyPullCallback callback) {
         super(callback);
         this.query = query;
         this.store = store;
@@ -57,10 +53,10 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore<T> store,
+    public AsyncPullRequest(BaseDataStore store,
                             Query query,
                             int pageSize,
-                            KinveyPullCallback<T> callback) {
+                            KinveyPullCallback callback) {
         super(callback);
         this.query = query;
         this.store = store;
@@ -69,16 +65,8 @@ public class AsyncPullRequest<T extends GenericJson> extends AsyncClientRequest<
 
 
     @Override
-    protected KinveyPullResponse<T> executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        KinveyPullResponse<T> kinveyPullResponse = new KinveyPullResponse<>();
-        KinveyAbstractReadResponse<T> pullResponse;
-        if (pageSize > 0) {
-            pullResponse = store.pullBlocking(query, pageSize);
-        } else {
-            pullResponse = store.pullBlocking(query);
-        }
-        kinveyPullResponse.setListOfExceptions(pullResponse.getListOfExceptions());
-        kinveyPullResponse.setResult(pullResponse.getResult());
-        return kinveyPullResponse;
+    protected KinveyPullResponse executeAsync() throws IOException {
+        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(query);
     }
+
 }

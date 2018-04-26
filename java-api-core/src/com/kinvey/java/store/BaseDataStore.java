@@ -28,6 +28,7 @@ import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyAbstractReadResponse;
 import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
@@ -362,45 +363,47 @@ public class BaseDataStore<T extends GenericJson> {
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
      */
-    public KinveyAbstractReadResponse<T> pullBlocking(Query query) throws IOException {
+    public KinveyPullResponse pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
-        KinveyAbstractReadResponse<T> response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+        KinveyAbstractReadResponse<T> readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
         cache.delete(query);
-        cache.save(response.getResult());
+        response.setCount(cache.save(readResponse.getResult()).size());
+        response.setListOfExceptions(readResponse.getListOfExceptions());
         return response;
     }
 
-    public KinveyAbstractReadResponse<T> pullBlocking(Query query, int pageSize) throws IOException {
+    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
         Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<>();
+        KinveyPullResponse response = new KinveyPullResponse();
+        KinveyAbstractReadResponse<T> readResponse;
         query = query == null ? client.query() : query;
         if (query.getSortString() == null || query.getSortString().isEmpty()) {
             query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
         }
-        List<T> networkData = new ArrayList<>();
         List<Exception> exceptions = new ArrayList<>();
         int skipCount = 0;
         // First, get the count of all the items to pull
         int totalItemCount = this.countNetwork();
-        KinveyAbstractReadResponse<T> pullResponse;
+
+        int pulledItemCount = 0;
         do {
             query.setSkip(skipCount).setLimit(pageSize);
-            pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-            networkData.addAll(pullResponse.getResult());
-            exceptions.addAll(pullResponse.getListOfExceptions());
+            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            exceptions.addAll(readResponse.getListOfExceptions());
             cache.delete(query);
-            cache.save(networkData);
+            pulledItemCount += cache.save(readResponse.getResult()).size();
             skipCount += pageSize;
         } while (skipCount < totalItemCount);
-        response.setResult(networkData);
+        response.setCount(pulledItemCount);
         response.setListOfExceptions(exceptions);
         return response;
     }
