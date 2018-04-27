@@ -54,7 +54,7 @@ public class DeltaCacheTest {
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        testManager = new TestManager<Person>();
+        testManager = new TestManager<>();
         testManager.login(USERNAME, PASSWORD, client);
 
     }
@@ -88,12 +88,12 @@ public class DeltaCacheTest {
         assertNotNull(callback.getResult().getUsername());
         assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
+        assertNotNull(syncCallback.getResult().getCount());
+        assertEquals(1, syncCallback.getResult().getCount());
     }
 
     @Test
@@ -111,9 +111,10 @@ public class DeltaCacheTest {
         assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        assertEquals(1, store.pullBlocking(client.query()).getCount());
+        
+        assertNotNull(store.find().getResult().get(0));
+        assertEquals(TEST_USERNAME, store.find().getResult().get(0).getUsername());
     }
 
     @Test
@@ -131,11 +132,11 @@ public class DeltaCacheTest {
         assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        assertEquals(1, store.pullBlocking(client.query()).getCount());
+        assertNotNull(store.find().getResult().get(0));
+        assertEquals(TEST_USERNAME, store.find().getResult().get(0).getUsername());
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
+        List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
@@ -153,9 +154,9 @@ public class DeltaCacheTest {
 
         store.pushBlocking();
         Query query = client.query().addSort("_kmd.ect", AbstractQuery.SortOrder.ASC);
-        List<Person> pulledPersons = store.pullBlocking(query).getResult();
+        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        List<Person> pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
 
         Person person;
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -163,16 +164,15 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        pulledPersons = store.pullBlocking(query).getResult();
-        assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
+        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        pulledPersons = store.find(query).getResult();
 
         for (int i = 0; i < TEN_ITEMS; i++) {
             person = pulledPersons.get(i);
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        List<Person> foundPersons = testManager.find(store, query).getResult();
+        List<Person> foundPersons = testManager.find(store, query).getResult().getResult();
         assertNotNull(foundPersons);
         assertEquals(TEN_ITEMS, foundPersons.size());
 
@@ -195,9 +195,9 @@ public class DeltaCacheTest {
         store.clear();
 
         Query query = client.query().addSort("_kmd.ect", AbstractQuery.SortOrder.ASC);
-        List<Person> pulledPersons = store.pullBlocking(query).getResult();
+        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        List<Person> pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
 
         Person person;
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -205,16 +205,16 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        pulledPersons = store.pullBlocking(query).getResult();
+        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
 
         for (int i = 0; i < TEN_ITEMS; i++) {
             person = pulledPersons.get(i);
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        List<Person> foundPersons = testManager.find(store, query).getResult();
+        List<Person> foundPersons = testManager.find(store, query).getResult().getResult();
         assertNotNull(foundPersons);
         assertEquals(TEN_ITEMS, foundPersons.size());
 
@@ -244,9 +244,11 @@ public class DeltaCacheTest {
         }
 
         store.pushBlocking();
-        List<Person> pulledPersons = store.pullBlocking(client.query().equals("age", "30").addSort("_kmd.ect", AbstractQuery.SortOrder.ASC)).getResult();
+        Query query = client.query().equals("age", "30").addSort("_kmd.ect", AbstractQuery.SortOrder.ASC);
+
+        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        List<Person> pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
-        assertEquals(TEN_ITEMS, pulledPersons.size());
 
         Person person;
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -254,7 +256,8 @@ public class DeltaCacheTest {
             assertEquals("DeltaCacheUserNameQuery_" + i, person.getUsername());
         }
 
-        List<Person> foundPersons = testManager.find(store, client.query().equals("age", "30").addSort("_kmd.ect", AbstractQuery.SortOrder.ASC)).getResult();
+        List<Person> foundPersons = testManager.find(store, client.query().equals("age", "30").addSort("_kmd.ect", AbstractQuery.SortOrder.ASC)).getResult().getResult();
+//        List<Person> foundPersons = testManager.find(store, query).getResult();
 
         Person person1;
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -278,11 +281,11 @@ public class DeltaCacheTest {
         assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        assertEquals(1, store.pullBlocking(client.query()).getCount());
+        assertNotNull(store.find().getResult().get(0));
+        assertEquals(TEST_USERNAME, store.find().getResult().get(0).getUsername());
 
-        List<Person> personList = store.find();
+        List<Person> personList = store.find().getResult();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
@@ -306,14 +309,14 @@ public class DeltaCacheTest {
         assertNotNull(callback.getResult().getUsername());
         assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
+        assertNotNull(syncCallback.getResult().getCount());
+        assertEquals(1, syncCallback.getResult().getCount());
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
+        List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         Person changedPerson = personList.get(0);
         assertNotNull(changedPerson);
         assertNotNull(changedPerson.getUsername());
@@ -322,7 +325,7 @@ public class DeltaCacheTest {
         changedPerson.setUsername("DeltaCacheUserName_changed");
         testManager.save(store, changedPerson);
 
-        personList = testManager.find(store, client.query()).getResult();
+        personList = testManager.find(store, client.query()).getResult().getResult();
         Person changedPerson1 = personList.get(0);
         assertNotNull(changedPerson1);
         assertNotNull(changedPerson1.getUsername());
@@ -332,10 +335,9 @@ public class DeltaCacheTest {
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals("DeltaCacheUserName_changed", syncCallback.getResult().getResult().get(0).getUsername());
+        assertNotNull(syncCallback.getResult().getCount());
 
-        personList = testManager.find(store, client.query()).getResult();
+        personList = testManager.find(store, client.query()).getResult().getResult();
         Person person1 = personList.get(0);
         assertNotNull(person1);
         assertNotNull(person1.getUsername());
@@ -357,11 +359,11 @@ public class DeltaCacheTest {
         assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
+        store.pullBlocking(client.query());
+        Person downloadedPerson = store.find().getResult().get(0);
         assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
 
-        List<Person> personList = store.find();
+        List<Person> personList = store.find().getResult();
         Person changedPerson = personList.get(0);
         assertNotNull(changedPerson);
         assertNotNull(changedPerson.getUsername());
@@ -370,18 +372,19 @@ public class DeltaCacheTest {
         changedPerson.setUsername("DeltaCacheUserName_changed");
         store.save(changedPerson);
 
-        personList = store.find();
+        personList = store.find().getResult();
         Person changedPerson1 = personList.get(0);
         assertNotNull(changedPerson1);
         assertNotNull(changedPerson1.getUsername());
         assertEquals("DeltaCacheUserName_changed", changedPerson1.getUsername());
 
         store.pushBlocking();
-        downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
+        store.pullBlocking(client.query());
+        downloadedPerson = store.find().getResult().get(0); 
         assertNotNull(downloadedPerson);
         assertEquals("DeltaCacheUserName_changed", downloadedPerson.getUsername());
 
-        personList = store.find();
+        personList = store.find().getResult();
         changedPerson1 = personList.get(0);
         assertNotNull(changedPerson1);
         assertNotNull(changedPerson1.getUsername());
@@ -405,14 +408,14 @@ public class DeltaCacheTest {
         assertNotNull(callback.getResult().getUsername());
         assertEquals(TEST_USERNAME, callback.getResult().getUsername());
 
-        CustomKinveySyncCallback<Person> syncCallback = testManager.sync(store, client.query());
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertNotNull(syncCallback.getResult().getResult().get(0).getUsername());
-        assertEquals(TEST_USERNAME, syncCallback.getResult().getResult().get(0).getUsername());
+        assertNotNull(syncCallback.getResult().getCount());
+        assertEquals(1, syncCallback.getResult().getCount());
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
+        List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         Person foundPerson = personList.get(0);
         assertNotNull(foundPerson);
         assertNotNull(foundPerson.getUsername());
@@ -423,7 +426,7 @@ public class DeltaCacheTest {
         assertNotNull(deleteCallback.getResult());
         assertNull(deleteCallback.getError());
 
-        personList = testManager.find(store, client.query()).getResult();
+        personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(0, personList.size());
         assertEquals(1, store.syncCount());
 
@@ -431,9 +434,9 @@ public class DeltaCacheTest {
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertEquals(0, syncCallback.getResult().getResult().size());
+        assertEquals(0, syncCallback.getResult().getCount());
 
-        personList = testManager.find(store, client.query()).getResult();
+        personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(0, personList.size());
         assertEquals(0, store.count().intValue());
         assertEquals(0, store.syncCount());
@@ -454,11 +457,11 @@ public class DeltaCacheTest {
         assertEquals(TEST_USERNAME, savedPerson.getUsername());
 
         store.pushBlocking();
-        Person downloadedPerson = store.pullBlocking(client.query()).getResult().get(0);
-        assertNotNull(downloadedPerson);
-        assertEquals(TEST_USERNAME, downloadedPerson.getUsername());
+        assertEquals(1, store.pullBlocking(client.query()).getCount());
+        assertNotNull(store.find().getResult().get(0));
+        assertEquals(TEST_USERNAME, store.find().getResult().get(0).getUsername());
 
-        List<Person> personList = store.find();
+        List<Person> personList = store.find().getResult();
         Person foundPerson = personList.get(0);
         assertNotNull(foundPerson);
         assertNotNull(foundPerson.getUsername());
@@ -467,16 +470,17 @@ public class DeltaCacheTest {
         int deletedItemsCount = store.delete(foundPerson.getId());
         assertEquals(1, deletedItemsCount);
 
-        personList = store.find();
+        personList = store.find().getResult();
         assertEquals(0, personList.size());
         assertEquals(1, store.syncCount());
 
         store.pushBlocking();
-        List<Person> downloadedPersons = store.pullBlocking(client.query()).getResult();
+        store.pullBlocking(client.query());
+        List<Person> downloadedPersons = store.find().getResult();
         assertNotNull(downloadedPersons);
         assertEquals(0, downloadedPersons.size());
 
-        personList = store.find();
+        personList = store.find().getResult();
         assertEquals(0, personList.size());
         assertEquals(0, store.count().intValue());
         assertEquals(0, store.syncCount());
@@ -495,11 +499,11 @@ public class DeltaCacheTest {
         testManager.createPersons(store, TEN_ITEMS);
         testManager.sync(store, client.query());
 
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
+        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
 
         DefaultKinveyDeleteCallback deleteCallback = testManager.delete(networkStore, client.query().equals("username", TEST_USERNAME + 0));
         assertNotNull(deleteCallback);
@@ -511,14 +515,15 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS - 1, pullCallback.getResult().getResult().size());
+        assertEquals(TEN_ITEMS - 1, pullCallback.getResult().getCount());
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
+        List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(TEN_ITEMS - 1, personList.size());
     }
 
     @Test
     public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {
+        client.enableDebugLogging();
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
 
@@ -530,11 +535,11 @@ public class DeltaCacheTest {
         testManager.createPersons(store, TEN_ITEMS);
         testManager.sync(store, client.query());
 
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query());
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
+        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
 
         DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, new Person(TEST_USERNAME + TEN_ITEMS));
         assertNotNull(saveCallback);
@@ -546,9 +551,9 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS + 1, pullCallback.getResult().getResult().size());
+        assertEquals(TEN_ITEMS + 1, pullCallback.getResult().getCount());
 
-        List<Person> personList = testManager.find(store, client.query()).getResult();
+        List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(TEN_ITEMS + 1, personList.size());
     }
 
@@ -565,7 +570,7 @@ public class DeltaCacheTest {
         testManager.createPersons(store, TEN_ITEMS);
         testManager.sync(store, client.query());
 
-        Person personForUpdate = testManager.find(networkStore, client.query().equals("username", TEST_USERNAME + 0)).getResult().get(0);
+        Person personForUpdate = testManager.find(networkStore, client.query().equals("username", TEST_USERNAME + 0)).getResult().getResult().get(0);
         personForUpdate.setUsername(TEST_USERNAME + 100);
         DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, personForUpdate);
         assertNotNull(saveCallback);
@@ -573,14 +578,16 @@ public class DeltaCacheTest {
         assertNull(saveCallback.getError());
         assertEquals(TEST_USERNAME + 100, saveCallback.getResult().getUsername());
 
-        CustomKinveyPullCallback<Person> pullCallback = testManager.pullCustom(store, client.query().addSort("_kmd.lmt", AbstractQuery.SortOrder.ASC));
+        Query query = client.query().addSort("_kmd.lmt", AbstractQuery.SortOrder.ASC);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, query);
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getResult().size());
-        assertEquals(TEST_USERNAME + 100, pullCallback.getResult().getResult().get(9).getUsername());
+        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
 
-        List<Person> personList = testManager.find(store, client.query().equals("username", TEST_USERNAME + 100)).getResult();
+        assertEquals(TEST_USERNAME + 100, store.find(query).getResult().get(9).getUsername());
+
+        List<Person> personList = testManager.find(store, client.query().equals("username", TEST_USERNAME + 100)).getResult().getResult();
         assertEquals(1, personList.size());
         assertEquals(TEST_USERNAME + 100, personList.get(0).getUsername());
     }

@@ -26,8 +26,8 @@ import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
-import com.kinvey.java.model.KinveyMetaData;
+import com.kinvey.java.model.KinveyReadResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.requests.data.AggregationRequest;
@@ -75,29 +75,6 @@ public class BaseDataStore<T extends GenericJson> {
     KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
-     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
-     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
-     * a developer would have to provide skip and limit modifiers to page through all the results.
-     * Setting this value to true will automatically fetch all the pages necessary.
-     * Default value is false.
-     */
-    private boolean autoPagination = false;
-
-    public boolean isAutoPaginationEnabled() {
-        return this.autoPagination;
-    }
-
-    public void setAutoPagination(boolean paginate) {
-        this.autoPagination = paginate;
-    }
-
-    private int pageSize = 10000; // default page size set to backend record retrieval limit
-
-    public void setAutoPaginationPageSize(int size) {
-        pageSize = size;
-    }
-
-    /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
      * @param collection collection name
@@ -127,7 +104,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new BaseDataStore<T>(client, collectionName, myClass, storeType);
+        return new BaseDataStore<>(client, collectionName, myClass, storeType);
     }
 
     /**
@@ -141,12 +118,12 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        T ret = null;
+        T ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadSingleRequest<T>(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute();
+            ret = new ReadSingleRequest<>(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute();
             cachedCallback.onSuccess(ret);
         }
-        ret = new ReadSingleRequest<T>(cache, id, this.storeType.readPolicy, networkManager).execute();
+        ret = new ReadSingleRequest<>(cache, id, this.storeType.readPolicy, networkManager).execute();
         return ret;
     }
 
@@ -165,17 +142,17 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return List of object found for given ids
      */
-    public List<T> find(Iterable<String> ids, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException{
+    public KinveyReadResponse<T> find(Iterable<String> ids, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
-        List<T> ret = null;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadIdsRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute();
+            ret = new ReadIdsRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute();
             cachedCallback.onSuccess(ret);
         }
-        ret = new ReadIdsRequest<T>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+        ret = new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
         return ret;
     }
 
@@ -184,9 +161,9 @@ public class BaseDataStore<T extends GenericJson> {
      * @param ids collection of strings that identify a set of ids we have to look for
      * @return List of object found for given ids
      */
-    public List<T> find(Iterable<String> ids) throws IOException {
+    public KinveyReadResponse<T> find(Iterable<String> ids) throws IOException {
         return find(ids, null);
-    };
+    }
 
 
     /**
@@ -195,18 +172,18 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return list of objects that are found
      */
-    public List<T> find (Query query, KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+    public KinveyReadResponse<T> find (Query query, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret = null;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadQueryRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
+            ret = new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute();
             cachedCallback.onSuccess(ret);
         }
-        ret = new ReadQueryRequest<T>(cache, networkManager, this.storeType.readPolicy, query).execute();
+        ret = new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
         return ret;
     }
 
@@ -215,7 +192,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query prepared query we have to look with
      * @return list of objects that are found
      */
-    public List<T> find (Query query) throws IOException {
+    public KinveyReadResponse<T> find (Query query) throws IOException {
         return find(query, null);
     }
 
@@ -224,17 +201,17 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
-    public List<T> find(KinveyCachedClientCallback<List<T>> cachedCallback) throws IOException {
+    public KinveyReadResponse<T> find(KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         // perform request based on policy
-        List<T> ret = null;
+        KinveyReadResponse<T> ret;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            ret = new ReadAllRequest<T>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute();
+            ret = new ReadAllRequest<>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute();
             cachedCallback.onSuccess(ret);
         }
-        ret = new ReadAllRequest<T>(cache, this.storeType.readPolicy, networkManager).execute();
+        ret = new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
         return ret;
     }
 
@@ -242,8 +219,8 @@ public class BaseDataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
-    public List<T> find() throws IOException {
-        return find((KinveyCachedClientCallback<List<T>>)null);
+    public KinveyReadResponse<T> find() throws IOException {
+        return find((KinveyCachedClientCallback<KinveyReadResponse<T>>)null);
     }
 
     /**
@@ -384,45 +361,55 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
+     * @param query query to pull the objects
      */
-    public KinveyAbstractReadResponse<T> pullBlocking(Query query) throws IOException {
+    public KinveyPullResponse pullBlocking(Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-
-        KinveyAbstractReadResponse<T> response = new KinveyAbstractReadResponse<T>();
+        KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
+        KinveyReadResponse<T> readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+        cache.delete(query);
+        response.setCount(cache.save(readResponse.getResult()).size());
+        response.setListOfExceptions(readResponse.getListOfExceptions());
+        return response;
+    }
 
-        if (isAutoPaginationEnabled()) {
-            if (query.getSortString() == null || query.getSortString().isEmpty()) {
-                query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
-            }
-            List<T> networkData = new ArrayList<T>();
-            List<Exception> exceptions = new ArrayList<Exception>();
-            int skipCount = 0;
-            int pageSize = this.pageSize;
-
-            // First, get the count of all the items to pull
-            int totalItemCount = this.countNetwork();
-            KinveyAbstractReadResponse<T> pullResponse;
-            do {
-                query.setSkip(skipCount).setLimit(pageSize);
-                pullResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-                networkData.addAll(pullResponse.getResult());
-                exceptions.addAll(pullResponse.getListOfExceptions());
-                cache.delete(query);
-                cache.save(networkData);
-                skipCount += pageSize;
-            } while (skipCount < totalItemCount);
-            response.setResult(networkData);
-            response.setListOfExceptions(exceptions);
-        } else {
-            response = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-            cache.delete(query);
-            cache.save(response.getResult());
+    /**
+     * Pull network data with given query into local storage
+     * should be user with {@link StoreType#SYNC}
+     * @param query query to pull the objects
+     * @param pageSize page size for auto-pagination
+     */
+    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
+        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        KinveyPullResponse response = new KinveyPullResponse();
+        query = query == null ? client.query() : query;
+        if (query.getSortString() == null || query.getSortString().isEmpty()) {
+            query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
         }
-
+        List<Exception> exceptions = new ArrayList<>();
+        int skipCount = 0;
+        // First, get the count of all the items to pull
+        int totalItemCount = this.countNetwork();
+        KinveyReadResponse<T> readResponse;
+        int pulledItemCount = 0;
+        do {
+            query.setSkip(skipCount).setLimit(pageSize);
+            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            exceptions.addAll(readResponse.getListOfExceptions());
+            cache.delete(query);
+            pulledItemCount += cache.save(readResponse.getResult()).size();
+            skipCount += pageSize;
+        } while (skipCount < totalItemCount);
+        response.setCount(pulledItemCount);
+        response.setListOfExceptions(exceptions);
         return response;
     }
 
@@ -433,6 +420,16 @@ public class BaseDataStore<T extends GenericJson> {
     public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param pageSize page size for auto-pagination
+     */
+    public void syncBlocking(Query query, int pageSize) throws IOException {
+        pushBlocking();
+        pullBlocking(query, pageSize);
     }
 
     public void purge() {
