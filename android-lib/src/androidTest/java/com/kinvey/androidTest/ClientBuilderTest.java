@@ -11,6 +11,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
+import com.kinvey.BuildConfig;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -182,6 +183,15 @@ public class ClientBuilderTest {
         client = new Client.Builder(mContext).setBaseUrl("https://baseurl.com").setInstanceID("TestInstanceId").build();
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
+    }
+
+    @Test
+    public void testAppVersionExists() {
+        client = new Client.Builder(mContext).build();
+        assertNotNull(client.getClientAppVersion());
+        assertTrue(!"".equals(client.getClientAppVersion()));
+        assertEquals(BuildConfig.VERSION, client.getClientAppVersion());
+        System.out.println("client version: " + client.getClientAppVersion());
     }
 
 }
