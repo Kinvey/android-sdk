@@ -75,6 +75,17 @@ public class BaseDataStore<T extends GenericJson> {
     KinveyDataStoreLiveServiceCallback<T> liveServiceCallback;
 
     /**
+     * It is a parameter to enable the auto-pagination of data retrieval from the backend.
+     * When you use a Sync or Cache data store, if you have more than 10,000 entities, normally
+     * a developer would have to provide skip and limit modifiers to page through all the results.
+     * Setting this value to true will automatically fetch all the pages necessary.
+     * Default value is false.
+     */
+    private boolean autoPagination = false;
+
+    private int pageSize = 10_000; // default page size set to backend record retrieval limit
+
+    /**
      * Constructor for creating BaseDataStore for given collection that will be mapped to itemType class
      * @param client Kinvey client instance to work with
      * @param collection collection name
@@ -106,6 +117,8 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         return new BaseDataStore<>(client, collectionName, myClass, storeType);
     }
+
+
 
     /**
      * Look up for data with given id
@@ -370,10 +383,15 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
-        KinveyReadResponse<T> readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-        cache.delete(query);
-        response.setCount(cache.save(readResponse.getResult()).size());
-        response.setListOfExceptions(readResponse.getListOfExceptions());
+        KinveyReadResponse<T> readResponse;
+        if (isAutoPaginationEnabled()) {
+            response = pullBlocking(query, getAutoPaginationPageSize());
+        } else {
+            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
+            cache.delete(query);
+            response.setCount(cache.save(readResponse.getResult()).size());
+            response.setListOfExceptions(readResponse.getListOfExceptions());
+        }
         return response;
     }
 
@@ -562,5 +580,21 @@ public class BaseDataStore<T extends GenericJson> {
     public void unsubscribe() throws IOException {
         liveServiceCallback = null;
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
+    }
+
+    public boolean isAutoPaginationEnabled() {
+        return this.autoPagination;
+    }
+
+    public void setAutoPagination(boolean paginate) {
+        this.autoPagination = paginate;
+    }
+
+    public void setAutoPaginationPageSize(int size) {
+        pageSize = size;
+    }
+
+    public int getAutoPaginationPageSize() {
+        return pageSize;
     }
 }
