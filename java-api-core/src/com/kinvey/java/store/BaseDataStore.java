@@ -118,8 +118,6 @@ public class BaseDataStore<T extends GenericJson> {
         return new BaseDataStore<>(client, collectionName, myClass, storeType);
     }
 
-
-
     /**
      * Look up for data with given id
      * @param id the id of object we need to find
