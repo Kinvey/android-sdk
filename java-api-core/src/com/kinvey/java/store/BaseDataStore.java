@@ -383,7 +383,7 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
         KinveyReadResponse<T> readResponse;
         if (isAutoPaginationEnabled()) {
-            response = pullBlocking(query, getAutoPaginationPageSize());
+            response = pullBlocking(query, pageSize);
         } else {
             readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
             cache.delete(query);
