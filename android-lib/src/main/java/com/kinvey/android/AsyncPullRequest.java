@@ -84,7 +84,7 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
 
     @Override
     protected KinveyPullResponse executeAsync() throws IOException {
-        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(isAutoPagination, query);
+        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(query, isAutoPagination);
     }
 
 }

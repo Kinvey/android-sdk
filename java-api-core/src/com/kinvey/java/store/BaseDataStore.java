@@ -385,7 +385,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param isAutoPagination true if auto-pagination is used
      * @param query query to pull the objects
      */
-    public KinveyPullResponse pullBlocking(boolean isAutoPagination, Query query) throws IOException {
+    public KinveyPullResponse pullBlocking(Query query, boolean isAutoPagination) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -440,6 +440,16 @@ public class BaseDataStore<T extends GenericJson> {
     public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param isAutoPagination true if auto-pagination is used
+     */
+    public void syncBlocking(Query query, boolean isAutoPagination) throws IOException {
+        pushBlocking();
+        pullBlocking(query, isAutoPagination);
     }
 
     /**
