@@ -199,7 +199,7 @@ public class PaginationTest {
         testManager.push(store);
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        assertEquals(5, store.pullBlocking(true, client.query()).getCount());
+        assertEquals(5, store.pullBlocking(client.query(), true).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }
 
@@ -213,7 +213,7 @@ public class PaginationTest {
         testManager.push(store);
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
-        assertEquals(5, store.pullBlocking(false, client.query()).getCount());
+        assertEquals(5, store.pullBlocking(client.query(), false).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }
 
