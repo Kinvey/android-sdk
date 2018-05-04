@@ -46,7 +46,6 @@ import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.BaseFileStore;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
-import com.kinvey.BuildConfig;
 
 /**
  * The core Kinvey client used to access Kinvey's BaaS.
@@ -86,7 +85,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     /** Class to use for representing a BaseUser **/
     private Class userModelClass = BaseUser.class;
     
-    private String clientAppVersion = BuildConfig.VERSION;
+    private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
 
