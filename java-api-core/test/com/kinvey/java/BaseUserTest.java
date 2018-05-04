@@ -16,11 +16,15 @@
 package com.kinvey.java;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Hashtable;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.gson.GsonFactory;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.ThirdPartyIdentity;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.KinveyMockUnitTest;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.UserStoreRequestManager;
@@ -314,5 +318,28 @@ public class BaseUserTest extends KinveyMockUnitTest {
         assertEquals(getClient().getMICApiVersion(), "v2");
     }
 
+    public void testClientAppVersionHeader() throws IOException, NoSuchFieldException, IllegalAccessException {
+        String clientAppVersion = "1.2.3";
+        getClient().setClientAppVersion(clientAppVersion);
+        UserStoreRequestManager user = new UserStoreRequestManager(getClient(), createBuilder(getClient()));
+        assertNotNull(user);
+        UserStoreRequestManager.LoginRequest loginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest();
+        Field kinveyAuthRequestField = loginRequest.getClass().getDeclaredField("request"); //NoSuchFieldException
+        kinveyAuthRequestField.setAccessible(true);
+        KinveyAuthRequest request = (KinveyAuthRequest) kinveyAuthRequestField.get(loginRequest);
+        Field kinveyHeadersField = request.getClass().getDeclaredField("kinveyHeaders"); //NoSuchFieldException
+        kinveyHeadersField.setAccessible(true);
+        KinveyHeaders kinveyHeaders = (KinveyHeaders) kinveyHeadersField.get(request);
+        String clientAppVersionHeader = (String) kinveyHeaders.get("X-Kinvey-Client-App-Version");
+        assertEquals(clientAppVersion, clientAppVersionHeader);
+    }
+
+    private KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
+        String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
+
+        return new KinveyAuthRequest.Builder(client.getRequestFactory().getTransport(),
+                client.getJsonFactory(), client.getBaseUrl(), appKey, appSecret, null);
+    }
 
 }
