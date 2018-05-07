@@ -753,7 +753,9 @@ public class UserStoreRequestManager<T extends BaseUser> {
         public LoginRequest buildAuthRequest() {
             this.request = builder.build();
             KinveyHeaders kinveyHeaders = (((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getKinveyHeaders());
-            kinveyHeaders.set("X-Kinvey-Client-App-Version", clientAppVersion);
+            if (clientAppVersion != null) {
+                kinveyHeaders.set("X-Kinvey-Client-App-Version", clientAppVersion);
+            }
             this.request.setKinveyHeaders(kinveyHeaders);
             return this;
         }

@@ -334,6 +334,20 @@ public class BaseUserTest extends KinveyMockUnitTest {
         assertEquals(clientAppVersion, clientAppVersionHeader);
     }
 
+    public void testClientAppVersionHeaderDefault() throws IOException, NoSuchFieldException, IllegalAccessException {
+        UserStoreRequestManager user = new UserStoreRequestManager(getClient(), createBuilder(getClient()));
+        assertNotNull(user);
+        UserStoreRequestManager.LoginRequest loginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest();
+        Field kinveyAuthRequestField = loginRequest.getClass().getDeclaredField("request"); //NoSuchFieldException
+        kinveyAuthRequestField.setAccessible(true);
+        KinveyAuthRequest request = (KinveyAuthRequest) kinveyAuthRequestField.get(loginRequest);
+        Field kinveyHeadersField = request.getClass().getDeclaredField("kinveyHeaders"); //NoSuchFieldException
+        kinveyHeadersField.setAccessible(true);
+        KinveyHeaders kinveyHeaders = (KinveyHeaders) kinveyHeadersField.get(request);
+        String clientAppVersionHeader = (String) kinveyHeaders.get("X-Kinvey-Client-App-Version");
+        assertNull(clientAppVersionHeader);
+    }
+
     private KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
         String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
