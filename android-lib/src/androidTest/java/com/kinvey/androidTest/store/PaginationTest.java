@@ -35,6 +35,7 @@ import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME_2;
 import static com.kinvey.androidTest.TestManager.USERNAME;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -180,6 +181,34 @@ public class PaginationTest {
 
 
     @Test
+    public void testSyncWithAutoPagination() throws InterruptedException, IOException {
+        syncAutoPaginationAsync(true);
+    }
+
+    @Test
+    public void testSyncWithoutAutoPagination() throws InterruptedException, IOException {
+        syncAutoPaginationAsync(false);
+    }
+
+    private void syncAutoPaginationAsync(boolean isAutoPagination) throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.createPersons(store, 10);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, null, isAutoPagination);
+        assertNull(syncCallback.getError());
+        assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertEquals(10, syncCallback.getKinveyPushResponse().getSuccessCount());
+        assertNotNull(syncCallback.getResult());
+        assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
+        assertEquals(10, syncCallback.getResult().getCount());
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertEquals(10, store.find().getResult().size());
+    }
+
+
+    @Test
     public void testPagedPullNotCorrectItem() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION_WITH_EXCEPTION, Person.class, StoreType.SYNC, client);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, null, 2);
@@ -217,5 +246,47 @@ public class PaginationTest {
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }
 
+    @Test
+    public void testPullAsyncWithAutoPagination() throws InterruptedException, IOException {
+        pullAutoPaginationAsync(true);
+    }
+
+    @Test
+    public void testPullAsyncWithoutAutoPagination() throws InterruptedException, IOException {
+        pullAutoPaginationAsync(false);
+    }
+
+    private void pullAutoPaginationAsync(boolean isAutoPagination) throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.createPersons(store, 5);
+        testManager.push(store);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        assertEquals(5, testManager.pullCustom(store, client.query(), isAutoPagination).getResult().getCount());
+        assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
+    }
+
+    @Test
+    public void testPagedPullPrecondition() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        try {
+            store.pull(client.query(), -1, null);
+            assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("pageSize mustn't be less than 0"));
+        }
+    }
+
+    @Test
+    public void testPagedPullPreconditionWithoutQuery() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        try {
+            store.pull(-1, null);
+            assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("pageSize mustn't be less than 0"));
+        }
+    }
 
 }

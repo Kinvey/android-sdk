@@ -19,7 +19,7 @@ package com.kinvey.android.store;
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
-import com.kinvey.android.AsyncPullRequest;
+import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.KinveyLiveServiceCallbackHandler;
 import com.kinvey.android.async.AsyncPushRequest;
@@ -110,6 +110,8 @@ import java.util.Map;
  */
 public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
+    private static final int PAGINATION_IS_NOT_USED = 0;
+    private static final int MIN_PAGE_SIZE = 0;
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
     //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkManager.
@@ -666,9 +668,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     Query myQuery = client.query();
-     *     myQuery.equals("age",21);
-     *     myAppData.pull(myQuery, new KinveyPullCallback {
+     *     myAppData.pull(new KinveyPullCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
      *     });
@@ -676,17 +676,16 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * </pre>
      * </p>
      *
-     * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback callback) {
+    public void pull(KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        new AsyncPullRequest(this, query, callback).execute();
+        this.pull(null, PAGINATION_IS_NOT_USED, callback);
     }
 
     /**
-     * Asynchronous request to pull a collection of entities from backend.
+     * Asynchronous request to pull a collection of entities from backend using auto-pagination.
      * <p>
      * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
@@ -727,7 +726,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     myAppData.pull(new KinveyPullCallback {
+     *     myAppData.pull(5000, new KinveyPullCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
      *     });
@@ -735,10 +734,14 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * </pre>
      * </p>
      *
+     * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(KinveyPullCallback callback) {
-        this.pull(null, callback);
+    public void pull(int pageSize, KinveyPullCallback callback) {
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        this.pull(null, pageSize,  callback);
     }
 
     /**
@@ -764,6 +767,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(boolean isAutoPagination, KinveyPullCallback callback) {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, isAutoPagination, callback);
     }
 
@@ -794,16 +799,17 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyPullCallback
      */
     public void pull(Query query, int pageSize, KinveyPullCallback callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncPullRequest(this, query, pageSize, callback).execute();
     }
 
+
     /**
-     * Asynchronous request to pull a collection of entities from backend using auto-pagination.
+     * Asynchronous request to pull a collection of entities from backend.
      * <p>
-     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback<T> to return a
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback<T> to return a
      * {@link KinveyPullResponse}.
      * </p>
      * <p>
@@ -811,7 +817,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * <pre>
      * {@code
      *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     myAppData.pull(5000, new KinveyPullCallback {
+     *     Query myQuery = client.query();
+     *     myQuery.equals("age", 21);
+     *     myAppData.pull(myQuery, new KinveyPullCallback {
      *         public void onFailure(Throwable t) { ... }
      *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
      *     });
@@ -819,14 +827,13 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * </pre>
      * </p>
      *
-     * @param pageSize Page size for auto-pagination
+     * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(int pageSize, KinveyPullCallback callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+    public void pull(Query query, KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        this.pull(null, pageSize,  callback);
+        pull(query, PAGINATION_IS_NOT_USED, callback);
     }
 
     /**
@@ -1042,7 +1049,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyDeleteCallback
      */
     public void sync(final Query query, final int pageSize, final KinveySyncCallback callback) {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+        Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         callback.onPushStarted();

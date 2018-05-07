@@ -14,8 +14,9 @@
  *
  */
 
-package com.kinvey.android;
+package com.kinvey.android.async;
 
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.model.KinveyPullResponse;

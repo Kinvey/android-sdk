@@ -542,12 +542,12 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testOver63SymbolsInListName() throws InterruptedException, IOException {
+    public void testOver63SymbolsInListName() {
         try {
             DataStore.collection(PersonOver63CharsInFieldName.LONG_NAME, PersonOver63CharsInFieldName.class, StoreType.SYNC, client);
             assertFalse(true);
         } catch (IllegalArgumentException e) {
-            assertNotNull(e.getMessage().contains("Column names are currently limited to max 63 characters."));
+            assertTrue(e.getMessage().contains("Column names are currently limited to max 63 characters."));
         }
     }
 
@@ -3233,6 +3233,5 @@ public class DataStoreTest {
         assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
         assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
     }
-
 
 }
