@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNull;
 public class TestManager<T extends GenericJson> {
 
     public static final String TEST_USERNAME = "Test_UserName";
+    public static final String TEST_USERNAME_2 = "Test_UserName_2";
     public static final String USERNAME = "test";
     public static final String PASSWORD = "test";
 
@@ -274,6 +275,25 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query, final boolean isAutoPagination) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, isAutoPagination, callback);
+                } else {
+                    store.pull(isAutoPagination, callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     public DefaultKinveyPushCallback push(final DataStore<Person> store) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPushCallback callback = new DefaultKinveyPushCallback(latch);
@@ -313,6 +333,21 @@ public class TestManager<T extends GenericJson> {
             @Override
             public void run() {
                 store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query, final boolean isAutoPagination) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, isAutoPagination, callback);
             }
         });
         looperThread.start();
@@ -418,5 +453,10 @@ public class TestManager<T extends GenericJson> {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    //use for Person.COLLECTION and for Person.class
+    public long getCacheSize(StoreType storeType, Client client) {
+        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
     }
 }

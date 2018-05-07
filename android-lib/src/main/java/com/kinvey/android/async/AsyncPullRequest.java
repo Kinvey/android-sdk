@@ -14,8 +14,9 @@
  *
  */
 
-package com.kinvey.android;
+package com.kinvey.android.async;
 
+import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.model.KinveyPullResponse;
@@ -28,8 +29,9 @@ import java.io.IOException;
  */
 public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
     private final BaseDataStore store;
+    private boolean isAutoPagination = false;
     private Query query;
-    private final int pageSize;
+    private int pageSize = 0;
 
     /**
      * Async pull request constructor
@@ -43,7 +45,6 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
         super(callback);
         this.query = query;
         this.store = store;
-        this.pageSize = 0;
     }
 
     /**
@@ -64,9 +65,27 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
     }
 
 
+    /**
+     * Async pull request constructor
+     * @param query Query that is used to fetch data from network
+     * @param isAutoPagination true if auto-pagination is used
+     * @param store Kinvey data store instance to be used to execute network requests
+     * @param callback async callbacks to be invoked when job is done
+     */
+    public AsyncPullRequest(BaseDataStore store,
+                            Query query,
+                            boolean isAutoPagination,
+                            KinveyPullCallback callback) {
+        super(callback);
+        this.query = query;
+        this.store = store;
+        this.isAutoPagination = isAutoPagination;
+    }
+
+
     @Override
     protected KinveyPullResponse executeAsync() throws IOException {
-        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(query);
+        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(query, isAutoPagination);
     }
 
 }

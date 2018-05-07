@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -44,18 +45,27 @@ import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
 
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 
 public class BaseDataStore<T extends GenericJson> {
+
+    private static final int BATCH_SIZE = 5;
 
     protected static final String FIND = "find";
     protected static final String DELETE = "delete";
     protected static final String PURGE = "purge";
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
+
+    private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
     protected final AbstractClient client;
     private final String collection;
@@ -324,7 +334,7 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Remove objects from given query that matches given query
      * @param query query to lookup objects for given collection
-     * @return cound of objects that was removed
+     * @return count of objects that was removed
      * @throws IOException
      */
     public Integer delete (Query query) throws IOException {
@@ -349,7 +359,7 @@ public class BaseDataStore<T extends GenericJson> {
 
     /**
      * Push local changes to network
-     * should be user with {@link StoreType#SYNC}
+     * should be used with {@link StoreType#SYNC}
      */
     public void pushBlocking() throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
@@ -360,7 +370,7 @@ public class BaseDataStore<T extends GenericJson> {
 
     /**
      * Pull network data with given query into local storage
-     * should be user with {@link StoreType#SYNC}
+     * should be used with {@link StoreType#SYNC}
      * @param query query to pull the objects
      */
     public KinveyPullResponse pullBlocking(Query query) throws IOException {
@@ -379,39 +389,89 @@ public class BaseDataStore<T extends GenericJson> {
 
     /**
      * Pull network data with given query into local storage
-     * should be user with {@link StoreType#SYNC}
+     * should be used with {@link StoreType#SYNC}
+     * @param isAutoPagination true if auto-pagination is used
      * @param query query to pull the objects
-     * @param pageSize page size for auto-pagination
      */
-    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
-        Preconditions.checkArgument(pageSize > 0, "pageSize must be more than 0");
+    public KinveyPullResponse pullBlocking(Query query, boolean isAutoPagination) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        if (isAutoPagination) {
+            return pullBlocking(query, DEFAULT_PAGE_SIZE);
+        } else {
+            return pullBlocking(query);
+        }
+    }
+
+    /**
+     * Pull network data with given query into local storage page by page
+     * getting pages works concurrently
+     * should be used with {@link StoreType#SYNC}
+     * @param query query to pull the objects
+     * @param pageSize page size for auto-pagination
+     */
+    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+
         KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
+
         if (query.getSortString() == null || query.getSortString().isEmpty()) {
             query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
         }
         List<Exception> exceptions = new ArrayList<>();
         int skipCount = 0;
+
         // First, get the count of all the items to pull
-        int totalItemCount = this.countNetwork();
-        KinveyReadResponse<T> readResponse;
+        int totalItemNumber = countNetwork();
         int pulledItemCount = 0;
-        do {
-            query.setSkip(skipCount).setLimit(pageSize);
-            readResponse = networkManager.pullBlocking(query, cache, isDeltaSetCachingEnabled()).execute();
-            exceptions.addAll(readResponse.getListOfExceptions());
-            cache.delete(query);
-            pulledItemCount += cache.save(readResponse.getResult()).size();
-            skipCount += pageSize;
-        } while (skipCount < totalItemCount);
-        response.setCount(pulledItemCount);
+        int totalPagesNumber = Math.abs(totalItemNumber/pageSize) + 1;
+        int batchSize = BATCH_SIZE; // batch size for concurrent push requests
+        ExecutorService executor;
+        List<FutureTask<PullTaskResponse>> tasks;
+        NetworkManager.Get pullRequest;
+        FutureTask<PullTaskResponse> ft;
+        for (int i = 0; i < totalPagesNumber; i += batchSize) {
+            executor = Executors.newFixedThreadPool(batchSize);
+            tasks = new ArrayList<>();
+            do {
+                query.setSkip(skipCount).setLimit(pageSize);
+                pullRequest = networkManager.pullBlocking(query, cache, deltaSetCachingEnabled);
+                skipCount += pageSize;
+                try {
+                    ft = new FutureTask<PullTaskResponse>(new CallableAsyncPullRequestHelper(pullRequest, query));
+                    tasks.add(ft);
+                    executor.execute(ft);
+                } catch (AccessControlException | KinveyException e) {
+                    e.printStackTrace();
+                    exceptions.add(e);
+                } catch (Exception e) {
+                    throw e;
+                }
+            } while (skipCount < totalItemNumber);
+
+            for (FutureTask<PullTaskResponse> task : tasks) {
+                try {
+                    PullTaskResponse tempResponse = task.get();
+                    cache.delete(tempResponse.getQuery());
+                    pulledItemCount += cache.save(tempResponse.getKinveyReadResponse().getResult()).size();
+                    exceptions.addAll(tempResponse.getKinveyReadResponse().getListOfExceptions());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+            executor.shutdown();
+        }
         response.setListOfExceptions(exceptions);
+        response.setCount(pulledItemCount);
         return response;
     }
+
 
     /**
      * Run sync operation to sync local and network storages
@@ -420,6 +480,16 @@ public class BaseDataStore<T extends GenericJson> {
     public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param isAutoPagination true if auto-pagination is used
+     */
+    public void syncBlocking(Query query, boolean isAutoPagination) throws IOException {
+        pushBlocking();
+        pullBlocking(query, isAutoPagination);
     }
 
     /**

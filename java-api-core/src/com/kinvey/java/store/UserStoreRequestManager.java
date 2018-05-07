@@ -30,6 +30,7 @@ import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.dto.DeviceId;
 import com.kinvey.java.dto.Email;
@@ -751,7 +752,11 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
         public LoginRequest buildAuthRequest() {
             this.request = builder.build();
-            this.request.setKinveyHeaders(((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getKinveyHeaders());
+            KinveyHeaders kinveyHeaders = (((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getKinveyHeaders());
+            if (clientAppVersion != null) {
+                kinveyHeaders.set("X-Kinvey-Client-App-Version", clientAppVersion);
+            }
+            this.request.setKinveyHeaders(kinveyHeaders);
             return this;
         }
 
