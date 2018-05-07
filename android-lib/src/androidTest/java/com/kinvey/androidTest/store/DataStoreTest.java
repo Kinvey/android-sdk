@@ -542,12 +542,12 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testOver63SymbolsInListName() throws InterruptedException, IOException {
+    public void testOver63SymbolsInListName() {
         try {
             DataStore.collection(PersonOver63CharsInFieldName.LONG_NAME, PersonOver63CharsInFieldName.class, StoreType.SYNC, client);
             assertFalse(true);
         } catch (IllegalArgumentException e) {
-            assertNotNull(e.getMessage().contains("Column names are currently limited to max 63 characters."));
+            assertTrue(e.getMessage().contains("Column names are currently limited to max 63 characters."));
         }
     }
 
@@ -3358,6 +3358,27 @@ public class DataStoreTest {
         assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
     }
 
+    @Test
+    public void testPagedPullPrecondition() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        try {
+            store.pull(client.query(), -1, null);
+            assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("pageSize mustn't be less than 0"));
+        }
+    }
+
+    @Test
+    public void testPagedPullPreconditionWithoutQuery() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        try {
+            store.pull(-1, null);
+            assertFalse(true);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("pageSize mustn't be less than 0"));
+        }
+    }
 
 
 }
