@@ -57,6 +57,8 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
 
+    private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
+
     protected final AbstractClient client;
     private final String collection;
     protected StoreType storeType;
@@ -380,6 +382,24 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Pull network data with given query into local storage
      * should be user with {@link StoreType#SYNC}
+     * @param isAutoPagination true if auto-pagination is used
+     * @param query query to pull the objects
+     */
+    public KinveyPullResponse pullBlocking(Query query, boolean isAutoPagination) throws IOException {
+        Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
+        if (isAutoPagination) {
+            return pullBlocking(query, DEFAULT_PAGE_SIZE);
+        } else {
+            return pullBlocking(query);
+        }
+    }
+
+    /**
+     * Pull network data with given query into local storage
+     * should be user with {@link StoreType#SYNC}
      * @param query query to pull the objects
      * @param pageSize page size for auto-pagination
      */
@@ -420,6 +440,16 @@ public class BaseDataStore<T extends GenericJson> {
     public void syncBlocking(Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
+    }
+
+    /**
+     * Run sync operation to sync local and network storages
+     * @param query query to pull the objects
+     * @param isAutoPagination true if auto-pagination is used
+     */
+    public void syncBlocking(Query query, boolean isAutoPagination) throws IOException {
+        pushBlocking();
+        pullBlocking(query, isAutoPagination);
     }
 
     /**

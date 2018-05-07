@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNull;
 public class TestManager<T extends GenericJson> {
 
     public static final String TEST_USERNAME = "Test_UserName";
+    public static final String TEST_USERNAME_2 = "Test_UserName_2";
     public static final String USERNAME = "test";
     public static final String PASSWORD = "test";
 
@@ -418,5 +419,10 @@ public class TestManager<T extends GenericJson> {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    //use for Person.COLLECTION and for Person.class
+    public long getCacheSize(StoreType storeType, Client client) {
+        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
     }
 }

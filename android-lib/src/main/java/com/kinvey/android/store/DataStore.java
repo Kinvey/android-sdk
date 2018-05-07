@@ -688,6 +688,37 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     /**
      * Asynchronous request to pull a collection of entities from backend.
      * <p>
+     * Creates an asynchronous request to pull an entity from backend.  Uses KinveyPullCallback to return a
+     * {@link KinveyPullResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     *     Query myQuery = client.query();
+     *     myQuery.equals("age",21);
+     *     myAppData.pull(myQuery, true, new KinveyPullCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param query {@link Query} to filter the results.
+     * @param isAutoPagination true if auto-pagination is used
+     * @param callback KinveyPullCallback
+     */
+    public void pull(Query query, boolean isAutoPagination, KinveyPullCallback callback) {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        new AsyncPullRequest(this, query, isAutoPagination, callback).execute();
+    }
+
+    /**
+     * Asynchronous request to pull a collection of entities from backend.
+     * <p>
      * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback to return a
      * {@link KinveyPullResponse}.
      * </p>
@@ -708,6 +739,32 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      */
     public void pull(KinveyPullCallback callback) {
         this.pull(null, callback);
+    }
+
+    /**
+     * Asynchronous request to pull a collection of entities from backend.
+     * <p>
+     * Creates an asynchronous request to pull all entity from backend.  Uses KinveyPullCallback to return a
+     * {@link KinveyPullResponse}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     *     myAppData.pull(true, new KinveyPullCallback {
+     *         public void onFailure(Throwable t) { ... }
+     *         public void onSuccess(KinveyPullResponse kinveyPullResponse) { ... }
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param isAutoPagination true if auto-pagination is used
+     * @param callback KinveyPullCallback
+     */
+    public void pull(boolean isAutoPagination, KinveyPullCallback callback) {
+        this.pull(null, isAutoPagination, callback);
     }
 
 
@@ -853,6 +910,76 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
                 callback.onPushSuccess(pushResult);
                 callback.onPullStarted();
                 DataStore.this.pull(query, new KinveyPullCallback() {
+
+                    @Override
+                    public void onSuccess(KinveyPullResponse pullResult) {
+                        callback.onPullSuccess(pullResult);
+                        callback.onSuccess(pushResult, pullResult);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        callback.onFailure(error);
+
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+                callback.onFailure(error);
+            }
+
+            @Override
+            public void onProgress(long current, long all) {
+
+            }
+        });
+    }
+
+    /**
+     * Asynchronous request to sync a collection of entities from a network collection by Query.
+     * <p>
+     * Creates an asynchronous request to sync local entities and network entries matched query from
+     * a given collection by Query.  Uses KinveySyncCallback to return a
+     * {@link com.kinvey.android.sync.KinveySyncCallback}.
+     * </p>
+     * <p>
+     * Sample Usage:
+     * <pre>
+     * {@code
+     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     *     Query myQuery = client.query();
+     *     myQuery.equals("age",21);
+     *     myAppData.sync(myQuery, true, new KinveySyncCallback {
+     *     public void onSuccess(KinveyPushResponse kinveyPushResponse,
+     *         KinveyPullResponse kinveyPullResponse) {...}
+     *         void onSuccess(){...};
+     *         void onPullStarted(){...};
+     *         void onPushStarted(){...};
+     *         void onPullSuccess(){...};
+     *         void onPushSuccess(){...};
+     *         void onFailure(Throwable t){...};
+     *
+     *     });
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param query {@link Query} to filter the results or null if you don't want to query.
+     * @param callback KinveyDeleteCallback
+     */
+    public void sync(final Query query, final boolean isAutoPagination, final KinveySyncCallback callback) {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
+        callback.onPushStarted();
+        push(new KinveyPushCallback() {
+            @Override
+            public void onSuccess(final KinveyPushResponse pushResult) {
+                callback.onPushSuccess(pushResult);
+                callback.onPullStarted();
+                DataStore.this.pull(query, isAutoPagination, new KinveyPullCallback() {
 
                     @Override
                     public void onSuccess(KinveyPullResponse pullResult) {
