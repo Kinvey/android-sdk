@@ -20,6 +20,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
+import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.Query;
@@ -1125,6 +1126,9 @@ public class UserStoreTest {
         client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         user.setCompanyName("Test Company");
+        InternalUserEntity internalUserEntity = new InternalUserEntity();
+        internalUserEntity.setStreet("TestStreet");
+        user.setInternalUserEntity(internalUserEntity);
         CustomKinveyClientCallback callback = signUp(user);
         assertNull(callback.error);
         assertNotNull(callback.result);
@@ -1135,6 +1139,7 @@ public class UserStoreTest {
         CustomKinveyClientCallback userKinveyClientCallback = updateCustomUser(client);
         assertNotNull(userKinveyClientCallback.result);
         assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getCompanyName());
+        assertNotEquals(user.getInternalUserEntity().getStreet(), userKinveyClientCallback.result.getInternalUserEntity().getStreet());
         assertNotNull(deleteUser(true, client));
     }
 
