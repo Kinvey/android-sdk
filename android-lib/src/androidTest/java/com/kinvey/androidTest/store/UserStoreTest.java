@@ -379,11 +379,17 @@ public class UserStoreTest {
         client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
         user.setCompanyName("Test Company");
+        InternalUserEntity internalUserEntity = new InternalUserEntity();
+        internalUserEntity.setStreet("TestStreet");
+        user.setInternalUserEntity(internalUserEntity);
         CustomKinveyClientCallback callback = signUp(user);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        destroyUser();
         assertEquals(user.getCompanyName(), callback.result.getCompanyName());
+        assertEquals("TestStreet", callback.result.getInternalUserEntity().getStreet());
+        assertEquals("Test Company", ((TestUser)client.getActiveUser()).getCompanyName());
+        assertEquals("TestStreet", ((TestUser)client.getActiveUser()).getInternalUserEntity().getStreet());
+        destroyUser();
     }
 
     @Test
@@ -1136,10 +1142,11 @@ public class UserStoreTest {
         assertEquals(user.getCompanyName(), callback.result.getCompanyName(), client.getActiveUser().get("companyName"));
 
         client.getActiveUser().set("companyName", "New Company");
+        ((TestUser) client.getActiveUser()).getInternalUserEntity().setStreet("TestStreet2");
         CustomKinveyClientCallback userKinveyClientCallback = updateCustomUser(client);
         assertNotNull(userKinveyClientCallback.result);
-        assertNotEquals(user.getCompanyName(), userKinveyClientCallback.result.getCompanyName());
-        assertNotEquals(user.getInternalUserEntity().getStreet(), userKinveyClientCallback.result.getInternalUserEntity().getStreet());
+        assertEquals("New Company", userKinveyClientCallback.result.getCompanyName());
+        assertEquals("TestStreet2", userKinveyClientCallback.result.getInternalUserEntity().getStreet());
         assertNotNull(deleteUser(true, client));
     }
 
