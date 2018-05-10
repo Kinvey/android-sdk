@@ -16,6 +16,8 @@
 
 package com.kinvey.java.auth;
 
+import com.kinvey.java.dto.BaseUser;
+
 import java.io.IOException;
 
 /**
@@ -76,6 +78,19 @@ public class CredentialManager {
             credentialStore.store(userId, newCredential);
         }
 
+        return newCredential;
+    }
+
+    /**
+     * @param baseUser user
+     * @return new credential object
+     */
+    public Credential createAndStoreCredential (BaseUser baseUser) throws IOException {
+        String userId = baseUser.getId();
+        Credential newCredential = Credential.from(baseUser);
+        if (userId != null && credentialStore != null) {
+            credentialStore.store(userId, newCredential);
+        }
         return newCredential;
     }
 

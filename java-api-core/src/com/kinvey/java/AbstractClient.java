@@ -83,7 +83,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     private ArrayList<ClientExtension> extensions;
 
     /** Class to use for representing a BaseUser **/
-    private Class userModelClass = BaseUser.class;
+    private Class userModelClass = null;
     
     private String clientAppVersion = null;
     
@@ -560,15 +560,15 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         return new SyncManager(getSyncCacheManager());
     }
 
-    public Class getUserClass(){
-        return this.userModelClass;
+    public Class<T> getUserClass(){
+        return this.userModelClass != null ? this.userModelClass : BaseUser.class;
     }
 
     public Class getUserArrayClass(){
-        return Array.newInstance(userModelClass, 0).getClass();
+        return Array.newInstance(getUserClass(), 0).getClass();
     }
 
-    public void setUserClass(Class userClass){
+    public void setUserClass(Class<T> userClass){
         this.userModelClass = userClass;
     }
 
