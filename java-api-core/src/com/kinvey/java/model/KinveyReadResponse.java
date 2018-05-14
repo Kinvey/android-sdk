@@ -6,7 +6,7 @@ import java.util.List;
  * Created by yuliya on 10/30/17.
  */
 
-public class KinveyAbstractReadResponse<T> extends KinveyAbstractResponse {
+public class KinveyReadResponse<T> extends KinveyAbstractResponse {
 
     private String lastRequestTime;
 

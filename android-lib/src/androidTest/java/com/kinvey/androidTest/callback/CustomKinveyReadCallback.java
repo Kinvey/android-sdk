@@ -1,29 +1,28 @@
 package com.kinvey.androidTest.callback;
 
-import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.androidTest.model.Person;
+import com.kinvey.android.callback.KinveyReadCallback;
+import com.kinvey.java.model.KinveyReadResponse;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Created by yuliya on 09/14/17.
+ * Created by yuliya on 09/20/17.
  */
 
-public class DefaultKinveyListCallback implements KinveyListCallback<Person> {
+public class CustomKinveyReadCallback<T> implements KinveyReadCallback<T> {
 
     private CountDownLatch latch;
-    private List<Person> result;
+    private KinveyReadResponse<T> result;
     private Throwable error;
 
-    public DefaultKinveyListCallback(CountDownLatch latch) {
+    public CustomKinveyReadCallback(CountDownLatch latch) {
         this.latch = latch;
     }
 
     @Override
-    public void onSuccess(List<Person> result) {
-        this.result = result;
-        finish();
+    public void onSuccess(KinveyReadResponse<T> result) {
+          this.result = result;
+          finish();
     }
 
     @Override
@@ -36,7 +35,7 @@ public class DefaultKinveyListCallback implements KinveyListCallback<Person> {
         latch.countDown();
     }
 
-    public List<Person> getResult() {
+    public KinveyReadResponse<T> getResult() {
         return result;
     }
 

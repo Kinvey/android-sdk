@@ -13,7 +13,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.model.KinveyAbstractReadResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.Locale;
  * Created by yuliya on 10/26/17.
  */
 
-public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyAbstractReadResponse> {
+public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonClientRequest<KinveyReadResponse<T>> {
 
     private Class<T> responseClass;
 
@@ -44,14 +44,14 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
     }
 
     @Override
-    public KinveyAbstractReadResponse<T> execute() throws IOException {
+    public KinveyReadResponse<T> execute() throws IOException {
 
         HttpResponse response = executeUnparsed() ;
 
         List<T> results = new ArrayList<>();
         List<Exception> exceptions = new ArrayList<>();
 
-        KinveyAbstractReadResponse ret = new KinveyAbstractReadResponse();
+        KinveyReadResponse<T> ret = new KinveyReadResponse<>();
 
         if (overrideRedirect){
             return onRedirect(response.getHeaders().getLocation());
@@ -101,6 +101,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
             Logger.ERROR("unable to parse response -> " + e.toString());
             throw new KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString());
         } catch (NullPointerException ex){
+            Logger.WARNING(ex.getMessage());
             return null;
         }
     }

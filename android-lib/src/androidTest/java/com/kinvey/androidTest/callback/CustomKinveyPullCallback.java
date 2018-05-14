@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.callback;
 
 import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.android.sync.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -9,10 +9,10 @@ import java.util.concurrent.CountDownLatch;
  * Created by yuliya on 09/14/17.
  */
 
-public class CustomKinveyPullCallback<T> implements KinveyPullCallback<T> {
+public class CustomKinveyPullCallback implements KinveyPullCallback {
 
     private CountDownLatch latch;
-    private KinveyPullResponse<T> result;
+    private KinveyPullResponse result;
     private Throwable error;
 
     public CustomKinveyPullCallback(CountDownLatch latch) {
@@ -20,7 +20,7 @@ public class CustomKinveyPullCallback<T> implements KinveyPullCallback<T> {
     }
 
     @Override
-    public void onSuccess(KinveyPullResponse<T> result) {
+    public void onSuccess(KinveyPullResponse result) {
         this.result = result;
         finish();
     }
@@ -35,7 +35,7 @@ public class CustomKinveyPullCallback<T> implements KinveyPullCallback<T> {
         latch.countDown();
     }
 
-    public KinveyPullResponse<T> getResult() {
+    public KinveyPullResponse getResult() {
         return result;
     }
 

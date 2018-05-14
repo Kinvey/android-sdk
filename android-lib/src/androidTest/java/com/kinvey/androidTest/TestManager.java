@@ -9,13 +9,15 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
+import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyLiveServiceCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
-import com.kinvey.androidTest.callback.DefaultKinveyListCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.AbstractClient;
@@ -45,6 +47,7 @@ import static org.junit.Assert.assertNull;
 public class TestManager<T extends GenericJson> {
 
     public static final String TEST_USERNAME = "Test_UserName";
+    public static final String TEST_USERNAME_2 = "Test_UserName_2";
     public static final String USERNAME = "test";
     public static final String PASSWORD = "test";
 
@@ -210,9 +213,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public DefaultKinveyListCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
+    public DefaultKinveyReadCallback find(final DataStore<Person> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultKinveyListCallback callback = new DefaultKinveyListCallback(latch);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -225,9 +228,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyListCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveyReadCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyListCallback<T> callback = new CustomKinveyListCallback<T>(latch);
+        final CustomKinveyReadCallback<T> callback = new CustomKinveyReadCallback<T>(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -240,9 +243,9 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveyPullCallback<T> pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveyPullCallback<T> callback = new CustomKinveyPullCallback<T>(latch);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -250,6 +253,44 @@ public class TestManager<T extends GenericJson> {
                     store.pull(query, callback);
                 } else {
                     store.pull(callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, pageSize, callback);
+                } else {
+                    store.pull(pageSize, callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveyPullCallback pullCustom(final DataStore<T> store, final Query query, final boolean isAutoPagination) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveyPullCallback callback = new CustomKinveyPullCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.pull(query, isAutoPagination, callback);
+                } else {
+                    store.pull(isAutoPagination, callback);
                 }
             }
         });
@@ -291,13 +332,47 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
-    public CustomKinveySyncCallback<T> sync(final DataStore<T> store, final Query query) throws InterruptedException {
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final CustomKinveySyncCallback<T> callback = new CustomKinveySyncCallback<T>(latch);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
                 store.sync(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query, final boolean isAutoPagination) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.sync(query, isAutoPagination, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    public CustomKinveySyncCallback sync(final DataStore<T> store, final Query query, final int pageSize) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CustomKinveySyncCallback callback = new CustomKinveySyncCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (query != null) {
+                    store.sync(query, pageSize, callback);
+                } else {
+                    store.sync(pageSize, callback);
+                }
             }
         });
         looperThread.start();
@@ -392,5 +467,10 @@ public class TestManager<T extends GenericJson> {
         constructor.setAccessible(true);
         BaseDataStore baseDataStore = constructor.newInstance(client, collectionName, className, storeType, networkManager);
         return baseDataStore;
+    }
+
+    //use for Person.COLLECTION and for Person.class
+    public long getCacheSize(StoreType storeType, Client client) {
+        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
     }
 }

@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
 
@@ -35,12 +36,14 @@ public class ReadAllRequest<T extends GenericJson> extends AbstractReadRequest<T
     }
 
     @Override
-    protected List<T> getCached() {
-        return cache.get();
+    protected KinveyReadResponse<T> getCached() {
+        KinveyReadResponse<T> response = new KinveyReadResponse<>();
+        response.setResult(cache.get());
+        return response;
     }
 
     @Override
-    protected List<T> getNetwork() throws IOException {
-        return Arrays.asList(getNetworkData().getBlocking().execute());
+    protected KinveyReadResponse<T> getNetwork() throws IOException {
+        return getNetworkData().getBlocking().execute();
     }
 }
