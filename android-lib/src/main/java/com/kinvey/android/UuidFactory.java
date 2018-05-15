@@ -19,6 +19,10 @@ package com.kinvey.android;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+import com.google.api.client.json.GenericJson;
+import com.google.gson.Gson;
+import com.kinvey.BuildConfig;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -36,6 +40,19 @@ class UuidFactory {
     protected static final String PREFS_FILE = "device_id.xml";
     /** Constant <code>PREFS_DEVICE_ID="device_id"</code> */
     protected static final String PREFS_DEVICE_ID = "device_id";
+
+    private static final String VERSION = "1";
+    private static final String OS = "Android";
+    private static final String SDK = "Android";
+
+    /*Headers*/
+    private static final String HEADER_VERSION = "hv";
+    private static final String DEVICE_MODEL = "md";
+    private static final String OS_NAME = "os";
+    private static final String OS_VERSION = "ov";
+    private static final String PLATFORM = "sdk";
+    private static final String PLATFORM_VERSION = "pv";
+    private static final String DEVICE_ID = "id";
 
     /** Constant <code>uuid</code> */
     protected static UUID uuid;
@@ -144,14 +161,35 @@ class UuidFactory {
         }
         // Device Model
         final String devModel = Build.MODEL.replace(" ", "_");
-        // OS name
-        final String osName = "Android";
         // OS Version
         final String osVersion = Build.VERSION.RELEASE.replace(" ", "_");
-        // UDID
-        final UUID udid = getDeviceUuid();
+        // UUID
+        final UUID uuid = getDeviceUuid();
+        return String.format("%s/%s %s %s %s", ma, devModel, OS_NAME, osVersion, uuid.toString());
+    }
 
-        return String.format("%s/%s %s %s %s", ma, devModel, osName, osVersion, udid.toString());
+    /**
+     * <p>getDeviceInfoHeader</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
+    public String getDeviceInfoHeader() {
+        // Device Model
+        final String devModel = Build.MODEL.replace(" ", "_");
+        // OS Version
+        final String osVersion = Build.VERSION.RELEASE.replace(" ", "_");
+        // UUID
+        final UUID uuid = getDeviceUuid();
+
+        GenericJson content = new GenericJson();
+        content.put(HEADER_VERSION, VERSION);
+        content.put(DEVICE_MODEL, devModel);
+        content.put(OS_NAME, OS);
+        content.put(OS_VERSION, osVersion);
+        content.put(PLATFORM, SDK);
+        content.put(PLATFORM_VERSION, BuildConfig.VERSION);
+        content.put(DEVICE_ID, uuid.toString());
+        return new Gson().toJson(content);
     }
 
 
