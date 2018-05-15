@@ -37,7 +37,7 @@ class KinveyHeaders extends com.kinvey.java.core.KinveyHeaders {
 
         UuidFactory uuidFactory = new UuidFactory(context);
         deviceInformation = uuidFactory.getDeviceInfoHeader(context);
-        deviceInfo = uuidFactory.getDeviceInfoHeader();
+        deviceInfo = uuidFactory.getDeviceInfoHeader(VERSION);
     }
 
 }

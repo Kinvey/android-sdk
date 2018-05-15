@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import com.google.api.client.json.GenericJson;
 import com.google.gson.Gson;
-import com.kinvey.BuildConfig;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -173,7 +172,7 @@ class UuidFactory {
      *
      * @return a {@link java.lang.String} object.
      */
-    public String getDeviceInfoHeader() {
+    public String getDeviceInfoHeader(String sdkVersion) {
         // Device Model
         final String devModel = Build.MODEL.replace(" ", "_");
         // OS Version
@@ -187,7 +186,7 @@ class UuidFactory {
         content.put(OS_NAME, OS);
         content.put(OS_VERSION, osVersion);
         content.put(PLATFORM, SDK);
-        content.put(PLATFORM_VERSION, BuildConfig.VERSION);
+        content.put(PLATFORM_VERSION, sdkVersion);
         content.put(DEVICE_ID, uuid.toString());
         return new Gson().toJson(content);
     }
