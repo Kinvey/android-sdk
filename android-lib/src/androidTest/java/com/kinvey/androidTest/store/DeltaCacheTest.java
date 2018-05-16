@@ -126,30 +126,36 @@ public class DeltaCacheTest {
     }
 
 //ignore while test app won't support delta cache
-/*    @Test
+   @Test
     public void testCreate() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+       client.enableDebugLogging();
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
 
         Person person = new Person();
         person.setUsername(TEST_USERNAME);
-        person.set("CustomField", "CustomValue");
+//        person.set("CustomField", "CustomValue");
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback);
         assertNotNull(callback.getResult());
         assertNull(callback.getError());
         assertNotNull(callback.getResult().getUsername());
         assertEquals(TEST_USERNAME, callback.getResult().getUsername());
+        store.pushBlocking();
+        KinveyPullResponse pullResponse = store.pullBlocking(client.query());
+        assertNotNull(pullResponse);
+//        assertNull(pullResponse.getListOfExceptions());
+        assertEquals(0, pullResponse.getCount());
 
-        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
+/*        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(1, syncCallback.getResult().getCount());*/
     }
-
+/*
     @Test
     public void testCreateSync() throws InterruptedException, IOException {
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
