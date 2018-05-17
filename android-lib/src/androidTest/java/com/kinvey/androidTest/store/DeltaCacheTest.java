@@ -43,6 +43,7 @@ import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
+import static com.kinvey.androidTest.TestManager.TEST_USERNAME_2;
 import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -89,6 +90,42 @@ public class DeltaCacheTest {
         }
     }
 
+
+    /* MLIBZ-2470 Test Server-side Delta Set use cases */
+
+
+    /* The goal of the test is to make sure delta set is not used when not enabled */
+    @Test
+    public void testDeltaSetIsNotUsed() throws InterruptedException, IOException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.saveCustom(store, new Person(TEST_USERNAME));
+        store.pushBlocking();
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(1, pullCallback.getResult().getCount());
+        testManager.saveCustom(store, new Person(TEST_USERNAME_2));
+        store.pushBlocking();
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(2, pullCallback.getResult().getCount());
+        assertFalse(store.isDeltaSetCachingEnabled());
+    }
+
+    /* The goal of the test is to confirm that empty array will be returned if the user has no changes and the since is respected */
+//    @Test
+//    public void testEmptyArrayIsReturnedIfNoChanges() throws InterruptedException, IOException {
+//        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+//        testManager.cleanBackend(store, StoreType.SYNC);
+//        store.setDeltaSetCachingEnabled(true);
+//        testManager.saveCustom(store, new Person(TEST_USERNAME));
+//        store.pushBlocking();
+//
+//        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+//        assertEquals(0, pullCallback.getResult().getCount());
+//    }
+
+    /* end */
+
+
     @Test
     public void testDeltaSyncPull() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Query query = client.query();
@@ -104,18 +141,18 @@ public class DeltaCacheTest {
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
 
-        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
         when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
 
-        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
-        Field field = BaseDataStore.class.getDeclaredField("queryCache");
-        field.setAccessible(true);
+//        Field field = BaseDataStore.class.getDeclaredField("queryCache");
+//        field.setAccessible(true);
         ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
-                Person.COLLECTION,
+                Person.DELTA_SET_COLLECTION,
                 query.getQueryFilterMap().toString(),
                 lastRequestTime));
 
@@ -125,7 +162,7 @@ public class DeltaCacheTest {
         assertEquals(2, response.getCount());
     }
 
-//ignore while test app won't support delta cache
+
    @Test
     public void testCreate() throws InterruptedException, IOException {
        client.enableDebugLogging();
@@ -136,7 +173,6 @@ public class DeltaCacheTest {
 
         Person person = new Person();
         person.setUsername(TEST_USERNAME);
-//        person.set("CustomField", "CustomValue");
         DefaultKinveyClientCallback callback = testManager.save(store, person);
         assertNotNull(callback);
         assertNotNull(callback.getResult());
@@ -146,19 +182,17 @@ public class DeltaCacheTest {
         store.pushBlocking();
         KinveyPullResponse pullResponse = store.pullBlocking(client.query());
         assertNotNull(pullResponse);
-//        assertNull(pullResponse.getListOfExceptions());
-        assertEquals(0, pullResponse.getCount());
-
-/*        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
+        assertEquals(1, pullResponse.getCount());
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query());
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertEquals(1, syncCallback.getResult().getCount());*/
+        assertEquals(1, syncCallback.getResult().getCount());
     }
-/*
+
     @Test
     public void testCreateSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -179,7 +213,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testRead() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -205,7 +239,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadALotOfItems() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -245,7 +279,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testReadALotOfItemsWithClearCache() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -283,7 +317,7 @@ public class DeltaCacheTest {
             person1 = foundPersons.get(i);
             assertEquals(TEST_USERNAME + i, person1.getUsername());
         }
-    }*/
+    }
 
     /**
      * Check that Delta Sync Find works with StoreType.CACHE
@@ -303,10 +337,10 @@ public class DeltaCacheTest {
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
 
-        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
         when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
 
-        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
         Field field = BaseDataStore.class.getDeclaredField("queryCache");
@@ -314,7 +348,7 @@ public class DeltaCacheTest {
         ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
-                Person.COLLECTION,
+                Person.DELTA_SET_COLLECTION,
                 query.getQueryFilterMap().toString(),
                 lastRequestTime));
 
@@ -325,9 +359,9 @@ public class DeltaCacheTest {
     }
 
 //ignore while test app won't support delta cache
- /*   @Test
+    @Test
     public void testUpdate() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -379,7 +413,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testUpdateSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -426,7 +460,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testDelete() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -477,7 +511,7 @@ public class DeltaCacheTest {
 
     @Test
     public void testDeleteSync() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -517,7 +551,7 @@ public class DeltaCacheTest {
         assertEquals(0, personList.size());
         assertEquals(0, store.count().intValue());
         assertEquals(0, store.syncCount());
-    }*/
+    }
 
     /**
      * Check Delta Sync Find by Query
@@ -537,10 +571,10 @@ public class DeltaCacheTest {
         mockResponse.setListOfExceptions(new ArrayList<Exception>());
         when(mockCacheGet.execute()).thenReturn(mockResponse);
 
-        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.COLLECTION, Person.class, client));
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
         when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
 
-        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, spyNetworkManager);
         store.setDeltaSetCachingEnabled(true);
 
 
@@ -549,7 +583,7 @@ public class DeltaCacheTest {
         ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
 
         queryCache.save(new QueryCacheItem(
-                Person.COLLECTION,
+                Person.DELTA_SET_COLLECTION,
                 query.getQueryFilterMap().toString(),
                 lastRequestTime));
 
@@ -560,14 +594,14 @@ public class DeltaCacheTest {
     }
 
 //ignore while test app won't support delta cache
-/*
+
     @Test
     public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {
         client.enableDebugLogging();
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
 
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
         assertTrue(store.isDeltaSetCachingEnabled());
         assertFalse(networkStore.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -599,10 +633,10 @@ public class DeltaCacheTest {
 
     @Test
     public void testUpdateWithTwoStorageTypes() throws InterruptedException, IOException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
 
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
         assertTrue(store.isDeltaSetCachingEnabled());
         assertFalse(networkStore.isDeltaSetCachingEnabled());
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -631,17 +665,17 @@ public class DeltaCacheTest {
         assertEquals(1, personList.size());
         assertEquals(TEST_USERNAME + 100, personList.get(0).getUsername());
     }
-*/
+
 
     @Test
     public void testDefaultDeltaCacheValue() {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         assertFalse(store.isDeltaSetCachingEnabled());
     }
 
     @Test
     public void testChangeDeltaCache() {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
         store.setDeltaSetCachingEnabled(false);
@@ -651,13 +685,13 @@ public class DeltaCacheTest {
     @Test
     public void testDeprecatedWay() {
         client.setUseDeltaCache(true);
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.isDeltaSetCachingEnabled());
     }
 
     @Test
     public void testErrorIfStoreTypeNetwork() {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
         try {
             store.setDeltaSetCachingEnabled(true);
             assertTrue(false);

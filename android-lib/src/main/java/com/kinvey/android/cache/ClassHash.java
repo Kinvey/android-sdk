@@ -705,6 +705,9 @@ public abstract class ClassHash {
         String shortName = TableNameManager.getShortName(collection, realm);
         DynamicRealmObject realmObject = realm.where(shortName).equalTo(ID, id).findFirst();
         int size = realmObject != null ? 1 : 0;
+        if (realmObject == null) {
+            return size;
+        }
         List<Field> fields = getClassFieldsAndParentClassFields(clazz);
 
         SelfReferenceState state = null;

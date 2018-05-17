@@ -205,7 +205,9 @@ public class BaseDataStore<T extends GenericJson> {
             if (cachedCallback != null) {
                 cachedCallback.onSuccess(new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute());
             }
-            if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
+            if (deltaSetCachingEnabled) {
+                query.setLimit(0);
+                query.setSkip(0);
                 return getBlockingDeltaSync(query);
             } else {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
@@ -404,7 +406,9 @@ public class BaseDataStore<T extends GenericJson> {
         query = query == null ? client.query() : query;
         KinveyPullResponse response = new KinveyPullResponse();
         KinveyReadResponse<T> readResponse;
-        if (deltaSetCachingEnabled && query.getSkip() == 0 && query.getLimit() == 0) {
+        if (deltaSetCachingEnabled) {
+            query.setLimit(0);
+            query.setSkip(0);
             readResponse = getBlockingDeltaSync(query);
             response.setCount(readResponse.getResult().size());
         } else {
