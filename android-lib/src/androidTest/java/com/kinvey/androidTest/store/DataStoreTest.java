@@ -477,6 +477,41 @@ public class DataStoreTest {
         testUpdate(StoreType.NETWORK);
     }
 
+    @Test
+    public void testUpdateSyncPush() throws InterruptedException {
+        // Setup
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        // Save an entity locally
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback callback = save(store, person);
+        assertNotNull(callback);
+        assertNotNull(callback.result);
+
+        // Record the temporary Realm-generated ID
+        Person updatedPerson = callback.result;
+        String tempID = updatedPerson.getId();
+
+        // Push the local entity to the backend
+        DefaultKinveyPushCallback pushCallback = push(store, 60);
+        assertNotNull(pushCallback);
+
+        // Find the item locally and verify that the permanent ID is in place
+        DefaultKinveyReadCallback findCallback = find(store,60);
+        assertNotNull(findCallback);
+        assertNotNull(findCallback.result);
+        KinveyReadResponse<Person> readResponse = findCallback.result;
+        assertNotNull(readResponse);
+        List<Person> people = readResponse.getResult();
+        assertNotNull(people);
+        assertEquals(1, people.size());
+        String permID = people.get(0).getId();
+        assertNotNull(permID);
+        assertNotEquals(tempID, permID);
+    }
+
     private void testUpdate(StoreType storeType) throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         client.getSyncManager().clear(Person.COLLECTION);
@@ -649,6 +684,21 @@ public class DataStoreTest {
         });
         looperThread.start();
         latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyReadCallback find(final DataStore<Person> store, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
     }

@@ -139,7 +139,7 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                     }
 
                     try {
-                        FutureTask ft = new FutureTask(new CallableAsyncPushRequestHelper(client, manager, syncRequest, syncItem));
+                        FutureTask ft = new FutureTask(new CallableAsyncPushRequestHelper<T>(client, manager, syncRequest, syncItem, storeItemType));
                         tasks.add(ft);
                         executor.execute(ft);
                         pushResponse.setSuccessCount(++progress);

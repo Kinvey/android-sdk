@@ -66,6 +66,12 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                     // silent fall, will be synced next time
                 }
 
+                // If object does not have an _id, then it is being created locally. The cache may
+                // provide an _id in this case, but before it is saved to the network, this temporary
+                // _id should be removed prior to saving to the backend. This way, the backend
+                // will generate a permanent _id that will be used by the cache. Once we get the
+                // result from the backend with the permanent _id, the record in the cache with the
+                // temporary _id should be removed, and the new record should be saved.
                 ret = cache.save(object);
                 try{
                     ret = networkManager.saveBlocking(object).execute();

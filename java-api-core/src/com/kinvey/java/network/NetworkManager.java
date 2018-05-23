@@ -446,12 +446,23 @@ public class NetworkManager<T extends GenericJson> {
             e.printStackTrace();
         }
 
-        if (sourceID != null) {
+        boolean bRealmGeneratedId = false;
+
+        try {
+            bRealmGeneratedId = sourceID.matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
+        } catch (NullPointerException npe) {
+            // issue with the regex, so do nothing because we default to false
+            String msg = npe.getMessage();
+        }
+
+        if (sourceID != null && !bRealmGeneratedId) {
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
         } else {
             save = new Save(entity, myClass, SaveMode.POST);
         }
+
         client.initializeRequest(save);
+
         return save;
     }
 

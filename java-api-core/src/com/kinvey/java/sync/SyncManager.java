@@ -271,12 +271,14 @@ public class SyncManager {
      * @param client kinvey client to execute request with
      * @param request Sync request to be executed
      */
-    public void executeRequest(final AbstractClient client, SyncRequest request) throws IOException {
+    public GenericJson executeRequest(final AbstractClient client, SyncRequest request) throws IOException {
 
         client.setClientAppVersion(request.getEntityID().customerVersion);
         client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
 
         GenericJson entity = null;
+        GenericJson result = null;
+
         try {
             if (request.getEntityID().data != null) {
                 entity = client.getJsonFactory().createJsonParser(request.getEntityID().data).parse(GenericJson.class);
@@ -292,7 +294,11 @@ public class SyncManager {
 
             if (entity != null){
                 try {
-                    networkDataStore.save(entity);
+                    if (request.getHttpVerb().equals(SyncRequest.HttpVerb.POST)) {
+                        // Remvove the _id, since this is a create operation
+                        entity.set("_id", null);
+                    }
+                    result = networkDataStore.save(entity);
                 } catch (Exception e){
                     enqueueRequest(request);
                     throw e;
@@ -324,7 +330,7 @@ public class SyncManager {
                     e.printStackTrace();
                 }
                 if (decodedQuery == null) {
-                    return;
+                    return result;
                 }
                 Query q = new Query().setQueryString(decodedQuery);
                 try {
@@ -343,9 +349,10 @@ public class SyncManager {
                         //enqueueRequest(request);
                         throw e;
                     }
-
-                }
             }
+        }
+
+        return result;
     }
 
     public int clear(String collectionName) {
