@@ -82,6 +82,14 @@ public class BaseDataStore<T extends GenericJson> {
     protected NetworkManager<T> networkManager;
 
     /**
+     * Possible methods where get with delta set is used
+     */
+    private enum METHOD_TYPE {
+        PULL,
+        FIND
+    }
+
+    /**
      * It is a parameter to enable mechanism to optimize the amount of data retrieved from the backend.
      * When you use a Sync or Cache datastore, data requests to the backend
      * only fetch data that changed since the previous update.
@@ -170,7 +178,7 @@ public class BaseDataStore<T extends GenericJson> {
             }
             if (deltaSetCachingEnabled) {
                 Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
-                return getBlockingDeltaSync(query);
+                return getBlockingDeltaSync(query, METHOD_TYPE.FIND);
             } else {
                 return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
             }
@@ -208,7 +216,7 @@ public class BaseDataStore<T extends GenericJson> {
             if (deltaSetCachingEnabled) {
                 query.setLimit(0);
                 query.setSkip(0);
-                return getBlockingDeltaSync(query);
+                return getBlockingDeltaSync(query, METHOD_TYPE.FIND);
             } else {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
             }
@@ -241,7 +249,7 @@ public class BaseDataStore<T extends GenericJson> {
                 cachedCallback.onSuccess(new ReadAllRequest<>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute());
             }
             if (deltaSetCachingEnabled) {
-                return getBlockingDeltaSync(client.query());
+                return getBlockingDeltaSync(client.query(), METHOD_TYPE.FIND);
             } else {
                 return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
             }
@@ -409,7 +417,7 @@ public class BaseDataStore<T extends GenericJson> {
         if (deltaSetCachingEnabled) {
             query.setLimit(0);
             query.setSkip(0);
-            readResponse = getBlockingDeltaSync(query);
+            readResponse = getBlockingDeltaSync(query, METHOD_TYPE.PULL);
             response.setCount(readResponse.getResult().size());
         } else {
             response = new KinveyPullResponse();
@@ -417,7 +425,7 @@ public class BaseDataStore<T extends GenericJson> {
             cache.delete(query);
             response.setCount(cache.save(readResponse.getResult()).size());
         }
-        response.setListOfExceptions(readResponse.getListOfExceptions());
+        response.setListOfExceptions(readResponse.getListOfExceptions() != null ? readResponse.getListOfExceptions() : new ArrayList<Exception>());
         return response;
     }
 
@@ -508,10 +516,11 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Get network data with given query into local storage using Delta Sync
      * @param query {@link Query}
+     * @param methodType method which calls getBlockingDeltaSync, can be pull or find
      * @return
      * @throws IOException
      */
-    private KinveyReadResponse<T> getBlockingDeltaSync(@Nonnull Query query) throws IOException {
+    private KinveyReadResponse<T> getBlockingDeltaSync(@Nonnull Query query,@Nonnull METHOD_TYPE methodType) throws IOException {
         KinveyReadResponse<T> response = new KinveyReadResponse<T>();
         if (queryCache == null) {
             queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
@@ -530,8 +539,16 @@ public class BaseDataStore<T extends GenericJson> {
             if (queryCacheResponse.getChanged() != null) {
                 cache.save(queryCacheResponse.getChanged());
             }
-            response.setResult(cache.get());
-            response.setListOfExceptions(queryCacheResponse.getListOfExceptions());
+            switch (methodType) {
+                case PULL:
+                    response.setResult(queryCacheResponse.getChanged());
+                    break;
+                case FIND:
+                default:
+                    response.setResult(cache.get());
+                    break;
+            }
+            response.setListOfExceptions(queryCacheResponse.getListOfExceptions() != null ? queryCacheResponse.getListOfExceptions() : new ArrayList<Exception>());
             response.setLastRequestTime(queryCacheResponse.getLastRequestTime());
             cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
             queryCache.save(cacheItem);
@@ -708,4 +725,6 @@ public class BaseDataStore<T extends GenericJson> {
         liveServiceCallback = null;
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
+
+
 }
