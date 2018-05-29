@@ -129,7 +129,7 @@ public class DeltaSetNewTest {
         testManager.push(store);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
-        updateItemLocally();
+        updateItem();
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
@@ -150,10 +150,11 @@ public class DeltaSetNewTest {
         testManager.push(store);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(2, pullCallback.getResult().getCount());
-        deleteItemLocally(usernameQuery);
+        deleteItem(usernameQuery);
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(0, pullCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, usernameQuery).getResult().getResult().size());
     }
 
     /* The test aims to confirm the correct use of deltaset in combination with queries */
@@ -167,7 +168,7 @@ public class DeltaSetNewTest {
         testManager.push(store);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(2, pullCallback.getResult().getCount());
-        updateItemLocally(usernameQuery);
+        updateItem(usernameQuery);
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(1, pullCallback.getResult().getCount());
@@ -207,7 +208,7 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME));
         CustomKinveySyncCallback syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
-        updateItemLocally();
+        updateItem();
         syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
     }
@@ -218,12 +219,13 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME));
         CustomKinveySyncCallback syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
-        updateItemLocally();
+        updateItem();
         syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
-        deleteItemLocally();
+        deleteItem();
         syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(0, syncCallback.getResult().getCount());
+        assertEquals(0, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     @Test
@@ -234,9 +236,10 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME_2));
         CustomKinveySyncCallback syncCallback  = testManager.sync(store, usernameQuery);
         assertEquals(2, syncCallback.getResult().getCount());
-        deleteItemLocally(usernameQuery);
+        deleteItem(usernameQuery);
         syncCallback  = testManager.sync(store, usernameQuery);
         assertEquals(0, syncCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, usernameQuery).getResult().getResult().size());
     }
 
     @Test
@@ -247,11 +250,81 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME_2));
         CustomKinveySyncCallback syncCallback  = testManager.sync(store, usernameQuery);
         assertEquals(2, syncCallback.getResult().getCount());
-        updateItemLocally(usernameQuery);
+        updateItem(usernameQuery);
         syncCallback  = testManager.sync(store, usernameQuery);
         assertEquals(1, syncCallback.getResult().getCount());
     }
 
+    @Test
+    public void testSyncAfterDisablingDeltaSet() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        CustomKinveySyncCallback syncCallback = testManager.sync(store, emptyQuery);
+        assertEquals(1, syncCallback.getResult().getCount());
+        syncCallback = testManager.sync(store, emptyQuery);
+        assertEquals(0, syncCallback.getResult().getCount());
+        store.setDeltaSetCachingEnabled(false);
+        syncCallback = testManager.sync(store, emptyQuery);
+        assertEquals(1, syncCallback.getResult().getCount());
+        syncCallback = testManager.sync(store, emptyQuery);
+        assertEquals(1, syncCallback.getResult().getCount());
+    }
+
+    /* The test aims at confirming that find with forceNetwork works as intended */
+    @Test
+    public void testForceNetwork() throws InterruptedException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        networkStore.setDeltaSetCachingEnabled(true);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        testManager.save(networkStore, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
+
+        List<Person> people = testManager.find(networkStore, emptyQuery).getResult().getResult();
+        Person person = people.get(0);
+        person.setAge("20");
+        testManager.save(networkStore, person);
+        assertEquals(2, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
+
+        people = testManager.find(networkStore, emptyQuery).getResult().getResult();
+        person = people.get(0);
+        testManager.delete(networkStore, person.getId());
+        assertEquals(1, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testForceNetworkWithQuery() throws InterruptedException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        networkStore.setDeltaSetCachingEnabled(true);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        testManager.save(networkStore, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
+        List<Person> people = testManager.find(networkStore, usernameQuery).getResult().getResult();
+        Person person = people.get(0);
+        person.setAge("20");
+        testManager.save(networkStore, person);
+        assertEquals(2, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
+        people = testManager.find(networkStore, usernameQuery).getResult().getResult();
+        person = people.get(0);
+        testManager.delete(networkStore, person.getId());
+        assertEquals(1, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testCacheStoreTypeDisabledDeltaSet() throws InterruptedException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        testManager.cleanBackend(store, StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, emptyQuery);
+        assertEquals(1, pullCallback.getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        pullCallback = testManager.pullCustom(store, emptyQuery);
+        assertEquals(2, pullCallback.getResult().getCount());
+        assertFalse(store.isDeltaSetCachingEnabled());
+    }
 
 
     /* support methods */
@@ -263,13 +336,13 @@ public class DeltaSetNewTest {
     }
 
     /* change one random person's user name to UPDATED_USERNAME */
-    private void updateItemLocally() throws InterruptedException {
-        updateItemLocally(emptyQuery);
+    private void updateItem() throws InterruptedException {
+        updateItem(emptyQuery);
     }
 
 
     /* change one random person's user name to UPDATED_USERNAME */
-    private void updateItemLocally(Query query) throws InterruptedException {
+    private void updateItem(Query query) throws InterruptedException {
         List<Person> personsInCache = testManager.find(store, query).getResult().getResult();
         Person person = personsInCache.get(0);
         person.setAge("20");
@@ -277,12 +350,12 @@ public class DeltaSetNewTest {
     }
 
     /* delete one random item from the cache */
-    private void deleteItemLocally() throws InterruptedException {
-        deleteItemLocally(emptyQuery);
+    private void deleteItem() throws InterruptedException {
+        deleteItem(emptyQuery);
     }
 
     /* delete one random item from the cache */
-    private void deleteItemLocally(Query query) throws InterruptedException {
+    private void deleteItem(Query query) throws InterruptedException {
         List<Person> personsInCache = testManager.find(store, query).getResult().getResult();
         Person person = personsInCache.get(0);
         testManager.delete(store, person.getId());

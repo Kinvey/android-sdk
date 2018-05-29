@@ -392,7 +392,7 @@ public class TestManager<T extends GenericJson> {
         if (storeType != StoreType.NETWORK) {
             sync(store, store.getClient().query());
         }
-        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, store.getClient().query());
+        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, new Query().notEqual("age", "100500"));
         assertNull(deleteCallback.getError());
         if (storeType == StoreType.SYNC) {
             sync(store, store.getClient().query());
