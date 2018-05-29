@@ -686,7 +686,6 @@ public class BaseDataStore<T extends GenericJson> {
      * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
      */
     public void setDeltaSetCachingEnabled(boolean deltaSetCachingEnabled) {
-        Preconditions.checkArgument(storeType != StoreType.NETWORK, "Delta Cache can't be used with StoreType.NETWORK");
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
     }
 
