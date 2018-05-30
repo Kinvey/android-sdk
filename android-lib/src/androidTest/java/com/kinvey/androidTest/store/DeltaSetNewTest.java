@@ -314,7 +314,7 @@ public class DeltaSetNewTest {
     }
 
     @Test
-    public void testCacheStoreTypeDisabledDeltaSet() throws InterruptedException {
+    public void testPullStoreTypeCacheDisabledDeltaSet() throws InterruptedException {
         store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
         testManager.cleanBackend(store, StoreType.CACHE);
         testManager.save(store, new Person(TEST_USERNAME));
@@ -326,12 +326,285 @@ public class DeltaSetNewTest {
         assertFalse(store.isDeltaSetCachingEnabled());
     }
 
+    @Test
+    public void testPullStoreTypeCache() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_CreatingNewItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_UpdatingItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.delete(store, person.getId());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_DeletingOneOfThreeItems() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.pullCustom(store, usernameQuery).getResult().getCount());
+        testManager.delete(store, person.getId());
+        assertEquals(0, testManager.pullCustom(store, usernameQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_Update() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.pullCustom(store, usernameQuery).getResult().getCount());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.pullCustom(store, usernameQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_DisablingDeltaSet() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        store.setDeltaSetCachingEnabled(false);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testPullStoreTypeCache_DoublePull() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_CreateItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+        testManager.save(store, person);
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_UpdateItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_UpdateAndDeleteItemWithQuery() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(3, testManager.sync(store, emptyQuery).getResult().getCount());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+        testManager.delete(store, person.getId());
+        assertEquals(0, testManager.sync(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_DeleteItemWithQuery() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.sync(store, usernameQuery).getResult().getCount());
+        testManager.delete(store, person.getId());
+        assertEquals(0, testManager.sync(store, usernameQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_UpdateItemWithQuery() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.sync(store, usernameQuery).getResult().getCount());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.sync(store, usernameQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSyncStoreTypeCache_DisablingDeltaSet() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+        assertEquals(0, testManager.sync(store, emptyQuery).getResult().getCount());
+        store.setDeltaSetCachingEnabled(false);
+        assertEquals(1, testManager.sync(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_CreateItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.find(store, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_UpdateItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_UpdateAndDeleteItem() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        testManager.delete(store, person.getId());
+        assertEquals(0, testManager.find(store, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_DeleteOneOfThreeItems() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
+        testManager.delete(store, person.getId());
+        List<Person> people = testManager.find(store, usernameQuery).getResult().getResult();
+        assertEquals(1, people.size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_UpdateOneOfThreeItems() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
+        person.setAge("20");
+        testManager.save(store, person);
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_DisablingDeltaSet() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        store.setDeltaSetCachingEnabled(false);
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeCache_FindById() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.find(store, client.query().equals("_id", person.getId())).getResult().getResult().size());
+        assertEquals(1, testManager.find(store, client.query().equals("_id", person.getId())).getResult().getResult().size());
+    }
+
+    @Test
+    public void testFindStoreTypeNetwork() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.NETWORK);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+    }
+
+    @Test
+    public void testChangeStoreTypeSyncToCache() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testChangeStoreTypeCacheToSync() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testChangeStoreTypeNetworkToSync() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.NETWORK);
+        Person firstPerson = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.delete(store, firstPerson.getId());
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testChangeStoreTypeNetworkToCache() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.NETWORK);
+        Person firstPerson = testManager.save(store, new Person(TEST_USERNAME)).getResult();
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.delete(store, firstPerson.getId());
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
 
     /* support methods */
 
     private void initDeltaSetCachedCollection(StoreType storeType) throws InterruptedException {
         store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
-        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.cleanBackend(store, storeType);
         store.setDeltaSetCachingEnabled(true);
     }
 

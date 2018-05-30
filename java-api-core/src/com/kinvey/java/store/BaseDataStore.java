@@ -520,7 +520,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @return
      * @throws IOException
      */
-    private KinveyReadResponse<T> getBlockingDeltaSync(@Nonnull Query query,@Nonnull METHOD_TYPE methodType) throws IOException {
+    private KinveyReadResponse<T> getBlockingDeltaSync(@Nonnull Query query, @Nonnull METHOD_TYPE methodType) throws IOException {
         KinveyReadResponse<T> response = new KinveyReadResponse<T>();
         if (queryCache == null) {
             queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
@@ -545,7 +545,7 @@ public class BaseDataStore<T extends GenericJson> {
                     break;
                 case FIND:
                 default:
-                    response.setResult(cache.get());
+                    response.setResult(cache.get(query));
                     break;
             }
             response.setListOfExceptions(queryCacheResponse.getListOfExceptions() != null ? queryCacheResponse.getListOfExceptions() : new ArrayList<Exception>());
