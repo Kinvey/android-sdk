@@ -697,6 +697,38 @@ public class DeltaSetNewTest {
     }
 
 
+    /* error handling*/
+    @Test
+    public void testUnconfiguredCollectionAtTheBackend() throws InterruptedException {
+        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, client.query()).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+        assertNotNull(pullCallback.getError());
+        assertTrue(pullCallback.getError().getMessage().contains("This feature is not properly configured for this app backend"));
+    }
+
+    /* check that skip and limit is ignored in delta set*/
+    @Test
+    public void testSkipLimit() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(3, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
+    }
+
+
     /* support methods */
 
     private void initDeltaSetCachedCollection(StoreType storeType) throws InterruptedException {
