@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
@@ -597,6 +598,102 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME_2));
         testManager.delete(store, firstPerson.getId());
         assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    /* The test aims to confirm that second request after clearing the cache would use deltaset */
+    @Test
+    public void testSecondRequestAfterClearingCacheStoreTypeSync() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        store.clear();
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.push(store);
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testSecondRequestAfterClearingCacheStoreTypeCache() throws InterruptedException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        store.clear();
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.save(store, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+
+    /* The test aims to confirm that the autopagination is envoked only at the regular GET request when deltaset is on */
+    @Test
+    public void testAutoPaginationStoreTypeSync() throws InterruptedException, IOException {
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.createPersons(store, 5);
+        testManager.push(store);
+        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
+        Person person1 = people.get(0);
+        Person person2 = people.get(1);
+        Person person3 = people.get(2);
+        person1.setAge("20");
+        person2.setAge("21");
+        person3.setAge("22");
+        testManager.save(store, person1);
+        testManager.save(store, person2);
+        testManager.save(store, person3);
+        testManager.push(store);
+        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        assertEquals(5, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        person1.setAge("23");
+        person2.setAge("24");
+        person3.setAge("25");
+        testManager.save(store, person1);
+        testManager.save(store, person2);
+        testManager.save(store, person3);
+        testManager.push(store);
+        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.delete(store, person1.getId());
+        testManager.push(store);
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    }
+
+    @Test
+    public void testAutoPaginationStoreTypeCache() throws InterruptedException, IOException {
+        initDeltaSetCachedCollection(StoreType.CACHE);
+        testManager.createPersons(store, 5);
+        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
+        Person person1 = people.get(0);
+        Person person2 = people.get(1);
+        Person person3 = people.get(2);
+        person1.setAge("20");
+        person2.setAge("21");
+        person3.setAge("22");
+        testManager.save(store, person1);
+        testManager.save(store, person2);
+        testManager.save(store, person3);
+        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        //delta set is used in this pull because find in cache store type makes call to the backend and caches result (to query cache collection as well)
+        person1.setAge("23");
+        person2.setAge("24");
+        person3.setAge("25");
+        testManager.save(store, person1);
+        testManager.save(store, person2);
+        testManager.save(store, person3);
+        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        testManager.delete(store, person1.getId());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
     }
 
 
