@@ -337,6 +337,9 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getCacheManager().clearCollection(getCollectionName(), storeItemType, Long.MAX_VALUE);
+        if (deltaSetCachingEnabled && queryCache != null) {
+            queryCache.clear();
+        }
         purge();
     }
 
