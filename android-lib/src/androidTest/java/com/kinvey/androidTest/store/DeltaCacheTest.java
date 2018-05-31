@@ -151,7 +151,7 @@ public class DeltaCacheTest {
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(0, syncCallback.getResult().getCount());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        assertEquals(0, store.pullBlocking(query).getCount());
         pulledPersons = store.find(query).getResult();
 
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -263,7 +263,7 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        assertEquals(0, store.pullBlocking(query).getCount());
         pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
 
@@ -557,8 +557,6 @@ public class DeltaCacheTest {
         assertEquals("name_1", response.get(1).getUsername());
     }
 
-//ignore while test app won't support delta cache
-
     @Test
     public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {
         client.enableDebugLogging();
@@ -577,7 +575,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
+        assertEquals(0, pullCallback.getResult().getCount());
 
         DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, new Person(TEST_USERNAME + TEN_ITEMS));
         assertNotNull(saveCallback);
@@ -589,7 +587,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS + 1, pullCallback.getResult().getCount());
+        assertEquals(1, pullCallback.getResult().getCount());
 
         List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(TEN_ITEMS + 1, personList.size());
@@ -621,7 +619,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
+        assertEquals(1, pullCallback.getResult().getCount());
 
         assertEquals(TEST_USERNAME + 100, store.find(query).getResult().get(9).getUsername());
 
@@ -652,18 +650,6 @@ public class DeltaCacheTest {
         store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.isDeltaSetCachingEnabled());
     }
-
-    @Test
-    public void testErrorIfStoreTypeNetwork() {
-        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
-        try {
-            store.setDeltaSetCachingEnabled(true);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertNotNull(e);
-        }
-    }
-
 
 
 }
