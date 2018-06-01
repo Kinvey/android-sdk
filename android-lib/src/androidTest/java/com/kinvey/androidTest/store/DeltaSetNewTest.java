@@ -105,6 +105,7 @@ public class DeltaSetNewTest {
         assertEquals(1, pullCallback.getResult().getCount());
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(0, pullCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     /* The test aims to confirm that since is respected and changes are handled properly */
@@ -119,6 +120,7 @@ public class DeltaSetNewTest {
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
+        assertEquals(2, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     /* The test aims to confirm the correct use of the since param and
@@ -134,10 +136,12 @@ public class DeltaSetNewTest {
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
         testManager.delete(store, emptyQuery);
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(0, pullCallback.getResult().getCount());
+        assertEquals(0, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     /* The test aims to confirm the correct use of deltaset in combination with queries */
@@ -169,10 +173,12 @@ public class DeltaSetNewTest {
         testManager.push(store);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(2, pullCallback.getResult().getCount());
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
         updateItem(usernameQuery);
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, usernameQuery);
         assertEquals(1, pullCallback.getResult().getCount());
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
     }
 
     /* The test aims to confirm the correct behavior for disabling deltaset */
@@ -198,9 +204,11 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME));
         CustomKinveySyncCallback syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
         testManager.save(store, new Person(TEST_USERNAME_2));
         syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(2, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     @Test
@@ -212,6 +220,7 @@ public class DeltaSetNewTest {
         updateItem();
         syncCallback  = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     @Test
@@ -275,43 +284,37 @@ public class DeltaSetNewTest {
     /* The test aims at confirming that find with forceNetwork works as intended */
     @Test
     public void testForceNetwork() throws InterruptedException {
-        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
-        networkStore.setDeltaSetCachingEnabled(true);
-        testManager.cleanBackend(networkStore, StoreType.NETWORK);
-        testManager.save(networkStore, new Person(TEST_USERNAME));
-        testManager.save(networkStore, new Person(TEST_USERNAME_2));
-        assertEquals(2, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
-
-        List<Person> people = testManager.find(networkStore, emptyQuery).getResult().getResult();
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.push(store);
+        store.setStoreType(StoreType.NETWORK);
+        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
+        assertEquals(2, people.size());
         Person person = people.get(0);
         person.setAge("20");
-        testManager.save(networkStore, person);
-        assertEquals(2, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
-
-        people = testManager.find(networkStore, emptyQuery).getResult().getResult();
-        person = people.get(0);
-        testManager.delete(networkStore, person.getId());
-        assertEquals(1, testManager.find(networkStore, emptyQuery).getResult().getResult().size());
+        testManager.save(store, person);
+        assertEquals(2, testManager.find(store, emptyQuery).getResult().getResult().size());
+        testManager.delete(store, person.getId());
+        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 
     @Test
     public void testForceNetworkWithQuery() throws InterruptedException {
-        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
-        networkStore.setDeltaSetCachingEnabled(true);
-        testManager.cleanBackend(networkStore, StoreType.NETWORK);
-        testManager.save(networkStore, new Person(TEST_USERNAME));
-        testManager.save(networkStore, new Person(TEST_USERNAME));
-        testManager.save(networkStore, new Person(TEST_USERNAME_2));
-        assertEquals(2, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
-        List<Person> people = testManager.find(networkStore, usernameQuery).getResult().getResult();
+        initDeltaSetCachedCollection(StoreType.SYNC);
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME));
+        testManager.save(store, new Person(TEST_USERNAME_2));
+        testManager.push(store);
+        store.setStoreType(StoreType.NETWORK);
+        List<Person> people = testManager.find(store, usernameQuery).getResult().getResult();
+        assertEquals(2, people.size());
         Person person = people.get(0);
         person.setAge("20");
-        testManager.save(networkStore, person);
-        assertEquals(2, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
-        people = testManager.find(networkStore, usernameQuery).getResult().getResult();
-        person = people.get(0);
-        testManager.delete(networkStore, person.getId());
-        assertEquals(1, testManager.find(networkStore, usernameQuery).getResult().getResult().size());
+        testManager.save(store, person);
+        assertEquals(2, testManager.find(store, usernameQuery).getResult().getResult().size());
+        testManager.delete(store, person.getId());
+        assertEquals(1, testManager.find(store, usernameQuery).getResult().getResult().size());
     }
 
     @Test
