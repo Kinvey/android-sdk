@@ -431,7 +431,7 @@ public class Client<T extends User> extends AbstractClient<T> {
      * <p/>
      * This Builder class is not thread-safe.
      */
-    public static class Builder extends AbstractClient.Builder {
+    public static class Builder<T extends User> extends AbstractClient.Builder {
 
         private Context context = null;
         private KinveyUserCallback<User> retrieveUserCallback = null;
@@ -447,7 +447,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         private String MICVersion;
         private String MICBaseURL;
         private boolean deltaSetCache = false;
-        private Class userClass = User.class;
+        private Class userClass = null;
         private byte[] encryptionKey;
 
         /**
@@ -764,7 +764,7 @@ public class Client<T extends User> extends AbstractClient<T> {
             this(context, newCompatibleTransport());
         }
 
-        public Builder setUserClass(Class userClass){
+        public Builder setUserClass(Class<T> userClass){
             this.userClass = userClass;
             return this;
         }
@@ -795,18 +795,18 @@ public class Client<T extends User> extends AbstractClient<T> {
          * which contains factory methods for accessing various functionality.
          */
         @Override
-        public Client build(){
+        public Client<T> build(){
             kinveyHandlerThread = new KinveyHandlerThread("KinveyHandlerThread");
             kinveyHandlerThread.start();
             Realm.init(context);
-            final Client client = new Client(getTransport(),
+            final Client<T> client = new Client<>(getTransport(),
                     getHttpRequestInitializer(), getBaseUrl(),
                     getServicePath(), this.getObjectParser(), getKinveyClientRequestInitializer(), getCredentialStore(),
                     getRequestBackoffPolicy(), this.encryptionKey, this.context);
 
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
-            client.setUserClass(userClass);
+            client.setUserClass(userClass != null ? userClass : User.class);
 
             //GCM explicitly enabled
             if (this.GCM_Enabled){
@@ -858,7 +858,7 @@ public class Client<T extends User> extends AbstractClient<T> {
          *
          * </p>
          *
-         * @param buildCallback Instance of {@link: KinveyClientBuilderCallback}
+         * @param buildCallback Instance of {@link KinveyClientBuilderCallback}
          */
         public void build(KinveyClientBuilderCallback buildCallback) {
             new Build(buildCallback).execute();
@@ -868,7 +868,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         /**
          * Define how credentials will be stored
          *
-         * @param store something implpemting CredentialStore interface
+         * @param store something implementing CredentialStore interface
          * @return this builder, with the new credential store set
          */
         public Builder setCredentialStore(CredentialStore store) {
@@ -894,7 +894,7 @@ public class Client<T extends User> extends AbstractClient<T> {
          * Sets a callback to be called after a client is intialized and BaseUser attributes is being retrieved.
          *
          * <p>
-         * When a client is intialized after an initial login, the user's credentials are cached locally and used for the
+         * When a client is initialized after an initial login, the user's credentials are cached locally and used for the
          * initialization of the client.  As part of the initialization process, a background thread is spawned to retrieve
          * up-to-date user attributes.  This optional callback is called when the retrieval process is complete and passes
          * an instance of the logged in user.

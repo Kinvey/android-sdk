@@ -16,10 +16,8 @@
 
 package com.kinvey.java.store.requests.user;
 
-import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.Key;
 import com.google.gson.Gson;
-import com.kinvey.java.auth.KinveyAuthResponse;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.dto.PasswordRequest;
@@ -31,15 +29,15 @@ import java.io.IOException;
  * Update Request Class, extends AbstractKinveyJsonClientRequest<BaseUser>.  Constructs the HTTP request object for
  * Update BaseUser requests.
  */
-public final class Update extends AbstractKinveyJsonClientRequest<BaseUser> {
+public final class Update<T extends BaseUser> extends AbstractKinveyJsonClientRequest<T> {
     private static final String REST_PATH = "user/{appKey}/{userID}";
 
-    private UserStoreRequestManager userStoreRequestManager;
+    private UserStoreRequestManager<T> userStoreRequestManager;
     @Key
     private String userID;
 
-    public Update(UserStoreRequestManager userStoreRequestManager, BaseUser baseUser) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, baseUser, BaseUser.class);
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, BaseUser baseUser, Class<T> userClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, baseUser, userClass);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = baseUser.getId();
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -48,8 +46,8 @@ public final class Update extends AbstractKinveyJsonClientRequest<BaseUser> {
         }
     }
 
-    public Update(UserStoreRequestManager userStoreRequestManager, BaseUser baseUser, PasswordRequest passwordRequest) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, BaseUser.class);
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, BaseUser baseUser, PasswordRequest passwordRequest, Class<T> userClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, userClass);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = baseUser.getId();
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -58,8 +56,8 @@ public final class Update extends AbstractKinveyJsonClientRequest<BaseUser> {
         }
     }
 
-    public Update(UserStoreRequestManager userStoreRequestManager, String userId) {
-        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, BaseUser.class);
+    public Update(UserStoreRequestManager<T> userStoreRequestManager, String userId, Class<T> userClass) {
+        super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, userClass);
         this.userStoreRequestManager = userStoreRequestManager;
         this.userID = userId;
         this.getRequestHeaders().put("X-Kinvey-Client-App-Version", userStoreRequestManager.getClientAppVersion());
@@ -68,31 +66,19 @@ public final class Update extends AbstractKinveyJsonClientRequest<BaseUser> {
         }
     }
 
-    public BaseUser execute() throws IOException {
+    @Override
+    public T execute() throws IOException {
 
-        BaseUser u = super.execute();
+        T updatedUser = super.execute();
 
-        if (u.getId() == null || u.getId() == null){
-            return u;
+        if (updatedUser.getId() == null || updatedUser.getId() == null){
+            return updatedUser;
         }
 
-        if (u.getId().equals(userID)){
-            KinveyAuthResponse auth = new KinveyAuthResponse();
-            auth.put("_id", u.get("_id"));
-            KinveyAuthResponse.KinveyUserMetadata kmd = new KinveyAuthResponse.KinveyUserMetadata();
-            kmd.put("lmt", u.get("_kmd.lmt")) ;
-            kmd.put("authtoken", u.get("_kmd.authtoken"));
-            kmd.putAll((ArrayMap) u.get("_kmd"));
-            auth.put("_kmd", kmd);
-            auth.put("username", u.get("username"));
-            for (Object key : u.keySet()){
-                if (!key.toString().equals("_kmd")){
-                    auth.put(key.toString(), u.get(key));
-                }
-            }
-            return userStoreRequestManager.initUser(auth, u);
-        }else{
-            return u;
+        if (updatedUser.getId().equals(userID)) {
+            return userStoreRequestManager.initUser(updatedUser);
+        } else {
+            return updatedUser;
         }
     }
 }

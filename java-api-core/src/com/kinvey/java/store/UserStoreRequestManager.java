@@ -84,8 +84,8 @@ public class UserStoreRequestManager<T extends BaseUser> {
         THIRDPARTY
     }
 
-    private final AbstractClient client;
-    private final KinveyAuthRequest.Builder builder;
+    private final AbstractClient<T> client;
+    private final KinveyAuthRequest.Builder<T> builder;
     private final Class<T> myClazz;
     private T user;
     private final String clientAppVersion;
@@ -118,7 +118,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         return client;
     }
 
-    public UserStoreRequestManager(AbstractClient client, KinveyAuthRequest.Builder builder){
+    public UserStoreRequestManager(AbstractClient<T> client, KinveyAuthRequest.Builder<T> builder){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null");
         this.client = client;
@@ -129,7 +129,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         this.customRequestProperties = client.getCustomRequestProperties();
     }
 
-    public UserStoreRequestManager(T user, AbstractClient client, KinveyAuthRequest.Builder builder){
+    public UserStoreRequestManager(T user, AbstractClient client, KinveyAuthRequest.Builder<T> builder){
         this(client, builder);
         this.user = user;
     }
@@ -140,7 +140,9 @@ public class UserStoreRequestManager<T extends BaseUser> {
      *
      * @param response KinveyAuthResponse object containing the login response
      * @throws IOException
+     * @deprecated use {@link UserStoreRequestManager#initUser(BaseUser)} instead.
      */
+    @Deprecated
     public T initUser(KinveyAuthResponse response, T userObject) throws IOException {
         userObject.setId(response.getUserId());
         userObject.put("_kmd", response.getMetadata());
@@ -169,6 +171,22 @@ public class UserStoreRequestManager<T extends BaseUser> {
         client.getClientUser().setUser(currentUser.getId());
         client.setActiveUser(currentUser);
         return currentUser;
+    }
+
+    /**
+     * Method to initialize the BaseUser after login, create a credential,
+     * and add it to the KinveyClientRequestInitializer
+     *
+     * @param userObject user object for setting to active user and to save to Credential
+     * @throws IOException exception
+     */
+    public T initUser(final T userObject) throws IOException {
+        CredentialManager credentialManager = new CredentialManager(client.getStore());
+        ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer())
+                .setCredential(credentialManager.createAndStoreCredential(userObject));
+        client.getClientUser().setUser(userObject.getId());
+        client.setActiveUser(userObject);
+        return userObject;
     }
 
     private T initUser(Credential credential, T userObject) {
@@ -340,7 +358,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         }
         currentUser.setAuthToken(authToken);
         currentUser.setId(userId);
-        Credential c = Credential.from(currentUser);
+        Credential c = Credential.from(userId, authToken);
         client.setActiveUser(currentUser);
         return login(c);
 
@@ -500,10 +518,10 @@ public class UserStoreRequestManager<T extends BaseUser> {
      * @return Update request
      * @throws IOException
      */
-    public Update updateBlocking() throws IOException{
+    public Update<T> updateBlocking() throws IOException{
         Preconditions.checkNotNull(client.getActiveUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getActiveUser().getId(), "currentUser ID must not be null");
-        Update update = new Update(this, client.getActiveUser());
+        Update<T> update = new Update<>(this, client.getActiveUser(), myClazz);
         client.initializeRequest(update);
         return update;
     }
@@ -515,20 +533,20 @@ public class UserStoreRequestManager<T extends BaseUser> {
      * @return an Update request ready to be executed
      * @throws IOException
      */
-    public Update updateBlocking(BaseUser baseUser) throws IOException{
+    public Update<T> updateBlocking(BaseUser baseUser) throws IOException{
         Preconditions.checkNotNull(baseUser, "currentUser must not be null");
         Preconditions.checkNotNull(baseUser.getId(), "currentUser ID must not be null");
-        Update update = new Update(this, baseUser);
+        Update<T> update = new Update<>(this, baseUser, myClazz);
         client.initializeRequest(update);
         return update;
     }
 
-    public Update changePassword(String newPassword) throws IOException{
+    public Update<T> changePassword(String newPassword) throws IOException{
         Preconditions.checkNotNull(client.getActiveUser(), "currentUser must not be null");
         Preconditions.checkNotNull(client.getActiveUser().getId(), "currentUser ID must not be null");
         PasswordRequest passwordRequest = new PasswordRequest();
         passwordRequest.setPassword(newPassword);
-        Update update = new Update(this, client.getActiveUser(), passwordRequest);
+        Update<T> update = new Update<>(this, client.getActiveUser(), passwordRequest, myClazz);
         client.initializeRequest(update);
         return update;
     }
@@ -542,14 +560,14 @@ public class UserStoreRequestManager<T extends BaseUser> {
         return userExists;
     }
 
-    public Update getUser(String userId) throws IOException {
+    public Update<T> getUser(String userId) throws IOException {
         Preconditions.checkNotNull(userId, "username must not be null");
-        Update update = new Update(this, userId);
+        Update<T> update = new Update<>(this, userId, myClazz);
         client.initializeRequest(update);
         return update;
     }
 
-    public Update save() throws IOException {
+    public Update<T> save() throws IOException {
         return updateBlocking();
     }
 
@@ -717,7 +735,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
     public class LoginRequest {
         Credential credential;
         UserStoreRequestManager.LoginType type;
-        KinveyAuthRequest request;
+        KinveyAuthRequest<T> request;
 
         public LoginRequest() {
             builder.setCreate(true);
@@ -766,19 +784,19 @@ public class UserStoreRequestManager<T extends BaseUser> {
                         "call `UserStore.logout(myClient, kinveyClientCallback)` first -or- check `myClient.isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended");
             }
-            T ret;
+            T loggedUser;
             try {
-                ret = myClazz.newInstance();
+                loggedUser = myClazz.newInstance();
             } catch (Exception e) {
 //                e.printStackTrace();
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                return initUser(credential, ret);
+                return initUser(credential, loggedUser);
             }
-            KinveyAuthResponse response = this.request.execute();
+            loggedUser = this.request.execute(myClazz);
             //if (response.)
-            return initUser(response, ret);
+            return initUser(loggedUser);
         }
     }
 

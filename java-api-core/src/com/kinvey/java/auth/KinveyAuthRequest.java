@@ -38,12 +38,13 @@ import java.util.Locale;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.core.KinveyJsonResponseException;
+import com.kinvey.java.dto.BaseUser;
 
 /**
  * @author m0rganic
  * @since 2.0
  */
-public class KinveyAuthRequest extends GenericJson {
+public class KinveyAuthRequest<T extends BaseUser> extends GenericJson {
 
 
     public enum LoginType {
@@ -225,6 +226,9 @@ public class KinveyAuthRequest extends GenericJson {
         return executeUnparsed().parseAs(KinveyAuthResponse.class);
     }
 
+    public T execute(Class<T> aClass) throws IOException {
+        return executeUnparsed().parseAs(aClass);
+    }
 
 
     /**
@@ -267,7 +271,7 @@ public class KinveyAuthRequest extends GenericJson {
      *              .execute();
      * </pre>
      */
-    public static class Builder {
+    public static class Builder<T extends BaseUser> {
 
         private final HttpTransport transport;
 
@@ -312,15 +316,15 @@ public class KinveyAuthRequest extends GenericJson {
             this.thirdPartyIdentity = identity;
         }
 
-        public KinveyAuthRequest build() {
+        public KinveyAuthRequest<T> build() {
             if (!isThirdPartyAuthUsed) {
-                return new KinveyAuthRequest(getTransport()
+                return new KinveyAuthRequest<>(getTransport()
                         , getJsonFactory()
                         , getBaseUrl(), getAppKeyAuthentication()
                         , getUsername()
                         , getPassword(),user, this.create);
             }
-            return new KinveyAuthRequest(getTransport()
+            return new KinveyAuthRequest<>(getTransport()
                     , getJsonFactory()
                     , getBaseUrl(), getAppKeyAuthentication()
                     , getThirdPartyIdentity(),user, this.create);
