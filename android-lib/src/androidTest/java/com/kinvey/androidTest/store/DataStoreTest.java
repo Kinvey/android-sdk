@@ -2111,13 +2111,23 @@ public class DataStoreTest {
     public void testSaveKmd() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, 60L).clear();
+        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        store.clear();
         Person person = createPerson(TEST_TEMP_USERNAME);
-        Person savedPerson = store.save(person);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback);
         sync(store, DEFAULT_TIMEOUT);
-        DefaultKinveyClientCallback findCallback = find(store, savedPerson.getId(), DEFAULT_TIMEOUT, null);
-        assertNotNull(findCallback.result.get(KMD));
-        assertNotNull(((GenericJson)findCallback.result.get(KMD)).get(LMT));
-        delete(store, findCallback.result.getId(), DEFAULT_TIMEOUT);
+        DefaultKinveyReadCallback findCallback = find(store, DEFAULT_TIMEOUT);
+        assertNotNull(findCallback);
+        assertNotNull(findCallback.result);
+        List<Person> people = findCallback.result.getResult();
+        assertNotNull(people);
+        assertEquals(1, people.size());
+        Person savedPerson = people.get(0);
+        assertNotNull(savedPerson.get(KMD));
+        assertNotNull(((GenericJson)savedPerson.get(KMD)).get(LMT));
+        delete(store, savedPerson.getId(), DEFAULT_TIMEOUT);
         push(store, DEFAULT_TIMEOUT);
         client.getSyncManager().clear(Person.COLLECTION);
     }
@@ -2126,22 +2136,31 @@ public class DataStoreTest {
     public void testUpdateLmt() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
+        store.clear();
+        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
         Person person = createPerson(TEST_TEMP_USERNAME);
         Person savedPerson = store.save(person);
         sync(store, DEFAULT_TIMEOUT);
-        DefaultKinveyClientCallback findCallback = find(store, savedPerson.getId(), DEFAULT_TIMEOUT, null);
-        assertNotNull(findCallback.result.get(KMD));
-        String savedLmd = (String)((GenericJson)findCallback.result.get(KMD)).get(LMT);
+        DefaultKinveyReadCallback findCallback = find(store, DEFAULT_TIMEOUT);
+        assertNotNull(findCallback);
+        assertNotNull(findCallback.result);
+        List<Person> people = findCallback.result.getResult();
+        assertEquals(1, people.size());
+        Person syncedPerson = people.get(0);
+        assertNotNull(syncedPerson.get(KMD));
+        String savedLmd = (String)((GenericJson)syncedPerson.get(KMD)).get(LMT);
         assertNotNull(savedLmd);
-        savedPerson.setUsername(TEST_TEMP_USERNAME + "_Change");
-        savedPerson = store.save(savedPerson);
+        syncedPerson.setUsername(TEST_TEMP_USERNAME + "_Change");
+        syncedPerson = store.save(syncedPerson);
         sync(store, DEFAULT_TIMEOUT);
-        findCallback = find(store, savedPerson.getId(), DEFAULT_TIMEOUT, null);
-        assertNotNull(findCallback.result.get(KMD));
-        String updatedLmd = (String)((GenericJson)findCallback.result.get(KMD)).get(LMT);
+        findCallback = find(store, DEFAULT_TIMEOUT);
+        assertNotNull(findCallback.result.getResult());
+        Person updatedSyncedPerson = findCallback.result.getResult().get(0);
+        assertNotNull(updatedSyncedPerson.get(KMD));
+        String updatedLmd = (String)((GenericJson)updatedSyncedPerson.get(KMD)).get(LMT);
         assertNotNull(updatedLmd);
         assertNotEquals(savedLmd, updatedLmd);
-        delete(store, findCallback.result.getId(), DEFAULT_TIMEOUT);
+        delete(store, updatedSyncedPerson.getId(), DEFAULT_TIMEOUT);
         push(store, DEFAULT_TIMEOUT);
         client.getSyncManager().clear(Person.COLLECTION);
     }
@@ -3246,13 +3265,16 @@ public class DataStoreTest {
     public void testCreateUpdateDeleteSync() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(Person.COLLECTION);
+        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        store.clear();
+
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback callback = save(store, person);
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
         sync(store, DEFAULT_TIMEOUT);
 
-        person = find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().get(0);
+        person = find(store, DEFAULT_TIMEOUT).result.getResult().get(0);
         person.setUsername(TEST_USERNAME_2);
         callback = save(store, person);
         assertNotNull(callback.result);
