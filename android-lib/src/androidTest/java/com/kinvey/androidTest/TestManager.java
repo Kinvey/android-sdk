@@ -22,8 +22,10 @@ import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
+import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.BaseDataStore;
@@ -81,6 +83,40 @@ public class TestManager<T extends GenericJson> {
             latch.await();
             looperThread.mHandler.sendMessage(new Message());
         }
+    }
+
+    public void logout(final Client client) throws InterruptedException {
+        if (client.isUserLoggedIn()) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            LooperThread looperThread;
+            looperThread = new LooperThread(new Runnable() {
+                @Override
+                public void run() {
+                    UserStore.logout(client, new KinveyClientCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            assertNull(error);
+                            latch.countDown();
+                        }
+                    });
+                }
+            });
+            looperThread.start();
+            latch.await();
+            looperThread.mHandler.sendMessage(new Message());
+        }
+    }
+
+    public KinveyAuthRequest.Builder createBuilder(AbstractClient client) {
+        String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
+        return new KinveyAuthRequest.Builder(client.getRequestFactory().getTransport(),
+                client.getJsonFactory(), client.getBaseUrl(), appKey, appSecret, null);
     }
 
     public DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {

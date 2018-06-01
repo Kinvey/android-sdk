@@ -22,10 +22,10 @@ import com.google.api.client.util.Key;
 public class KinveyHeaders extends  com.kinvey.java.core.KinveyHeaders {
 
     @Key("x-kinvey-device-information")
-    private String deviceInfo;
+    private String deviceInformation;
 
     public KinveyHeaders() {
         super();
-        deviceInfo = "JAVA/" + System.getProperty("java.version");
+        deviceInformation = "JAVA/" + System.getProperty("java.version");
     }
 }
