@@ -264,6 +264,21 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public DefaultKinveyClientCallback find(final DataStore<Person> store, final String id) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(id, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     public CustomKinveyReadCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final CustomKinveyReadCallback<T> callback = new CustomKinveyReadCallback<T>(latch);
