@@ -26,6 +26,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
 import com.kinvey.java.model.KinveyMetaData;
@@ -531,7 +532,18 @@ public class BaseDataStore<T extends GenericJson> {
         List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, query.getQueryFilterMap().toString()));
         if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
             QueryCacheItem cacheItem = queryCacheItems.get(0);
-            KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
+            KinveyQueryCacheResponse<T> queryCacheResponse;
+            try {
+                queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
+            } catch (KinveyJsonResponseException responseException) {
+                if (responseException.getDetails().getError().equals("MissingConfiguration")
+                        && responseException.getDetails().getDescription().equals("This feature is not properly configured for this app backend. Please configure it through the console first, or contact support for more information.")) {
+                   return getBlocking(query);
+                } else {
+                    throw responseException;
+                }
+
+            }
             if (queryCacheResponse.getDeleted() != null) {
                 List<String> ids = new ArrayList<>();
                 for (GenericJson json : queryCacheResponse.getDeleted()) {
@@ -556,14 +568,20 @@ public class BaseDataStore<T extends GenericJson> {
             cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
             queryCache.save(cacheItem);
         } else {
-            response = networkManager.pullBlocking(query).execute();
-            cache.delete(query);
-            cache.save(response.getResult());
+            response = getBlocking(query);
             queryCache.save(new QueryCacheItem(
                     getCollectionName(),
                     query.getQueryFilterMap().toString(),
                     response.getLastRequestTime()));
         }
+        return response;
+    }
+
+    @Nonnull
+    private KinveyReadResponse<T> getBlocking(@Nonnull Query query) throws IOException {
+        KinveyReadResponse<T> response = networkManager.pullBlocking(query).execute();
+        cache.delete(query);
+        cache.save(response.getResult());
         return response;
     }
 
