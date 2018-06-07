@@ -75,8 +75,8 @@ public class BaseDataStore<T extends GenericJson> {
     private static final String MISSING_CONFIGURATION_ERROR = "MissingConfiguration";
     private static final String MISSING_CONFIGURATION_ERROR_DETAILS = "This feature is not properly configured for this app backend. Please configure it through the console first, or contact support for more information.";
 
-    protected static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
-    protected static final String RESULT_SIZE_ERROR_DETAILS = "Your query produced more than 10,000 results. Please rewrite your query to be more selective.";
+    private static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
+    private static final String RESULT_SIZE_ERROR_DETAILS = "Your query produced more than 10,000 results. Please rewrite your query to be more selective.";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
