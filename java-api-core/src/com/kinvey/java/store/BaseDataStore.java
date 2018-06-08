@@ -518,7 +518,9 @@ public class BaseDataStore<T extends GenericJson> {
                         cache.delete(tempResponse.getQuery());
                         pulledItemCount += cache.save(tempResponse.getKinveyReadResponse().getResult()).size();
                         exceptions.addAll(tempResponse.getKinveyReadResponse().getListOfExceptions());
-                        lastRequestTime = tempResponse.getKinveyReadResponse().getLastRequestTime();
+                        if (lastRequestTime == null) { //it will be changed to time from count request
+                            lastRequestTime = tempResponse.getKinveyReadResponse().getLastRequestTime();
+                        }
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }
