@@ -26,6 +26,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
+import com.kinvey.java.core.KinveyJsonError;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
@@ -71,6 +72,8 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String PURGE = "purge";
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
+
+    private static final String MISSING_CONFIGURATION_ERROR = "MissingConfiguration";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
@@ -536,7 +539,9 @@ public class BaseDataStore<T extends GenericJson> {
             try {
                 queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
             } catch (KinveyJsonResponseException responseException) {
-                if (responseException.getStatusCode() == 403) { // MissingConfiguration
+                KinveyJsonError jsonError = responseException.getDetails();
+                int statusCode = responseException.getStatusCode();
+                if (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR)) { // MissingConfiguration
                    return getBlocking(query);
                 } else {
                     throw responseException;
