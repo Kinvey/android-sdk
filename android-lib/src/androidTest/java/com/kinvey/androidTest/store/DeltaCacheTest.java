@@ -654,7 +654,7 @@ public class DeltaCacheTest {
     }
 
 
-    @Test
+/*    @Test
     public void testResultSetSizeExceededErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
         store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -684,8 +684,9 @@ public class DeltaCacheTest {
         assertNotNull(response);
         assertEquals(0, response.getListOfExceptions().size());
         assertEquals(3, response.getCount());
-    }
+    }*/
 
+/*
     @Test
     public void testMissingConfigurationErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
         store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
@@ -716,6 +717,7 @@ public class DeltaCacheTest {
         assertEquals(0, response.getListOfExceptions().size());
         assertEquals(2, response.getCount());
     }
+*/
 
     @Test
     public void testKinveyErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
