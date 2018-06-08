@@ -72,11 +72,7 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
 
-    private static final String MISSING_CONFIGURATION_ERROR = "MissingConfiguration";
-    private static final String MISSING_CONFIGURATION_ERROR_DETAILS = "This feature is not properly configured for this app backend. Please configure it through the console first, or contact support for more information.";
-
     private static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
-    private static final String RESULT_SIZE_ERROR_DETAILS = "Your query produced more than 10,000 results. Please rewrite your query to be more selective.";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
@@ -606,11 +602,9 @@ public class BaseDataStore<T extends GenericJson> {
         try {
             queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
         } catch (KinveyJsonResponseException responseException) {
+            int statusCode = responseException.getStatusCode();
             KinveyJsonError jsonError = responseException.getDetails();
-            if ((jsonError.getError().equals(MISSING_CONFIGURATION_ERROR) &&
-                    jsonError.getDescription().equals(MISSING_CONFIGURATION_ERROR_DETAILS)) ||
-                    ((jsonError.getError().equals(RESULT_SIZE_ERROR) &&
-                            jsonError.getDescription().equals(RESULT_SIZE_ERROR_DETAILS)))) {
+            if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR))) {
                 return getBlocking(query);
             } else {
                 throw responseException;
@@ -648,11 +642,9 @@ public class BaseDataStore<T extends GenericJson> {
             try {
                 queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
             } catch (KinveyJsonResponseException responseException) {
+                int statusCode = responseException.getStatusCode();
                 KinveyJsonError jsonError = responseException.getDetails();
-                if ((jsonError.getError().equals(MISSING_CONFIGURATION_ERROR) &&
-                        jsonError.getDescription().equals(MISSING_CONFIGURATION_ERROR_DETAILS)) ||
-                        ((jsonError.getError().equals(RESULT_SIZE_ERROR) &&
-                                jsonError.getDescription().equals(RESULT_SIZE_ERROR_DETAILS)))) {
+                if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR))) {
                     return pageSize > 0 ? pullBlockingPaged(query, pageSize) : pullBlockingRegular(query);
                 } else {
                     throw responseException;
