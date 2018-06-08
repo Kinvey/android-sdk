@@ -536,8 +536,7 @@ public class BaseDataStore<T extends GenericJson> {
             try {
                 queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
             } catch (KinveyJsonResponseException responseException) {
-                if (responseException.getDetails().getError().equals("MissingConfiguration")
-                        && responseException.getDetails().getDescription().equals("This feature is not properly configured for this app backend. Please configure it through the console first, or contact support for more information.")) {
+                if (responseException.getStatusCode() == 403) { // MissingConfiguration
                    return getBlocking(query);
                 } else {
                     throw responseException;
