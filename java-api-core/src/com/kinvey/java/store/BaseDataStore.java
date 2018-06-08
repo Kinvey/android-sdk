@@ -73,6 +73,7 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String COUNT = "count";
 
     private static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
+    private static final String PARAMETER_VALUE_OF_RANGE_ERROR = "ParameterValueOutOfRange";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
@@ -604,7 +605,8 @@ public class BaseDataStore<T extends GenericJson> {
         } catch (KinveyJsonResponseException responseException) {
             int statusCode = responseException.getStatusCode();
             KinveyJsonError jsonError = responseException.getDetails();
-            if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR))) {
+            if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
+                    (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR))) {
                 return getBlocking(query);
             } else {
                 throw responseException;
@@ -644,7 +646,8 @@ public class BaseDataStore<T extends GenericJson> {
             } catch (KinveyJsonResponseException responseException) {
                 int statusCode = responseException.getStatusCode();
                 KinveyJsonError jsonError = responseException.getDetails();
-                if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR))) {
+                if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
+                        (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR))) {
                     return pageSize > 0 ? pullBlockingPaged(query, pageSize) : pullBlockingRegular(query);
                 } else {
                     throw responseException;
