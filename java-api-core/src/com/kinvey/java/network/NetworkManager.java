@@ -309,7 +309,7 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     /**
-     * @deprecated use {@link #pullBlocking(Query)} ()} instead.
+     * @deprecated use {@link #getBlocking(Query)} instead.
      */
     @Deprecated
     public Get pullBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
@@ -333,7 +333,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Pull request
      * @throws IOException
      *
-     * @deprecated use {@link #pullBlocking(Query)} ()} instead.
+     * @deprecated use {@link #getBlocking(Query)} instead.
      */
     public Get pullBlocking(Query query, ICache<T> cache, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
@@ -353,7 +353,9 @@ public class NetworkManager<T extends GenericJson> {
      * @param query Query to get
      * @return Pull request
      * @throws IOException
+     * @deprecated use {@link #getBlocking(Query)} instead.
      */
+    @Deprecated
     public Get pullBlocking(@Nonnull Query query) throws IOException {
         Preconditions.checkNotNull(query);
         Get pull = new Get(query, myClass);

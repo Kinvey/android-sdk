@@ -656,8 +656,8 @@ public class DeltaSetNewTest {
         testManager.save(store, person2);
         testManager.save(store, person3);
         testManager.push(store);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(5, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
         person1.setAge("23");
         person2.setAge("24");
         person3.setAge("25");
@@ -686,8 +686,8 @@ public class DeltaSetNewTest {
         testManager.save(store, person1);
         testManager.save(store, person2);
         testManager.save(store, person3);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
         //delta set is used in this pull because find in cache store type makes call to the backend and caches result (to query cache collection as well)
         person1.setAge("23");
         person2.setAge("24");
