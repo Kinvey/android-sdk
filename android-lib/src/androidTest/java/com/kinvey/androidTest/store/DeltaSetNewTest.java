@@ -537,6 +537,7 @@ public class DeltaSetNewTest {
         Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
         assertEquals(1, testManager.find(store, client.query().equals("_id", person.getId())).getResult().getResult().size());
         assertEquals(1, testManager.find(store, client.query().equals("_id", person.getId())).getResult().getResult().size());
+        assertEquals(person.getId(), testManager.find(store, person.getId()).getResult().getId());
     }
 
     @Test
@@ -655,8 +656,8 @@ public class DeltaSetNewTest {
         testManager.save(store, person2);
         testManager.save(store, person3);
         testManager.push(store);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(5, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, emptyQuery, 2).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
         person1.setAge("23");
         person2.setAge("24");
         person3.setAge("25");
@@ -685,8 +686,8 @@ public class DeltaSetNewTest {
         testManager.save(store, person1);
         testManager.save(store, person2);
         testManager.save(store, person3);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
         //delta set is used in this pull because find in cache store type makes call to the backend and caches result (to query cache collection as well)
         person1.setAge("23");
         person2.setAge("24");
@@ -701,20 +702,20 @@ public class DeltaSetNewTest {
 
 
     /* error handling*/
-    @Test
+/*    @Test
     public void testUnconfiguredCollectionAtTheBackend() throws InterruptedException {
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
         store.setDeltaSetCachingEnabled(true);
         testManager.save(store, new Person(TEST_USERNAME));
         testManager.push(store);
-        assertEquals(1, testManager.pullCustom(store, client.query()).getResult().getCount());
-        testManager.save(store, new Person(TEST_USERNAME));
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, emptyQuery);
+        assertEquals(1, pullCallback.getResult().getCount());
+        updateItem();
         testManager.push(store);
-        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
-        assertNotNull(pullCallback.getError());
-        assertTrue(pullCallback.getError().getMessage().contains("This feature is not properly configured for this app backend"));
-    }
+        pullCallback = testManager.pullCustom(store, emptyQuery);
+        assertEquals(1, pullCallback.getResult().getCount());
+    }*/
 
     /* check that skip and limit is ignored in delta set*/
     @Test
@@ -730,7 +731,6 @@ public class DeltaSetNewTest {
         testManager.push(store);
         assertEquals(1, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
     }
-
 
     /* support methods */
 
