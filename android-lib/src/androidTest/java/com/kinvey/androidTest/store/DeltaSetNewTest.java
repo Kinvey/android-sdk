@@ -717,7 +717,7 @@ public class DeltaSetNewTest {
         assertEquals(1, pullCallback.getResult().getCount());
     }
 
-    /* check that if query contains skip and limit than delta set is ignored */
+    /* check that if query contains skip or limit than delta set is ignored */
     @Test
     public void testSkipLimit() throws InterruptedException {
         initDeltaSetCachedCollection(StoreType.SYNC);
