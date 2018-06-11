@@ -717,7 +717,7 @@ public class DeltaSetNewTest {
         assertEquals(1, pullCallback.getResult().getCount());
     }
 
-    /* check that skip and limit is ignored in delta set*/
+    /* check that if query contains skip and limit than delta set is ignored */
     @Test
     public void testSkipLimit() throws InterruptedException {
         initDeltaSetCachedCollection(StoreType.SYNC);
@@ -726,10 +726,10 @@ public class DeltaSetNewTest {
         testManager.save(store, new Person(TEST_USERNAME));
         testManager.save(store, new Person(TEST_USERNAME));
         testManager.push(store);
-        assertEquals(3, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
+        assertEquals(2, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
         testManager.save(store, new Person(TEST_USERNAME));
         testManager.push(store);
-        assertEquals(1, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
+        assertEquals(2, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
     }
 
     /* support methods */
