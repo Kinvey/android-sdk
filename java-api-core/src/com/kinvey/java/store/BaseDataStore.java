@@ -74,7 +74,7 @@ public class BaseDataStore<T extends GenericJson> {
 
     private static final String MISSING_CONFIGURATION_ERROR = "MissingConfiguration";
     private static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
-
+    private static final String PARAMETER_VALUE_OF_RANGE_ERROR = "ParameterValueOutOfRange";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
@@ -609,6 +609,7 @@ public class BaseDataStore<T extends GenericJson> {
             int statusCode = responseException.getStatusCode();
             KinveyJsonError jsonError = responseException.getDetails();
             if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
+                    (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR)) ||
                     (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR))) {
                 return getBlocking(query);
             } else {
@@ -650,7 +651,8 @@ public class BaseDataStore<T extends GenericJson> {
                 int statusCode = responseException.getStatusCode();
                 KinveyJsonError jsonError = responseException.getDetails();
                 if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
-                    (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR))) {
+                        (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR)) ||
+                        (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR))) {
                     return pageSize > 0 ? pullBlockingPaged(query, pageSize) : pullBlockingRegular(query);
                 } else {
                     throw responseException;
