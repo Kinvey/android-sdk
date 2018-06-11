@@ -210,9 +210,7 @@ public class BaseDataStore<T extends GenericJson> {
             if (cachedCallback != null) {
                 cachedCallback.onSuccess(new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute());
             }
-            if (deltaSetCachingEnabled) {
-                query.setLimit(0);
-                query.setSkip(0);
+            if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 return findBlockingDeltaSync(query);
             } else {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
@@ -414,9 +412,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         query = query == null ? client.query() : query;
         KinveyPullResponse response;
-        if (deltaSetCachingEnabled) {
-            query.setLimit(0);
-            query.setSkip(0);
+        if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
             response = pullBlockingDeltaSync(query);
         } else {
             response = new KinveyPullResponse();
@@ -458,7 +454,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         query = query == null ? client.query() : query;
         QueryCacheItem cacheItem = null;
-        if (deltaSetCachingEnabled) {
+        if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
             cacheItem = getQueryCacheItem(query);
         }
         return cacheItem != null ? pullBlockingDeltaSync(cacheItem, query, pageSize) : pullBlockingPaged(query, pageSize);
@@ -844,5 +840,8 @@ public class BaseDataStore<T extends GenericJson> {
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
 
+    private boolean isQueryContainSkipLimit(@Nonnull Query query) {
+        return query.getSkip() != 0 || query.getLimit() != 0;
+    }
 
 }
