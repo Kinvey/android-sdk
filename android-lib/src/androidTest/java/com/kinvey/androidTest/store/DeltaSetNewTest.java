@@ -656,7 +656,7 @@ public class DeltaSetNewTest {
         testManager.save(store, person2);
         testManager.save(store, person3);
         testManager.push(store);
-        assertEquals(3, testManager.pullCustom(store, emptyQuery, 2).getResult().getCount());
+        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
         assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
         person1.setAge("23");
         person2.setAge("24");
@@ -702,7 +702,7 @@ public class DeltaSetNewTest {
 
 
     /* error handling*/
-/*    @Test
+    @Test
     public void testUnconfiguredCollectionAtTheBackend() throws InterruptedException {
         store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
@@ -715,7 +715,7 @@ public class DeltaSetNewTest {
         testManager.push(store);
         pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
-    }*/
+    }
 
     /* check that skip and limit is ignored in delta set*/
     @Test
