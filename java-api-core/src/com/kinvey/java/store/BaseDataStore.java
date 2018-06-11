@@ -210,7 +210,7 @@ public class BaseDataStore<T extends GenericJson> {
             if (cachedCallback != null) {
                 cachedCallback.onSuccess(new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute());
             }
-            if (deltaSetCachingEnabled && isQueryContainSkipLimit(query)) {
+            if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 return findBlockingDeltaSync(query);
             } else {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
