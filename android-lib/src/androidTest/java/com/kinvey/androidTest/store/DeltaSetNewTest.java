@@ -1017,7 +1017,7 @@ public class DeltaSetNewTest {
         updateItem(networkStore);
         syncCallback = testManager.sync(store, emptyQuery);
         assertEquals(1, syncCallback.getResult().getCount());
-        assertEquals(1, store.count().intValue());
+        assertEquals(3, store.count().intValue());
     }
 
     /* with enabled deltaset should return correct number of items when deleting (SYNC)*/
