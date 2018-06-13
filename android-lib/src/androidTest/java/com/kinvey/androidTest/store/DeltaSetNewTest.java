@@ -704,22 +704,54 @@ public class DeltaSetNewTest {
         assertEquals(5, people.size());
     }
 
-
-
-    /* error handling*/
+    /* should use regular GET when deltaset configuration is missing on the backend */
     @Test
-    public void testUnconfiguredCollectionAtTheBackend() throws InterruptedException {
-        store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.SYNC, client);
-        testManager.cleanBackend(store, StoreType.SYNC);
+    public void testStoreTypeSyncWithMissedConfigurationAtTheBackend() throws IOException, InterruptedException {
+        testMissedConfigurationAtTheBackend(StoreType.SYNC);
+    }
+
+    /* should use regular GET when deltaset configuration is missing on the backend */
+    @Test
+    public void testStoreTypeCacheWithMissedConfigurationAtTheBackend() throws IOException, InterruptedException {
+        testMissedConfigurationAtTheBackend(StoreType.CACHE);
+    }
+
+    private void testMissedConfigurationAtTheBackend(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, storeType, client);
         store.setDeltaSetCachingEnabled(true);
-        testManager.save(store, new Person(TEST_USERNAME));
-        testManager.push(store);
+        testManager.createPersons(networkStore, 1);
         CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, emptyQuery);
         assertEquals(1, pullCallback.getResult().getCount());
-        updateItem();
-        testManager.push(store);
+        testManager.createPersons(networkStore, 1);
         pullCallback = testManager.pullCustom(store, emptyQuery);
-        assertEquals(1, pullCallback.getResult().getCount());
+        assertEquals(2, pullCallback.getResult().getCount());
+    }
+
+    /* should use regular auto-pagination when deltaset configuration is missing on the backend and AP is on */
+    @Test
+    public void testStoreTypeSyncWithMissedConfigurationAtTheBackendAPisOn() throws IOException, InterruptedException {
+        testMissedConfigurationAtTheBackendAPisOn(StoreType.SYNC);
+    }
+
+    /* should use regular auto-pagination when deltaset configuration is missing on the backend and AP is on */
+    @Test
+    public void testStoreTypeCacheWithMissedConfigurationAtTheBackendAPisOn() throws IOException, InterruptedException {
+        testMissedConfigurationAtTheBackendAPisOn(StoreType.CACHE);
+    }
+
+    private void testMissedConfigurationAtTheBackendAPisOn(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.createPersons(networkStore, 3);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, emptyQuery, 2);
+        assertEquals(3, pullCallback.getResult().getCount());
+        testManager.createPersons(networkStore, 1);
+        pullCallback = testManager.pullCustom(store, emptyQuery, 2);
+        assertEquals(4, pullCallback.getResult().getCount());
     }
 
     /* check that if query contains skip or limit then delta set is ignored */
