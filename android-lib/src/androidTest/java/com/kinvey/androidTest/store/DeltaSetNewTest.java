@@ -10,7 +10,9 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
+import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.store.StoreType;
@@ -507,18 +509,6 @@ public class DeltaSetNewTest {
     }
 
     @Test
-    public void testFindStoreTypeCache_UpdateAndDeleteItem() throws InterruptedException {
-        initDeltaSetCachedCollection(StoreType.CACHE);
-        Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
-        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
-        person.setAge("20");
-        testManager.save(store, person);
-        assertEquals(1, testManager.find(store, emptyQuery).getResult().getResult().size());
-        testManager.delete(store, person.getId());
-        assertEquals(0, testManager.find(store, emptyQuery).getResult().getResult().size());
-    }
-
-    @Test
     public void testFindStoreTypeCache_DeleteOneOfThreeItems() throws InterruptedException {
         initDeltaSetCachedCollection(StoreType.CACHE);
         Person person = testManager.save(store, new Person(TEST_USERNAME)).getResult();
@@ -660,66 +650,60 @@ public class DeltaSetNewTest {
 
 
     /* The test aims to confirm that the autopagination is envoked only at the regular GET request when deltaset is on */
+    /* with enabled deltaset and autopagination should use AP for first request and DS for the next */
     @Test
-    public void testAutoPaginationStoreTypeSync() throws InterruptedException, IOException {
-        initDeltaSetCachedCollection(StoreType.SYNC);
-        testManager.createPersons(store, 5);
-        testManager.push(store);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
-        Person person1 = people.get(0);
-        Person person2 = people.get(1);
-        Person person3 = people.get(2);
-        person1.setAge("20");
-        person2.setAge("21");
-        person3.setAge("22");
-        testManager.save(store, person1);
-        testManager.save(store, person2);
-        testManager.save(store, person3);
-        testManager.push(store);
-        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
-        person1.setAge("23");
-        person2.setAge("24");
-        person3.setAge("25");
-        testManager.save(store, person1);
-        testManager.save(store, person2);
-        testManager.save(store, person3);
-        testManager.push(store);
-        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
-        testManager.delete(store, person1.getId());
-        testManager.push(store);
-        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    public void testPullAutoPaginationStoreTypeSync() throws InterruptedException, IOException {
+        testPullAutoPagination(StoreType.SYNC);
     }
 
+    /* with enabled deltaset and autopagination should use AP for first request and DS for the next */
     @Test
-    public void testAutoPaginationStoreTypeCache() throws InterruptedException, IOException {
-        initDeltaSetCachedCollection(StoreType.CACHE);
-        testManager.createPersons(store, 5);
-        assertEquals(5, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
-        Person person1 = people.get(0);
-        Person person2 = people.get(1);
-        Person person3 = people.get(2);
-        person1.setAge("20");
-        person2.setAge("21");
-        person3.setAge("22");
-        testManager.save(store, person1);
-        testManager.save(store, person2);
-        testManager.save(store, person3);
-        assertEquals(3, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
-        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
-        //delta set is used in this pull because find in cache store type makes call to the backend and caches result (to query cache collection as well)
-        person1.setAge("23");
-        person2.setAge("24");
-        person3.setAge("25");
-        testManager.save(store, person1);
-        testManager.save(store, person2);
-        testManager.save(store, person3);
-        assertEquals(3, testManager.pullCustom(store, emptyQuery).getResult().getCount());
-        testManager.delete(store, person1.getId());
-        assertEquals(0, testManager.pullCustom(store, emptyQuery).getResult().getCount());
+    public void testSyncAutoPaginationStoreTypeSync() throws InterruptedException, IOException {
+        testSyncAutoPagination(StoreType.SYNC);
     }
+
+    /* with enabled deltaset and autopagination should use AP for first request and DS for the next */
+    @Test
+    public void testPullAutoPaginationStoreTypeCache() throws InterruptedException, IOException {
+        testPullAutoPagination(StoreType.CACHE);
+    }
+
+    /* with enabled deltaset and autopagination should use AP for first request and DS for the next */
+    @Test
+    public void testSyncAutoPaginationStoreTypeCache() throws InterruptedException, IOException {
+        testSyncAutoPagination(StoreType.CACHE);
+    }
+
+    private void testPullAutoPagination(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.createPersons(networkStore, 4);
+        assertEquals(4, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
+        assertEquals(4, people.size());
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.pullCustom(store, client.query(), 2).getResult().getCount());
+        people = testManager.find(store, emptyQuery).getResult().getResult();
+        assertEquals(5, people.size());
+    }
+
+    private void testSyncAutoPagination(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.createPersons(networkStore, 4);
+        assertEquals(4, testManager.sync(store, client.query(), 2).getResult().getCount());
+        List<Person> people = testManager.find(store, emptyQuery).getResult().getResult();
+        assertEquals(4, people.size());
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        assertEquals(1, testManager.sync(store, client.query(), 2).getResult().getCount());
+        people = testManager.find(store, emptyQuery).getResult().getResult();
+        assertEquals(5, people.size());
+    }
+
 
 
     /* error handling*/
@@ -739,18 +723,81 @@ public class DeltaSetNewTest {
     }
 
     /* check that if query contains skip or limit then delta set is ignored */
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
     @Test
-    public void testSkipLimit() throws InterruptedException {
-        initDeltaSetCachedCollection(StoreType.SYNC);
-        testManager.cleanBackend(store, StoreType.SYNC);
-        testManager.save(store, new Person(TEST_USERNAME));
-        testManager.save(store, new Person(TEST_USERNAME));
-        testManager.save(store, new Person(TEST_USERNAME));
-        testManager.push(store);
-        assertEquals(2, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
-        testManager.save(store, new Person(TEST_USERNAME));
-        testManager.push(store);
-        assertEquals(2, testManager.pullCustom(store, client.query().setLimit(2).setSkip(0)).getResult().getCount());
+    public void testPullSkipLimitStoreTypeSync() throws InterruptedException, IOException {
+        testPullSkipLimit(StoreType.SYNC);
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testPullSkipLimitStoreTypeCache() throws InterruptedException, IOException {
+        testPullSkipLimit(StoreType.CACHE);
+    }
+
+    private void testPullSkipLimit(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME_2));
+        assertEquals(4, testManager.pullCustom(store, client.query()).getResult().getCount());
+        Query query = new Query().equals("username", TEST_USERNAME);
+        assertEquals(2, testManager.pullCustom(store, query.setLimit(2).setSkip(1)).getResult().getCount());
+        updateItem(networkStore, new Query().equals("username", TEST_USERNAME_2));
+        assertEquals(2, testManager.pullCustom(store, query.setLimit(2).setSkip(1)).getResult().getCount());
+        assertEquals(1, testManager.pullCustom(store, client.query()).getResult().getCount());
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testSyncSkipLimitStoreTypeSync() throws InterruptedException, IOException {
+        testSyncSkipLimit(StoreType.SYNC);
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testSyncSkipLimitStoreTypeCache() throws InterruptedException, IOException {
+        testSyncSkipLimit(StoreType.CACHE);
+    }
+
+    private void testSyncSkipLimit(StoreType storeType) throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME_2));
+        assertEquals(4, testManager.sync(store, client.query()).getResult().getCount());
+        Query query = new Query().equals("username", TEST_USERNAME);
+        assertEquals(2, testManager.sync(store, query.setLimit(2).setSkip(1)).getResult().getCount());
+        updateItem(networkStore, new Query().equals("username", TEST_USERNAME_2));
+        assertEquals(2, testManager.sync(store, query.setLimit(2).setSkip(1)).getResult().getCount());
+        assertEquals(1, testManager.sync(store, client.query()).getResult().getCount());
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testFindSkipLimitStoreTypeCache() throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME_2));
+        assertEquals(4, testManager.find(store, client.query()).getResult().getResult().size());
+        Query query = new Query().equals("username", TEST_USERNAME);
+        assertEquals(2, testManager.find(store, query.setLimit(2).setSkip(1)).getResult().getResult().size());
+        updateItem(networkStore, new Query().equals("username", TEST_USERNAME_2));
+        assertEquals(2, testManager.find(store, query.setLimit(2).setSkip(1)).getResult().getResult().size());
+        assertEquals(4, testManager.find(store, client.query()).getResult().getResult().size());
     }
 
     /* support methods */
@@ -969,8 +1016,8 @@ public class DeltaSetNewTest {
         assertEquals(3, store.count().intValue());
         updateItem(networkStore);
         syncCallback = testManager.sync(store, emptyQuery);
-        assertEquals(3, syncCallback.getResult().getCount());
-        assertEquals(3, store.count().intValue());
+        assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(1, store.count().intValue());
     }
 
     /* with enabled deltaset should return correct number of items when deleting (SYNC)*/
@@ -1007,5 +1054,73 @@ public class DeltaSetNewTest {
         assertEquals(0, store.count().intValue());
     }
 
+    /* with enabled deltaset should return correct number of items when creating */
+    @Test
+    public void testFindStoreTypeCache_Creating() throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        DefaultKinveyReadCallback readCallback = testManager.find(store, emptyQuery);
+        assertEquals(1, readCallback.getResult().getResult().size());
+        networkStore.save(new Person(TEST_USERNAME_2));
+        readCallback = testManager.find(store, emptyQuery);
+        assertEquals(2, readCallback.getResult().getResult().size());
+        assertEquals(2, store.count().intValue());
+    }
 
+    /* with enabled deltaset should return correct number of items when updating */
+    @Test
+    public void testFindStoreTypeCache_Updating() throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        DefaultKinveyReadCallback readCallback = testManager.find(store, emptyQuery);
+        assertEquals(1, readCallback.getResult().getResult().size());
+        updateItem(networkStore);
+        readCallback = testManager.find(store, emptyQuery);
+        assertEquals(1, readCallback.getResult().getResult().size());
+    }
+
+    /* with enabled deltaset should return correct number of items when deleting v2 */
+    @Test
+    public void testFindStoreTypeCache_Deleting() throws InterruptedException, IOException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        networkStore.save(new Person(TEST_USERNAME));
+        DefaultKinveyReadCallback readCallback = testManager.find(store, emptyQuery);
+        assertEquals(3, readCallback.getResult().getResult().size());
+        deleteItem(networkStore);
+        readCallback = testManager.find(store, emptyQuery);
+        assertEquals(2, readCallback.getResult().getResult().size());
+        deleteItem(networkStore);
+        deleteItem(networkStore);
+        readCallback = testManager.find(store, emptyQuery);
+        assertEquals(0, readCallback.getResult().getResult().size());
+    }
+
+    /* with enabled deltaset should return correct number of items when deleting and updating */
+    @Test
+    public void testFindStoreTypeCache_DeletingUpdating() throws InterruptedException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.CACHE, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.save(networkStore, new Person(TEST_USERNAME));
+        testManager.save(networkStore, new Person(TEST_USERNAME_2));
+        testManager.save(networkStore, new Person(TEST_USERNAME_2));
+        DefaultKinveyReadCallback readCallback = testManager.find(store, emptyQuery);
+        assertEquals(3, readCallback.getResult().getResult().size());
+        deleteItem(networkStore);
+        updateItem(networkStore);
+        readCallback = testManager.find(store, emptyQuery);
+        assertEquals(2, readCallback.getResult().getResult().size());
+    }
 }
