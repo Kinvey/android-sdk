@@ -16,6 +16,9 @@
 package com.kinvey.android.store;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.android.AsyncClientRequest;
@@ -172,6 +175,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         loadMethodMap();
     }
 
+    @NonNull
     public static <T extends GenericJson> DataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
@@ -239,7 +243,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entityID entityID to fetch
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(String entityID, KinveyClientCallback<T> callback)  {
+    public void find(@NonNull String entityID, @NonNull KinveyClientCallback<T> callback)  {
         find(entityID, callback, null);
     }
 
@@ -271,7 +275,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      *
      */
-    public void find(String entityID, KinveyClientCallback<T> callback, final KinveyCachedClientCallback<T> cachedCallback)  {
+    public void find(@NonNull String entityID, @NonNull KinveyClientCallback<T> callback, @Nullable final KinveyCachedClientCallback<T> cachedCallback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entityID, "entityID must not be null.");
@@ -300,7 +304,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param ids A list of _ids to query by.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Iterable<String> ids, KinveyReadCallback<T> callback){
+    public void find(@NonNull Iterable<String> ids, @NonNull KinveyReadCallback<T> callback){
         find(ids, callback, null);
     }
 
@@ -330,7 +334,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(Iterable<String> ids, KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
+    public void find(@NonNull Iterable<String> ids, @NonNull KinveyReadCallback<T> callback, @Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
@@ -364,7 +368,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(Query query, KinveyReadCallback<T> callback){
+    public void find(@NonNull Query query, @NonNull KinveyReadCallback<T> callback){
         find(query, callback, null);
     }
 
@@ -398,7 +402,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(Query query, KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
+    public void find(@NonNull Query query, @NonNull KinveyReadCallback<T> callback, @Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "Query must not be null.");
@@ -427,7 +431,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback either successfully returns list of resolved entities or an error
      */
-    public void find(KinveyReadCallback<T> callback) {
+    public void find(@NonNull KinveyReadCallback<T> callback) {
         find(callback, null);
     }
 
@@ -456,7 +460,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback either successfully returns list of resolved entities or an error
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
-    public void find(KinveyReadCallback<T> callback, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) {
+    public void find(@NonNull KinveyReadCallback<T> callback, @Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<>(this, methodMap.get(KEY_GET_ALL), callback, getWrappedCacheCallback(cachedCallback)).execute();
@@ -466,7 +470,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Get items count in collection
      * @param callback return items count in collection
      */
-    public void count(KinveyCountCallback callback) {
+    public void count(@NonNull KinveyCountCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         count(callback, null);
@@ -477,7 +481,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback return items count in collection
      * @param cachedCallback is using with StoreType.CACHE to get items count in collection
      */
-    public void count(KinveyCountCallback callback, KinveyCachedClientCallback<Integer> cachedCallback) {
+    public void count(@NonNull KinveyCountCallback callback, @Nullable KinveyCachedClientCallback<Integer> cachedCallback) {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
@@ -506,7 +510,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entity The entity to save
      * @param callback KinveyClientCallback<T>
      */
-    public void save(T entity, KinveyClientCallback<T> callback)  {
+    public void save(@NonNull T entity, @NonNull KinveyClientCallback<T> callback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
@@ -536,7 +540,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entities The list of entities to save
      * @param callback KinveyClientCallback<List<T>>
      */
-    public void save(List<T> entities, KinveyClientCallback<List<T>> callback)  {
+    public void save(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
@@ -566,7 +570,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entityID the ID to delete
      * @param callback KinveyDeleteCallback
      */
-    public void delete(String entityID, KinveyDeleteCallback callback) {
+    public void delete(@NonNull String entityID, @NonNull KinveyDeleteCallback callback) {
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_ID), callback, entityID).execute();
     }
 
@@ -594,7 +598,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param entityIDs the ID to delete
      * @param callback KinveyDeleteCallback
      */
-    public void delete(Iterable<String> entityIDs, KinveyDeleteCallback callback) {
+    public void delete(@NonNull Iterable<String> entityIDs, @NonNull KinveyDeleteCallback callback) {
         new AsyncRequest<Integer>(this, methodMap.get(KEY_DELETE_BY_IDS), callback, entityIDs).execute();
     }
 
@@ -622,7 +626,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback KinveyDeleteCallback
      */
-    public void delete(Query query, KinveyDeleteCallback callback) {
+    public void delete(@NonNull Query query, @NonNull KinveyDeleteCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query cannot be null.");
@@ -651,7 +655,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPushCallback
      */
-    public void push(KinveyPushCallback callback){
+    public void push(@NonNull KinveyPushCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncPushRequest<T>(getCollectionName(), client.getSyncManager(), client, storeType, networkManager, getCurrentClass(), callback).execute();
@@ -678,7 +682,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPullCallback
      */
-    public void pull(KinveyPullCallback callback) {
+    public void pull(@NonNull KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, PAGINATION_IS_NOT_USED, callback);
@@ -709,7 +713,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param isAutoPagination true if auto-pagination is used
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, boolean isAutoPagination, KinveyPullCallback callback) {
+    public void pull(@Nullable Query query, boolean isAutoPagination, @NonNull KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncPullRequest(this, query, isAutoPagination, callback).execute();
@@ -737,7 +741,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(int pageSize, KinveyPullCallback callback) {
+    public void pull(int pageSize, @NonNull KinveyPullCallback callback) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -766,7 +770,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param isAutoPagination true if auto-pagination is used
      * @param callback KinveyPullCallback
      */
-    public void pull(boolean isAutoPagination, KinveyPullCallback callback) {
+    public void pull(boolean isAutoPagination, @NonNull KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         this.pull(null, isAutoPagination, callback);
@@ -798,7 +802,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, int pageSize, KinveyPullCallback callback) {
+    public void pull(@Nullable Query query, int pageSize, @NonNull KinveyPullCallback callback) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -830,7 +834,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results.
      * @param callback KinveyPullCallback
      */
-    public void pull(Query query, KinveyPullCallback callback) {
+    public void pull(@Nullable Query query,@NonNull KinveyPullCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         pull(query, PAGINATION_IS_NOT_USED, callback);
@@ -857,7 +861,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPurgeCallback
      */
-    public void purge(KinveyPurgeCallback callback){
+    public void purge(@NonNull KinveyPurgeCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE), callback).execute();
@@ -868,7 +872,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query query to filter pending requests for deleting
      * @param callback KinveyPurgeCallback
      */
-    public void purge(Query query, KinveyPurgeCallback callback){
+    public void purge(@NonNull Query query, @NonNull KinveyPurgeCallback callback){
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         new AsyncRequest<Void>(this, methodMap.get(KEY_PURGE_BY_QUERY), callback, query).execute();
@@ -907,7 +911,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final KinveySyncCallback callback) {
+    public void sync(@Nullable final Query query, @NonNull final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         callback.onPushStarted();
@@ -977,7 +981,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param query {@link Query} to filter the results or null if you don't want to query.
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final boolean isAutoPagination, final KinveySyncCallback callback) {
+    public void sync(@Nullable final Query query, final boolean isAutoPagination, @NonNull final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         callback.onPushStarted();
@@ -1048,7 +1052,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback KinveyDeleteCallback
      */
-    public void sync(final Query query, final int pageSize, final KinveySyncCallback callback) {
+    public void sync(@Nullable final Query query, final int pageSize, @NonNull final KinveySyncCallback callback) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than " + MIN_PAGE_SIZE);
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -1091,7 +1095,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final KinveySyncCallback callback) {
+    public void sync(@NonNull final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, callback);
@@ -1103,12 +1107,13 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param pageSize Page size for auto-pagination
      * @param callback callback to notify working thread on operation status update
      */
-    public void sync(final int pageSize, final KinveySyncCallback callback) {
+    public void sync(final int pageSize, @NonNull final KinveySyncCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized");
         sync(null, pageSize, callback);
     }
 
+    @NonNull
     public Query query() {
         return new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
     }
@@ -1128,10 +1133,9 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param fields fields for group by
      * @param reduceField field for apply reduce function
      * @param query query to filter results
-     * @return the array of groups containing the result of the reduce function
      */
-    public void group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query query,
-                      KinveyAggregateCallback callback, KinveyCachedAggregateCallback cachedCallback) {
+    public void group(@NonNull AggregateType aggregateType, @NonNull ArrayList<String> fields, @NonNull String reduceField, @NonNull Query query,
+                      @NonNull KinveyAggregateCallback callback, @Nullable KinveyCachedAggregateCallback cachedCallback) {
         new AsyncRequest<Aggregation>(this, methodMap.get(KEY_GROUP), callback, aggregateType, fields, reduceField, query, cachedCallback).execute();
     }
 
@@ -1140,7 +1144,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param storeLiveServiceCallback {@link KinveyDataStoreLiveServiceCallback}
      * @param callback {@link KinveyClientCallback<Boolean>}
      */
-    public void subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback, KinveyClientCallback<Boolean> callback) {
+    public void subscribe(@NonNull KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback, @NonNull KinveyClientCallback<Boolean> callback) {
         new AsyncRequest<Boolean>(this, methodMap.get(KEY_SUBSCRIBE), callback, getWrappedLiveServiceCallback(storeLiveServiceCallback)).execute();
     }
 
@@ -1148,7 +1152,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * Unsubscribe this instance.
      * @param callback {@link KinveyClientCallback<Void>}
      */
-    public void unsubscribe(KinveyClientCallback<Void> callback) {
+    public void unsubscribe(@NonNull KinveyClientCallback<Void> callback) {
         new AsyncRequest<Void>(this, methodMap.get(KEY_UNSUBSCRIBE), callback).execute();
     }
 

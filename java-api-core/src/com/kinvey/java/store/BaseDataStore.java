@@ -103,11 +103,11 @@ public class BaseDataStore<T extends GenericJson> {
      * @param itemType class that data should be mapped to
      * @param storeType type of storage that client want to use
      */
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
+    protected BaseDataStore(@Nonnull AbstractClient client, @Nonnull String collection, @Nonnull Class<T> itemType, @Nonnull StoreType storeType){
         this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
     }
 
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
+    protected BaseDataStore(@Nonnull AbstractClient client, @Nonnull String collection, @Nonnull Class<T> itemType, @Nonnull StoreType storeType,
                             NetworkManager<T> networkManager){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -122,7 +122,8 @@ public class BaseDataStore<T extends GenericJson> {
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
     }
 
-    public static <T extends GenericJson> BaseDataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
+    @Nonnull
+    public static <T extends GenericJson> BaseDataStore<T> collection(@Nonnull String collectionName, @Nonnull Class<T> myClass, @Nonnull StoreType storeType, @Nonnull AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -135,7 +136,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return null or object that matched given id
      */
-    public T find (String id, KinveyCachedClientCallback<T> cachedCallback) throws IOException{
+    @Nullable
+    public T find (@Nonnull String id, @Nullable KinveyCachedClientCallback<T> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
@@ -154,7 +156,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param id the id of object we need to find
      * @return null or object that matched given id
      */
-    public T find (String id) throws IOException {
+    @Nullable
+    public T find (@Nonnull String id) throws IOException {
         return find(id, null);
     }
 
@@ -200,7 +203,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return list of objects that are found
      */
-    public KinveyReadResponse<T> find (Query query, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find (@Nonnull Query query, @Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
@@ -225,7 +229,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query prepared query we have to look with
      * @return list of objects that are found
      */
-    public KinveyReadResponse<T> find (Query query) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find (@Nonnull Query query) throws IOException {
         return find(query, null);
     }
 
@@ -234,7 +239,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
-    public KinveyReadResponse<T> find(KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find(@Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
@@ -257,6 +263,7 @@ public class BaseDataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
+    @Nonnull
     public KinveyReadResponse<T> find() throws IOException {
         return find((KinveyCachedClientCallback<KinveyReadResponse<T>>)null);
     }
@@ -265,6 +272,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Get items count in collection
      * @return items count in collection
      */
+    @Nonnull
     public Integer count() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -276,6 +284,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback is using with StoreType.CACHE to get items count in collection
      * @return items count in collection
      */
+    @Nonnull
     public Integer count(KinveyCachedClientCallback<Integer> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -291,6 +300,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Get items count in collection on the server
      * @return items count in collection on the server
      */
+    @Nonnull
     public Integer countNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -303,7 +313,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return updated list of object that will contain ids if they was not present in moment of saving
      * @throws IOException
      */
-    public List<T> save (Iterable<T> objects) throws IOException {
+    @Nonnull
+    public List<T> save (@Nonnull Iterable<T> objects) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
@@ -317,7 +328,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return updated object with filled some required fields
      * @throws IOException
      */
-    public T save (T object) throws IOException {
+    @Nonnull
+    public T save (@Nonnull T object) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
@@ -341,7 +353,7 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Clear the local cache storage
      */
-    public void clear(Query query) {
+    public void clear(@Nonnull Query query) {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -355,7 +367,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of object that was deleted
      * @throws IOException
      */
-    public Integer delete (String id) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull String id) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
@@ -368,7 +381,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of objects that was removed
      * @throws IOException
      */
-    public Integer delete (Query query) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull Query query) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
@@ -381,7 +395,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of objects that was deleted bu given call
      * @throws IOException
      */
-    public Integer delete (Iterable<String> ids) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull Iterable<String> ids) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
@@ -683,7 +698,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Run sync operation to sync local and network storages
      * @param query query to pull the objects
      */
-    public void syncBlocking(Query query) throws IOException {
+    public void syncBlocking(@Nullable Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
     }
@@ -693,7 +708,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query query to pull the objects
      * @param isAutoPagination true if auto-pagination is used
      */
-    public void syncBlocking(Query query, boolean isAutoPagination) throws IOException {
+    public void syncBlocking(@Nullable Query query, boolean isAutoPagination) throws IOException {
         pushBlocking();
         pullBlocking(query, isAutoPagination);
     }
@@ -703,7 +718,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query query to pull the objects
      * @param pageSize page size for auto-pagination
      */
-    public void syncBlocking(Query query, int pageSize) throws IOException {
+    public void syncBlocking(@Nullable Query query, int pageSize) throws IOException {
         pushBlocking();
         pullBlocking(query, pageSize);
     }
@@ -715,7 +730,7 @@ public class BaseDataStore<T extends GenericJson> {
         client.getSyncManager().clear(collection);
     }
 
-    public void purge(Query query) {
+    public void purge(@Nonnull Query query) {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -748,8 +763,9 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Used for aggregate fields
      */
-    private Aggregation aggregation(AggregateType type, ArrayList<String> fields,
-                                    String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
+    @Nonnull
+    private Aggregation aggregation(@Nonnull AggregateType type, @Nonnull ArrayList<String> fields,
+                                    @Nonnull String field, @Nonnull Query query, @Nullable KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Aggregation ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             try {
@@ -765,9 +781,9 @@ public class BaseDataStore<T extends GenericJson> {
 
     /**
      * Set store type for current BaseDataStore
-     * @param storeType
+     * @param storeType type of storage that client uses
      */
-    public void setStoreType(StoreType storeType) {
+    public void setStoreType(@Nonnull StoreType storeType) {
         Preconditions.checkNotNull(storeType, "storeType must not be null.");
         this.storeType = storeType;
     }
@@ -776,14 +792,17 @@ public class BaseDataStore<T extends GenericJson> {
      * Getter for client
      * @return Client instance for given BaseDataStore
      */
+    @Nonnull
     public AbstractClient getClient() {
         return client;
     }
 
+    @Nonnull
     public Class<T> getCurrentClass() {
         return storeItemType;
     }
 
+    @Nonnull
     public String getCollectionName() {
         return collection;
     }
@@ -804,7 +823,7 @@ public class BaseDataStore<T extends GenericJson> {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
     }
 
-    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
+    public boolean subscribe(@Nonnull KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
         boolean success = false;
         if (storeLiveServiceCallback != null) {
             liveServiceCallback = storeLiveServiceCallback;
@@ -835,7 +854,7 @@ public class BaseDataStore<T extends GenericJson> {
         return success;
     }
 
-    public void unsubscribe() throws IOException {
+    public void unsubscribe() {
         liveServiceCallback = null;
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
