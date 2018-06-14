@@ -16,6 +16,9 @@
 
 package com.kinvey.android.cache;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
@@ -33,6 +36,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
@@ -88,8 +93,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return objects;
     }
 
+    @NonNull
     @Override
-    public List<T> get(Query query) {
+    public List<T> get(@NonNull Query query) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
         try {
@@ -126,15 +132,16 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 ret = ret.subList(0, limit);
             }
         } finally {
-            mRealm.close();    
+            mRealm.close();
         }
 
-        
+
         return ret;
     }
 
     @Override
-    public List<T> get(Iterable<String> ids) {
+    @NonNull
+    public List<T> get(@Nonnull Iterable<String> ids) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         List<T> ret = new ArrayList<T>();
@@ -162,12 +169,13 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-        
+
         return ret;
     }
 
     @Override
-    public T get(String id) {
+    @Nullable
+    public T get(@NonNull String id) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         T ret;
@@ -182,11 +190,12 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-        
+
         return ret;
     }
 
 
+    @NonNull
     @Override
     public List<T> get() {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
@@ -206,17 +215,18 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         } finally {
             mRealm.close();
         }
-        
+
         return ret;
     }
 
 
 
+    @NonNull
     @Override
-    public List<T> save(Iterable<T> items) {
+    public List<T> save(@NonNull Iterable<T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
-        try{
+        try {
             mRealm.beginTransaction();
             for (T item : items){
                 if (item != null) {
@@ -233,10 +243,11 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
 
 
+    @NonNull
     @Override
-    public T save(T item) {
+    public T save(@NonNull T item) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
-        try{
+        try {
             mRealm.beginTransaction();
             item.put(ID, insertOrUpdate(item, mRealm));
             mRealm.commitTransaction();
@@ -247,7 +258,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public int delete(Query query) {
+    public int delete(@NonNull Query query) {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
@@ -344,7 +355,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public int delete(Iterable<String> ids) {
+    public int delete(@NonNull Iterable<String> ids) {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i = 0;
         try {
@@ -370,7 +381,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public int delete(String id) {
+    public int delete(@NonNull String id) {
         DynamicRealm realm = mCacheManager.getDynamicRealm();
         int i;
         try {
@@ -405,6 +416,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
+    @Nullable
     public T getFirst() {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
@@ -425,7 +437,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
     }
 
     @Override
-    public T getFirst(Query q) {
+    @Nullable
+    public T getFirst(@NonNull Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
 
         T ret = null;
@@ -451,7 +464,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
 
     @Override
-    public long count(Query q) {
+    public long count(@Nullable Query q) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         long ret = 0;
         try {
@@ -465,8 +478,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                 List<T> list;
                 if (q != null) {
                     list = get(q);
-                }
-                else {
+                } else {
                     list = get();
                 }
                 ret = list.size();
@@ -896,8 +908,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return results.toArray(resultsArray);
     }
 
+    @NonNull
     @Override
-    public Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q) {
+    public Aggregation.Result[] group(@NonNull AggregateType aggregateType, @NonNull ArrayList<String> fields, @NonNull String reduceField, @NonNull Query q) {
         return calculation(aggregateType, fields, reduceField, q);
     }
 

@@ -15,132 +15,155 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public abstract class BaseUserStore {
 
-    public static <T extends BaseUser> T signUp(String userId, String password, T user, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T signUp(@Nonnull String userId, @Nonnull String password, @Nullable T user, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).createBlocking(userId, password, user).execute();
     }
 
-    public static <T extends BaseUser> T signUp(String userId, String password, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T signUp(@Nonnull String userId, @Nonnull String password, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).createBlocking(userId, password).execute();
     }
 
     /*Deletes a 'BaseUser'*/
-    public static <T extends BaseUser>  void destroy(boolean isHard, AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser>  void destroy(boolean isHard, @Nonnull AbstractClient<T> client) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).deleteBlocking(isHard).execute();
     }
 
-    public static  <T extends BaseUser> T login(String username, String password,
-                                                AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static  <T extends BaseUser> T login(@Nonnull String username, @Nonnull String password,
+                                                @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginBlocking(username, password).execute();
     }
 
-    public static  <T extends BaseUser> T login(AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static  <T extends BaseUser> T login(@Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginBlocking().execute();
     }
 
-    public static <T extends BaseUser> T loginFacebook(String accessToken, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginFacebook(@Nonnull String accessToken, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginFacebookBlocking(accessToken).execute();
     }
 
-    public static <T extends BaseUser> T loginGoogle(String accessToken, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginGoogle(@Nonnull String accessToken, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginGoogleBlocking(accessToken).execute();
     }
 
-    public static <T extends BaseUser> T loginTwitter(String accessToken, String accessSecret, String consumerKey,
-                                                      String consumerSecret, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginTwitter(@Nonnull String accessToken, @Nonnull String accessSecret, @Nonnull String consumerKey,
+                                                      @Nonnull String consumerSecret, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).
                 loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
     }
 
-    public static <T extends BaseUser> T loginLinkedIn(String accessToken, String accessSecret, String consumerKey,
-                                                       String consumerSecret, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginLinkedIn(@Nonnull String accessToken, @Nonnull String accessSecret, @Nonnull String consumerKey,
+                                                       @Nonnull String consumerSecret, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute();
     }
 
-    public static <T extends BaseUser> T loginAuthLink(String accessToken, String refreshToken,
-                                                       AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginAuthLink(@Nonnull String accessToken, @Nonnull String refreshToken,
+                                                       @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginAuthLinkBlocking(accessToken, refreshToken).execute();
     }
 
-    public static <T extends BaseUser> T loginSalesForce(String accessToken, String clientId,
-                                                         String refreshToken, String id,
-                                                         AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginSalesForce(@Nonnull String accessToken, @Nonnull String clientId,
+                                                         @Nonnull String refreshToken, @Nonnull String id,
+                                                         @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginSalesForceBlocking(accessToken, clientId, refreshToken, id).execute();
     }
 
-    public static <T extends BaseUser> T loginMobileIdentity(String authToken, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginMobileIdentity(@Nonnull String authToken, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client))
                 .loginMobileIdentityBlocking(authToken).execute();
     }
 
-    public static <T extends BaseUser> T login(Credential credential, AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser> T login(@Nonnull Credential credential, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).login(credential).execute();
     }
 
-    public static <T extends BaseUser> T loginKinveyAuthToken(String userId, String authToken, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T loginKinveyAuthToken(@Nonnull String userId, @Nonnull String authToken, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).loginKinveyAuthTokenBlocking(userId, authToken).execute();
     }
 
-    public static <T extends BaseUser> void logout(AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser> void logout(@Nonnull AbstractClient<T> client) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).logout().execute();
     }
 
-    public static <T extends BaseUser> void sendEmailConfirmation(AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser> void sendEmailConfirmation(@Nonnull AbstractClient<T> client) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).sendEmailVerificationBlocking().execute();
     }
 
-    public static<T extends BaseUser> void resetPassword(String usernameOrEmail, AbstractClient<T> client) throws IOException {
+    public static<T extends BaseUser> void resetPassword(@Nonnull String usernameOrEmail, @Nonnull AbstractClient<T> client) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).resetPasswordBlocking(usernameOrEmail).execute();
     }
 
-    public static <T extends BaseUser> void changePassword(String password, AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser> void changePassword(@Nonnull String password, @Nonnull AbstractClient<T> client) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).changePassword(password).execute();
     }
 
-    public static <T extends BaseUser> T convenience(AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T convenience(@Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).retrieveMetadataBlocking();
     }
 
-    public static <T extends BaseUser> T retrieve(AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T retrieve(@Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).retrieveBlocking().execute();
     }
 
-    public static <T extends BaseUser> List<T> retrieve(Query query, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> List<T> retrieve(@Nonnull Query query, @Nonnull AbstractClient<T> client) throws IOException {
         return new ArrayList<>(Arrays.asList((T[]) new UserStoreRequestManager<>(client, createBuilder(client)).retrieveBlocking(query).execute()));
     }
 
-    public static <T extends BaseUser> T retrieve(String[] resolves, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T retrieve(@Nonnull String[] resolves, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).retrieveBlocking(resolves).execute();
     }
 
-    public static <T extends BaseUser> List<T> retrieve(Query query, String[] resolves, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> List<T> retrieve(@Nonnull Query query, @Nonnull String[] resolves, @Nonnull AbstractClient<T> client) throws IOException {
         return new ArrayList<>(Arrays.asList((T[]) new UserStoreRequestManager<>(client, createBuilder(client)).retrieveBlocking(query, resolves).execute()));
     }
 
-    public static <T extends BaseUser> void forgotUsername(AbstractClient<T> client, String email) throws IOException {
+    public static <T extends BaseUser> void forgotUsername(@Nonnull AbstractClient<T> client, @Nonnull String email) throws IOException {
         new UserStoreRequestManager<>(client, createBuilder(client)).forgotUsername(email).execute();
     }
 
-    public static <T extends BaseUser> boolean exists( String username, AbstractClient<T> client) throws IOException {
+    public static <T extends BaseUser> boolean exists(@Nonnull String username, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).exists(username).execute().doesUsernameExist();
     }
 
-    public static <T extends BaseUser> T get(String userId, AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T get(@Nonnull String userId, @Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).getUser(userId).execute();
     }
 
-    public static <T extends BaseUser> T save(AbstractClient<T> client) throws IOException {
+    @Nonnull
+    public static <T extends BaseUser> T save(@Nonnull AbstractClient<T> client) throws IOException {
         return new UserStoreRequestManager<>(client, createBuilder(client)).save().execute();
     }
 
+    @Nonnull
     public static <T extends BaseUser> T update() throws IOException {
         return new UserStoreRequestManager<T>(AbstractClient.sharedInstance(), createBuilder(AbstractClient.sharedInstance())).save().execute();
     }
@@ -184,7 +207,8 @@ public abstract class BaseUserStore {
         }
     }
 
-    private static <T extends BaseUser> KinveyAuthRequest.Builder<T> createBuilder(AbstractClient<T> client) {
+    @Nonnull
+    private static <T extends BaseUser> KinveyAuthRequest.Builder<T> createBuilder(@Nonnull AbstractClient<T> client) {
         String appKey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         String appSecret = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppSecret();
 

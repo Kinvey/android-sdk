@@ -24,34 +24,41 @@ import com.kinvey.java.model.Aggregation;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Created by Prots on 1/26/16.
  */
 public interface ICache<T extends GenericJson> {
     /**
-     * Query cache for objects mathing query
+     * Query cache for objects matching query
      * @param query
      * @return
      */
-    List<T> get(Query query);   //run query
+    @Nonnull
+    List<T> get(@Nonnull Query query);   //run query
 
     /**
      * Query cache for objects with given ids
      * @param ids
      * @return
      */
-    List<T> get (Iterable<String> ids);    //get
+    @Nonnull
+    List<T> get (@Nonnull Iterable<String> ids);    //get
 
     /**
      * Get Single object from cache with given id
      * @return Object
      */
-    T get(String id);    //get all
+    @Nullable
+    T get(@Nonnull String id);    //get all
 
     /**
      * Get all objects from cache
      * @return
      */
+    @Nonnull
     List<T> get();    //get all
 
     /**
@@ -61,7 +68,9 @@ public interface ICache<T extends GenericJson> {
      * @param items
      * @return ids of saved items
      */
-    List<T> save (Iterable<T> items);
+    @Nonnull
+    List<T> save (@Nonnull Iterable<T> items);
+
     /**
      * Saving given item
      * if item does not have an _id field application will assign it to the object
@@ -69,24 +78,26 @@ public interface ICache<T extends GenericJson> {
      * @param item
      * @return id of saved items
      */
-    T save (T item);   //store objects in cache
+    @Nonnull
+    T save (@Nonnull T item);   //store objects in cache
+
     /**
      * Delete all object that matches query
      * @param query
      */
-    int delete(Query query);
+    int delete(@Nonnull Query query);
 
     /**
      * Delete all object with given ids
      * @param ids
      */
-    int delete(Iterable<String> ids);
+    int delete(@Nonnull Iterable<String> ids);
 
     /**
      * Delete all object with given ids
      * @param id
      */
-    int delete(String id);
+    int delete(@Nonnull String id);
 
     /**
      * Delete all object from cache
@@ -98,19 +109,21 @@ public interface ICache<T extends GenericJson> {
      * gets the first item from the cache
      * @return first item
      */
+    @Nullable
     T getFirst();
 
     /**
      * gets the first item from the cache matched query
      * @return first item
      */
-    T getFirst(Query q);
+    @Nullable
+    T getFirst(@Nonnull Query q);
 
     /**
      * gets the count of matching elements from the cache
      * @return first the count of matching elements from the cache
      */
-    long count(Query q);
+    long count(@Nullable Query q);
 
     /**
      * get current ttl value
@@ -133,5 +146,6 @@ public interface ICache<T extends GenericJson> {
      * @param q query to filter results
      * @return the array of groups containing the result of the reduce function
      */
-    Aggregation.Result[] group(AggregateType aggregateType, ArrayList<String> fields, String reduceField, Query q);
+    @Nonnull
+    Aggregation.Result[] group(@Nonnull AggregateType aggregateType, @Nonnull ArrayList<String> fields, @Nonnull String reduceField, @Nonnull Query q);
 }
