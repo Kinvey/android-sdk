@@ -14,7 +14,10 @@ import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
+import com.kinvey.java.cache.ICache;
+import com.kinvey.java.store.QueryCacheItem;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -26,6 +29,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
@@ -1234,5 +1238,40 @@ public class DeltaSetNewTest {
         updateItem(networkStore);
         readCallback = testManager.find(store, emptyQuery);
         assertEquals(2, readCallback.getResult().getResult().size());
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testParameterValueOutOfRangeErrorHandling_StoreTypeSync() throws IOException, InterruptedException {
+        testParameterValueOutOfRangeErrorHandling(StoreType.SYNC);
+    }
+
+    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    @Test
+    public void testParameterValueOutOfRangeErrorHandling_StoreTypeCache() throws IOException, InterruptedException {
+        testParameterValueOutOfRangeErrorHandling(StoreType.CACHE);
+    }
+
+    private void testParameterValueOutOfRangeErrorHandling(StoreType storeType) throws IOException, InterruptedException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, storeType, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.createPersons(networkStore, 10);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(10, pullCallback.getResult().getCount());
+        deleteItem(networkStore);
+        deleteItem(networkStore);
+        deleteItem(networkStore);
+        deleteItem(networkStore);
+        deleteItem(networkStore);
+        String lastRequestTime = "2018-05-14T09:40:44.470Z";
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        QueryCacheItem cacheItem = queryCache.getFirst();
+        cacheItem.setLastRequestTime(lastRequestTime);
+        queryCache.save(cacheItem);
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(5, pullCallback.getResult().getCount());
+        assertEquals(5, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
 }
