@@ -1240,13 +1240,13 @@ public class DeltaSetNewTest {
         assertEquals(2, readCallback.getResult().getResult().size());
     }
 
-    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    /* should delete old items when lastRunAt is outdated */
     @Test
     public void testParameterValueOutOfRangeErrorHandling_StoreTypeSync() throws IOException, InterruptedException {
         testParameterValueOutOfRangeErrorHandling(StoreType.SYNC);
     }
 
-    /* with enable deltaset and limit and skip should not use deltaset and should not override lastRunAt */
+    /* should delete old items when lastRunAt is outdated */
     @Test
     public void testParameterValueOutOfRangeErrorHandling_StoreTypeCache() throws IOException, InterruptedException {
         testParameterValueOutOfRangeErrorHandling(StoreType.CACHE);
