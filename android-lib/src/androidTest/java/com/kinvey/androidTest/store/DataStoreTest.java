@@ -62,6 +62,7 @@ import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -3087,6 +3088,7 @@ public class DataStoreTest {
     }
 
     @Test
+    @Ignore //ignore while test app won't support delta cache
     public void testDeltaCache() throws InterruptedException, IOException {
         client.setUseDeltaCache(true);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
@@ -3124,8 +3126,8 @@ public class DataStoreTest {
     @Test
     public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.setUseDeltaCache(true);
-        assertFalse(store.isDeltaSetCachingEnabled());
+        store.setDeltaSetCachingEnabled(true);
+        assertTrue(store.isDeltaSetCachingEnabled());
     }
 
     @Test
