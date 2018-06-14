@@ -41,7 +41,7 @@ public class KinveyJsonResponseException extends HttpResponseException {
 
     /**
      *
-     * @param response raw http reponse
+     * @param response raw http response
      * @param details detail message give by the response
      * @param message general message
      */

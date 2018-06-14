@@ -11,6 +11,7 @@ import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyLiveServiceCallback;
+import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
@@ -26,9 +27,13 @@ import com.kinvey.java.core.KinveyCachedAggregateCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -51,7 +56,7 @@ public class TestManager<T extends GenericJson> {
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
         if (!client.isUserLoggedIn()) {
             final CountDownLatch latch = new CountDownLatch(1);
-            LooperThread looperThread = null;
+            LooperThread looperThread;
             looperThread = new LooperThread(new Runnable() {
                 @Override
                 public void run() {
@@ -259,6 +264,21 @@ public class TestManager<T extends GenericJson> {
         return callback;
     }
 
+    public DefaultKinveyClientCallback find(final DataStore<Person> store, final String id) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(id, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     public CustomKinveyReadCallback<T> findCustom(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final CustomKinveyReadCallback<T> callback = new CustomKinveyReadCallback<T>(latch);
@@ -423,7 +443,7 @@ public class TestManager<T extends GenericJson> {
         if (storeType != StoreType.NETWORK) {
             sync(store, store.getClient().query());
         }
-        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, store.getClient().query());
+        DefaultKinveyDeleteCallback deleteCallback = deleteCustom(store, new Query().notEqual("age", "100500"));
         assertNull(deleteCallback.getError());
         if (storeType == StoreType.SYNC) {
             sync(store, store.getClient().query());
@@ -490,6 +510,14 @@ public class TestManager<T extends GenericJson> {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    public BaseDataStore<T> mockBaseDataStore(AbstractClient client, String collectionName, Class className, StoreType storeType, NetworkManager networkManager) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        Class<?> aClass = Class.forName("com.kinvey.java.store.BaseDataStore");
+        Constructor<BaseDataStore> constructor = (Constructor<BaseDataStore>) aClass.getDeclaredConstructor(AbstractClient.class, String.class, Class.class, StoreType.class, NetworkManager.class);
+        constructor.setAccessible(true);
+        BaseDataStore baseDataStore = constructor.newInstance(client, collectionName, className, storeType, networkManager);
+        return baseDataStore;
     }
 
     //use for Person.COLLECTION and for Person.class

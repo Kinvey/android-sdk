@@ -8,6 +8,8 @@ import java.util.List;
 public class Person extends GenericJson{
 
     public static final String COLLECTION = "Persons";
+    public static final String DELTA_SET_COLLECTION = "QuerySyncCollection";
+    public static final String DELTA_SET_OFF_COLLECTION = "DeltaSetNotEnabled";
     public static final String COLLECTION_WITH_EXCEPTION = "CollectionWithException";
 
     public static final String LONG_NAME = "LoremIpsumissimplydummytextoftheprintingandtypesettingindustry";

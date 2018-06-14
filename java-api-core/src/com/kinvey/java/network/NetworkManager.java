@@ -27,6 +27,7 @@ import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
@@ -36,6 +37,7 @@ import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
@@ -44,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 /**
  * Class for managing appData access to the Kinvey backend.
@@ -176,7 +180,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public GetEntity getEntityBlocking(String entityID) throws IOException {
+    public GetEntity getEntityBlocking(@Nonnull String entityID) throws IOException {
         GetEntity getEntity = new GetEntity(entityID, myClass);
         client.initializeRequest(getEntity);
         return getEntity;
@@ -211,7 +215,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public Get getBlocking(Query query) throws IOException {
+    public Get getBlocking(@Nonnull Query query) throws IOException {
         Preconditions.checkNotNull(query);
         Get get = new Get(query, myClass);
         client.initializeRequest(get);
@@ -226,7 +230,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public Get getBlocking(String queryString) throws IOException{
+    public Get getBlocking(@Nonnull String queryString) throws IOException{
     	Preconditions.checkNotNull(queryString);
         Get get = new Get(queryString, myClass);
         client.initializeRequest(get);
@@ -240,7 +244,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public Get getBlocking(String[] ids) throws IOException {
+    public Get getBlocking(@Nonnull String[] ids) throws IOException {
         Preconditions.checkNotNull(ids, "ids cannot be null.");
         Query q = new Query();
         q.in("_id", ids);
@@ -301,11 +305,11 @@ public class NetworkManager<T extends GenericJson> {
      */
 
     public Get getBlocking() throws IOException {
-        return getBlocking(new Query());
+        return getBlocking(client.query());
     }
 
     /**
-     * @deprecated use {@link #pullBlocking(Query, ICache, boolean)} ()} instead.
+     * @deprecated use {@link #getBlocking(Query)} instead.
      */
     @Deprecated
     public Get pullBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
@@ -328,6 +332,8 @@ public class NetworkManager<T extends GenericJson> {
      * @param deltaSetCachingEnabled Flag to show if Delta Set Caching is enable
      * @return Pull request
      * @throws IOException
+     *
+     * @deprecated use {@link #getBlocking(Query)} instead.
      */
     public Get pullBlocking(Query query, ICache<T> cache, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
@@ -342,6 +348,22 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     /**
+     * Method to create a Pull request
+     *
+     * @param query Query to get
+     * @return Pull request
+     * @throws IOException
+     * @deprecated use {@link #getBlocking(Query)} instead.
+     */
+    @Deprecated
+    public Get pullBlocking(@Nonnull Query query) throws IOException {
+        Preconditions.checkNotNull(query);
+        Get pull = new Get(query, myClass);
+        client.initializeRequest(pull);
+        return pull;
+    }
+
+    /**
      * Method to get a query of entities that are changed on server side agains given ones.  Pass
      * an empty query and empty items to compare with to return all entities in a collection.
      *
@@ -349,7 +371,7 @@ public class NetworkManager<T extends GenericJson> {
      * @return Get object
      * @throws java.io.IOException
      */
-    public Get getBlocking(Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
+    public Get getBlocking(@Nonnull Query query, List<T> cachedItems, boolean deltaSetCachingEnabled) throws IOException {
         Preconditions.checkNotNull(query);
         Get get;
         if (deltaSetCachingEnabled) {
@@ -361,6 +383,22 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(get);
         return get;
     }
+
+
+    /**
+     * Get blocking with Delta Sync implementation
+     * @param query Query to get
+     * @param lastRequestTime Last request time
+     * @return
+     * @throws IOException
+     */
+    public QueryCacheGet queryCacheGetBlocking(@Nonnull Query query, String lastRequestTime) throws IOException {
+        Preconditions.checkNotNull(query);
+        QueryCacheGet queryCacheGet = new QueryCacheGet(query, myClass, lastRequestTime);
+        client.initializeRequest(queryCacheGet);
+        return queryCacheGet;
+    }
+
 
     public GetCount getCountBlocking() throws IOException {
 //        Preconditions.checkNotNull();
@@ -751,6 +789,52 @@ public class NetworkManager<T extends GenericJson> {
 
         @Override
         public KinveyReadResponse<T> execute() throws IOException {
+            return super.execute();
+        }
+    }
+
+    public class QueryCacheGet extends AbstractKinveyQueryCacheReadRequest<T> {
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}" +
+                "/_deltaset{?since,query,sort,limit,skip,resolve,resolve_depth,retainReference}";
+
+        @Key
+        protected String collectionName;
+        @Key("query")
+        protected String queryFilter;
+        @Key("sort")
+        protected String sortFilter;
+        @Key("limit")
+        protected String limit;
+        @Key("skip")
+        protected String skip;
+
+        @Key("resolve")
+        protected String resolve;
+        @Key("resolve_depth")
+        protected String resolve_depth;
+        @Key("since")
+        protected String since;
+
+        QueryCacheGet(Query query, Class<T> myClass, String lastRequestTime) {
+            super(client, "GET", REST_PATH, null, myClass);
+            this.since = lastRequestTime;
+            this.collectionName = NetworkManager.this.collectionName;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            String sortString = query.getSortString();
+            this.sortFilter = !(sortString.equals("")) ? sortString : null;
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
+        }
+
+        @Override
+        public KinveyQueryCacheResponse<T> execute() throws IOException {
             return super.execute();
         }
     }
