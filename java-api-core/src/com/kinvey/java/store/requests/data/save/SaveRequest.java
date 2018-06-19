@@ -73,8 +73,27 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                 // result from the backend with the permanent _id, the record in the cache with the
                 // temporary _id should be removed, and the new record should be saved.
                 ret = cache.save(object);
+                String tempID = ret.get("_id").toString();
+                boolean bRealmGeneratedId = false;
+
+                try {
+                    bRealmGeneratedId = tempID.matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
+                    if (bRealmGeneratedId) {
+                        ret.set("_id", null);
+                    }
+                } catch (NullPointerException npe) {
+                    // issue with the regex, so do nothing because we default to false
+                    String msg = npe.getMessage();
+                }
+
                 try{
                     ret = networkManager.saveBlocking(object).execute();
+                    if (bRealmGeneratedId) {
+                        // The result from the network has the entity with its permanent ID. Need
+                        // to remove the entity from the local cache with the temporary ID.
+                        cache.delete(tempID);
+                    }
+
                 } catch (IOException e) {
                     syncManager.enqueueRequest(networkManager.getCollectionName(),
                             networkManager, RequestMethod.SAVE, (String)object.get(Constants._ID));
