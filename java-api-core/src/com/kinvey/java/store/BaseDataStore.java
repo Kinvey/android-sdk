@@ -50,9 +50,13 @@ import com.kinvey.java.store.requests.data.save.SaveRequest;
 
 import java.io.IOException;
 import java.security.AccessControlException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -539,12 +543,19 @@ public class BaseDataStore<T extends GenericJson> {
         response.setListOfExceptions(exceptions);
         response.setCount(pulledItemCount);
         if (deltaSetCachingEnabled && lastRequestTime != null) {
-            queryCache.save(new QueryCacheItem(
-                    getCollectionName(),
-                    stringQuery,
-                    lastRequestTime));
+            saveQueryCacheItem(stringQuery, lastRequestTime);
         }
         return response;
+    }
+
+    private void saveQueryCacheItem(@Nonnull String stringQuery,@Nonnull String lastRequestTime) {
+        QueryCacheItem queryCacheItem = getQueryCacheItem(stringQuery);
+        if (queryCacheItem != null) {
+            queryCacheItem.setLastRequestTime(lastRequestTime);
+            queryCache.save(queryCacheItem);
+        } else {
+            queryCache.save(new QueryCacheItem(getCollectionName(), stringQuery, lastRequestTime));
+        }
     }
 
     /**
@@ -596,10 +607,7 @@ public class BaseDataStore<T extends GenericJson> {
         KinveyReadResponse<T> response = networkManager.getBlocking(query).execute();
         cache.delete(query);
         cache.save(response.getResult());
-        queryCache.save(new QueryCacheItem(
-                getCollectionName(),
-                query.getQueryFilterMap().toString(),
-                response.getLastRequestTime()));
+        saveQueryCacheItem(query.getQueryFilterMap().toString(), response.getLastRequestTime());
         return response;
     }
 
@@ -687,10 +695,37 @@ public class BaseDataStore<T extends GenericJson> {
 
     @Nullable
     private QueryCacheItem getQueryCacheItem(@Nonnull Query query) {
+        return getQueryCacheItem(query.getQueryFilterMap().toString());
+    }
+
+    @Nullable
+    private QueryCacheItem getQueryCacheItem(@Nonnull String stringQuery) {
         if (queryCache == null) {
             queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
         }
-        List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, query.getQueryFilterMap().toString()));
+        List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, stringQuery));
+        // In usual case, queryCacheItems always 1 or 0.
+        if (queryCacheItems.size() > 1) { // check that the queryCache has only 1 item for the query,
+            QueryCacheItem tempItem = queryCacheItems.get(0); // else remove all items(with the same query) except the latest
+            SimpleDateFormat format = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.US);
+            Date tempItemDate;
+            Date cacheItemDate;
+            for (QueryCacheItem cacheItem : queryCacheItems) {
+                try {
+                    tempItemDate = format.parse(tempItem.getLastRequestTime());
+                    cacheItemDate = format.parse(cacheItem.getLastRequestTime());
+                    if (tempItemDate.compareTo(cacheItemDate) < 0) { // if result is < 0 than cacheItemDate is after tempItemDate
+                        tempItem = cacheItem;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return tempItem;
+                }
+            }
+            queryCache.clear();
+            queryCache.save(tempItem);
+            return tempItem;
+        }
         return queryCacheItems.size() == 1 ? queryCacheItems.get(0) : null;
     }
 
