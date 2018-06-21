@@ -37,6 +37,9 @@ public class Person extends GenericJson{
     private long weight ;
 
     @Key
+    private int intVal ;
+
+    @Key
     private Integer carNumber ;
 
     @Key("username")
@@ -96,5 +99,13 @@ public class Person extends GenericJson{
 
     public void setAuthor(Author author) {
         this.author = author;
+    }
+
+    public int getIntVal() {
+        return intVal;
+    }
+
+    public void setIntVal(int intVal) {
+        this.intVal = intVal;
     }
 }
