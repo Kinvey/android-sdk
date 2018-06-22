@@ -25,7 +25,7 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
  * Created by Prots on 2/12/16.
  */
 public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson> {
-    private static final String REST_PATH = "oauth/auth?scope=openid";
+    private static final String REST_PATH = "oauth/auth";
 
 
     public GetMICTempURL(AbstractClient client, HttpContent content) {

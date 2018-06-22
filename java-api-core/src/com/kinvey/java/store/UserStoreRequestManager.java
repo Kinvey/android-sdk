@@ -724,7 +724,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
         data.put("password", password);
 
         HttpContent content = new UrlEncodedContent(data);
-        LoginToTempURL loginTemp = new LoginToTempURL(this, clientId, tempURL, content);
+        LoginToTempURL loginTemp = new LoginToTempURL(this, tempURL, clientId, content);
         loginTemp.setRequireAppCredentials(true);
         client.initializeRequest(loginTemp);
         return loginTemp;
