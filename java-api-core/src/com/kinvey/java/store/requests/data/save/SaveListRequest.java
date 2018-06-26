@@ -76,7 +76,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                         ret.add(networkManager.saveBlocking(object).execute());
                     } catch (IOException e) {
                         syncManager.enqueueRequest(networkManager.getCollectionName(),
-                                networkManager, isTempId(object) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
+                                networkManager, networkManager.isTempId(object) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
                         exception = e;
                     }
                 }
@@ -94,17 +94,6 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                 break;
         }
         return ret;
-    }
-
-    private boolean isTempId(T item) {
-        String tempID = item.get(Constants._ID).toString();
-        boolean isTempId = false;
-        try {
-            isTempId = tempID.matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
-        } catch (NullPointerException npe) {
-            // issue with the regex, so do nothing because we default to false
-        }
-        return isTempId;
     }
 
     @Override

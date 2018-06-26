@@ -123,7 +123,8 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                     id = syncItem.getEntityID().id;
 
                     switch (syncItem.getRequestMethod()) {
-                        case SAVE:
+                        case POST:
+                        case PUT:
                             t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
                             if (t == null) {
                                 // check that item wasn't deleted before

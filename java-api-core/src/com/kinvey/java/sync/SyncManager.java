@@ -189,11 +189,9 @@ public class SyncManager {
         List<SyncItem> syncRequests = new ArrayList<>();
         String syncItemId;
         SyncItem syncItem;
-        boolean isTempId = false;
         for (T t : ret) {
             syncItemId = (String) t.get(ID);
-            isTempId = syncItemId.matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
-            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, isTempId ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, syncItemId);
+            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, networkManager.isTempId(t) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, syncItemId);
             if (syncItem != null) {
                 syncRequests.add(syncItem);
             }
