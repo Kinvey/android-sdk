@@ -17,6 +17,8 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.KinveyJsonError;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
@@ -187,7 +189,7 @@ public class DeltaCacheTest {
         assertNotNull(syncCallback);
         assertNotNull(syncCallback.getResult());
         assertNull(syncCallback.getError());
-        assertEquals(1, syncCallback.getResult().getCount());
+        assertEquals(0, syncCallback.getResult().getCount());
     }
 
     @Test
@@ -258,7 +260,7 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        assertEquals(0, store.pullBlocking(query).getCount());
         pulledPersons = store.find(query).getResult();
 
         for (int i = 0; i < TEN_ITEMS; i++) {
@@ -299,7 +301,7 @@ public class DeltaCacheTest {
             assertEquals(TEST_USERNAME + i, person.getUsername());
         }
 
-        assertEquals(TEN_ITEMS, store.pullBlocking(query).getCount());
+        assertEquals(0, store.pullBlocking(query).getCount());
         pulledPersons = store.find(query).getResult();
         assertNotNull(pulledPersons);
 
@@ -613,7 +615,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
+        assertEquals(0, pullCallback.getResult().getCount());
 
         DefaultKinveyClientCallback saveCallback = testManager.save(networkStore, new Person(TEST_USERNAME + TEN_ITEMS));
         assertNotNull(saveCallback);
@@ -625,7 +627,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS + 1, pullCallback.getResult().getCount());
+        assertEquals(1, pullCallback.getResult().getCount());
 
         List<Person> personList = testManager.find(store, client.query()).getResult().getResult();
         assertEquals(TEN_ITEMS + 1, personList.size());
@@ -657,7 +659,7 @@ public class DeltaCacheTest {
         assertNotNull(pullCallback);
         assertNotNull(pullCallback.getResult());
         assertNull(pullCallback.getError());
-        assertEquals(TEN_ITEMS, pullCallback.getResult().getCount());
+        assertEquals(1, pullCallback.getResult().getCount());
 
         assertEquals(TEST_USERNAME + 100, store.find(query).getResult().get(9).getUsername());
 
@@ -689,17 +691,102 @@ public class DeltaCacheTest {
         assertTrue(store.isDeltaSetCachingEnabled());
     }
 
+/*
     @Test
-    public void testErrorIfStoreTypeNetwork() {
-        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.NETWORK, client);
+    public void testResultSetSizeExceededErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        Query query = client.query();
+        String lastRequestTime = "Time";
+        NetworkManager<Person>.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyJsonResponseException exception = mock(KinveyJsonResponseException.class);
+        KinveyJsonError jsonError = new KinveyJsonError();
+        jsonError.setError("ResultSetSizeExceeded");
+        when(exception.getDetails()).thenReturn(jsonError);
+        when(exception.getStatusCode()).thenReturn(400);
+        when(mockCacheGet.execute()).thenThrow(exception);
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
+        store.setDeltaSetCachingEnabled(true);
+        store.save(new Person(TEST_USERNAME));
+        store.save(new Person(TEST_USERNAME));
+        store.save(new Person(TEST_USERNAME));
+        store.pushBlocking();
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        queryCache.save(new QueryCacheItem(
+                Person.DELTA_SET_COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+        KinveyPullResponse response = store.pullBlocking(query);
+        assertNotNull(response);
+        assertEquals(0, response.getListOfExceptions().size());
+        assertEquals(3, response.getCount());
+    }
+*/
+
+/*    @Test
+    public void testMissingConfigurationErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        Query query = client.query();
+        String lastRequestTime = "Time";
+        NetworkManager<Person>.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyJsonResponseException exception = mock(KinveyJsonResponseException.class);
+        KinveyJsonError jsonError = new KinveyJsonError();
+        jsonError.setError("MissingConfiguration");
+        when(exception.getDetails()).thenReturn(jsonError);
+        when(exception.getStatusCode()).thenReturn(403);
+        when(mockCacheGet.execute()).thenThrow(exception);
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
+        store.setDeltaSetCachingEnabled(true);
+        store.save(new Person(TEST_USERNAME));
+        store.save(new Person(TEST_USERNAME));
+        store.pushBlocking();
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        queryCache.save(new QueryCacheItem(
+                Person.DELTA_SET_COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
+
+        KinveyPullResponse response = store.pullBlocking(query);
+        assertEquals(0, response.getListOfExceptions().size());
+        assertEquals(2, response.getCount());
+    }*/
+
+    @Test
+    public void testKinveyErrorHandling() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        Query query = client.query();
+        String lastRequestTime = "Time";
+        NetworkManager<Person>.QueryCacheGet mockCacheGet = mock(NetworkManager.QueryCacheGet.class);
+        KinveyJsonResponseException exception = mock(KinveyJsonResponseException.class);
+        KinveyJsonError jsonError = new KinveyJsonError();
+        jsonError.setError("KinveyException");
+        jsonError.setDescription("Some Description.");
+        when(exception.getDetails()).thenReturn(jsonError);
+        when(mockCacheGet.execute()).thenThrow(exception);
+        NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+        when(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet);
+        BaseDataStore<Person> store = testManager.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, spyNetworkManager);
+        store.setDeltaSetCachingEnabled(true);
+        store.save(new Person(TEST_USERNAME));
+        store.save(new Person(TEST_USERNAME));
+        store.pushBlocking();
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        queryCache.save(new QueryCacheItem(
+                Person.DELTA_SET_COLLECTION,
+                query.getQueryFilterMap().toString(),
+                lastRequestTime));
         try {
-            store.setDeltaSetCachingEnabled(true);
-            assertTrue(false);
-        } catch (Exception e) {
-            assertNotNull(e);
+            store.pullBlocking(query);
+        } catch (KinveyJsonResponseException e) {
+            assertEquals(jsonError.getError(), e.getDetails().getError());
         }
     }
-
 
 
 }

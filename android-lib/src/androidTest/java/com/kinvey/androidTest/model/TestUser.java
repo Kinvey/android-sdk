@@ -8,9 +8,8 @@ public class TestUser extends User {
     @Key("companyName")
     private String companyName;
 
-    public TestUser() {
-
-    }
+    @Key
+    private InternalUserEntity internalUserEntity;
 
     public String getCompanyName() {
         return companyName;
@@ -18,5 +17,13 @@ public class TestUser extends User {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public InternalUserEntity getInternalUserEntity() {
+        return internalUserEntity;
+    }
+
+    public void setInternalUserEntity(InternalUserEntity internalUserEntity) {
+        this.internalUserEntity = internalUserEntity;
     }
 }

@@ -16,9 +16,12 @@
 
 package com.kinvey.java.auth;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
+
+import java.util.Map;
 
 /**
  * @author m0rganic
@@ -29,6 +32,8 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
     private static final long serialVersionUID = 1L;
 
     private final static String AUTH_N_HEADER_FORMAT = "Kinvey %s";
+    private final static String AUTH_TOKEN = "authtoken";
+    private final static String KMD = "_kmd";
 
     private String userId;
 
@@ -61,11 +66,25 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
      * @return a newly constructed Credential object
      */
     public static Credential from(KinveyAuthResponse response){
-        return new Credential(response.getUserId(), response.getAuthToken(), null);
+        return from(response.getUserId(), response.getAuthToken());
     }
 
+    /**
+     * @param baseUser authorised user for saving auth token
+     * @return a newly constructed Credential object
+     */
     public static Credential from(BaseUser baseUser){
-        return new Credential(baseUser.getId(), baseUser.get("authToken").toString(), null);
+        Map<String, String> kmd = (Map<String, String>)baseUser.get(KMD);
+        return from(baseUser.getId(), kmd != null ? kmd.get(AUTH_TOKEN) : null);
+    }
+
+    /**
+     * @param userId user id for saving
+     * @param authToken authToken for saving
+     * @return a newly constructed Credential object
+     */
+    public static Credential from(String userId, String authToken){
+        return new Credential(userId, authToken, null);
     }
 
     public String getUserId() {

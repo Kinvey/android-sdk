@@ -40,18 +40,18 @@ import com.kinvey.java.query.MongoQueryFilter;
  * @author edwardf
  * @since 2.0
  */
-public abstract class KinveyMockUnitTest extends TestCase {
+public abstract class KinveyMockUnitTest<T extends BaseUser> extends TestCase {
 
-    private MockTestClient mockClient;
+    private MockTestClient<T> mockClient;
         
-    public MockTestClient getClient(){
+    public MockTestClient<T> getClient(){
     	if (mockClient == null){
     		mockClient = new MockTestClient.Builder(new MockHttpTransport(),new MockJsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
     	}
     	return mockClient;
     }
     
-    public MockTestClient getClient(HttpTransport transport){
+    public MockTestClient<T> getClient(HttpTransport transport){
     	return new MockTestClient.Builder(transport, new GsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
     }
 
@@ -62,7 +62,7 @@ public abstract class KinveyMockUnitTest extends TestCase {
         return (KinveyClientRequestInitializer) mockClient.getKinveyRequestInitializer();
     }
 
-    protected static class MockTestClient extends AbstractClient {
+    protected static class MockTestClient<T extends BaseUser> extends AbstractClient<T> {
 
         private ConcurrentHashMap<String, NetworkManager> appDataInstanceCache;
 
@@ -112,14 +112,14 @@ public abstract class KinveyMockUnitTest extends TestCase {
         }
 
         @Override
-        public void setActiveUser(BaseUser user) {
+        public void setActiveUser(T user) {
             synchronized (lock) {
                 this.user = user;
             }
         }
 
         @Override
-        public BaseUser getActiveUser() {
+        public T getActiveUser() {
             synchronized (lock) {
                 return this.user;
             }

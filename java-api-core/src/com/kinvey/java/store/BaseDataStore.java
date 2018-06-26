@@ -26,9 +26,10 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;
+import com.kinvey.java.core.KinveyJsonError;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyPullResponse;
@@ -59,6 +60,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 
 public class BaseDataStore<T extends GenericJson> {
@@ -70,6 +72,10 @@ public class BaseDataStore<T extends GenericJson> {
     protected static final String PURGE = "purge";
     protected static final String GROUP = "group";
     protected static final String COUNT = "count";
+
+    private static final String MISSING_CONFIGURATION_ERROR = "MissingConfiguration";
+    private static final String RESULT_SIZE_ERROR = "ResultSetSizeExceeded";
+    private static final String PARAMETER_VALUE_OF_RANGE_ERROR = "ParameterValueOutOfRange";
 
     private static final int DEFAULT_PAGE_SIZE = 10_000;  // default page size set to backend record retrieval limit
 
@@ -98,11 +104,11 @@ public class BaseDataStore<T extends GenericJson> {
      * @param itemType class that data should be mapped to
      * @param storeType type of storage that client want to use
      */
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType){
+    protected BaseDataStore(@Nonnull AbstractClient client, @Nonnull String collection, @Nonnull Class<T> itemType, @Nonnull StoreType storeType){
         this(client, collection, itemType, storeType, new NetworkManager<T>(collection, itemType, client));
     }
 
-    protected BaseDataStore(AbstractClient client, String collection, Class<T> itemType, StoreType storeType,
+    protected BaseDataStore(@Nonnull AbstractClient client, @Nonnull String collection, @Nonnull Class<T> itemType, @Nonnull StoreType storeType,
                             NetworkManager<T> networkManager){
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -117,7 +123,8 @@ public class BaseDataStore<T extends GenericJson> {
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
     }
 
-    public static <T extends GenericJson> BaseDataStore<T> collection(String collectionName, Class<T> myClass, StoreType storeType, AbstractClient client) {
+    @Nonnull
+    public static <T extends GenericJson> BaseDataStore<T> collection(@Nonnull String collectionName, @Nonnull Class<T> myClass, @Nonnull StoreType storeType, @Nonnull AbstractClient client) {
         Preconditions.checkNotNull(collectionName, "collectionName cannot be null.");
         Preconditions.checkNotNull(storeType, "storeType cannot be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -130,7 +137,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return null or object that matched given id
      */
-    public T find (String id, KinveyCachedClientCallback<T> cachedCallback) throws IOException{
+    @Nullable
+    public T find (@Nonnull String id, @Nullable KinveyCachedClientCallback<T> cachedCallback) throws IOException{
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
@@ -149,7 +157,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param id the id of object we need to find
      * @return null or object that matched given id
      */
-    public T find (String id) throws IOException {
+    @Nullable
+    public T find (@Nonnull String id) throws IOException {
         return find(id, null);
     }
 
@@ -170,7 +179,7 @@ public class BaseDataStore<T extends GenericJson> {
             }
             if (deltaSetCachingEnabled) {
                 Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
-                return getBlockingDeltaSync(query);
+                return findBlockingDeltaSync(query);
             } else {
                 return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
             }
@@ -195,7 +204,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return list of objects that are found
      */
-    public KinveyReadResponse<T> find (Query query, KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find (@Nonnull Query query, @Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
@@ -205,10 +215,8 @@ public class BaseDataStore<T extends GenericJson> {
             if (cachedCallback != null) {
                 cachedCallback.onSuccess(new ReadQueryRequest<>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute());
             }
-            if (deltaSetCachingEnabled) {
-                query.setLimit(0);
-                query.setSkip(0);
-                return getBlockingDeltaSync(query);
+            if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+                return findBlockingDeltaSync(query);
             } else {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
             }
@@ -222,7 +230,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query prepared query we have to look with
      * @return list of objects that are found
      */
-    public KinveyReadResponse<T> find (Query query) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find (@Nonnull Query query) throws IOException {
         return find(query, null);
     }
 
@@ -231,7 +240,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback callback to be executed in case of {@link StoreType#CACHE} is used to get cached data before network
      * @return all objects in given collection
      */
-    public KinveyReadResponse<T> find(KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
+    @Nonnull
+    public KinveyReadResponse<T> find(@Nullable KinveyCachedClientCallback<KinveyReadResponse<T>> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
@@ -241,7 +251,7 @@ public class BaseDataStore<T extends GenericJson> {
                 cachedCallback.onSuccess(new ReadAllRequest<>(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute());
             }
             if (deltaSetCachingEnabled) {
-                return getBlockingDeltaSync(client.query());
+                return findBlockingDeltaSync(client.query());
             } else {
                 return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
             }
@@ -254,6 +264,7 @@ public class BaseDataStore<T extends GenericJson> {
      * get all objects for given collections
      * @return all objects in given collection
      */
+    @Nonnull
     public KinveyReadResponse<T> find() throws IOException {
         return find((KinveyCachedClientCallback<KinveyReadResponse<T>>)null);
     }
@@ -262,6 +273,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Get items count in collection
      * @return items count in collection
      */
+    @Nonnull
     public Integer count() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -273,6 +285,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param cachedCallback is using with StoreType.CACHE to get items count in collection
      * @return items count in collection
      */
+    @Nonnull
     public Integer count(KinveyCachedClientCallback<Integer> cachedCallback) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -288,6 +301,7 @@ public class BaseDataStore<T extends GenericJson> {
      * Get items count in collection on the server
      * @return items count in collection on the server
      */
+    @Nonnull
     public Integer countNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -300,7 +314,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return updated list of object that will contain ids if they was not present in moment of saving
      * @throws IOException
      */
-    public List<T> save (Iterable<T> objects) throws IOException {
+    @Nonnull
+    public List<T> save (@Nonnull Iterable<T> objects) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
@@ -314,7 +329,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return updated object with filled some required fields
      * @throws IOException
      */
-    public T save (T object) throws IOException {
+    @Nonnull
+    public T save (@Nonnull T object) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
@@ -329,13 +345,16 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         client.getCacheManager().clearCollection(getCollectionName(), storeItemType, Long.MAX_VALUE);
+        if (deltaSetCachingEnabled && queryCache != null) {
+            queryCache.clear();
+        }
         purge();
     }
 
     /**
      * Clear the local cache storage
      */
-    public void clear(Query query) {
+    public void clear(@Nonnull Query query) {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -349,7 +368,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of object that was deleted
      * @throws IOException
      */
-    public Integer delete (String id) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull String id) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
@@ -362,7 +382,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of objects that was removed
      * @throws IOException
      */
-    public Integer delete (Query query) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull Query query) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
@@ -375,7 +396,8 @@ public class BaseDataStore<T extends GenericJson> {
      * @return count of objects that was deleted bu given call
      * @throws IOException
      */
-    public Integer delete (Iterable<String> ids) throws IOException {
+    @Nonnull
+    public Integer delete (@Nonnull Iterable<String> ids) throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
@@ -398,26 +420,23 @@ public class BaseDataStore<T extends GenericJson> {
      * should be used with {@link StoreType#SYNC}
      * @param query query to pull the objects
      */
-    public KinveyPullResponse pullBlocking(Query query) throws IOException {
+    @Nonnull
+    public KinveyPullResponse pullBlocking(@Nullable Query query) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
         query = query == null ? client.query() : query;
-        KinveyPullResponse response = new KinveyPullResponse();
-        KinveyReadResponse<T> readResponse;
-        if (deltaSetCachingEnabled) {
-            query.setLimit(0);
-            query.setSkip(0);
-            readResponse = getBlockingDeltaSync(query);
-            response.setCount(readResponse.getResult().size());
+        KinveyPullResponse response;
+        if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+            response = pullBlockingDeltaSync(query);
         } else {
             response = new KinveyPullResponse();
-            readResponse = networkManager.pullBlocking(query).execute();
+            KinveyReadResponse<T> readResponse = networkManager.getBlocking(query).execute();
             cache.delete(query);
             response.setCount(cache.save(readResponse.getResult()).size());
+            response.setListOfExceptions(readResponse.getListOfExceptions() != null ? readResponse.getListOfExceptions() : new ArrayList<Exception>());
         }
-        response.setListOfExceptions(readResponse.getListOfExceptions());
         return response;
     }
 
@@ -427,16 +446,13 @@ public class BaseDataStore<T extends GenericJson> {
      * @param isAutoPagination true if auto-pagination is used
      * @param query query to pull the objects
      */
-    public KinveyPullResponse pullBlocking(Query query, boolean isAutoPagination) throws IOException {
+    @Nonnull
+    public KinveyPullResponse pullBlocking(@Nullable Query query, boolean isAutoPagination) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-        if (isAutoPagination) {
-            return pullBlocking(query, DEFAULT_PAGE_SIZE);
-        } else {
-            return pullBlocking(query);
-        }
+        return isAutoPagination ? pullBlocking(query, DEFAULT_PAGE_SIZE) : pullBlocking(query);
     }
 
     /**
@@ -446,14 +462,31 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query query to pull the objects
      * @param pageSize page size for auto-pagination
      */
-    public KinveyPullResponse pullBlocking(Query query, int pageSize) throws IOException {
+    @Nonnull
+    public KinveyPullResponse pullBlocking(@Nullable Query query, int pageSize) throws IOException {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(client.getSyncManager().getCount(getCollectionName()) == 0, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.");
-        KinveyPullResponse response = new KinveyPullResponse();
         query = query == null ? client.query() : query;
+        QueryCacheItem cacheItem = null;
+        if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+            cacheItem = getQueryCacheItem(query);
+        }
+        return cacheItem != null ? pullBlockingDeltaSync(cacheItem, query, pageSize) : pullBlockingPaged(query, pageSize);
+    }
 
+    /**
+     * Delta Set isn't used in the method
+     * @param query query to filter results
+     * @param pageSize page size for auto-pagination
+     * @return KinveyPullResponse object
+     * @throws IOException
+     */
+    @Nonnull
+    private KinveyPullResponse pullBlockingPaged(@Nonnull Query query, int pageSize) throws IOException {
+        KinveyPullResponse response = new KinveyPullResponse();
+        String stringQuery = query.getQueryFilterMap().toString();
         if (query.getSortString() == null || query.getSortString().isEmpty()) {
             query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC);
         }
@@ -462,8 +495,9 @@ public class BaseDataStore<T extends GenericJson> {
 
         // First, get the count of all the items to pull
         int totalItemNumber = countNetwork();
+        String lastRequestTime = null;
         int pulledItemCount = 0;
-        int totalPagesNumber = Math.abs(totalItemNumber/pageSize) + 1;
+        int totalPagesNumber = Math.abs(totalItemNumber / pageSize) + 1;
         int batchSize = BATCH_SIZE; // batch size for concurrent push requests
         ExecutorService executor;
         List<FutureTask<PullTaskResponse>> tasks;
@@ -494,6 +528,9 @@ public class BaseDataStore<T extends GenericJson> {
                     cache.delete(tempResponse.getQuery());
                     pulledItemCount += cache.save(tempResponse.getKinveyReadResponse().getResult()).size();
                     exceptions.addAll(tempResponse.getKinveyReadResponse().getListOfExceptions());
+                    if (lastRequestTime == null) { //it will be changed to time from count request
+                        lastRequestTime = tempResponse.getKinveyReadResponse().getLastRequestTime();
+                    }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
@@ -502,56 +539,167 @@ public class BaseDataStore<T extends GenericJson> {
         }
         response.setListOfExceptions(exceptions);
         response.setCount(pulledItemCount);
+        if (deltaSetCachingEnabled && lastRequestTime != null) {
+            queryCache.save(new QueryCacheItem(
+                    getCollectionName(),
+                    stringQuery,
+                    lastRequestTime));
+        }
         return response;
     }
 
     /**
      * Get network data with given query into local storage using Delta Sync
      * @param query {@link Query}
-     * @return
+     * @return KinveyReadResponse object
      * @throws IOException
      */
-    private KinveyReadResponse<T> getBlockingDeltaSync(@Nonnull Query query) throws IOException {
-        KinveyReadResponse<T> response = new KinveyReadResponse<T>();
+    @Nonnull
+    private KinveyReadResponse<T> findBlockingDeltaSync(@Nonnull Query query) throws IOException {
+        QueryCacheItem cacheItem = getQueryCacheItem(query); //one is correct number of query cache item count for any request.
+        return cacheItem != null ? findBlockingDeltaSync(cacheItem, query) : getBlocking(query);
+    }
+
+    /**
+     * Get network data with given query into local storage using Delta Sync
+     * @param query {@link Query}
+     * @return KinveyReadResponse object
+     * @throws IOException
+     */
+    @Nonnull
+    private KinveyPullResponse pullBlockingDeltaSync(@Nonnull Query query) throws IOException {
+        QueryCacheItem cacheItem = getQueryCacheItem(query); //one is correct number of query cache item count for any request.
+        return cacheItem != null ? pullBlockingDeltaSync(cacheItem, query, 0) : pullBlockingRegular(query);
+    }
+
+    /**
+     * Regular Pull. Delta Set and auto-pagination aren't used
+     * @param query query to filter results
+     * @return KinveyPullResponse object
+     * @throws IOException
+     */
+    private KinveyPullResponse pullBlockingRegular(@Nonnull Query query) throws IOException {
+        KinveyReadResponse<T> readResponse = getBlocking(query);
+        KinveyPullResponse pullResponse = new KinveyPullResponse();
+        pullResponse.setCount(readResponse.getResult().size());
+        pullResponse.setListOfExceptions(readResponse.getListOfExceptions() != null ? readResponse.getListOfExceptions() : new ArrayList<Exception>());
+        return pullResponse;
+    }
+
+    /**
+     * Delta Set isn't used
+     * @param query query to filter results
+     * @return KinveyReadResponse object
+     * @throws IOException
+     */
+    @Nonnull
+    private KinveyReadResponse<T> getBlocking(@Nonnull Query query) throws IOException {
+        KinveyReadResponse<T> response = networkManager.getBlocking(query).execute();
+        cache.delete(query);
+        cache.save(response.getResult());
+        queryCache.save(new QueryCacheItem(
+                getCollectionName(),
+                query.getQueryFilterMap().toString(),
+                response.getLastRequestTime()));
+        return response;
+    }
+
+    /**
+     * PullBlocking with Delta Set
+     * @param cacheItem cached query from QueryCacheTable
+     * @param query query to filter results
+     * @return KinveyReadResponse object
+     * @throws IOException
+     */
+    @Nonnull
+    private KinveyReadResponse<T> findBlockingDeltaSync(@Nonnull QueryCacheItem cacheItem, @Nonnull Query query) throws IOException {
+        KinveyReadResponse<T> response = new KinveyReadResponse<>();
+        KinveyQueryCacheResponse<T> queryCacheResponse;
+        try {
+            queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
+        } catch (KinveyJsonResponseException responseException) {
+            int statusCode = responseException.getStatusCode();
+            KinveyJsonError jsonError = responseException.getDetails();
+            if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
+                    (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR)) ||
+                    (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR))) {
+                return getBlocking(query);
+            } else {
+                throw responseException;
+            }
+        }
+        if (queryCacheResponse.getDeleted() != null) {
+            List<String> ids = new ArrayList<>();
+            for (GenericJson json : queryCacheResponse.getDeleted()) {
+                ids.add((String) json.get(Constants._ID));
+            }
+            cache.delete(ids);
+        }
+        if (queryCacheResponse.getChanged() != null) {
+            cache.save(queryCacheResponse.getChanged());
+        }
+        response.setResult(cache.get(query));
+        response.setListOfExceptions(queryCacheResponse.getListOfExceptions() != null ? queryCacheResponse.getListOfExceptions() : new ArrayList<Exception>());
+        response.setLastRequestTime(queryCacheResponse.getLastRequestTime());
+        cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
+        queryCache.save(cacheItem);
+        return response;
+    }
+
+    /**
+     * PullBlocking with Delta Set
+     * @param cacheItem cached query from QueryCacheTable
+     * @param query query to filter results
+     * @return KinveyReadResponse object
+     * @throws IOException
+     */
+    @Nonnull
+    private KinveyPullResponse pullBlockingDeltaSync(@Nonnull QueryCacheItem cacheItem, @Nonnull Query query, int pageSize) throws IOException {
+        KinveyPullResponse response = new KinveyPullResponse();
+        KinveyQueryCacheResponse<T> queryCacheResponse;
+            try {
+                queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
+            } catch (KinveyJsonResponseException responseException) {
+                int statusCode = responseException.getStatusCode();
+                KinveyJsonError jsonError = responseException.getDetails();
+                if ((statusCode == 400 && jsonError.getError().equals(RESULT_SIZE_ERROR)) ||
+                        (statusCode == 400 && jsonError.getError().equals(PARAMETER_VALUE_OF_RANGE_ERROR)) ||
+                        (statusCode == 403 && jsonError.getError().equals(MISSING_CONFIGURATION_ERROR))) {
+                    return pageSize > 0 ? pullBlockingPaged(query, pageSize) : pullBlockingRegular(query);
+                } else {
+                    throw responseException;
+                }
+            }
+        if (queryCacheResponse.getDeleted() != null) {
+            List<String> ids = new ArrayList<>();
+            for (GenericJson json : queryCacheResponse.getDeleted()) {
+                ids.add((String) json.get(Constants._ID));
+            }
+            cache.delete(ids);
+        }
+        if (queryCacheResponse.getChanged() != null) {
+            response.setCount(cache.save(queryCacheResponse.getChanged()).size());
+        }
+        response.setListOfExceptions(queryCacheResponse.getListOfExceptions() != null ? queryCacheResponse.getListOfExceptions() : new ArrayList<Exception>());
+        cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
+        queryCache.save(cacheItem);
+        return response;
+    }
+
+    @Nullable
+    private QueryCacheItem getQueryCacheItem(@Nonnull Query query) {
         if (queryCache == null) {
             queryCache = client.getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
         }
         List<QueryCacheItem> queryCacheItems = queryCache.get(client.query().equals(Constants.QUERY, query.getQueryFilterMap().toString()));
-        if (queryCacheItems.size() == 1) { //one is correct number of query cache item count for any request.
-            QueryCacheItem cacheItem = queryCacheItems.get(0);
-            KinveyQueryCacheResponse<T> queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.getLastRequestTime()).execute();
-            if (queryCacheResponse.getDeleted() != null) {
-                List<String> ids = new ArrayList<>();
-                for (GenericJson json : queryCacheResponse.getDeleted()) {
-                    ids.add((String) json.get(Constants._ID));
-                }
-                cache.delete(ids);
-            }
-            if (queryCacheResponse.getChanged() != null) {
-                cache.save(queryCacheResponse.getChanged());
-            }
-            response.setResult(cache.get());
-            response.setListOfExceptions(queryCacheResponse.getListOfExceptions());
-            response.setLastRequestTime(queryCacheResponse.getLastRequestTime());
-            cacheItem.setLastRequestTime(queryCacheResponse.getLastRequestTime());
-            queryCache.save(cacheItem);
-        } else {
-            response = networkManager.pullBlocking(query).execute();
-            cache.delete(query);
-            cache.save(response.getResult());
-            queryCache.save(new QueryCacheItem(
-                    getCollectionName(),
-                    query.getQueryFilterMap().toString(),
-                    response.getLastRequestTime()));
-        }
-        return response;
+        return queryCacheItems.size() == 1 ? queryCacheItems.get(0) : null;
     }
 
     /**
      * Run sync operation to sync local and network storages
      * @param query query to pull the objects
      */
-    public void syncBlocking(Query query) throws IOException {
+    public void syncBlocking(@Nullable Query query) throws IOException {
         pushBlocking();
         pullBlocking(query);
     }
@@ -561,7 +709,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query query to pull the objects
      * @param isAutoPagination true if auto-pagination is used
      */
-    public void syncBlocking(Query query, boolean isAutoPagination) throws IOException {
+    public void syncBlocking(@Nullable Query query, boolean isAutoPagination) throws IOException {
         pushBlocking();
         pullBlocking(query, isAutoPagination);
     }
@@ -571,7 +719,7 @@ public class BaseDataStore<T extends GenericJson> {
      * @param query query to pull the objects
      * @param pageSize page size for auto-pagination
      */
-    public void syncBlocking(Query query, int pageSize) throws IOException {
+    public void syncBlocking(@Nullable Query query, int pageSize) throws IOException {
         pushBlocking();
         pullBlocking(query, pageSize);
     }
@@ -583,7 +731,7 @@ public class BaseDataStore<T extends GenericJson> {
         client.getSyncManager().clear(collection);
     }
 
-    public void purge(Query query) {
+    public void purge(@Nonnull Query query) {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType");
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
@@ -616,8 +764,9 @@ public class BaseDataStore<T extends GenericJson> {
     /**
      * Used for aggregate fields
      */
-    private Aggregation aggregation(AggregateType type, ArrayList<String> fields,
-                                    String field, Query query, KinveyCachedAggregateCallback cachedCallback) throws IOException {
+    @Nonnull
+    private Aggregation aggregation(@Nonnull AggregateType type, @Nonnull ArrayList<String> fields,
+                                    @Nonnull String field, @Nonnull Query query, @Nullable KinveyCachedAggregateCallback cachedCallback) throws IOException {
         Aggregation ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             try {
@@ -633,9 +782,9 @@ public class BaseDataStore<T extends GenericJson> {
 
     /**
      * Set store type for current BaseDataStore
-     * @param storeType
+     * @param storeType type of storage that client uses
      */
-    public void setStoreType(StoreType storeType) {
+    public void setStoreType(@Nonnull StoreType storeType) {
         Preconditions.checkNotNull(storeType, "storeType must not be null.");
         this.storeType = storeType;
     }
@@ -644,14 +793,17 @@ public class BaseDataStore<T extends GenericJson> {
      * Getter for client
      * @return Client instance for given BaseDataStore
      */
+    @Nonnull
     public AbstractClient getClient() {
         return client;
     }
 
+    @Nonnull
     public Class<T> getCurrentClass() {
         return storeItemType;
     }
 
+    @Nonnull
     public String getCollectionName() {
         return collection;
     }
@@ -673,7 +825,7 @@ public class BaseDataStore<T extends GenericJson> {
         this.deltaSetCachingEnabled = deltaSetCachingEnabled;
     }
 
-    public boolean subscribe(KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
+    public boolean subscribe(@Nonnull KinveyDataStoreLiveServiceCallback<T> storeLiveServiceCallback) throws IOException {
         boolean success = false;
         if (storeLiveServiceCallback != null) {
             liveServiceCallback = storeLiveServiceCallback;
@@ -704,8 +856,13 @@ public class BaseDataStore<T extends GenericJson> {
         return success;
     }
 
-    public void unsubscribe() throws IOException {
+    public void unsubscribe() {
         liveServiceCallback = null;
         LiveServiceRouter.getInstance().unsubscribeCollection(collection);
     }
+
+    private boolean isQueryContainSkipLimit(@Nonnull Query query) {
+        return query.getSkip() != 0 || query.getLimit() != 0;
+    }
+
 }
