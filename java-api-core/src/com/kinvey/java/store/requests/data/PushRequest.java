@@ -69,6 +69,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                 httpVerb = syncItem.getRequestMethod();
                 if (httpVerb != null) {
                     switch (httpVerb) {
+                        case SAVE: //the SAVE case need for backward compatibility
                         case POST:
                         case PUT:
                             t = cache.get(syncItem.getEntityID().id);
