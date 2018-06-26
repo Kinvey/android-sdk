@@ -30,6 +30,8 @@ import com.kinvey.java.sync.dto.SyncRequest;
 import java.io.IOException;
 import java.util.List;
 
+import static com.kinvey.java.sync.dto.SyncRequest.HttpVerb.SAVE;
+
 /**
  * Created by Prots on 2/8/16.
  */
@@ -65,7 +67,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
             T t;
             for (SyncItem syncItem : syncItems) {
                 if (syncItem.getRequestMethod() != null) {
-                    switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
+                    switch (syncItem.getRequestMethod()) {
                         case SAVE:
                             t = cache.get(syncItem.getEntityID().id);
                             if (t == null) {

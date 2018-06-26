@@ -15,17 +15,17 @@ public class SyncItem extends SyncRequest{
     public SyncItem() {
     }
 
-    public SyncItem(RequestMethod requestMethod, SyncMetaData entityID, String collectionName) {
-        this.requestMethod = requestMethod.name();
+    public SyncItem(SyncItem.HttpVerb httpMethod, SyncMetaData entityID, String collectionName) {
+        this.requestMethod = httpMethod.name();
         this.id = entityID;
         this.collectionName = collectionName;
     }
 
-    public String getRequestMethod() {
-        return requestMethod;
+    public SyncItem.HttpVerb getRequestMethod() {
+        return SyncItem.HttpVerb.fromString(requestMethod);
     }
 
-    public void setRequestMethod(String requestMethod) {
-        this.requestMethod = requestMethod;
+    public void setRequestMethod(SyncItem.HttpVerb requestMethod) {
+        this.requestMethod = requestMethod.name();
     }
 }
