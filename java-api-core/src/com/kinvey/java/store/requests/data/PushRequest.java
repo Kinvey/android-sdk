@@ -64,9 +64,11 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
 
         if (syncItems != null) {
             T t;
+            SyncRequest.HttpVerb httpVerb;
             for (SyncItem syncItem : syncItems) {
-                if (syncItem.getRequestMethod() != null) {
-                    switch (syncItem.getRequestMethod()) {
+                httpVerb = syncItem.getRequestMethod();
+                if (httpVerb != null) {
+                    switch (httpVerb) {
                         case POST:
                         case PUT:
                             t = cache.get(syncItem.getEntityID().id);
@@ -83,7 +85,16 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                     }
                 }
                 try {
-                    syncManager.executeRequest(client, syncRequest);
+                    if (httpVerb == SyncRequest.HttpVerb.POST) {
+                        String tempID = syncRequest.getEntityID().id;
+                        GenericJson result = syncManager.executeRequest(client, syncRequest);
+                        T temp = cache.get(tempID);
+                        temp.set("_id", result.get("_id"));
+                        cache.delete(tempID);
+                        cache.save(temp);
+                    } else {
+                        syncManager.executeRequest(client, syncRequest);
+                    }
                 } catch (KinveyJsonResponseException e) {
                     if (e.getStatusCode() != IGNORED_EXCEPTION_CODE && !e.getMessage().contains(IGNORED_EXCEPTION_MESSAGE)) {
                         throw e;
