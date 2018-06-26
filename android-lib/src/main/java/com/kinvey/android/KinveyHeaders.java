@@ -27,13 +27,17 @@ import com.google.api.client.util.Key;
 class KinveyHeaders extends com.kinvey.java.core.KinveyHeaders {
 
     @Key("x-kinvey-device-information")
+    private String deviceInformation;
+
+    @Key("x-kinvey-device-info")
     private String deviceInfo;
 
     public KinveyHeaders(Context context) {
         super();
 
         UuidFactory uuidFactory = new UuidFactory(context);
-        deviceInfo = uuidFactory.getDeviceInfoHeader(context);
+        deviceInformation = uuidFactory.getDeviceInfoHeader(context);
+        deviceInfo = uuidFactory.getDeviceInfoHeader(VERSION);
     }
 
 }
