@@ -25,6 +25,7 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICAccessToken;
 import com.kinvey.java.store.requests.user.GetMICTempURL;
+import com.kinvey.java.store.requests.user.LoginToTempURL;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +108,18 @@ public class MICLoginTest {
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
         requestManager.setMICRedirectURI(REDIRECT_URI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL(CLIENT_ID);
+        assertTrue(micTempURL.getUriTemplate().endsWith("scope=openid"));
         assertEquals(APP_KEY + "." + CLIENT_ID, ((HashMap) ((UrlEncodedContent) micTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
+    }
+
+    @Test
+    public void testLoginToTempURL() throws IOException {
+        UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+        LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(USERNAME, PASSWORD, CLIENT_ID, "tempURL");
+        requestManager.setMICRedirectURI(REDIRECT_URI);
+        GetMICTempURL micTempURL = requestManager.getMICTempURL(CLIENT_ID);
+        assertTrue(micTempURL.getUriTemplate().endsWith("scope=openid"));
+        assertEquals(APP_KEY + "." + CLIENT_ID, ((HashMap) ((UrlEncodedContent) loginToTempURL.getHttpContent()).getData()).get(CLIENT_ID_FIELD));
     }
 
     // Check clientId (should be absent second part of client_id) for getting Temp Link
