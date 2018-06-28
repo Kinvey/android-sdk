@@ -14,6 +14,7 @@ import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
+import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.BooleanPrimitiveListInPerson;
 import com.kinvey.androidTest.model.FloatPrimitiveListInPerson;
 import com.kinvey.androidTest.model.IntegerPrimitiveListInPerson;
@@ -65,6 +66,18 @@ public class CacheRealDataTest {
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
+    }
+
+    @After
+    public void tearDown() {
+        client.performLockDown();
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
     }
 
     @Test
@@ -1000,17 +1013,21 @@ public class CacheRealDataTest {
 
     }
 
-
-    @After
-    public void tearDown() {
-        client.performLockDown();
-        if (client.getKinveyHandlerThread() != null) {
-            try {
-                client.stopKinveyHandlerThread();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        }
+    @Test
+    public void testFillingIntField() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        Person person = new Person(TEST_USERNAME);
+        person.setIntVal(1);
+        DefaultKinveyClientCallback clientCallback = testManager.save(store, person);
+        assertEquals(person.getIntVal(), clientCallback.getResult().getIntVal());
+        DefaultKinveyReadCallback readCallback = testManager.find(store, client.query());
+        assertNotNull(readCallback);
+        assertNull(readCallback.getError());
+        assertNotNull(readCallback.getResult());
+        assertEquals(1, readCallback.getResult().getResult().size());
+        assertEquals(1, readCallback.getResult().getResult().get(0).getIntVal());
     }
 
 
