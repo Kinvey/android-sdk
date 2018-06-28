@@ -1274,4 +1274,23 @@ public class DeltaSetNewTest {
         assertEquals(5, pullCallback.getResult().getCount());
         assertEquals(5, testManager.find(store, emptyQuery).getResult().getResult().size());
     }
+
+    @Test
+    public void testDeltaSetDoRequestAfter2FailedAttempts() throws IOException, InterruptedException {
+        DataStore<Person> networkStore = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.NETWORK, client);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        store = DataStore.collection(Person.DELTA_SET_OFF_COLLECTION, Person.class, StoreType.SYNC, client);
+        store.setDeltaSetCachingEnabled(true);
+        testManager.createPersons(networkStore, 2);
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(2, pullCallback.getResult().getCount());
+        ICache<QueryCacheItem> queryCache = client.getSyncManager().getCacheManager().getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem.class, Long.MAX_VALUE);
+        assertEquals(1, queryCache.get().size());
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(2, pullCallback.getResult().getCount());
+        assertEquals(1, queryCache.get().size());
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(2, pullCallback.getResult().getCount());
+        assertEquals(1, queryCache.get().size());
+    }
 }
