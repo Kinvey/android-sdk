@@ -22,7 +22,6 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.network.NetworkManager;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
@@ -90,7 +89,7 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                         String tempID = syncRequest.getEntityID().id;
                         GenericJson result = syncManager.executeRequest(client, syncRequest);
                         T temp = cache.get(tempID);
-                        temp.set("_id", result.get("_id"));
+                        temp.set(Constants._ID, result.get(Constants._ID));
                         cache.delete(tempID);
                         cache.save(temp);
                     } else {
