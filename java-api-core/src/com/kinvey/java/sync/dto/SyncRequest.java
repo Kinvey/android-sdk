@@ -36,6 +36,7 @@ public class SyncRequest extends GenericJson implements Serializable {
         PUT("PUT"),
         POST("POST"),
         DELETE("DELETE"),
+        SAVE("SAVE"), // for backward compatibility with previous versions of keeping Sync requests
         QUERY("QUERY");
 
         private String query;

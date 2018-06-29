@@ -23,8 +23,8 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,7 +57,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
         switch (writePolicy) {
             case FORCE_LOCAL:
                 ret = cache.save(objects);
-                syncManager.enqueueRequests(networkManager.getCollectionName(), networkManager, RequestMethod.SAVE, ret);
+                syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, ret);
                 break;
             case LOCAL_THEN_NETWORK:
                 PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(), cache, networkManager,
@@ -75,7 +75,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                         ret.add(networkManager.saveBlocking(object).execute());
                     } catch (IOException e) {
                         syncManager.enqueueRequest(networkManager.getCollectionName(),
-                                networkManager, RequestMethod.SAVE, (String) object.get(Constants._ID));
+                                networkManager, networkManager.isTempId(object) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
                         exception = e;
                     }
                 }

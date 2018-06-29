@@ -20,10 +20,11 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
+
 
 /**
  * Created by Prots on 2/15/16.
@@ -49,6 +50,6 @@ public class DeleteSingleRequest<T extends GenericJson> extends AbstractDeleteRe
 
     @Override
     protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException {
-        syncManager.enqueueRequest(collectionName, networkManager, RequestMethod.DELETE, id);
+        syncManager.enqueueRequest(collectionName, networkManager, SyncRequest.HttpVerb.DELETE, id);
     }
 }

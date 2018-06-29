@@ -59,6 +59,7 @@ public abstract class ClassHash {
     public static final String TTL = "__ttl__";
     private static final String ID = "_id";
     private static final String ITEMS = "_items";
+    private static final String TEMP_ID = "temp_";
 
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
@@ -520,7 +521,7 @@ public abstract class ClassHash {
                     .equalTo(ID, (String) obj.get(ID))
                     .findFirst();
         } else {
-            obj.put(ID, UUID.randomUUID().toString());
+            obj.put(ID, TEMP_ID + UUID.randomUUID().toString());
         }
 
         String kmdId = null;
