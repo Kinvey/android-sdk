@@ -289,4 +289,25 @@ public class PaginationTest {
         }
     }
 
+    @Test
+    public void testDeletingItemsFromTheCacheIfItemsWereDeletedAtTheBackendUsingAP() throws IOException, InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(Person.COLLECTION);
+        testManager.cleanBackend(networkStore, StoreType.NETWORK);
+        for (int i = 0; i < 30; i++) {
+            testManager.save(networkStore, new Person(TEST_USERNAME_2));
+        }
+        for (int i = 0; i < 5; i++) {
+            testManager.save(networkStore, new Person(TEST_USERNAME));
+        }
+
+        assertEquals(35, testManager.pullCustom(store, client.query(), 10).getResult().getCount());
+        assertEquals(35, store.count().intValue());
+
+        testManager.delete(networkStore, client.query().equals("username", TEST_USERNAME_2));
+        assertEquals(5, testManager.pullCustom(store, client.query(), 10).getResult().getCount());
+        assertEquals(5, store.count().intValue());
+    }
+
 }

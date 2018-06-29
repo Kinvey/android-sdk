@@ -506,12 +506,14 @@ public class BaseDataStore<T extends GenericJson> {
         List<FutureTask<PullTaskResponse>> tasks;
         NetworkManager.Get pullRequest;
         FutureTask<PullTaskResponse> ft;
+        cache.delete(query.setSkip(0).setLimit(0));// To be sure that skip and limit are 0,
+        // because in next lines custom skip and limit are set anyway
         for (int i = 0; i < totalPagesNumber; i += batchSize) {
             executor = Executors.newFixedThreadPool(batchSize);
             tasks = new ArrayList<>();
             do {
                 query.setSkip(skipCount).setLimit(pageSize);
-                pullRequest = networkManager.pullBlocking(query);
+                pullRequest = networkManager.getBlocking(query);
                 skipCount += pageSize;
                 try {
                     ft = new FutureTask<PullTaskResponse>(new CallableAsyncPullRequestHelper(pullRequest, query));
@@ -528,7 +530,6 @@ public class BaseDataStore<T extends GenericJson> {
             for (FutureTask<PullTaskResponse> task : tasks) {
                 try {
                     PullTaskResponse tempResponse = task.get();
-                    cache.delete(tempResponse.getQuery());
                     pulledItemCount += cache.save(tempResponse.getKinveyReadResponse().getResult()).size();
                     exceptions.addAll(tempResponse.getKinveyReadResponse().getListOfExceptions());
                     if (lastRequestTime == null) { //it will be changed to time from count request
@@ -540,6 +541,7 @@ public class BaseDataStore<T extends GenericJson> {
             }
             executor.shutdown();
         }
+        query.setSkip(0).setLimit(0); // To set back default value of skip and limit
         response.setListOfExceptions(exceptions);
         response.setCount(pulledItemCount);
         if (deltaSetCachingEnabled && lastRequestTime != null) {
