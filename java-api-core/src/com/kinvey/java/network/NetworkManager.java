@@ -23,6 +23,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
@@ -448,14 +449,7 @@ public class NetworkManager<T extends GenericJson> {
             e.printStackTrace();
         }
 
-        boolean bRealmGeneratedId = false;
-
-        try {
-            bRealmGeneratedId = sourceID.matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
-        } catch (NullPointerException npe) {
-            // issue with the regex, so do nothing because we default to false
-            String msg = npe.getMessage();
-        }
+        boolean bRealmGeneratedId = isTempId(entity);
 
         if (sourceID != null && !bRealmGeneratedId) {
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
@@ -466,6 +460,18 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(save);
 
         return save;
+    }
+
+    public boolean isTempId(T item) {
+        boolean isTempId = false;
+        if (item.get(Constants._ID) != null) {
+            try {
+                isTempId = item.get(Constants._ID).toString().startsWith("temp_");
+            } catch (NullPointerException npe) {
+                // issue with the regex, so do nothing because we default to false
+            }
+        }
+        return isTempId;
     }
 
     /**
