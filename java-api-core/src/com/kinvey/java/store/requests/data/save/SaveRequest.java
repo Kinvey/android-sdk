@@ -23,8 +23,8 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 
@@ -55,7 +55,7 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
             case FORCE_LOCAL:
                 ret = cache.save(object);
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager, RequestMethod.SAVE, (String)object.get(Constants._ID));
+                        networkManager, networkManager.isTempId(ret) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
                 break;
             case LOCAL_THEN_NETWORK:
                 PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(), cache, networkManager,
@@ -66,12 +66,29 @@ public class SaveRequest<T extends GenericJson> implements IRequest<T> {
                     // silent fall, will be synced next time
                 }
 
+                // If object does not have an _id, then it is being created locally. The cache may
+                // provide an _id in this case, but before it is saved to the network, this temporary
+                // _id should be removed prior to saving to the backend. This way, the backend
+                // will generate a permanent _id that will be used by the cache. Once we get the
+                // result from the backend with the permanent _id, the record in the cache with the
+                // temporary _id should be removed, and the new record should be saved.
                 ret = cache.save(object);
+                String id = ret.get(Constants._ID).toString();
+                boolean bRealmGeneratedId = networkManager.isTempId(ret);
+                if (bRealmGeneratedId) {
+                    ret.set(Constants._ID, null);
+                }
                 try{
                     ret = networkManager.saveBlocking(object).execute();
+                    if (bRealmGeneratedId) {
+                        // The result from the network has the entity with its permanent ID. Need
+                        // to remove the entity from the local cache with the temporary ID.
+                        cache.delete(id);
+                    }
+
                 } catch (IOException e) {
                     syncManager.enqueueRequest(networkManager.getCollectionName(),
-                            networkManager, RequestMethod.SAVE, (String)object.get(Constants._ID));
+                            networkManager, bRealmGeneratedId ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, id);
                     throw e;
                 }
                 cache.save(ret);

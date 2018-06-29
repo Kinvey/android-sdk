@@ -122,8 +122,10 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                     SyncItem syncItem = syncItems.get(j+i);
                     id = syncItem.getEntityID().id;
 
-                    switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
-                        case SAVE:
+                    switch (syncItem.getRequestMethod()) {
+                        case SAVE: // the SAVE case need for backward compatibility
+                        case POST:
+                        case PUT:
                             t = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE).get(id);
                             if (t == null) {
                                 // check that item wasn't deleted before
@@ -139,7 +141,7 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                     }
 
                     try {
-                        FutureTask ft = new FutureTask(new CallableAsyncPushRequestHelper(client, manager, syncRequest, syncItem));
+                        FutureTask ft = new FutureTask(new CallableAsyncPushRequestHelper<T>(client, manager, syncRequest, syncItem, storeItemType));
                         tasks.add(ft);
                         executor.execute(ft);
                         pushResponse.setSuccessCount(++progress);

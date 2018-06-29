@@ -59,6 +59,7 @@ public abstract class ClassHash {
     public static final String TTL = "__ttl__";
     private static final String ID = "_id";
     private static final String ITEMS = "_items";
+    private static final String TEMP_ID = "temp_";
 
     private static final HashSet<String> PRIVATE_FIELDS = new HashSet<String>(){
         {
@@ -520,7 +521,7 @@ public abstract class ClassHash {
                     .equalTo(ID, (String) obj.get(ID))
                     .findFirst();
         } else {
-            obj.put(ID, UUID.randomUUID().toString());
+            obj.put(ID, TEMP_ID + UUID.randomUUID().toString());
         }
 
         String kmdId = null;
@@ -817,7 +818,7 @@ public abstract class ClassHash {
                 }
 
                 if (Number.class.isAssignableFrom(info.getType())){
-                    Number n = (Number)dynamic.get(info.getName());
+                    Number n = dynamic.get(info.getName());
                     if (Long.class.isAssignableFrom(info.getType())){
                         ret.put(info.getName(), n.longValue());
                     } else if (Byte.class.isAssignableFrom(info.getType())){
@@ -860,8 +861,13 @@ public abstract class ClassHash {
                             ret.put(info.getName(), c);
                         }
                     }
-                } else {
-                    ret.put(info.getName(), o);
+                } else { //if you are here, then the field is a primitive
+                    // realm keeps int values as a long, so we need to convert it back
+                    if (info.getType().isPrimitive() && info.getType().getSimpleName().equals("int") && o instanceof Long) {
+                        ret.put(info.getName(), ((Long) o).intValue());
+                    } else {
+                        ret.put(info.getName(), o);
+                    }
                 }
 
             }

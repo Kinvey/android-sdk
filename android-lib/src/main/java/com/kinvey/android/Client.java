@@ -18,6 +18,7 @@ package com.kinvey.android;
 
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
@@ -25,7 +26,7 @@ import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
@@ -55,6 +56,8 @@ import com.kinvey.java.store.StoreType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import io.realm.Realm;
@@ -451,13 +454,34 @@ public class Client<T extends User> extends AbstractClient<T> {
         private byte[] encryptionKey;
 
         /**
-         * creating new HttpTransport with fix for 401 error that rais an exception
+         * creating new HttpTransport with fix for 401 error that raise an exception MLIBZ-708
          * @return HttpTransport
          */
+        @NonNull
         private static HttpTransport newCompatibleTransport(){
-            return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 18 ?  //versions affected by no auth challenge exception
-                    new ApacheHttpTransport() :
-                    AndroidHttp.newCompatibleTransport();
+            /*  http://developer.android.com/intl/zh-cn/reference/javax/net/ssl/SSLSocket.html
+                support for SSL/TLSv1 was disabled in the Kinvey Android SDK 3.1.3 version
+                SDK 16-19 are versions where TLSv1.1 and TLSv1.2 are disabled by default
+             */
+            return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 19 ?
+                    buildSupportHttpTransport() :
+                    new NetHttpTransport();
+        }
+
+        @NonNull
+        private static HttpTransport buildSupportHttpTransport() {
+            NetHttpTransport httpTransport;
+            try {
+                httpTransport = new NetHttpTransport.Builder()
+                        .setProxy(null)
+                        .setHostnameVerifier(null)
+                        .setSslSocketFactory(new KinveySocketFactory())
+                        .build();
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                httpTransport = new NetHttpTransport();
+            }
+            return httpTransport;
         }
 
         /**

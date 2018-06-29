@@ -92,6 +92,42 @@ public class DeltaCacheTest {
         }
     }
 
+
+    /* MLIBZ-2470 Test Server-side Delta Set use cases */
+
+
+    /* The goal of the test is to make sure delta set is not used when not enabled */
+    @Test
+    public void testDeltaSetIsNotUsed() throws InterruptedException, IOException {
+        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+        testManager.cleanBackend(store, StoreType.SYNC);
+        testManager.saveCustom(store, new Person(TEST_USERNAME));
+        store.pushBlocking();
+        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(1, pullCallback.getResult().getCount());
+        testManager.saveCustom(store, new Person(TEST_USERNAME_2));
+        store.pushBlocking();
+        pullCallback = testManager.pullCustom(store, client.query());
+        assertEquals(2, pullCallback.getResult().getCount());
+        assertFalse(store.isDeltaSetCachingEnabled());
+    }
+
+    /* The goal of the test is to confirm that empty array will be returned if the user has no changes and the since is respected */
+//    @Test
+//    public void testEmptyArrayIsReturnedIfNoChanges() throws InterruptedException, IOException {
+//        store = DataStore.collection(Person.DELTA_SET_COLLECTION, Person.class, StoreType.SYNC, client);
+//        testManager.cleanBackend(store, StoreType.SYNC);
+//        store.setDeltaSetCachingEnabled(true);
+//        testManager.saveCustom(store, new Person(TEST_USERNAME));
+//        store.pushBlocking();
+//
+//        CustomKinveyPullCallback pullCallback = testManager.pullCustom(store, client.query());
+//        assertEquals(0, pullCallback.getResult().getCount());
+//    }
+
+    /* end */
+
+
     @Test
     public void testDeltaSyncPull() throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Query query = client.query();
@@ -558,6 +594,8 @@ public class DeltaCacheTest {
         assertEquals("name_1", response.get(0).getUsername());
         assertEquals("name_1", response.get(1).getUsername());
     }
+
+//ignore while test app won't support delta cache
 
     @Test
     public void testSaveWithTwoStorageTypes() throws InterruptedException, IOException {

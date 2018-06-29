@@ -22,13 +22,13 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.network.NetworkManager;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.List;
+
 
 /**
  * Created by Prots on 2/8/16.
@@ -63,10 +63,14 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
 
         if (syncItems != null) {
             T t;
+            SyncRequest.HttpVerb httpVerb;
             for (SyncItem syncItem : syncItems) {
-                if (syncItem.getRequestMethod() != null) {
-                    switch (RequestMethod.fromString(syncItem.getRequestMethod())) {
-                        case SAVE:
+                httpVerb = syncItem.getRequestMethod();
+                if (httpVerb != null) {
+                    switch (httpVerb) {
+                        case SAVE: //the SAVE case need for backward compatibility
+                        case POST:
+                        case PUT:
                             t = cache.get(syncItem.getEntityID().id);
                             if (t == null) {
                                 // check that item wasn't deleted before
@@ -81,7 +85,16 @@ public class PushRequest<T extends GenericJson> extends AbstractKinveyExecuteReq
                     }
                 }
                 try {
-                    syncManager.executeRequest(client, syncRequest);
+                    if (httpVerb == SyncRequest.HttpVerb.POST) {
+                        String tempID = syncRequest.getEntityID().id;
+                        GenericJson result = syncManager.executeRequest(client, syncRequest);
+                        T temp = cache.get(tempID);
+                        temp.set(Constants._ID, result.get(Constants._ID));
+                        cache.delete(tempID);
+                        cache.save(temp);
+                    } else {
+                        syncManager.executeRequest(client, syncRequest);
+                    }
                 } catch (KinveyJsonResponseException e) {
                     if (e.getStatusCode() != IGNORED_EXCEPTION_CODE && !e.getMessage().contains(IGNORED_EXCEPTION_MESSAGE)) {
                         throw e;

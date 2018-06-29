@@ -21,8 +21,8 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 
@@ -51,6 +51,6 @@ public class DeleteQueryRequest<T extends GenericJson> extends AbstractDeleteReq
 
     @Override
     protected void enqueueRequest(String collectionName, NetworkManager<T> networkManager) throws IOException {
-        syncManager.enqueueRequests(collectionName, networkManager, RequestMethod.DELETE, cache.get(query));
+        syncManager.enqueueDeleteRequests(collectionName, networkManager, cache.get(query));
     }
 }

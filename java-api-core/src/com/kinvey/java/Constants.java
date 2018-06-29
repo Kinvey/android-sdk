@@ -8,6 +8,7 @@ public final class Constants {
     public static final String COLLECTION = "collection";
     public static final String UNDERSCORE = "_";
     public static final String TIME_FORMAT = "%tFT%<tTZ";
+    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     public static final String Z = "Z";
     public static final String DOT = ".";
     public static final String QUERY = "query";
