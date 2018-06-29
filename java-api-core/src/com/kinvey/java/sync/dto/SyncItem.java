@@ -1,7 +1,6 @@
 package com.kinvey.java.sync.dto;
 
 import com.google.api.client.util.Key;
-import com.kinvey.java.sync.RequestMethod;
 
 /**
  * Created by yuliya on 10/04/17.

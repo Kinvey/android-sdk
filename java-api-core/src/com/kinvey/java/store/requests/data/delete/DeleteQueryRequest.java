@@ -21,7 +21,6 @@ import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
-import com.kinvey.java.sync.RequestMethod;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
