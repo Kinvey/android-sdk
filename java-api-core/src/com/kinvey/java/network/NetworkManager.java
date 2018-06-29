@@ -466,7 +466,7 @@ public class NetworkManager<T extends GenericJson> {
         boolean isTempId = true;
         if (item.get(Constants._ID) != null) {
             try {
-                isTempId = item.get(Constants._ID).toString().matches("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
+                isTempId = item.get(Constants._ID).toString().startsWith("temp_");
             } catch (NullPointerException npe) {
                 // issue with the regex, so do nothing because we default to false
             }
