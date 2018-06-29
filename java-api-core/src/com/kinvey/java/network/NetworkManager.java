@@ -463,7 +463,7 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     public boolean isTempId(T item) {
-        boolean isTempId = true;
+        boolean isTempId = false;
         if (item.get(Constants._ID) != null) {
             try {
                 isTempId = item.get(Constants._ID).toString().startsWith("temp_");
