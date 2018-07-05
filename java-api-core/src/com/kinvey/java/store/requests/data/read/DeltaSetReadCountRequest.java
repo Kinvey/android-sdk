@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -25,12 +25,12 @@ import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 
-public class ReadCountRequest<T extends GenericJson> extends AbstractReadCountRequest<T> {
+public class DeltaSetReadCountRequest<T extends GenericJson> extends AbstractReadCountRequest<T> {
 
     private final Query query;
 
-    public ReadCountRequest(ICache<T> cache, NetworkManager<T> networkManager, ReadPolicy readPolicy,
-                              Query query, SyncManager syncManager) {
+    public DeltaSetReadCountRequest(ICache<T> cache, NetworkManager<T> networkManager, ReadPolicy readPolicy,
+                                    Query query, SyncManager syncManager) {
         super(cache, readPolicy, networkManager, syncManager);
         this.query = query;
     }

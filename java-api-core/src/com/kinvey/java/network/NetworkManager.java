@@ -27,6 +27,7 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.AbstractKinveyCachedReadRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
@@ -35,6 +36,7 @@ import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.dto.DeviceId;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
+import com.kinvey.java.model.KinveyDeltaSetCountResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
@@ -401,9 +403,19 @@ public class NetworkManager<T extends GenericJson> {
     }
 
 
+    /**
+     *  @deprecated use {@link #getDeltaSetCountBlocking } instead.
+     */
+    @Deprecated
     public GetCount getCountBlocking() throws IOException {
 //        Preconditions.checkNotNull();
         GetCount getCount = new GetCount();
+        client.initializeRequest(getCount);
+        return getCount;
+    }
+
+    public GetCountDeltaSet getDeltaSetCountBlocking() throws IOException {
+        GetCountDeltaSet getCount = new GetCountDeltaSet();
         client.initializeRequest(getCount);
         return getCount;
     }
@@ -924,18 +936,27 @@ public class NetworkManager<T extends GenericJson> {
         @Key
         private String collectionName;
 
-//        GetCount(String queryString) {
-//            super(client, "GET", REST_PATH, null, myClass);
-//            this.collectionName= NetworkManager.this.collectionName;
-//            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
-//            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-//                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
-//            }
-//        }
-
         GetCount() {
             super (client, "GET", REST_PATH, null, KinveyCountResponse.class);
             this.collectionName= NetworkManager.this.collectionName;
+
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
+        }
+    }
+
+    public class GetCountDeltaSet extends AbstractKinveyCachedReadRequest {
+
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_count";
+
+        @Key
+        private String collectionName;
+
+        GetCountDeltaSet() {
+            super (client, "GET", REST_PATH, null);
+            this.collectionName = NetworkManager.this.collectionName;
 
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
