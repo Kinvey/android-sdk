@@ -41,7 +41,7 @@ public class ReadCountRequest<T extends GenericJson> extends AbstractReadCountRe
     }
 
     @Override
-    protected NetworkManager.GetCountDeltaSet countNetwork() throws IOException {
-        return networkManager.getDeltaSetCountBlocking();
+    protected NetworkManager.GetCount countNetwork() throws IOException {
+        return networkManager.getCountBlocking();
     }
 }

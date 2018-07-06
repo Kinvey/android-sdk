@@ -30,7 +30,7 @@ import com.kinvey.java.core.KinveyJsonError;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
-import com.kinvey.java.model.KinveyDeltaSetCountResponse;
+import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyPullResponse;
@@ -41,7 +41,6 @@ import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteQueryRequest;
 import com.kinvey.java.store.requests.data.delete.DeleteSingleRequest;
-import com.kinvey.java.store.requests.data.read.DeltaSetReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadAllRequest;
 import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
@@ -319,10 +318,10 @@ public class BaseDataStore<T extends GenericJson> {
      * @return items count in collection on the server
      */
     @Nonnull
-    private KinveyDeltaSetCountResponse internalCountNetwork() throws IOException {
+    private KinveyCountResponse internalCountNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        return new DeltaSetReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
+        return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
     }
 
     /**
@@ -511,7 +510,7 @@ public class BaseDataStore<T extends GenericJson> {
         int skipCount = 0;
 
         // First, get the count of all the items to pull
-        KinveyDeltaSetCountResponse countResponse = internalCountNetwork();
+        KinveyCountResponse countResponse = internalCountNetwork();
         int totalItemNumber = countResponse.getCount();
         String lastRequestTime = countResponse.getLastRequestTime();
         int pulledItemCount = 0;

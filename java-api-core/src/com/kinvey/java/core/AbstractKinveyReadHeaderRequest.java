@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
+ *
+ * This software is licensed to you under the Kinvey terms of service located at
+ * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
+ * software, you hereby accept such terms of service  (and any agreement referenced
+ * therein) and agree that you have read, understand and agree to be bound by such
+ * terms of service and are of legal age to agree to such terms with Kinvey.
+ *
+ * This software contains valuable confidential and proprietary information of
+ * KINVEY, INC and is subject to applicable licensing agreements.
+ * Unauthorized reproduction, transmission or distribution of this file and its
+ * contents is a violation of applicable laws.
+ *
+ */
+
 package com.kinvey.java.core;
 
 import com.google.api.client.http.HttpMethods;
@@ -6,28 +22,21 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.util.Charsets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
-import com.kinvey.java.model.KinveyDeltaSetCountResponse;
-import com.kinvey.java.model.KinveyQueryCacheResponse;
+import com.kinvey.java.model.AbstractKinveyHeadersResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 /**
  * Created by yuliya on 05/07/17.
  */
 
-public abstract class AbstractKinveyCachedReadRequest extends AbstractKinveyJsonClientRequest<KinveyDeltaSetCountResponse> {
+public abstract class AbstractKinveyReadHeaderRequest<T extends AbstractKinveyHeadersResponse> extends AbstractKinveyJsonClientRequest<T> {
 
     /**
      * @param abstractKinveyJsonClient kinvey credential JSON client
@@ -37,12 +46,12 @@ public abstract class AbstractKinveyCachedReadRequest extends AbstractKinveyJson
      *                                 full URL.
      * @param jsonContent              POJO that can be serialized into JSON content or {@code null} for none
      */
-    protected AbstractKinveyCachedReadRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent) {
-        super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null);
+    protected AbstractKinveyReadHeaderRequest(AbstractClient abstractKinveyJsonClient, String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
+        super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass);
     }
 
     @Override
-    public KinveyDeltaSetCountResponse execute() throws IOException {
+    public T execute() throws IOException {
         HttpResponse response = executeUnparsed();
         if (overrideRedirect) {
             return onRedirect(response.getHeaders().getLocation());
@@ -53,7 +62,7 @@ public abstract class AbstractKinveyCachedReadRequest extends AbstractKinveyJson
             return null;
         }
         try {
-            KinveyDeltaSetCountResponse ret;
+            T ret;
             int statusCode = response.getStatusCode();
             if (response.getRequest().getRequestMethod().equals(HttpMethods.HEAD) || statusCode / 100 == 1
                     || statusCode == HttpStatusCodes.STATUS_CODE_NO_CONTENT
@@ -64,7 +73,7 @@ public abstract class AbstractKinveyCachedReadRequest extends AbstractKinveyJson
             } else {
                 String jsonString = response.parseAsString();
                 JsonObjectParser objectParser = getAbstractKinveyClient().getObjectParser();
-                ret = objectParser.parseAndClose(new ByteArrayInputStream(jsonString.getBytes(Charsets.UTF_8)), Charsets.UTF_8, KinveyDeltaSetCountResponse.class);
+                ret = objectParser.parseAndClose(new ByteArrayInputStream(jsonString.getBytes(Charsets.UTF_8)), Charsets.UTF_8, responseClass);
                 if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START)) {
                     ret.setLastRequestTime(response.getHeaders().getHeaderStringValues(Constants.X_KINVEY_REQUEST_START).get(0).toUpperCase(Locale.US));
                 } else if (response.getHeaders().containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {

@@ -10,14 +10,13 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
-import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.KinveyDeltaSetCountResponse;
+import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.QueryCacheItem;
 import com.kinvey.java.store.StoreType;
@@ -1307,9 +1306,9 @@ public class DeltaSetNewTest {
         }
         assert method != null;
         method.setAccessible(true);
-        KinveyDeltaSetCountResponse response = null;
+        KinveyCountResponse response = null;
         try {
-            response = (KinveyDeltaSetCountResponse) method.invoke(BaseDataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+            response = (KinveyCountResponse) method.invoke(BaseDataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

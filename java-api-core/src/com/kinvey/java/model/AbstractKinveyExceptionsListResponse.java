@@ -6,7 +6,7 @@ import java.util.List;
  * Created by yuliya on 10/26/17.
  */
 
-public abstract class KinveyAbstractResponse {
+public abstract class AbstractKinveyExceptionsListResponse {
 
     private List<Exception> listOfExceptions;
 
