@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
@@ -1315,6 +1317,10 @@ public class DeltaSetNewTest {
             e.printStackTrace();
         }
         assertNotNull(response);
-        assertNotNull(response.getLastRequestTime());
+        String lastRequestTime = response.getLastRequestTime();
+        assertNotNull(lastRequestTime);
+        Pattern p = Pattern.compile("\\b\\d{4}\\-\\d{2}\\-\\d{2}T\\d{1,2}:\\d{2}:\\d{2}.\\d{3}Z"); // check data pattern "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        Matcher m = p.matcher(lastRequestTime);
+        assertTrue(m.matches());
     }
 }
