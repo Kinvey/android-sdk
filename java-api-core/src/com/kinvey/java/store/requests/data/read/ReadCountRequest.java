@@ -42,6 +42,6 @@ public class ReadCountRequest<T extends GenericJson> extends AbstractReadCountRe
 
     @Override
     protected NetworkManager.GetCount countNetwork() throws IOException {
-        return networkManager.getCountBlocking(/*query*/);
+        return networkManager.getCountBlocking();
     }
 }

@@ -18,18 +18,17 @@ package com.kinvey.java.store.requests.data.read;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.AbstractKinveyReadHeaderRequest;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.ReadPolicy;
-import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
 
 import java.io.IOException;
 
-public abstract class AbstractReadCountRequest<T extends GenericJson> implements IRequest<Integer> {
+public abstract class AbstractReadCountRequest<T extends GenericJson> implements IRequest<KinveyCountResponse> {
     protected final ICache<T> cache;
     private final ReadPolicy readPolicy;
     protected NetworkManager<T> networkManager;
@@ -45,9 +44,9 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
     }
 
     @Override
-    public Integer execute() throws IOException {
-        Integer ret = 0;
-        AbstractKinveyJsonClientRequest<KinveyCountResponse> request = null;
+    public KinveyCountResponse execute() throws IOException {
+        KinveyCountResponse ret = new KinveyCountResponse();
+        AbstractKinveyReadHeaderRequest<KinveyCountResponse> request = null;
         try {
             request = countNetwork();
         } catch (IOException e) {
@@ -56,11 +55,10 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
 
         switch (readPolicy){
             case FORCE_LOCAL:
-                ret = countCached();
+                ret.setCount(countCached());
                 break;
             case FORCE_NETWORK:
-                KinveyCountResponse response = request.execute();
-                ret = response.getCount();
+                ret = request.execute();
                 break;
             case BOTH:
                 PushRequest<T> pushRequest = new PushRequest<T>(networkManager.getCollectionName(),
@@ -71,7 +69,7 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
                     // silent fall, will be synced next time
                 }
 
-                ret = request.execute().getCount();
+                ret = request.execute();
                 break;
         }
         return ret;
@@ -84,5 +82,5 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
 
     abstract protected Integer countCached();
 
-    abstract protected AbstractKinveyJsonClientRequest<KinveyCountResponse> countNetwork() throws IOException;
+    abstract protected NetworkManager.GetCount countNetwork() throws IOException;
 }

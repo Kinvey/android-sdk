@@ -1,8 +1,8 @@
 package com.kinvey.android.sync;
 
-import com.kinvey.java.model.KinveyAbstractResponse;
+import com.kinvey.java.model.AbstractKinveyExceptionsListResponse;
 
-public class KinveyPushResponse extends KinveyAbstractResponse {
+public class KinveyPushResponse extends AbstractKinveyExceptionsListResponse {
 
     private int successCount;
 

@@ -27,16 +27,18 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.core.AbstractKinveyReadHeaderRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.dto.DeviceId;
+import com.kinvey.java.model.AbstractKinveyHeadersResponse;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyCountResponse;
+import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -400,9 +402,12 @@ public class NetworkManager<T extends GenericJson> {
         return queryCacheGet;
     }
 
-
+    /**
+     * Get items count in the collection
+     * @return GetCount request
+     * @throws IOException
+     */
     public GetCount getCountBlocking() throws IOException {
-//        Preconditions.checkNotNull();
         GetCount getCount = new GetCount();
         client.initializeRequest(getCount);
         return getCount;
@@ -917,21 +922,12 @@ public class NetworkManager<T extends GenericJson> {
      * requests.
      *
      */
-    public class GetCount extends AbstractKinveyJsonClientRequest<KinveyCountResponse> {
+    public class GetCount extends AbstractKinveyReadHeaderRequest<KinveyCountResponse> {
 
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_count";
 
         @Key
         private String collectionName;
-
-//        GetCount(String queryString) {
-//            super(client, "GET", REST_PATH, null, myClass);
-//            this.collectionName= NetworkManager.this.collectionName;
-//            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
-//            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-//                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
-//            }
-//        }
 
         GetCount() {
             super (client, "GET", REST_PATH, null, KinveyCountResponse.class);
