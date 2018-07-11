@@ -6,7 +6,7 @@ import java.util.List;
  * Created by yuliya on 03/06/18.
  */
 
-public class KinveyQueryCacheResponse<T> extends KinveyAbstractResponse {
+public class KinveyQueryCacheResponse<T> extends AbstractKinveyExceptionsListResponse {
 
     private List<T> deleted;
 

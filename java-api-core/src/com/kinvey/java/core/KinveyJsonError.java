@@ -23,6 +23,8 @@ import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 /**
  *
@@ -53,6 +55,19 @@ public class KinveyJsonError extends GenericData {
   public static KinveyJsonError parse(JsonFactory jsonFactory, HttpResponse response) throws IOException {
     return new JsonObjectParser(jsonFactory).parseAndClose(response.getContent(),
         response.getContentCharset(), KinveyJsonError.class);
+  }
+
+  /**
+   * Parses the HttpResponse as a standard Kinvey error.
+   *
+   * @param jsonFactory the json factory to use while parsing
+   * @param content
+   * @param charset
+   * @return standard error object
+   * @throws IOException error occurred during parse
+   */
+  public static KinveyJsonError parse(JsonFactory jsonFactory, InputStream content, Charset charset) throws IOException {
+    return new JsonObjectParser(jsonFactory).parseAndClose(content, charset, KinveyJsonError.class);
   }
 
   /**

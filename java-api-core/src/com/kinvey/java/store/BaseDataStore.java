@@ -30,6 +30,7 @@ import com.kinvey.java.core.KinveyJsonError;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.Aggregation;
+import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyPullResponse;
@@ -294,10 +295,10 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.getSyncManager()).execute();
+            Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.getSyncManager()).execute().getCount();
             cachedCallback.onSuccess(ret);
         }
-        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute();
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute().getCount();
     }
 
     /**
@@ -306,6 +307,18 @@ public class BaseDataStore<T extends GenericJson> {
      */
     @Nonnull
     public Integer countNetwork() throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute().getCount();
+    }
+
+    /**
+     * Get items count in collection on the server with last request time info from the response headers.
+     * Is used for Delta Set auto-pagination requests.
+     * @return items count in collection on the server
+     */
+    @Nonnull
+    private KinveyCountResponse internalCountNetwork() throws IOException {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         return new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.getSyncManager()).execute();
@@ -497,8 +510,9 @@ public class BaseDataStore<T extends GenericJson> {
         int skipCount = 0;
 
         // First, get the count of all the items to pull
-        int totalItemNumber = countNetwork();
-        String lastRequestTime = null;
+        KinveyCountResponse countResponse = internalCountNetwork();
+        int totalItemNumber = countResponse.getCount();
+        String lastRequestTime = countResponse.getLastRequestTime();
         int pulledItemCount = 0;
         int totalPagesNumber = Math.abs(totalItemNumber / pageSize) + 1;
         int batchSize = BATCH_SIZE; // batch size for concurrent push requests
@@ -532,9 +546,6 @@ public class BaseDataStore<T extends GenericJson> {
                     PullTaskResponse tempResponse = task.get();
                     pulledItemCount += cache.save(tempResponse.getKinveyReadResponse().getResult()).size();
                     exceptions.addAll(tempResponse.getKinveyReadResponse().getListOfExceptions());
-                    if (lastRequestTime == null) { //it will be changed to time from count request
-                        lastRequestTime = tempResponse.getKinveyReadResponse().getLastRequestTime();
-                    }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }

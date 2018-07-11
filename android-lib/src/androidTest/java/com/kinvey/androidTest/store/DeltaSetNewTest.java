@@ -10,13 +10,14 @@ import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
-import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyCountResponse;
+import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.QueryCacheItem;
 import com.kinvey.java.store.StoreType;
 
@@ -30,7 +31,10 @@ import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
@@ -1292,5 +1296,31 @@ public class DeltaSetNewTest {
         pullCallback = testManager.pullCustom(store, client.query());
         assertEquals(2, pullCallback.getResult().getCount());
         assertEquals(1, queryCache.get().size());
+    }
+
+    @Test
+    public void testCountHaveTimeStamp() {
+        Method method = null;
+        try {
+            method = BaseDataStore.class.getDeclaredMethod("internalCountNetwork");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        assert method != null;
+        method.setAccessible(true);
+        KinveyCountResponse response = null;
+        try {
+            response = (KinveyCountResponse) method.invoke(BaseDataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(response);
+        String lastRequestTime = response.getLastRequestTime();
+        assertNotNull(lastRequestTime);
+        Pattern p = Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}T\\d{1,2}:\\d{2}:\\d{2}.\\d{3}Z"); // check data pattern "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        Matcher m = p.matcher(lastRequestTime);
+        assertTrue(m.matches());
     }
 }

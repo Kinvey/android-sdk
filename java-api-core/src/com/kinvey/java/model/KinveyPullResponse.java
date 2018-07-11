@@ -1,7 +1,7 @@
 package com.kinvey.java.model;
 
 
-public class KinveyPullResponse extends KinveyAbstractResponse {
+public class KinveyPullResponse extends AbstractKinveyExceptionsListResponse {
 
     private int count;
 
