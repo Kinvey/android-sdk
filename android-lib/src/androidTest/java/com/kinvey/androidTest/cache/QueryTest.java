@@ -9,6 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.cache.QueryHelper;
 import com.kinvey.java.Query;
+import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import org.junit.After;
@@ -21,7 +22,9 @@ import io.realm.DynamicRealmObject;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
+import io.realm.Sort;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -296,11 +299,110 @@ public class QueryTest {
     }
 
     @Test
-    public void testNotEquqlStringClause() {
+    public void testNotEqualStringClause() {
         Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
         q.notEqual(TEST_FIELD, TEST_FIELD);
         QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
         verify(query, times(1)).notEqualTo(TEST_FIELD, TEST_FIELD);
+    }
+
+    @Test
+    public void tesEqualByteClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Byte aByte = 1;
+        q.equals(TEST_FIELD, aByte);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, aByte);
+    }
+
+    @Test
+    public void testEqualByteArrayClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        byte[] bytes = {1};
+        q.equals(TEST_FIELD, bytes);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, bytes);
+    }
+
+    @Test
+    public void testEqualShortClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        Short aShort = 12345;
+        q.equals(TEST_FIELD, aShort);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, aShort);
+    }
+
+    @Test
+    public void testEqualIntClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals(TEST_FIELD, 1);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, 1);
+    }
+
+    @Test
+    public void testEqualLongClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals(TEST_FIELD, 1L);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, 1L);
+    }
+
+    @Test
+    public void testEqualDoubleClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals(TEST_FIELD, 1d);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, 1d);
+    }
+
+    @Test
+    public void testEqualFloatClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals(TEST_FIELD, 1f);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, 1f);
+    }
+
+    @Test
+    public void testEqualStringClause() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.equals(TEST_FIELD, TEST_FIELD);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        verify(query, times(1)).equalTo(TEST_FIELD, TEST_FIELD);
+    }
+
+    @Test
+    public void testAddSortASC() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.addSort(TEST_FIELD, AbstractQuery.SortOrder.ASC);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+
+        //check that addSort isn't used in prepareRealmQuery
+        verify(query, times(0)).beginGroup();
+        verify(query, times(0)).equalTo(eq(TEST_FIELD), anyString());
+        verify(query, times(0)).or();
+        verify(query, times(0)).not();
+        verify(query, times(0)).endGroup();
+
+        assertEquals("{\"field\" : 1}", q.getSortString());
+    }
+
+    @Test
+    public void testAddSortDESC() {
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder());
+        q.addSort(TEST_FIELD, AbstractQuery.SortOrder.DESC);
+        QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+
+        //check that addSort isn't used in prepareRealmQuery
+        verify(query, times(0)).beginGroup();
+        verify(query, times(0)).equalTo(eq(TEST_FIELD), anyString());
+        verify(query, times(0)).or();
+        verify(query, times(0)).not();
+        verify(query, times(0)).endGroup();
+
+        assertEquals("{\"field\" : -1}", q.getSortString());
     }
 
     @Test
