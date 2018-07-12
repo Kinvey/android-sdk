@@ -1,16 +1,14 @@
 Kinvey Java Library
 ======
 
-This library is a standalone library designed for all java environments.
-The library acts as a client for the Kinvey REST api and can be used for
-building Android apps and Java6 server applications.
+This library is a standalone library designed for all java environments. The library acts as a client for the Kinvey REST API and can be used for building Android apps and Java6 server applications.
 
 It is recommended to use either IntelliJ or Android Studio. Eclipse is NOT recommended.
 
 ## Documentation
-Refer https://devcenter.kinvey.com/android-v2 for complete documentation of the library APIs and usage.
+Refer to https://devcenter.kinvey.com/android-v2 for complete documentation of the library APIs and usage.
 
-## Overview of the Library -
+## Overview of the Library
 
 The codebase is made of the following key projects at the top level (under java-library): 
 
@@ -30,9 +28,10 @@ Encryption module built on top of android-lib. Rarely used; not compiled into th
 Samples built on top of the libraries. This is a submodule, the full source for samples is under https://github.com/Kinvey/java-library/tree/ver2.x/samples
 
 ## Build
-Pre-requisites:
 
-* [android sdk](http://developer.android.com/sdk/index.html)
+Prerequisites:
+
+* [Android SDK](http://developer.android.com/sdk/index.html)
 * Set JAVA_HOME
 * Set ANDROID_HOME
 * Download android_sdk/platforms/android-19, android_sdk/platforms/android-10
@@ -41,12 +40,22 @@ Pre-requisites:
 ./gradlew clean release
 ```
 
-After this .zip with generated .aar and .jar files should be in the directory: /release/zipped
+The command should generate a .zip archive in `/release/zipped` containing .aar and .jar files.
 
-## How to enable TLSv1.1/TLSv1.2 on the Android 4.1 - 4.4 versions
-The Kinvey backend doesn't support TLSv1.0 connections anymore. Devices with Android 5.0+ support TLSv1.1/TLSv1.2 by default, so for these versions it doesn't need to add any changes. But it's disabled by default at the devices with Android 4.1 - 4.4. To enable TLSv1.1/TLSv1.2 on the Android 4.1 - 4.4 versions you need to:
-- set up minSdkVersion = 16
-- create a custom SSLSocketFactory that is going to proxy all calls to a default  SSLSocketFactory implementation. Override all createSocket methods and callsetEnabledProtocols on the returned SSLSocket to enable TLS 1.1 and TLS 1.2. For example:
+## How to enable TLSv1.1/TLSv1.2 on Android v4.1-v4.4.4
+
+As part of keeping Kinvey secure, Kinvey has disabled TLS version 1.0 in favor of TLS version 1.1/1.2.
+
+Devices running Android v4.1-v4.4.4 0+ support TLS versions 1.1 and 1.2 but they are disabled by default. To enable TLSv1.1/TLSv1.2 on Android 4.1-4.4.4 you need to:
+
+- Set the minimum SDK version to 4.1 (API version 16)
+- Create a custom `SSLSocketFactory` that proxies all calls to a default  `SSLSocketFactory` implementation.
+- Override all `createSocket` methods and call `setEnabledProtocols` on the returned `SSLSocket` to enable TLS 1.1 and TLS 1.2.
+- Set custom `SSLSocketFactory` to the `NetHttpTransport.Builder` in the `Client.java` class
+- Rebuild and redistribute your app
+
+
+
 ```java
 import java.io.IOException;
 import java.net.InetAddress;
@@ -121,9 +130,7 @@ class KinveySocketFactory extends SSLSocketFactory {
         return socket;
     }
 }
-```
-- set custom SSLSocketFactory to the NetHttpTransport.Builder in the Client.java class
- ```java       
+
 private static HttpTransport newCompatibleTransport(){
     return android.os.Build.VERSION.SDK_INT >= 16 && android.os.Build.VERSION.SDK_INT <= 19 ?
             buildSupportHttpTransport() :
@@ -145,7 +152,6 @@ private static HttpTransport buildSupportHttpTransport() {
     return httpTransport;
 }
 ```
-- make new build 
 
 ## License
 
