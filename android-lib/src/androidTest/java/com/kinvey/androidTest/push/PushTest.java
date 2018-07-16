@@ -38,13 +38,11 @@ public class PushTest {
 
 
     private Client client;
-    private TestManager<LiveModel> testManager;
-    private DataStore<LiveModel> store;
-    Context mMockContext;
+    private TestManager testManager;
 
     @Before
     public void setUp() {
-        mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         testManager = new TestManager<>();
