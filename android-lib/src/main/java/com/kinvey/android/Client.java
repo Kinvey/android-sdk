@@ -566,6 +566,8 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (BuildConfig.TRAVIS) {
                 key = BuildConfig.KINVEY_APP_KEY;
                 secret = BuildConfig.KINVEY_APP_SECRET;
+                GCM_Enabled = true;
+                GCM_SenderID = BuildConfig.SENDER_ID;
             } else {
                 key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
                 secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
