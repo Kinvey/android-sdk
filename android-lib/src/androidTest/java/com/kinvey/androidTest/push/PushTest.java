@@ -67,13 +67,14 @@ public class PushTest {
 
     //check not initialized state
     @Test
-    public void testGCMPushConstructor() {
+    public void testGCMPushDefaultValues() {
         String[] senderIds = {"id1", "id2"};
         GCMPush push = new GCMPush(client, false, senderIds);
         assertFalse(push.isInProduction());
         assertFalse(push.isPushEnabled());
         assertEquals(senderIds, push.getSenderIDs());
         assertEquals("", push.getPushId());
+        assertEquals("com.kinvey.android.push.AbstractPush", GCMPush.TAG);
     }
 
     @Test
