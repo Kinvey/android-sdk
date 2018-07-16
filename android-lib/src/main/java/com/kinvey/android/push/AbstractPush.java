@@ -42,9 +42,6 @@ public abstract class AbstractPush {
 
     protected Class pushServiceClass;
 
-    private AbstractPush() {
-    }
-
     protected AbstractPush(Client client) {
         this.client = client;
     }

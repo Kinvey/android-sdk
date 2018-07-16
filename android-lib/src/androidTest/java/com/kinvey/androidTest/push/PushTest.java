@@ -1,6 +1,8 @@
 package com.kinvey.androidTest.push;
 
+import android.app.Application;
 import android.content.Context;
+import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
@@ -9,19 +11,16 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.push.KinveyGCMService;
-import com.kinvey.android.store.DataStore;
+import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.KinveyException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
-import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
@@ -75,22 +74,66 @@ public class PushTest {
         assertFalse(push.isPushEnabled());
         assertEquals(senderIds, push.getSenderIDs());
         assertEquals("", push.getPushId());
-
     }
 
     @Test
-    public void testGCMPush() throws InterruptedException {
+    public void testGCMPushUserIsNotLoggedIn() throws InterruptedException {
         if (client.isUserLoggedIn()) {
             testManager.logout(client);
         }
         try {
-            GCMPush push = (GCMPush) client.push(GCMService.class).initialize(new MockApplication());
+            client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
             assertTrue(false);
         } catch (KinveyException ex) {
             assertNotNull(ex);
             assertEquals("No user is currently logged in", ex.getReason());
         }
-
     }
 
+    @Test
+    public void testGCMPush() throws InterruptedException {
+        if (!client.isUserLoggedIn()) {
+            testManager.login(USERNAME, PASSWORD, client);
+        }
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                GCMPush push = (GCMPush) client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+                assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+
+                assertNotNull(push);
+                sleep();
+                assertTrue(push.isPushEnabled());
+                assertNotNull(push.getPushId());
+
+                push.disablePush(); //when we call disablePush, all token's are deleted from device, but not from the back end,
+                //but we don't have possibility get this tokens from the backend.
+                //so push.registerWithKinvey(regid, true); isn't work after it
+                sleep();
+                assertFalse(push.isPushEnabled());
+
+                push.initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+                sleep();
+                assertTrue(push.isPushEnabled());
+
+                push.disablePush();
+                sleep();
+                assertFalse(push.isPushEnabled());
+
+                latch.countDown();
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(20_000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
