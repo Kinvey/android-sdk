@@ -33,7 +33,7 @@ android:
     - addon-google_apis-google-$EMULATOR_API_LEVEL # google play services
     # - addon-google_apis-google-$ANDROID_API
     # - sys-img-armeabi-v7a-addon-google_apis-google-$ANDROID_API
-    - sys-img-armeabi-v7a-addon-google_apis-google-$EMULATOR_API_LEVEL
+    - sys-img-armeabi-v7a-google_apis-$EMULATOR_API_LEVEL
 before_script:
   - chmod +x gradlew
   - android list targets
