@@ -20,6 +20,9 @@ env:
   - ADB_INSTALL_TIMEOUT=10 # minutes
   - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
 
+before_install:
+  - yes | sdkmanager "platforms;android-23"
+
 android:
   components:
     - tools
