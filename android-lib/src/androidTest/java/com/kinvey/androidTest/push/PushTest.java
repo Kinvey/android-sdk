@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-@Ignore
 public class PushTest {
 
 
@@ -67,7 +66,6 @@ public class PushTest {
             }
         }
     }
-
 
     //check not initialized state
     @Test
@@ -96,6 +94,7 @@ public class PushTest {
     }
 
     @Test
+    @Ignore
     public void testGCMPush() throws InterruptedException {
         if (!client.isUserLoggedIn()) {
             testManager.login(USERNAME, PASSWORD, client);
