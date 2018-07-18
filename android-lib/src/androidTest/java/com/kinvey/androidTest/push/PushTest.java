@@ -94,7 +94,6 @@ public class PushTest {
     }
 
     @Test
-    @Ignore
     public void testGCMPush() throws InterruptedException {
         if (!client.isUserLoggedIn()) {
             testManager.login(USERNAME, PASSWORD, client);
