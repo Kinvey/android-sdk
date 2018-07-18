@@ -47,7 +47,6 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-@Ignore
 public class FileStoreTest {
 
     private Client client = null;
