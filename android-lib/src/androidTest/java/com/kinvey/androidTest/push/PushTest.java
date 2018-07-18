@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Ignore
 public class PushTest {
 
 
