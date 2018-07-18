@@ -2,24 +2,29 @@ package com.kinvey.androidTest.push;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
-import android.test.mock.MockApplication;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.push.KinveyGCMService;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.java.KinveyException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
@@ -27,9 +32,11 @@ import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -60,10 +67,6 @@ public class PushTest {
         }
     }
 
-    @Test
-    public void testKinveyGCMService() {
-        new GCMService();
-    }
 
     //check not initialized state
     @Test
@@ -92,6 +95,7 @@ public class PushTest {
     }
 
     @Test
+    @Ignore
     public void testGCMPush() throws InterruptedException {
         if (!client.isUserLoggedIn()) {
             testManager.login(USERNAME, PASSWORD, client);
