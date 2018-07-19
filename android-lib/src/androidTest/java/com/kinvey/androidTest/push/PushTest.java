@@ -10,11 +10,13 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
+import com.kinvey.android.push.AbstractPush;
 import com.kinvey.android.push.GCMPush;
 import com.kinvey.android.push.KinveyGCMService;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.core.KinveyClientCallback;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
@@ -67,7 +70,6 @@ public class PushTest {
         }
     }
 
-    //check not initialized state
     @Test
     public void testGCMPushDefaultValues() {
         String[] senderIds = {"id1", "id2"};
@@ -77,6 +79,107 @@ public class PushTest {
         assertEquals(senderIds, push.getSenderIDs());
         assertEquals("", push.getPushId());
         assertEquals("com.kinvey.android.push.AbstractPush", GCMPush.TAG);
+        push.setPushServiceClass(GCMService.class);
+        assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+        Method method = null;
+        try {
+            method = AbstractPush.class.getDeclaredMethod("getClient");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        assert method != null;
+        method.setAccessible(true);
+        Client client = null;
+        try {
+            client = (Client) method.invoke(push);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(client);
+    }
+
+    @Test
+    public void testPushRegistrationConstructors() {
+        AbstractPush.PushRegistration pushRegistration = new AbstractPush.PushRegistration();
+        assertNotNull(pushRegistration);
+        AbstractPush.PushRegistration pushRegistration2 = new AbstractPush.PushRegistration("DeviceId");
+        assertNotNull(pushRegistration2);
+    }
+
+    @Test
+    public void testRegisterPushRequestConstructor() throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        GCMPush push = createGCMPush();
+        Method method = null;
+        try {
+            method = AbstractPush.class.getDeclaredMethod("createRegisterPushRequest", AbstractPush.PushRegistration.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        assert method != null;
+        method.setAccessible(true);
+        AbstractPush.RegisterPush registerPush = null;
+        try {
+            registerPush = (AbstractPush.RegisterPush) method.invoke(push, new AbstractPush.PushRegistration("DeviceId"));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(registerPush);
+    }
+
+    @Test
+    public void testUnRegisterPushRequestConstructor() throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        GCMPush push = new GCMPush(client, false, "id1", "id2");
+        Method method = null;
+        try {
+            method = AbstractPush.class.getDeclaredMethod("createUnregisterPushRequest", AbstractPush.PushRegistration.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        assert method != null;
+        method.setAccessible(true);
+        AbstractPush.UnregisterPush unregisterPush = null;
+        try {
+            unregisterPush = (AbstractPush.UnregisterPush) method.invoke(push, new AbstractPush.PushRegistration("DeviceId"));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(unregisterPush);
+    }
+
+    @Test
+    public void testKinveyGCMServiceConstructor() {
+        KinveyGCMService gcmService = new GCMService();
+        assertNotNull(gcmService);
+    }
+
+    @Test
+    public void testPushConfigField() {
+        GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
+        assertNotNull(configField);
+        String[] senderIds = {"id1", "id2"};
+        configField.setIds(senderIds);
+        assertEquals(senderIds, configField.getIds());
+        configField.setNotificationKey("NotificationKey");
+        assertEquals("NotificationKey", configField.getNotificationKey());
+    }
+
+    @Test
+    public void testPushConfig() {
+        GCMPush.PushConfig pushConfig = new GCMPush.PushConfig();
+        assertNotNull(pushConfig);
+        String[] senderIds = {"id1", "id2"};
+        GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
+        pushConfig.setGcm(configField);
+        assertEquals(configField, pushConfig.getGcm());
+        GCMPush.PushConfigField configField2 = new GCMPush.PushConfigField();
+        pushConfig.setGcmDev(configField2);
+        assertEquals(configField2, pushConfig.getGcmDev());
     }
 
     @Test
@@ -93,7 +196,77 @@ public class PushTest {
         }
     }
 
+    private GCMPush createGCMPush() {
+        return new GCMPush(client, false, "id1", "id2");
+    }
+
     @Test
+    public void testAsyncEnablePushRequestConstructor() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                GCMPush push = new GCMPush(client, false, "id1", "id2");
+                Method method = null;
+                try {
+                    method = GCMPush.class.getDeclaredMethod("createAsyncEnablePushRequest", KinveyClientCallback.class, String.class);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+                assert method != null;
+                method.setAccessible(true);
+                Object enablePushRequest = null;
+                try {
+                    enablePushRequest = method.invoke(push, null, "DeviceID");
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                assertNotNull(enablePushRequest);
+                latch.countDown();
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+    }
+
+    @Test
+    public void testAsyncDisablePushRequestConstructor() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                GCMPush push = new GCMPush(client, false, "id1", "id2");
+                Method method = null;
+                try {
+                    method = GCMPush.class.getDeclaredMethod("createAsyncDisablePushRequest", KinveyClientCallback.class, String.class);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+                assert method != null;
+                method.setAccessible(true);
+                Object enablePushRequest = null;
+                try {
+                    enablePushRequest = method.invoke(push, null, "DeviceID");
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                assertNotNull(enablePushRequest);
+                latch.countDown();
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+    }
+
+
+// Google Services is needed for this test
+/*    @Test
     @Ignore
     public void testGCMPush() throws InterruptedException {
         if (!client.isUserLoggedIn()) {
@@ -139,5 +312,5 @@ public class PushTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }
