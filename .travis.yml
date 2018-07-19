@@ -44,7 +44,7 @@ before_script:
   - ./gradlew --stop
 script: 
   - ./gradlew clean
-  - travis_wait 40 ./gradlew connectedAndroidTest -PdisablePreDex --stacktrace --no-daemon
+  - travis_wait 60 ./gradlew connectedAndroidTest -PdisablePreDex --stacktrace --no-daemon
   - ./gradlew release --no-daemon  
 
 after_success:
