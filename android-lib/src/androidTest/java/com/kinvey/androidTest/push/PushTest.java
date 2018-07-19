@@ -48,6 +48,9 @@ public class PushTest {
 
     private Client client;
     private TestManager testManager;
+    private static final String ID_1 = "id1";
+    private static final String ID_2 = "id2";
+    private static final String DEVICE_ID = "DeviceID";
 
     @Before
     public void setUp() {
@@ -72,7 +75,7 @@ public class PushTest {
 
     @Test
     public void testGCMPushDefaultValues() {
-        String[] senderIds = {"id1", "id2"};
+        String[] senderIds = {ID_1, ID_2};
         GCMPush push = new GCMPush(client, false, senderIds);
         assertFalse(push.isInProduction());
         assertFalse(push.isPushEnabled());
@@ -104,7 +107,7 @@ public class PushTest {
     public void testPushRegistrationConstructors() {
         AbstractPush.PushRegistration pushRegistration = new AbstractPush.PushRegistration();
         assertNotNull(pushRegistration);
-        AbstractPush.PushRegistration pushRegistration2 = new AbstractPush.PushRegistration("DeviceId");
+        AbstractPush.PushRegistration pushRegistration2 = new AbstractPush.PushRegistration(DEVICE_ID);
         assertNotNull(pushRegistration2);
     }
 
@@ -121,7 +124,7 @@ public class PushTest {
         method.setAccessible(true);
         AbstractPush.RegisterPush registerPush = null;
         try {
-            registerPush = (AbstractPush.RegisterPush) method.invoke(push, new AbstractPush.PushRegistration("DeviceId"));
+            registerPush = (AbstractPush.RegisterPush) method.invoke(push, new AbstractPush.PushRegistration(DEVICE_ID));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -132,7 +135,7 @@ public class PushTest {
 
     @Test
     public void testUnRegisterPushRequestConstructor() {
-        GCMPush push = new GCMPush(client, false, "id1", "id2");
+        GCMPush push = new GCMPush(client, false, ID_1, ID_2);
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("createUnregisterPushRequest", AbstractPush.PushRegistration.class);
@@ -143,7 +146,7 @@ public class PushTest {
         method.setAccessible(true);
         AbstractPush.UnregisterPush unregisterPush = null;
         try {
-            unregisterPush = (AbstractPush.UnregisterPush) method.invoke(push, new AbstractPush.PushRegistration("DeviceId"));
+            unregisterPush = (AbstractPush.UnregisterPush) method.invoke(push, new AbstractPush.PushRegistration(DEVICE_ID));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -162,7 +165,7 @@ public class PushTest {
     public void testPushConfigField() {
         GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
         assertNotNull(configField);
-        String[] senderIds = {"id1", "id2"};
+        String[] senderIds = {ID_1, ID_2};
         configField.setIds(senderIds);
         assertEquals(senderIds, configField.getIds());
         configField.setNotificationKey("NotificationKey");
@@ -173,7 +176,7 @@ public class PushTest {
     public void testPushConfig() {
         GCMPush.PushConfig pushConfig = new GCMPush.PushConfig();
         assertNotNull(pushConfig);
-        String[] senderIds = {"id1", "id2"};
+        String[] senderIds = {ID_1, ID_2};
         GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
         pushConfig.setGcm(configField);
         assertEquals(configField, pushConfig.getGcm());
@@ -197,7 +200,7 @@ public class PushTest {
     }
 
     private GCMPush createGCMPush() {
-        return new GCMPush(client, false, "id1", "id2");
+        return new GCMPush(client, false, ID_1, ID_2);
     }
 
     @Test
@@ -206,7 +209,7 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                GCMPush push = new GCMPush(client, false, "id1", "id2");
+                GCMPush push = new GCMPush(client, false, ID_1, ID_2);
                 Method method = null;
                 try {
                     method = GCMPush.class.getDeclaredMethod("createAsyncEnablePushRequest", KinveyClientCallback.class, String.class);
@@ -217,7 +220,7 @@ public class PushTest {
                 method.setAccessible(true);
                 Object enablePushRequest = null;
                 try {
-                    enablePushRequest = method.invoke(push, null, "DeviceID");
+                    enablePushRequest = method.invoke(push, null, DEVICE_ID);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
@@ -238,7 +241,7 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                GCMPush push = new GCMPush(client, false, "id1", "id2");
+                GCMPush push = new GCMPush(client, false, ID_1, ID_2);
                 Method method = null;
                 try {
                     method = GCMPush.class.getDeclaredMethod("createAsyncDisablePushRequest", KinveyClientCallback.class, String.class);
@@ -249,7 +252,7 @@ public class PushTest {
                 method.setAccessible(true);
                 Object enablePushRequest = null;
                 try {
-                    enablePushRequest = method.invoke(push, null, "DeviceID");
+                    enablePushRequest = method.invoke(push, null, DEVICE_ID);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
