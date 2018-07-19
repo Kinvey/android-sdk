@@ -43,9 +43,8 @@ before_script:
   - adb shell input keyevent 82 &
   - ./gradlew --stop
 script: 
-  - ./gradlew clean
+  - ./gradlew clean release --no-daemon 
   - travis_wait 60 ./gradlew connectedAndroidTest -PdisablePreDex --stacktrace --no-daemon
-  - ./gradlew release --no-daemon  
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t $CODECOV_GIT_TOKEN
