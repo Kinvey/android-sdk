@@ -109,7 +109,7 @@ public class PushTest {
     }
 
     @Test
-    public void testRegisterPushRequestConstructor() throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public void testRegisterPushRequestConstructor() {
         GCMPush push = createGCMPush();
         Method method = null;
         try {
@@ -131,7 +131,7 @@ public class PushTest {
     }
 
     @Test
-    public void testUnRegisterPushRequestConstructor() throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public void testUnRegisterPushRequestConstructor() {
         GCMPush push = new GCMPush(client, false, "id1", "id2");
         Method method = null;
         try {

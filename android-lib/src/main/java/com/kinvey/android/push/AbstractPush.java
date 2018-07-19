@@ -135,4 +135,12 @@ public abstract class AbstractPush {
     public void setPushServiceClass(Class pushServiceClass) {
         this.pushServiceClass = pushServiceClass;
     }
+
+    RegisterPush createRegisterPushRequest(PushRegistration pushRegistration) {
+        return new RegisterPush(pushRegistration);
+    }
+
+    UnregisterPush createUnregisterPushRequest(PushRegistration pushRegistration) {
+        return new UnregisterPush(pushRegistration);
+    }
 }

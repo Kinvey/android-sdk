@@ -340,12 +340,12 @@ public class GCMPush extends AbstractPush {
 
     @Override
     public void enablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncEnablePush(callback, deviceID).execute();
+        createAsyncEnablePushRequest(callback, deviceID).execute();
     }
 
     @Override
     public void disablePushViaRest(KinveyClientCallback callback, String deviceID){
-        new AsyncDisablePush(callback, deviceID).execute();
+        createAsyncDisablePushRequest(callback, deviceID).execute();
     }
 
 
@@ -404,7 +404,7 @@ public class GCMPush extends AbstractPush {
         protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
-            RegisterPush p = new RegisterPush(ent);
+            RegisterPush p = createRegisterPushRequest(ent);
             getClient().initializeRequest(p);
             p.execute();
 
@@ -427,12 +427,20 @@ public class GCMPush extends AbstractPush {
         protected User executeAsync() throws IOException {
 
             PushRegistration ent = new PushRegistration(deviceID);
-            UnregisterPush p = new UnregisterPush(ent);
+            UnregisterPush p = createUnregisterPushRequest(ent);
             getClient().initializeRequest(p);
             p.execute();
 
             return null;
         }
+    }
+
+    private AsyncDisablePush createAsyncDisablePushRequest(KinveyClientCallback callback, String deviceID) {
+        return new AsyncDisablePush(callback, deviceID);
+    }
+
+    private AsyncEnablePush createAsyncEnablePushRequest(KinveyClientCallback callback, String deviceID) {
+        return new AsyncEnablePush(callback, deviceID);
     }
 
 }
