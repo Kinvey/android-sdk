@@ -43,6 +43,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -57,9 +61,9 @@ public class FileStoreTest {
     private static final String PASSWORD = "test";
     private static final int MB = 1024 * 1024;
     private static final int DEFAULT_FILE_SIZE_MB = 1;
-    private static final int CUSTOM_FILE_SIZE_MB = 22;
-    private static final int UPLOAD_CHUNK_SIZE_MB = 10;
-    private static final int DOWNLOAD_CHUNK_SIZE_MB = 5;
+    private static final int CUSTOM_FILE_SIZE_MB = 5;
+    private static final int UPLOAD_CHUNK_SIZE_MB = 4;
+    private static final int DOWNLOAD_CHUNK_SIZE_MB = 2;
 
     private static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
@@ -949,6 +953,13 @@ public class FileStoreTest {
         return file;
     }
 
+    private File createSmallFile() throws IOException {
+        File file = createFile();
+        RandomAccessFile f = new RandomAccessFile(createFile(), "rw");
+        f.setLength(1);
+        return file;
+    }
+
     private File createFile(String fileName) throws IOException {
         File file = new File(client.getContext().getFilesDir(), fileName);
         if (!file.exists()) {
@@ -1082,6 +1093,65 @@ public class FileStoreTest {
         DefaultDeleteListener deleteListener = removeFile(storeType, listener.fileMetaDataResult);
         assertNotNull(deleteListener.result);
     }
+
+    @Test
+    public void testDownloadProgressChangingError() throws IOException, InterruptedException {
+        File file = createSmallFile();
+        final DefaultUploadProgressListener listener = uploadFileWithOutMetadata(StoreType.NETWORK, file);
+        assertTrue(file.delete());
+        assertNotNull(listener.fileMetaDataResult);
+
+        final CountDownLatch downloadLatch = new CountDownLatch(1);
+        final DefaultDownloadProgressListener downloadProgressListener = spy(new DefaultDownloadProgressListener(downloadLatch));
+        doThrow(new IOException()).when(downloadProgressListener).progressChanged(any(MediaHttpDownloader.class));
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final FileOutputStream fos = new FileOutputStream(createFile());
+                    client.getFileStore(StoreType.NETWORK).download(listener.fileMetaDataResult,
+                            fos, downloadProgressListener,null);
+
+                } catch (IOException e) {
+                    downloadProgressListener.onFailure(e);
+                }
+            }
+        });
+        looperThread.start();
+        downloadLatch.await();
+        looperThread.mHandler.sendMessage(new Message());
+
+        assertNotNull(downloadProgressListener.error);
+        DefaultDeleteListener deleteListener = removeFile(StoreType.NETWORK, listener.fileMetaDataResult);
+        assertNotNull(deleteListener.result);
+    }
+
+    @Test
+    public void testUploadProgressChangingError() throws IOException, InterruptedException {
+        final File file = createSmallFile();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultUploadProgressListener listener = spy(new DefaultUploadProgressListener(latch));
+        doThrow(new IOException()).when(listener).progressChanged(any(MediaHttpUploader.class));
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.getFileStore(StoreType.NETWORK).upload(file, listener);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    listener.onFailure(e);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+
+        assertTrue(file.delete());
+        assertNotNull(listener.error);
+    }
+
 
     @After
     public void tearDown() {
