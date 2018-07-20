@@ -42,9 +42,6 @@ public abstract class AbstractPush {
 
     protected Class pushServiceClass;
 
-    private AbstractPush() {
-    }
-
     protected AbstractPush(Client client) {
         this.client = client;
     }
@@ -137,5 +134,13 @@ public abstract class AbstractPush {
 
     public void setPushServiceClass(Class pushServiceClass) {
         this.pushServiceClass = pushServiceClass;
+    }
+
+    RegisterPush createRegisterPushRequest(PushRegistration pushRegistration) {
+        return new RegisterPush(pushRegistration);
+    }
+
+    UnregisterPush createUnregisterPushRequest(PushRegistration pushRegistration) {
+        return new UnregisterPush(pushRegistration);
     }
 }
