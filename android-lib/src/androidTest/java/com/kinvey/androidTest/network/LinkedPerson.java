@@ -11,8 +11,12 @@ public class LinkedPerson extends LinkedGenericJson {
     @Key
     private String username;
 
-    public String get_id() {
+    public String getId() {
         return _id;
+    }
+
+    public LinkedPerson() {
+        putFile("attachment");
     }
 
     public void setId(String _id) {

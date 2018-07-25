@@ -12,6 +12,7 @@ import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
@@ -82,6 +84,7 @@ public class AsyncLinkedNetworkManagerTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
+                CountDownLatch downLatch = new CountDownLatch(1);
                 AsyncLinkedNetworkManager<LinkedPerson> linkedNetworkManager =
                         spy(new AsyncLinkedNetworkManager<>(LinkedPerson.COLLECTION, LinkedPerson.class, client));
                 assertNotNull(linkedNetworkManager);
@@ -95,17 +98,20 @@ public class AsyncLinkedNetworkManagerTest {
                             any(DownloaderProgressListener.class),
                             (String[]) isNull())).thenReturn(getEntityRequest);
                     //method for the test - getEntity
-                    linkedNetworkManager.getEntity("", createKinveyClientCallback(), new DownloaderProgressListener() {
+                    linkedNetworkManager.getEntity("", createKinveyClientCallback(downLatch), new DownloaderProgressListener() {
                         @Override
                         public void progressChanged(MediaHttpDownloader downloader) throws IOException {
 
                         }
                     });
+                    downLatch.await(15, TimeUnit.SECONDS);
                     verify(linkedNetworkManager, times(1)).getEntityBlocking(any(String.class),
                             any(DownloaderProgressListener.class),
                             (String[]) isNull());
                     verify(getEntityRequest, times(1)).execute();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 latch.countDown();
@@ -117,17 +123,17 @@ public class AsyncLinkedNetworkManagerTest {
         looperThread.mHandler.sendMessage(new Message());
     }
 
-    private KinveyClientCallback<LinkedPerson> createKinveyClientCallback() {
+    private KinveyClientCallback<LinkedPerson> createKinveyClientCallback(final CountDownLatch latch) {
         return new KinveyClientCallback<LinkedPerson>() {
 
             @Override
             public void onSuccess(LinkedPerson result) {
-
+                latch.countDown();
             }
 
             @Override
             public void onFailure(Throwable error) {
-
+                latch.countDown();
             }
         };
     }
