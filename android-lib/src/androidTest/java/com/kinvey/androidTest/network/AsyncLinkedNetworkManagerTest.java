@@ -8,13 +8,14 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.network.AndroidNetworkManager;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.model.Person;
+import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.network.LinkedNetworkManager;
 
 import org.junit.After;
@@ -23,6 +24,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
@@ -30,6 +33,7 @@ import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -41,12 +45,15 @@ import static org.mockito.Mockito.when;
 public class AsyncLinkedNetworkManagerTest {
 
     private Client client;
+    private TestManager testManager;
 
     @Before
-    public void setUp() {
+    public void setUp() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        testManager = new TestManager();
+        testManager.login(USERNAME, PASSWORD, client);
 
     }
 
@@ -68,5 +75,63 @@ public class AsyncLinkedNetworkManagerTest {
                 new AsyncLinkedNetworkManager<>(LinkedPerson.COLLECTION, LinkedPerson.class, client);
         assertNotNull(linkedNetworkManager);
     }
+
+    @Test
+    public void testGetEntity() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                AsyncLinkedNetworkManager<LinkedPerson> linkedNetworkManager =
+                        spy(new AsyncLinkedNetworkManager<>(LinkedPerson.COLLECTION, LinkedPerson.class, client));
+                assertNotNull(linkedNetworkManager);
+                LinkedPerson result = new LinkedPerson();
+                result.setId("TestID");
+                LinkedNetworkManager<LinkedPerson>.GetEntity getEntityRequest = mock(LinkedNetworkManager.GetEntity.class);
+                try {
+                    when(getEntityRequest.execute()).thenReturn(result);
+                    when(linkedNetworkManager.getEntityBlocking(
+                            any(String.class),
+                            any(DownloaderProgressListener.class),
+                            (String[]) isNull())).thenReturn(getEntityRequest);
+                    //method for the test - getEntity
+                    linkedNetworkManager.getEntity("", createKinveyClientCallback(), new DownloaderProgressListener() {
+                        @Override
+                        public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+
+                        }
+                    });
+                    verify(linkedNetworkManager, times(1)).getEntityBlocking(any(String.class),
+                            any(DownloaderProgressListener.class),
+                            (String[]) isNull());
+                    verify(getEntityRequest, times(1)).execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                latch.countDown();
+
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+    }
+
+    private KinveyClientCallback<LinkedPerson> createKinveyClientCallback() {
+        return new KinveyClientCallback<LinkedPerson>() {
+
+            @Override
+            public void onSuccess(LinkedPerson result) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
+            }
+        };
+    }
+
+
 
 }
