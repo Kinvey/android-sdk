@@ -13,6 +13,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyReadCallback;
@@ -3306,6 +3307,23 @@ public class DataStoreTest {
 
         assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
         assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
+    }
+
+    @Test
+    public void testAsyncPullRequestConstructors() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+                AsyncPullRequest pullRequest = new AsyncPullRequest(store, new Query(), null);
+                assertNotNull(pullRequest);
+                latch.countDown();
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
     }
 
 }
