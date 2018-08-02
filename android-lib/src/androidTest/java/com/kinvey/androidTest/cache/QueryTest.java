@@ -25,12 +25,14 @@ import io.realm.RealmQuery;
 import io.realm.Sort;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Prots on 30/01/16.
@@ -433,4 +435,15 @@ public class QueryTest {
         verify(query, times(3)).endGroup();
     }
 
+    @Test
+    public void testUnsupportedOperationException() {
+        Query q = new Query();
+        q.startsWith(TEST_FIELD, 1);
+        try {
+            QueryHelper.prepareRealmQuery(query, q.getQueryFilterMap());
+        } catch (UnsupportedOperationException e) {
+            assertEquals("this query is not supported by cache", e.getMessage());
+        }
+    }
+    
 }
