@@ -195,4 +195,11 @@ public class CacheTest {
         }
 
     }
+
+    @Test
+    public void testGetTTL() {
+        long ttl = 123456L;
+        assertEquals(ttl, cacheManager.getCache("testInnerWithList3", SampleGsonWithInnerList.class, ttl).getTtl());
+    }
+
 }
