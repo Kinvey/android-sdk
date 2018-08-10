@@ -549,6 +549,8 @@ public class FileStoreTest {
         final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
         if (cachedListener != null) {
             cachedListener.setLatch(downloadLatch);
+        } else if (storeType == StoreType.CACHE) {
+            downloadLatch.countDown();
         }
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
