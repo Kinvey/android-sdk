@@ -15,6 +15,7 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
+import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -224,6 +225,44 @@ public class FileStoreTest {
         }
     }
 
+    private static class DefaultDownloadCallback implements KinveyClientCallback<FileMetaData> {
+
+        private CountDownLatch latch;
+        private FileMetaData result;
+        private Throwable error;
+
+        public DefaultDownloadCallback() {
+        }
+
+        private DefaultDownloadCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(FileMetaData result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     @Before
     public void setup() throws InterruptedException {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
@@ -366,6 +405,32 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testDownloadCachedFile_TypeSync() throws IOException, InterruptedException {
+        testDownloadFileNoCachedCallback(StoreType.SYNC);
+    }
+
+    @Test
+    public void testDownloadCachedFile_TypeCache() throws IOException, InterruptedException {
+        testDownloadFileNoCachedCallback(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDownloadCachedFile_TypeNetwork() throws IOException, InterruptedException {
+        testDownloadFileNoCachedCallback(StoreType.NETWORK);
+    }
+
+    private void testDownloadFileNoCachedCallback(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile();
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, testMetadata());
+        assertNotNull(listener.fileMetaDataResult);
+        DefaultDownloadProgressListener downloadListener = downloadCachedOutputStreamFile(storeType, null, listener.fileMetaDataResult);
+        assertNotNull(downloadListener.fileMetaDataResult);
+        assertNull(downloadListener.error);
+        file.delete();
+        removeFile(storeType, listener.fileMetaDataResult);
+    }
+
+    @Test
     public void testDownloadFileNetwork() throws InterruptedException, IOException {
         downloadFile(StoreType.NETWORK);
     }
@@ -482,15 +547,21 @@ public class FileStoreTest {
     private DefaultDownloadProgressListener downloadCachedOutputStreamFile(final StoreType storeType, final DefaultDownloadCachedListener cachedListener, final FileMetaData metaFile) throws InterruptedException, IOException {
         final CountDownLatch downloadLatch = new CountDownLatch(storeType == StoreType.CACHE ? 2 : 1);
         final DefaultDownloadProgressListener listener = new DefaultDownloadProgressListener(downloadLatch);
-        cachedListener.setLatch(downloadLatch);
+        if (cachedListener != null) {
+            cachedListener.setLatch(downloadLatch);
+        }
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
-                    client.getFileStore(storeType).download(metaFile, fos, listener,
-                            storeType == StoreType.CACHE ? createOutputStream() : null,
-                            storeType == StoreType.CACHE ? cachedListener : null);
+                    if (cachedListener != null) {
+                        client.getFileStore(storeType).download(metaFile, fos, listener,
+                                storeType == StoreType.CACHE ? createOutputStream() : null,
+                                storeType == StoreType.CACHE ? cachedListener : null);
+                    } else {
+                        client.getFileStore(storeType).download(metaFile, fos, listener);
+                    }
                 } catch (IOException e) {
                     listener.onFailure(e);
                 }
@@ -566,33 +637,22 @@ public class FileStoreTest {
         DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, testMetadata());
         file.delete();
         assertNotNull(listener.fileMetaDataResult);
-        refresh(storeType, listener.fileMetaDataResult);
+        refresh(storeType, listener.fileMetaDataResult, true);
         removeFile(storeType, listener.fileMetaDataResult);
     }
 
-    private void refresh(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException, IOException {
+    private void refresh(final StoreType storeType, final FileMetaData fileMetaData, final boolean isCreateCachedCallback) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultDownloadCallback callback = new DefaultDownloadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    client.getFileStore(storeType).refresh(fileMetaData, new KinveyClientCallback<FileMetaData>() {
-                        @Override
-                        public void onSuccess(FileMetaData result) {
-                            finish(result != null);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            finish(false);
-                        }
-
-                        private void finish(boolean result) {
-                            success = result;
-                            latch.countDown();
-                        }
-                    }, storeType == StoreType.CACHE ? createCachedClientCallback() : null);
-
+                    if (isCreateCachedCallback) {
+                        client.getFileStore(storeType).refresh(fileMetaData, callback, storeType == StoreType.CACHE ? createCachedClientCallback() : null);
+                    } else {
+                        client.getFileStore(storeType).refresh(fileMetaData, callback);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     latch.countDown();
@@ -602,7 +662,31 @@ public class FileStoreTest {
         looperThread.start();
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
-        assertTrue(success);
+        assertNotNull(callback.result);
+    }
+
+    @Test
+    public void testRefreshFile_TypeSync() throws IOException, InterruptedException {
+        testRefreshFileNoCachedCallback(StoreType.SYNC);
+    }
+
+    @Test
+    public void testRefreshFile_TypeCache() throws IOException, InterruptedException {
+        testRefreshFileNoCachedCallback(StoreType.CACHE);
+    }
+
+    @Test
+    public void testRefreshFile_TypeNetwork() throws IOException, InterruptedException {
+        testRefreshFileNoCachedCallback(StoreType.NETWORK);
+    }
+
+    private void testRefreshFileNoCachedCallback(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile();
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, testMetadata());
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        refresh(storeType, listener.fileMetaDataResult, false);
+        removeFile(storeType, listener.fileMetaDataResult);
     }
 
     @Test
@@ -670,6 +754,110 @@ public class FileStoreTest {
         } else {
             storeTypeResult = null;
         }
+    }
+
+    @Test
+    public void testFindFile_TypeSync() throws IOException, InterruptedException {
+        testFindFileNoCachedCallback(StoreType.SYNC);
+    }
+
+    @Test
+    public void testFindFile_TypeCache() throws IOException, InterruptedException {
+        testFindFileNoCachedCallback(StoreType.CACHE);
+    }
+
+    @Test
+    public void testFindFile_TypeNetwork() throws IOException, InterruptedException {
+        testFindFileNoCachedCallback(StoreType.NETWORK);
+    }
+
+    private void testFindFileNoCachedCallback(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile();
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, testMetadata());
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        find(storeType, listener.fileMetaDataResult);
+        removeFile(storeType, listener.fileMetaDataResult);
+    }
+
+    private void find(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                Query query = new Query().equals(ID, fileMetaData.getId());
+                client.getFileStore(storeType).find(query, new KinveyClientCallback<FileMetaData[]>() {
+                    @Override
+                    public void onSuccess(FileMetaData[] result) {
+                        finish(result != null && result.length > 0);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable error) {
+                        finish(false);
+                    }
+
+                    public void finish(boolean result) {
+                        success = result;
+                        latch.countDown();
+                    }
+                });
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        assertTrue(success);
+    }
+
+    @Test
+    public void testGetCacheFile_TypeSync() throws IOException, InterruptedException {
+        testGetCacheFileById(StoreType.SYNC);
+    }
+
+    @Test
+    public void testGetCacheFile_TypeNetwork() throws IOException, InterruptedException {
+        testGetCacheFileById(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testGetCacheFile_TypeCache() throws IOException, InterruptedException {
+        testGetCacheFileById(StoreType.CACHE);
+    }
+
+    private void testGetCacheFileById(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile();
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.SYNC, file, testMetadata());
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        FileMetaData fileMetaData = client.getFileStore(storeType).cachedFile(listener.fileMetaDataResult.getId());
+        assertNotNull(fileMetaData);
+        removeFile(StoreType.SYNC, listener.fileMetaDataResult);
+    }
+
+    @Test
+    public void testGetCacheFileByFileMetadata_TypeSync() throws IOException, InterruptedException {
+        testGetCacheFileByFileMetadata(StoreType.SYNC);
+    }
+
+    @Test
+    public void testGetCacheFileByFileMetadata_TypeNetwork() throws IOException, InterruptedException {
+        testGetCacheFileByFileMetadata(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testGetCacheFileByFileMetadata_TypeCache() throws IOException, InterruptedException {
+        testGetCacheFileByFileMetadata(StoreType.CACHE);
+    }
+
+    private void testGetCacheFileByFileMetadata(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile();
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.SYNC, file, testMetadata());
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        FileMetaData fileMetaData = client.getFileStore(storeType).cachedFile(listener.fileMetaDataResult);
+        assertNotNull(fileMetaData);
+        removeFile(StoreType.SYNC, listener.fileMetaDataResult);
     }
 
     @Test
