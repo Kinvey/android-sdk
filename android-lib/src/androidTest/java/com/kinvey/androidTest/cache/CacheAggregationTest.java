@@ -9,7 +9,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
+import com.kinvey.androidTest.model.ModelWithDifferentTypeFields;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -24,11 +24,12 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.TEST_USERNAME;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -247,6 +248,60 @@ public class CacheAggregationTest {
 
         assertTrue(results[0].result.intValue() == 350);
     }
+
+    @Test
+    public void testCalculationFields() throws InterruptedException {
+        TestManager<ModelWithDifferentTypeFields> testManager = new TestManager<ModelWithDifferentTypeFields>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<ModelWithDifferentTypeFields> store = DataStore.collection(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, StoreType.SYNC, client);
+        ICache<ModelWithDifferentTypeFields> cache = client.getCacheManager().getCache(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, Long.MAX_VALUE);
+
+        int carNumber = 1000;
+        boolean isUseAndroid = true;
+        Date date = new Date();
+        date.setTime(1);
+        float height = 180f;
+        double time = 1.2d;
+
+        ModelWithDifferentTypeFields person = new ModelWithDifferentTypeFields(TEST_USERNAME, carNumber, isUseAndroid, date, height, time);
+        ModelWithDifferentTypeFields person2 = new ModelWithDifferentTypeFields("test", carNumber, isUseAndroid, date, height, time);
+        ModelWithDifferentTypeFields person3 = new ModelWithDifferentTypeFields(TEST_USERNAME, carNumber, isUseAndroid, date, height, time);
+
+        testManager.saveCustom(store, person);
+        testManager.saveCustom(store, person2);
+        testManager.saveCustom(store, person3);
+
+        Query query = client.query().equals("username", TEST_USERNAME);
+        ArrayList<String> fields = new ArrayList<>();
+
+        fields.add("carNumber");
+        Aggregation.Result[] results = cache.group(AggregateType.SUM, fields, "height", query);
+        assertTrue(results[0].result.intValue() == 360);
+
+        fields.clear();
+        fields.add("isUseAndroid");
+        results = cache.group(AggregateType.SUM, fields, "height", query);
+        assertTrue(results[0].result.intValue() == 360);
+
+        fields.clear();
+        fields.add("height");
+        results = cache.group(AggregateType.SUM, fields, "height", query);
+        assertTrue(results[0].result.intValue() == 360);
+
+        fields.clear();
+        fields.add("time");
+        results = cache.group(AggregateType.SUM, fields, "height", query);
+        assertTrue(results[0].result.intValue() == 360);
+
+
+//commented out because of MLIBZ-2643
+/*        fields.clear();
+        fields.add("date");
+        results = cache.group(AggregateType.SUM, fields, "height", query);
+        assertTrue(results[0].result.intValue() == 360);*/
+
+    }
+
 
     @After
     public void tearDown() {
