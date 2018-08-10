@@ -16,8 +16,10 @@ import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.model.BooleanPrimitiveListInPerson;
+import com.kinvey.androidTest.model.EntityForInQueryTest;
 import com.kinvey.androidTest.model.FloatPrimitiveListInPerson;
 import com.kinvey.androidTest.model.IntegerPrimitiveListInPerson;
+import com.kinvey.androidTest.model.LongPrimitiveListInPerson;
 import com.kinvey.androidTest.model.ObjectListInPerson;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.StringGenericJson;
@@ -53,10 +55,12 @@ public class CacheRealDataTest {
     private static final String TEST_STRING = "123456789";
     private static final Float TEST_FLOAT = 123456789.1f;
     private static final Integer TEST_INTEGER = 123456789;
+    private static final Long TEST_LONG = 123456789L;
     private static final Boolean TEST_BOOLEAN = true;
     private static final String STRING_LIST_FIELD = "stringList";
     private static final String FLOAT_LIST_FIELD = "floatList";
     private static final String INTEGER_LIST_FIELD = "integerList";
+    private static final String LONG_LIST_FIELD = "longList";
     private static final String BOOLEAN_LIST_FIELD = "booleanList";
     private static final String STRING_GENERIC_JSON_LIST_FIELD = "stringGenericJsons";
 
@@ -238,6 +242,94 @@ public class CacheRealDataTest {
     }
 
     @Test
+    public void testInQueryOperatorOnFindMethodLocallyInListOfLong() throws InterruptedException {
+        TestManager<LongPrimitiveListInPerson> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<LongPrimitiveListInPerson> store = DataStore.collection(Person.COLLECTION, LongPrimitiveListInPerson.class, StoreType.SYNC, client);
+        LongPrimitiveListInPerson person = new LongPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<Long> longArrayList = new ArrayList<>();
+        longArrayList.add(TEST_LONG);
+        longArrayList.add(987654321L);
+        person.setLongList(longArrayList);
+        CustomKinveyClientCallback<LongPrimitiveListInPerson> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getLongList());
+
+        LongPrimitiveListInPerson person2 = new LongPrimitiveListInPerson(TEST_USERNAME);
+        ArrayList<Long> longArrayList1 = new ArrayList<>();
+        longArrayList1.add(TEST_LONG);
+        longArrayList1.add(11111L);
+        person2.setLongList(longArrayList1);
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult());
+        assertNotNull(saveCallback.getResult().getLongList());
+
+        Query query = new Query().in(LONG_LIST_FIELD, new Long[]{TEST_LONG});
+        CustomKinveyReadCallback<LongPrimitiveListInPerson> findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().getResult().size() == 2);
+
+        query = new Query().in(LONG_LIST_FIELD, new Long[]{987654321L});
+        findCallback = testManager.findCustom(store, query);
+        assertNotNull(findCallback.getResult());
+        assertTrue(findCallback.getResult().getResult().size() == 1);
+    }
+
+    @Test
+    public void testInQueryOperatorOnFindMethodLocally() throws InterruptedException {
+        TestManager<EntityForInQueryTest> testManager = new TestManager<>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<EntityForInQueryTest> store = DataStore.collection(EntityForInQueryTest.COLLECTION, EntityForInQueryTest.class, StoreType.SYNC, client);
+        EntityForInQueryTest firstTestEntity = new EntityForInQueryTest();
+        firstTestEntity.setLongVal(1L);
+        firstTestEntity.setStringVal("test_string");
+        firstTestEntity.setBooleanVal(true);
+        firstTestEntity.setIntVal(2);
+        firstTestEntity.setFloatVal(3f);
+        CustomKinveyClientCallback<EntityForInQueryTest> saveCallback = testManager.saveCustom(store, firstTestEntity);
+        assertNotNull(saveCallback.getResult());
+
+        EntityForInQueryTest secondTestEntity = new EntityForInQueryTest();
+        secondTestEntity.setLongVal(4L);
+        secondTestEntity.setStringVal("test_string_2");
+        secondTestEntity.setBooleanVal(false);
+        secondTestEntity.setIntVal(5);
+        secondTestEntity.setFloatVal(6f);
+        saveCallback = testManager.saveCustom(store, secondTestEntity);
+        assertNotNull(saveCallback.getResult());
+
+        Query query = new Query().in("longVal", new Long[]{1L});
+        CustomKinveyReadCallback<EntityForInQueryTest> findCallback = testManager.findCustom(store, query);
+        List<EntityForInQueryTest> resultList = findCallback.getResult().getResult();
+        assertNotNull(resultList);
+        assertTrue(resultList.size() == 1);
+
+        query = new Query().in("stringVal", new String[]{"test_string"});
+        findCallback = testManager.findCustom(store, query);
+        resultList = findCallback.getResult().getResult();
+        assertNotNull(resultList);
+        assertTrue(resultList.size() == 1);
+
+        query = new Query().in("booleanVal", new Boolean[]{true});
+        findCallback = testManager.findCustom(store, query);
+        resultList = findCallback.getResult().getResult();
+        assertNotNull(resultList);
+        assertTrue(resultList.size() == 1);
+
+        query = new Query().in("intVal", new Integer[]{5});
+        findCallback = testManager.findCustom(store, query);
+        resultList = findCallback.getResult().getResult();
+        assertNotNull(resultList);
+        assertTrue(resultList.size() == 1);
+
+        query = new Query().in("floatVal", new Float[]{3f});
+        findCallback = testManager.findCustom(store, query);
+        resultList = findCallback.getResult().getResult();
+        assertNotNull(resultList);
+        assertTrue(resultList.size() == 1);
+    }
+
+    @Test
     public void testInQueryOperatorOnFindMethodLocallyInListOfBoolean() throws InterruptedException {
         TestManager<BooleanPrimitiveListInPerson> testManager = new TestManager<BooleanPrimitiveListInPerson>();
         testManager.login(USERNAME, PASSWORD, client);
@@ -360,6 +452,17 @@ public class CacheRealDataTest {
 
     @Test
     public void testGetFirstMethodWithInOperator() throws InterruptedException {
+        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
+        testGetFirst(query);
+    }
+
+    @Test
+    public void testGetFirstMethodWithOutInOperator() throws InterruptedException {
+        Query query = new Query().equals("username", "NEW_PERSON");
+        testGetFirst(query);
+    }
+
+    private void testGetFirst(Query query) throws InterruptedException {
         TestManager<StringPrimitiveListInPerson> testManager = new TestManager<StringPrimitiveListInPerson>();
         testManager.login(USERNAME, PASSWORD, client);
 
@@ -404,8 +507,6 @@ public class CacheRealDataTest {
         assertNotNull(saveCallback.getResult());
         saveCallback = testManager.saveCustom(store, person5);
         assertNotNull(saveCallback.getResult());
-
-        Query query = new Query().in(STRING_LIST_FIELD, new String[]{TEST_STRING}).equals("username", "NEW_PERSON");
 
         StringPrimitiveListInPerson firstPerson;
         firstPerson = client.getCacheManager().getCache(Person.COLLECTION, StringPrimitiveListInPerson.class, Long.MAX_VALUE).getFirst(query);

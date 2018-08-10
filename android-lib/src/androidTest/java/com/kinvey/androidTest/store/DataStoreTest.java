@@ -22,6 +22,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.androidTest.model.PersonArray;
 import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
@@ -2586,6 +2587,53 @@ public class DataStoreTest {
         assertNotNull(deleteCallback.getResult());
         assertNull(deleteCallback.getError());
     }
+
+// filed as MLIBZ-2647
+/*
+    @Test
+    public void testSelfReferenceClassInClassWithArray() throws InterruptedException {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        client.enableDebugLogging();
+        TestManager<PersonArray> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<PersonArray> store = DataStore.collection(PersonArray.COLLECTION, PersonArray.class, StoreType.SYNC, client);
+        assertNotNull(store);
+
+        PersonArray person1 = new PersonArray("person1");
+        PersonArray person2 = new PersonArray("person2");
+        PersonArray person3 = new PersonArray("person3");
+        PersonArray person4 = new PersonArray("person4");
+        PersonArray person5 = new PersonArray("person5");
+        PersonArray person6 = new PersonArray("person6");
+
+        PersonArray[] array = new PersonArray[4];
+        array[0] = person3;
+        array[1] = person4;
+        array[2] = person5;
+        array[3] = person6;
+        person2.setArray(array);
+
+        person1.setPersonArray(person2);
+
+        CustomKinveyClientCallback<PersonArray> callback = testManager.saveCustom(store, person1);
+        assertNotNull(callback.getResult());
+        assertNull(callback.getError());
+
+        CustomKinveyReadCallback<PersonArray> listCallback = testManager.findCustom(store, client.query());
+        assertNotNull(listCallback.getResult());
+        assertNull(listCallback.getError());
+
+        PersonArray person = listCallback.getResult().getResult().get(0);
+        assertEquals(person.getUsername(), "person1");
+        assertEquals(person.getPersonArray().getUsername(), "person2");
+        assertEquals(person.getPersonArray().getArray()[0].getUsername(), "person3");
+
+        com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback deleteCallback = testManager.deleteCustom(store, client.query());
+        assertNotNull(deleteCallback.getResult());
+        assertNull(deleteCallback.getError());
+    }
+*/
 
     @Test
     public void testSelfReferenceBookAuthorBook() throws InterruptedException {
