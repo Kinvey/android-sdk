@@ -325,7 +325,7 @@ public class UserStore {
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginSalesForce("accessToken", mClient, new KinveyClientCallback<User>() {
+     *  UserStore.loginMobileIdentity("accessToken", mClient, new KinveyClientCallback<User>() {
      *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });

@@ -9,6 +9,7 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import com.google.api.client.http.HttpResponseException;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
@@ -20,11 +21,15 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
+import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.Query;
+import com.kinvey.java.auth.Credential;
+import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -34,6 +39,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -363,6 +371,18 @@ public class UserStoreTest {
 //        client.enableDebugLogging();
         if (client.isUserLoggedIn()) {
             logout(client);
+        }
+    }
+
+    @After
+    public void tearDown() {
+        client.performLockDown();
+        if (client.getKinveyHandlerThread() != null) {
+            try {
+                client.stopKinveyHandlerThread();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
         }
     }
 
@@ -1310,16 +1330,272 @@ public class UserStoreTest {
         return testName + "_" +System.currentTimeMillis();
     }
 
-    @After
-    public void tearDown() {
-        client.performLockDown();
-        if (client.getKinveyHandlerThread() != null) {
-            try {
-                client.stopKinveyHandlerThread();
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        }
+//    client.isUserLoggedIn is true if not correct auth token is used
+/*    @Test
+    public void testLoginKinveyAuthTokenError() throws InterruptedException {
+        client.enableDebugLogging();
+        User user = login(USERNAME, PASSWORD, client).result;
+        assertNotNull(user);
+        assertNotNull(user.getId());
+        String authToken = "InvalidAuthToken";
+        String clientID = user.getId();
+        logout(client);
+
+        DefaultKinveyClientCallback callback = loginKinveyAuthToken(clientID, authToken, client);
+        assertNotNull(callback.error);
+        assertFalse(client.isUserLoggedIn());
     }
 
+    private DefaultKinveyClientCallback loginKinveyAuthToken(final String userId, final String authToken, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                new UserStore().loginKinveyAuthToken(userId, authToken, client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }*/
+
+    @Test
+    public void testLoginMobileIdentityError() throws InterruptedException {
+        String authToken = "WrongToken";
+        DefaultKinveyClientCallback callback = loginMobileIdentity(authToken, client);
+        assertNotNull(callback.error);
+        assertFalse(client.isUserLoggedIn());
+    }
+
+    private DefaultKinveyClientCallback loginMobileIdentity(final String authToken, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UserStore.loginMobileIdentity(authToken, client, callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testLoginByCredential() throws InterruptedException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        User user = login(USERNAME, PASSWORD, client).result;
+        Thread.sleep(2000);// This is time for the SDK to write user's data to the Credential Store
+        Credential credential = getCredential(client.getContext(), user.getId());
+        logout(client);
+        assertFalse(client.isUserLoggedIn());
+        assertNotNull(credential);
+        DefaultKinveyClientCallback callback = loginCredential(credential, client);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        assertTrue(client.isUserLoggedIn());
+    }
+
+    private Credential getCredential(Context context, String userId) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        Class c = Class.forName("com.kinvey.android.AndroidCredentialStore");
+        Constructor constructor = c.getDeclaredConstructor(Context.class);
+        constructor.setAccessible(true);
+        Object obj  = constructor.newInstance(context);
+        Method m1 = c.getDeclaredMethod("load", new Class[]{String.class});
+        return (Credential) m1.invoke(obj,userId);
+    }
+
+    @Test
+    public void testLoginByCredentialError() throws InterruptedException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        DefaultKinveyClientCallback callback = loginCredential(null, client);
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertFalse(client.isUserLoggedIn());
+    }
+
+    private DefaultKinveyClientCallback loginCredential(final Credential credential, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UserStore.login(credential, client, callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testChangePassword() throws InterruptedException {
+        String userName = "testUser123";
+        String newPassword = "testUser123Password";
+        signUp(userName, PASSWORD, client);
+        assertTrue(client.isUserLoggedIn());
+        DefaultKinveyUserManagementCallback callback = changePassword(newPassword, client);
+        assertNull(callback.error);
+        assertTrue(callback.result);
+        assertTrue(client.isUserLoggedIn());
+        logout(client);
+        login(userName, PASSWORD, client);
+        assertFalse(client.isUserLoggedIn());
+        login(userName, newPassword, client);
+        assertTrue(client.isUserLoggedIn());
+        assertNull(deleteUser(true, client).error);
+        assertFalse(client.isUserLoggedIn());
+    }
+
+    private DefaultKinveyUserManagementCallback changePassword(final String password, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserManagementCallback callback = new DefaultKinveyUserManagementCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.changePassword(password, client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+//    UserStore#get doesn't return User object
+/*    @Test
+    public void testGet() throws InterruptedException {
+        User user = login(USERNAME, PASSWORD).result;
+        DefaultKinveyClientCallback callback = get(user.getId(), client);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        assertEquals(user.getId(), callback.result.getId());
+    }*/
+
+    @Test
+    public void testGetRequestError() throws InterruptedException {
+        login(USERNAME, PASSWORD);
+        DefaultKinveyClientCallback callback = get("unexistUser", client);
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertEquals("This user does not exist for this app backend.",
+                ((KinveyJsonResponseException) callback.error).getDetails().getDescription());
+    }
+
+    private DefaultKinveyClientCallback get(final String userId, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.get(userId, client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testConvenience() throws InterruptedException {
+        User user = login(USERNAME, PASSWORD).result;
+        DefaultKinveyClientCallback callback = convenience(client);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        assertEquals(user.getId(), callback.result.getId());
+    }
+
+    @Test
+    public void testConvenienceError() throws InterruptedException {
+        assertFalse(client.isUserLoggedIn());
+        DefaultKinveyClientCallback callback = convenience(client);
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertEquals("currentUser must not be null", callback.error.getMessage());
+    }
+
+    private DefaultKinveyClientCallback convenience(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.convenience(client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+
+    @Test
+    public void testRetrieveResolves() throws InterruptedException {
+        User user = login(USERNAME, PASSWORD).result;
+        DefaultKinveyClientCallback callback = retrieve(new String[]{USERNAME, PASSWORD}, client);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        assertEquals(user.getId(), callback.result.getId());
+    }
+
+    @Test
+    public void testRetrieveResolvesError() throws InterruptedException {
+        assertFalse(client.isUserLoggedIn());
+        DefaultKinveyClientCallback callback = retrieve(new String[]{USERNAME, PASSWORD}, client);
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertEquals("currentUser must not be null", callback.error.getMessage());
+    }
+
+    private DefaultKinveyClientCallback retrieve(final String[] resolves, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.retrieve(resolves, client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testLoginWithAuthorizationCodeAPIError() throws InterruptedException {
+        login(USERNAME, PASSWORD, client);
+        DefaultKinveyUserCallback callback = loginWithAuthorizationCodeAPI(USERNAME, PASSWORD, "someClientId", "redirectURI");
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertTrue(((HttpResponseException) callback.error).getContent().contains("Client authentication failed"));
+    }
+
+    private DefaultKinveyUserCallback loginWithAuthorizationCodeAPI(final String username, final String password
+            , final String clientId, final String redirectURI) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserCallback callback = new DefaultKinveyUserCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.loginWithAuthorizationCodeAPI(client, username, password, clientId, redirectURI, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
 }
