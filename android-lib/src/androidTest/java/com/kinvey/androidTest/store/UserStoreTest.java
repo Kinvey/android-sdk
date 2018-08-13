@@ -1330,7 +1330,7 @@ public class UserStoreTest {
         return testName + "_" +System.currentTimeMillis();
     }
 
-//    client.isUserLoggedIn is true if not correct auth token is used
+//   MLIBZ-2654 client.isUserLoggedIn is true if not correct auth token is used
 /*    @Test
     public void testLoginKinveyAuthTokenError() throws InterruptedException {
         client.enableDebugLogging();
@@ -1472,7 +1472,7 @@ public class UserStoreTest {
         return callback;
     }
 
-//    UserStore#get doesn't return User object
+//  MLIBZ-2653  UserStore#get doesn't return User object
 /*    @Test
     public void testGet() throws InterruptedException {
         User user = login(USERNAME, PASSWORD).result;
