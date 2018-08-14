@@ -1,4 +1,4 @@
-package com.kinvey.androidTest;
+package com.kinvey.androidTest.client;
 
 
 import android.content.Context;
@@ -9,19 +9,14 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.google.api.client.http.UrlEncodedContent;
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyMICCallback;
-import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.TestUser;
-import com.kinvey.androidTest.store.UserStoreTest;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.store.UserStoreRequestManager;
 import com.kinvey.java.store.requests.user.GetMICAccessToken;
 import com.kinvey.java.store.requests.user.GetMICTempURL;

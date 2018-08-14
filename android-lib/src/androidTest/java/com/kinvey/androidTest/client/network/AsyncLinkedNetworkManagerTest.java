@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.network;
+package com.kinvey.androidTest.client.network;
 
 import android.content.Context;
 import android.os.Message;
@@ -8,12 +8,9 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.java.Constants;
-import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
@@ -25,8 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

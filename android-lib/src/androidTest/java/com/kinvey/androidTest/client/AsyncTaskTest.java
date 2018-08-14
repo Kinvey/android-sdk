@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.async;
+package com.kinvey.androidTest.client;
 
 import android.content.Context;
 import android.os.AsyncTask;

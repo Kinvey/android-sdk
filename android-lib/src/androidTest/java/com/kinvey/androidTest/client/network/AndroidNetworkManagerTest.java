@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.network;
+package com.kinvey.androidTest.client.network;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -8,11 +8,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.network.AndroidNetworkManager;
-import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.Person;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

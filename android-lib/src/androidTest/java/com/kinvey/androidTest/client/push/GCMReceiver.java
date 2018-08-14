@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.push;
+package com.kinvey.androidTest.client.push;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -9,7 +9,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 public class GCMReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        ComponentName comp = new ComponentName(context.getPackageName(), com.kinvey.androidTest.push.GCMService.class.getName());
+        ComponentName comp = new ComponentName(context.getPackageName(), com.kinvey.androidTest.client.push.GCMService.class.getName());
         startWakefulService(context, (intent.setComponent(comp)));
         setResultCode(Activity.RESULT_OK);
     }

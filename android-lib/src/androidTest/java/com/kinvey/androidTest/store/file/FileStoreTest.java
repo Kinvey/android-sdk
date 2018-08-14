@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store;
+package com.kinvey.androidTest.store.file;
 
 import android.content.Context;
 import android.os.Message;

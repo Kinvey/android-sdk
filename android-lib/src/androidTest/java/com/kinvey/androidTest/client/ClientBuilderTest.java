@@ -1,4 +1,4 @@
-package com.kinvey.androidTest;
+package com.kinvey.androidTest.client;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

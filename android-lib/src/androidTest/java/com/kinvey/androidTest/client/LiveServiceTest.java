@@ -1,4 +1,4 @@
-package com.kinvey.androidTest;
+package com.kinvey.androidTest.client;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
+import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.LiveModel;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;

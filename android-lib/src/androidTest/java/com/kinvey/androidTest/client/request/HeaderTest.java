@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.request;
+package com.kinvey.androidTest.client.request;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -6,11 +6,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.TestManager;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.KinveyAuthRequest;
-import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyHeaders;
 import com.kinvey.java.store.UserStoreRequestManager;
 

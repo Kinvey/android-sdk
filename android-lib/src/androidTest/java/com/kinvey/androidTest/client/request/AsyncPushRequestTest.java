@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.request;
+package com.kinvey.androidTest.client.request;
 
 import android.content.Context;
 import android.os.Message;
@@ -10,20 +10,14 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.async.AsyncPushRequest;
-import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.KinveyException;
-import com.kinvey.java.cache.ICache;
-import com.kinvey.java.cache.ICacheManager;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
-import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import org.junit.After;

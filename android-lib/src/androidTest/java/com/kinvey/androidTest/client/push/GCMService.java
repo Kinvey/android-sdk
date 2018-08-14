@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.push;
+package com.kinvey.androidTest.client.push;
 
 import com.kinvey.android.push.KinveyGCMService;
 

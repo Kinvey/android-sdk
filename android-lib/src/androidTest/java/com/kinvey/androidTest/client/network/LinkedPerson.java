@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.network;
+package com.kinvey.androidTest.client.network;
 
 import com.google.api.client.util.Key;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;

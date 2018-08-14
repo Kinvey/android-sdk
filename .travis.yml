@@ -12,13 +12,19 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 env:
- global:
-  - CI = true
-  - ANDROID_API=23
-  - EMULATOR_API_LEVEL=16
-  - ANDROID_ABI=armeabi-v7a
-  - ADB_INSTALL_TIMEOUT=10 # minutes
-  - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+  global:
+    - CI = true
+    - ANDROID_API=23
+    - EMULATOR_API_LEVEL=21
+    - ANDROID_ABI=armeabi-v7a
+    - ADB_INSTALL_TIMEOUT=10 # minutes
+    - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+  matrix:
+    - PACKAGE=client
+    - PACKAGE=cache
+    - PACKAGE=store.data
+    - PACKAGE=store.file
+    - PACKAGE=store.user
 
 android:
   components:

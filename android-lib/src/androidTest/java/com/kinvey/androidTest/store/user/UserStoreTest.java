@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store;
+package com.kinvey.androidTest.store.user;
 
 import android.content.Context;
 import android.os.Looper;
