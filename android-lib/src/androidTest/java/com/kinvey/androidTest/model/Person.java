@@ -9,6 +9,7 @@ public class Person extends GenericJson{
 
     public static final String COLLECTION = "Persons";
     public static final String DELTA_SET_COLLECTION = "QuerySyncCollection";
+    public static final String TEST_COLLECTION = "TestCollection";
     public static final String DELTA_SET_OFF_COLLECTION = "DeltaSetNotEnabled";
     public static final String COLLECTION_WITH_EXCEPTION = "CollectionWithException";
 

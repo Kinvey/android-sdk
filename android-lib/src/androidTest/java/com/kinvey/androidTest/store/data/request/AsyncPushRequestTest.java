@@ -52,7 +52,6 @@ public class AsyncPushRequestTest {
     public void setUp() {
         Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
         client = new Client.Builder(mMockContext).build();
-        client.enableDebugLogging();
     }
 
     @After
@@ -74,7 +73,7 @@ public class AsyncPushRequestTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
                 SyncManager syncManager = spy(mock(SyncManager.class));
                 try {
                     when(syncManager.executeRequest(any(Client.class), any(SyncRequest.class))).thenReturn(new GenericJson());
@@ -121,7 +120,7 @@ public class AsyncPushRequestTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
                 SyncManager syncManager = spy(mock(SyncManager.class));
                 List<SyncRequest> syncRequests = new ArrayList<>();
                 syncRequests.add(new SyncRequest());
@@ -183,7 +182,7 @@ public class AsyncPushRequestTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
                 SyncManager syncManager = spy(mock(SyncManager.class));
                 List<SyncRequest> syncRequests = new ArrayList<>();
                 syncRequests.add(new SyncRequest());
@@ -216,7 +215,7 @@ public class AsyncPushRequestTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.DELTA_SET_COLLECTION, Person.class, client));
+                NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
                 SyncManager syncManager = spy(mock(SyncManager.class));
                 List<SyncRequest> syncRequests = new ArrayList<>();
                 syncRequests.add(new SyncRequest());

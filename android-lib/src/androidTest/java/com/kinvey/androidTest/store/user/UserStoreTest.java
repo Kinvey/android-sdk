@@ -1107,7 +1107,7 @@ public class UserStoreTest {
 
     @Test
     public void testSignUpWithEmptyPassword() throws InterruptedException {
-        DefaultKinveyClientCallback callback = signUp(createRandomUserName("Test"), "", client);
+        DefaultKinveyClientCallback callback = signUp(createRandomUserName("Test123"), "", client);
         assertNotNull(callback.result);
         assertNull(callback.error);
         assertTrue(client.isUserLoggedIn());
