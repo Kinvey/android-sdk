@@ -20,8 +20,6 @@ env:
     - ADB_INSTALL_TIMEOUT=10 # minutes
     - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
   matrix:
-    - PACKAGE=client
-    - PACKAGE=cache
     - PACKAGE=store.data
     - PACKAGE=store.file
     - PACKAGE=store.user
