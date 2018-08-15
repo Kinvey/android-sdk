@@ -39,6 +39,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.concurrent.CountDownLatch;
 
+import static com.kinvey.androidTest.TestManager.PASSWORD;
+import static com.kinvey.androidTest.TestManager.USERNAME_FILE;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -58,8 +60,6 @@ public class FileStoreTest {
     private StoreType storeTypeResult;
     private static final String ID = "_id";
     private static final String TEST_FILENAME = "test.xml";
-    private static final String USER = "test";
-    private static final String PASSWORD = "test";
     private static final int MB = 1024 * 1024;
     private static final int DEFAULT_FILE_SIZE_MB = 1;
     private static final int CUSTOM_FILE_SIZE_MB = 5;
@@ -235,7 +235,7 @@ public class FileStoreTest {
                 @Override
                 public void run() {
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(USERNAME_FILE, PASSWORD, client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);
