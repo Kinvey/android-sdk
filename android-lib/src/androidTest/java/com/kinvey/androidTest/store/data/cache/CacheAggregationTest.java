@@ -7,6 +7,7 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
+import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.ModelWithDifferentTypeFields;
@@ -52,7 +53,11 @@ public class CacheAggregationTest {
     @Test
     public void testCount() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
+
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -77,7 +82,10 @@ public class CacheAggregationTest {
     @Test
     public void testQueryToFloatField() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -102,7 +110,10 @@ public class CacheAggregationTest {
     @Test
     public void testQueryToLongField() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -127,7 +138,10 @@ public class CacheAggregationTest {
     @Test
     public void testQueryToIntField() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -152,7 +166,10 @@ public class CacheAggregationTest {
     @Test
     public void testMin() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -177,7 +194,10 @@ public class CacheAggregationTest {
     @Test
     public void testMax() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -202,7 +222,10 @@ public class CacheAggregationTest {
     @Test
     public void testAverage() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -227,7 +250,10 @@ public class CacheAggregationTest {
     @Test
     public void testSum() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -252,7 +278,10 @@ public class CacheAggregationTest {
     @Test
     public void testCalculationFields() throws InterruptedException {
         TestManager<ModelWithDifferentTypeFields> testManager = new TestManager<ModelWithDifferentTypeFields>();
-        testManager.login(USERNAME, PASSWORD, client);
+//        testManager.login(USERNAME, PASSWORD, client);
+        User user = new User();
+        user.setId("testId");
+        Client.sharedInstance().setActiveUser(user);
         DataStore<ModelWithDifferentTypeFields> store = DataStore.collection(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, StoreType.SYNC, client);
         ICache<ModelWithDifferentTypeFields> cache = client.getCacheManager().getCache(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, Long.MAX_VALUE);
 
