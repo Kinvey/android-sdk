@@ -376,10 +376,13 @@ public class UserStoreTest {
 
     @Test
     public void get() throws InterruptedException {
+        String userId;
         login(USERNAME, PASSWORD);
-        DefaultKinveyClientCallback callback = get(client.getActiveUser().getId());
+        userId = client.getActiveUser().getId();
+        DefaultKinveyClientCallback callback = get(userId);
         assertNull(callback.error);
         assertNotNull(callback.result);
+        assertEquals(userId, callback.result.getId());
     }
 
     private DefaultKinveyClientCallback get(final String userName) throws InterruptedException {
