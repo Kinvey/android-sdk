@@ -364,6 +364,39 @@ public class DataStoreTest {
         }
     }
 
+    private static class CustomKinveyCachedCallback<T> implements KinveyCachedClientCallback<T> {
+        private CountDownLatch latch;
+        T result;
+        Throwable error;
+
+        public CustomKinveyCachedCallback() {
+        }
+
+        CustomKinveyCachedCallback(CountDownLatch latch) { this.latch = latch; }
+
+        @Override
+        public void onSuccess(T result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() { latch.countDown(); }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     private static class DefaultKinveyDeleteCallback implements KinveyDeleteCallback {
 
         private CountDownLatch latch;
@@ -3425,25 +3458,24 @@ public class DataStoreTest {
         saveCallback = save(store, createPerson(TEST_USERNAME_2));
         assertNotNull(saveCallback.result.getId());
         ids.add(saveCallback.result.getId());
-        DefaultKinveyReadCallback kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, new KinveyCachedClientCallback<KinveyReadResponse<Person>>() {
-            @Override
-            public void onSuccess(KinveyReadResponse<Person> result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-
-            }
-        });
+        CustomKinveyCachedCallback<KinveyReadResponse<Person>> cachedCallback = new CustomKinveyCachedCallback<>();
+        DefaultKinveyReadCallback kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, cachedCallback);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertEquals(2, kinveyListCallback.result.getResult().size());
+        assertNotNull(cachedCallback.result);
+        assertNull(cachedCallback.error);
+        assertNotNull(cachedCallback.result);
+        assertNotNull(cachedCallback.result.getResult());
+        assertEquals(2, cachedCallback.result.getResult().size());
         testManager.cleanBackend(store, StoreType.CACHE);
     }
 
-    private DefaultKinveyReadCallback find(final DataStore<Person> store, final Iterable<String> ids, int seconds, final KinveyCachedClientCallback<KinveyReadResponse<Person>> cachedClientCallback) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
+    private DefaultKinveyReadCallback find(final DataStore<Person> store, final Iterable<String> ids, int seconds, final CustomKinveyCachedCallback<KinveyReadResponse<Person>> cachedClientCallback) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(cachedClientCallback != null ? 2 : 1);
+        if (cachedClientCallback != null) {
+            cachedClientCallback.setLatch(latch);
+        }
         final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
