@@ -325,7 +325,7 @@ public class UserStore {
      * Sample Usage:
      * <pre>
      * {@code
-     *  UserStore.loginSalesForce("accessToken", mClient, new KinveyClientCallback<User>() {
+     *  UserStore.loginMobileIdentity("accessToken", mClient, new KinveyClientCallback<User>() {
      *          void onSuccess(User user){...};
      *          void onFailure(Throwable t){...};
      *  });
@@ -1297,8 +1297,7 @@ public class UserStore {
 
         @Override
         protected T executeAsync() throws IOException {
-            BaseUserStore.get(userId, client);
-            return null;
+            return (T) BaseUserStore.get(userId, client);
         }
     }
 

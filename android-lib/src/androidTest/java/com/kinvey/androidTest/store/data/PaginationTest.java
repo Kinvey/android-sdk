@@ -265,6 +265,9 @@ public class PaginationTest {
         client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
         assertEquals(5, testManager.pullCustom(store, client.query(), isAutoPagination).getResult().getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        assertEquals(5, testManager.pullCustom(store, null, isAutoPagination).getResult().getCount());
+        assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }
 
     @Test
