@@ -1297,8 +1297,7 @@ public class UserStore {
 
         @Override
         protected T executeAsync() throws IOException {
-            BaseUserStore.get(userId, client);
-            return null;
+            return (T) BaseUserStore.get(userId, client);
         }
     }
 

@@ -375,6 +375,33 @@ public class UserStoreTest {
     }
 
     @Test
+    public void get() throws InterruptedException {
+        String userId;
+        login(USERNAME, PASSWORD);
+        userId = client.getActiveUser().getId();
+        DefaultKinveyClientCallback callback = get(userId);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        assertEquals(userId, callback.result.getId());
+    }
+
+    private DefaultKinveyClientCallback get(final String userName) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.get(userName, client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+
+    @Test
     public void testCustomSignUp() throws InterruptedException {
         client.setUserClass(TestUser.class);
         TestUser user = new TestUser();
