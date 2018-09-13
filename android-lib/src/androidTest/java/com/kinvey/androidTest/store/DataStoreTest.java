@@ -364,6 +364,39 @@ public class DataStoreTest {
         }
     }
 
+    private static class CustomKinveyCachedCallback<T> implements KinveyCachedClientCallback<T> {
+        private CountDownLatch latch;
+        T result;
+        Throwable error;
+
+        public CustomKinveyCachedCallback() {
+        }
+
+        CustomKinveyCachedCallback(CountDownLatch latch) { this.latch = latch; }
+
+        @Override
+        public void onSuccess(T result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() { latch.countDown(); }
+
+        public CountDownLatch getLatch() {
+            return latch;
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+    }
+
     private static class DefaultKinveyDeleteCallback implements KinveyDeleteCallback {
 
         private CountDownLatch latch;
@@ -958,7 +991,11 @@ public class DataStoreTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.count(callback, cachedClientCallback);
+                if (cachedClientCallback != null) {
+                    store.count(callback, cachedClientCallback);
+                } else {
+                    store.count(callback);
+                }
             }
         });
         looperThread.start();
@@ -1123,13 +1160,17 @@ public class DataStoreTest {
         }
     }
 
-    private DefaultKinveyPurgeCallback purge(final DataStore<Person> store) throws InterruptedException {
+    private DefaultKinveyPurgeCallback purge(final Query query, final DataStore<Person> store) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyPurgeCallback callback = new DefaultKinveyPurgeCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.purge(callback);
+                if (query != null) {
+                    store.purge(query, callback);
+                } else {
+                    store.purge(callback);
+                }
             }
         });
         looperThread.start();
@@ -1144,7 +1185,19 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
-        DefaultKinveyPurgeCallback purgeCallback = purge(store);
+        DefaultKinveyPurgeCallback purgeCallback = purge(null, store);
+        assertNull(purgeCallback.error);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+
+        store.clear();
+        save(store, createPerson(TEST_USERNAME));
+        save(store, createPerson(TEST_USERNAME_2));
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 2);
+        purgeCallback = purge(new Query().equals("username", TEST_USERNAME), store);
+        assertNull(purgeCallback.error);
+        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+
+        purgeCallback = purge(new Query(), store);
         assertNull(purgeCallback.error);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
@@ -1155,7 +1208,7 @@ public class DataStoreTest {
         client.getSyncManager().clear(Person.COLLECTION);
         save(store, createPerson(TEST_USERNAME));
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
-        DefaultKinveyPurgeCallback purgeCallback = purge(store);
+        DefaultKinveyPurgeCallback purgeCallback = purge(null, store);
         assertNotNull(purgeCallback.error);
         assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
     }
@@ -3372,6 +3425,92 @@ public class DataStoreTest {
         looperThread.start();
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
+    }
+
+    @Test
+    public void testFindByIds() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.clear();
+        client.getSyncManager().clear(Person.COLLECTION);
+        List<String> ids = new ArrayList<>();
+        DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        saveCallback = save(store, createPerson(TEST_USERNAME_2));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        DefaultKinveyReadCallback kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, null);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertEquals(2, kinveyListCallback.result.getResult().size());
+        store.clear();
+    }
+
+    @Test
+    public void testFindByIdsCached() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.CACHE);
+        List<String> ids = new ArrayList<>();
+        DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        saveCallback = save(store, createPerson(TEST_USERNAME_2));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        CustomKinveyCachedCallback<KinveyReadResponse<Person>> cachedCallback = new CustomKinveyCachedCallback<>();
+        DefaultKinveyReadCallback kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, cachedCallback);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertEquals(2, kinveyListCallback.result.getResult().size());
+        assertNotNull(cachedCallback.result);
+        assertNull(cachedCallback.error);
+        assertNotNull(cachedCallback.result);
+        assertNotNull(cachedCallback.result.getResult());
+        assertEquals(2, cachedCallback.result.getResult().size());
+        testManager.cleanBackend(store, StoreType.CACHE);
+    }
+
+    private DefaultKinveyReadCallback find(final DataStore<Person> store, final Iterable<String> ids, int seconds, final CustomKinveyCachedCallback<KinveyReadResponse<Person>> cachedClientCallback) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(cachedClientCallback != null ? 2 : 1);
+        if (cachedClientCallback != null) {
+            cachedClientCallback.setLatch(latch);
+        }
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                if (cachedClientCallback != null) {
+                    store.find(ids, callback, cachedClientCallback);
+                } else {
+                    store.find(ids, callback);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testCount() throws InterruptedException, IOException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store.clear();
+        client.getSyncManager().clear(Person.COLLECTION);
+        DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
+        assertNotNull(saveCallback.result.getId());
+        saveCallback = save(store, createPerson(TEST_USERNAME_2));
+        assertNotNull(saveCallback.result.getId());
+        int count = findCount(store, DEFAULT_TIMEOUT, null).result;
+        assertEquals(2, count);
+        store.clear();
+    }
+
+    @Test
+    public void testQuery() {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        assertNotNull(store.query());
     }
 
 }
