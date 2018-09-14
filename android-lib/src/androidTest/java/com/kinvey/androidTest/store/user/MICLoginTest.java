@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
-import static com.kinvey.androidTest.TestManager.USERNAME_USER;
+import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -110,7 +110,7 @@ public class MICLoginTest {
     @Test
     public void testLoginToTempURL() throws IOException {
         UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
-        LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(USERNAME_USER, PASSWORD, CLIENT_ID, "tempURL");
+        LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(USERNAME, PASSWORD, CLIENT_ID, "tempURL");
         requestManager.setMICRedirectURI(REDIRECT_URI);
         GetMICTempURL micTempURL = requestManager.getMICTempURL(CLIENT_ID);
         assertTrue(micTempURL.getUriTemplate().endsWith("scope=openid"));

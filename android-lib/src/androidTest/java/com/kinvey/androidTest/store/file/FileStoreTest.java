@@ -41,7 +41,7 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
-import static com.kinvey.androidTest.TestManager.USERNAME_FILE;
+import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -274,7 +274,7 @@ public class FileStoreTest {
                 @Override
                 public void run() {
                     try {
-                        UserStore.login(USERNAME_FILE, PASSWORD, client, new KinveyClientCallback<User>() {
+                        UserStore.login(USERNAME, PASSWORD, client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);

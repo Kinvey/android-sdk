@@ -9,7 +9,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.store.LinkedDataStore;
-import com.kinvey.androidTest.network.LinkedPerson;
+
+import com.kinvey.androidTest.store.data.network.LinkedPerson;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
