@@ -1,5 +1,4 @@
-package com.kinvey.androidTest.store;
-
+package com.kinvey.androidTest.store.data.network;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -8,29 +7,21 @@ import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
-import com.kinvey.android.store.LinkedDataStore;
-
-import com.kinvey.androidTest.store.data.network.LinkedPerson;
-import com.kinvey.java.store.StoreType;
+import com.kinvey.android.network.AndroidNetworkManager;
+import com.kinvey.androidTest.model.Person;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class LinkedDataStoreTest {
+public class AndroidNetworkManagerTest {
 
     private Client client;
-
-    @Before
-    public void setUp() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
-        client = new Client.Builder(mMockContext).build();
-    }
 
     @After
     public void tearDown() {
@@ -45,9 +36,12 @@ public class LinkedDataStoreTest {
     }
 
     @Test
-    public void testConstructor() {
-        LinkedDataStore<LinkedPerson> linkedDataStore = new LinkedDataStore<>(client, LinkedPerson.COLLECTION, LinkedPerson.class, StoreType.NETWORK);
-        assertNotNull(linkedDataStore);
+    public void testIsOnline() {
+        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        client = new Client.Builder(mMockContext).build();
+        AndroidNetworkManager androidNetworkManager = new AndroidNetworkManager<>(Person.COLLECTION, Person.class, client);
+        assertNotNull(androidNetworkManager);
+        assertTrue(androidNetworkManager.isOnline());
     }
 
 }

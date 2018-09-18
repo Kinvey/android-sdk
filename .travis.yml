@@ -12,13 +12,17 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 env:
- global:
-  - CI = true
-  - ANDROID_API=23
-  - EMULATOR_API_LEVEL=21
-  - ANDROID_ABI=armeabi-v7a
-  - ADB_INSTALL_TIMEOUT=10 # minutes
-  - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+  global:
+    - CI = true
+    - ANDROID_API=23
+    - EMULATOR_API_LEVEL=21
+    - ANDROID_ABI=armeabi-v7a
+    - ADB_INSTALL_TIMEOUT=10 # minutes
+    - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+  matrix:
+    - PACKAGE=store.data
+    - PACKAGE=store.file
+    - PACKAGE=store.user
 
 android:
   components:
@@ -44,7 +48,7 @@ before_script:
   - ./gradlew --stop
 script: 
   - ./gradlew clean release --no-daemon 
-  - travis_wait 60 ./gradlew connectedAndroidTest -PdisablePreDex --stacktrace --no-daemon
+  - travis_wait 60 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.kinvey.androidTest.$PACKAGE -PdisablePreDex --stacktrace --no-daemon
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t $CODECOV_GIT_TOKEN

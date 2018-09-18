@@ -51,6 +51,8 @@ public class TestManager<T extends GenericJson> {
     public static final String TEST_USERNAME = "Test_UserName";
     public static final String TEST_USERNAME_2 = "Test_UserName_2";
     public static final String USERNAME = "test";
+    public static final String USERNAME_USER = "test_user";
+    public static final String USERNAME_FILE = "test_file";
     public static final String PASSWORD = "test";
 
     public void login(final String userName, final String password, final Client client) throws InterruptedException {
