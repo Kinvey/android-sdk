@@ -376,7 +376,9 @@ public class UserStore {
      * @param userId the _id field of the user to login
      * @param authToken a valid Kinvey Auth token
      * @param callback {@link KinveyUserCallback} that contains a valid logged in user
+     * @deprecated use {@link UserStore#login(String, String, AbstractClient, KinveyClientCallback<T>)}
      */
+    @Deprecated
     public <T extends User> void loginKinveyAuthToken(@NonNull String userId, @NonNull String authToken,
                                                       @NonNull AbstractClient client, @NonNull KinveyClientCallback<T> callback){
         new LoginKinveyAuth<>(userId, authToken, client, callback).execute();
