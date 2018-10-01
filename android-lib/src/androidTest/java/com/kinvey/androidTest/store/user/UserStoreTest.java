@@ -806,6 +806,54 @@ public class UserStoreTest {
     }
 
     @Test
+    public void testMICRefreshTokenAfterRetrieve() throws InterruptedException, IOException {
+        String redirectURI = "kinveyAuthDemo://";
+        String refreshToken = null;
+        String newRefreshToken = null;
+        DefaultKinveyUserCallback userCallback = loginMICCodeApi(client, redirectURI);
+        Credential cred = client.getStore().load(userCallback.result.getId());
+        if (cred != null) {
+            refreshToken = cred.getRefreshToken();
+        }
+        DefaultKinveyClientCallback clientCallback = retrieveMICTest(client);
+        Credential credNew = client.getStore().load(clientCallback.result.getId());
+        if (credNew != null) {
+            newRefreshToken = credNew.getRefreshToken();
+        }
+        assertEquals(refreshToken, newRefreshToken);
+    }
+
+    public DefaultKinveyUserCallback loginMICCodeApi(final Client client, final String redirectUrl) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserCallback callback = new DefaultKinveyUserCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.loginWithAuthorizationCodeAPI(client, USERNAME, PASSWORD, redirectUrl, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyClientCallback retrieveMICTest(final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                UserStore.retrieve(client, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
     public void testMIC_LoginWithAuthorizationCodeLoginPage() throws InterruptedException {
         String redirectURI = "http://test.redirect";
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(redirectURI, client);
