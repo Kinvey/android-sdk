@@ -742,10 +742,11 @@ public class UserStore {
         }
         final Uri uri = intent.getData();
         String accessToken = uri.getQueryParameter("code");
-        if (accessToken == null){
-            return;
+        String error = uri.getQueryParameter("error");
+        String errorDescription = uri.getQueryParameter("error_description");
+        if(accessToken != null && error == null) {
+            getMICAccessToken(accessToken, clientId, client);
         }
-        getMICAccessToken(accessToken, clientId, client);
     }
 
     /**

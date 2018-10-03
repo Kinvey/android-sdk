@@ -1,6 +1,8 @@
 package com.kinvey.androidTest.store.user;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Looper;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
@@ -803,6 +805,18 @@ public class UserStoreTest {
         latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    @Test
+    public void testMICErrorMockResponse() throws InterruptedException {
+        if (client.isUserLoggedIn()) {
+            logout(client);
+        }
+        String redirectURIMock = "kinveyauthdemo://?error=credentialError";
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(redirectURIMock));
+        UserStore.onOAuthCallbackReceived(intent, null, client);
+        assertNull(client.getActiveUser());
     }
 
     @Test
