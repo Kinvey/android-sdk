@@ -104,12 +104,6 @@
 
 			</exclusions>
 		</dependency>
-
-        <dependency>
-            <groupId>com.kinvey</groupId>
-            <artifactId>java-lib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>

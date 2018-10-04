@@ -20,8 +20,6 @@ The core of the library. Most of the library logic is written here. This project
 ### android-lib
 The wrapper library for android, built on top of java-api-core. All the android specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
-### java-lib
-The wrapper library for java, built on top of java-api-core. All the standalone-java specific implementation goes here. Most of the classes in this library extend from the ones in java-api-core.
 
 ### android-secure
 Encryption module built on top of android-lib. Rarely used; not compiled into the standard build process. This may be requested by certain customers who need encryption in their app.

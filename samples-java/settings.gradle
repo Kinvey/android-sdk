@@ -1,1 +1,1 @@
-include ':Samples-Java', ':HelloWorld', ':java-lib'
+include ':Samples-Java', ':HelloWorld'
