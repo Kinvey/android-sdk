@@ -376,7 +376,9 @@ public class UserStore {
      * @param userId the _id field of the user to login
      * @param authToken a valid Kinvey Auth token
      * @param callback {@link KinveyUserCallback} that contains a valid logged in user
+     * @deprecated use {@link UserStore#login(String, String, AbstractClient, KinveyClientCallback<T>)}
      */
+    @Deprecated
     public <T extends User> void loginKinveyAuthToken(@NonNull String userId, @NonNull String authToken,
                                                       @NonNull AbstractClient client, @NonNull KinveyClientCallback<T> callback){
         new LoginKinveyAuth<>(userId, authToken, client, callback).execute();
@@ -740,10 +742,11 @@ public class UserStore {
         }
         final Uri uri = intent.getData();
         String accessToken = uri.getQueryParameter("code");
-        if (accessToken == null){
-            return;
+        String error = uri.getQueryParameter("error");
+        String errorDescription = uri.getQueryParameter("error_description");
+        if(accessToken != null && error == null) {
+            getMICAccessToken(accessToken, clientId, client);
         }
-        getMICAccessToken(accessToken, clientId, client);
     }
 
     /**
