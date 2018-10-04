@@ -269,20 +269,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return i;
     }
 
-    /**
-     * Method gets item ids in support tables (_acl and _kmd)
-     * @param items items for getting them ids
-     * @param field _acl or _kmd
-     * @return item ids in support tables
-     */
-    private List<String> getSupportIds(List<T> items, String field) {
-        List<String> supportIds = new ArrayList<>();
-        for (T item : items) {
-            supportIds.add(getSupportId(item, field));
-        }
-        return supportIds;
-    }
-
     private int delete(DynamicRealm realm, Query query, String tableName) {
 
         int ret;
@@ -392,10 +378,6 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             realm.close();
         }
         return i;
-    }
-
-    private String getSupportId(T item, String field) {
-        return item.get(field) != null ? ((String) ((GenericJson) item.get(field)).get(ID)) : null;
     }
 
     public String getCollection() {

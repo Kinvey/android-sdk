@@ -3,7 +3,7 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '3.1.4'
+  version = '3.1.5'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
   ext.kinveyApiVersion = '4'
 }
@@ -44,12 +44,6 @@ task makeAndroidJar(type: Copy)  {
 task copyAndroid(type: Copy)  {
   from 'java-api-core/build/libs'
   into 'release/build/android'
-}
-
-task copyJava(type: Copy)  {
-  from 'java-lib/build/libs'
-  from 'java-api-core/build/libs'
-  into 'release/build/nativejava'
 }
 
 task zipAndroid(type: Zip) {
@@ -116,33 +110,23 @@ task prepAndroid{
   prepAndroid.dependsOn(":android-lib:docgen")
 }
 
-task prepJava{
-  prepJava.dependsOn(":java-lib:clean")
-  prepJava.dependsOn(":java-lib:cleanTest")
-  prepJava.dependsOn(":java-lib:cleanDocgen")
-  prepJava.dependsOn(":java-lib:build")
-  prepJava.dependsOn(":java-lib:docgen")
-}
-
 task prepSecure{
   prepSecure.dependsOn(":android-secure:clean")
   prepSecure.dependsOn(":android-secure:cleanTest")
   prepSecure.dependsOn(":android-secure:build")
 }
 
-task release(dependsOn: ['cleanDir', 'prepCore', 'prepJava', 'prepAndroid'/*, 'prepSecure'*/, 'makeAndroidJar', 'copyAndroid', 'copyJava', 'zipAndroid', 'zipJava']){
+task release(dependsOn: ['cleanDir', 'prepCore', 'prepAndroid'/*, 'prepSecure'*/, 'makeAndroidJar', 'copyAndroid', 'zipAndroid', 'zipJava']){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 
 prepCore.mustRunAfter cleanDir
 prepAndroid.mustRunAfter prepCore
-prepJava.mustRunAfter prepAndroid
 //prepSecure.mustRunAfter prepJava
 //prepSecure.mustRunAfter prepAndroid
-makeAndroidJar.mustRunAfter prepJava
+makeAndroidJar.mustRunAfter prepAndroid
 copyAndroid.mustRunAfter makeAndroidJar
-copyJava.mustRunAfter copyAndroid
-zipAndroid.mustRunAfter copyJava
+zipAndroid.mustRunAfter copyAndroid
 //zipAndroid.mustRunAfter copyAndroid
 
 zipJava.mustRunAfter zipAndroid

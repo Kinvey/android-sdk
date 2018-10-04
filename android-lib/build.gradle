@@ -17,24 +17,26 @@ android {
   }
 
   dexOptions {
-    javaMaxHeapSize "6g"
+    javaMaxHeapSize "4g"
   }
 
   defaultConfig {
     minSdkVersion 16
     targetSdkVersion 23
     multiDexEnabled true
-    testInstrumentationRunner "com.kinvey.androidTest.cache.TestRunner"
+    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
   }
   buildTypes {
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ? "true" : "false"
-        buildConfigField "String", "KINVEY_APP_KEY", System.getenv("KINVEY_APP_KEY") != null ?
+      buildConfigField "boolean", "TRAVIS", System.getenv("TRAVIS") != null ? "true" : "false"
+      buildConfigField "String", "KINVEY_APP_KEY", System.getenv("KINVEY_APP_KEY") != null ?
                 '"'+System.getenv("KINVEY_APP_KEY")+'"' : "\"KINVEY_APP_KEY\""
-        buildConfigField "String", "KINVEY_APP_SECRET", System.getenv("KINVEY_APP_SECRET") != null ?
+      buildConfigField "String", "KINVEY_APP_SECRET", System.getenv("KINVEY_APP_SECRET") != null ?
                 '"'+System.getenv("KINVEY_APP_SECRET")+'"' : "\"KINVEY_APP_SECRET\""
+      buildConfigField "String", "SENDER_ID", System.getenv("SENDER_ID") != null ?
+              '"'+System.getenv("SENDER_ID")+'"' : "\"SENDER_ID\""
     }
     debug {
       testCoverageEnabled true
@@ -43,6 +45,8 @@ android {
               '"'+System.getenv("KINVEY_APP_KEY")+'"' : "\"KINVEY_APP_KEY\""
       buildConfigField "String", "KINVEY_APP_SECRET", System.getenv("KINVEY_APP_SECRET") != null ?
               '"'+System.getenv("KINVEY_APP_SECRET")+'"' : "\"KINVEY_APP_SECRET\""
+      buildConfigField "String", "SENDER_ID", System.getenv("SENDER_ID") != null ?
+              '"'+System.getenv("SENDER_ID")+'"' : "\"SENDER_ID\""
     }
   }
 
