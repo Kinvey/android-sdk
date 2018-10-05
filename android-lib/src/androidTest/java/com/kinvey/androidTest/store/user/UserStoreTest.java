@@ -27,6 +27,7 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
@@ -856,14 +857,18 @@ public class UserStoreTest {
     }
 
     @Test
-    public void testMICErrorMockResponse() throws InterruptedException {
+    public void testMICErrorMockResponse() throws InterruptedException, KinveyException {
         if (client.isUserLoggedIn()) {
             logout(client);
         }
         String redirectURIMock = "kinveyauthdemo://?error=credentialError";
         Intent intent = new Intent();
         intent.setData(Uri.parse(redirectURIMock));
-        UserStore.onOAuthCallbackReceived(intent, null, client);
+        try {
+            UserStore.onOAuthCallbackReceived(intent, null, client);
+        } catch (KinveyException e) {
+            e.printStackTrace();
+        }
         assertNull(client.getActiveUser());
     }
 

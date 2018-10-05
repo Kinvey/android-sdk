@@ -18,6 +18,7 @@ import com.kinvey.android.callback.KinveyUserManagementCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.ui.MICLoginActivity;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
@@ -736,9 +737,9 @@ public class UserStore {
      * @param clientId ClientId
      * @param client Client object
      */
-    public static void onOAuthCallbackReceived(@Nullable Intent intent, @Nullable String clientId, @NonNull AbstractClient client){
+    public static void onOAuthCallbackReceived(@Nullable Intent intent, @Nullable String clientId, @NonNull AbstractClient client) throws KinveyException{
         if (intent == null || intent.getData() == null){
-            return;
+            throw new KinveyException("Intent or data from intent from MIC login page is null");
         }
         final Uri uri = intent.getData();
         String accessToken = uri.getQueryParameter("code");
@@ -746,6 +747,8 @@ public class UserStore {
         String errorDescription = uri.getQueryParameter("error_description");
         if(accessToken != null && error == null) {
             getMICAccessToken(accessToken, clientId, client);
+        } else {
+            throw new KinveyException(error + ": " + errorDescription);
         }
     }
 
