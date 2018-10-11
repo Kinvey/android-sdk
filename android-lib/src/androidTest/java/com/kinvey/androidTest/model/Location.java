@@ -21,8 +21,8 @@ public class Location  extends GenericJson {
     @Key
     private String address;
 
-    @Key
-    private Double[] _geoloc ;
+    @Key("_geoloc")
+    private Double[] geoloc ;
 
     public String getId() {
         return id;
@@ -57,10 +57,10 @@ public class Location  extends GenericJson {
     }
 
     public Double[] getGeo() {
-        return _geoloc;
+        return geoloc;
     }
 
     public void setGeo(Double[] geoloc) {
-        this._geoloc = geoloc;
+        this.geoloc = geoloc;
     }
 }
