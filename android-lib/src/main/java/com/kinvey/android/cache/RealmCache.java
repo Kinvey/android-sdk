@@ -508,6 +508,7 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
         item.set(ID, clone.get(ID));
 
+        item.remove(ClassHash.TTL);
         return item.get(ID).toString();
     }
 
