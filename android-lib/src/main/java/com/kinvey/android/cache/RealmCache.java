@@ -501,14 +501,12 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
 
     private String insertOrUpdate(T item, DynamicRealm mRealm){
 
-        T clone = (T)item;
-        clone.put(ClassHash.TTL, getItemExpireTime());
+        item.put(ClassHash.TTL, getItemExpireTime());
 
-        ClassHash.saveData(mCollection, mRealm, mCollectionItemClass, clone);
-
-        item.set(ID, clone.get(ID));
+        ClassHash.saveData(mCollection, mRealm, mCollectionItemClass, item);
 
         item.remove(ClassHash.TTL);
+
         return item.get(ID).toString();
     }
 
