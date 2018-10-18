@@ -22,6 +22,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.androidTest.model.DateExample;
 import com.kinvey.androidTest.model.PersonArray;
 import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
@@ -73,6 +74,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -102,6 +104,7 @@ public class DataStoreTest {
     private static final String KMD = "_kmd";
     private static final String SORT_FIELD = "_kmd.ect";
     private static final String LMT = "lmt";
+    private static final String FIELD = "field";
     private static final int DEFAULT_TIMEOUT = 60;
     private static final int LONG_TIMEOUT = 6*DEFAULT_TIMEOUT;
 
@@ -451,6 +454,60 @@ public class DataStoreTest {
         }
     }
 
+    private static class DefaultKinveyReadDateCallback implements KinveyReadCallback<DateExample> {
+
+        private CountDownLatch latch;
+        KinveyReadResponse<DateExample> result;
+        Throwable error;
+
+        DefaultKinveyReadDateCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(KinveyReadResponse<DateExample> result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class DefaultKinveyDateCallback implements KinveyClientCallback<DateExample> {
+
+        private CountDownLatch latch;
+        DateExample result;
+        Throwable error;
+
+        DefaultKinveyDateCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(DateExample result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
     private Person createPerson(String name) {
         return new Person(name);
     }
@@ -573,6 +630,71 @@ public class DataStoreTest {
         assertNotNull(callback.result.getUsername());
         assertNull(callback.error);
         assertTrue(callback.result.getUsername().equals(TEST_USERNAME));
+    }
+
+    @Test
+    public void testDateObject() throws InterruptedException {
+        DataStore<DateExample> store = DataStore.collection(DateExample.COLLECTION, DateExample.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(DateExample.COLLECTION);
+        Date date = new Date();
+        DateExample object = new DateExample("first", date);
+        long startTime = date.getTime();
+        long timeFromEntity = object.getDate().getTime();
+        DefaultKinveyDateCallback callback = saveDate(store, object);
+        assertNotNull(callback.result);
+        Query query = client.query();
+        query = query.equals(FIELD, "first");
+        DefaultKinveyReadDateCallback kinveyListCallback = findDate(store, query, DEFAULT_TIMEOUT);
+        deleteDate(store, query);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(startTime == timeFromEntity);
+        assertTrue(kinveyListCallback.result.getResult().get(0).getDate().getTime() == startTime);
+    }
+
+    private DefaultKinveyDateCallback saveDate(final DataStore<DateExample> store, final DateExample object) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDateCallback callback = new DefaultKinveyDateCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.save(object, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyReadDateCallback findDate(final DataStore<DateExample> store, final Query query, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyReadDateCallback callback = new DefaultKinveyReadDateCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(query, callback, null);
+            }
+        });
+        looperThread.start();
+        latch.await(seconds, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyDeleteCallback deleteDate(final DataStore<DateExample> store, final Query query) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await(120, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
     }
 
     @Test
