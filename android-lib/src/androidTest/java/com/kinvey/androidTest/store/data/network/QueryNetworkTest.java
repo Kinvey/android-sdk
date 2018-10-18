@@ -393,7 +393,7 @@ public class QueryNetworkTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
         Query query = client.query();
-        query = query.startsWith(USERNAME, "^T");
+        query = query.regEx(USERNAME, "^T");
         DefaultKinveyReadCallback kinveyListCallback = find(store, query, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
