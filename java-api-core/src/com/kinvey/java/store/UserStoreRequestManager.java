@@ -64,6 +64,11 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
 
     public static final String USER_COLLECTION_NAME = "user";
+    public static final String GRANT_TYPE = "grant_type";
+    public static final String USERNAME_PARAM = "username";
+    public static final String PASSWORD_PARAM = "password";
+    public static final String PASSWORD_TYPE = "password";
+    public static final String CLIENT_ID = "client_id";
 
     public KinveyAuthRequest.Builder getBuilder() {
         return builder;
@@ -657,14 +662,14 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
     public GetMICAccessToken getOAuthToken(String clientId, String username, String password) throws IOException{
         Map<String, String> data = new HashMap<String, String>();
-        data.put("grant_type", "password");
-        data.put("username", username);
-        data.put("password", password);
+        data.put(GRANT_TYPE, PASSWORD_TYPE);
+        data.put(USERNAME_PARAM, username);
+        data.put(PASSWORD_PARAM, password);
         String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
         if (clientId != null) {
             fullClientIdField = fullClientIdField + "." + clientId;
         }
-        data.put("client_id",  fullClientIdField);
+        data.put(CLIENT_ID,  fullClientIdField);
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
         getToken.setRequireAppCredentials(true);
