@@ -40,6 +40,8 @@ public class UserStore {
     private static KinveyUserCallback MICCallback;
     private static String MICRedirectURI;
     private static String MICClientId;
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String REFRESH_TOKEN = "refresh_token";
 
     /**
      * Asynchronous request to signUp.
@@ -1099,9 +1101,9 @@ public class UserStore {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
-            T ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
+            T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get("refresh_token").toString());
+            currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
             return ret;
