@@ -655,6 +655,23 @@ public class UserStoreRequestManager<T extends BaseUser> {
         return getToken;
     }
 
+    public GetMICAccessToken getOAuthToken(String clientId, String username, String password) throws IOException{
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("grant_type", "password");
+        data.put("username", username);
+        data.put("password", password);
+        String fullClientIdField = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        if (clientId != null) {
+            fullClientIdField = fullClientIdField + "." + clientId;
+        }
+        data.put("client_id",  fullClientIdField);
+        HttpContent content = new UrlEncodedContent(data) ;
+        GetMICAccessToken getToken = new GetMICAccessToken(this, content);
+        getToken.setRequireAppCredentials(true);
+        client.initializeRequest(getToken);
+        return getToken;
+    }
+
     public GetMICAccessToken useRefreshToken(String refreshToken) throws IOException{
 //        grant_type: "refresh_token" - this is always set to this value  - note the difference
 //        refresh_token: use the refresh token
