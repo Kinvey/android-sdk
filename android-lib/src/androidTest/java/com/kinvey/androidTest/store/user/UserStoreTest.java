@@ -12,6 +12,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
+import com.kinvey.android.AsyncUserGroup;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
@@ -29,6 +30,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
+import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -61,6 +63,8 @@ import static org.junit.Assert.assertNull;
 public class UserStoreTest {
 
     private Client client = null;
+
+    public static final String INSUFFICIENT_CREDENTIAL_TYPE = "InsufficientCredentials";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
@@ -209,6 +213,33 @@ public class UserStoreTest {
         @Override
         public void onSuccess(Void result) {
             this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class UserGroupResponseCallback implements KinveyClientCallback<UserGroup.UserGroupResponse> {
+
+        private CountDownLatch latch;
+        private UserGroup.UserGroupResponse result;
+        private Throwable error;
+
+        private UserGroupResponseCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(UserGroup.UserGroupResponse user) {
+            this.result = user;
             finish();
         }
 
@@ -800,6 +831,29 @@ public class UserStoreTest {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testAddUsersToGroupWrongCredentials() throws InterruptedException, IOException {
+        AsyncUserGroup asyncUserGroup = client.userGroup();
+        login(client);
+        UserGroupResponseCallback callback = addUsersWrongCredentials(asyncUserGroup);
+        assertEquals(((KinveyJsonResponseException)callback.error).getDetails().getError(), INSUFFICIENT_CREDENTIAL_TYPE);
+    }
+
+    private UserGroupResponseCallback addUsersWrongCredentials(final AsyncUserGroup asyncUserGroup) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final UserGroupResponseCallback callback = new UserGroupResponseCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                asyncUserGroup.addAllUsersToGroup("group","group", callback);
             }
         });
         looperThread.start();

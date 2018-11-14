@@ -7,6 +7,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.kinvey.android.AndroidMimeTypeFinder;
 import com.kinvey.android.Client;
 import com.kinvey.android.network.AsyncLinkedNetworkManager;
 import com.kinvey.androidTest.LooperThread;
@@ -14,6 +15,7 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.LinkedNetworkManager;
 
 import org.junit.After;
@@ -22,16 +24,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -71,6 +75,35 @@ public class AsyncLinkedNetworkManagerTest {
         AsyncLinkedNetworkManager<LinkedPerson> linkedNetworkManager =
                 new AsyncLinkedNetworkManager<>(LinkedPerson.COLLECTION, LinkedPerson.class, client);
         assertNotNull(linkedNetworkManager);
+    }
+
+    @Test
+    public void testMimeTypeFinder() {
+        AndroidMimeTypeFinder androidMimeTypeFinder = mock(AndroidMimeTypeFinder.class);
+        androidMimeTypeFinder.getMimeType(new FileMetaData(), new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return -1;
+            }
+        });
+        verify(androidMimeTypeFinder, times(1)).getMimeType((FileMetaData) any(), (InputStream) any());
+        verify(androidMimeTypeFinder, never()).getMimeType((FileMetaData) any());
+    }
+
+    @Test
+    public void testMimeTypeFinderNullFile() {
+        AndroidMimeTypeFinder androidMimeTypeFinder = new AndroidMimeTypeFinder();
+        FileMetaData fileMetaData = new FileMetaData();
+        androidMimeTypeFinder.getMimeType(fileMetaData);
+        assertEquals(fileMetaData.getMimetype(), "application/octet-stream");
+    }
+
+    @Test
+    public void testMimeTypeFinderNullMimetype() {
+        AndroidMimeTypeFinder androidMimeTypeFinder = new AndroidMimeTypeFinder();
+        FileMetaData fileMetaData = new FileMetaData();
+        androidMimeTypeFinder.getMimeType(fileMetaData);
+        assertEquals(fileMetaData.getMimetype(), "application/octet-stream");
     }
 
     @Test

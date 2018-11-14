@@ -6,6 +6,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.kinvey.android.AndroidCredentialStoreException;
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.androidTest.TestManager;
@@ -245,6 +246,18 @@ public class AggregationTest {
         assertNull(callback.getError());
         assertNotNull(callback.getResult().getResultsFor("username", TEST_USERNAME));
         assertTrue(callback.getResult().getResultsFor("username", TEST_USERNAME).get(0).intValue() == 2);
+    }
+
+    @Test
+    public void testAndroidCredentialStoreExceptionMessage() {
+        AndroidCredentialStoreException androidCredentialStoreException =  new AndroidCredentialStoreException("Credential store corrupted and was rebuilt");
+        assertEquals(androidCredentialStoreException.getMessage(), "Credential store corrupted and was rebuilt");
+    }
+
+    @Test
+    public void testAndroidCredentialStoreExceptionConstructor() {
+        AndroidCredentialStoreException androidCredentialStoreException =  new AndroidCredentialStoreException();
+        assertNotNull(androidCredentialStoreException);
     }
 
     @Test
