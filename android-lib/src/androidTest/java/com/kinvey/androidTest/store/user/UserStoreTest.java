@@ -12,8 +12,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
+import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.AsyncUserGroup;
 import com.kinvey.android.Client;
+import com.kinvey.android.SharedPrefCredentialStore;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -25,6 +27,7 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
@@ -33,8 +36,10 @@ import com.kinvey.java.Query;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
+import com.kinvey.java.auth.InMemoryCredentialStore;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyJsonResponseException;
+import com.kinvey.java.model.UserLookup;
 import com.kinvey.java.store.StoreType;
 
 import org.junit.After;
@@ -863,6 +868,24 @@ public class UserStoreTest {
     }
 
     @Test
+    public void testUserDiscovery() throws InterruptedException, IOException {
+        AsyncUserDiscovery asyncUserGroup = client.userDiscovery();
+        UserLookup userLookup = asyncUserGroup.userLookup();
+        userLookup.setId("id");
+        assertEquals("id", userLookup.getId());
+        userLookup.setEmail("email");
+        assertEquals("email", userLookup.getEmail());
+        userLookup.setFirstName("first");
+        assertEquals("first", userLookup.getFirstName());
+        userLookup.setLastName("last");
+        assertEquals("last", userLookup.getLastName());
+        userLookup.setFacebookID("facebook");
+        assertEquals("facebook", userLookup.getFacebookID());
+        userLookup.setUsername("username");
+        assertEquals("username", userLookup.getUsername());
+    }
+
+    @Test
     public void testMICRefreshTokenAfterRetrieve() throws InterruptedException, IOException {
         String redirectURI = "kinveyAuthDemo://";
         String refreshToken = null;
@@ -909,6 +932,26 @@ public class UserStoreTest {
         looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
+
+    @Test
+    public void testSharedPrefCredentialStore() throws IOException {
+        String userId = "userId";
+        String authotoken = "authotoken";
+        String refresh = "refreshToken";
+        Credential testCredential = new Credential(userId, authotoken, refresh);
+        SharedPrefCredentialStore store = new SharedPrefCredentialStore(client.getContext());
+        assertNull(store.load(userId));
+        store.store(userId, testCredential);
+        Credential emptyCred = new Credential(null, null, null);
+        emptyCred = store.load(userId);
+        assertNotNull(emptyCred);
+        assertEquals(emptyCred.getUserId(), userId);
+        assertEquals(emptyCred.getAuthToken(), authotoken);
+        assertEquals(emptyCred.getRefreshToken(), refresh);
+        store.delete(userId);
+        assertNull(store.load(userId));
+    }
+
 
     @Test
     public void testMICErrorMockResponse() throws InterruptedException, KinveyException {

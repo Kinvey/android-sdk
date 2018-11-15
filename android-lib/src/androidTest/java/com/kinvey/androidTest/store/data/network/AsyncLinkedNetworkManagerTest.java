@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
@@ -91,10 +92,23 @@ public class AsyncLinkedNetworkManagerTest {
     }
 
     @Test
+    public void testMimeTypeFinderInputStream() {
+        AndroidMimeTypeFinder androidMimeTypeFinder = new AndroidMimeTypeFinder();
+        FileMetaData fileMetaData = new FileMetaData();
+        androidMimeTypeFinder.getMimeType(fileMetaData, new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return -1;
+            }
+        });
+        assertEquals(fileMetaData.getMimetype(), "application/octet-stream");
+    }
+
+    @Test
     public void testMimeTypeFinderNullFile() {
         AndroidMimeTypeFinder androidMimeTypeFinder = new AndroidMimeTypeFinder();
         FileMetaData fileMetaData = new FileMetaData();
-        androidMimeTypeFinder.getMimeType(fileMetaData);
+        androidMimeTypeFinder.getMimeType(fileMetaData, (File) null);
         assertEquals(fileMetaData.getMimetype(), "application/octet-stream");
     }
 
