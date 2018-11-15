@@ -202,6 +202,33 @@ public class DataStoreTest {
         }
     }
 
+    private static class DefaultKinveyClientArrayCallback implements KinveyClientCallback<PersonArray> {
+
+        private CountDownLatch latch;
+        PersonArray result;
+        Throwable error;
+
+        DefaultKinveyClientArrayCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(PersonArray result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
     private static class DefaultKinveySyncCallback implements KinveySyncCallback {
 
         private CountDownLatch latch;
@@ -693,6 +720,32 @@ public class DataStoreTest {
         });
         looperThread.start();
         latch.await(120, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testUpdatePersonArray() throws InterruptedException, IOException {
+        DataStore<PersonArray> store = DataStore.collection(PersonArray.COLLECTION, PersonArray.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(PersonArray.COLLECTION);
+        PersonArray person = new PersonArray();
+        DefaultKinveyClientArrayCallback callback = savePersonArray(store, person);
+        assertNotNull(callback.result);
+        KinveyReadResponse<PersonArray> callbackFind = store.find();
+        assertTrue(callbackFind.getResult().size() > 0);
+    }
+
+    private DefaultKinveyClientArrayCallback savePersonArray(final DataStore<PersonArray> store, final PersonArray person) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientArrayCallback callback = new DefaultKinveyClientArrayCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.save(person, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
         looperThread.mHandler.sendMessage(new Message());
         return callback;
     }

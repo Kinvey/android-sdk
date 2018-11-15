@@ -380,7 +380,7 @@ public abstract class ClassHash {
             if (fieldInfo == null){
                 continue;
             }
-            if (fieldInfo.getType().isArray() || Collection.class.isAssignableFrom(fieldInfo.getType())){
+            if (Collection.class.isAssignableFrom(fieldInfo.getType())){
                 Class underlying = getUnderlying(f);
                 if (underlying != null && GenericJson.class.isAssignableFrom(underlying)){
                     if (!underlying.getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
