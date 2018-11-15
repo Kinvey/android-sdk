@@ -40,6 +40,8 @@ public class UserStore {
     private static KinveyUserCallback MICCallback;
     private static String MICRedirectURI;
     private static String MICClientId;
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String REFRESH_TOKEN = "refresh_token";
 
     /**
      * Asynchronous request to signUp.
@@ -792,7 +794,7 @@ public class UserStore {
                                                      @NonNull String password, @Nullable String clientId,
                                                      @NonNull String redirectURI, @NonNull KinveyUserCallback<User> callback){
         MICCallback = callback;
-        new PostForTempURL(client, clientId, redirectURI, username, password, callback).execute();
+        new PostForOAuthToken(client, clientId, redirectURI, username, password, callback).execute();
     }
 
     /**
@@ -1077,7 +1079,7 @@ public class UserStore {
         }
     }
 
-    private static class PostForTempURL<T extends User> extends AsyncClientRequest<T>{
+    private static class PostForOAuthToken<T extends User> extends AsyncClientRequest<T>{
 
         private final AbstractClient<T> client;
         private String clientId;
@@ -1085,7 +1087,7 @@ public class UserStore {
         String username;
         String password;
 
-        public PostForTempURL(AbstractClient<T> client, String clientId, String redirectURI, String username, String password, KinveyUserCallback<T> callback) {
+        public PostForOAuthToken(AbstractClient<T> client, String clientId, String redirectURI, String username, String password, KinveyUserCallback<T> callback) {
             super(callback);
             this.client = client;
             this.clientId = clientId;
@@ -1096,25 +1098,15 @@ public class UserStore {
 
         @Override
         protected T executeAsync() throws IOException {
-
-            UserStoreRequestManager<T> requestManager = new UserStoreRequestManager<>(client, createBuilder(client));
+            UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
-            GetMICTempURL micTempURL = requestManager.getMICTempURL(clientId);
-            GenericJson tempResult = micTempURL.execute();
-
-            String tempURL = tempResult.get("temp_login_uri").toString();
-            LoginToTempURL loginToTempURL = requestManager.MICLoginToTempURL(username, password, clientId, tempURL);
-            GenericJson accessResult = loginToTempURL.execute();
-
-            T user = BaseUserStore.loginMobileIdentity(accessResult.get("access_token").toString(), client);
-
-
+            GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
+            T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(accessResult.get("refresh_token").toString());
+            currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
-
-            return user;
+            return ret;
         }
     }
 
