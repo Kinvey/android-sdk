@@ -1389,6 +1389,78 @@ public class UserStoreTest {
     }
 
     @Test
+    public void testUserDiscoveryLookup() throws InterruptedException, IOException {
+        AsyncUserDiscovery asyncUserGroup = client.userDiscovery();
+        login(USERNAME, PASSWORD);
+        DefaultKinveyUserListCallback callback = lookupByFullNameDiscovery("first", "last", asyncUserGroup);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+    }
+
+    private DefaultKinveyUserListCallback lookupByFullNameDiscovery(final String firstname, final String lastname, final AsyncUserDiscovery asyncUserDiscovery) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserListCallback callback = new DefaultKinveyUserListCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                asyncUserDiscovery.lookupByFullName(firstname, lastname, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testUsernameDiscoveryLookup() throws InterruptedException, IOException {
+        AsyncUserDiscovery asyncUserGroup = client.userDiscovery();
+        login(USERNAME, PASSWORD);
+        DefaultKinveyUserListCallback callback = lookupByUsernameDiscovery(USERNAME, asyncUserGroup);
+        assertNotNull(callback.result);
+        assertTrue(callback.result.length > 0);
+    }
+
+    private DefaultKinveyUserListCallback lookupByUsernameDiscovery(final String name, final AsyncUserDiscovery asyncUserDiscovery) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserListCallback callback = new DefaultKinveyUserListCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                asyncUserDiscovery.lookupByUserName(name, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
+    public void testFacebookIdDiscoveryLookup() throws InterruptedException, IOException {
+        AsyncUserDiscovery asyncUserGroup = client.userDiscovery();
+        login(USERNAME, PASSWORD);
+        DefaultKinveyUserListCallback callback = lookupByFacebookIdDiscovery("testID", asyncUserGroup);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+    }
+
+    private DefaultKinveyUserListCallback lookupByFacebookIdDiscovery(final String id, final AsyncUserDiscovery asyncUserDiscovery) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyUserListCallback callback = new DefaultKinveyUserListCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                asyncUserDiscovery.lookupByFacebookID(id, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    @Test
     public void testRetrieve() throws InterruptedException {
         DefaultKinveyClientCallback loginCallback = login(USERNAME, PASSWORD);
         assertNull(loginCallback.error);
