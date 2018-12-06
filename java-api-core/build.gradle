@@ -85,7 +85,7 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    
+
     options.addStringOption("hdf", "project.name JavaApiCore")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")

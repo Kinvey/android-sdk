@@ -75,8 +75,8 @@ public class PushTest {
         assertEquals(senderIds, push.getSenderIDs());
         assertEquals("", push.getPushId());
         assertEquals("com.kinvey.android.push.AbstractPush", FCMPush.TAG);
-        push.setPushServiceClass(GCMService.class);
-        assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+        push.setPushServiceClass(FCMService.class);
+        assertEquals(FCMService.class.getName(), push.getPushServiceClass().getName());
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("getClient");
@@ -150,7 +150,7 @@ public class PushTest {
 
     @Test
     public void testKinveyGCMServiceConstructor() {
-        KinveyFCMService gcmService = new GCMService();
+        KinveyFCMService gcmService = new FCMService();
         assertNotNull(gcmService);
     }
 
@@ -184,7 +184,7 @@ public class PushTest {
             testManager.logout(client);
         }
         try {
-            client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+            client.push(FCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
             assertTrue(false);
         } catch (KinveyException ex) {
             assertNotNull(ex);
@@ -272,8 +272,8 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                FCMPush push = (FCMPush) client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
-                assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+                FCMPush push = (FCMPush) client.push(FCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+                assertEquals(FCMService.class.getName(), push.getPushServiceClass().getName());
 
                 assertNotNull(push);
                 sleep();
