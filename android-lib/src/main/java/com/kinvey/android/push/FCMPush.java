@@ -17,14 +17,19 @@ package com.kinvey.android.push;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyUserCallback;
@@ -45,72 +50,71 @@ import java.util.ArrayList;
  * This functionality can be accessed through the {@link com.kinvey.android.Client#push(Class)} ()} convenience method.
  * </p>
  *
- * <p>This class manages GCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable GCM.</p>
+ * <p>This class manages FCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable FCM.</p>
  *
  * sample usage:
  * <pre>
  kinveyClient.push().initialize(getApplicationContext());
  * </pre>
  *
- *<p>This code snippet will enable push notifications through GCM for the current logged in user.</p>
+ *<p>This code snippet will enable push notifications through FCM for the current logged in user.</p>
  *
  *
  * @author edwardf
- * @since 2.2
+ * @since 3.0
  */
-public class GCMPush extends AbstractPush {
+public class FCMPush extends AbstractPush {
 
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
     private static final String shared_pref = "Kinvey_Push";
     private static final String pref_regid = "reg_id";
 
-    public GCMPush(Client client, boolean inProduction, String ... senderIDs) {
+    public FCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);
-        GCMPush.senderIDs = senderIDs;
-        GCMPush.inProduction = inProduction;
+        FCMPush.senderIDs = senderIDs;
+        FCMPush.inProduction = inProduction;
     }
 
 
     /**
-     * Initialize GCM by registering the current user with both GCM as well as your backend at Kinvey.
+     * Initialize FCM by registering the current user with both FCM as well as your backend at Kinvey.
      *
      * Note these operations are performed asynchronously, however there is no callback.  Instead, updates
-     * are delegated to your custom `KinveyGCMService` which will handle any responses.
+     * are delegated to your custom `KinveyFCMService` which will handle any responses.
      *
      * @param currentApp - The current valid application context.
-     * @return an instance of GCM push, initialized for the current user.
+     * @return an instance of FCM push, initialized for the current user.
      */
     @Override
-    public GCMPush initialize(final Application currentApp) {
+    public FCMPush initialize(final Application currentApp) {
         if (!getClient().isUserLoggedIn()) {
             throw new KinveyException("No user is currently logged in", "call UserStore.login(...) first to login", "Registering for Push Notifications needs a logged in user");
         }
         
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS){
-        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "GCM for push notifications requires Google Play Services");  
+        	throw new KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "FCM for push notifications requires Google Play Services");
         }
 
-        new AsyncRegisterGCM(new KinveyClientCallback() {
+        new AsyncRegisterFCM(new KinveyClientCallback() {
             @Override
             public void onSuccess(Object result) {
-                Logger.ERROR("GCM - successful register CGM");
+                Logger.ERROR("FCM - successful register CGM");
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Logger.ERROR("GCM - unsuccessful register CGM: " + error.getMessage());
+                Logger.ERROR("FCM - unsuccessful register CGM: " + error.getMessage());
             }
         }).execute();
 
         return this;
     }
 
-    public void registerWithKinvey(final String gcmRegID, boolean register) {
-        //registered on GCM but not on Kinvey?
+    public void registerWithKinvey(final String fcmRegID, boolean register) {
     	Logger.INFO("about to register with Kinvey");
         if (client == null) {
-        	Logger.ERROR("GCMService got garbage collected, cannot complete registration!");
+        	Logger.ERROR("FCMService got garbage collected, cannot complete registration!");
             return;
         }
 
@@ -118,7 +122,6 @@ public class GCMPush extends AbstractPush {
         	Logger.ERROR("Need to login a current user before registering for push!");
             return;
         }
-
         if (register) {
 
             client.push(pushServiceClass).enablePushViaRest(new KinveyClientCallback() {
@@ -129,51 +132,44 @@ public class GCMPush extends AbstractPush {
 						@Override
 						public void onSuccess(User result) {
 							client.getActiveUser().put("_messaging", result.get("_messaging"));
-							Intent reg = new Intent(client.getContext(), pushServiceClass);
-		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
-		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-		                	client.getContext().startService(reg);							
 						}
 						
 						@Override
 						public void onFailure(Throwable error) {
-							Logger.ERROR("GCM - user update error: " + error);
+							Logger.ERROR("FCM - user update error: " + error);
 						}
 					});
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                	Logger.ERROR("GCM - user update error: " + error);
+                	Logger.ERROR("FCM - user update error: " + error);
                 }
-            }, gcmRegID);
+            }, fcmRegID);
 
         } else {
             client.push(pushServiceClass).disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), pushServiceClass);
-                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
-                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-                	client.getContext().startService(reg);      
+                    Logger.ERROR("FCM - user update success");
                 }
 
                 @Override
                 public void onFailure(Throwable error) {
-                	Logger.ERROR("GCM - user update error: " + error);
+                	Logger.ERROR("FCM - user update error: " + error);
                 }
-            }, gcmRegID);
+            }, fcmRegID);
 
         }
     }
 
 
     /**
-     * Get the Registration ID from GCM for the Client's current application context.
+     * Get the InstanceID from FCM for the Client's current application context.
      *
      * Note if the current user is not registered, the registration ID will be an empty string.
      *
-     * @return - the current user's GCM registration ID or an empty string ""
+     * @return - the current user's FCM InstanceID or an empty string ""
      */
     @Override
     public String getPushId() {
@@ -185,9 +181,7 @@ public class GCMPush extends AbstractPush {
     }
 
     /**
-     * Check to see if the current user is registered for GCM.  This checks both with GCM directly as well as with a Kinvey backend.
-     *
-     * As registration occurs asynchronously, ensure your `KinveyGCMService` has received the onRegister call first.
+     * Check to see if the current user is registered for FCM.  This checks both with FCM directly as well as with a Kinvey backend.
      *
      * @return true if current user is registered, false if they are not.
      */
@@ -219,9 +213,9 @@ public class GCMPush extends AbstractPush {
     }
 
     /**
-     * Unregisters the current user with GCM
+     * Unregisters the current user with FCM
      *
-     * Unregistration is asynchronous, so use the `KinveyGCMService` to receive notification when unregistration has completed.
+     * Unregistration is asynchronous, so use the `KinveyFCMService` to receive notification when unregistration has completed.
      *
      */
     @Override
@@ -239,15 +233,15 @@ public class GCMPush extends AbstractPush {
     		registerWithKinvey(regid, false);
     	}
 
-        new AsyncUnRegisterGCM(new KinveyClientCallback() {
+        new AsyncUnRegisterFCM(new KinveyClientCallback() {
             @Override
             public void onSuccess(Object result) {
-                Logger.ERROR("GCM - successful unregister CGM");
+                Logger.ERROR("FCM - successful unregister CGM");
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Logger.ERROR("GCM - unsuccessful unregister CGM: " + error.getMessage());
+                Logger.ERROR("FCM - unsuccessful unregister CGM: " + error.getMessage());
             }
         }).execute();
 //        GCMRegistrar.unregister(getClient().getContext());
@@ -257,7 +251,7 @@ public class GCMPush extends AbstractPush {
 
 
     /**
-     * Is GCM Push configured for production or a dev environment?
+     * Is FCM Push configured for production or a dev environment?
      *
      * @return true if in production mode, false if not
      */
@@ -349,33 +343,45 @@ public class GCMPush extends AbstractPush {
     }
 
 
-    private class AsyncRegisterGCM extends AsyncClientRequest{
+    private class AsyncRegisterFCM extends AsyncClientRequest{
 
-        AsyncRegisterGCM(KinveyClientCallback callback) {
+        AsyncRegisterFCM(KinveyClientCallback callback) {
             super(callback);
         }
 
         @Override
         protected User executeAsync() throws IOException {
             try {
-                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getClient().getContext());
-//                final String regid = InstanceID.getInstance(context).getToken(getSenderIDs()[0], "GCM");
-                final String regid = gcm.register(getSenderIDs());
-                Logger.INFO("regid is " + regid);
-                SharedPreferences.Editor pref = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
-                pref.putString(pref_regid, regid);
-                pref.apply();
-                registerWithKinvey(regid, true);
-            } catch (IOException ex) {
-                Logger.ERROR("unable to register with GCM: " + ex.getMessage());
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Log.w(TAG, "getInstanceId failed", task.getException());
+                                    return;
+                                }
+                                if (task.getResult() != null) {
+                                    final String regid = task.getResult().getToken();
+                                    Logger.INFO("regid is " + regid);
+                                    SharedPreferences.Editor pref = getClient().getContext().getSharedPreferences(shared_pref, Context.MODE_PRIVATE).edit();
+                                    pref.putString(pref_regid, regid);
+                                    pref.apply();
+                                    registerWithKinvey(regid, true);
+                                }
+                            }
+                        });
+
+
+            } catch (Exception ex) {
+                Logger.ERROR("unable to register with FCM: " + ex.getMessage());
             }
             return null;
         }
     }
 
-    private class AsyncUnRegisterGCM extends AsyncClientRequest{
+    private class AsyncUnRegisterFCM extends AsyncClientRequest{
 
-        AsyncUnRegisterGCM(KinveyClientCallback callback) {
+        AsyncUnRegisterFCM(KinveyClientCallback callback) {
             super(callback);
         }
 

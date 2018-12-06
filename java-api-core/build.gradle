@@ -89,7 +89,7 @@ task docgen(type: Javadoc) {
     options.addStringOption("hdf", "project.name JavaApiCore")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")
-    options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
+   // options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
 
 }
 

@@ -4,7 +4,7 @@ apply plugin: 'realm-android'
 
 android {
   compileSdkVersion 23
-  buildToolsVersion '25.0.0'
+  buildToolsVersion '26.0.2'
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
@@ -71,6 +71,7 @@ buildscript {
   repositories {
     mavenCentral()
     jcenter()
+    google()
     maven {
       url "http://jcenter.bintray.com"
     }
@@ -82,7 +83,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.3.1'
+    classpath 'com.android.tools.build:gradle:3.0.1'
     classpath "io.realm:realm-gradle-plugin:3.2.1"
   }
 
@@ -151,7 +152,8 @@ dependencies {
   compile 'com.google.android.gms:play-services:8.4.0'
   compile 'com.google.android.gms:play-services-ads:8.4.0'
   compile 'com.google.android.gms:play-services-identity:8.4.0'
-  compile 'com.google.android.gms:play-services-gcm:8.4.0'
+  compile 'com.google.firebase:firebase-core:16.0.5'
+  compile 'com.google.firebase:firebase-messaging:17.3.4'
   compile 'io.reactivex:rxjava:1.1.0'
 }
 
@@ -175,10 +177,10 @@ task docgen(type: Javadoc) {
   options.addStringOption("quiet")
   options.addStringOption("hdf", "project.name AndroidLib")
   options.addStringOption("stubs", "target/stubs")
-  options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
+ // options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
   options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
   //options.addStringOption("d", "target/apidocs")
-  options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
+ // options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
 }
 
 task superJar(type: Jar) {

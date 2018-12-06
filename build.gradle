@@ -15,6 +15,7 @@ subprojects {
   repositories {
     mavenLocal()
     jcenter()
+    google()
     maven {
       url  "http://dl.bintray.com/realm/maven"
     }
@@ -132,3 +133,12 @@ zipAndroid.mustRunAfter copyAndroid
 zipJava.mustRunAfter zipAndroid
 release.mustRunAfter zipJava
 //release.mustRunAfter zipAndroid
+
+repositories {
+  google()
+}
+buildscript {
+  repositories {
+    google()
+  }
+}
