@@ -177,8 +177,9 @@ task docgen(type: Javadoc) {
   options.addStringOption("quiet")
   options.addStringOption("hdf", "project.name AndroidLib")
   options.addStringOption("stubs", "target/stubs")
- // options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
+  options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
   options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
+  options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api")
  // options.addStringOption("d", "target/apidocs")
  // options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
 }
