@@ -755,7 +755,7 @@ public class UserStore {
             myURLToRender = myURLToRender + "." + clientId;
         }
         myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code" + "&scope=openid";
-        //keep a reference to the callback and redirect uri for later
+        ///keep a reference to the callback and redirect uri to use later
 
         MICCallback = callback;
         MICRedirectURI = redirectURI;
