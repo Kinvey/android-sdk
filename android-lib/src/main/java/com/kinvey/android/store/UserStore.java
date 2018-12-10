@@ -705,8 +705,42 @@ public class UserStore {
      *
      * @param redirectURI redirectURI
      * @param callback KinveyMICCallback
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)}
      */
     public static void loginWithAuthorizationCodeLoginPage(@NonNull Client client, @Nullable String clientId, /*Class userClass, */
+                                                           @NonNull String redirectURI, @NonNull KinveyMICCallback callback){
+        //return URL for login page
+        //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
+        String appkey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
+        String host = client.getMICHostName();
+        String apiVersion = client.getMICApiVersion();
+        if (apiVersion != null && apiVersion.length() > 0){
+            host = client.getMICHostName() + apiVersion + "/";
+        }
+        String myURLToRender = host + "oauth/auth?client_id=" + appkey;
+        if (clientId != null) {
+            myURLToRender = myURLToRender + "." + clientId;
+        }
+        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code" + "&scope=openid";
+        //keep a reference to the callback and redirect uri for later
+
+        MICCallback = callback;
+        MICRedirectURI = redirectURI;
+
+        if (callback != null){
+            callback.onReadyToRender(myURLToRender);
+        }
+
+    }
+
+    /***
+     *
+     * Login with the MIC service, using the oauth flow.  This method provides a URL to render containing a login page.
+     *
+     * @param redirectURI redirectURI
+     * @param callback KinveyMICCallback
+     */
+    public static void loginWithMIC(@NonNull Client client, @Nullable String clientId, /*Class userClass, */
                                                            @NonNull String redirectURI, @NonNull KinveyMICCallback callback){
         //return URL for login page
         //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
@@ -789,8 +823,25 @@ public class UserStore {
      * @param password {@link String} the password of Kinvey user.
      * @param redirectURI redirectURI
      * @param callback {@link KinveyUserCallback}
+     * @deprecated Use {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
      */
     public static void loginWithAuthorizationCodeAPI(@NonNull AbstractClient client, @NonNull String username,
+                                                     @NonNull String password, @Nullable String clientId,
+                                                     @NonNull String redirectURI, @NonNull KinveyUserCallback<User> callback){
+        MICCallback = callback;
+        new PostForOAuthToken(client, clientId, redirectURI, username, password, callback).execute();
+    }
+
+    /***
+     *
+     * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page.
+     *
+     * @param username {@link String} the userName of Kinvey user
+     * @param password {@link String} the password of Kinvey user.
+     * @param redirectURI redirectURI
+     * @param callback {@link KinveyUserCallback}
+     */
+    public static void loginWithMIC(@NonNull AbstractClient client, @NonNull String username,
                                                      @NonNull String password, @Nullable String clientId,
                                                      @NonNull String redirectURI, @NonNull KinveyUserCallback<User> callback){
         MICCallback = callback;
