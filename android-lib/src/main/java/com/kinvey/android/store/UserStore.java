@@ -709,28 +709,7 @@ public class UserStore {
      */
     public static void loginWithAuthorizationCodeLoginPage(@NonNull Client client, @Nullable String clientId, /*Class userClass, */
                                                            @NonNull String redirectURI, @NonNull KinveyMICCallback callback){
-        //return URL for login page
-        //https://auth.kinvey.com/oauth/auth?client_id=<your_app_id>i&redirect_uri=<redirect_uri>&response_type=code
-        String appkey = ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).getAppKey();
-        String host = client.getMICHostName();
-        String apiVersion = client.getMICApiVersion();
-        if (apiVersion != null && apiVersion.length() > 0){
-            host = client.getMICHostName() + apiVersion + "/";
-        }
-        String myURLToRender = host + "oauth/auth?client_id=" + appkey;
-        if (clientId != null) {
-            myURLToRender = myURLToRender + "." + clientId;
-        }
-        myURLToRender  = myURLToRender  + "&redirect_uri=" + redirectURI + "&response_type=code" + "&scope=openid";
-        //keep a reference to the callback and redirect uri for later
-
-        MICCallback = callback;
-        MICRedirectURI = redirectURI;
-
-        if (callback != null){
-            callback.onReadyToRender(myURLToRender);
-        }
-
+        loginWithMIC(client, clientId, redirectURI, callback);
     }
 
     /***
@@ -828,8 +807,7 @@ public class UserStore {
     public static void loginWithAuthorizationCodeAPI(@NonNull AbstractClient client, @NonNull String username,
                                                      @NonNull String password, @Nullable String clientId,
                                                      @NonNull String redirectURI, @NonNull KinveyUserCallback<User> callback){
-        MICCallback = callback;
-        new PostForOAuthToken(client, clientId, redirectURI, username, password, callback).execute();
+        loginWithMIC(client, username, password, clientId,redirectURI, callback);
     }
 
     /***
