@@ -13,6 +13,7 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
+import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.model.Location;
 import com.kinvey.androidTest.model.Person;
@@ -62,7 +63,7 @@ public class QueryNetworkTest {
                 @Override
                 public void run() {
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);

@@ -13,6 +13,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
+import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -55,7 +56,7 @@ public class CustomEndpointsTest {
                 public void run() {
                     Looper.prepare();
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);
