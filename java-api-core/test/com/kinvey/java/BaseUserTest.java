@@ -288,9 +288,10 @@ public class BaseUserTest extends KinveyMockUnitTest {
     	}catch(Exception e){}
 
 
-
+        // Construct the full token path. Might be affected by the MIC API version.
+        String fullTokenPath = "https://www.google.com/" + getClient().getMICApiVersion() + "/oauth/token";
     	GetMICAccessToken getToken = requestManager.getMICToken("myCODE", null);
-    	assertEquals("https://www.google.com/oauth/token", getToken.buildHttpRequest().getUrl().toString());
+    	assertEquals(fullTokenPath, getToken.buildHttpRequest().getUrl().toString());
     }
 
     public void testMICLoginWithAccessToken() throws IOException{

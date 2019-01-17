@@ -20,17 +20,20 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.store.UserStoreRequestManager;
+import com.kinvey.java.AbstractClient;
 
 /**
  * Created by Prots on 2/12/16.
  */
 public final class GetMICAccessToken extends AbstractKinveyClientRequest<GenericJson> {
-    private static final String REST_PATH = "oauth/token";
+    // Base path, without the MIC API version.
+    private static final String BASE_TOKEN_PATH = "oauth/token";
 
     private UserStoreRequestManager userStoreRequestManager;
 
     public GetMICAccessToken(UserStoreRequestManager userStoreRequestManager, HttpContent content) {
-        super(userStoreRequestManager.getClient(), userStoreRequestManager.getClient().getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
+        super(userStoreRequestManager.getClient(), userStoreRequestManager.getClient().getMICHostName(), "POST", 
+            "/" + userStoreRequestManager.getClient().getMICApiVersion() + "/" + BASE_TOKEN_PATH, content, GenericJson.class);
         this.userStoreRequestManager = userStoreRequestManager;
     }
 }
