@@ -180,8 +180,9 @@ public class MongoQueryFilter implements QueryFilter, Serializable {
         private Boolean negate(LinkedHashMap<String, Object> map) {
 
             boolean processParent = false;
-            LinkedHashMap<String,Object> newMap = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, LinkedHashMap<String, Object>> newMap = new LinkedHashMap<>();
             LinkedHashMap<String,Object> tempMap = (LinkedHashMap<String,Object>) map.clone();
+            LinkedHashMap<String, Object> element = new LinkedHashMap<>();
 
             for (Map.Entry<String, Object> entry : tempMap.entrySet()) {
                 String key = entry.getKey();
@@ -202,22 +203,28 @@ public class MongoQueryFilter implements QueryFilter, Serializable {
                 } else if (op != null) {
                     switch(op) {
                         case GREATERTHAN:
-                            newMap.put("$lte", obj);
+                            element.put("$gt", obj);
+                            newMap.put("$not", element);
                             break;
                         case LESSTHAN :
-                            newMap.put("$gte", obj);
+                            element.put("$lt", obj);
+                            newMap.put("$not", element);
                             break;
                         case GREATERTHANEQUAL:
-                            newMap.put("$lt", obj);
+                            element.put("$gte", obj);
+                            newMap.put("$not", element);
                             break;
                         case LESSTHANEQUAL:
-                            newMap.put("$gt", obj);
+                            element.put("$lte", obj);
+                            newMap.put("$not", element);
                             break;
                         case IN :
-                            newMap.put("$nin", obj);
+                            element.put("$in", obj);
+                            newMap.put("$not", element);
                             break;
                         case NOTIN :
-                            newMap.put("$in", obj);
+                            element.put("$nin", obj);
+                            newMap.put("$not", element);
                             break;
                         case NOTEQUAL :
                             processParent = true;
@@ -235,7 +242,7 @@ public class MongoQueryFilter implements QueryFilter, Serializable {
                 map.remove("$lte");
                 map.remove("$in");
                 map.remove("$nin");
-                for (Map.Entry<String, Object> entry : newMap.entrySet()) {
+                for (Map.Entry<String, LinkedHashMap<String, Object>> entry : newMap.entrySet()) {
                     map.put(entry.getKey(),entry.getValue());
                 }
             }
