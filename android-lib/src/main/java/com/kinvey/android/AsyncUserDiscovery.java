@@ -193,7 +193,7 @@ public class AsyncUserDiscovery extends UserDiscovery {
         }
 
         protected User[] executeAsync() throws IOException {
-            return (User[]) AsyncUserDiscovery.this.lookupBlocking(userLookup).execute();
+            return (User[]) AsyncUserDiscovery.this.lookupBlocking(userLookup, User[].class).execute();
         }
     }
 }

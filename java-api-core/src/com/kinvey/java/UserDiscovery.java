@@ -34,7 +34,7 @@ import com.kinvey.java.model.UserLookup;
  * @author edwardf
  * @since 2.0
  */
-public class UserDiscovery {
+public class UserDiscovery<T extends BaseUser> {
 
     private AbstractClient client;
     private KinveyClientRequestInitializer requestInitializer;
@@ -64,43 +64,43 @@ public class UserDiscovery {
 
     //some convenience wrappers
 
-    public Lookup lookupByFullNameBlocking(String firstname, String lastname) throws IOException{
+    public Lookup lookupByFullNameBlocking(String firstname, String lastname, Class<T> myClass) throws IOException{
 
         Preconditions.checkNotNull(firstname, "firstname must not be null.");
         Preconditions.checkNotNull(lastname, "lastname must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setFirstName(firstname);
         lookup.setLastName(lastname);
-        return lookupBlocking(lookup);
+        return lookupBlocking(lookup, myClass);
     }
 
-    public Lookup lookupByUserNameBlocking(String username) throws IOException{
+    public Lookup lookupByUserNameBlocking(String username, Class<T> myClass) throws IOException{
         Preconditions.checkNotNull(username, "username must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setUsername(username);
-        return lookupBlocking(lookup);
+        return lookupBlocking(lookup, myClass);
     }
 
-    public Lookup lookupByFacebookIDBlocking(String facebookID) throws IOException{
+    public Lookup lookupByFacebookIDBlocking(String facebookID, Class<T> myClass) throws IOException{
         Preconditions.checkNotNull(facebookID, "facebookID must not be null.");
         UserLookup lookup = new UserLookup();
         lookup.setFacebookID(facebookID);
-        return lookupBlocking(lookup);
+        return lookupBlocking(lookup, myClass);
     }
 
-    public Lookup lookupBlocking(UserLookup userlookup) throws IOException{
+    public Lookup lookupBlocking(UserLookup userlookup, Class<T> myClass) throws IOException{
 
         Preconditions.checkNotNull(userlookup, "userlookup must not be null.");
-        Lookup lookup = new Lookup(userlookup, BaseUser[].class);
+        Lookup lookup = new Lookup(userlookup, myClass);
         client.initializeRequest(lookup);
         return lookup;
 
     }
 
-    public class Lookup extends AbstractKinveyJsonClientRequest<BaseUser[]> {
+    public class Lookup extends AbstractKinveyJsonClientRequest<T> {
         private static final String REST_PATH = "user/{appKey}/_lookup";
 
-        Lookup(UserLookup lookup, Class myClass) {
+        Lookup(UserLookup lookup, Class<T> myClass) {
             super(client, "POST", REST_PATH, lookup, myClass);
         }
     }
