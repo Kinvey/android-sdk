@@ -18,7 +18,6 @@ package com.kinvey.android.push;
 
 import java.lang.reflect.Method;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -68,8 +67,8 @@ public abstract class KinveyGCMService extends JobIntentService {
     static final int SERVICE_JOB_ID = 50;
 
     // Enqueuing work in to this service.
-    public static void enqueueWork(Context context, Intent work) {
-        enqueueWork(context, KinveyGCMService.class, SERVICE_JOB_ID, work);
+    public static void enqueueWork(Context context, Intent work, Class service) {
+        enqueueWork(context, service, SERVICE_JOB_ID, work);
     }
 
     @Override
