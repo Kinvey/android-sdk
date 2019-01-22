@@ -125,14 +125,14 @@ dependencies {
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
   classpaths files('build/classes/release')
   //testing
-  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.1'
+  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
   // Required -- JUnit 4 framework
   androidTestCompile 'junit:junit:4.12'
   // Optional -- Mockito framework
   androidTestCompile 'org.mockito:mockito-android:2.7.15'
   androidTestCompile 'com.android.support:support-annotations:23.2.0'
-  androidTestCompile 'com.android.support.test:runner:0.4.1'
-  androidTestCompile 'com.android.support.test:rules:0.4.1'
+  androidTestCompile 'com.android.support.test:runner:1.0.2'
+  androidTestCompile 'com.android.support.test:rules:1.0.2'
 
   // Unit Testing
   testCompile 'io.reactivex:rxjava:1.1.0'

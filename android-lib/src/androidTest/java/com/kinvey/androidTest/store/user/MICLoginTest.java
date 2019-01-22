@@ -4,9 +4,8 @@ package com.kinvey.androidTest.store.user;
 import android.content.Context;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.google.api.client.http.UrlEncodedContent;
 import com.kinvey.android.Client;
@@ -52,7 +51,7 @@ public class MICLoginTest {
 
     @Before
     public void setup() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(APP_KEY, APP_SECRET, mMockContext).setUserClass(TestUser.class).build();
     }
 

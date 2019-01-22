@@ -6,9 +6,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.Client;
@@ -53,7 +52,7 @@ public class AsyncTaskTest {
 
     @Before
     public void setup(){
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
     }
 
