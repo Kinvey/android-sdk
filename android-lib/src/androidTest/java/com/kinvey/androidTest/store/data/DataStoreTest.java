@@ -122,7 +122,7 @@ public class DataStoreTest {
                 @Override
                 public void run() {
                     try {
-                        UserStore.login(client, new KinveyClientCallback<User>() {
+                        UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client, new KinveyClientCallback<User>() {
                             @Override
                             public void onSuccess(User result) {
                                 assertNotNull(result);

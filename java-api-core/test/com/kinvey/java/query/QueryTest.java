@@ -278,16 +278,18 @@ public class QueryTest extends TestCase {
         myQuery.lessThan("Age", 65);
         myQuery.notEqual("Status","deleted");
         myQuery.not();
+        LinkedHashMap<String, LinkedHashMap<String, Object>> newMap = new LinkedHashMap<>();
         LinkedHashMap<String,Object> expected = new LinkedHashMap<String,Object>();
         LinkedHashMap<String,Object> city = new LinkedHashMap<String,Object>();
         LinkedHashMap<String,Object> age = new LinkedHashMap<String,Object>();
 
         city.put("$ne","Boston");
-        age.put("$lte",21);
-        age.put("$gte",65);
+        age.put("$gt",21);
+        age.put("$lt",65);
+        newMap.put("$not", age);
 
         expected.put("City",city);
-        expected.put("Age", age);
+        expected.put("Age", newMap);
         expected.put("Status","deleted");
         assertEquals(expected, myQuery.getQueryFilterMap());
     }

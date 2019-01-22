@@ -19,6 +19,7 @@ package com.kinvey.android.cache;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.realm.DynamicRealmObject;
@@ -79,6 +80,11 @@ public abstract class QueryHelper {
                         lte(realmQuery, field, paramMap.getValue());
                     } else if (operation.equalsIgnoreCase("$ne")){
                         notEqualTo(realmQuery, field, paramMap.getValue());
+                    } else if (operation.equalsIgnoreCase("$not")) {
+                        Map<String, Object> newMap = new LinkedHashMap<>();
+                        newMap.put(field, (Map<String, Object>) paramMap.getValue());
+                        realmQuery.not();
+                        prepareRealmQuery(realmQuery, newMap, isIgnoreIn);
                     } else {
                         throw new UnsupportedOperationException("this query is not supported by cache");
                     }
