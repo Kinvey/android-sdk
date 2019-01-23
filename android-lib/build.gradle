@@ -91,7 +91,7 @@ buildscript {
 
 dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-  compile project(':java-api-core')
+  implementation project(':java-api-core')
   // compile 'com.github.KeepSafe:ReLinker:1.1'
   /*compile('com.google.http-client:google-http-client:1.19.0') {
             exclude(module: 'xpp3')
@@ -100,61 +100,61 @@ dependencies {
             exclude(module: 'android')
             exclude(module: 'guava-jdk5')
         }*/
-  compile('com.google.api-client:google-api-client:1.19.0') {
+  implementation('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
   }
-  compile('com.google.api-client:google-api-client-android:1.19.0') {
+  implementation('com.google.api-client:google-api-client-android:1.19.0') {
     exclude(module: 'google-play-services')
     exclude(module: 'xpp3')
   }
-  compile('com.google.http-client:google-http-client-android:1.19.0') {
+  implementation('com.google.http-client:google-http-client-android:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'httpclient')
     exclude(module: 'junit')
     exclude(module: 'android')
     exclude(module: 'guava-jdk5')
   }
-  compile('com.google.http-client:google-http-client-gson:1.19.0') {
+  implementation('com.google.http-client:google-http-client-gson:1.19.0') {
     exclude(module: 'xpp3')
   }
-  compile('com.google.http-client:google-http-client-jackson:1.19.0') {
+  implementation('com.google.http-client:google-http-client-jackson:1.19.0') {
     exclude(module: 'xpp3')
   }
   //compile 'com.google.guava:guava:18.0'
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
   classpaths files('build/classes/release')
   //testing
-  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
+  androidTestImplementation 'com.android.support:multidex-instrumentation:1.0.3'
   // Required -- JUnit 4 framework
-  androidTestCompile 'junit:junit:4.12'
+  androidTestImplementation 'junit:junit:4.12'
   // Optional -- Mockito framework
-  androidTestCompile 'org.mockito:mockito-android:2.7.15'
-  androidTestCompile 'com.android.support:support-annotations:23.2.0'
-  androidTestCompile 'com.android.support.test:runner:1.0.2'
-  androidTestCompile 'com.android.support.test:rules:1.0.2'
+  androidTestImplementation 'org.mockito:mockito-android:2.7.15'
+  androidTestImplementation 'com.android.support:support-annotations:23.2.0'
+  androidTestImplementation 'com.android.support.test:runner:1.0.2'
+  androidTestImplementation 'com.android.support.test:rules:1.0.2'
 
   // Unit Testing
-  testCompile 'io.reactivex:rxjava:1.1.0'
-  testCompile 'junit:junit:4.12'
-  testCompile "org.robolectric:robolectric:3.0"
-  testCompile "org.mockito:mockito-core:1.10.19"
-  testCompile 'org.robolectric:shadows-support-v4:3.0'
-  testCompile "org.powermock:powermock-module-junit4:1.6.5"
-  testCompile "org.powermock:powermock-module-junit4-rule:1.6.5"
-  testCompile "org.powermock:powermock-api-mockito:1.6.5"
-  testCompile "org.powermock:powermock-classloading-xstream:1.6.5"
+  testImplementation 'io.reactivex:rxjava:1.1.0'
+  testImplementation 'junit:junit:4.12'
+  testImplementation "org.robolectric:robolectric:3.0"
+  testImplementation "org.mockito:mockito-core:1.10.19"
+  testImplementation 'org.robolectric:shadows-support-v4:3.0'
+  testImplementation "org.powermock:powermock-module-junit4:1.6.5"
+  testImplementation "org.powermock:powermock-module-junit4-rule:1.6.5"
+  testImplementation "org.powermock:powermock-api-mockito:1.6.5"
+  testImplementation "org.powermock:powermock-classloading-xstream:1.6.5"
 
   // Optional -- Hamcrest library
-  androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-  compile 'com.google.code.gson:gson:2.4'
-  compile 'com.android.support:support-compat:28.0.0'
-  compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
-  compile 'com.google.android.gms:play-services:10.2.1'
-  compile 'com.google.android.gms:play-services-ads:10.2.1'
-  compile 'com.google.android.gms:play-services-identity:10.2.1'
-  compile 'com.google.android.gms:play-services-gcm:10.2.1'
-  compile 'io.reactivex:rxjava:1.1.0'
+  androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+  implementation 'com.google.code.gson:gson:2.4'
+  implementation 'com.android.support:support-compat:28.0.0'
+  implementation 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  implementation 'com.google.android.gms:play-services:10.2.1'
+  implementation 'com.google.android.gms:play-services-ads:10.2.1'
+  implementation 'com.google.android.gms:play-services-identity:10.2.1'
+  implementation 'com.google.android.gms:play-services-gcm:10.2.1'
+  implementation 'io.reactivex:rxjava:1.1.0'
 }
 
 task docgen(type: Javadoc) {
