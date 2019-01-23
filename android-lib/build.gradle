@@ -159,7 +159,6 @@ dependencies {
 
 task docgen(type: Javadoc) {
 
-
   source = android.sourceSets.main.java.srcDirs
 
   options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
