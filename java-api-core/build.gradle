@@ -52,7 +52,7 @@ configurations {
 
 dependencies {
     jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-    compile 'com.google.guava:guava:18.0'
+    compile 'com.google.guava:guava:23.0'
     implementation 'com.google.http-client:google-http-client-jackson:1.19.0'
     implementation 'com.google.code.gson:gson:2.1'
     testImplementation('com.google.http-client:google-http-client-gson:1.19.0') {
