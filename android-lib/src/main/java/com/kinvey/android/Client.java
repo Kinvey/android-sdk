@@ -832,7 +832,7 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             client.clientUser = AndroidUserStore.getUserStore(this.context);
 
-            client.setUserClass(userClass != null ? userClass : User.class);
+            client.setUserClass(userClass != null ? userClass : (Class<T>) User.class);
 
             //GCM explicitly enabled
             if (this.GCM_Enabled){
