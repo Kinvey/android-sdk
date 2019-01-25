@@ -41,7 +41,7 @@ sourceSets {
 }
 
 jacoco {
-    toolVersion = "0.7.1.201405082137"
+    toolVersion = "0.8.2"
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
@@ -52,7 +52,7 @@ configurations {
 
 dependencies {
     jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-    compile 'com.google.guava:guava:23.0'
+    compile 'com.google.guava:guava:18.0'
     implementation 'com.google.http-client:google-http-client-jackson:1.19.0'
     implementation 'com.google.code.gson:gson:2.1'
     testImplementation('com.google.http-client:google-http-client-gson:1.19.0') {
@@ -85,7 +85,6 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    
     options.addStringOption("hdf", "project.name JavaApiCore")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")
