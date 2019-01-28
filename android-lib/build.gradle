@@ -7,8 +7,8 @@ android {
   buildToolsVersion '28.0.3'
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
   }
 
   packagingOptions {
@@ -90,7 +90,7 @@ buildscript {
 
 dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-  implementation project(':java-api-core')
+  compile project(':java-api-core')
   // compile 'com.github.KeepSafe:ReLinker:1.1'
   /*compile('com.google.http-client:google-http-client:1.19.0') {
             exclude(module: 'xpp3')
@@ -99,62 +99,62 @@ dependencies {
             exclude(module: 'android')
             exclude(module: 'guava-jdk5')
         }*/
-  implementation('com.google.api-client:google-api-client:1.19.0') {
+  compile('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
   }
-  implementation('com.google.api-client:google-api-client-android:1.19.0') {
+  compile('com.google.api-client:google-api-client-android:1.19.0') {
     exclude(module: 'google-play-services')
     exclude(module: 'xpp3')
   }
-  implementation('com.google.http-client:google-http-client-android:1.19.0') {
+  compile('com.google.http-client:google-http-client-android:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'httpclient')
     exclude(module: 'junit')
     exclude(module: 'android')
     exclude(module: 'guava-jdk5')
   }
-  implementation('com.google.http-client:google-http-client-gson:1.19.0') {
+  compile('com.google.http-client:google-http-client-gson:1.19.0') {
     exclude(module: 'xpp3')
   }
-  implementation('com.google.http-client:google-http-client-jackson:1.19.0') {
+  compile('com.google.http-client:google-http-client-jackson:1.19.0') {
     exclude(module: 'xpp3')
   }
   //compile 'com.google.guava:guava:18.0'
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
   classpaths files('build/classes/release')
   //testing
-  androidTestImplementation 'com.android.support:multidex-instrumentation:1.0.3'
+  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
   // Required -- JUnit 4 framework
-  androidTestImplementation 'junit:junit:4.12'
+  androidTestCompile 'junit:junit:4.12'
   // Optional -- Mockito framework
-  androidTestImplementation 'org.mockito:mockito-android:2.7.15'
-  androidTestImplementation 'com.android.support:support-annotations:28.0.0'
-  androidTestImplementation 'com.android.support.test:runner:1.0.2'
-  androidTestImplementation 'com.android.support.test:rules:1.0.2'
+  androidTestCompile 'org.mockito:mockito-android:2.7.15'
+  androidTestCompile 'com.android.support:support-annotations:28.0.0'
+  androidTestCompile 'com.android.support.test:runner:1.0.2'
+  androidTestCompile 'com.android.support.test:rules:1.0.2'
 
   // Unit Testing
-  testImplementation 'io.reactivex:rxjava:1.1.0'
-  testImplementation 'junit:junit:4.12'
-  testImplementation "org.robolectric:robolectric:3.0"
-  testImplementation "org.mockito:mockito-core:1.10.19"
-  testImplementation 'org.robolectric:shadows-support-v4:3.0'
-  testImplementation "org.powermock:powermock-module-junit4:1.6.5"
-  testImplementation "org.powermock:powermock-module-junit4-rule:1.6.5"
-  testImplementation "org.powermock:powermock-api-mockito:1.6.5"
-  testImplementation "org.powermock:powermock-classloading-xstream:1.6.5"
+  testCompile 'io.reactivex:rxjava:1.1.0'
+  testCompile 'junit:junit:4.12'
+  testCompile "org.robolectric:robolectric:3.0"
+  testCompile "org.mockito:mockito-core:1.10.19"
+  testCompile 'org.robolectric:shadows-support-v4:3.0'
+  testCompile "org.powermock:powermock-module-junit4:1.6.5"
+  testCompile "org.powermock:powermock-module-junit4-rule:1.6.5"
+  testCompile "org.powermock:powermock-api-mockito:1.6.5"
+  testCompile "org.powermock:powermock-classloading-xstream:1.6.5"
 
   // Optional -- Hamcrest library
-  androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
-  implementation 'com.google.code.gson:gson:2.4'
-  implementation 'com.android.support:appcompat-v7:28.0.0'
-  implementation 'com.android.support:support-v4:28.0.0'
-  implementation 'org.codehaus.jackson:jackson-core-asl:1.9.12'
-  implementation 'com.google.android.gms:play-services:10.2.1'
-  implementation 'com.google.android.gms:play-services-ads:10.2.1'
-  implementation 'com.google.android.gms:play-services-identity:10.2.1'
-  implementation 'com.google.android.gms:play-services-gcm:10.2.1'
-  implementation 'io.reactivex:rxjava:1.1.0'
+  androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+  compile 'com.google.code.gson:gson:2.4'
+  compile 'com.android.support:appcompat-v7:28.0.0'
+  compile 'com.android.support:support-v4:28.0.0'
+  compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  compile 'com.google.android.gms:play-services:10.2.1'
+  compile 'com.google.android.gms:play-services-ads:10.2.1'
+  compile 'com.google.android.gms:play-services-identity:10.2.1'
+  compile 'com.google.android.gms:play-services-gcm:10.2.1'
+  compile 'io.reactivex:rxjava:1.1.0'
 }
 
 task docgen(type: Javadoc) {
