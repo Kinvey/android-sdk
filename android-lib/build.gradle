@@ -172,7 +172,6 @@ task docgen(type: Javadoc) {
       file(System.getenv('ANDROID_HOME') + "/platforms/android-10/android.jar")
   ]
   options.overview = "javadoc/overview.html"
-
   options.addStringOption("quiet")
   options.addStringOption("hdf", "project.name AndroidLib")
   options.addStringOption("stubs", "target/stubs")
