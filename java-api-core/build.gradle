@@ -4,14 +4,13 @@ plugins {
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 apply plugin: "jacoco"
 description = 'JavaApiCore'
 
 compileJava.options.encoding = 'UTF-8'
-
 
 buildConfig {
     appName = project.name       // sets value of NAME field
@@ -85,11 +84,11 @@ task docgen(type: Javadoc) {
     title = null
 
     options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    
     options.addStringOption("hdf", "project.name JavaApiCore")
     options.addStringOption("stubs", "target/stubs")
     options.addStringOption("apixml", "target/apidocs/api.xml")
-    options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
+    options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api/java")
+    //options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
 
 }
 

@@ -2,9 +2,8 @@ package com.kinvey.androidTest.store.data.network;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.network.AndroidNetworkManager;
@@ -37,7 +36,7 @@ public class AndroidNetworkManagerTest {
 
     @Test
     public void testIsOnline() {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         AndroidNetworkManager androidNetworkManager = new AndroidNetworkManager<>(Person.COLLECTION, Person.class, client);
         assertNotNull(androidNetworkManager);

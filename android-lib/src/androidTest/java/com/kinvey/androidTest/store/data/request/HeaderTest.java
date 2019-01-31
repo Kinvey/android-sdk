@@ -3,7 +3,6 @@ package com.kinvey.androidTest.store.data.request;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
 
 import com.kinvey.android.Client;
 import com.kinvey.androidTest.TestManager;
@@ -30,7 +29,7 @@ public class HeaderTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         testManager = new TestManager<>();
         if (client.isUserLoggedIn()) {

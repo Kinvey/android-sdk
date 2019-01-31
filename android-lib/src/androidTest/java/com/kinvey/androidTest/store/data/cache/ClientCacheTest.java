@@ -1,9 +1,9 @@
 package com.kinvey.androidTest.store.data.cache;
 
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCacheManager;
@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class ClientCacheTest extends InstrumentationTestCase {
+public class ClientCacheTest {
     Client client;
     @Before
     public void setUp(){

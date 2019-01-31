@@ -3,9 +3,8 @@ package com.kinvey.androidTest.store.file;
 import android.content.Context;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.kinvey.android.Client;
@@ -265,7 +264,7 @@ public class FileStoreTest {
 
     @Before
     public void setup() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;

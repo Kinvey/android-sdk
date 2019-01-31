@@ -128,11 +128,12 @@ public class GCMPush extends AbstractPush {
 						
 						@Override
 						public void onSuccess(User result) {
-							client.getActiveUser().put("_messaging", result.get("_messaging"));
-							Intent reg = new Intent(client.getContext(), pushServiceClass);
-		                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
-		                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-		                	client.getContext().startService(reg);							
+                            client.getActiveUser().put("_messaging", result.get("_messaging"));
+                            Intent reg = new Intent(client.getContext(), pushServiceClass);
+                            reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.REGISTERED);
+                            reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
+                            KinveyGCMService.enqueueWork(client.getContext(), reg, pushServiceClass);
+                            Logger.INFO("GCM - user update success");
 						}
 						
 						@Override
@@ -152,10 +153,11 @@ public class GCMPush extends AbstractPush {
             client.push(pushServiceClass).disablePushViaRest(new KinveyClientCallback() {
                 @Override
                 public void onSuccess(Object result) {
-                	Intent reg = new Intent(client.getContext(), pushServiceClass);
-                	reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
-                	reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
-                	client.getContext().startService(reg);      
+                    Intent reg = new Intent(client.getContext(), pushServiceClass);
+                    reg.putExtra(KinveyGCMService.TRIGGER, KinveyGCMService.UNREGISTERED);
+                    reg.putExtra(KinveyGCMService.REG_ID, gcmRegID);
+                    KinveyGCMService.enqueueWork(client.getContext(), reg, pushServiceClass);
+                    Logger.INFO("GCM - user update success");
                 }
 
                 @Override

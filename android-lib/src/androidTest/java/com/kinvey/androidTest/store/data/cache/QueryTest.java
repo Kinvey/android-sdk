@@ -3,9 +3,9 @@ package com.kinvey.androidTest.store.data.cache;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
+
 
 import com.kinvey.android.cache.QueryHelper;
 import com.kinvey.java.Query;
@@ -46,7 +46,7 @@ public class QueryTest {
 
     @Before
     public void setup(){
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Realm.init(mMockContext);
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
 
@@ -67,7 +67,7 @@ public class QueryTest {
 
     @After
     public void tearDown() {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Realm.init(mMockContext);
         DynamicRealm realm = DynamicRealm.getInstance(new RealmConfiguration.Builder().build());
         if (realm.getSchema().contains("test")){

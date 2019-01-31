@@ -18,9 +18,11 @@ package com.kinvey.android.push;
 
 import java.lang.reflect.Method;
 
-import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.kinvey.android.Client;
@@ -38,7 +40,7 @@ import com.kinvey.java.Logger;
  * @author edwardf
  * @since 2.0
  */
-public abstract class KinveyGCMService extends IntentService {
+public abstract class KinveyGCMService extends JobIntentService {
 
     public static final String MESSAGE_FROM_GCM = "msg";
     public static final String TAG = "KINVEY-GCM";
@@ -58,12 +60,24 @@ public abstract class KinveyGCMService extends IntentService {
      * Public Constructor used by operating system.
      */
     public KinveyGCMService() {
-        super("GCM PUSH");
+        super();
     }
-    
-	@Override
+
+    // Service unique ID
+    static final int SERVICE_JOB_ID = 50;
+
+    // Enqueuing work in to this service.
+    public static void enqueueWork(Context context, Intent work, Class service) {
+        enqueueWork(context, service, SERVICE_JOB_ID, work);
+    }
+
+    @Override
+    protected void onHandleWork(@NonNull Intent intent) {
+        onHandleIntent(intent);
+    }
+
 	protected void onHandleIntent(Intent intent) {
-		
+
 		if (intent.getExtras().getString(TRIGGER, "default").equals(REGISTERED)){
 			String regID = intent.getExtras().getString(REG_ID);
 			onRegistered(regID);
