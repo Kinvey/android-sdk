@@ -6,9 +6,8 @@ import android.net.Uri;
 import android.os.Looper;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
@@ -404,7 +403,7 @@ public class UserStoreTest {
 
     @Before
     public void setup() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
 //        client.enableDebugLogging();
         if (client.isUserLoggedIn()) {
@@ -616,7 +615,7 @@ public class UserStoreTest {
 
     @Test
     public void testLoginAsyncBad() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Client fakeClient = new Client.Builder("app_key_fake", "app_secret_fake", mMockContext).build();
         DefaultKinveyClientCallback userCallback = login(fakeClient);
         assertNotNull(userCallback.error);
@@ -998,7 +997,7 @@ public class UserStoreTest {
     public void testMIC_LoginWithAuthorizationCodeAPI() throws InterruptedException {
         String redirectURI = "kinveyAuthDemo://";
         String clientId = "clientId";
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         if (client.isUserLoggedIn()) {
             logout(client);
@@ -1264,13 +1263,13 @@ public class UserStoreTest {
     @Test
     @Ignore //need to check
     public void testUserInitFromCredential() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Client.Builder localBuilder = new Client.Builder(mMockContext);
         Client localClient = localBuilder.build();
         DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD, localClient);
         assertNotNull(callback.result);
         User activeUser = callback.result;
-        Context mMockContext2 = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getContext(), "test_");
+        Context mMockContext2 = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Client.Builder localBuilder2 = new Client.Builder(mMockContext2);
         Client localClient2 = localBuilder2.build();
         assertNotNull(localClient2.getActiveUser());

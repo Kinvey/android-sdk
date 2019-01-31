@@ -4,9 +4,8 @@ package com.kinvey.androidTest.store.data.cache;
 import android.content.Context;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -104,7 +103,7 @@ public class QueryWithRealDataTest {
 
     @Before
     public void setUp() throws InterruptedException, IOException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;

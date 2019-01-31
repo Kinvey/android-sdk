@@ -3,7 +3,6 @@ package com.kinvey.androidTest.store.data;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
 
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.kinvey.android.Client;
@@ -42,7 +41,7 @@ public class ClientBuilderTest {
 
     @Before
     public void setUp() throws InterruptedException, IOException {
-        mContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
     @Test

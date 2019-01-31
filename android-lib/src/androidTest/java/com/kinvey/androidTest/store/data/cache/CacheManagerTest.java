@@ -3,9 +3,8 @@ package com.kinvey.androidTest.store.data.cache;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCache;
@@ -36,7 +35,7 @@ public class CacheManagerTest {
 
     @Before
     public void setUp() {
-        mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Client.Builder builder = new Client.Builder(mMockContext);
         manager = builder.build().getCacheManager();
     }

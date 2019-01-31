@@ -4,9 +4,8 @@ package com.kinvey.androidTest.store.data;
 import android.content.Context;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.google.api.client.http.HttpRequest;
@@ -112,7 +111,7 @@ public class DataStoreTest {
 
     @Before
     public void setUp() throws InterruptedException, IOException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -2541,7 +2540,7 @@ public class DataStoreTest {
 
     @Test
     public void testSelfReferenceClassWithData() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
@@ -2575,7 +2574,7 @@ public class DataStoreTest {
 
     @Test
     public void testQueryInSelfReferenceClass() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
@@ -2617,7 +2616,7 @@ public class DataStoreTest {
 
     @Test
     public void testSelfReferenceClassInListWithData() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<PersonList> testManager = new TestManager<>();
@@ -2672,7 +2671,7 @@ public class DataStoreTest {
 
     @Test
     public void testQueryInSelfReferenceClassInList() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<PersonList> testManager = new TestManager<>();
@@ -2751,7 +2750,7 @@ public class DataStoreTest {
 
     @Test
     public void testSelfReferenceClassInClassWithList() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<PersonList> testManager = new TestManager<>();
@@ -3046,7 +3045,7 @@ public class DataStoreTest {
 
     @Test
     public void testSelfReferenceClassComplex() throws InterruptedException {
-        Context mMockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_");
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         TestManager<PersonList> testManager = new TestManager<>();
@@ -3196,7 +3195,7 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
-        Context mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_1");
+        Context mockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mockContext).build();
 
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
@@ -3212,7 +3211,7 @@ public class DataStoreTest {
             realm.close();
         }
 
-        mockContext = new RenamingDelegatingContext(InstrumentationRegistry.getInstrumentation().getTargetContext(), "test_2");
+        mockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mockContext).build();
 
         store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
