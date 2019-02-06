@@ -5,7 +5,9 @@ import com.kinvey.java.core.KinveyClientCallback;
 /**
  *
  * @param <T> The type of Entity that is planned to be fetched
+ * @deprecated
  */
+@Deprecated
 public interface KinveyCachedClientCallback<T> extends KinveyClientCallback<T> {
 
     /**
