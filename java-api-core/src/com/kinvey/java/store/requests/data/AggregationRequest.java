@@ -48,6 +48,12 @@ public class AggregationRequest implements IRequest<Aggregation.Result[]> {
             case BOTH:
                 ret = getNetwork();
                 break;
+            case NETWORK_OTHER_WISE_LOCAL:
+                try {
+                    ret = getNetwork();
+                } catch (Exception e) {
+                    ret = getCached();
+                }
         }
         return ret;
     }

@@ -56,6 +56,14 @@ public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyData
                 ret = networkManager.getEntityBlocking(id).execute();
                 cache.save(ret);
                 break;
+            case NETWORK_OTHER_WISE_LOCAL:
+                try {
+                    ret = networkManager.getEntityBlocking(id).execute();
+                    cache.save(ret);
+                } catch (Exception e) {
+                    ret = cache.get(id);
+                }
+                break;
         }
         return ret;
     }

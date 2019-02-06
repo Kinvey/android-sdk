@@ -864,7 +864,6 @@ public class DataStoreTest {
         assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result.getId());
-
         String personId = saveCallback.result.getId();
         DefaultKinveyClientCallback findCallback = find(store, personId, LONG_TIMEOUT, new KinveyCachedClientCallback<Person>() {
             @Override
@@ -877,6 +876,22 @@ public class DataStoreTest {
                 Log.d("testFindById: ", error.getMessage());
             }
         });
+        assertNotNull(findCallback.result);
+        assertNull(saveCallback.error);
+        assertEquals(findCallback.result.getId(), personId);
+    }
+
+    @Test
+    public void testFindByIdForAutoType() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        assertNotNull(saveCallback.result.getId());
+        String personId = saveCallback.result.getId();
+        DefaultKinveyClientCallback findCallback = find(store, personId, LONG_TIMEOUT, null);
         assertNotNull(findCallback.result);
         assertNull(saveCallback.error);
         assertEquals(findCallback.result.getId(), personId);
@@ -895,6 +910,25 @@ public class DataStoreTest {
         latch.await(seconds, TimeUnit.SECONDS);
         looperThread.mHandler.sendMessage(new Message());
         return callback;
+    }
+
+    @Test
+    public void testFindPersonsAutoType() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        clearBackend(store);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(store, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        Person personSecond = createPerson(TEST_USERNAME_2);
+        DefaultKinveyClientCallback saveSecondCallback = save(store, personSecond);
+        assertNotNull(saveSecondCallback.result);
+        assertNull(saveSecondCallback.error);
+        DefaultKinveyReadCallback findCallback = find(store, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertEquals(findCallback.result.getResult().size(), 2);
+        clearBackend(store);
     }
 
     private DefaultKinveyReadCallback find(final DataStore<Person> store, int seconds) throws InterruptedException {
@@ -1126,6 +1160,11 @@ public class DataStoreTest {
     @Test
     public void testFindCountNetwork() throws InterruptedException, IOException {
         testFindCount(StoreType.NETWORK, false);
+    }
+
+    @Test
+    public void testFindCountAuto() throws InterruptedException, IOException {
+        testFindCount(StoreType.AUTO, false);
     }
 
     private void testFindCount(StoreType storeType, boolean isCachedCallbackUsed) throws InterruptedException, IOException {
@@ -3643,6 +3682,25 @@ public class DataStoreTest {
         assertNotNull(cachedCallback.result.getResult());
         assertEquals(2, cachedCallback.result.getResult().size());
         testManager.cleanBackend(store, StoreType.CACHE);
+    }
+
+    @Test
+    public void testFindByIdsAuto() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.cleanBackend(store, StoreType.AUTO);
+        List<String> ids = new ArrayList<>();
+        DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        saveCallback = save(store, createPerson(TEST_USERNAME_2));
+        assertNotNull(saveCallback.result.getId());
+        ids.add(saveCallback.result.getId());
+        DefaultKinveyReadCallback kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, null);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertEquals(2, kinveyListCallback.result.getResult().size());
+        testManager.cleanBackend(store, StoreType.AUTO);
     }
 
     private DefaultKinveyReadCallback find(final DataStore<Person> store, final Iterable<String> ids, int seconds, final CustomKinveyCachedCallback<KinveyReadResponse<Person>> cachedClientCallback) throws InterruptedException {

@@ -22,5 +22,6 @@ package com.kinvey.java.store;
 public enum ReadPolicy {
     FORCE_LOCAL,
     FORCE_NETWORK,
-    BOTH
+    BOTH,
+    NETWORK_OTHER_WISE_LOCAL
 }

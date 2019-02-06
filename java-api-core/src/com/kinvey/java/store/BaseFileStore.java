@@ -259,6 +259,13 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
+            case NETWORK_OTHER_WISE_LOCAL:
+                try {
+                    metaData = download.execute();
+                } catch (Exception e) {
+                    metaData = getFileMetaDataFromCache(q);
+                }
+                break;
         }
         return metaData;
     };
@@ -302,10 +309,15 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
+            case NETWORK_OTHER_WISE_LOCAL:
+                try {
+                    metaData = download.execute();
+                } catch (Exception e) {
+                    metaData = cache.get(id);
+                }
+                break;
         }
-
         return metaData;
-
     }
 
     /**
@@ -491,6 +503,30 @@ public class BaseFileStore {
                 return fmd;
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
+            case NETWORK_OTHER_WISE_LOCAL:
+                try {
+                    FileMetaData fm = getNetworkFile(metadata, os, listener);
+                    if (fm != null) {
+                        f = new File(cacheStorage(), metadata.getId());
+                        if (!f.exists()) {
+                            f.createNewFile();
+                        }
+                        FileMetadataWithPath fmdWithPath = new FileMetadataWithPath();
+                        os.write(f.getAbsolutePath().getBytes());
+                        fmdWithPath.putAll(fm);
+                        fmdWithPath.setPath(f.getAbsolutePath());
+                        cache.save(fmdWithPath);
+                    }
+                    return fm;
+                } catch (Exception e) {
+                    f = getCachedFile(metadata);
+                    if (f == null){
+                        throw new KinveyException("FileMissing", "File Missing in cache", "");
+                    } else {
+                        FileUtils.copyStreams(new FileInputStream(f), os);
+                        return metadata;
+                    }
+                }
         }
         return null;
     }

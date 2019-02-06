@@ -188,7 +188,12 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
             }
         } else {
-            return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
+                Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
+                return findBlockingDeltaSync(query);
+            } else {
+                return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            }
         }
     }
 
@@ -225,7 +230,11 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
             }
         } else {
-            return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+                return findBlockingDeltaSync(query);
+            } else {
+                return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            }
         }
     }
 
@@ -260,7 +269,11 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
             }
         } else {
-            return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
+                return findBlockingDeltaSync(client.query());
+            } else {
+                return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+            }
         }
     }
 

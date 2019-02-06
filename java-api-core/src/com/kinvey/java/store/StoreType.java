@@ -37,6 +37,13 @@ public enum StoreType {
      */
     CACHE(ReadPolicy.BOTH, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
     /**
+     * This StoreType that will always try to retrieve `find` results from the network.
+     * If successful, it will store those results in the local database.If a subsequent call to `find`
+     * fails to retrieve results from the network because of connectivity
+     * issues, then results will be returned from the local database
+     */
+    AUTO(ReadPolicy.NETWORK_OTHER_WISE_LOCAL, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
+    /**
      * This store type means that all the changes goes dirrectly to the server
      * no caching will be used
      */
