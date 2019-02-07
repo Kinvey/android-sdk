@@ -23,5 +23,5 @@ public enum ReadPolicy {
     FORCE_LOCAL,
     FORCE_NETWORK,
     BOTH,
-    NETWORK_OTHER_WISE_LOCAL
+    NETWORK_OTHERWISE_LOCAL
 }

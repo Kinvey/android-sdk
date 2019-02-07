@@ -53,7 +53,7 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
                 ret = getNetwork();
                 cache.save(ret.getResult());
                 break;
-            case NETWORK_OTHER_WISE_LOCAL:
+            case NETWORK_OTHERWISE_LOCAL:
                 try {
                     ret = getNetwork();
                     cache.save(ret.getResult());

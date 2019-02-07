@@ -59,7 +59,7 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyReadReques
             case BOTH:
                 ret = networkManager.getBlocking(query).execute();
                 break;
-            case NETWORK_OTHER_WISE_LOCAL:
+            case NETWORK_OTHERWISE_LOCAL:
                 try {
                     ret = networkManager.getBlocking(query).execute();
                 } catch (Exception e) {

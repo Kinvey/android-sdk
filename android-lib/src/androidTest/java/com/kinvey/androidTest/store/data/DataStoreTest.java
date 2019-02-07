@@ -566,6 +566,11 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSaveAuto() throws InterruptedException {
+        testSave(StoreType.AUTO);
+    }
+
+    @Test
     public void testSaveNetwork() throws InterruptedException {
         testSave(StoreType.NETWORK);
     }
@@ -589,6 +594,12 @@ public class DataStoreTest {
     public void testUpdateCache() throws InterruptedException {
         testUpdate(StoreType.CACHE);
     }
+
+    @Test
+    public void testUpdateAuto() throws InterruptedException {
+        testUpdate(StoreType.AUTO);
+    }
+
 
     @Test
     public void testUpdateNetwork() throws InterruptedException {
@@ -834,6 +845,11 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testFindByIdAuto() throws InterruptedException {
+        testFindById(StoreType.AUTO);
+    }
+
+    @Test
     public void testFindByIdNetwork() throws InterruptedException {
         testFindById(StoreType.NETWORK);
     }
@@ -954,6 +970,11 @@ public class DataStoreTest {
     @Test
     public void testFindByQueryCache() throws InterruptedException {
         testFindByQuery(StoreType.CACHE);
+    }
+
+    @Test
+    public void testFindByQueryAuto() throws InterruptedException {
+        testFindByQuery(StoreType.AUTO);
     }
 
     @Test
@@ -1243,6 +1264,11 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testDeleteAuto() throws InterruptedException {
+        testDelete(StoreType.AUTO);
+    }
+
+    @Test
     public void testDeleteNetwork() throws InterruptedException {
         testDelete(StoreType.NETWORK);
     }
@@ -1270,6 +1296,11 @@ public class DataStoreTest {
     @Test
     public void testDeleteNullIdCache() throws InterruptedException {
         testDeleteNullId(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDeleteNullIdAuto() throws InterruptedException {
+        testDeleteNullId(StoreType.AUTO);
     }
 
     @Test
@@ -1313,6 +1344,11 @@ public class DataStoreTest {
     @Test
     public void testDeleteArrayCache() throws InterruptedException {
         testDeleteArray(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDeleteArrayAuto() throws InterruptedException {
+        testDeleteArray(StoreType.AUTO);
     }
 
     @Test
@@ -2493,6 +2529,25 @@ public class DataStoreTest {
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
     }
+
+    @Test
+    public void testSaveListWithStoreTypeAuto() throws InterruptedException {
+        client.enableDebugLogging();
+        TestManager<Person> testManager = new TestManager<>();
+        testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        ArrayList<Person> persons = new ArrayList<>();
+        persons.add(new Person(TEST_USERNAME));
+        persons.add(new Person(TEST_USERNAME_2));
+        persons.add(new Person(TEST_TEMP_USERNAME));
+
+        CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
+        assertNotNull(saveCallback.getResult());
+        assertEquals(3, saveCallback.getResult().size());
+        List<Person> cachedItems = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).get();
+        assertEquals(3, cachedItems.size());
+    }
+
 
     @Test
     public void testQueryClear() throws InterruptedException, IOException {

@@ -44,7 +44,7 @@ public enum StoreType {
      * fails to retrieve results from the network because of connectivity
      * issues, then results will be returned from the local database
      */
-    AUTO(ReadPolicy.NETWORK_OTHER_WISE_LOCAL, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
+    AUTO(ReadPolicy.NETWORK_OTHERWISE_LOCAL, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
     /**
      * This store type means that all the changes goes dirrectly to the server
      * no caching will be used

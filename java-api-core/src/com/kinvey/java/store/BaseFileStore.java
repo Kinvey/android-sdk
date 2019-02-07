@@ -18,10 +18,8 @@ package com.kinvey.java.store;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
@@ -37,8 +35,6 @@ import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.file.FileUtils;
-
-import org.apache.tools.ant.util.TeeOutputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -259,7 +255,7 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
-            case NETWORK_OTHER_WISE_LOCAL:
+            case NETWORK_OTHERWISE_LOCAL:
                 try {
                     metaData = download.execute();
                 } catch (Exception e) {
@@ -309,7 +305,7 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
-            case NETWORK_OTHER_WISE_LOCAL:
+            case NETWORK_OTHERWISE_LOCAL:
                 try {
                     metaData = download.execute();
                 } catch (Exception e) {
@@ -503,7 +499,7 @@ public class BaseFileStore {
                 return fmd;
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
-            case NETWORK_OTHER_WISE_LOCAL:
+            case NETWORK_OTHERWISE_LOCAL:
                 try {
                     FileMetaData fm = getNetworkFile(metadata, os, listener);
                     if (fm != null) {
