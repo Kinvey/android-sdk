@@ -45,6 +45,8 @@ import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,6 +81,13 @@ public class NetworkManager<T extends GenericJson> {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+
+    public static boolean checkNetworkRuntimeExceptions(Exception e) {
+        if (!(e instanceof UnknownHostException) && !(e instanceof SocketTimeoutException)) {
+            return true;
+        }
+        return false;
+    }
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	

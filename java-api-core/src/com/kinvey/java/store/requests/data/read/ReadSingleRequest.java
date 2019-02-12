@@ -23,6 +23,8 @@ import com.kinvey.java.store.ReadPolicy;
 import com.kinvey.java.store.requests.data.AbstractKinveyDataRequest;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 /**
  * Created by Prots on 2/8/16.
@@ -57,10 +59,19 @@ public class ReadSingleRequest<T extends GenericJson> extends AbstractKinveyData
                 cache.save(ret);
                 break;
             case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
                 try {
                     ret = networkManager.getEntityBlocking(id).execute();
                     cache.save(ret);
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     ret = cache.get(id);
                 }
                 break;

@@ -34,6 +34,7 @@ import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.file.FileUtils;
 
 import java.io.File;
@@ -256,9 +257,18 @@ public class BaseFileStore {
                 metaData = download.execute();
                 break;
             case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
                 try {
                     metaData = download.execute();
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     metaData = getFileMetaDataFromCache(q);
                 }
                 break;
@@ -306,9 +316,18 @@ public class BaseFileStore {
                 metaData = download.execute();
                 break;
             case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
                 try {
                     metaData = download.execute();
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     metaData = cache.get(id);
                 }
                 break;
@@ -500,6 +519,7 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
             case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
                 try {
                     FileMetaData fm = getNetworkFile(metadata, os, listener);
                     if (fm != null) {
@@ -514,9 +534,17 @@ public class BaseFileStore {
                         cache.save(fmdWithPath);
                     }
                     return fm;
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     f = getCachedFile(metadata);
-                    if (f == null){
+                    if (f == null) {
                         throw new KinveyException("FileMissing", "File Missing in cache", "");
                     } else {
                         FileUtils.copyStreams(new FileInputStream(f), os);

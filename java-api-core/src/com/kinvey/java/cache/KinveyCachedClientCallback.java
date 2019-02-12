@@ -5,7 +5,8 @@ import com.kinvey.java.core.KinveyClientCallback;
 /**
  *
  * @param <T> The type of Entity that is planned to be fetched
- * @deprecated
+ * @deprecated It is callback for deprecated DataStore type {@link com.kinvey.java.store.StoreType#CACHE}
+ * use {@link com.kinvey.java.store.StoreType#AUTO}
  */
 @Deprecated
 public interface KinveyCachedClientCallback<T> extends KinveyClientCallback<T> {

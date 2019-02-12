@@ -49,11 +49,21 @@ public class AggregationRequest implements IRequest<Aggregation.Result[]> {
                 ret = getNetwork();
                 break;
             case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
                 try {
                     ret = getNetwork();
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     ret = getCached();
                 }
+                break;
         }
         return ret;
     }

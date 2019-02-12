@@ -80,9 +80,18 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
                     // silent fall, will be synced next time
                 }
 
+                IOException networkException = null;
                 try {
                     ret = request.execute();
-                } catch (Exception c) {
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
                     ret.setCount(countCached());
                 }
                 break;
