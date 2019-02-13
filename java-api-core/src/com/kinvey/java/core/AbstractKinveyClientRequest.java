@@ -333,6 +333,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         }
 
         response = request.execute();
+        Logger.INFO("Getting response for network request");
 
         lastResponseCode = response.getStatusCode();
         lastResponseMessage = response.getStatusMessage();
@@ -345,6 +346,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         //process refresh token needed
         if (response.getStatusCode() == 401 && !hasRetryed) {
             //get the refresh token
+            Logger.INFO("get the refresh token");
             Credential cred = client.getStore().load(client.getActiveUser().getId());
             String refreshToken = null;
 
@@ -386,6 +388,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
             throw newExceptionOnError(response);
         }
 
+        Logger.INFO("Return response for network request");
         return response;
     }
 
@@ -405,6 +408,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      * @throws IOException
      */
     public T execute() throws IOException {
+        Logger.INFO("Start execute for network request");
         HttpResponse response = executeUnparsed();
        
         if (overrideRedirect){

@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Constants;
+import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
@@ -85,11 +86,13 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                 }
                 break;
             case FORCE_NETWORK:
+                Logger.INFO("Start saving entities");
                 for (T obj : objects){
                     SaveRequest<T> save = new SaveRequest<>(
                             cache, networkManager , writePolicy, obj, syncManager);
                     ret.add(save.execute());
                 }
+                Logger.INFO("Finish saving entities");
                 break;
         }
         return ret;
