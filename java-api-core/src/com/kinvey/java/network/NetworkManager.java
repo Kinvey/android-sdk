@@ -465,10 +465,13 @@ public class NetworkManager<T extends GenericJson> {
 
         boolean bRealmGeneratedId = isTempId(entity);
 
+        Logger.INFO("Start choosing PUT or POST request");
         if (sourceID != null && !bRealmGeneratedId) {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
             Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
         } else {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
             save = new Save(entity, myClass, SaveMode.POST);
             Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
         }
