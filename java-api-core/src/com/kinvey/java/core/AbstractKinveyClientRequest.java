@@ -412,6 +412,7 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
         HttpResponse response = executeUnparsed();
        
         if (overrideRedirect){
+            Logger.INFO("overrideRedirect == true");
         	return onRedirect(response.getHeaders().getLocation());
         }
         

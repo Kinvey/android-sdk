@@ -51,18 +51,22 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
     }
 
     public void execute() {
+        Logger.INFO("Calling AsyncClientRequest#execute");
         Client.sharedInstance().getKinveyHandlerThread().postTask(this);
     }
 
     @Override
     public void run() {
+        Logger.INFO("Calling AsyncClientRequest#run");
         Result result = null;
         if(callback == null){
             return;
         }
         try{
             if (!hasCancelled()){
+                Logger.INFO("Start executeAsync");
                 result = executeAsync();
+                Logger.INFO("Finish executeAsync");
             }
         }catch(Throwable e){
 //            e.printStackTrace();
@@ -76,10 +80,13 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
         }
 //        KinveyCallbackHandler kinveyCallbackHandler = new KinveyCallbackHandler();
         if (hasCancelled()){
+            Logger.INFO("Calling kinveyCallbackHandler.onCancel");
             kinveyCallbackHandler.onCancel(((KinveyCancellableCallback) callback));
         }else if(error != null){
+            Logger.INFO("Calling kinveyCallbackHandler.onFailure");
             kinveyCallbackHandler.onFailure(error, callback);
         }else{
+            Logger.INFO("Calling kinveyCallbackHandler.onResult");
             kinveyCallbackHandler.onResult(result, callback);
         }
     }
