@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Constants;
+import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.network.NetworkManager;
@@ -28,9 +29,15 @@ import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.util.List;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by Prots on 2/5/16.
@@ -87,15 +94,51 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                 break;
             case FORCE_NETWORK:
                 Logger.INFO("Start saving entities");
-                for (T obj : objects){
-                    SaveRequest<T> save = new SaveRequest<>(
-                            cache, networkManager , writePolicy, obj, syncManager);
-                    ret.add(save.execute());
+                ExecutorService executor;
+                List<FutureTask<T>> tasks;
+                FutureTask<T> ft;
+                List<T> items = (List<T>) objects;
+                executor = Executors.newFixedThreadPool(items.size());
+                tasks = new ArrayList<>();
+                for (T obj : objects) {
+                    try {
+                        SaveRequest<T> save = new SaveRequest<>(
+                                cache, networkManager, writePolicy, obj, syncManager);
+                        ft = new FutureTask<T>(new CallableAsyncSaveRequestHelper(save));
+                        tasks.add(ft);
+                        executor.execute(ft);
+                    } catch (AccessControlException | KinveyException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        throw e;
+                    }
                 }
+                for (FutureTask<T> task : tasks) {
+                    try {
+                        ret.add(task.get());
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+                executor.shutdown();
                 Logger.INFO("Finish saving entities");
                 break;
         }
         return ret;
+    }
+
+    private class CallableAsyncSaveRequestHelper implements Callable {
+
+        SaveRequest<T> save;
+
+        CallableAsyncSaveRequestHelper(SaveRequest<T> save) {
+            this.save = save;
+        }
+
+        @Override
+        public T call() throws Exception {
+            return save.execute();
+        }
     }
 
     @Override
