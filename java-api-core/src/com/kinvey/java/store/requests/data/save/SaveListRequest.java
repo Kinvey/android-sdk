@@ -17,6 +17,7 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
@@ -98,7 +99,7 @@ public class SaveListRequest<T extends GenericJson> implements IRequest<List<T>>
                 List<FutureTask<T>> tasks;
                 FutureTask<T> ft;
                 List<T> items = (List<T>) objects;
-                executor = Executors.newFixedThreadPool(items.size());
+                executor = Executors.newFixedThreadPool(networkManager.getClient().getNumberThreadsForDataStoreSaveList());
                 tasks = new ArrayList<>();
                 for (T obj : objects) {
                     try {
