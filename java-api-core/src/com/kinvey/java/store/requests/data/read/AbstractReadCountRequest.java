@@ -71,6 +71,30 @@ public abstract class AbstractReadCountRequest<T extends GenericJson> implements
 
                 ret = request.execute();
                 break;
+            case NETWORK_OTHERWISE_LOCAL:
+                PushRequest<T> pushAutoRequest = new PushRequest<T>(networkManager.getCollectionName(),
+                        cache, networkManager, networkManager.getClient());
+                try {
+                    pushAutoRequest.execute();
+                } catch (Throwable t){
+                    // silent fall, will be synced next time
+                }
+
+                IOException networkException = null;
+                try {
+                    ret = request.execute();
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    ret.setCount(countCached());
+                }
+                break;
         }
         return ret;
     }

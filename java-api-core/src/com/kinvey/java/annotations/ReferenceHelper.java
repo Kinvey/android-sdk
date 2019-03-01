@@ -19,6 +19,7 @@ package com.kinvey.java.annotations;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.ClassInfo;
 import com.google.api.client.util.FieldInfo;
+import com.kinvey.java.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -41,7 +42,7 @@ public abstract class ReferenceHelper {
 
     public static <T extends GenericJson> T processReferences(T gson, final ReferenceListener listener) throws IllegalAccessException, InstantiationException {
 
-
+        Logger.INFO("Start ReferenceHelper.processReferences(T gson, final ReferenceListener listener)");
         for (Field f : gson.getClass().getDeclaredFields()){
             //find field info
             if (f.isAnnotationPresent(KinveyReference.class)){
@@ -84,6 +85,7 @@ public abstract class ReferenceHelper {
             }
         }
 
+        Logger.INFO("Finish ReferenceHelper.processReferences(T gson, final ReferenceListener listener) and return gson");
         return gson;
     }
 }

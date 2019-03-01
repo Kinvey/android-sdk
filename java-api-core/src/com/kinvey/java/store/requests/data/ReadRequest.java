@@ -59,6 +59,24 @@ public class ReadRequest<T extends GenericJson> extends AbstractKinveyReadReques
             case BOTH:
                 ret = networkManager.getBlocking(query).execute();
                 break;
+            case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
+                try {
+                    ret = networkManager.getBlocking(query).execute();
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    KinveyReadResponse<T> res = new KinveyReadResponse<>();
+                    res.setResult(cache.get(query));
+                    ret = res;
+                }
+                break;
         }
         return ret;
     }

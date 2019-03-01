@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
 import com.kinvey.java.cache.ICache;
@@ -45,6 +46,8 @@ import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,6 +82,13 @@ public class NetworkManager<T extends GenericJson> {
     private String clientAppVersion = null;
     
     private GenericData customRequestProperties = new GenericData();
+
+    public static boolean checkNetworkRuntimeExceptions(Exception e) {
+        if (!(e instanceof UnknownHostException) && !(e instanceof SocketTimeoutException)) {
+            return true;
+        }
+        return false;
+    }
 
     public void setClientAppVersion(String appVersion){
     	this.clientAppVersion = appVersion;	
@@ -422,6 +432,7 @@ public class NetworkManager<T extends GenericJson> {
      */
     public Save saveBlocking(T entity) throws IOException {
 
+        Logger.INFO("Start saveBlocking for object");
         Save save;
         String sourceID;
 
@@ -430,21 +441,28 @@ public class NetworkManager<T extends GenericJson> {
 
         //prepare entity relation data saving
         try {
+            Logger.INFO("Start prepare entity relation data saving");
             ReferenceHelper.processReferences(entity, new ReferenceHelper.ReferenceListener() {
                 @Override
                 public String onUnsavedReferenceFound(String collection, GenericJson object) {
+                    Logger.INFO("Calling onUnsavedReferenceFound(String, GenericJson)");
                     if (object.containsKey("_id")){
+                        Logger.INFO("return object.get(_id).toString() for onUnsavedReferenceFound(String, GenericJson)");
                         return object.get("_id").toString();
                     }
 
                     NetworkManager<GenericJson> manager = new NetworkManager<GenericJson>(collection, GenericJson.class, client);
                     try {
+                        Logger.INFO("Start recursive call for manager.saveBlocking(object).execute() inside saveBlocking");
                         GenericJson saved = manager.saveBlocking(object).execute();
+                        Logger.INFO("return saved.get(ID_FIELD_NAME).toString() for onUnsavedReferenceFound(String, GenericJson)");
                         return saved.get(ID_FIELD_NAME).toString();
                     } catch (IOException e) {
+                        Logger.ERROR("Catch exception for recursive call for manager.saveBlocking(object).execute()");
                         e.printStackTrace();
                     }
 
+                    Logger.INFO("return null for onUnsavedReferenceFound(String, GenericJson)");
                     return null;
                 }
             });
@@ -456,18 +474,25 @@ public class NetworkManager<T extends GenericJson> {
 
         boolean bRealmGeneratedId = isTempId(entity);
 
+        Logger.INFO("Start choosing PUT or POST request");
         if (sourceID != null && !bRealmGeneratedId) {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
             save = new Save(entity, myClass, sourceID, SaveMode.PUT);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
         } else {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
             save = new Save(entity, myClass, SaveMode.POST);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
         }
 
         client.initializeRequest(save);
-
+        Logger.INFO("Finish for initializing request with save object");
+        Logger.INFO("Return save object");
         return save;
     }
 
     public boolean isTempId(T item) {
+        Logger.INFO("Start checking for isTempId(entity)");
         boolean isTempId = false;
         if (item.get(Constants._ID) != null) {
             try {
@@ -476,6 +501,7 @@ public class NetworkManager<T extends GenericJson> {
                 // issue with the regex, so do nothing because we default to false
             }
         }
+        Logger.INFO("Finish checking for isTempId(entity)");
         return isTempId;
     }
 

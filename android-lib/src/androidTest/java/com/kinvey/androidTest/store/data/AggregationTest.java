@@ -159,6 +159,33 @@ public class AggregationTest {
         assertTrue(callback.getResult().getResultsFor("username", TEST_USERNAME).get(0).intValue() == 1);
     }
 
+    @Test
+    public void testCountAuto() throws InterruptedException, IOException {
+        TestManager<Person> testManager = new TestManager<Person>();
+        testManager.login(USERNAME, PASSWORD, client);
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+
+        testManager.cleanBackendDataStore(store);
+
+        Person person = new Person(TEST_USERNAME);
+        person.setHeight(170);
+        Person person2 = new Person(TEST_USERNAME);
+        person2.setHeight(170);
+
+        CustomKinveyClientCallback<Person> saveCallback = testManager.saveCustom(store, person);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person.getUsername()));
+        saveCallback = testManager.saveCustom(store, person2);
+        assertNotNull(saveCallback.getResult().getUsername().equals(person2.getUsername()));
+
+        Query query = client.query();
+        query = query.notEqual("age", "100200300");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("username");
+        DefaultKinveyAggregateCallback callback = testManager.calculation(store, AggregateType.COUNT, fields, null, query, null);
+        assertNotNull(callback);
+        assertNotNull(callback.getResult().getResultsFor("username", TEST_USERNAME));
+        assertTrue(callback.getResult().getResultsFor("username", TEST_USERNAME).get(0).intValue() == 2);
+    }
 
     @Test
     public void testMaxLocally() throws InterruptedException, IOException {

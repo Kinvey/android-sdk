@@ -514,6 +514,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entity, "Entity cannot be null.");
+        Logger.INFO("Calling DataStore#save(object)");
         new SaveRequest(entity, callback).execute();
     }
 
@@ -544,6 +545,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
+        Logger.INFO("Calling DataStore#save(listObjects)");
         new SaveListRequest(entities, callback).execute();
     }
 
@@ -1166,6 +1168,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
         @Override
         protected T executeAsync() throws IOException {
+            Logger.INFO("Calling SaveRequest#executeAsync()");
             return (DataStore.super.save(entity));
         }
     }
@@ -1180,6 +1183,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
         @Override
         protected List<T> executeAsync() throws IOException {
+            Logger.INFO("Calling SaveListRequest#executeAsync()");
             return (DataStore.super.save(entities));
         }
     }

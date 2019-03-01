@@ -74,6 +74,8 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      */
     public static final String DEFAULT_MIC_API_VERSION = "3";
 
+    public static final int DEFAULT_NUMBER_OF_THREADS_FOR_DATASTORE_SAVE_OF_LIST = 1;
+
     private CredentialStore store;
 
     /** used to synchronized access to the local api wrappers **/
@@ -105,6 +107,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     private String MICApiVersion;
     private int requestTimeout;
+    private int numberThreadsForDataStoreSaveList = DEFAULT_NUMBER_OF_THREADS_FOR_DATASTORE_SAVE_OF_LIST;
 
     public void setMICApiVersion(String version){
         if (!version.startsWith("v")){
@@ -139,7 +142,15 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     public String getClientAppVersion(){
     	return this.clientAppVersion;
     }
-    
+
+    public int getNumberThreadsForDataStoreSaveList() {
+        return numberThreadsForDataStoreSaveList;
+    }
+
+    public void setNumberThreadsForDataStoreSaveList(int numberThreadsForDataStoreSaveList) {
+        this.numberThreadsForDataStoreSaveList = numberThreadsForDataStoreSaveList;
+    }
+
     public void setCustomRequestProperties(GenericJson customheaders){
     	this.customRequestProperties = customheaders;
     }

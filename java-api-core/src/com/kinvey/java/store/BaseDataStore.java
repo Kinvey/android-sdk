@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
@@ -188,7 +189,12 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
             }
         } else {
-            return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
+                Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
+                return findBlockingDeltaSync(query);
+            } else {
+                return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+            }
         }
     }
 
@@ -225,7 +231,11 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
             }
         } else {
-            return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+                return findBlockingDeltaSync(query);
+            } else {
+                return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+            }
         }
     }
 
@@ -260,7 +270,11 @@ public class BaseDataStore<T extends GenericJson> {
                 return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
             }
         } else {
-            return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+            if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
+                return findBlockingDeltaSync(client.query());
+            } else {
+                return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+            }
         }
     }
 
@@ -335,6 +349,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
+        Logger.INFO("Calling BaseDataStore#save(listObjects)");
         return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
     }
 
@@ -350,6 +365,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
+        Logger.INFO("Calling BaseDataStore#save(object)");
         return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSyncManager()).execute();
     }
 
