@@ -325,6 +325,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testUploadFileAUTONullCheck() throws InterruptedException, IOException {
+        nullUpload(StoreType.AUTO);
+    }
+
+    @Test
     public void testUploadFileSyncNullCheck() throws InterruptedException, IOException {
         nullUpload(StoreType.SYNC);
     }
@@ -363,6 +368,11 @@ public class FileStoreTest {
     @Test
     public void testDownloadFileCacheNullCheck() throws InterruptedException, IOException {
         nullDownload(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDownloadFileAutoNullCheck() throws InterruptedException, IOException {
+        nullDownload(StoreType.AUTO);
     }
 
     @Test
@@ -414,6 +424,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testDownloadCachedFile_TypeAuto() throws IOException, InterruptedException {
+        testDownloadFileNoCachedCallback(StoreType.AUTO);
+    }
+
+    @Test
     public void testDownloadCachedFile_TypeNetwork() throws IOException, InterruptedException {
         testDownloadFileNoCachedCallback(StoreType.NETWORK);
     }
@@ -440,6 +455,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testDownloadFileAuto() throws InterruptedException, IOException {
+        downloadFile(StoreType.AUTO);
+    }
+
+    @Test
     public void testDownloadFileSync() throws InterruptedException, IOException {
         downloadCachedOutputStreamFile(StoreType.SYNC);
     }
@@ -453,6 +473,11 @@ public class FileStoreTest {
     @Test
     public void testDownloadFileWithCachedOutputStreamCache() throws InterruptedException, IOException {
         downloadCachedOutputStreamFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDownloadFileWithCachedOutputStreamAuto() throws InterruptedException, IOException {
+        downloadCachedOutputStreamFile(StoreType.AUTO);
     }
 
     @Test
@@ -599,6 +624,11 @@ public class FileStoreTest {
         executeRemoveFile(StoreType.CACHE);
     }
 
+    @Test
+    public void testRemoveFileAuto() throws InterruptedException, IOException {
+        executeRemoveFile(StoreType.AUTO);
+    }
+
     private DefaultDeleteListener removeFile(final StoreType storeType, final FileMetaData fileMetaData) throws InterruptedException, IOException {
         final CountDownLatch deleteLatch = new CountDownLatch(1);
         final DefaultDeleteListener deleteListener = new DefaultDeleteListener(deleteLatch);
@@ -626,6 +656,11 @@ public class FileStoreTest {
     @Test
     public void testRefreshFileCache() throws InterruptedException, IOException {
         testRefreshFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testRefreshFileAuto() throws InterruptedException, IOException {
+        testRefreshFile(StoreType.AUTO);
     }
 
     @Test
@@ -677,6 +712,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testRefreshFile_TypeAuto() throws IOException, InterruptedException {
+        testRefreshFileNoCachedCallback(StoreType.AUTO);
+    }
+
+    @Test
     public void testRefreshFile_TypeNetwork() throws IOException, InterruptedException {
         testRefreshFileNoCachedCallback(StoreType.NETWORK);
     }
@@ -698,6 +738,11 @@ public class FileStoreTest {
     @Test
     public void testFindFileCache() throws InterruptedException, IOException {
         testFindFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testFindFileAuto() throws InterruptedException, IOException {
+        testFindFile(StoreType.AUTO);
     }
 
     @Test
@@ -768,6 +813,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testFindFile_TypeAuto() throws IOException, InterruptedException {
+        testFindFileNoCachedCallback(StoreType.AUTO);
+    }
+
+    @Test
     public void testFindFile_TypeNetwork() throws IOException, InterruptedException {
         testFindFileNoCachedCallback(StoreType.NETWORK);
     }
@@ -826,6 +876,11 @@ public class FileStoreTest {
         testGetCacheFileById(StoreType.CACHE);
     }
 
+    @Test
+    public void testGetCacheFile_TypeAuto() throws IOException, InterruptedException {
+        testGetCacheFileById(StoreType.AUTO);
+    }
+
     private void testGetCacheFileById(StoreType storeType) throws IOException, InterruptedException {
         File file = createFile();
         DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.SYNC, file, testMetadata());
@@ -849,6 +904,11 @@ public class FileStoreTest {
     @Test
     public void testGetCacheFileByFileMetadata_TypeCache() throws IOException, InterruptedException {
         testGetCacheFileByFileMetadata(StoreType.CACHE);
+    }
+
+    @Test
+    public void testGetCacheFileByFileMetadata_TypeAuto() throws IOException, InterruptedException {
+        testGetCacheFileByFileMetadata(StoreType.AUTO);
     }
 
     private void testGetCacheFileByFileMetadata(StoreType storeType) throws IOException, InterruptedException {
@@ -884,6 +944,17 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testClearCacheStoreAuto() throws InterruptedException, IOException {
+        File file = createFile(DEFAULT_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(StoreType.AUTO, file, testMetadata());
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        client.getFileStore(StoreType.AUTO).clearCache();
+        find(StoreType.AUTO, listener.fileMetaDataResult, false);
+        removeFile(StoreType.AUTO, listener.fileMetaDataResult);
+    }
+
+    @Test
     public void tesUploadFileNetwork() throws InterruptedException, IOException {
         testUploadFileWithMetadata(StoreType.NETWORK);
     }
@@ -891,6 +962,11 @@ public class FileStoreTest {
     @Test
     public void tesUploadFileCache() throws InterruptedException, IOException {
         testUploadFileWithMetadata(StoreType.CACHE);
+    }
+
+    @Test
+    public void tesUploadFileAuto() throws InterruptedException, IOException {
+        testUploadFileWithMetadata(StoreType.AUTO);
     }
 
     @Test
@@ -915,6 +991,11 @@ public class FileStoreTest {
     @Test
     public void testUploadInputStreamWithMetadataCache() throws InterruptedException, IOException {
         testUploadInputStreamWithMetadata(StoreType.CACHE);
+    }
+
+    @Test
+    public void testUploadInputStreamWithMetadataAuto() throws InterruptedException, IOException {
+        testUploadInputStreamWithMetadata(StoreType.AUTO);
     }
 
     @Test
@@ -963,6 +1044,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void tesUploadFileWithOutMetadataAuto() throws InterruptedException, IOException {
+        testUploadFileWithOutMetadata(StoreType.AUTO);
+    }
+
+    @Test
     public void tesUploadFileWithOutMetadataSync() throws InterruptedException, IOException {
         testUploadFileWithOutMetadata(StoreType.SYNC);
     }
@@ -1004,6 +1090,11 @@ public class FileStoreTest {
     @Test
     public void testUploadInputStreamWithFileNameCache() throws InterruptedException, IOException {
         testUploadInputStreamWithFileName(StoreType.CACHE);
+    }
+
+    @Test
+    public void testUploadInputStreamWithFileNameAuto() throws InterruptedException, IOException {
+        testUploadInputStreamWithFileName(StoreType.AUTO);
     }
 
     @Test
@@ -1051,6 +1142,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testCancelFileUploadingAuto() throws InterruptedException, IOException {
+        testCancelFileUploading(StoreType.AUTO);
+    }
+
+    @Test
     public void testCancelFileUploadingSync() throws InterruptedException, IOException {
         testCancelFileUploading(StoreType.SYNC);
     }
@@ -1094,6 +1190,11 @@ public class FileStoreTest {
     @Test
     public void testCancelFileDownloadingCache() throws InterruptedException, IOException {
         testCancelFileDownloading(StoreType.CACHE);
+    }
+
+    @Test
+    public void testCancelFileDownloadingAuto() throws InterruptedException, IOException {
+        testCancelFileDownloading(StoreType.AUTO);
     }
 
     @Test
@@ -1177,6 +1278,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testUploadPubliclyReadableFileAuto() throws InterruptedException, IOException {
+        testUploadPubliclyReadableFile(StoreType.AUTO);
+    }
+
+    @Test
     public void testUploadPubliclyReadableFileSync() throws InterruptedException, IOException {
         testUploadPubliclyReadableFile(StoreType.SYNC);
     }
@@ -1203,6 +1309,11 @@ public class FileStoreTest {
     @Test
     public void testUploadPrivatelyReadableFileCache() throws InterruptedException, IOException {
         testUploadPrivatelyReadableFile(StoreType.CACHE);
+    }
+
+    @Test
+    public void testUploadPrivatelyReadableFileAuto() throws InterruptedException, IOException {
+        testUploadPrivatelyReadableFile(StoreType.AUTO);
     }
 
     @Test
@@ -1235,6 +1346,11 @@ public class FileStoreTest {
     }
 
     @Test
+    public void testUploadProgressChangingAuto() throws InterruptedException, IOException {
+        testUploadProgressChanging(StoreType.AUTO);
+    }
+
+    @Test
     public void testUploadProgressChangingSync() throws InterruptedException, IOException {
         testUploadProgressChanging(StoreType.SYNC);
     }
@@ -1261,6 +1377,11 @@ public class FileStoreTest {
     @Test
     public void testDownloadProgressChangingCache() throws InterruptedException, IOException {
         testDownloadProgressChanging(StoreType.CACHE);
+    }
+
+    @Test
+    public void testDownloadProgressChangingAuto() throws InterruptedException, IOException {
+        testDownloadProgressChanging(StoreType.AUTO);
     }
 
     @Test

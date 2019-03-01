@@ -18,10 +18,8 @@ package com.kinvey.java.store;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Key;
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Closer;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
@@ -36,9 +34,8 @@ import com.kinvey.java.core.MetaDownloadProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.network.NetworkFileManager;
+import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.file.FileUtils;
-
-import org.apache.tools.ant.util.TeeOutputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -259,6 +256,22 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
+            case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
+                try {
+                    metaData = download.execute();
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    metaData = getFileMetaDataFromCache(q);
+                }
+                break;
         }
         return metaData;
     };
@@ -302,10 +315,24 @@ public class BaseFileStore {
             case FORCE_NETWORK:
                 metaData = download.execute();
                 break;
+            case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
+                try {
+                    metaData = download.execute();
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    metaData = cache.get(id);
+                }
+                break;
         }
-
         return metaData;
-
     }
 
     /**
@@ -491,6 +518,39 @@ public class BaseFileStore {
                 return fmd;
             case FORCE_NETWORK:
                 return getNetworkFile(metadata, os, listener);
+            case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
+                try {
+                    FileMetaData fm = getNetworkFile(metadata, os, listener);
+                    if (fm != null) {
+                        f = new File(cacheStorage(), metadata.getId());
+                        if (!f.exists()) {
+                            f.createNewFile();
+                        }
+                        FileMetadataWithPath fmdWithPath = new FileMetadataWithPath();
+                        os.write(f.getAbsolutePath().getBytes());
+                        fmdWithPath.putAll(fm);
+                        fmdWithPath.setPath(f.getAbsolutePath());
+                        cache.save(fmdWithPath);
+                    }
+                    return fm;
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    f = getCachedFile(metadata);
+                    if (f == null) {
+                        throw new KinveyException("FileMissing", "File Missing in cache", "");
+                    } else {
+                        FileUtils.copyStreams(new FileInputStream(f), os);
+                        return metadata;
+                    }
+                }
         }
         return null;
     }

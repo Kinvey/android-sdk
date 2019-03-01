@@ -22,5 +22,10 @@ package com.kinvey.java.store;
 public enum ReadPolicy {
     FORCE_LOCAL,
     FORCE_NETWORK,
-    BOTH
+    /**
+     *  @deprecated use {@link ReadPolicy#NETWORK_OTHERWISE_LOCAL}
+     */
+    @Deprecated
+    BOTH,
+    NETWORK_OTHERWISE_LOCAL
 }

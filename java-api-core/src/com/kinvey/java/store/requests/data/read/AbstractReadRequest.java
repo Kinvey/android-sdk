@@ -53,6 +53,23 @@ public abstract class AbstractReadRequest<T extends GenericJson> extends Abstrac
                 ret = getNetwork();
                 cache.save(ret.getResult());
                 break;
+            case NETWORK_OTHERWISE_LOCAL:
+                IOException networkException = null;
+                try {
+                    ret = getNetwork();
+                    cache.save(ret.getResult());
+                } catch (IOException e) {
+                    if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
+                        throw e;
+                    }
+                    networkException = e;
+                }
+
+                // if the network request fails, fetch data from local cache
+                if (networkException != null) {
+                    ret = getCached();
+                }
+                break;
         }
         return ret;
     }
