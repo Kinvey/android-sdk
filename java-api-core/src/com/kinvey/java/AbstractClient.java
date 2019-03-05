@@ -524,6 +524,10 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
             BATCH_RATE("batch.rate"),
             /**size of batch of offline requests **/
             BATCH_SIZE("batch.size"),
+            /**enable async requests **/
+            CLIENT_REQUEST_MULTITHREADING("client.request.multithreading"),
+            /**number of threads for pool of threads **/
+            NUMBER_THREAD_POOL("number.thread.pool"),
             /** debug mode, used for HTTP logging **/
             DEBUG_MODE("debug"),
             /** JSON parser**/
