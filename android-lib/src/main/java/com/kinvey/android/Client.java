@@ -20,7 +20,6 @@ package com.kinvey.android;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -38,7 +37,7 @@ import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.push.AbstractPush;
-import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.push.FCMPush;
 import com.kinvey.android.store.FileStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
@@ -349,10 +348,10 @@ public class Client<T extends User> extends AbstractClient<T> {
      */
     public AbstractPush push(Class pushServiceClass) {
         synchronized (lock) {
-            //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
-            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
+            //NOTE:  pushProvider is defined as a FCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
+            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create FCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = new GCMPush(this, true, "");
+                pushProvider = new FCMPush(this, true, "");
             }
             if (pushProvider.getPushServiceClass() == null) {
                 pushProvider.setPushServiceClass(pushServiceClass);
@@ -836,7 +835,7 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             //GCM explicitly enabled
             if (this.GCM_Enabled){
-                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+                client.pushProvider = new FCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
             }
 
             if (this.debugMode){

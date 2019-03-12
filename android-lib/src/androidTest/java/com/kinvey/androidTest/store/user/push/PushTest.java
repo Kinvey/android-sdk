@@ -10,8 +10,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.push.AbstractPush;
-import com.kinvey.android.push.GCMPush;
-import com.kinvey.android.push.KinveyGCMService;
+import com.kinvey.android.push.FCMPush;
+import com.kinvey.android.push.KinveyFCMService;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.java.KinveyException;
@@ -69,14 +69,14 @@ public class PushTest {
     @Test
     public void testGCMPushDefaultValues() {
         String[] senderIds = {ID_1, ID_2};
-        GCMPush push = new GCMPush(client, false, senderIds);
+        FCMPush push = new FCMPush(client, false, senderIds);
         assertFalse(push.isInProduction());
         assertFalse(push.isPushEnabled());
         assertEquals(senderIds, push.getSenderIDs());
         assertEquals("", push.getPushId());
-        assertEquals("com.kinvey.android.push.AbstractPush", GCMPush.TAG);
-        push.setPushServiceClass(GCMService.class);
-        assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+        assertEquals("com.kinvey.android.push.AbstractPush", FCMPush.TAG);
+        push.setPushServiceClass(FCMService.class);
+        assertEquals(FCMService.class.getName(), push.getPushServiceClass().getName());
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("getClient");
@@ -106,7 +106,7 @@ public class PushTest {
 
     @Test
     public void testRegisterPushRequestConstructor() {
-        GCMPush push = createGCMPush();
+        FCMPush push = createGCMPush();
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("createRegisterPushRequest", AbstractPush.PushRegistration.class);
@@ -128,7 +128,7 @@ public class PushTest {
 
     @Test
     public void testUnRegisterPushRequestConstructor() {
-        GCMPush push = new GCMPush(client, false, ID_1, ID_2);
+        FCMPush push = new FCMPush(client, false, ID_1, ID_2);
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("createUnregisterPushRequest", AbstractPush.PushRegistration.class);
@@ -150,13 +150,13 @@ public class PushTest {
 
     @Test
     public void testKinveyGCMServiceConstructor() {
-        KinveyGCMService gcmService = new GCMService();
+        KinveyFCMService gcmService = new FCMService();
         assertNotNull(gcmService);
     }
 
     @Test
     public void testPushConfigField() {
-        GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
+        FCMPush.PushConfigField configField = new FCMPush.PushConfigField();
         assertNotNull(configField);
         String[] senderIds = {ID_1, ID_2};
         configField.setIds(senderIds);
@@ -167,13 +167,13 @@ public class PushTest {
 
     @Test
     public void testPushConfig() {
-        GCMPush.PushConfig pushConfig = new GCMPush.PushConfig();
+        FCMPush.PushConfig pushConfig = new FCMPush.PushConfig();
         assertNotNull(pushConfig);
         String[] senderIds = {ID_1, ID_2};
-        GCMPush.PushConfigField configField = new GCMPush.PushConfigField();
+        FCMPush.PushConfigField configField = new FCMPush.PushConfigField();
         pushConfig.setGcm(configField);
         assertEquals(configField, pushConfig.getGcm());
-        GCMPush.PushConfigField configField2 = new GCMPush.PushConfigField();
+        FCMPush.PushConfigField configField2 = new FCMPush.PushConfigField();
         pushConfig.setGcmDev(configField2);
         assertEquals(configField2, pushConfig.getGcmDev());
     }
@@ -184,7 +184,7 @@ public class PushTest {
             testManager.logout(client);
         }
         try {
-            client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+            client.push(FCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
             assertTrue(false);
         } catch (KinveyException ex) {
             assertNotNull(ex);
@@ -192,8 +192,8 @@ public class PushTest {
         }
     }
 
-    private GCMPush createGCMPush() {
-        return new GCMPush(client, false, ID_1, ID_2);
+    private FCMPush createGCMPush() {
+        return new FCMPush(client, false, ID_1, ID_2);
     }
 
     @Test
@@ -202,10 +202,10 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                GCMPush push = new GCMPush(client, false, ID_1, ID_2);
+                FCMPush push = new FCMPush(client, false, ID_1, ID_2);
                 Method method = null;
                 try {
-                    method = GCMPush.class.getDeclaredMethod("createAsyncEnablePushRequest", KinveyClientCallback.class, String.class);
+                    method = FCMPush.class.getDeclaredMethod("createAsyncEnablePushRequest", KinveyClientCallback.class, String.class);
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -234,10 +234,10 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                GCMPush push = new GCMPush(client, false, ID_1, ID_2);
+                FCMPush push = new FCMPush(client, false, ID_1, ID_2);
                 Method method = null;
                 try {
-                    method = GCMPush.class.getDeclaredMethod("createAsyncDisablePushRequest", KinveyClientCallback.class, String.class);
+                    method = FCMPush.class.getDeclaredMethod("createAsyncDisablePushRequest", KinveyClientCallback.class, String.class);
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -272,8 +272,8 @@ public class PushTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                GCMPush push = (GCMPush) client.push(GCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
-                assertEquals(GCMService.class.getName(), push.getPushServiceClass().getName());
+                FCMPush push = (FCMPush) client.push(FCMService.class).initialize((Application) InstrumentationRegistry.getContext().getApplicationContext());
+                assertEquals(FCMService.class.getName(), push.getPushServiceClass().getName());
 
                 assertNotNull(push);
                 sleep();
