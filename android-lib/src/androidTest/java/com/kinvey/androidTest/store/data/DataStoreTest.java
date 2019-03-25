@@ -24,6 +24,8 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.androidTest.model.DateExample;
 import com.kinvey.androidTest.model.PersonArray;
+import com.kinvey.java.AbstractClient;
+import com.kinvey.java.core.AbstractKinveyClient;
 import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
@@ -1176,6 +1178,59 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, query, DEFAULT_TIMEOUT);
         assertNotNull(findCallbackAuto.error);
         assertNull(findCallbackAuto.result);
+    }
+
+    @Test
+    public void testLocalDataNoConnectionAuto() throws InterruptedException { //FIND
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        createAndSavePerson(storeNetwork, TEST_USERNAME_2);
+        DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, LONG_TIMEOUT);
+        assertNotNull(findCallbackAuto.result);
+        assertEquals(findCallbackAuto.result.getResult().size(), 2);
+        createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME);
+        mockInvalidConnection();
+        DefaultKinveyReadCallback findCallbackSecondAuto = find(storeAuto, LONG_TIMEOUT);
+        assertNotNull(findCallbackSecondAuto.result);
+        assertEquals(findCallbackSecondAuto.result.getResult().size(), 2);
+        cancelMockInvalidConnection();
+    }
+
+    private void mockInvalidConnection() {
+        Field field = null;
+        try {
+            field = AbstractKinveyClient.class.getDeclaredField("rootUrl");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        assert field != null;
+        field.setAccessible(true);
+        try {
+            field.set(client, "https://bmock.kinvey.com/");
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void cancelMockInvalidConnection() {
+        Field field = null;
+        try {
+            field = AbstractKinveyClient.class.getDeclaredField("rootUrl");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        assert field != null;
+        field.setAccessible(true);
+        try {
+            field.set(client, AbstractClient.DEFAULT_BASE_URL);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
