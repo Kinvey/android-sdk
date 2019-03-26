@@ -5,11 +5,14 @@ import android.os.HandlerThread;
 import android.os.Looper;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class KinveyHandlerThread extends HandlerThread {
 
     private Handler mWorkerHandler;
     private ConcurrentLinkedQueue<Runnable> pendingQueue;
+    private ExecutorService executor;
 
     public KinveyHandlerThread(String name, int priority) {
         super(name, priority);
@@ -22,10 +25,17 @@ public class KinveyHandlerThread extends HandlerThread {
     }
 
     public synchronized void postTask(Runnable task){
-        if (mWorkerHandler != null) {
-            mWorkerHandler.post(task);
+        if (Client.sharedInstance().isClientRequestMultithreading()) {
+            if (executor == null) {
+                executor = Executors.newFixedThreadPool(Client.sharedInstance().getNumberThreadPool());
+            }
+            executor.submit(task);
         } else {
-            pendingQueue.add(task);
+            if (mWorkerHandler != null) {
+                mWorkerHandler.post(task);
+            } else {
+                pendingQueue.add(task);
+            }
         }
     }
 

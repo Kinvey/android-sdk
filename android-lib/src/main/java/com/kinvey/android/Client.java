@@ -105,7 +105,9 @@ public class Client<T extends User> extends AbstractClient<T> {
 //    private AsyncUser currentUser;
     private long syncRate;
     private long batchRate;
+    private int numberThreadPool;
     private int batchSize;
+    private boolean clientRequestMultithreading;
     private RealmCacheManager cacheManager;
 
     private static KinveyHandlerThread kinveyHandlerThread;
@@ -408,6 +410,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         return this.batchRate;
     }
 
+    public int getNumberThreadPool(){
+        return this.numberThreadPool;
+    }
+
+    public boolean isClientRequestMultithreading(){
+        return this.clientRequestMultithreading;
+    }
+
     public int getBatchSize(){
         return this.batchSize;
     }
@@ -445,6 +455,8 @@ public class Client<T extends User> extends AbstractClient<T> {
         private long syncRate = 1000 * 60 * 10; //10 minutes
         private int batchSize = 5;
         private long batchRate = 1000L * 30L; //30 seconds
+        private int numberThreadPool = 1;
+        private boolean clientRequestMultithreading = false;
         private JsonFactory factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON);
         private String MICVersion;
         private String MICBaseURL;
@@ -642,8 +654,12 @@ public class Client<T extends User> extends AbstractClient<T> {
                 this.debugMode = Boolean.parseBoolean(super.getString(Option.DEBUG_MODE));
             }
 
-            if (super.getString(Option.SYNC_RATE) != null) {
-                this.syncRate = Long.parseLong(super.getString(Option.SYNC_RATE));
+            if (super.getString(Option.CLIENT_REQUEST_MULTITHREADING) != null) {
+                this.clientRequestMultithreading = Boolean.parseBoolean(super.getString(Option.CLIENT_REQUEST_MULTITHREADING));
+            }
+
+            if (super.getString(Option.NUMBER_THREAD_POOL) != null) {
+                this.numberThreadPool = Integer.parseInt(super.getString(Option.NUMBER_THREAD_POOL));
             }
 
             if (super.getString(Option.BATCH_SIZE) != null) {
@@ -845,6 +861,8 @@ public class Client<T extends User> extends AbstractClient<T> {
             client.setRequestTimeout(this.requestTimeout);
             client.syncRate = this.syncRate;
             client.batchRate = this.batchRate;
+            client.clientRequestMultithreading = this.clientRequestMultithreading;
+            client.numberThreadPool = this.numberThreadPool;
             client.batchSize = this.batchSize;
             client.setUseDeltaCache(this.deltaSetCache);
             if (this.MICVersion != null){
