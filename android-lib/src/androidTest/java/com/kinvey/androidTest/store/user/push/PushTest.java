@@ -105,6 +105,14 @@ public class PushTest {
     }
 
     @Test
+    public void testPushRegistrationServiceParameter() {
+        AbstractPush.PushRegistration pushRegistration = new AbstractPush.PushRegistration();
+        assertNotNull(pushRegistration);
+        assertTrue(pushRegistration.containsKey("service"));
+        assertTrue(pushRegistration.containsValue("firebase"));
+    }
+
+    @Test
     public void testRegisterPushRequestConstructor() {
         FCMPush push = createGCMPush();
         Method method = null;
