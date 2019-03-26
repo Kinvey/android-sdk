@@ -73,6 +73,9 @@ public abstract class AbstractPush {
         private String platform = "android";
 
         @Key
+        private String service = "firebase";
+
+        @Key
         private String deviceId;
 
         public PushRegistration() {
