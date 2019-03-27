@@ -12,6 +12,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
+import com.kinvey.android.KinveyHandlerThread;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -70,6 +71,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2528,6 +2530,20 @@ public class DataStoreTest {
 
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
+    }
+
+    @Test
+    public void testNumberThreadPoolForNotMultithreading() {
+        if (!client.isClientRequestMultithreading()) {
+            assertTrue(client.getNumberThreadPool() == 1);
+        }
+    }
+
+    @Test
+    public void testNumberThreadPoolForMultithreading() {
+        if (client.isClientRequestMultithreading()) {
+            assertTrue(client.getNumberThreadPool() >= 1);
+        }
     }
 
     @Test
