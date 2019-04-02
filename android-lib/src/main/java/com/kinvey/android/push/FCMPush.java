@@ -66,8 +66,8 @@ public class FCMPush extends AbstractPush {
 
     public static String[] senderIDs = new String[0];
     private static boolean inProduction = false;
-    private static final String shared_pref = "Kinvey_Push";
-    private static final String pref_regid = "reg_id";
+    public static final String shared_pref = "Kinvey_Push";
+    public static final String pref_regid = "reg_id";
 
     public FCMPush(Client client, boolean inProduction, String ... senderIDs) {
         super(client);

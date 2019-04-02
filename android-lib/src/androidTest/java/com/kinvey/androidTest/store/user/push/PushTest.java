@@ -67,7 +67,7 @@ public class PushTest {
     }
 
     @Test
-    public void testGCMPushDefaultValues() {
+    public void testFCMPushDefaultValues() {
         String[] senderIds = {ID_1, ID_2};
         FCMPush push = new FCMPush(client, false, senderIds);
         assertFalse(push.isInProduction());
@@ -114,7 +114,7 @@ public class PushTest {
 
     @Test
     public void testRegisterPushRequestConstructor() {
-        FCMPush push = createGCMPush();
+        FCMPush push = createFCMPush();
         Method method = null;
         try {
             method = AbstractPush.class.getDeclaredMethod("createRegisterPushRequest", AbstractPush.PushRegistration.class);
@@ -157,9 +157,9 @@ public class PushTest {
     }
 
     @Test
-    public void testKinveyGCMServiceConstructor() {
-        KinveyFCMService gcmService = new FCMService();
-        assertNotNull(gcmService);
+    public void testKinveyFCMServiceConstructor() {
+        KinveyFCMService fcmService = new FCMService();
+        assertNotNull(fcmService);
     }
 
     @Test
@@ -187,7 +187,7 @@ public class PushTest {
     }
 
     @Test
-    public void testGCMPushUserIsNotLoggedIn() throws InterruptedException {
+    public void testFCMPushUserIsNotLoggedIn() throws InterruptedException {
         if (client.isUserLoggedIn()) {
             testManager.logout(client);
         }
@@ -200,7 +200,7 @@ public class PushTest {
         }
     }
 
-    private FCMPush createGCMPush() {
+    private FCMPush createFCMPush() {
         return new FCMPush(client, false, ID_1, ID_2);
     }
 
