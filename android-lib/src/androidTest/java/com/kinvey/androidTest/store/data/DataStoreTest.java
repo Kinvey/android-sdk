@@ -1439,6 +1439,50 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testCountAllItemsAuto() throws InterruptedException, IOException { //COUNT
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        clearBackend(storeNetwork);
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        createAndSavePerson(storeNetwork, TEST_USERNAME_2);
+        assertTrue(storeAuto.count()==2);
+        createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME);
+        assertTrue(storeAuto.count()==3);
+    }
+
+    @Test
+    public void testCountLocallyStoredNoConnectionAuto() throws InterruptedException, IOException { //COUNT
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        createAndSavePerson(storeNetwork, TEST_USERNAME_2);
+        DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, LONG_TIMEOUT);
+        assertNotNull(findCallbackAuto.result);
+        assertEquals(findCallbackAuto.result.getResult().size(), 2);
+        createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME);
+        mockInvalidConnection();
+        assertTrue(storeAuto.count()==2);
+        cancelMockInvalidConnection();
+    }
+
+    @Test
+    public void testCountNoAccessForCollection() throws InterruptedException { //COUNT
+        DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
+        Exception exception = null;
+        try {
+            storeAuto.count();
+        } catch (Exception e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getClass(), KinveyJsonResponseException.class);
+    }
+
+    @Test
     public void testMongoQueryStringBuilder() {
         // Arrange
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
