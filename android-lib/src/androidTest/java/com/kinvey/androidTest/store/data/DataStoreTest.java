@@ -514,6 +514,33 @@ public class DataStoreTest {
         }
     }
 
+    private static class DefaultKinveyClientEntitySetCallback implements KinveyClientCallback<EntitySet> {
+
+        private CountDownLatch latch;
+        EntitySet result;
+        Throwable error;
+
+        DefaultKinveyClientEntitySetCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(EntitySet result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
     private static class DefaultKinveyReadDateCallback implements KinveyReadCallback<DateExample> {
 
         private CountDownLatch latch;
@@ -1277,6 +1304,21 @@ public class DataStoreTest {
         return callback;
     }
 
+    private DefaultKinveyClientEntitySetCallback findIdEntitySet(final DataStore<EntitySet> store, final String id, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientEntitySetCallback callback = new DefaultKinveyClientEntitySetCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(id, callback, null);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
     @Test
     public void testSortedDataNoConnectionAuto() throws InterruptedException { //FIND
         DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
@@ -1429,6 +1471,70 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallbackSync = find(storeSync, LONG_TIMEOUT);
         assertNotNull(findCallbackSync.result);
         assertEquals(findCallbackSync.result.getResult().size(), 4);
+    }
+
+    @Test
+    public void testFindIdItemAuto() throws InterruptedException { //FINDBYID
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        createAndSavePerson(storeAuto, TEST_USERNAME_2);
+        String userId = saveCallback.result.getId();
+        DefaultKinveyClientCallback findCallbackAuto = find(storeAuto, userId, DEFAULT_TIMEOUT, null);
+        assertNotNull(findCallbackAuto.result);
+        assertEquals(findCallbackAuto.result.getUsername(), TEST_USERNAME);
+        DefaultKinveyClientCallback findCallbackAutoSecond = find(storeSync, userId, DEFAULT_TIMEOUT, null);
+        assertNotNull(findCallbackAutoSecond.result);
+        assertEquals(findCallbackAutoSecond.result.getUsername(), TEST_USERNAME);
+    }
+
+    @Test
+    public void testFindWithoutSpecifyingIdAuto() throws InterruptedException { //FINDBYID
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        String userId = "test";
+        DefaultKinveyClientCallback findCallbackAuto = find(storeAuto, userId, DEFAULT_TIMEOUT, null);
+        assertNull(findCallbackAuto.result);
+        assertNotNull(findCallbackAuto.error);
+        assertTrue(findCallbackAuto.error.getMessage().contains("EntityNotFound"));
+    }
+
+    @Test
+    public void testFindIdNoAccessForCollection() throws InterruptedException { //FINDBYID
+        DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
+        DefaultKinveyClientEntitySetCallback findCallbackAuto = findIdEntitySet(storeAuto, "testId", LONG_TIMEOUT);
+        assertNotNull(findCallbackAuto.error);
+        assertEquals(findCallbackAuto.error.getClass(), KinveyJsonResponseException.class);
+    }
+
+    @Test
+    public void testLocalDataByIdNoConnectionAuto() throws InterruptedException { //FINDBYID
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        createAndSavePerson(storeNetwork, TEST_USERNAME_2);
+        String userId = saveCallback.result.getId();
+        DefaultKinveyClientCallback findCallbackAuto = find(storeAuto, userId, DEFAULT_TIMEOUT, null);
+        assertNotNull(findCallbackAuto.result);
+        assertEquals(findCallbackAuto.result.getUsername(), TEST_USERNAME);
+        mockInvalidConnection();
+        DefaultKinveyClientCallback findCallbackAutoSecond = find(storeAuto, userId, DEFAULT_TIMEOUT, null);
+        assertNotNull(findCallbackAutoSecond.result);
+        assertEquals(findCallbackAutoSecond.result.getUsername(), TEST_USERNAME);
+        cancelMockInvalidConnection();
     }
 
     public void createAndSavePerson(final DataStore<Person> store, String username) throws InterruptedException {
