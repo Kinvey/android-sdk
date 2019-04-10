@@ -66,6 +66,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.sync.dto.SyncItem;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1686,6 +1687,121 @@ public class DataStoreTest {
         assertEquals(pullCallback.error.getClass(), KinveyJsonResponseException.class);
     }
 
+    public List<SyncItem> pendingSyncEntities(String collectionName) {
+        return client.getSyncManager().popSingleItemQueue(collectionName);
+    }
+
+    @Test
+    public void testPushRecreateAuto() throws InterruptedException { //PUSH
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        createAndSavePerson(storeSync, TEST_USERNAME);
+        createAndSavePerson(storeSync, TEST_USERNAME_2);
+        DefaultKinveyPushCallback pushCallback = push(storeAuto, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(pushCallback.result.getSuccessCount(), 2);
+        DefaultKinveyReadCallback kinveyReadCallback = find(storeSync, LONG_TIMEOUT);
+        String userId = null;
+        for(Person personFollowing: kinveyReadCallback.result.getResult()) {
+            if (personFollowing.getUsername().equals(TEST_USERNAME)) {
+                personFollowing.setWeight(15);
+                userId = personFollowing.getId();
+                DefaultKinveyClientCallback saveCallbackSecond = save(storeSync, personFollowing);
+                assertNotNull(saveCallbackSecond.result);
+                assertNull(saveCallbackSecond.error);
+            }
+        }
+        DefaultKinveyDeleteCallback deleteCallback = delete(storeNetwork, userId, DEFAULT_TIMEOUT);
+        assertNull(deleteCallback.error);
+        assertNotNull(deleteCallback.result);
+        DefaultKinveyPushCallback pushCallbackSecond = push(storeAuto, LONG_TIMEOUT);
+        assertNotNull(pushCallbackSecond.result);
+        assertEquals(pushCallbackSecond.result.getSuccessCount(), 1);
+    }
+
+    @Test
+    public void testPushAuto() throws InterruptedException { //PUSH
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        createAndSavePerson(storeSync, TEST_USERNAME);
+        createAndSavePerson(storeSync, TEST_USERNAME_2);
+        DefaultKinveyPushCallback pushCallback = push(storeAuto, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(pushCallback.result.getSuccessCount(), 2);
+        DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertEquals(findCallback.result.getResult().size(), 2);
+        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+    }
+
+    @Test
+    public void testPushUpdateAuto() throws InterruptedException { //PUSH
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        createAndSavePerson(storeNetwork, TEST_USERNAME_2);
+        DefaultKinveyPullCallback pullCallback = pull(storeAuto, null);
+        assertNotNull(pullCallback.result);
+        assertEquals(pullCallback.result.getCount(), 2);
+        DefaultKinveyReadCallback kinveyReadCallback = find(storeSync, LONG_TIMEOUT);
+        Person personFirst = kinveyReadCallback.result.getResult().get(0);
+        personFirst.setWeight(15);
+        DefaultKinveyClientCallback saveCallback = save(storeSync, personFirst);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        DefaultKinveyPushCallback pushCallback = push(storeAuto, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(pushCallback.result.getSuccessCount(), 1);
+        DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertEquals(findCallback.result.getResult().size(), 2);
+        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+    }
+
+    @Test
+    public void testPushDeleteAuto() throws InterruptedException { //PUSH
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeNetwork);
+        clearBackend(storeSync);
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        String userId = saveCallback.result.getId();
+        Person personSecond = createPerson(TEST_USERNAME_2);
+        DefaultKinveyClientCallback saveCallbackSecond = save(storeNetwork, personSecond);
+        assertNotNull(saveCallbackSecond.result);
+        assertNull(saveCallbackSecond.error);
+        String userIdSecond = saveCallbackSecond.result.getId();
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        DefaultKinveyPullCallback pullCallback = pull(storeAuto, null);
+        assertNotNull(pullCallback.result);
+        assertEquals(pullCallback.result.getCount(), 3);
+        DefaultKinveyDeleteCallback deleteCallback = delete(storeSync, userId, DEFAULT_TIMEOUT);
+        assertNull(deleteCallback.error);
+        assertNotNull(deleteCallback.result);
+        DefaultKinveyDeleteCallback deleteCallbackSecond = delete(storeSync, userIdSecond, DEFAULT_TIMEOUT);
+        assertNull(deleteCallbackSecond.error);
+        assertNotNull(deleteCallbackSecond.result);
+        DefaultKinveyPushCallback pushCallback = push(storeAuto, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(pushCallback.result.getSuccessCount(), 2);
+        DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertEquals(findCallback.result.getResult().size(), 1);
+        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+    }
 
     @Test
     public void testFindIdItemAuto() throws InterruptedException { //FINDBYID
