@@ -1534,29 +1534,6 @@ public class DataStoreTest {
     }
 
     @Test
-    public void testClearQudddrySyncAuto() throws InterruptedException { //CLEARSYNC
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        clearBackend(storeSync);
-        createAndSavePerson(storeSync, TEST_USERNAME);
-        Person personSecond = createPerson(TEST_USERNAME_2);
-        personSecond.setWeight(2);
-        DefaultKinveyClientCallback saveSecondCallback = save(storeSync, personSecond);
-        assertNotNull(saveSecondCallback.result);
-        assertNull(saveSecondCallback.error);
-        Person personThird = createPerson(TEST_TEMP_USERNAME);
-        personThird.setWeight(2);
-        DefaultKinveyClientCallback saveThirdCallback = save(storeSync, personThird);
-        assertNotNull(saveThirdCallback.result);
-        assertNull(saveThirdCallback.error);
-        Query query = client.query();
-        query = query.equals("weight", 2);
-        storeAuto.clear(query);
-        assertNotNull(pendingSyncEntities(Person.COLLECTION));
-        assertEquals(pendingSyncEntities(Person.COLLECTION).size(), 1);
-    }
-
-    @Test
     public void testSyncAuto() throws InterruptedException { //SYNC
         DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
