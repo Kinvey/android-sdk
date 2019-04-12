@@ -817,7 +817,7 @@ public class UserStore {
 
     /***
      *
-     * Login with the MIC service, using the oauth flow.  This method provides direct login, without rending a login page and without redirectURI.
+     * Login with the MIC service, using the resource owner grant flow.
      *
      * @param username {@link String} the userName of Kinvey user
      * @param password {@link String} the password of Kinvey user.
