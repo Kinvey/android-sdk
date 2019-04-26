@@ -1459,6 +1459,33 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testSaveNoAccess() throws InterruptedException { //SAVE
+        DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
+        DefaultKinveyEntityCallback defaultKinveyEntityCallback  = saveEntitySet(storeAuto, new EntitySet());
+        assertNotNull(defaultKinveyEntityCallback.error);
+        assertEquals(defaultKinveyEntityCallback.error.getClass(), KinveyJsonResponseException.class);
+    }
+
+    @Test
+    public void testSaveConnectErrorAuto() throws InterruptedException { //SAVE
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeAuto);
+        clearBackend(storeSync);
+        mockInvalidConnection();
+        Person person = createPerson(TEST_USERNAME);
+        DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
+        assertNull(saveCallback.result);
+        DefaultKinveyReadCallback findCallback = find(storeAuto, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(findCallback.result.getResult().size() == 1);
+        cancelMockInvalidConnection();
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems.size() == 1);
+        assertEquals(syncItems.get(0).getRequestMethod(), SyncRequest.HttpVerb.POST);
+    }
+    
+    @Test
     public void testQueriedDataNoConnectionAuto() throws InterruptedException { //FIND
         DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
@@ -1516,33 +1543,6 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallbackSync = find(storeSync, LONG_TIMEOUT);
         assertNotNull(findCallbackSync.result);
         assertEquals(findCallbackSync.result.getResult().size(), 4);
-    }
-
-    @Test
-    public void testSaveNoAccess() throws InterruptedException { //SAVE
-        DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
-        DefaultKinveyEntityCallback defaultKinveyEntityCallback  = saveEntitySet(storeAuto, new EntitySet());
-        assertNotNull(defaultKinveyEntityCallback.error);
-        assertEquals(defaultKinveyEntityCallback.error.getClass(), KinveyJsonResponseException.class);
-    }
-
-    @Test
-    public void testSaveConnectErrorAuto() throws InterruptedException { //SAVE
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        clearBackend(storeAuto);
-        clearBackend(storeSync);
-        mockInvalidConnection();
-        Person person = createPerson(TEST_USERNAME);
-        DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
-        assertNull(saveCallback.result);
-        DefaultKinveyReadCallback findCallback = find(storeAuto, LONG_TIMEOUT);
-        assertNotNull(findCallback.result);
-        assertTrue(findCallback.result.getResult().size() == 1);
-        cancelMockInvalidConnection();
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
-        assertTrue(syncItems.size() == 1);
-        assertEquals(syncItems.get(0).getRequestMethod(), SyncRequest.HttpVerb.POST);
     }
 
     @Test
