@@ -1120,7 +1120,9 @@ public class UserStore {
             T ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get("refresh_token").toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get("refresh_token").toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
@@ -1152,7 +1154,9 @@ public class UserStore {
             GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
             T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
             return ret;

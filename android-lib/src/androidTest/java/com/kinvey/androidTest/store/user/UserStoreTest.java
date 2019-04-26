@@ -11,6 +11,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.AsyncUserGroup;
 import com.kinvey.android.Client;
@@ -27,21 +28,27 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
+import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
+import com.kinvey.androidTest.store.data.DataStoreTest;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.auth.InMemoryCredentialStore;
+import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.UserStoreRequestManager;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -397,6 +404,48 @@ public class UserStoreTest {
         }
 
         private void finish() {
+            latch.countDown();
+        }
+    }
+
+    private DefaultKinveyClientEntitySetCallback findIdEntitySet(final DataStore<EntitySet> store, final String id, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientEntitySetCallback callback = new DefaultKinveyClientEntitySetCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(id, callback, null);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private static class DefaultKinveyClientEntitySetCallback implements KinveyClientCallback<EntitySet> {
+
+        private CountDownLatch latch;
+        EntitySet result;
+        Throwable error;
+
+        DefaultKinveyClientEntitySetCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(EntitySet result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
             latch.countDown();
         }
     }
@@ -975,6 +1024,28 @@ public class UserStoreTest {
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
         assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id"));
+    }
+
+    @Test
+    public void testImitationUnauthorizedForRefreshToken() throws InterruptedException, IOException {
+        if (client.getActiveUser() == null) {
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        }
+        Credential cred = client.getStore().load(client.getActiveUser().getId());
+        String refreshToken = null;
+        if (cred != null) {
+            refreshToken = cred.getRefreshToken();
+        }
+        if (refreshToken != null) {
+            cred.setRefreshToken(null);
+        }
+        assertTrue(refreshToken == null);
+        DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.NETWORK, client);
+        DefaultKinveyClientEntitySetCallback findCallback = findIdEntitySet(storeAuto, "testId", 60);
+        Assert.assertNotNull(findCallback.error);
+        Assert.assertTrue(findCallback.error.getMessage().contains("InsufficientCredentials"));
     }
 
     private DefaultKinveyMICCallback loginWithAuthorizationCodeLoginPage(final String redirectUrl, final Client client) throws InterruptedException {
