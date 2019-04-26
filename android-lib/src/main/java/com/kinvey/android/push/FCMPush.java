@@ -49,7 +49,7 @@ import java.util.ArrayList;
  * This functionality can be accessed through the {@link com.kinvey.android.Client#push(Class)} ()} convenience method.
  * </p>
  *
- * <p>This class manages FCM Push for the current logged in user.  Use `gcm.enabled=true` in the `kinvey.properties` file to enable FCM.</p>
+ * <p>This class manages FCM Push for the current logged in user.  Use `fcm.enabled=true` in the `kinvey.properties` file to enable FCM.</p>
  *
  * sample usage:
  * <pre>

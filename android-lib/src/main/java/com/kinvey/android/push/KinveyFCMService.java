@@ -53,15 +53,15 @@ public abstract class KinveyFCMService extends FirebaseMessagingService {
 
         if (remoteMessage.getData() != null && remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            processMessage((String) remoteMessage.getData().values().toArray()[0]);
+            onMessage((String) remoteMessage.getData().values().toArray()[0]);
         }
         if (remoteMessage.getData() == null && remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            processMessage(remoteMessage.getNotification().getBody());
+            onMessage(remoteMessage.getNotification().getBody());
         }
     }
 
-    public abstract void processMessage(String r);
+    public abstract void onMessage(String r);
 
     /**
      * Persist token to third-party servers.
