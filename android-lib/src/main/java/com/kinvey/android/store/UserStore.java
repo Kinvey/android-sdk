@@ -1116,15 +1116,13 @@ public class UserStore {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getMICToken(token, clientId).execute();
-            if (result.get(ACCESS_TOKEN) == null) {
-                throw new KinveyException("Invalid Access MIC token");
-            }
+
             T ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
-            if (result.get(REFRESH_TOKEN) == null) {
-                throw new KinveyException("Invalid Refresh MIC token");
-            }
+
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get("refresh_token").toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get("refresh_token").toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
@@ -1154,15 +1152,11 @@ public class UserStore {
             UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
-            if (result.get(ACCESS_TOKEN) == null) {
-                throw new KinveyException("Invalid Access MIC token");
-            }
             T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);
-            if (result.get(REFRESH_TOKEN) == null) {
-                throw new KinveyException("Invalid Refresh MIC token");
-            }
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
             return ret;
