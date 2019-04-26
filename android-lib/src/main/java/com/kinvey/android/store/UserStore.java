@@ -156,7 +156,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
-     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static  <T extends User> void loginFacebook(@NonNull String accessToken, @NonNull AbstractClient client, @NonNull KinveyClientCallback<T> callback) throws IOException {
         new Login<>(accessToken, UserStoreRequestManager.LoginType.FACEBOOK, client, callback).execute();
@@ -184,7 +184,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
-     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static <T extends User> void loginGoogle(@NonNull String accessToken, @NonNull AbstractClient client, @NonNull KinveyClientCallback<T> callback) throws IOException {
         new Login<>(accessToken, UserStoreRequestManager.LoginType.GOOGLE, client, callback).execute();
@@ -217,7 +217,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
-     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static <T extends User> void loginTwitter(@NonNull String accessToken, @NonNull String accessSecret,
                                                      @NonNull String consumerKey, @NonNull String consumerSecret,
@@ -252,7 +252,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
-     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static <T extends User> void loginLinkedIn(@NonNull String accessToken, @NonNull String accessSecret,
                                                       @NonNull String consumerKey, @NonNull String consumerSecret,
@@ -315,7 +315,7 @@ public class UserStore {
      * @param client {@link Client} an instance of the client
      * @param callback {@link com.kinvey.java.core.KinveyClientCallback<User>} the callback
      * @throws IOException
-     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(Client, String, String, KinveyMICCallback)} or {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static <T extends User> void loginSalesForce(@NonNull String accessToken, @NonNull String client_id,
                                                         @NonNull String refreshToken, @NonNull String id,
@@ -807,12 +807,26 @@ public class UserStore {
      * @param password {@link String} the password of Kinvey user.
      * @param redirectURI redirectURI
      * @param callback {@link KinveyUserCallback}
-     * @deprecated Use {@link #loginWithMIC(AbstractClient, String, String, String, String, KinveyUserCallback)}
+     * @deprecated Use {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static void loginWithAuthorizationCodeAPI(@NonNull AbstractClient client, @NonNull String username,
                                                      @NonNull String password, @Nullable String clientId,
                                                      @NonNull String redirectURI, @NonNull KinveyUserCallback<User> callback){
         loginWithMIC(client, username, password, clientId,redirectURI, callback);
+    }
+
+    /***
+     *
+     * Login with the MIC service, using the resource owner grant flow.
+     *
+     * @param username {@link String} the userName of Kinvey user
+     * @param password {@link String} the password of Kinvey user.
+     * @param callback {@link KinveyUserCallback}
+     */
+    public static void loginWithMIC(@NonNull AbstractClient client, @NonNull String username,
+                                    @NonNull String password, @Nullable String clientId, @NonNull KinveyUserCallback<User> callback){
+        MICCallback = callback;
+        new PostForOAuthToken(client, clientId, null, username, password, callback).execute();
     }
 
     /***
@@ -823,6 +837,7 @@ public class UserStore {
      * @param password {@link String} the password of Kinvey user.
      * @param redirectURI redirectURI
      * @param callback {@link KinveyUserCallback}
+     * @deprecated Use {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}
      */
     public static void loginWithMIC(@NonNull AbstractClient client, @NonNull String username,
                                                      @NonNull String password, @Nullable String clientId,
@@ -1105,7 +1120,9 @@ public class UserStore {
             T ret =  BaseUserStore.loginMobileIdentity(result.get("access_token").toString(), client);
 
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get("refresh_token").toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get("refresh_token").toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
 
@@ -1137,7 +1154,9 @@ public class UserStore {
             GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
             T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);
             Credential currentCred = client.getStore().load(client.getActiveUser().getId());
-            currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            if (result.get(REFRESH_TOKEN) != null) {
+                currentCred.setRefreshToken(result.get(REFRESH_TOKEN).toString());
+            }
             currentCred.setClientId(clientId);
             client.getStore().store(client.getActiveUser().getId(), currentCred);
             return ret;
