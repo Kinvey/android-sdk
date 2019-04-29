@@ -109,6 +109,7 @@ public class Client<T extends User> extends AbstractClient<T> {
     private int batchSize;
     private boolean clientRequestMultithreading;
     private RealmCacheManager cacheManager;
+    private Class pushServiceClass;
 
     private static KinveyHandlerThread kinveyHandlerThread;
     
@@ -357,6 +358,7 @@ public class Client<T extends User> extends AbstractClient<T> {
             }
             if (pushProvider.getPushServiceClass() == null) {
                 pushProvider.setPushServiceClass(pushServiceClass);
+                this.pushServiceClass = pushServiceClass;
             }
             return pushProvider;
         }
@@ -420,6 +422,14 @@ public class Client<T extends User> extends AbstractClient<T> {
 
     public int getBatchSize(){
         return this.batchSize;
+    }
+
+    public Class getPushServiceClass(){
+        return this.pushServiceClass;
+    }
+
+    public void setPushServiceClass(Class pushServiceClass){
+        this.pushServiceClass = pushServiceClass;
     }
 
     /**

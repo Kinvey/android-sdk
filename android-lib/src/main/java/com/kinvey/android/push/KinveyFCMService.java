@@ -74,15 +74,12 @@ public abstract class KinveyFCMService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         Log.d(TAG, "New FCM InstanceID token");
-    }
-
-    public void sendRegistrationToServer(String token, final Class pushServiceClass) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 String regid = Client.sharedInstance().getContext().getSharedPreferences(FCMPush.shared_pref, Context.MODE_PRIVATE).getString(FCMPush.pref_regid, "");
                 if (Client.sharedInstance().isUserLoggedIn() && !regid.isEmpty()) {
-                    Client.sharedInstance().push(pushServiceClass).initialize(getApplication());
+                    Client.sharedInstance().push(Client.sharedInstance().getPushServiceClass()).initialize(getApplication());
                 }
             }
         });

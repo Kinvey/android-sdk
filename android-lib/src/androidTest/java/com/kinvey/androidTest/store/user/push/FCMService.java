@@ -10,7 +10,7 @@ public class FCMService extends KinveyFCMService {
     }
 
     @Override
-    public void processMessage(String r) {
+    public void onMessage(String r) {
 
     }
 }
