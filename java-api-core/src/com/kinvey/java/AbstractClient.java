@@ -512,10 +512,10 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
             PUSH_MODE("push.mode"),
             /** PUSH enabled key **/
             PUSH_ENABLED("push.enabled"),
-            /**GCM Push enabled **/
-            GCM_PUSH_ENABLED("gcm.enabled"),
-            /**GCM Sender ID **/
-            GCM_SENDER_ID("gcm.senderID"),
+            /**FCM Push enabled **/
+            FCM_PUSH_ENABLED("fcm.enabled"),
+            /**FCM Sender ID **/
+            FCM_SENDER_ID("fcm.senderID"),
             /**GCM SERVER URL **/
             GCM_PROD_MODE("gcm.production"),
             /** time limit for retrying failed offline requests **/
