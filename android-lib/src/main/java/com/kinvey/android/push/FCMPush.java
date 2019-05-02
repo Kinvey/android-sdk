@@ -235,12 +235,12 @@ public class FCMPush extends AbstractPush {
         new AsyncUnRegisterFCM(new KinveyClientCallback() {
             @Override
             public void onSuccess(Object result) {
-                Logger.ERROR("FCM - successful unregister CGM");
+                Logger.ERROR("FCM - successful unregister FCM");
             }
 
             @Override
             public void onFailure(Throwable error) {
-                Logger.ERROR("FCM - unsuccessful unregister CGM: " + error.getMessage());
+                Logger.ERROR("FCM - unsuccessful unregister FCM: " + error.getMessage());
             }
         }).execute();
 //        GCMRegistrar.unregister(getClient().getContext());
