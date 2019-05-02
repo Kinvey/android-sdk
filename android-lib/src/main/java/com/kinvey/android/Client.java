@@ -20,7 +20,6 @@ package com.kinvey.android;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -38,7 +37,7 @@ import com.kinvey.android.callback.KinveyPingCallback;
 import com.kinvey.android.callback.KinveyUserCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.push.AbstractPush;
-import com.kinvey.android.push.GCMPush;
+import com.kinvey.android.push.FCMPush;
 import com.kinvey.android.store.FileStore;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.ClientExtension;
@@ -110,6 +109,7 @@ public class Client<T extends User> extends AbstractClient<T> {
     private int batchSize;
     private boolean clientRequestMultithreading;
     private RealmCacheManager cacheManager;
+    private Class pushServiceClass;
 
     private static KinveyHandlerThread kinveyHandlerThread;
     
@@ -351,13 +351,14 @@ public class Client<T extends User> extends AbstractClient<T> {
      */
     public AbstractPush push(Class pushServiceClass) {
         synchronized (lock) {
-            //NOTE:  pushProvider is defined as a GCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
-            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create GCMPush inline here)
+            //NOTE:  pushProvider is defined as a FCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
+            //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create FCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = new GCMPush(this, true, "");
+                pushProvider = new FCMPush(this, true, "");
             }
             if (pushProvider.getPushServiceClass() == null) {
                 pushProvider.setPushServiceClass(pushServiceClass);
+                this.pushServiceClass = pushServiceClass;
             }
             return pushProvider;
         }
@@ -423,6 +424,14 @@ public class Client<T extends User> extends AbstractClient<T> {
         return this.batchSize;
     }
 
+    public Class getPushServiceClass(){
+        return this.pushServiceClass;
+    }
+
+    public void setPushServiceClass(Class pushServiceClass){
+        this.pushServiceClass = pushServiceClass;
+    }
+
     /**
      * Get a reference to the Application Context used to create this instance of the Client
      * @return {@code null} or the live Application Context
@@ -449,8 +458,8 @@ public class Client<T extends User> extends AbstractClient<T> {
         private Context context = null;
         private KinveyUserCallback<User> retrieveUserCallback = null;
         //GCM Push Fields
-        private String GCM_SenderID = "";
-        private boolean GCM_Enabled = false;
+        private String FCM_SenderID = "";
+        private boolean FCM_Enabled = false;
         private boolean GCM_InProduction = true;
         private boolean debugMode = false;
         private long syncRate = 1000 * 60 * 10; //10 minutes
@@ -578,8 +587,8 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (BuildConfig.TRAVIS) {
                 key = BuildConfig.KINVEY_APP_KEY;
                 secret = BuildConfig.KINVEY_APP_SECRET;
-                GCM_Enabled = true;
-                GCM_SenderID = BuildConfig.SENDER_ID;
+                FCM_Enabled = true;
+                FCM_SenderID = BuildConfig.SENDER_ID;
             } else {
                 key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties");
                 secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties");
@@ -639,16 +648,16 @@ public class Client<T extends User> extends AbstractClient<T> {
                 this.useDeltaCache = Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE));
             }
 
-            if (super.getString(Option.GCM_PUSH_ENABLED) != null) {
-                this.GCM_Enabled = Boolean.parseBoolean(super.getString(Option.GCM_PUSH_ENABLED));
+            if (super.getString(Option.FCM_PUSH_ENABLED) != null) {
+                this.FCM_Enabled = Boolean.parseBoolean(super.getString(Option.FCM_PUSH_ENABLED));
             }
 
             if (super.getString(Option.GCM_PROD_MODE) != null) {
                 this.GCM_InProduction = Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE));
             }
 
-            if (super.getString(Option.GCM_SENDER_ID) != null) {
-                this.GCM_SenderID = super.getString(Option.GCM_SENDER_ID);
+            if (super.getString(Option.FCM_SENDER_ID) != null) {
+                this.FCM_SenderID = super.getString(Option.FCM_SENDER_ID);
             }
 
             if (super.getString(Option.DEBUG_MODE) != null) {
@@ -850,9 +859,9 @@ public class Client<T extends User> extends AbstractClient<T> {
 
             client.setUserClass(userClass != null ? userClass : (Class<T>) User.class);
 
-            //GCM explicitly enabled
-            if (this.GCM_Enabled){
-                client.pushProvider = new GCMPush(client, this.GCM_InProduction, this.GCM_SenderID);
+            //FCM explicitly enabled
+            if (this.FCM_Enabled){
+                client.pushProvider = new FCMPush(client, this.GCM_InProduction, this.FCM_SenderID);
             }
 
             if (this.debugMode){
@@ -971,24 +980,24 @@ public class Client<T extends User> extends AbstractClient<T> {
         }
 
         /**
-         * Builder method to enable GCM for the client
+         * Builder method to enable FCM for the client
          *
-         * @param gcmEnabled - should push use GCM, defaults to true
+         * @param fcmEnabled - should push use FCM, defaults to true
          * @return the current instance of the builder
          */
-        public Client.Builder enableGCM(boolean gcmEnabled){
-            this.GCM_Enabled = gcmEnabled;
+        public Client.Builder enableFCM(boolean fcmEnabled){
+            this.FCM_Enabled = fcmEnabled;
             return this;
         }
 
         /**
-         * Builder method to set sender ID for GCM push
+         * Builder method to set sender ID for FCM push
          *
          * @param senderID - the senderID to register
          * @return the current instance of the builder
          */
         public Client.Builder setSenderIDs(String senderID){
-            this.GCM_SenderID = senderID;
+            this.FCM_SenderID = senderID;
             return this;
         }
         

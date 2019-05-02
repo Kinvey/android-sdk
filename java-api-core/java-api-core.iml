@@ -13,9 +13,9 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/build/classes/main" />
-    <output-test url="file://$MODULE_DIR$/build/classes/test" />
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/build/classes/java/main" />
+    <output-test url="file://$MODULE_DIR$/build/classes/java/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
@@ -29,16 +29,25 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="_home_hpg4_projects_Kinvey_android_sdk_java_api_core_build_gen_buildconfig_classes_main" level="project" />
     <orderEntry type="library" exported="" name="guava-18.0" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-jackson-1.19.0" level="project" />
-    <orderEntry type="library" exported="" name="gson-2.1" level="project" />
+    <orderEntry type="library" exported="" name="pubnub-gson-4.18.0" level="project" />
+    <orderEntry type="library" exported="" name="converter-gson-2.3.0" level="project" />
+    <orderEntry type="library" exported="" name="gson-2.8.2" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-1.19.0" level="project" />
     <orderEntry type="library" exported="" name="dexmaker-1.2" level="project" />
     <orderEntry type="library" exported="" name="ant-1.8.0" level="project" />
+    <orderEntry type="library" exported="" name="animal-sniffer-annotations-1.16" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-asl-1.9.11" level="project" />
     <orderEntry type="library" exported="" name="jsr305-1.3.9" level="project" />
     <orderEntry type="library" exported="" name="ant-launcher-1.8.0" level="project" />
+    <orderEntry type="library" exported="" name="retrofit-2.3.0" level="project" />
+    <orderEntry type="library" exported="" name="logging-interceptor-3.9.1" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-3.9.1" level="project" />
+    <orderEntry type="library" exported="" name="slf4j-api-1.7.22" level="project" />
     <orderEntry type="library" exported="" name="httpclient-4.0.1" level="project" />
+    <orderEntry type="library" exported="" name="okio-1.13.0" level="project" />
     <orderEntry type="library" exported="" name="httpcore-4.0.1" level="project" />
     <orderEntry type="library" exported="" name="commons-logging-1.1.1" level="project" />
     <orderEntry type="library" exported="" name="commons-codec-1.3" level="project" />
@@ -46,9 +55,5 @@
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-all-1.9.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.1" level="project" />
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />   
-    <orderEntry type="library" exported="" name="java-api-core.java-api-core-3.0.0-BETA-04" level="project" />
   </component>
 </module>
