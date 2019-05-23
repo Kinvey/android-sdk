@@ -34,6 +34,7 @@ import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
+import com.kinvey.java.dto.BatchList;
 import com.kinvey.java.dto.DeviceId;
 import com.kinvey.java.model.AbstractKinveyHeadersResponse;
 import com.kinvey.java.model.AggregateEntity;
@@ -489,6 +490,14 @@ public class NetworkManager<T extends GenericJson> {
         Logger.INFO("Finish for initializing request with save object");
         Logger.INFO("Return save object");
         return save;
+    }
+
+    public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
+        BatchList json = new BatchList(list);
+        Class clazz = KinveyReadResponse.class;
+        SaveBatch batch = new SaveBatch(json, clazz, SaveMode.POST);
+        client.initializeRequest(batch);
+        return batch;
     }
 
     public boolean isTempId(T item) {
@@ -998,6 +1007,29 @@ public class NetworkManager<T extends GenericJson> {
 
         Save(T entity, Class<T> myClass, SaveMode update) {
             this(entity, myClass, null, update);            
+        }
+    }
+
+    /**
+     * SaveBatch class. Constructs the HTTP request object to
+     * create multi-insert requests.
+     *
+     */
+    public class SaveBatch extends AbstractKinveyJsonClientRequest<KinveyReadResponse<T>> {
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}";
+
+        @Key
+        private String collectionName;
+
+        SaveBatch(BatchList json, Class<KinveyReadResponse<T>> myClass, SaveMode update) {
+            super(getClient(), update.toString(), REST_PATH, json, myClass);
+            this.collectionName = NetworkManager.this.getCollectionName();
+            GenericData customRequestProperties = NetworkManager.this.getCustomRequestProperties();
+            String clientAppVersion = NetworkManager.this.getClientAppVersion();
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", clientAppVersion);
+            if (customRequestProperties != null && !customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(customRequestProperties));
+            }
         }
     }
 
