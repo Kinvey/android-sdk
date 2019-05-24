@@ -424,6 +424,16 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     /**
+     * Get count of queried items in the collection
+     * @return GetCount request
+     * @throws IOException
+     */
+    public GetCount getCountBlocking(Query query) throws IOException {
+        GetCount getCount = new GetCount(query);
+        client.initializeRequest(getCount);
+        return getCount;
+    }
+    /**
      * Save (create or update) an entity to a collection.
      *
      * @param entity Entity to Save
@@ -652,7 +662,7 @@ public class NetworkManager<T extends GenericJson> {
         protected String limit;
         @Key("skip")
         protected String skip;
-        
+
 
         @Key
         private String fields = "_id,_kmd";
@@ -950,14 +960,39 @@ public class NetworkManager<T extends GenericJson> {
      */
     public class GetCount extends AbstractKinveyReadHeaderRequest<KinveyCountResponse> {
 
-        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_count";
-
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}/_count" +
+                "{?query,sort,limit,skip,resolve,resolve_depth,retainReference}";
         @Key
         private String collectionName;
+        @Key("query")
+        private String queryFilter;
+        @Key("sort")
+        private String sortFilter;
+        @Key("limit")
+        private String limit;
+        @Key("skip")
+        private String skip;
 
         GetCount() {
             super (client, "GET", REST_PATH, null, KinveyCountResponse.class);
             this.collectionName= NetworkManager.this.collectionName;
+
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
+            if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+            }
+        }
+
+        GetCount(Query query) {
+            super (client, "GET", REST_PATH, null, KinveyCountResponse.class);
+            this.collectionName= NetworkManager.this.collectionName;
+            this.queryFilter = query.getQueryFilterJson(client.getJsonFactory());
+            int queryLimit = query.getLimit();
+            int querySkip = query.getSkip();
+            this.limit = queryLimit > 0 ? Integer.toString(queryLimit) : null;
+            this.skip = querySkip > 0 ? Integer.toString(querySkip) : null;
+            String sortString = query.getSortString();
+            this.sortFilter = !(sortString.equals("")) ? sortString : null;
 
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){

@@ -699,6 +699,9 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (super.getString(Option.MIC_VERSION) != null) {
                 this.MICVersion = super.getString(Option.MIC_VERSION);
             }
+            if (super.getString(Option.KINVEY_API_VERSION) != null) {
+                KINVEY_API_VERSION = super.getString(Option.KINVEY_API_VERSION);
+            }
         }
 
 

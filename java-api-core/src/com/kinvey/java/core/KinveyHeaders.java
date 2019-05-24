@@ -19,6 +19,7 @@ package com.kinvey.java.core;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.util.Key;
 import com.kinvey.BuildConfig;
+import com.kinvey.java.AbstractClient;
 
 /**
  * @author m0rganic
@@ -29,7 +30,8 @@ public class KinveyHeaders extends HttpHeaders {
     public static final String VERSION = BuildConfig.VERSION;
 
     @Key("X-Kinvey-api-Version")
-    private String kinveyApiVersion = BuildConfig.KINVEY_API_VERSION;
+    private String kinveyApiVersion = AbstractClient.KINVEY_API_VERSION != null ?
+            AbstractClient.KINVEY_API_VERSION : BuildConfig.KINVEY_API_VERSION;
 
     private String userAgent = "android-kinvey-http/"+ VERSION;
 

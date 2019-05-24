@@ -2475,6 +2475,29 @@ public class DataStoreTest {
     }
 
     @Test
+    public void testCountAllQueriedItemsAuto() throws InterruptedException, IOException { //COUNT
+        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        clearBackend(storeNetwork);
+        createAndSavePerson(storeNetwork, TEST_USERNAME);
+        Person personSecond = createPerson(TEST_USERNAME_2);
+        personSecond.setWeight(2);
+        DefaultKinveyClientCallback saveSecondCallback = save(storeAuto, personSecond);
+        assertNotNull(saveSecondCallback.result);
+        assertNull(saveSecondCallback.error);
+        Query query = client.query();
+        query = query.equals("weight", 2);
+        assertTrue(storeAuto.count(null, query) == 1);
+        Person personThird = createPerson(TEST_USERNAME_2);
+        personThird.setWeight(2);
+        DefaultKinveyClientCallback saveThirdCallback = save(storeAuto, personThird);
+        assertNotNull(saveThirdCallback.result);
+        assertNull(saveThirdCallback.error);
+        assertTrue(storeAuto.count() == 3);
+        assertTrue(storeAuto.count(null, query) == 2);
+    }
+
+    @Test
     public void testCountLocallyStoredNoConnectionAuto() throws InterruptedException, IOException { //COUNT
         DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);

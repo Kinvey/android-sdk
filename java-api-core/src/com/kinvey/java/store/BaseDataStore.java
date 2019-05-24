@@ -316,6 +316,23 @@ public class BaseDataStore<T extends GenericJson> {
     }
 
     /**
+     * Get count of queried items in collection
+     * @param cachedCallback is using with StoreType.CACHE to get items count in collection
+     * @return count of queried items in collection
+     */
+    @Nonnull
+    public Integer count(KinveyCachedClientCallback<Integer> cachedCallback, Query query) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE");
+        if (storeType == StoreType.CACHE && cachedCallback != null) {
+            Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query, client.getSyncManager()).execute().getCount();
+            cachedCallback.onSuccess(ret);
+        }
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, query, client.getSyncManager()).execute().getCount();
+    }
+
+    /**
      * Get items count in collection on the server
      * @return items count in collection on the server
      */

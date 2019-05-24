@@ -74,6 +74,11 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
      */
     public static final String DEFAULT_MIC_API_VERSION = "3";
 
+    /**
+     * Not default version of API. Developer should initialize it for change API version
+     */
+    public static String KINVEY_API_VERSION = null;
+
     public static final int DEFAULT_NUMBER_OF_THREADS_FOR_DATASTORE_SAVE_OF_LIST = 1;
 
     private CredentialStore store;
@@ -536,6 +541,8 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
             MIC_BASE_URL("mic.base.url"),
             /**MIC Version**/
             MIC_VERSION("mic.version"),
+            /**Kinvey API Version**/
+            KINVEY_API_VERSION("kinvey.api.version"),
             /** Request Timeout for http requests **/
             /**DeltaSet cache enabled **/
             DELTA_SET_CACHE("app.deltaset"),
