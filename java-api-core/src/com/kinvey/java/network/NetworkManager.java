@@ -17,6 +17,7 @@
 package com.kinvey.java.network;
 
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.GenericData;
 import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
@@ -27,11 +28,14 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.annotations.ReferenceHelper;
+import com.kinvey.java.auth.ThirdPartyIdentity;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.AbstractKinveyReadHeaderRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
+import com.kinvey.java.core.KinveyJsonStringClientRequest;
+import com.kinvey.java.core.RawJsonFactory;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
 import com.kinvey.java.dto.BatchList;
@@ -43,12 +47,15 @@ import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
+import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -493,9 +500,8 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
-        BatchList json = new BatchList(list);
-        Class clazz = KinveyReadResponse.class;
-        SaveBatch batch = new SaveBatch(json, clazz, SaveMode.POST);
+        Class clazz = KinveySaveBatchResponse.class;
+        SaveBatch batch = new SaveBatch(list, clazz, SaveMode.POST);
         client.initializeRequest(batch);
         return batch;
     }
@@ -1015,14 +1021,14 @@ public class NetworkManager<T extends GenericJson> {
      * create multi-insert requests.
      *
      */
-    public class SaveBatch extends AbstractKinveyJsonClientRequest<KinveyReadResponse<T>> {
+    public class SaveBatch extends KinveyJsonStringClientRequest <KinveySaveBatchResponse<T>> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}";
 
         @Key
         private String collectionName;
 
-        SaveBatch(BatchList json, Class<KinveyReadResponse<T>> myClass, SaveMode update) {
-            super(getClient(), update.toString(), REST_PATH, json, myClass);
+        SaveBatch(List<T> itemsList, Class<KinveySaveBatchResponse<T>> myClass, SaveMode update) {
+            super(getClient(), update.toString(), REST_PATH, new BatchList(itemsList).toString(), myClass);
             this.collectionName = NetworkManager.this.getCollectionName();
             GenericData customRequestProperties = NetworkManager.this.getCustomRequestProperties();
             String clientAppVersion = NetworkManager.this.getClientAppVersion();

@@ -17,17 +17,22 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.kinvey.java.network.NetworkManager.ID_FIELD_NAME;
 
 public class SaveListBatchRequest<T extends GenericJson> implements IRequest<List<T>> {
     private final ICache<T> cache;
@@ -48,33 +53,56 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
 
     @Override
     public List<T> execute() throws IOException {
-        List<T> ret = new ArrayList<>();
+        List<T> retList = new ArrayList<>();
         List<T> items = (List<T>) objects;
+        List<T> newObjects = filterNewObjects(items);
         switch (writePolicy) {
             case FORCE_LOCAL:
-                ret = cache.save(objects);
-                syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, ret);
+                retList = cache.save(objects);
+                //syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, ret);
                 break;
             case LOCAL_THEN_NETWORK:
-                PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(), cache, networkManager,
-                        networkManager.getClient());
-                try {
-                    pushRequest.execute();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                    // silent fall, will be synced next time
+//                PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(), cache, networkManager,
+//                        networkManager.getClient());
+//                try {
+//                    pushRequest.execute();
+//                } catch (Throwable t) {
+//                    t.printStackTrace();
+//                    // silent fall, will be synced next time
+//                }
+                retList = cache.save(objects);
+                KinveySaveBatchResponse<T> response = networkManager.saveBatchBlocking(newObjects).execute();
+                if (response != null) {
+                    if (response.getErrors() == null || response.getErrors().isEmpty()) {
+                        retList = response.getEntities();
+                        cache.save(retList);
+                    } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                        throw new IOException(response.getErrors().get(0).getErrmsg());
+                    }
                 }
-                ret = cache.save(objects);
-                networkManager.saveBatchBlocking(items).execute();
-                cache.save(ret);
                 break;
             case FORCE_NETWORK:
                 Logger.INFO("Start saving entities");
-                networkManager.saveBatchBlocking(items).execute();
+                response = networkManager.saveBatchBlocking(newObjects).execute();
+                if (response != null) {
+                    retList = response.getEntities();
+                }
                 Logger.INFO("Finish saving entities");
                 break;
         }
-        return ret;
+        return retList;
+    }
+
+    private List<T> filterNewObjects(List<T> list) {
+        String sourceId;
+        List<T> resultList = new ArrayList<T>();
+        for (T object : list) {
+             sourceId = (String) object.get(ID_FIELD_NAME);
+             if (sourceId == null || !networkManager.isTempId(object)) {
+                 resultList.add(object);
+             }
+        }
+        return resultList;
     }
 
     @Override
