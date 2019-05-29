@@ -23,6 +23,7 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
@@ -53,6 +54,7 @@ import com.kinvey.java.query.MongoQueryFilter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.time.Period;
@@ -500,8 +502,8 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
-        Class clazz = KinveySaveBatchResponse.class;
-        SaveBatch batch = new SaveBatch(list, clazz, SaveMode.POST);
+        Class responseClassType = KinveySaveBatchResponse.class;
+        SaveBatch batch = new SaveBatch(list, responseClassType, myClass, SaveMode.POST);
         client.initializeRequest(batch);
         return batch;
     }
@@ -1021,14 +1023,14 @@ public class NetworkManager<T extends GenericJson> {
      * create multi-insert requests.
      *
      */
-    public class SaveBatch extends KinveyJsonStringClientRequest <KinveySaveBatchResponse<T>> {
+    public class SaveBatch extends KinveyJsonStringClientRequest<KinveySaveBatchResponse> {
         private static final String REST_PATH = "appdata/{appKey}/{collectionName}";
 
         @Key
         private String collectionName;
 
-        SaveBatch(List<T> itemsList, Class<KinveySaveBatchResponse<T>> myClass, SaveMode update) {
-            super(getClient(), update.toString(), REST_PATH, new BatchList(itemsList).toString(), myClass);
+       SaveBatch(List<T> itemsList, Class responseClassType, Class parClassType, SaveMode update) {
+            super(getClient(), update.toString(), REST_PATH, new BatchList(itemsList).toString(), responseClassType, parClassType);
             this.collectionName = NetworkManager.this.getCollectionName();
             GenericData customRequestProperties = NetworkManager.this.getCustomRequestProperties();
             String clientAppVersion = NetworkManager.this.getClientAppVersion();

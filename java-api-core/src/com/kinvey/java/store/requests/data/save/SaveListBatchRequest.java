@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
+import com.kinvey.java.model.KinveyError;
 import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
@@ -77,13 +78,13 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                         retList = response.getEntities();
                         cache.save(retList);
                     } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-                        throw new IOException(response.getErrors().get(0).getErrmsg());
+                        throw new IOException(((KinveyError)response.getErrors().get(0)).getErrmsg());
                     }
                 }
                 break;
             case FORCE_NETWORK:
                 Logger.INFO("Start saving entities");
-                response = networkManager.saveBatchBlocking(newObjects).execute();
+                response  = networkManager.saveBatchBlocking(newObjects).execute();
                 if (response != null) {
                     retList = response.getEntities();
                 }
