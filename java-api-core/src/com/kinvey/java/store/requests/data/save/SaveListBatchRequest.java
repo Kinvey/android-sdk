@@ -17,17 +17,14 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
-import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
-import com.kinvey.java.model.KinveyError;
 import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
-import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +39,8 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
     private final WritePolicy writePolicy;
     private SyncManager syncManager;
 
-    public SaveListBatchRequest(ICache<T> cache, NetworkManager<T> networkManager, WritePolicy writePolicy, Iterable<T> objects,
-                                SyncManager syncManager) {
+    public SaveListBatchRequest(ICache<T> cache, NetworkManager<T> networkManager,
+                                WritePolicy writePolicy, Iterable<T> objects, SyncManager syncManager) {
 
         this.cache = cache;
         this.networkManager = networkManager;
@@ -60,17 +57,10 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         switch (writePolicy) {
             case FORCE_LOCAL:
                 retList = cache.save(objects);
-                //syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, ret);
+                syncManager.enqueueSaveBatchRequests(networkManager.getCollectionName(), networkManager, retList);
                 break;
             case LOCAL_THEN_NETWORK:
-//                PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(), cache, networkManager,
-//                        networkManager.getClient());
-//                try {
-//                    pushRequest.execute();
-//                } catch (Throwable t) {
-//                    t.printStackTrace();
-//                    // silent fall, will be synced next time
-//                }
+                doPushRequest();
                 retList = cache.save(objects);
                 KinveySaveBatchResponse<T> response = networkManager.saveBatchBlocking(newObjects).execute();
                 if (response != null) {
@@ -78,13 +68,13 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                         retList = response.getEntities();
                         cache.save(retList);
                     } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-                        throw new IOException(((KinveyError)response.getErrors().get(0)).getErrmsg());
+                        throw new IOException(response.getErrors().get(0).getErrmsg());
                     }
                 }
                 break;
             case FORCE_NETWORK:
                 Logger.INFO("Start saving entities");
-                response  = networkManager.saveBatchBlocking(newObjects).execute();
+                response = networkManager.saveBatchBlocking(newObjects).execute();
                 if (response != null) {
                     retList = response.getEntities();
                 }
@@ -92,6 +82,16 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                 break;
         }
         return retList;
+    }
+
+    private void doPushRequest() {
+        PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(),
+                                          cache, networkManager, networkManager.getClient());
+        try {
+            pushRequest.execute();
+        } catch (Throwable t) {
+            Logger.ERROR(t.getMessage());
+        }
     }
 
     private List<T> filterNewObjects(List<T> list) {

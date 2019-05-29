@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
+import com.kinvey.BuildConfig;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
@@ -543,6 +544,15 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyClientCallback<List<T>>
      */
     public void save(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
+         String apiVer = BuildConfig.KINVEY_API_VERSION;
+         if ("5".equals(apiVer)) {
+             saveBatch(entities, callback);
+         } else {
+             saveV4(entities, callback);
+         }
+    }
+
+    private void saveV4(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
@@ -550,34 +560,11 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         new SaveListRequest(entities, callback).execute();
     }
 
-    /**
-     * Asynchronous request to save or update an list of entities to a collection.
-     * <p>
-     * Constructs an asynchronous request to save a list of entities <T> to a collection.
-     * Creates the entity if it doesn't exist, updates it if it does exist.
-     * If an "_id" property is not present, the Kinvey backend will generate one.
-     * </p>
-     * <p>
-     * Sample Usage:
-     * <pre>
-     * {@code
-     *     DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     *     myAppData.save(entities, new KinveyClientCallback<List<EventEntity>> {
-     *         public void onFailure(Throwable t) { ... }
-     *         public void onSuccess(List<EventEntity> entities) { ... }
-     *     });
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param entities The list of entities to save
-     * @param callback KinveyClientCallback<List<T>>
-     */
-    public void saveBatch(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
+    private void saveBatch(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
-        Logger.INFO("Calling DataStore#save(listObjects)");
+        Logger.INFO("Calling DataStore#saveBatch(listObjects)");
         new SaveListBatchRequest(entities, callback).execute();
     }
 

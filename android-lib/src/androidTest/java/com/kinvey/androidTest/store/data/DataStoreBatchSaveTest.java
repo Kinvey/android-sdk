@@ -121,7 +121,7 @@ public class DataStoreBatchSaveTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.saveBatch(personList, callback);
+                store.save(personList, callback);
             }
         });
         looperThread.start();
