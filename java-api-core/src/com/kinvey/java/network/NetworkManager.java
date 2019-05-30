@@ -442,6 +442,28 @@ public class NetworkManager<T extends GenericJson> {
         sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         //prepare entity relation data saving
+        entityRelationDataSavingCheck(entity);
+
+        boolean bRealmGeneratedId = isTempId(entity);
+
+        Logger.INFO("Start choosing PUT or POST request");
+        if (sourceID != null && !bRealmGeneratedId) {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
+            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
+        } else {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
+            save = new Save(entity, myClass, SaveMode.POST);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
+        }
+
+        client.initializeRequest(save);
+        Logger.INFO("Finish for initializing request with save object");
+        Logger.INFO("Return save object");
+        return save;
+    }
+
+    private void entityRelationDataSavingCheck(T entity) {
         try {
             Logger.INFO("Start prepare entity relation data saving");
             ReferenceHelper.processReferences(entity, new ReferenceHelper.ReferenceListener() {
@@ -473,24 +495,6 @@ public class NetworkManager<T extends GenericJson> {
         } catch (InstantiationException e) {
             e.printStackTrace();
         }
-
-        boolean bRealmGeneratedId = isTempId(entity);
-
-        Logger.INFO("Start choosing PUT or POST request");
-        if (sourceID != null && !bRealmGeneratedId) {
-            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
-            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
-            Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
-        } else {
-            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
-            save = new Save(entity, myClass, SaveMode.POST);
-            Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
-        }
-
-        client.initializeRequest(save);
-        Logger.INFO("Finish for initializing request with save object");
-        Logger.INFO("Return save object");
-        return save;
     }
 
     public SaveBatch saveBatchBlocking(List<T> list) throws IOException {

@@ -199,23 +199,6 @@ public class SyncManager {
         requestCache.save(syncRequests);
     }
 
-    public <T extends GenericJson> void enqueueSaveBatchRequests(String collectionName, NetworkManager<T> networkManager, List<T> retList) throws IOException {
-        ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
-        List<SyncItem> syncRequests = new ArrayList<>();
-        String syncItemId;
-        SyncItem syncItem;
-
-        for (T t : retList) {
-            syncItemId = (String) t.get(ID);
-            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, networkManager.isTempId(t) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, syncItemId);
-            if (syncItem != null) {
-                syncRequests.add(syncItem);
-            }
-        }
-
-        requestCache.save(syncRequests);
-    }
-
     public <T extends GenericJson> void enqueueDeleteRequests(String collectionName, NetworkManager<T> networkManager, Iterable<String> ids) throws IOException {
         ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         List<SyncItem> syncRequests = new ArrayList<>();

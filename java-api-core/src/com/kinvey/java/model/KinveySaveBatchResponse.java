@@ -4,7 +4,7 @@ import com.google.api.client.util.Key;
 
 import java.util.List;
 
-public class KinveySaveBatchResponse<T> {
+public class KinveySaveBatchResponse<T> extends KinveyErrorResponse {
     @Key
     private List<T> entities;
     @Key

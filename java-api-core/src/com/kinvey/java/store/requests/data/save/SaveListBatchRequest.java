@@ -17,14 +17,17 @@
 package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.Constants;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
+import com.kinvey.java.store.requests.data.PushBatchRequest;
 import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,32 +55,44 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
     @Override
     public List<T> execute() throws IOException {
         List<T> retList = new ArrayList<>();
-        List<T> items = (List<T>) objects;
-        List<T> newObjects = filterNewObjects(items);
+        List<List<T>> listObjects = filterObjects((List<T>) objects);
+        List<T> updateList = listObjects.get(0);
+        List<T> saveList   = listObjects.get(1);
         switch (writePolicy) {
             case FORCE_LOCAL:
                 retList = cache.save(objects);
-                syncManager.enqueueSaveBatchRequests(networkManager.getCollectionName(), networkManager, retList);
+                syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, retList);
                 break;
             case LOCAL_THEN_NETWORK:
                 doPushRequest();
                 retList = cache.save(objects);
-                KinveySaveBatchResponse<T> response = networkManager.saveBatchBlocking(newObjects).execute();
+                KinveySaveBatchResponse<T> response = networkManager.saveBatchBlocking(saveList).execute();
+                List<T> updateResultList = updateObjects(updateList);
+                retList.addAll(updateResultList);
+                IOException exception = null;
                 if (response != null) {
                     if (response.getErrors() == null || response.getErrors().isEmpty()) {
-                        retList = response.getEntities();
-                        cache.save(retList);
+                        List<T> respResultList = response.getEntities();
+                        if (respResultList != null) {
+                            retList.addAll(respResultList);
+                        }
                     } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-                        throw new IOException(response.getErrors().get(0).getErrmsg());
+                        exception = new IOException(response.getErrors().get(0).getErrmsg());
                     }
+                }
+                cache.save(retList);
+                if (exception != null) {
+                    throw exception;
                 }
                 break;
             case FORCE_NETWORK:
                 Logger.INFO("Start saving entities");
-                response = networkManager.saveBatchBlocking(newObjects).execute();
+                response = networkManager.saveBatchBlocking(saveList).execute();
+                updateResultList = updateObjects(updateList);
                 if (response != null) {
                     retList = response.getEntities();
                 }
+                retList.addAll(updateResultList);
                 Logger.INFO("Finish saving entities");
                 break;
         }
@@ -85,8 +100,8 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
     }
 
     private void doPushRequest() {
-        PushRequest<T> pushRequest = new PushRequest<>(networkManager.getCollectionName(),
-                                          cache, networkManager, networkManager.getClient());
+        PushBatchRequest<T> pushRequest = new PushBatchRequest<>(networkManager.getCollectionName(),
+                                         cache, networkManager, networkManager.getClient());
         try {
             pushRequest.execute();
         } catch (Throwable t) {
@@ -94,16 +109,36 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         }
     }
 
-    private List<T> filterNewObjects(List<T> list) {
+    private List<List<T>> filterObjects(List<T> list) {
         String sourceId;
-        List<T> resultList = new ArrayList<T>();
+        List<T> resultListOld = new ArrayList<>();
+        List<T> resultListNew = new ArrayList<>();
+        List<List<T>> objects = new ArrayList<>();
+        objects.add(resultListOld);
+        objects.add(resultListNew);
         for (T object : list) {
              sourceId = (String) object.get(ID_FIELD_NAME);
              if (sourceId == null || !networkManager.isTempId(object)) {
-                 resultList.add(object);
+                 resultListNew.add(object);
+             } else {
+                 resultListOld.add(object);
              }
         }
-        return resultList;
+        return objects;
+    }
+
+    private List<T> updateObjects(List<T> items) throws IOException {
+        List<T> ret = new ArrayList<>();
+        for (T object : items) {
+            try {
+                ret.add(networkManager.saveBlocking(object).execute());
+            } catch (IOException e) {
+                syncManager.enqueueRequest(networkManager.getCollectionName(),
+                networkManager, networkManager.isTempId(object) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
+                //throw e;
+            }
+        }
+        return ret;
     }
 
     @Override

@@ -137,6 +137,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
     private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
+    private static final String kinveyApiVersion = BuildConfig.KINVEY_API_VERSION;
+    private static final String KINVEY_API_VERSION_5 = "5";
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
@@ -544,8 +546,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyClientCallback<List<T>>
      */
     public void save(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
-         String apiVer = BuildConfig.KINVEY_API_VERSION;
-         if ("5".equals(apiVer)) {
+         if (KINVEY_API_VERSION_5.equals(kinveyApiVersion)) {
              saveBatch(entities, callback);
          } else {
              saveV4(entities, callback);

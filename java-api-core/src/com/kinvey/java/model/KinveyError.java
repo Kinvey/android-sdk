@@ -1,9 +1,14 @@
 package com.kinvey.java.model;
 
+import com.google.api.client.util.Key;
+
 public class KinveyError {
 
+    @Key
     private long index;
+    @Key
     private long code;
+    @Key
     private String errmsg;
 
     public String getErrmsg() {
