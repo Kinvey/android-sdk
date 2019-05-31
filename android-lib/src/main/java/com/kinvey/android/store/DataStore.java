@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -117,6 +118,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     private static final int PAGINATION_IS_NOT_USED = 0;
     private static final int MIN_PAGE_SIZE = 0;
+    private static final int MAX_MULTI_INSERT_SIZE = 100;
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
     //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkManager.
@@ -565,6 +567,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
+        Preconditions.checkPositionIndex(entities.size(), MAX_MULTI_INSERT_SIZE,
+             String.format(Locale.US, "Reached maximum of %d items per request.", MAX_MULTI_INSERT_SIZE));
         Logger.INFO("Calling DataStore#saveBatch(listObjects)");
         new SaveListBatchRequest(entities, callback).execute();
     }
