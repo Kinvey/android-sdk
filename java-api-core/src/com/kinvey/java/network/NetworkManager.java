@@ -32,16 +32,18 @@ import com.kinvey.java.core.AbstractKinveyReadHeaderRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.core.AbstractKinveyQueryCacheReadRequest;
 import com.kinvey.java.core.AbstractKinveyReadRequest;
+import com.kinvey.java.core.KinveyJsonStringClientRequest;
 import com.kinvey.java.deltaset.DeltaSetItem;
 import com.kinvey.java.deltaset.DeltaSetMerge;
+import com.kinvey.java.dto.BatchList;
 import com.kinvey.java.dto.DeviceId;
-import com.kinvey.java.model.AbstractKinveyHeadersResponse;
 import com.kinvey.java.model.AggregateEntity;
 import com.kinvey.java.model.AggregateType;
 import com.kinvey.java.model.KinveyCountResponse;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
+import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
@@ -450,6 +452,28 @@ public class NetworkManager<T extends GenericJson> {
         sourceID = (String) jsonEntity.get(ID_FIELD_NAME);
 
         //prepare entity relation data saving
+        entityRelationDataSavingCheck(entity);
+
+        boolean bRealmGeneratedId = isTempId(entity);
+
+        Logger.INFO("Start choosing PUT or POST request");
+        if (sourceID != null && !bRealmGeneratedId) {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
+            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
+        } else {
+            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
+            save = new Save(entity, myClass, SaveMode.POST);
+            Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
+        }
+
+        client.initializeRequest(save);
+        Logger.INFO("Finish for initializing request with save object");
+        Logger.INFO("Return save object");
+        return save;
+    }
+
+    private void entityRelationDataSavingCheck(T entity) {
         try {
             Logger.INFO("Start prepare entity relation data saving");
             ReferenceHelper.processReferences(entity, new ReferenceHelper.ReferenceListener() {
@@ -481,24 +505,13 @@ public class NetworkManager<T extends GenericJson> {
         } catch (InstantiationException e) {
             e.printStackTrace();
         }
+    }
 
-        boolean bRealmGeneratedId = isTempId(entity);
-
-        Logger.INFO("Start choosing PUT or POST request");
-        if (sourceID != null && !bRealmGeneratedId) {
-            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
-            save = new Save(entity, myClass, sourceID, SaveMode.PUT);
-            Logger.INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)");
-        } else {
-            Logger.INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)");
-            save = new Save(entity, myClass, SaveMode.POST);
-            Logger.INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)");
-        }
-
-        client.initializeRequest(save);
-        Logger.INFO("Finish for initializing request with save object");
-        Logger.INFO("Return save object");
-        return save;
+    public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
+        Class responseClassType = KinveySaveBatchResponse.class;
+        SaveBatch batch = new SaveBatch(list, responseClassType, myClass, SaveMode.POST);
+        client.initializeRequest(batch);
+        return batch;
     }
 
     public boolean isTempId(T item) {
@@ -1033,6 +1046,29 @@ public class NetworkManager<T extends GenericJson> {
 
         Save(T entity, Class<T> myClass, SaveMode update) {
             this(entity, myClass, null, update);            
+        }
+    }
+
+    /**
+     * SaveBatch class. Constructs the HTTP request object to
+     * create multi-insert requests.
+     *
+     */
+    public class SaveBatch extends KinveyJsonStringClientRequest<KinveySaveBatchResponse> {
+        private static final String REST_PATH = "appdata/{appKey}/{collectionName}";
+
+        @Key
+        private String collectionName;
+
+       SaveBatch(List<T> itemsList, Class responseClassType, Class parClassType, SaveMode update) {
+            super(getClient(), update.toString(), REST_PATH, new BatchList(itemsList).toString(), responseClassType, parClassType);
+            this.collectionName = NetworkManager.this.getCollectionName();
+            GenericData customRequestProperties = NetworkManager.this.getCustomRequestProperties();
+            String clientAppVersion = NetworkManager.this.getClientAppVersion();
+            this.getRequestHeaders().put("X-Kinvey-Client-App-Version", clientAppVersion);
+            if (customRequestProperties != null && !customRequestProperties.isEmpty()){
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(customRequestProperties));
+            }
         }
     }
 

@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
+import com.kinvey.BuildConfig;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
@@ -52,6 +53,7 @@ import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
 import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
+import com.kinvey.java.store.requests.data.save.SaveListBatchRequest;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -59,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -115,6 +118,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     private static final int PAGINATION_IS_NOT_USED = 0;
     private static final int MIN_PAGE_SIZE = 0;
+    private static final int MAX_MULTI_INSERT_SIZE = 100;
 
     //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
     //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkManager.
@@ -135,6 +139,8 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
     private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
+    private static final String kinveyApiVersion = BuildConfig.KINVEY_API_VERSION;
+    private static final String KINVEY_API_VERSION_5 = "5";
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
@@ -542,11 +548,29 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyClientCallback<List<T>>
      */
     public void save(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
+         if (KINVEY_API_VERSION_5.equals(kinveyApiVersion)) {
+             saveBatch(entities, callback);
+         } else {
+             saveV4(entities, callback);
+         }
+    }
+
+    private void saveV4(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
         Logger.INFO("Calling DataStore#save(listObjects)");
         new SaveListRequest(entities, callback).execute();
+    }
+
+    private void saveBatch(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
+        Preconditions.checkNotNull(client, "client must not be null");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(entities, "Entity cannot be null.");
+        Preconditions.checkPositionIndex(entities.size(), MAX_MULTI_INSERT_SIZE,
+             String.format(Locale.US, "Reached maximum of %d items per request.", MAX_MULTI_INSERT_SIZE));
+        Logger.INFO("Calling DataStore#saveBatch(listObjects)");
+        new SaveListBatchRequest(entities, callback).execute();
     }
 
     /**
@@ -1185,6 +1209,21 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         protected List<T> executeAsync() throws IOException {
             Logger.INFO("Calling SaveListRequest#executeAsync()");
             return (DataStore.super.save(entities));
+        }
+    }
+
+    private class SaveListBatchRequest extends AsyncClientRequest<List<T>> {
+        List<T> entities;
+
+        SaveListBatchRequest(List<T> entities, KinveyClientCallback<List<T>> callback) {
+            super(callback);
+            this.entities = entities;
+        }
+
+        @Override
+        protected List<T> executeAsync() throws IOException {
+            Logger.INFO("Calling SaveListRequest#executeAsync()");
+            return (DataStore.super.saveBatch(entities));
         }
     }
 

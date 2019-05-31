@@ -47,6 +47,7 @@ import com.kinvey.java.store.requests.data.read.ReadCountRequest;
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest;
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest;
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest;
+import com.kinvey.java.store.requests.data.save.SaveListBatchRequest;
 import com.kinvey.java.store.requests.data.save.SaveListRequest;
 import com.kinvey.java.store.requests.data.save.SaveRequest;
 
@@ -370,6 +371,20 @@ public class BaseDataStore<T extends GenericJson> {
         return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
     }
 
+    /**
+     * Save multiple objects for collections
+     * @param objects list of objects to be saved
+     * @return updated list of object that will contain ids if they was not present in moment of saving
+     * @throws IOException
+     */
+    @Nonnull
+    public List<T> saveBatch (@Nonnull Iterable<T> objects) throws IOException {
+        Preconditions.checkNotNull(client, "client must not be null.");
+        Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        Preconditions.checkNotNull(objects, "objects must not be null.");
+        Logger.INFO("Calling BaseDataStore#save(listObjects)");
+        return new SaveListBatchRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
+    }
 
     /**
      * Save single object into collection
