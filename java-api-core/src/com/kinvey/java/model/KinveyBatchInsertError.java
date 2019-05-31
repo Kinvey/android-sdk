@@ -2,7 +2,7 @@ package com.kinvey.java.model;
 
 import com.google.api.client.util.Key;
 
-public class KinveyError {
+public class KinveyBatchInsertError {
 
     @Key
     private long index;

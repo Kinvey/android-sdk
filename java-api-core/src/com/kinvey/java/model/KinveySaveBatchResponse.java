@@ -8,7 +8,7 @@ public class KinveySaveBatchResponse<T> extends KinveyErrorResponse {
     @Key
     private List<T> entities;
     @Key
-    private List<KinveyError> errors;
+    private List<KinveyBatchInsertError> errors;
 
     public List<T> getEntities() {
         return entities;
@@ -18,11 +18,11 @@ public class KinveySaveBatchResponse<T> extends KinveyErrorResponse {
         this.entities = entities;
     }
 
-    public List<KinveyError> getErrors() {
+    public List<KinveyBatchInsertError> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<KinveyError> errors) {
+    public void setErrors(List<KinveyBatchInsertError> errors) {
         this.errors = errors;
     }
 }
