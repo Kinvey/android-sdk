@@ -82,7 +82,7 @@ buildscript {
     google()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.0.1'
+    classpath 'com.android.tools.build:gradle:3.4.1'
     classpath "io.realm:realm-gradle-plugin:3.2.1"
   }
 
@@ -124,7 +124,7 @@ dependencies {
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
   classpaths files('build/classes/release')
   //testing
-  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
+  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.2'
   // Required -- JUnit 4 framework
   androidTestCompile 'junit:junit:4.12'
   // Optional -- Mockito framework
