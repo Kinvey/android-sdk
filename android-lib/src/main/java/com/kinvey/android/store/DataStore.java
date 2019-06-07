@@ -139,7 +139,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
     private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
-    private static final String kinveyApiVersion = BuildConfig.KINVEY_API_VERSION;
+    private static final String kinveyApiVersion = AbstractClient.KINVEY_API_VERSION;
     private static final String KINVEY_API_VERSION_5 = "5";
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
