@@ -655,7 +655,9 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
-        getToken.setRequireAppCredentials(true);
+        getToken.setRequireAppCredentials(false);
+        getToken.setRequiredClientIdAuth(true);
+        ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setClientId(fullClientIdField);
         client.initializeRequest(getToken);
         return getToken;
     }

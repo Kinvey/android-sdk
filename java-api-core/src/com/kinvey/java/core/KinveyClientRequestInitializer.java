@@ -32,6 +32,9 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
     /** the app key for the request **/
     private final String appKey;
 
+    /** the clientId for the request in format:  AppKey.ServiceId **/
+    private String clientId = null;
+
     /** the app secret for the request **/
     private final String appSecret;
 
@@ -62,6 +65,10 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
         this.kinveyHeaders = kinveyHeaders;
         this.appKey = appKey;
         this.appSecret = appSecret;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     /**
@@ -100,21 +107,26 @@ public class KinveyClientRequestInitializer implements KinveyRequestInitializer 
      * @param request the request to initialize
      */
     public void initialize(AbstractKinveyClientRequest<?> request) {
-        if (!request.isRequireAppCredentials()){
+        if (!request.isRequireAppCredentials() && !request.isRequiredClientIdAuth()) {
             Preconditions.checkNotNull(credential, "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
             Preconditions.checkNotNull(credential.getUserId(), "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
             Preconditions.checkNotNull(credential.getAuthToken(), "No Active User - please login a user by calling UserStore.login( ... ) before retrying this request.");
         }
 
-        if (credential != null && !request.isRequireAppCredentials()) {
+        if (credential != null && !request.isRequireAppCredentials() && !request.isRequiredClientIdAuth()) {
             credential.initialize(request);
         }
 
         if (request.isRequireAppCredentials()){
             request.getRequestHeaders().setBasicAuthentication(getAppKey(), getAppSecret());
+        } else if (request.isRequiredClientIdAuth() && clientId != null) {
+            request.getRequestHeaders().setBasicAuthentication(clientId, getAppSecret());
         }
 
-        request.setAppKey(appKey);
+        if (!request.isRequiredClientIdAuth()) {
+            request.setAppKey(appKey);
+        }
+
         request.getRequestHeaders().putAll(kinveyHeaders);
     }
 
