@@ -239,7 +239,7 @@ public class DataStoreMultiInsertTest {
         assertTrue(callback.result.getUsername().equals(TEST_USERNAME));
     }
 
-    public void testSaveWithoutId(StoreType storeType) throws InterruptedException {
+    private void testSaveWithoutId(StoreType storeType) throws InterruptedException {
         DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         clearBackend(storeAuto);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -249,7 +249,7 @@ public class DataStoreMultiInsertTest {
         assertTrue(findCallback.result.getResult().get(0).getId() != null);
     }
 
-    public void testSaveWithId(StoreType storeType) throws InterruptedException {
+    private void testSaveWithId(StoreType storeType) throws InterruptedException {
         DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         clearBackend(storeAuto);
         String id = "123456";
@@ -426,6 +426,77 @@ public class DataStoreMultiInsertTest {
         // save() using the array
     }
 
+    @Test
+    public void testPushItemsListWithoutIdSync() throws InterruptedException {
+        print("should use multi insert for multiple items without _id");
+        // create an array of items without _id
+        // save using the array above
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListCombineWithIdAndWithoutIdSync() throws InterruptedException {
+        print("should combine POST and PUT requests for items with and without _id");
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListCombineWithIdAndWithoutIdMockedSync() throws InterruptedException {
+        print("should combine POST and PUT requests for items with and without _id - mocked");
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListReturnsErrorForEachItemSync() throws InterruptedException {
+        print("should return the failure reason in the result for each pushed item even if it is the same");
+        // create an array of items without _id and set the collection permission for create to never
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListReturnsErrorsForEachItemErrorSync() throws InterruptedException {
+        print("should return the failure reason in the result for each pushed item when they are different");
+        // create an array with 3 items without _id, two of which should be invalid for different reasons
+        // save using the array above
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushShouldUseMultiInsertAfterSaveSync() throws InterruptedException {
+        print("should use multi-insert even if the items have not been created in an array");
+        // save an item without _id
+        // save another item without _id
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testSyncItemsListSync() throws InterruptedException {
+        print("test sync items list");
+        // create an array of 3 items, the second of which has invalid _geoloc parameters
+        // save()
+        // sync()
+        // pendingSyncEntities()
+        // find() using networkstore
+        // find using syncstore
+    }
+
     // AUTO STORE
 
     @Test
@@ -473,5 +544,139 @@ public class DataStoreMultiInsertTest {
         // call save with it - mock the request to return connectivity error
         // find using syncstore
         // pendingSyncEntities()
+    }
+
+    @Test
+    public void testSaveListWithoutIdAuto() throws InterruptedException {
+        print("should send POST multi-insert request for array of items with no _id");
+        // create an array with a few items that have no _id property
+        // save() with the array as param
+        // find using network store
+    }
+
+    @Test
+    public void testSaveListWithIdAuto() throws InterruptedException {
+        print("should sent PUT requests for an array of items with _id");
+        // create an array with a few items that have _id property
+        // save() with the array as param
+        // find using network store
+    }
+
+    @Test
+    public void testSaveListCombineWithIdAndWithoutIdAuto() throws InterruptedException {
+        print("should combine POST and PUT requests for items with and without _id");
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // save() using the array
+        // find using network store
+    }
+
+    @Test
+    public void testSaveListReturnErrorForEmptyListAuto() throws InterruptedException {
+        print("should return an error for an empty array");
+        // create an empty array
+        // save() using the array
+    }
+
+    @Test
+    public void testSaveListReturnErrorForInvalidCredentialsAuto() throws InterruptedException {
+        print("should return an error when all items fail with multi-insert for invalid credentials");
+        // create an array with a few items that have no _id property
+        // set a collection permission to deny creating items
+        // save() using the array from above
+    }
+
+    @Test
+    public void testSaveListReturnErrorArrayForAllItemsFailAuto() throws InterruptedException {
+        print("should return an array of errors for all items failing for different reasons");
+        // create an array containing two items failing for different reasons
+        // save using the array above
+    }
+
+
+    @Test
+    public void testSaveListReturnErrorArrayForSomeItemsFailAuto() throws InterruptedException {
+        print("should return an entities and errors when some requests fail and some succeed");
+        // create an array of items with no _id and the second of them should have invalid _geoloc params
+        // save using the array above
+        // find using network store
+    }
+
+    @Test
+    public void testSaveListReturnPutFailuresAtMatchingIndexAuto() throws InterruptedException {
+        print("should return PUT failures at the matching index");
+        // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
+        // save using the array above
+        // find using network store
+    }
+
+    @Test
+    public void testPushItemsListWithoutIdAuto() throws InterruptedException {
+        print("should use multi insert for multiple items without _id");
+        // create an array of items without _id
+        // save using the array above
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListCombineWithIdAndWithoutIdAuto() throws InterruptedException {
+        print("should combine POST and PUT requests for items with and without _id");
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListCombineWithIdAndWithoutIdMockedAuto() throws InterruptedException {
+        print("should combine POST and PUT requests for items with and without _id - mocked");
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListReturnsErrorForEachItemAuto() throws InterruptedException {
+        print("should return the failure reason in the result for each pushed item even if it is the same");
+        // create an array of items without _id and set the collection permission for create to never
+        // save() using the array
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushItemsListReturnsErrorsForEachItemErrorAuto() throws InterruptedException {
+        print("should return the failure reason in the result for each pushed item when they are different");
+        // create an array with 3 items without _id, two of which should be invalid for different reasons
+        // save using the array above
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testPushShouldUseMultiInsertAfterSaveAuto() throws InterruptedException {
+        print("should use multi-insert even if the items have not been created in an array");
+        // save an item without _id
+        // save another item without _id
+        // push()
+        // pendingSyncEntities()
+        // find using syncstore
+    }
+
+    @Test
+    public void testSyncItemsListAuto() throws InterruptedException {
+        print("test sync items list");
+        // create an array of 3 items, the second of which has invalid _geoloc parameters
+        // save() mocking connectivity error
+        // Sync()
+        // pendingSyncEntities()
+        // find() using networkstore
+        // find using syncstore
     }
 }
