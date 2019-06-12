@@ -14,10 +14,12 @@ import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
+import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.store.StoreType;
 
@@ -27,6 +29,8 @@ import org.junit.runner.RunWith;
 
 import java.io.Console;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -42,15 +46,21 @@ public class DataStoreMultiInsertTest {
     private static final String TEST_USERNAME = "Test_UserName";
     private static final int DEFAULT_TIMEOUT = 60;
     private static final int LONG_TIMEOUT = 6 * DEFAULT_TIMEOUT;
+    private static final int MAX_PERSONS_COUNT = 5;
+    private static final int MAX_ENTITY_COUNT = 5;
+    private static final String ERR_GEOLOC = "#!@%^&*())_+?{}";
 
     private Client client;
+    private Client unauthClient;
 
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         AbstractClient.KINVEY_API_VERSION = "5";
         client = new Client.Builder(mMockContext).build();
+        unauthClient = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        unauthClient.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -98,6 +108,33 @@ public class DataStoreMultiInsertTest {
 
         @Override
         public void onSuccess(Person result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
+    private static class DefaultKinveyClientListCallback implements KinveyClientCallback<List<Person>> {
+
+        private CountDownLatch latch;
+        List<Person> result;
+        Throwable error;
+
+        DefaultKinveyClientListCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(List<Person> result) {
             this.result = result;
             finish();
         }
@@ -167,6 +204,33 @@ public class DataStoreMultiInsertTest {
         }
     }
 
+    private static class DefaultKinveyEntityListCallback implements KinveyClientCallback<List<EntitySet>> {
+
+        private CountDownLatch latch;
+        List<EntitySet> result;
+        Throwable error;
+
+        DefaultKinveyEntityListCallback(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(List<EntitySet> result) {
+            this.result = result;
+            finish();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            this.error = error;
+            finish();
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+    }
+
     private Person createPerson(String name) {
         return new Person(name);
     }
@@ -207,11 +271,37 @@ public class DataStoreMultiInsertTest {
         DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
     }
 
+    private void print(String msg) {
+        Console con = System.console();
+        if (con != null) {
+            con.printf(msg);
+        }
+    }
+
     public void createAndSavePerson(final DataStore<Person> store, String username) throws InterruptedException {
         Person person = createPerson(username);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
+    }
+
+    private DefaultKinveyClientListCallback saveList(final DataStore<Person> store, final List<Person> persons) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientListCallback callback = new DefaultKinveyClientListCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+            try {
+                store.save(persons, callback);
+            } catch (Exception e) {
+                callback.onFailure(e);
+            }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
     }
 
     private DefaultKinveyClientCallback save(final DataStore<Person> store, final Person person) throws InterruptedException {
@@ -261,11 +351,139 @@ public class DataStoreMultiInsertTest {
         assertEquals(saveCallback.result.getId(), id);
     }
 
-    private void print(String msg) {
-        Console con = System.console();
-        if (con != null) {
-            con.printf(msg);
+    private DefaultKinveyEntityListCallback saveListEntitySet(final DataStore<EntitySet> store, final List<EntitySet> object) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyEntityListCallback callback = new DefaultKinveyEntityListCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.save(object, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    // create an array with a few items that have _id property or have not.
+    private List<Person> createPersonsList(boolean withId) {
+        List<Person> items = new ArrayList<>();
+        for (int i = 0; i < MAX_PERSONS_COUNT; i++) {
+            Person person = createPerson(TEST_USERNAME + String.valueOf(i));
+            if (withId) {
+                String id = "123456" + i;
+                person.setId(id);
+            }
+            items.add(person);
         }
+        return items;
+    }
+
+    // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no _id, _id]
+    private List<Person> createCombineList() {
+        List<Person> items = new ArrayList<>();
+        Person person1 = new Person(TEST_USERNAME + String.valueOf(1));
+        items.add(person1);
+        Person person2 = new Person("76575", TEST_USERNAME + String.valueOf(2));
+        items.add(person2);
+        Person person3 = new Person(TEST_USERNAME + String.valueOf(3));
+        items.add(person3);
+        Person person4 = new Person("53521", TEST_USERNAME + String.valueOf(4));
+        items.add(person4);
+        return items;
+    }
+
+    // create an array containing two items failing for different reasons
+    private List<Person> createErrList() {
+        List<Person> items = new ArrayList<>();
+        String errStr = ERR_GEOLOC;
+        Person person1 = new Person(errStr, TEST_USERNAME + String.valueOf(1));
+        items.add(person1);
+        Person person2 = new Person("76575", TEST_USERNAME + String.valueOf(2));
+        person2.setGeoloc(errStr);
+        items.add(person2);
+        return items;
+    }
+
+    // create an array of items with no _id and the second of them should have invalid _geoloc params
+    private List<Person> createErrList1() {
+        List<Person> items = new ArrayList<>();
+        Person person1 = new Person(TEST_USERNAME + String.valueOf(1));
+        items.add(person1);
+        Person person2 = new Person("76575", TEST_USERNAME + String.valueOf(2));
+        person2.setGeoloc(ERR_GEOLOC);
+        items.add(person2);
+        return items;
+    }
+
+    // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
+    private List<Person> createErrListGeoloc() {
+        List<Person> items = new ArrayList<>();
+        String errStr = ERR_GEOLOC;
+        Person person1 = new Person(TEST_USERNAME + String.valueOf(1));
+        person1.setGeoloc(errStr);
+        items.add(person1);
+        Person person2 = new Person("76575", TEST_USERNAME + String.valueOf(2));
+        items.add(person2);
+        Person person3 = new Person("343275", TEST_USERNAME + String.valueOf(3));
+        person1.setGeoloc(errStr);
+        items.add(person3);
+        Person person4 = new Person(TEST_USERNAME + String.valueOf(4));
+        items.add(person4);
+        return items;
+    }
+
+    private List<EntitySet> createEntityList() {
+        List<EntitySet> items = new ArrayList<>();
+        EntitySet entity = null;
+        for (int i = 0; i < MAX_ENTITY_COUNT; i++) {
+            entity = new EntitySet();
+            items.add(entity);
+        }
+        return items;
+    }
+
+    private void testSaveList(List<Person> personList, StoreType storeType) throws InterruptedException {
+        DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        clearBackend(personStore);
+        DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+        assertEquals(saveCallback.result.size(), personList.size());
+    }
+
+    private void testSaveListWithId(StoreType storeType) throws InterruptedException {
+        List<Person> personList = createPersonsList(true);
+        testSaveList(personList, storeType);
+    }
+
+    private void testSaveEmptyList(List<Person> personList, StoreType storeType) throws InterruptedException {
+        DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        clearBackend(personStore);
+        DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
+        assertNull(saveCallback.result);
+        assertNotNull(saveCallback.error);
+    }
+
+    private void testSaveListNoAccessErr(List<EntitySet> list, StoreType storeType) throws InterruptedException {
+        DataStore<EntitySet> entityStore = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, storeType, client);
+        DefaultKinveyEntityListCallback defaultKinveyEntityCallback = saveListEntitySet(entityStore, list);
+        assertNotNull(defaultKinveyEntityCallback.error);
+        assertEquals(defaultKinveyEntityCallback.error.getClass(), KinveyJsonResponseException.class);
+    }
+
+    private void testSaveListWithErr(List<Person> personList, StoreType storeType) throws InterruptedException {
+        DataStore<Person> personStore = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        clearBackend(personStore);
+        DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
+        assertNull(saveCallback.result);
+        assertNotNull(saveCallback.error);
+    }
+
+    private void testSaveListWithoutId(StoreType storeType) throws InterruptedException {
+        List<Person> personList = createPersonsList(false);
+        testSaveList(personList, storeType);
     }
 
     // NETWORK STORE
@@ -303,6 +521,7 @@ public class DataStoreMultiInsertTest {
         // create an array with a few items that have no _id property
         // save() with the array as param
         // find using network store
+        testSaveListWithoutId(StoreType.NETWORK);
     }
 
     @Test
@@ -311,14 +530,17 @@ public class DataStoreMultiInsertTest {
         // create an array with a few items that have _id property
         // save() with the array as param
         // find using network store
+        testSaveListWithId(StoreType.NETWORK);
     }
 
     @Test
     public void testSaveListCombineWithIdAndWithoutIdNetwork() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id");
-        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
+        // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no _id, _id]
         // save() using the array
         // find using network store
+        List<Person> list = createCombineList();
+        testSaveList(list, StoreType.NETWORK);
     }
 
     @Test
@@ -326,6 +548,8 @@ public class DataStoreMultiInsertTest {
         print("should return an error for an empty array");
         // create an empty array
         // save() using the array
+        List<Person> list = new ArrayList<>();
+        testSaveEmptyList(list, StoreType.NETWORK);
     }
 
     @Test
@@ -334,6 +558,8 @@ public class DataStoreMultiInsertTest {
         // create an array with a few items that have no _id property
         // set a collection permission to deny creating items
         // save() using the array from above
+        List<EntitySet> entityList = createEntityList();
+        testSaveListNoAccessErr(entityList, StoreType.NETWORK);
     }
 
     @Test
@@ -341,8 +567,9 @@ public class DataStoreMultiInsertTest {
         print("should return an array of errors for all items failing for different reasons");
         // create an array containing two items failing for different reasons
         // save using the array above
+        List<Person> personList = createErrList();
+        testSaveListWithErr(personList, StoreType.NETWORK);
     }
-
 
     @Test
     public void testSaveListReturnErrorArrayForSomeItemsFailNetwork() throws InterruptedException {
@@ -350,6 +577,8 @@ public class DataStoreMultiInsertTest {
         // create an array of items with no _id and the second of them should have invalid _geoloc params
         // save using the array above
         // find using network store
+        List<Person> personList = createErrList1();
+        testSaveListWithErr(personList, StoreType.NETWORK);
     }
 
     @Test
@@ -358,6 +587,8 @@ public class DataStoreMultiInsertTest {
         // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
         // save using the array above
         // find using network store
+        List<Person> personList = createErrListGeoloc();
+        testSaveListWithErr(personList, StoreType.NETWORK);
     }
 
     // SYNC STORE
@@ -399,6 +630,7 @@ public class DataStoreMultiInsertTest {
         // save() with the array as param
         // pendingSyncEntities()
         // find() using syncstore
+        testSaveWithoutId(StoreType.SYNC);
     }
 
     @Test
@@ -408,6 +640,7 @@ public class DataStoreMultiInsertTest {
         // save() with the array as param
         // pendingSyncEntities()
         // find() using syncstore
+        testSaveWithId(StoreType.SYNC);
     }
 
     @Test
@@ -417,6 +650,8 @@ public class DataStoreMultiInsertTest {
         // save() using the array
         // pendingSyncEntities()
         // find() using syncstore
+        List<Person> list = createCombineList();
+        testSaveList(list, StoreType.SYNC);
     }
 
     @Test
@@ -424,6 +659,8 @@ public class DataStoreMultiInsertTest {
         print("should return an error for an empty array");
         // create an empty array
         // save() using the array
+        List<Person> list = new ArrayList<>();
+        testSaveEmptyList(list, StoreType.SYNC);
     }
 
     @Test
