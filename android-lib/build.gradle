@@ -7,8 +7,8 @@ android {
   buildToolsVersion '28.0.3'
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
   }
 
   packagingOptions {
@@ -64,6 +64,7 @@ configurations {
   jaxDoclet
   classpaths
   compile.exclude module: 'guava-jdk5'
+  testCompile
 }
 
 buildscript {
@@ -82,8 +83,8 @@ buildscript {
     google()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.0.1'
-    classpath "io.realm:realm-gradle-plugin:3.2.1"
+    classpath 'com.android.tools.build:gradle:3.4.1'
+    classpath "io.realm:realm-gradle-plugin:5.8.0"
   }
 
 }
@@ -92,13 +93,6 @@ dependencies {
   jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   compile project(':java-api-core')
   // compile 'com.github.KeepSafe:ReLinker:1.1'
-  /*compile('com.google.http-client:google-http-client:1.19.0') {
-            exclude(module: 'xpp3')
-            exclude(module: 'httpclient')
-            exclude(module: 'junit')
-            exclude(module: 'android')
-            exclude(module: 'guava-jdk5')
-        }*/
   compile('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
@@ -120,24 +114,25 @@ dependencies {
   compile('com.google.http-client:google-http-client-jackson:1.19.0') {
     exclude(module: 'xpp3')
   }
+  compile 'com.google.guava:guava:24.1-jre'
+
   //compile 'com.google.guava:guava:18.0'
-  classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-19/android.jar'))
+  classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-28/android.jar'))
   classpaths files('build/classes/release')
-  //testing
-  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
+
   // Required -- JUnit 4 framework
   androidTestCompile 'junit:junit:4.12'
   // Optional -- Mockito framework
   androidTestCompile 'org.mockito:mockito-android:2.7.15'
   androidTestCompile 'com.android.support:support-annotations:28.0.0'
-  androidTestCompile 'com.android.support.test:runner:1.0.2'
+  androidTestCompile 'com.android.support.test:runner:1.0.0'
   androidTestCompile 'com.android.support.test:rules:1.0.2'
 
   // Unit Testing
   testCompile 'io.reactivex:rxjava:1.1.0'
   testCompile 'junit:junit:4.12'
-  testCompile "org.robolectric:robolectric:3.0"
-  testCompile "org.mockito:mockito-core:1.10.19"
+  testCompile "org.robolectric:robolectric:4.3"
+  testCompile "org.mockito:mockito-core:2.15.0"
   testCompile 'org.robolectric:shadows-support-v4:3.0'
   testCompile "org.powermock:powermock-module-junit4:1.6.5"
   testCompile "org.powermock:powermock-module-junit4-rule:1.6.5"
@@ -146,15 +141,27 @@ dependencies {
 
   // Optional -- Hamcrest library
   androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-  compile 'com.google.code.gson:gson:2.4'
+  compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  compile 'io.reactivex:rxjava:1.1.0'
+  compile 'com.google.code.gson:gson:2.8.5'
+
+  // Android Support Libs
   compile 'com.android.support:appcompat-v7:28.0.0'
   compile 'com.android.support:support-v4:28.0.0'
-  compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  compile 'com.android.support:support-annotations:28.0.0'
+
+  // Google Services Libs
   compile 'com.google.android.gms:play-services-ads:10.2.1'
   compile 'com.google.android.gms:play-services-identity:10.2.1'
+
+  // Google Firebase Libs
   compile 'com.google.firebase:firebase-core:16.0.5'
   compile 'com.google.firebase:firebase-messaging:17.3.4'
-  compile 'io.reactivex:rxjava:1.1.0'
+
+  // Multidex Support
+  compile 'com.android.support:multidex:1.0.3'
+  // Multidex Support for testing
+  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
 }
 
 task docgen(type: Javadoc) {
@@ -169,7 +176,7 @@ task docgen(type: Javadoc) {
 
   options.bootClasspath = [
       file(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar"),
-      file(System.getenv('ANDROID_HOME') + "/platforms/android-10/android.jar")
+      file(System.getenv('ANDROID_HOME') + "/platforms/android-28/android.jar")
   ]
   options.overview = "javadoc/overview.html"
   options.addStringOption("quiet")

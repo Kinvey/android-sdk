@@ -30,8 +30,6 @@ import com.kinvey.java.query.AbstractQuery;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -86,7 +84,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
                     sorts.add(Sort.DESCENDING);
                 }
             }
-            objects = realmQuery.findAllSorted(fields.toArray(new String[fields.size()]), sorts.toArray(new Sort[sorts.size()]));
+            //objects = realmQuery.findAllSorted(fields.toArray(new String[fields.size()]), sorts.toArray(new Sort[sorts.size()]));
+            objects = realmQuery.sort(fields.toArray(new String[fields.size()]), sorts.toArray(new Sort[sorts.size()])).findAll();
         } else {
             objects = realmQuery.findAll();
         }
@@ -819,7 +818,8 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
             Number ret = null;
             Aggregation.Result result;
             for (String field : fields) {
-                RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
+                //RealmResults<DynamicRealmObject> realmObjects = query.findAllSorted(field);
+                RealmResults<DynamicRealmObject> realmObjects = query.sort(field).findAll();
                 for (DynamicRealmObject d : realmObjects) {
                     result = new Aggregation.Result();
                     query = realmObjects.where();

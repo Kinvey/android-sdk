@@ -3,28 +3,28 @@ description = 'AndroidSecure'
 
 
 dependencies {
-    compile('com.google.api-client:google-api-client:1.19.0') {
+    implementation('com.google.api-client:google-api-client:1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'android')
     }
-    compile('com.google.api-client:google-api-client-android:1.19.0') {
+    implementation('com.google.api-client:google-api-client-android:1.19.0') {
         exclude(module: 'google-play-services')
         exclude(module: 'xpp3')
     }
-    compile 'com.google.http-client:google-http-client-android:1.19.0'
-    compile('com.google.http-client:google-http-client-gson:1.19.0') {
+    implementation 'com.google.http-client:google-http-client-android:1.19.0'
+    implementation('com.google.http-client:google-http-client-gson:1.19.0') {
         exclude(module: 'xpp3')
     }
-    compile 'com.google.code.gson:gson:2.1'
-    compile('com.google.http-client:google-http-client-jackson:1.19.0') {
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation('com.google.http-client:google-http-client-jackson:1.19.0') {
         exclude(module: 'xpp3')
     }
-    compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
-    compile project(':java-api-core')
-    compile project(':android-lib')
-    testCompile 'junit:junit:4.10'
-    testCompile 'org.robolectric:robolectric:2.1.1'
-    compile('com.google.android:android:4.0.1.2') {
+    implementation 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+    implementation project(':java-api-core')
+    implementation project(':android-lib')
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.robolectric:robolectric:3.8'
+    implementation('com.google.android:android:4.0.1.2') {
         /* This dependency was originally in the Maven provided scope, but the project was not of type war.
         This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
         Please review and delete this closure when resolved. */
