@@ -1,6 +1,9 @@
 apply plugin: 'com.android.library'
-description = 'AndroidLib'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
+description = 'AndroidLib'
 
 android {
   compileSdkVersion 28
@@ -68,6 +71,7 @@ configurations {
 }
 
 buildscript {
+  ext.kotlin_version = '1.3.31'
   repositories {
     mavenCentral()
     jcenter()
@@ -85,8 +89,8 @@ buildscript {
   dependencies {
     classpath 'com.android.tools.build:gradle:3.4.1'
     classpath "io.realm:realm-gradle-plugin:5.8.0"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
-
 }
 
 dependencies {
@@ -162,6 +166,7 @@ dependencies {
   compile 'com.android.support:multidex:1.0.3'
   // Multidex Support for testing
   androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 task docgen(type: Javadoc) {
@@ -199,5 +204,3 @@ task superJar(type: Jar) {
 cleanDocgen.mustRunAfter clean
 build.mustRunAfter cleanDocgen
 docgen.mustRunAfter build
-
-
