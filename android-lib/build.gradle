@@ -120,28 +120,27 @@ dependencies {
   }
   compile 'com.google.guava:guava:24.1-jre'
 
-  //compile 'com.google.guava:guava:18.0'
   classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-28/android.jar'))
   classpaths files('build/classes/release')
 
   // Required -- JUnit 4 framework
-  androidTestCompile 'junit:junit:4.12'
+  androidTestImplementation 'junit:junit:4.12'
   // Optional -- Mockito framework
-  androidTestCompile 'org.mockito:mockito-android:2.7.15'
-  androidTestCompile 'com.android.support:support-annotations:28.0.0'
-  androidTestCompile 'com.android.support.test:runner:1.0.0'
-  androidTestCompile 'com.android.support.test:rules:1.0.2'
+  androidTestImplementation 'org.mockito:mockito-android:2.28.2'
+  androidTestImplementation 'com.android.support:support-annotations:28.0.0'
+  androidTestImplementation 'com.android.support.test:runner:1.0.2'
+  androidTestImplementation 'com.android.support.test:rules:1.0.2'
 
   // Unit Testing
-  testCompile 'io.reactivex:rxjava:1.1.0'
-  testCompile 'junit:junit:4.12'
-  testCompile "org.robolectric:robolectric:4.3"
-  testCompile "org.mockito:mockito-core:2.15.0"
-  testCompile 'org.robolectric:shadows-support-v4:3.0'
-  testCompile "org.powermock:powermock-module-junit4:1.6.5"
-  testCompile "org.powermock:powermock-module-junit4-rule:1.6.5"
-  testCompile "org.powermock:powermock-api-mockito:1.6.5"
-  testCompile "org.powermock:powermock-classloading-xstream:1.6.5"
+  testImplementation 'io.reactivex:rxjava:1.1.0'
+  testImplementation 'junit:junit:4.12'
+  testImplementation "org.robolectric:robolectric:4.3"
+  testImplementation "org.mockito:mockito-core:2.28.2"
+  testImplementation 'org.robolectric:shadows-support-v4:3.0'
+  testImplementation "org.powermock:powermock-module-junit4:1.6.5"
+  testImplementation "org.powermock:powermock-module-junit4-rule:1.6.5"
+  testImplementation "org.powermock:powermock-api-mockito:1.6.5"
+  testImplementation "org.powermock:powermock-classloading-xstream:1.6.5"
 
   // Optional -- Hamcrest library
   androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
@@ -155,11 +154,11 @@ dependencies {
   compile 'com.android.support:support-annotations:28.0.0'
 
   // Google Services Libs
-  compile 'com.google.android.gms:play-services-ads:10.2.1'
-  compile 'com.google.android.gms:play-services-identity:10.2.1'
+  compile 'com.google.android.gms:play-services-ads:16.0.0'
+  compile 'com.google.android.gms:play-services-identity:16.0.0'
 
   // Google Firebase Libs
-  compile 'com.google.firebase:firebase-core:16.0.5'
+  compile 'com.google.firebase:firebase-core:16.0.0'
   compile 'com.google.firebase:firebase-messaging:17.3.4'
 
   // Multidex Support
