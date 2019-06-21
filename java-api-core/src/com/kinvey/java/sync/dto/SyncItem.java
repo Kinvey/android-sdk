@@ -1,6 +1,9 @@
 package com.kinvey.java.sync.dto;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+
+import java.io.IOException;
 
 /**
  * Created by yuliya on 10/04/17.
@@ -26,5 +29,14 @@ public class SyncItem extends SyncRequest{
 
     public void setRequestMethod(SyncItem.HttpVerb requestMethod) {
         this.requestMethod = requestMethod.name();
+    }
+
+    public GenericJson getEntity() {
+        GenericJson entity = null;
+        SyncMetaData entityId = getEntityID();
+        if (entityId != null) {
+            entity = entityId.getEntity();
+        }
+        return entity;
     }
 }

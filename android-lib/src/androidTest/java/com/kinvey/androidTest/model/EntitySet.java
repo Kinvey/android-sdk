@@ -5,6 +5,7 @@ import com.google.api.client.util.Key;
 
 public class EntitySet  extends GenericJson {
     public static final String COLLECTION = "EntitySet";
+    public static final String DESCRIPTION_KEY = "username";
 
     public EntitySet() {
     }
