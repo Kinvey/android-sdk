@@ -11,9 +11,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import okhttp3.TlsVersion;
-
-
 class KinveySocketFactory extends SSLSocketFactory {
 
     private static final String TLS = "TLS";

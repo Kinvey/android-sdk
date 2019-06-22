@@ -15,13 +15,11 @@
  */
 package com.kinvey.android.store;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
-import com.kinvey.BuildConfig;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
@@ -53,7 +51,6 @@ import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
 import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.requests.data.save.SaveListBatchRequest;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
