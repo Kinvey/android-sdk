@@ -20,6 +20,7 @@ import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.androidTest.network.MockMultiInsertNetworkManager;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveySaveBunchException;
@@ -62,7 +63,6 @@ public class DataStoreMultiInsertTest {
     private static final int DEFAULT_TIMEOUT = 60;
     private static final int LONG_TIMEOUT = 6 * DEFAULT_TIMEOUT;
     private static final int MAX_PERSONS_COUNT = 5;
-    private static final int MAX_ENTITY_COUNT = 5;
     private static final String ERR_GEOLOC = "#!@%^&*())_+?{}";
 
     private Client client;
@@ -467,7 +467,7 @@ public class DataStoreMultiInsertTest {
     }
 
     private List<Person> createPersonsList(boolean withId) {
-        return createPersonsList(MAX_ENTITY_COUNT, withId);
+        return createPersonsList(MAX_PERSONS_COUNT, withId);
     }
 
     // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no _id, _id]
@@ -523,6 +523,19 @@ public class DataStoreMultiInsertTest {
         return items;
     }
 
+    // create an array of items with no _id and the second of them should have invalid _geoloc params
+    private List<Person> createErrList2() {
+        List<Person> items = new ArrayList<>();
+        Person person1 = new Person(TEST_USERNAME + String.valueOf(1));
+        items.add(person1);
+        Person person2 = new Person(TEST_USERNAME + String.valueOf(2));
+        person2.setGeoloc(ERR_GEOLOC);
+        items.add(person2);
+        Person person3 = new Person(TEST_USERNAME + String.valueOf(3));
+        items.add(person3);
+        return items;
+    }
+
     // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
     private List<Person> createErrListGeoloc() {
         List<Person> items = new ArrayList<>();
@@ -540,15 +553,44 @@ public class DataStoreMultiInsertTest {
         return items;
     }
 
-    private List<EntitySet> createEntityList() {
+    private List<EntitySet> createEntityList(int itemsCount) {
         List<EntitySet> items = new ArrayList<>();
         EntitySet entity = null;
-        for (int i = 0; i < MAX_ENTITY_COUNT; i++) {
+        for (int i = 0; i < itemsCount; i++) {
             entity = new EntitySet();
             entity.setDescription("entity #" + i);
             items.add(entity);
         }
         return items;
+    }
+
+    private <T extends GenericJson> boolean checkIfItemsAtRightIndex(List<T> srcList, List<T> resultList,
+                                             int[] checkIndexes, String checkField, boolean checkErr, boolean checkIsBackendItem) throws AssertionError {
+
+        assertNotNull(srcList);
+        assertNotNull(resultList);
+
+        boolean result = true;
+        GenericJson srcItem;
+        GenericJson item;
+        int curIdx = 0;
+        for (int idx : checkIndexes) {
+            item = resultList.get(curIdx);
+            if (checkErr) {
+                result &= item == null;
+            } else {
+                srcItem = srcList.get(idx);
+                result &= item != null;
+                if (checkIsBackendItem) {
+                    result &= isBackendItem(item);
+                }
+                String resultField = item.get(checkField).toString();
+                String srcField = srcItem.get(checkField).toString();
+                result &= srcField.equals(resultField);
+            }
+            curIdx++;
+        }
+        return result;
     }
 
     private boolean checkErrorsIndexes(List<KinveyBatchInsertError> errors, int[] checkIndexes) throws AssertionError {
@@ -558,15 +600,17 @@ public class DataStoreMultiInsertTest {
         assertEquals(errors.size(), checkIndexes.length);
 
         boolean result = true;
+        int curIdx = 0;
         KinveyBatchInsertError err;
         for (int idx : checkIndexes) {
-            err = errors.get(idx);
+            err = errors.get(curIdx);
             result &= idx == err.getIndex();
+            curIdx++;
         }
         return result;
     }
 
-    private <T extends GenericJson> boolean checkIfSameObjects(List<T> srcList, List<T> resultList, String checkField) throws AssertionError {
+    private <T extends GenericJson> boolean checkIfSameObjects(List<T> srcList, List<T> resultList, String checkField, boolean checkIsBackendItem) throws AssertionError {
 
         assertNotNull(srcList);
         assertNotNull(resultList);
@@ -577,35 +621,12 @@ public class DataStoreMultiInsertTest {
         for (int i = 0; i < srcList.size(); i++) {
             srcItem = srcList.get(i);
             resultItem = resultList.get(i);
-            result &= isBackendItem(resultItem);
+            if (checkIsBackendItem) {
+                result &= isBackendItem(resultItem);
+            }
             String srcField = srcItem.get(checkField).toString();
             String resultField = resultItem.get(checkField).toString();
             result &= srcField.equals(resultField);
-        }
-        return result;
-    }
-
-    private <T extends GenericJson> boolean checkIfItemsAtRightIndex(List<T> srcList, List<T> resultList,
-                                             int[] checkIndexes, String checkField, boolean checkErr) throws AssertionError {
-
-        assertNotNull(srcList);
-        assertNotNull(resultList);
-
-        boolean result = true;
-        GenericJson srcItem;
-        GenericJson item;
-        for (int idx : checkIndexes) {
-            item = resultList.get(idx);
-            if (checkErr) {
-                result &= item == null;
-            } else {
-                srcItem = srcList.get(idx);
-                result &= item != null;
-                result &= isBackendItem(item);
-                String resultField = item.get(checkField).toString();
-                String srcField = srcItem.get(checkField).toString();
-                result &= srcField.equals(resultField);
-            }
         }
         return result;
     }
@@ -619,12 +640,16 @@ public class DataStoreMultiInsertTest {
         return result;
     }
 
+    private boolean checkPersonIfSameObjects(List<Person> srcList, List<Person> resultList, boolean checkIsBackendItem) throws AssertionError {
+        return checkIfSameObjects(srcList, resultList, Person.USERNAME_KEY, checkIsBackendItem);
+    }
+
     private boolean checkPersonIfSameObjects(List<Person> srcList, List<Person> resultList) throws AssertionError {
-        return checkIfSameObjects(srcList, resultList, Person.USERNAME_KEY);
+        return checkIfSameObjects(srcList, resultList, Person.USERNAME_KEY, true);
     }
 
     private boolean checkIfPersonItemsAtRightIndex(List<Person> srcList, List<Person> resultList, int[] checkIndexes, boolean checkErr) {
-        return checkIfItemsAtRightIndex(srcList, resultList, checkIndexes, Person.USERNAME_KEY, checkErr);
+        return checkIfItemsAtRightIndex(srcList, resultList, checkIndexes, Person.USERNAME_KEY, checkErr, true);
     }
 
     private <T extends GenericJson> void testSaveLocally(T item, Class<T> cls, String collection, StoreType storeType) throws InterruptedException {
@@ -634,18 +659,14 @@ public class DataStoreMultiInsertTest {
         client.getSyncManager().clear(Person.COLLECTION);
 
         mockInvalidConnection();
-
-        DefaultKinveyClientCallback saveCallback = save(store, item);
-        //assertNotNull(saveCallback.result);
-        //assertNull(saveCallback.error);
+        save(store, item);
+        cancelMockInvalidConnection();
 
         DefaultKinveyReadCallback findCallback = find(store, LONG_TIMEOUT);
         assertNotNull(findCallback.result);
         List<Person> list = findCallback.result.getResult();
         assertEquals(1, list.size());
         assertNotNull(list.get(0).getId());
-
-        cancelMockInvalidConnection();
     }
 
     private SyncItem testSaveLocallyIfNetworkError(Person person, StoreType storeType) throws InterruptedException {
@@ -672,108 +693,52 @@ public class DataStoreMultiInsertTest {
         assertTrue(error.getMessage().contains("Entity list cannot be empty"));
     }
 
-    private <T extends GenericJson> void testSaveListNoAccessErr(List<T> list, Class<T> cls, String collection, StoreType storeType) throws InterruptedException {
-        DataStore<T> store = DataStore.collection(collection, cls, storeType, client);
-        clearBackend(store);
-        DefaultKinveyClientListCallback defaultKinveyListCallback = saveList(store, list);
-        assertNotNull(defaultKinveyListCallback.error);
-        assertEquals(defaultKinveyListCallback.error.getClass(), KinveyJsonResponseException.class);
-    }
+    // save an item without _id
+    // save another item without _id
+    // push(), should use a multi-insert POST request and return the items with POST operations
+    // pendingSyncEntities(), should return an empty array
+    // find using syncstore, should return all items from step 1
+    private void testPushMultiInsertSupport(StoreType storeType) throws InterruptedException {
 
-    //TODO: Add improvements to support multi-insert
-    private <T extends GenericJson> void testPushItemsList(List<T> list, int checkCount, Class<T> cls, String collection, StoreType storeType) throws InterruptedException {
-        DataStore<T> personStore = DataStore.collection(collection, cls, storeType, client);
-        DataStore<T> storeSync = DataStore.collection(collection, cls, StoreType.SYNC, client);
-        DataStore<T> storeNetwork = DataStore.collection(collection, cls, StoreType.NETWORK, client);
+        List<Person> personsList = createPersonsList(2, false);
 
-        clearBackend(personStore);
-        clearBackend(storeSync);
-        clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
-
-        DefaultKinveyClientListCallback saveCallbackSecond = saveList(storeSync, list);
-        assertNotNull(saveCallbackSecond.result);
-        assertNull(saveCallbackSecond.error);
-
-        DefaultKinveyPushCallback pushCallback = push(personStore, LONG_TIMEOUT);
-        assertNotNull(pushCallback.result);
-        //assertEquals(pushCallback.result.getSuccessCount(), checkCount);
-
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
-        //assertNotNull(syncItems);
-        int pendingCount = syncItems == null ? 0 : syncItems.size();
-        int errCount = list.size() - checkCount;
-        assertEquals(pendingCount, errCount);
-
-        DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
-        assertNotNull(findCallback.result);
-        assertEquals(findCallback.result.getResult().size(), checkCount);
-        //TODO: Should check if the returned items are the same we saved
-    }
-
-    //TODO: Add improvements to support multi-insert
-    private <T extends GenericJson> void testPushItemsListError(List<T> list, int checkCount, Class<T> cls, String collection, StoreType storeType) throws InterruptedException {
-        DataStore<T> personStore = DataStore.collection(collection, cls, storeType, client);
-        DataStore<T> storeSync = DataStore.collection(collection, cls, StoreType.SYNC, client);
+        MockMultiInsertNetworkManager<Person> netManager = new MockMultiInsertNetworkManager<Person>(Person.COLLECTION, Person.class, client);
+        DataStore<Person> personStore = new DataStore<Person>(Person.COLLECTION, Person.class, client, storeType, netManager);
+        DataStore<Person> storeSync = new DataStore<Person>(Person.COLLECTION, Person.class, client, StoreType.SYNC, netManager);
 
         clearBackend(personStore);
         clearBackend(storeSync);
         client.getSyncManager().clear(Person.COLLECTION);
 
-        DefaultKinveyClientListCallback saveCallbackSecond = saveList(storeSync, list);
-        assertNotNull(saveCallbackSecond.result);
-        assertNull(saveCallbackSecond.error);
-
-        DefaultKinveyPushCallback pushCallback = push(personStore, LONG_TIMEOUT);
-        assertNotNull(pushCallback.error);
-
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
-        assertNotNull(syncItems);
-        int errCount = list.size() - checkCount;
-        assertTrue(syncItems.size() == errCount || syncItems.isEmpty());
-
-        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
-        assertNotNull(findCallback.result);
-        List resultList = findCallback.result.getResult();
-        assertNotNull(resultList);
-        if (checkCount > 0) {
-            assertEquals(resultList.size(), checkCount);
-        } else {
-            assertEquals(resultList.size(), list.size());
-        }
-    }
-
-    //TODO: Add improvements to support multi-insert
-    private <T extends GenericJson> void testPushMultiInsertSupport(List<T> list, int checkCount, Class<T> cls, String collection, StoreType storeType) throws InterruptedException {
-        DataStore<T> personStore = DataStore.collection(collection, cls, storeType, client);
-        DataStore<T> storeSync = DataStore.collection(collection, cls, StoreType.SYNC, client);
-        DataStore<T> storeNetwork = DataStore.collection(collection, cls, StoreType.NETWORK, client);
-
-        clearBackend(storeSync);
-        clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
-
-        for (T item : list) {
+        for (Person item : personsList) {
             save(storeSync, item);
         }
 
+        netManager.clear();
         DefaultKinveyPushCallback pushCallback = push(personStore, LONG_TIMEOUT);
         assertNotNull(pushCallback.result);
-        assertEquals(pushCallback.result.getSuccessCount(), checkCount);
-        //TODO: We should mock this so we can check that event if the entities are saved one by one,
-        // the store will use multi-insert when pushing
-
-        DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
-        assertNotNull(findCallback.result);
-        assertEquals(findCallback.result.getResult().size(), checkCount);
+        assertEquals(pushCallback.result.getSuccessCount(), personsList.size());
+        assertTrue(netManager.useMultiInsertSave());
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult()));
     }
 
-    //TODO: Add improvements to support multi-insert
-    private void testSyncItemsList(List<Person> list, int checkCount, boolean mockConnectionErr, StoreType storeType) throws InterruptedException {
+    // create an array of 3 items, the second of which has invalid _geoloc parameters
+    // save()
+    // Sync(), Should return error for not pushed item
+    // pendingSyncEntities(), should return the item with invalid params
+    // find() using networkstore, should return the valid items
+    // find using syncstore, should return all items including the invalid one
+    private void testSyncItemsList(boolean mockConnectionErr, StoreType storeType) throws InterruptedException {
 
+        List<Person> personList = createErrList2();
+        int[] checkIndexesSuccess = new int[] { 0, 2 };
+        int[] checkIndexesErr = new int[] { 1 };
         DataStore<Person> personStoreCurrent = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
         DataStore<Person> personStoreNet = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
         DataStore<Person> personStoreSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
@@ -784,30 +749,28 @@ public class DataStoreMultiInsertTest {
         client.getSyncManager().clear(Person.COLLECTION);
 
         if (mockConnectionErr) { mockInvalidConnection(); }
-
-        DefaultKinveyClientListCallback saveCallback = saveList(personStoreSync, list);
-        assertNotNull(saveCallback.result);
-        assertNull(saveCallback.error);
-
+        saveList(personStoreSync, personList);
         if (mockConnectionErr) { cancelMockInvalidConnection(); }
 
-        sync(personStoreCurrent, LONG_TIMEOUT);
-
-        int errCount = list.size() - checkCount;
+        DefaultKinveySyncCallback syncCallback = sync(personStoreCurrent, LONG_TIMEOUT);
+        assertNotNull(syncCallback.error);
+        if (syncCallback.error instanceof KinveySaveBunchException) {
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, ((KinveySaveBunchException) syncCallback.error).getEntities(), checkIndexesSuccess, false));
+            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) syncCallback.error).getEntities(), checkIndexesErr));
+        }
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertNotNull(syncItems);
-        assertEquals(syncItems.size(), errCount);
-        //TODO: Should check that the item is the one supposed to fail
+        assertEquals(syncItems.size(), 1);
 
         DefaultKinveyReadCallback findCallbackNet = find(personStoreNet, LONG_TIMEOUT);
         DefaultKinveyReadCallback findCallbackSync = find(personStoreSync, LONG_TIMEOUT);
 
         assertNotNull(findCallbackNet.result);
-        assertEquals(findCallbackNet.result.getResult().size(), checkCount);
+        assertTrue(checkIfPersonItemsAtRightIndex(personList, findCallbackNet.result.getResult(), checkIndexesSuccess, false));
 
         assertNotNull(findCallbackSync.result);
-        assertEquals(findCallbackSync.result.getResult().size(), list.size());
+        assertTrue(checkPersonIfSameObjects(personList, findCallbackNet.result.getResult()));
     }
 
     // NETWORK STORE
@@ -956,8 +919,14 @@ public class DataStoreMultiInsertTest {
         // create an array with a few items that have no _id property
         // set a collection permission to deny creating items
         // save() using the array from above
-        List<EntitySet> entityList = createEntityList();
-        testSaveListNoAccessErr(entityList, EntitySet.class, EntitySet.COLLECTION, StoreType.NETWORK);
+        List<EntitySet> entityList = createEntityList(2);
+
+        DataStore<EntitySet> store = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.NETWORK, client);
+        clearBackend(store);
+
+        DefaultKinveyClientListCallback defaultKinveyListCallback = saveList(store, entityList);
+        assertNotNull(defaultKinveyListCallback.error);
+        assertEquals(defaultKinveyListCallback.error.getClass(), KinveyJsonResponseException.class);
     }
 
     @Test
@@ -1218,11 +1187,30 @@ public class DataStoreMultiInsertTest {
         print("should use multi insert for multiple items without _id");
         // create an array of items without _id
         // save using the array above
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
+        // push(), should return an array of the objects pushed with the operation performed
+        // pendingSyncEntities(), should return an empty array
+        // find using syncstore, should return the items with ect and lmt
         List<Person> personsList = createPersonsList(false);
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.SYNC);
+
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        DefaultKinveyClientListCallback saveCallbackSecond = saveList(storeSync, personsList);
+        assertNull(saveCallbackSecond.error);
+        assertNotNull(saveCallbackSecond.result);
+        assertTrue(checkPersonIfSameObjects(personsList, saveCallbackSecond.result, false));
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult()));
     }
 
     @Test
@@ -1230,11 +1218,30 @@ public class DataStoreMultiInsertTest {
         print("should combine POST and PUT requests for items with and without _id");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
         // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
+        // push(), should return and array of the items pushed with the respective operation - POST for no _id and PUT for _id
+        // pendingSyncEntities(), should return an empty array
+        // find using syncstore, should return the items with ect and lmt
         List<Person> personsList = createCombineList();
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.SYNC);
+
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        DefaultKinveyClientListCallback saveCallbackSecond = saveList(storeSync, personsList);
+        assertNull(saveCallbackSecond.error);
+        assertNotNull(saveCallbackSecond.result);
+        assertTrue(checkPersonIfSameObjects(personsList, saveCallbackSecond.result, false));
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult()));
     }
 
     @Test
@@ -1242,15 +1249,29 @@ public class DataStoreMultiInsertTest {
         print("should combine POST and PUT requests for items with and without _id - mocked");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
         // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-
+        // push(), should use a multi-insert POST request and separate PUT requests for the items with _id. Should return and array of the items pushed with the respective operation - POST for no _id and PUT for _id
+        // pendingSyncEntities(), should return an empty array
+        // find using syncstore, should return the items with ect and lmt
         List<Person> personsList = createCombineList();
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.SYNC);
-        //TODO: What is the difference between this test and the above?
-        // The goal of this one is to confirm that the correct requests are used - e.g.
-        // that we actually use multi-insert POST requests and not a single POST per entity.
+
+        MockMultiInsertNetworkManager<Person> mockNetManager = new MockMultiInsertNetworkManager<Person>(Person.COLLECTION, Person.class, client);
+        DataStore<Person> storeSync = new DataStore<Person>(Person.COLLECTION, Person.class, client, StoreType.SYNC, mockNetManager);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        saveList(storeSync, personsList);
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+        assertTrue(mockNetManager.useMultiInsertSave());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult(), true));
     }
 
     @Test
@@ -1258,23 +1279,65 @@ public class DataStoreMultiInsertTest {
         print("should return the failure reason in the result for each pushed item even if it is the same");
         // create an array of items without _id and set the collection permission for create to never
         // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        List<EntitySet> entitySetList = createEntityList();
-        testPushItemsListError(entitySetList, 0, EntitySet.class, EntitySet.COLLECTION, StoreType.SYNC);
+        // push(), should return the items from step 1 each with a POST operation and an error property with value: the invalid credentials error
+        // pendingSyncEntities(), should return all items from step 1
+        // find using syncstore, should return the items from step 1
+
+        List<EntitySet> entitySetList = createEntityList(2);
+        int[] itemsErrorIndexes = new int[] { 0, 1 };
+
+        DataStore<EntitySet> storeSync = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.SYNC, client);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        saveList(storeSync, entitySetList);
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.error);
+        if (pushCallback.error instanceof KinveySaveBunchException) {
+            assertTrue(checkIfItemsAtRightIndex(entitySetList, ((KinveySaveBunchException) pushCallback.error).getEntities(),
+                    itemsErrorIndexes, EntitySet.DESCRIPTION_KEY, true, false));
+            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) pushCallback.error).getErrors(), itemsErrorIndexes));
+        }
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertNotNull(syncItems);
+        assertEquals(syncItems.size(), entitySetList.size());
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        checkIfSameObjects(entitySetList, findCallback.result.getResult(), EntitySet.DESCRIPTION_KEY, false);
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testPushItemsListReturnsErrorsForEachItemErrorSync() throws InterruptedException {
         print("should return the failure reason in the result for each pushed item when they are different");
         // create an array with 3 items without _id, two of which should be invalid for different reasons
         // save using the array above
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        List<Person> personList = createPushErrList();
-        testPushItemsList(personList, 1, Person.class, Person.COLLECTION, StoreType.SYNC);
+        // push(), should return the items with respective POST and PUT operations and items which are set to fail should have their distinct errors
+        // pendingSyncEntities(), should return the failing items from step 1
+        // find using syncstore, should return the items from step 1 - the successfull one with lmt and ect
+        List<Person> personsList = createPushErrList();
+        int[] successItemsIdx = new int[] { 2 };
+
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        saveList(storeSync, personsList);
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertNotNull(syncItems);
+        assertTrue(checkSyncItems(syncItems, 2, SyncRequest.HttpVerb.POST));
+
+        DefaultKinveyReadCallback findCallback = find(storeSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkIfPersonItemsAtRightIndex(personsList, findCallback.result.getResult(), successItemsIdx, false));
     }
 
     @Test
@@ -1282,25 +1345,23 @@ public class DataStoreMultiInsertTest {
         print("should use multi-insert even if the items have not been created in an array");
         // save an item without _id
         // save another item without _id
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        int itemsCount = 2;
-        List<Person> list = createPersonsList(itemsCount, false);
-        testPushMultiInsertSupport(list, itemsCount, Person.class, Person.COLLECTION, StoreType.SYNC);
+        // push(), should use a multi-insert POST request and return the items with POST operations
+        // pendingSyncEntities(), should return an empty array
+        // find using syncstore, should return all items from step 1
+        testPushMultiInsertSupport(StoreType.SYNC);
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testSyncItemsListSync() throws InterruptedException {
         print("test sync items list");
         // create an array of 3 items, the second of which has invalid _geoloc parameters
         // save()
-        // sync()
-        // pendingSyncEntities()
-        // find() using networkstore
-        // find using syncstore
-        List<Person> personList = createErrListGeoloc();
-        testSyncItemsList(personList, 2, false, StoreType.SYNC);
+        // Sync(), Should return error for not pushed item
+        // pendingSyncEntities(), should return the item with invalid params
+        // find() using networkstore, should return the valid items
+        // find using syncstore, should return all items including the invalid one
+        testSyncItemsList(false, StoreType.SYNC);
     }
 
     // AUTO STORE
@@ -1539,13 +1600,17 @@ public class DataStoreMultiInsertTest {
         // pendingSyncEntities()
         // find() using syncstore
 
-        List<EntitySet> entityList = createEntityList();
+        List<EntitySet> entityList = createEntityList(2);
 
+        DataStore<EntitySet> autoStore = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
         DataStore<EntitySet> syncStore = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.SYNC, client);
+        clearBackend(autoStore);
         clearBackend(syncStore);
         client.getSyncManager().clear(EntitySet.COLLECTION);
 
-        testSaveListNoAccessErr(entityList, EntitySet.class, EntitySet.COLLECTION, StoreType.AUTO);
+        DefaultKinveyClientListCallback defaultKinveyListCallback = saveList(autoStore, entityList);
+        assertNotNull(defaultKinveyListCallback.error);
+        assertEquals(defaultKinveyListCallback.error.getClass(), KinveyJsonResponseException.class);
 
         List<SyncItem> syncItems = pendingSyncEntities(EntitySet.COLLECTION);
         assertNotNull(syncItems);
@@ -1553,10 +1618,11 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyReadCallback findCallback = find(syncStore, LONG_TIMEOUT);
         assertNotNull(findCallback.result);
-        assertTrue(checkIfSameObjects(entityList, findCallback.result.getResult(), EntitySet.DESCRIPTION_KEY));
+        assertTrue(checkIfSameObjects(entityList, findCallback.result.getResult(), EntitySet.DESCRIPTION_KEY, false));
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testSaveListReturnErrorArrayForAllItemsFailAuto() throws InterruptedException {
         print("should return an array of errors for all items failing for different reasons");
         // create an array containing two items failing for different reasons
@@ -1587,10 +1653,11 @@ public class DataStoreMultiInsertTest {
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertNotNull(syncItems);
-        checkSyncItems(syncItems, personList.size(), SyncRequest.HttpVerb.POST);
+        assertTrue(checkSyncItems(syncItems, personList.size(), SyncRequest.HttpVerb.POST));
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testSaveListReturnErrorArrayForSomeItemsFailAuto() throws InterruptedException {
         print("should return an entities and errors when some requests fail and some succeed");
         // create an array of items with no _id and the second of them should have invalid _geoloc params
@@ -1621,7 +1688,7 @@ public class DataStoreMultiInsertTest {
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertNotNull(syncItems);
-        checkSyncItems(syncItems, 1, SyncRequest.HttpVerb.POST);
+        assertTrue(checkSyncItems(syncItems, 1, SyncRequest.HttpVerb.POST));
 
         DefaultKinveyReadCallback findCallbackSync = find(syncStore, LONG_TIMEOUT);
         assertNotNull(findCallbackSync.result);
@@ -1633,6 +1700,7 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testSaveListReturnPutFailuresAtMatchingIndexAuto() throws InterruptedException {
         print("should return PUT failures at the matching index");
         // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
@@ -1658,7 +1726,7 @@ public class DataStoreMultiInsertTest {
             assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
             assertTrue(checkErrorsIndexes(errorsList, checkIndexesErr));
         }
-        
+
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertNotNull(syncItems);
         assertEquals(syncItems.get(0).getRequestMethod(), SyncRequest.HttpVerb.POST);
@@ -1673,38 +1741,99 @@ public class DataStoreMultiInsertTest {
     public void testPushItemsListWithoutIdAuto() throws InterruptedException {
         print("should use multi insert for multiple items without _id");
         // create an array of items without _id
-        // save using the array above
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
+        // save using the array above : mock to return connection error
+        // push() : should return an array of the objects pushed with the operation performed
+        // pendingSyncEntities() : should return empty array
+        // find() using networkstore : should return the items from step 1
         List<Person> personsList = createPersonsList(false);
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.AUTO);
+
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> netSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        clearBackend(storeSync);
+        clearBackend(netSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        mockInvalidConnection();
+        saveList(storeSync, personsList);
+        cancelMockInvalidConnection();
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(netSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult()));
     }
 
     @Test
     public void testPushItemsListCombineWithIdAndWithoutIdAuto() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
-        // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
+        // save() using the array, mock to return connection error
+        // push(), should use a multi-insert POST request and separate PUT requests for the items with _id. Should return and array of the items pushed with the respective operation - POST for no _id and PUT for _id
+        // pendingSyncEntities(), should return empty array
+        // find() using networkstore, should return the items from step 1
         List<Person> personsList = createCombineList();
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.AUTO);
+
+        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> netSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        clearBackend(storeSync);
+        clearBackend(netSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        mockInvalidConnection();
+        saveList(storeSync, personsList);
+        cancelMockInvalidConnection();
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(netSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult()));
     }
 
     @Test
     public void testPushItemsListCombineWithIdAndWithoutIdMockedAuto() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id - mocked");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
-        // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
+        // save() using the array, mock to return connection error
+        // push(), should use a multi-insert POST request and separate PUT requests for the items with _id. Should return and array of the items pushed with the respective operation - POST for no _id and PUT for _id
+        // pendingSyncEntities(), should return empty array
+        // find() using networkstore, should return the items from step 1
         List<Person> personsList = createCombineList();
-        testPushItemsList(personsList, personsList.size(), Person.class, Person.COLLECTION, StoreType.AUTO);
-        //TODO: What is the difference between this test and the above?
-        // The goal here is to mock the request and check if multi-insert is used
+
+        MockMultiInsertNetworkManager<Person> mockNetManager = new MockMultiInsertNetworkManager<Person>(Person.COLLECTION, Person.class, client);
+        DataStore<Person> autoSync = new DataStore<Person>(Person.COLLECTION, Person.class, client, StoreType.AUTO, mockNetManager);
+        DataStore<Person> netSync = new DataStore<Person>(Person.COLLECTION, Person.class, client, StoreType.NETWORK, mockNetManager);
+
+        clearBackend(autoSync);
+        clearBackend(netSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        mockInvalidConnection();
+        saveList(autoSync, personsList);
+        cancelMockInvalidConnection();
+
+        DefaultKinveyPushCallback pushCallback = push(autoSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+        assertTrue(mockNetManager.useMultiInsertSave());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertTrue(syncItems == null || syncItems.isEmpty());
+
+        DefaultKinveyReadCallback findCallback = find(netSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkPersonIfSameObjects(personsList, findCallback.result.getResult(), true));
     }
 
     @Test
@@ -1712,48 +1841,85 @@ public class DataStoreMultiInsertTest {
         print("should return the failure reason in the result for each pushed item even if it is the same");
         // create an array of items without _id and set the collection permission for create to never
         // save() using the array
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        List<EntitySet> entitySetList = createEntityList();
-        testPushItemsListError(entitySetList, 0, EntitySet.class, EntitySet.COLLECTION, StoreType.AUTO);
+        // push(), should return the items from step 1 each with a POST operation and an error property with value: the invalid credentials error
+        // pendingSyncEntities(), should return all items from step 1
+
+        List<EntitySet> entitySetList = createEntityList(2);
+        int[] itemsErrorIndexes = new int[] { 0, 1 };
+
+        DataStore<EntitySet> storeSync = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.SYNC, client);
+        clearBackend(storeSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        saveList(storeSync, entitySetList);
+
+        DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.error);
+        if (pushCallback.error instanceof KinveySaveBunchException) {
+            assertTrue(checkIfItemsAtRightIndex(entitySetList, ((KinveySaveBunchException) pushCallback.error).getEntities(),
+                    itemsErrorIndexes, EntitySet.DESCRIPTION_KEY, true, false));
+            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) pushCallback.error).getErrors(), itemsErrorIndexes));
+        }
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertNotNull(syncItems);
+        assertEquals(syncItems.size(), entitySetList.size());
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testPushItemsListReturnsErrorsForEachItemErrorAuto() throws InterruptedException {
         print("should return the failure reason in the result for each pushed item when they are different");
         // create an array with 3 items without _id, two of which should be invalid for different reasons
-        // save using the array above
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        List<Person> personList = createPushErrList();
-        testPushItemsList(personList, 1, Person.class, Person.COLLECTION, StoreType.AUTO);
+        // save using the array above, mock to return connection error
+        // push(), should return the items with respective POST and PUT operations and items which are set to fail should have their distinct errors
+        // pendingSyncEntities(), should return the failing items
+
+        List<Person> personsList = createPushErrList();
+        int[] successItemsIdx = new int[] { 2 };
+
+        DataStore<Person> autoSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        clearBackend(autoSync);
+        client.getSyncManager().clear(Person.COLLECTION);
+
+        mockInvalidConnection();
+        saveList(autoSync, personsList);
+        cancelMockInvalidConnection();
+
+        DefaultKinveyPushCallback pushCallback = push(autoSync, LONG_TIMEOUT);
+        assertNotNull(pushCallback.result);
+        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+
+        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        assertNotNull(syncItems);
+        assertTrue(checkSyncItems(syncItems, 2, SyncRequest.HttpVerb.PUT));
+
+        DefaultKinveyReadCallback findCallback = find(autoSync, LONG_TIMEOUT);
+        assertNotNull(findCallback.result);
+        assertTrue(checkIfPersonItemsAtRightIndex(personsList, findCallback.result.getResult(), successItemsIdx, false));
     }
 
     @Test
     public void testPushShouldUseMultiInsertAfterSaveAuto() throws InterruptedException {
         print("should use multi-insert even if the items have not been created in an array");
         // save an item without _id
-        // save another item without _id
-        // push()
-        // pendingSyncEntities()
-        // find using syncstore
-        int itemsCount = 2;
-        List<Person> list = createPersonsList(itemsCount, false);
-        testPushMultiInsertSupport(list, itemsCount, Person.class, Person.COLLECTION, StoreType.AUTO);
+        // save another item without _id, mock to return connection error
+        // push(), should use a multi-insert POST request and return the items with POST operations
+        // pendingSyncEntities(), should return empty array
+        // find() using networkstore, should return all items from step 1
+        testPushMultiInsertSupport(StoreType.AUTO);
     }
 
     @Test
+    @Ignore("Currently fail because of KCS bug: https://kinvey.atlassian.net/browse/BACK-3959")
     public void testSyncItemsListAuto() throws InterruptedException {
         print("test sync items list");
         // create an array of 3 items, the second of which has invalid _geoloc parameters
         // save() mocking connectivity error
-        // Sync()
-        // pendingSyncEntities()
-        // find() using networkstore
-        // find using syncstore
-        List<Person> personList = createErrListGeoloc();
-        testSyncItemsList(personList, 2, true, StoreType.AUTO);
+        // Sync(), Should return error for not pushed item
+        // pendingSyncEntities(), should return the item with invalid params
+        // find() using networkstore, should return the valid items
+        // find using syncstore, should return all items including the invalid one
+        testSyncItemsList(true, StoreType.AUTO);
     }
 }
