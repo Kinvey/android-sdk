@@ -24,6 +24,7 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
+import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -32,6 +33,7 @@ import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.dto.SyncCollections;
 import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -106,8 +108,7 @@ public class SyncManager {
 
     public List<SyncItem> popSingleItemQueue(String collectionName) {
         ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
-        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder())
-                .equals(COLLECTION, collectionName);
+        Query q = new Query(new MongoQueryFilter.MongoQueryFilterBuilder()).equals(COLLECTION, collectionName);
         return requestCache.get().size() !=0 ? requestCache.get(q) : null;
     }
 
@@ -134,7 +135,7 @@ public class SyncManager {
      * use {@link #enqueueRequest(String, NetworkManager, SyncItem.HttpVerb, String)}
      */
     @Deprecated
-    public void enqueueRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
+    public void enqueueRequest(String collectionName, AbstractKinveyClientRequest clientRequest) throws IOException {
         ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
         requestCache.save(createSyncRequest(collectionName, clientRequest));
     }
@@ -240,7 +241,7 @@ public class SyncManager {
         return new SyncItem(httpMethod, entityID, collectionName);
     }
 
-    public SyncRequest createSyncRequest(String collectionName, AbstractKinveyJsonClientRequest clientRequest) throws IOException {
+    public SyncRequest createSyncRequest(String collectionName, AbstractKinveyClientRequest clientRequest) throws IOException {
         HttpRequest httpRequest = clientRequest.buildHttpRequest();
         SyncRequest.SyncMetaData entityID = new SyncRequest.SyncMetaData();
 
@@ -250,17 +251,22 @@ public class SyncManager {
             entityID.data = os.toString(UTF_8);
         }
 
-        if (clientRequest.getJsonContent() != null) {
-            entityID.id = clientRequest.getJsonContent().get(ID).toString();
+        if (clientRequest instanceof AbstractKinveyJsonClientRequest) {
+            GenericJson content = ((AbstractKinveyJsonClientRequest) clientRequest).getJsonContent();
+            if (content != null) {
+                entityID.id = content.get(ID).toString();
+            }
         }
+
         if (clientRequest.containsKey(ENTITY_ID)){
             entityID.id = clientRequest.get(ENTITY_ID).toString();
         }
         entityID.customerVersion = clientRequest.getCustomerAppVersion();
         entityID.customheader = clientRequest.getCustomRequestProperties();
 
+        String requestMethod = clientRequest.getRequestMethod().toUpperCase();
         return new SyncRequest(
-                SyncRequest.HttpVerb.valueOf(clientRequest.getRequestMethod().toUpperCase()),
+                SyncRequest.HttpVerb.fromString(requestMethod),
                 entityID, httpRequest.getUrl(),
                 collectionName
         );
@@ -294,82 +300,99 @@ public class SyncManager {
         client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
 
         GenericJson entity = null;
+        List<GenericJson> entityList = null;
+
         GenericJson result = null;
 
         try {
             if (request.getEntityID().data != null) {
                 entity = client.getJsonFactory().createJsonParser(request.getEntityID().data).parse(GenericJson.class);
-
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        BaseDataStore networkDataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
+        BaseDataStore dataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
 
-        if (request.getHttpVerb().equals(SyncRequest.HttpVerb.PUT) || request.getHttpVerb().equals((SyncRequest.HttpVerb.POST))) {
+        switch (request.getHttpVerb()) {
+            case PUT:
+            case POST:
+                result = runSaveItemSyncRequest(request, entity, dataStore);
+                break;
+            case DELETE:
+                runDeleteQuerySyncRequest(request, dataStore);
+                break;
+            default:
+                runDeleteItemSyncRequest(request, dataStore);
+                break;
+        }
+        return result;
+    }
 
-            if (entity != null){
-                try {
-                    if (request.getHttpVerb().equals(SyncRequest.HttpVerb.POST)) {
-                        // Remvove the _id, since this is a create operation
-                        entity.set("_id", null);
-                    }
-                    result = networkDataStore.save(entity);
-                } catch (Exception e){
-                    enqueueRequest(request);
-                    throw e;
+    private GenericJson runSaveItemSyncRequest(SyncRequest request, GenericJson entity, BaseDataStore dataStore) throws IOException {
+        GenericJson result = null;
+        if (entity != null) {
+            try {
+                if (request.getHttpVerb().equals(SyncRequest.HttpVerb.POST)) {
+                    // Remvove the _id, since this is a create operation
+                    entity.set("_id", null);
                 }
-            }
-        } else if (request.getHttpVerb().equals(SyncRequest.HttpVerb.DELETE)){
-            String curID = request.getEntityID().id;
-
-            if (curID != null && curID.startsWith("{") && curID.endsWith("}")){
-                //it's a query
-                Query q = new Query().setQueryString(curID);
-                try {
-                    networkDataStore.delete(q);
-                } catch(Exception e) {
-                    enqueueRequest(request);
-                    throw e;
-                }
-
-
-            } else if (curID == null && request.getUrl().contains("?query=")) {
-
-                String url = request.getUrl();
-                int index = url.indexOf("?query=") + 7;
-                String qString = url.substring(index);
-                String decodedQuery = null;
-                try {
-                    decodedQuery = URLDecoder.decode(qString, UTF_8);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                if (decodedQuery == null) {
-                    return result;
-                }
-                Query q = new Query().setQueryString(decodedQuery);
-                try {
-                    networkDataStore.delete(q);
-                } catch(Exception e) {
-                    enqueueRequest(request);
-                    throw e;
-                }
-
-            } else {
-                    //it's a single ID
-                    try {
-                        networkDataStore.delete(request.getEntityID().id);
-                    } catch(Exception e) {
-                        //TODO: need to check the errors
-                        //enqueueRequest(request);
-                        throw e;
-                    }
+                result = dataStore.save(entity);
+            } catch (Exception e){
+                enqueueRequest(request);
+                throw e;
             }
         }
-
         return result;
+    }
+
+    private GenericJson runDeleteQuerySyncRequest(SyncRequest request, BaseDataStore dataStore) throws IOException {
+        GenericJson result = null;
+        String curID = request.getEntityID().id;
+
+        if (curID != null && curID.startsWith("{") && curID.endsWith("}")){
+            //it's a query
+            Query q = new Query().setQueryString(curID);
+            try {
+                dataStore.delete(q);
+            } catch(Exception e) {
+                enqueueRequest(request);
+                throw e;
+            }
+        } else if (curID == null && request.getUrl().contains("?query=")) {
+
+            String url = request.getUrl();
+            int index = url.indexOf("?query=") + 7;
+            String qString = url.substring(index);
+            String decodedQuery = null;
+            try {
+                decodedQuery = URLDecoder.decode(qString, UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            if (decodedQuery == null) {
+                return result;
+            }
+            Query q = new Query().setQueryString(decodedQuery);
+            try {
+                dataStore.delete(q);
+            } catch (Exception e) {
+                enqueueRequest(request);
+                throw e;
+            }
+        }
+        return result;
+    }
+
+    private void runDeleteItemSyncRequest(SyncRequest request, BaseDataStore dataStore) throws IOException {
+        //it's a single ID
+        try {
+            dataStore.delete(request.getEntityID().id);
+        } catch(Exception e) {
+            //TODO: need to check the errors
+            //enqueueRequest(request);
+            throw e;
+        }
     }
 
     public int clear(String collectionName) {

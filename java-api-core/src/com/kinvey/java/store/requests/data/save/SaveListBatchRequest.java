@@ -111,6 +111,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
 
     private List<List<T>> filterObjects(List<T> list) {
         String sourceId;
+        boolean isTempId;
         List<T> resultListOld = new ArrayList<>();
         List<T> resultListNew = new ArrayList<>();
         List<List<T>> objects = new ArrayList<>();
@@ -118,7 +119,8 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         objects.add(resultListNew);
         for (T object : list) {
             sourceId = (String) object.get(ID_FIELD_NAME);
-            if (sourceId == null || !networkManager.isTempId(object)) {
+            isTempId = networkManager.isTempId(object);
+            if (sourceId == null || !isTempId) {
                 resultListNew.add(object);
             } else {
                 resultListOld.add(object);
@@ -134,7 +136,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                 ret.add(networkManager.saveBlocking(object).execute());
             } catch (IOException e) {
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager, networkManager.isTempId(object) ? SyncRequest.HttpVerb.POST : SyncRequest.HttpVerb.PUT, (String)object.get(Constants._ID));
+                        networkManager, SyncRequest.HttpVerb.PUT, (String) object.get(Constants._ID));
                 //throw e;
             }
         }

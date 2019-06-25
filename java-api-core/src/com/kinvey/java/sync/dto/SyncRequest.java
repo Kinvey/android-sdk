@@ -47,9 +47,11 @@ public class SyncRequest extends GenericJson implements Serializable {
         }
 
         public static HttpVerb fromString(String verb){
-            for (HttpVerb v : HttpVerb.values()){
-                if (v.query.equals(verb)){
-                    return v;
+            if (verb != null) {
+                for (HttpVerb v : HttpVerb.values()){
+                    if (v.query.equals(verb)){
+                        return v;
+                    }
                 }
             }
             return null;
@@ -141,19 +143,27 @@ public class SyncRequest extends GenericJson implements Serializable {
         @Key
         public String data;
 
+        @Key
+        boolean bunchData = false;
+
         public SyncMetaData(){}
 
         public SyncMetaData(String id){
             this.id = id;
         }
 
-        public SyncMetaData(String id, String customerVersion, String customHeader){
+        public SyncMetaData(String id, String customerVersion, String customHeader) {
             this.id = id;
             this.customerVersion = customerVersion;
             this.customheader = customHeader;
         }
 
-        public SyncMetaData(String id, AbstractKinveyJsonClientRequest req){
+        public SyncMetaData(String id, String customerVersion, String customHeader, boolean bunchData) {
+            this(id, customerVersion, customHeader);
+            this.bunchData = bunchData;
+        }
+
+        public SyncMetaData(String id, AbstractKinveyJsonClientRequest req) {
             this.id = id;
             if (req != null){
                 this.customerVersion = req.getCustomerAppVersion();
@@ -161,7 +171,8 @@ public class SyncRequest extends GenericJson implements Serializable {
             }
 
         }
-        public SyncMetaData(GenericJson entity, AbstractKinveyJsonClientRequest req){
+
+        public SyncMetaData(GenericJson entity, AbstractKinveyJsonClientRequest req) {
             this.id = (String) entity.get("_id");
             if (req != null){
                 this.customerVersion = req.getCustomerAppVersion();
