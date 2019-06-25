@@ -3,6 +3,7 @@ package com.kinvey.androidTest.network;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
+import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,8 +26,11 @@ public class MockMultiInsertNetworkManager<T extends GenericJson> extends Networ
 
     @Override
     public Save saveBlocking(T entity) throws IOException {
-        useSingleSave = true;
-        return super.saveBlocking(entity);
+        Save result = super.saveBlocking(entity);
+        if (SyncRequest.HttpVerb.POST.toString().equals(result.getRequestMethod().toUpperCase())) {
+            useSingleSave = true;
+        }
+        return result;
     }
 
     @Override
