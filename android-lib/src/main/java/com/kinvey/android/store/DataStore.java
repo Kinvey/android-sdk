@@ -23,6 +23,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.common.base.Preconditions;
 import com.kinvey.BuildConfig;
 import com.kinvey.android.AsyncClientRequest;
+import com.kinvey.android.async.AsyncBatchPushRequest;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.KinveyCallbackHandler;
 import com.kinvey.android.KinveyLiveServiceCallbackHandler;
@@ -681,10 +682,22 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      *
      * @param callback KinveyPushCallback
      */
-    public void push(@NonNull KinveyPushCallback callback){
+    public void push(@NonNull KinveyPushCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
+        if (KINVEY_API_VERSION_5.equals(kinveyApiVersion)) {
+            pushBatch(callback);
+        } else {
+            pushV4(callback);
+        }
+    }
+
+    private void pushV4(@NonNull KinveyPushCallback callback) {
         new AsyncPushRequest<T>(getCollectionName(), client.getSyncManager(), client, storeType, networkManager, getCurrentClass(), callback).execute();
+    }
+
+    private void pushBatch(@NonNull KinveyPushCallback callback) {
+        new AsyncBatchPushRequest<T>(getCollectionName(), client.getSyncManager(), client, storeType, networkManager, getCurrentClass(), callback).execute();
     }
 
     /**

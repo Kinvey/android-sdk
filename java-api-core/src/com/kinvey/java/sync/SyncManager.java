@@ -19,13 +19,17 @@ package com.kinvey.java.sync;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonParser;
 import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
+import com.kinvey.java.KinveySaveBunchException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.model.KinveySyncSaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.BaseDataStore;
@@ -40,6 +44,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -144,7 +149,7 @@ public class SyncManager {
      * use {@link #enqueueRequests(String, NetworkManager, SyncItem.HttpVerb, List)}
      */
     @Deprecated
-    public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager,  List<T> ret) throws IOException {
+    public <T extends GenericJson> void enqueueRequests(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
         ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
         List<SyncRequest> syncRequests = new ArrayList<>();
         for (T t : ret) {
@@ -183,6 +188,13 @@ public class SyncManager {
             }
         }
         requestCache.save(syncRequests);
+    }
+
+    public <T extends GenericJson> void enqueueSaveBatchRequest(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
+        ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
+        SyncRequest request = createSyncRequest(collectionName, networkManager.saveBatchBlocking(ret));
+        request.getEntityID().bunchData = true;
+        requestCache.save(request);
     }
 
     public <T extends GenericJson> void enqueueSaveRequests(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
@@ -300,30 +312,40 @@ public class SyncManager {
         client.setCustomRequestProperties(new Gson().fromJson(request.getEntityID().customheader, GenericJson.class));
 
         GenericJson entity = null;
-        List<GenericJson> entityList = null;
-
+        Collection<GenericJson> entityList = null;
         GenericJson result = null;
+        boolean bunchData = request.getEntityID().bunchData;
+        String dataJson = request.getEntityID().data;
 
         try {
-            if (request.getEntityID().data != null) {
-                entity = client.getJsonFactory().createJsonParser(request.getEntityID().data).parse(GenericJson.class);
+            if (dataJson != null) {
+                JsonParser parser = client.getJsonFactory().createJsonParser(dataJson);
+                if (bunchData) {
+                    entityList = parser.parseArray(List.class, GenericJson.class);
+                } else {
+                    entity = parser.parse(GenericJson.class);
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.ERROR(e.getMessage());
         }
 
-        BaseDataStore dataStore = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
+        BaseDataStore dataStoreNet = BaseDataStore.collection(request.getCollectionName(), GenericJson.class, StoreType.NETWORK, client);
 
         switch (request.getHttpVerb()) {
             case PUT:
             case POST:
-                result = runSaveItemSyncRequest(request, entity, dataStore);
+                if (entityList != null && bunchData) {
+                    result = runSaveItemListSyncRequest(request, entityList, dataStoreNet);
+                } else {
+                    result = runSaveItemSyncRequest(request, entity, dataStoreNet);
+                }
                 break;
             case DELETE:
-                runDeleteQuerySyncRequest(request, dataStore);
+                runDeleteQuerySyncRequest(request, dataStoreNet);
                 break;
             default:
-                runDeleteItemSyncRequest(request, dataStore);
+                runDeleteItemSyncRequest(request, dataStoreNet);
                 break;
         }
         return result;
@@ -333,10 +355,7 @@ public class SyncManager {
         GenericJson result = null;
         if (entity != null) {
             try {
-                if (request.getHttpVerb().equals(SyncRequest.HttpVerb.POST)) {
-                    // Remvove the _id, since this is a create operation
-                    entity.set("_id", null);
-                }
+                checkEntityId(request, entity);
                 result = dataStore.save(entity);
             } catch (Exception e){
                 enqueueRequest(request);
@@ -346,7 +365,36 @@ public class SyncManager {
         return result;
     }
 
-    private GenericJson runDeleteQuerySyncRequest(SyncRequest request, BaseDataStore dataStore) throws IOException {
+    private KinveySyncSaveBatchResponse runSaveItemListSyncRequest(SyncRequest request,
+                  Collection<GenericJson> entityList, BaseDataStore dataStore) throws IOException {
+        KinveySyncSaveBatchResponse result = null;
+        if (entityList != null) {
+            try {
+                for (GenericJson entity : entityList) {
+                    checkEntityId(request, entity);
+                }
+                List<GenericJson> resultItems = dataStore.saveBatch(entityList);
+                result = new KinveySyncSaveBatchResponse(resultItems, null);
+            } catch (KinveySaveBunchException e) {
+                result = new KinveySyncSaveBatchResponse(e.getEntities(), e.getErrors());
+                //throw e;
+            } catch (Exception e) {
+                enqueueRequest(request);
+                throw e;
+            }
+        }
+        return result;
+    }
+
+    private GenericJson checkEntityId(SyncRequest request, GenericJson entity) {
+        if (request.getHttpVerb().equals(SyncRequest.HttpVerb.POST)) {
+            // Remvove the _id, since this is a create operation
+            entity.set("_id", null);
+        }
+        return entity;
+    }
+
+    private void runDeleteQuerySyncRequest(SyncRequest request, BaseDataStore dataStore) throws IOException {
         GenericJson result = null;
         String curID = request.getEntityID().id;
 
@@ -371,7 +419,7 @@ public class SyncManager {
                 e.printStackTrace();
             }
             if (decodedQuery == null) {
-                return result;
+                return;
             }
             Query q = new Query().setQueryString(decodedQuery);
             try {
@@ -381,7 +429,6 @@ public class SyncManager {
                 throw e;
             }
         }
-        return result;
     }
 
     private void runDeleteItemSyncRequest(SyncRequest request, BaseDataStore dataStore) throws IOException {

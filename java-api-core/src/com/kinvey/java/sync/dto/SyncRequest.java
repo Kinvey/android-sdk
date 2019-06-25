@@ -18,9 +18,11 @@ package com.kinvey.java.sync.dto;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Key;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -144,7 +146,7 @@ public class SyncRequest extends GenericJson implements Serializable {
         public String data;
 
         @Key
-        boolean bunchData = false;
+        public boolean bunchData = false;
 
         public SyncMetaData(){}
 
@@ -180,8 +182,17 @@ public class SyncRequest extends GenericJson implements Serializable {
             }
         }
 
-
-
+        public GenericJson getEntity() {
+            GenericJson entity = null;
+            try {
+                JsonFactory factory = getFactory();
+                if (factory != null && data != null) {
+                    entity = factory.createJsonParser(data).parse(GenericJson.class);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return entity;
+        }
     }
-
 }
