@@ -5,12 +5,12 @@ import com.kinvey.java.model.KinveyBatchInsertError;
 import java.io.IOException;
 import java.util.List;
 
-public class KinveySaveBunchException extends IOException {
+public class KinveySaveBatchException extends IOException {
 
     private List<KinveyBatchInsertError> errors;
     private List entities;
 
-    public KinveySaveBunchException(List<KinveyBatchInsertError> errors, List entities) {
+    public KinveySaveBatchException(List<KinveyBatchInsertError> errors, List entities) {
         this.errors = errors;
         this.entities = entities;
     }

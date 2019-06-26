@@ -18,7 +18,7 @@ package com.kinvey.java.store.requests.data.save;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.Constants;
-import com.kinvey.java.KinveySaveBunchException;
+import com.kinvey.java.KinveySaveBatchException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.KinveySaveBatchResponse;
@@ -26,7 +26,6 @@ import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushBatchRequest;
-import com.kinvey.java.store.requests.data.PushRequest;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
@@ -59,7 +58,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         List<List<T>> listObjects = filterObjects((List<T>) objects);
         List<T> updateList = listObjects.get(0);
         List<T> saveList   = listObjects.get(1);
-        KinveySaveBunchException exception = null;
+        KinveySaveBatchException exception = null;
         switch (writePolicy) {
             case FORCE_LOCAL:
                 retList = cache.save(objects);
@@ -76,7 +75,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                             retList = respResultList;
                         }
                     } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-                        exception = new KinveySaveBunchException(response.getErrors(), response.getEntities());
+                        exception = new KinveySaveBatchException(response.getErrors(), response.getEntities());
                     }
                 }
                 List<T> updateResultList = updateObjects(updateList);
@@ -98,7 +97,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                             retList = respResultList;
                         }
                     } else if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-                        exception = new KinveySaveBunchException(response.getErrors(), response.getEntities());
+                        exception = new KinveySaveBatchException(response.getErrors(), response.getEntities());
                     }
                 }
                 retList.addAll(updateResultList);

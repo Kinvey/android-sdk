@@ -5,7 +5,6 @@ import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
@@ -24,7 +23,7 @@ import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
-import com.kinvey.java.KinveySaveBunchException;
+import com.kinvey.java.KinveySaveBatchException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.AbstractKinveyClient;
@@ -66,17 +65,18 @@ public class DataStoreMultiInsertTest {
     private static final int MAX_PERSONS_COUNT = 5;
     private static final String ERR_GEOLOC = "#!@%^&*())_+?{}";
 
+    private static final String ERR_GEOLOC_MSG = "The value specified for one of the request parameters is out of range";
+    private static final String ERR_PERMISSION_MSG = "The credentials used to authenticate this request are not authorized to run this operation";
+    private static final String ERR_EMPTY_LIST_MSG = "Entity list cannot be empty";
+
     private Client client;
-    private Client unauthClient;
 
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         AbstractClient.KINVEY_API_VERSION = "5";
         client = new Client.Builder(mMockContext).build();
-        unauthClient = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        unauthClient.enableDebugLogging();
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -623,11 +623,15 @@ public class DataStoreMultiInsertTest {
         return result;
     }
 
-    private boolean checkErrorsIndexes(List<KinveyBatchInsertError> errors, int[] checkIndexes) throws AssertionError {
+    private boolean checkBatchResponseErrors(List<KinveyBatchInsertError> errors, int[] checkIndexes, boolean checkErrMsg, String[] errMessages) throws AssertionError {
 
         assertNotNull(errors);
         assertNotNull(checkIndexes);
         assertEquals(errors.size(), checkIndexes.length);
+        if (checkErrMsg) {
+            assertNotNull(errMessages);
+            assertEquals(checkIndexes.length, errMessages.length);
+        }
 
         boolean result = true;
         int curIdx = 0;
@@ -635,9 +639,16 @@ public class DataStoreMultiInsertTest {
         for (int idx : checkIndexes) {
             err = errors.get(curIdx);
             result &= idx == err.getIndex();
+            if (checkErrMsg) {
+                result &= err.getErrmsg().contains(errMessages[curIdx]);
+            }
             curIdx++;
         }
         return result;
+    }
+
+    private boolean checkBatchResponseErrors(List<KinveyBatchInsertError> errors, int[] checkIndexes) throws AssertionError {
+        return checkBatchResponseErrors(errors, checkIndexes, false, null);
     }
 
     private <T extends GenericJson> boolean checkSyncItems(List<SyncItem> list, int checkCount, SyncItem.HttpVerb requestMethod) throws AssertionError {
@@ -671,7 +682,7 @@ public class DataStoreMultiInsertTest {
         Throwable error = saveCallback.error;
         assertNotNull(error);
         assertEquals(error.getClass(), IllegalStateException.class);
-        assertTrue(error.getMessage().contains("Entity list cannot be empty"));
+        assertTrue(error.getMessage().contains(ERR_EMPTY_LIST_MSG));
     }
 
     // save an item without _id
@@ -735,9 +746,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveySyncCallback syncCallback = sync(personStoreCurrent, LONG_TIMEOUT);
         assertNotNull(syncCallback.error);
-        if (syncCallback.error instanceof KinveySaveBunchException) {
-            assertTrue(checkIfPersonItemsAtRightIndex(personList, ((KinveySaveBunchException) syncCallback.error).getEntities(), checkIndexesSuccess, false));
-            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) syncCallback.error).getErrors(), checkIndexesErr));
+        if (syncCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) syncCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) syncCallback.error).getErrors();
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages));
         }
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
@@ -924,11 +939,12 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
             assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexes, true));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexes));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG, ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexes, true, errMessages));
         }
     }
 
@@ -949,11 +965,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
-            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, true));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexesErr));
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG, ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages));
         }
 
         DefaultKinveyReadCallback findCallback = find(personStore, LONG_TIMEOUT);
@@ -977,11 +995,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(personStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
             assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexesErr));
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG, ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages));
         }
 
         DefaultKinveyReadCallback findCallback = find(personStore, LONG_TIMEOUT);
@@ -1280,10 +1300,14 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
         assertNotNull(pushCallback.error);
-        if (pushCallback.error instanceof KinveySaveBunchException) {
-            assertTrue(checkIfItemsAtRightIndex(entitySetList, ((KinveySaveBunchException) pushCallback.error).getEntities(),
+        if (pushCallback.error instanceof KinveySaveBatchException) {
+
+            List<EntitySet> entityList = ((KinveySaveBatchException) pushCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) pushCallback.error).getErrors();
+            assertTrue(checkIfItemsAtRightIndex(entitySetList, entityList,
                     itemsErrorIndexes, EntitySet.DESCRIPTION_KEY, true, false));
-            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) pushCallback.error).getErrors(), itemsErrorIndexes));
+            String[] errMessages = new String[] { ERR_PERMISSION_MSG, ERR_PERMISSION_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, itemsErrorIndexes, true, errMessages));
         }
 
         List<SyncItem> syncItems = pendingSyncEntities(EntitySet.COLLECTION);
@@ -1315,7 +1339,7 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
         assertNotNull(pushCallback.result);
-        assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
+        assertEquals(1, pushCallback.result.getSuccessCount());
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertNotNull(syncItems);
@@ -1669,11 +1693,12 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(autoStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
             assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexes, true));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexes));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG, ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexes, true, errMessages));
         }
 
         DefaultKinveyReadCallback findCallback = find(syncStore, LONG_TIMEOUT);
@@ -1690,10 +1715,10 @@ public class DataStoreMultiInsertTest {
     public void testSaveListReturnErrorArrayForSomeItemsFailAuto() throws InterruptedException {
         print("should return an entities and errors when some requests fail and some succeed");
         // create an array of items with no _id and the second of them should have invalid _geoloc params
-        // save using the array above
-        // pendingSyncEntities()
-        // find() using syncstore
-        // find() using networkstore
+        // save using the array above, should return an array of entities where the second one is null, and an array of errors where the index of the one entry is 1
+        // pendingSyncEntities(), should return the items that failed with their respective operations
+        // find() using syncstore, should return all items from step 1 the successful items with valid ect and lmt properties and the failed one with local:true property
+        // find() using networkstore, should return the successful items
         List<Person> personList = createErrList1();
         int[] checkIndexesSuccess = new int[] {0};
         int[] checkIndexesErr = new int[] {1};
@@ -1708,11 +1733,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(autoStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
-            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, true));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexesErr));
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages));
         }
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
@@ -1749,11 +1776,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyClientListCallback saveCallback = saveList(autoStore, personList);
         assertNotNull(saveCallback.error);
-        if (saveCallback.error instanceof KinveySaveBunchException) {
-            List<Person> resultEntities = ((KinveySaveBunchException) saveCallback.error).getEntities();
-            List<KinveyBatchInsertError> errorsList = ((KinveySaveBunchException) saveCallback.error).getErrors();
+        if (saveCallback.error instanceof KinveySaveBatchException) {
+            List<Person> resultEntities = ((KinveySaveBatchException) saveCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) saveCallback.error).getErrors();
             assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false));
-            assertTrue(checkErrorsIndexes(errorsList, checkIndexesErr));
+            assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true));
+            String[] errMessages = new String[] { ERR_GEOLOC_MSG, ERR_GEOLOC_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages));
         }
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
@@ -1888,10 +1917,13 @@ public class DataStoreMultiInsertTest {
 
         DefaultKinveyPushCallback pushCallback = push(autoSync, LONG_TIMEOUT);
         assertNotNull(pushCallback.error);
-        if (pushCallback.error instanceof KinveySaveBunchException) {
-            assertTrue(checkIfItemsAtRightIndex(entitySetList, ((KinveySaveBunchException) pushCallback.error).getEntities(),
+        if (pushCallback.error instanceof KinveySaveBatchException) {
+            List<EntitySet> entityList = ((KinveySaveBatchException) pushCallback.error).getEntities();
+            List<KinveyBatchInsertError> errorsList = ((KinveySaveBatchException) pushCallback.error).getErrors();
+            assertTrue(checkIfItemsAtRightIndex(entitySetList, entityList,
                     itemsErrorIndexes, EntitySet.DESCRIPTION_KEY, true, false));
-            assertTrue(checkErrorsIndexes(((KinveySaveBunchException) pushCallback.error).getErrors(), itemsErrorIndexes));
+            String[] errMessages = new String[] { ERR_PERMISSION_MSG, ERR_PERMISSION_MSG };
+            assertTrue(checkBatchResponseErrors(errorsList, itemsErrorIndexes, true, errMessages));
         }
 
         List<SyncItem> syncItems = pendingSyncEntities(EntitySet.COLLECTION);
