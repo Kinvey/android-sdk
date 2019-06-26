@@ -16,13 +16,12 @@
 
 package com.kinvey.java.sync;
 
-import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonParser;
 import com.google.gson.Gson;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.KinveySaveBunchException;
+import com.kinvey.java.KinveySaveBatchException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -37,7 +36,6 @@ import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.dto.SyncCollections;
 import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,7 +43,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -375,7 +372,7 @@ public class SyncManager {
                 }
                 List<GenericJson> resultItems = dataStore.saveBatch(entityList);
                 result = new KinveySyncSaveBatchResponse(resultItems, null);
-            } catch (KinveySaveBunchException e) {
+            } catch (KinveySaveBatchException e) {
                 result = new KinveySyncSaveBatchResponse(e.getEntities(), e.getErrors());
                 //throw e;
             } catch (Exception e) {

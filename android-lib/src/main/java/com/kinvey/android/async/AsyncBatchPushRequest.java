@@ -148,6 +148,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
                 callback.onProgress(pushResponse.getSuccessCount(), fullCount);
             }
         }
+        pushResponse.setListOfExceptions(errors);
         KinveySyncSaveBatchResponse batchResponse = null;
         if (!batchSyncItems.isEmpty()) {
             List<T> saveItems = getSaveItems(batchSyncItems, cache);
@@ -159,14 +160,13 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
             if (batchResponse.getEntityList() != null) {
                 resultAllItems.addAll(batchResponse.getEntityList());
                 progress += batchResponse.getEntityList().size();
-                pushResponse.setSuccessCount(++progress);
+                pushResponse.setSuccessCount(progress);
             }
             if (batchResponse.getErrors() != null) {
                 pushResponse.setErrors(batchResponse.getErrors());
             }
         }
         pushResponse.setEntities(resultAllItems);
-        pushResponse.setListOfExceptions(errors);
         return pushResponse;
     }
 
