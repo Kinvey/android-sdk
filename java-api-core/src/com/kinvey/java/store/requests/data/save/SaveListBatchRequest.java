@@ -22,7 +22,7 @@ import com.kinvey.java.KinveySaveBatchException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.model.KinveyBatchInsertError;
-import com.kinvey.java.model.KinveyPutItemError;
+import com.kinvey.java.model.KinveyUpdateSingleItemError;
 import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.model.KinveyUpdateObjectsResponse;
 import com.kinvey.java.network.NetworkManager;
@@ -59,7 +59,6 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
     @Override
     public List<T> execute() throws IOException {
         List<T> retList = new ArrayList<>();
-
         switch (writePolicy) {
             case FORCE_LOCAL:
                 retList = cache.save(objects);
@@ -75,18 +74,17 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
                 }
                 break;
             case FORCE_NETWORK:
-                Logger.INFO("Start saving entities");
                 retList = runSaveItemsRequest(objects);
                 if (exception != null) {
                     throw exception;
                 }
-                Logger.INFO("Finish saving entities");
                 break;
         }
         return retList;
     }
 
     private List<T> runSaveItemsRequest(Iterable<T> objects) throws IOException {
+        Logger.INFO("Start saving entities");
         List<List<T>> listObjects = filterObjects((List<T>) objects);
         List<T> updateList = listObjects.get(0);
         List<T> saveList   = listObjects.get(1);
@@ -105,6 +103,7 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
             }
         }
         retList.addAll(updateResponse.getEntities());
+        Logger.INFO("Finish saving entities");
         return retList;
     }
 
@@ -153,13 +152,13 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
 
     private KinveyUpdateObjectsResponse<T> updateObjects(List<T> items) throws IOException {
         List<T> ret = new ArrayList<>();
-        List<KinveyPutItemError> errors = new ArrayList<>();
+        List<KinveyUpdateSingleItemError> errors = new ArrayList<>();
         KinveyUpdateObjectsResponse result = new KinveyUpdateObjectsResponse();
         for (T object : items) {
             try {
                 ret.add(networkManager.saveBlocking(object).execute());
             } catch (IOException e) {
-                errors.add(new KinveyPutItemError(e, object));
+                errors.add(new KinveyUpdateSingleItemError(e, object));
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
                         networkManager, SyncRequest.HttpVerb.PUT, (String) object.get(Constants._ID));
             }

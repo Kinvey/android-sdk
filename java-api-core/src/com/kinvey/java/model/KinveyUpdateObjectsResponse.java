@@ -10,7 +10,7 @@ public class KinveyUpdateObjectsResponse<T> extends KinveyErrorResponse {
     private List<T> entities;
 
     @Key
-    private List<KinveyPutItemError> errors;
+    private List<KinveyUpdateSingleItemError> errors;
 
     public List<T> getEntities() {
         return entities;
@@ -20,11 +20,11 @@ public class KinveyUpdateObjectsResponse<T> extends KinveyErrorResponse {
         this.entities = entities;
     }
 
-    public List<KinveyPutItemError> getErrors() {
+    public List<KinveyUpdateSingleItemError> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<KinveyPutItemError> errors) {
+    public void setErrors(List<KinveyUpdateSingleItemError> errors) {
         this.errors = errors;
     }
 

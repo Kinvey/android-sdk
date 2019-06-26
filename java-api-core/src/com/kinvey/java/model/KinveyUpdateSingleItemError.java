@@ -5,9 +5,9 @@ import com.google.api.client.util.Key;
 
 import java.io.IOException;
 
-public class KinveyPutItemError extends IOException {
+public class KinveyUpdateSingleItemError extends IOException {
 
-    public KinveyPutItemError(IOException e, GenericJson entity) {
+    public KinveyUpdateSingleItemError(Exception e, GenericJson entity) {
         this.entity = entity;
         this.errmsg = e.getMessage();
     }

@@ -1,7 +1,7 @@
 package com.kinvey.java;
 
 import com.kinvey.java.model.KinveyBatchInsertError;
-import com.kinvey.java.model.KinveyPutItemError;
+import com.kinvey.java.model.KinveyUpdateSingleItemError;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.List;
 public class KinveySaveBatchException extends IOException {
 
     private List<KinveyBatchInsertError> postErrors;
-    private List<KinveyPutItemError> putErrors;
+    private List<KinveyUpdateSingleItemError> putErrors;
     private List entities;
 
-    public KinveySaveBatchException(List<KinveyBatchInsertError> postErrors, List<KinveyPutItemError> putErrors, List entities) {
+    public KinveySaveBatchException(List<KinveyBatchInsertError> postErrors, List<KinveyUpdateSingleItemError> putErrors, List entities) {
         this.postErrors = postErrors;
         this.putErrors = putErrors;
         this.entities = entities;
@@ -34,11 +34,11 @@ public class KinveySaveBatchException extends IOException {
         this.postErrors = errors;
     }
 
-    public void setPutErrors(List<KinveyPutItemError> putErrors) {
+    public void setPutErrors(List<KinveyUpdateSingleItemError> putErrors) {
         this.putErrors = putErrors;
     }
 
-    public List<KinveyPutItemError> getPutErrors() {
+    public List<KinveyUpdateSingleItemError> getPutErrors() {
         return putErrors;
     }
 

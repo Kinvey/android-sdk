@@ -29,6 +29,7 @@ import com.kinvey.java.KinveyException;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveySyncSaveBatchResponse;
+import com.kinvey.java.model.KinveyUpdateSingleItemError;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.store.StoreType;
 import com.kinvey.java.sync.SyncManager;
@@ -104,7 +105,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
         List<SyncItem> batchSyncItems = new ArrayList<>();
 
         String id;
-        T item;
+        T item = null;
         ICache<T> cache = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE);
         SyncRequest syncRequest = null;
 
@@ -140,7 +141,8 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
                         pushResponse.setSuccessCount(++progress);
                     }
                 } catch (AccessControlException | KinveyException e) { //TODO check Exception
-                    errors.add(e);
+                    KinveyUpdateSingleItemError err = new KinveyUpdateSingleItemError(e, item);
+                    errors.add(err);
                 } catch (Exception e) {
                     callback.onFailure(e);
                 }
