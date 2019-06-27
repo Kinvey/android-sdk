@@ -195,7 +195,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
     }
 
     private KinveySyncSaveBatchResponse processBatchSyncRequest(List<T> saveItems) throws IOException {
-        SyncRequest syncRequest = manager.createSyncRequest(collection, networkManager.saveBatchBlocking(saveItems));
+        SyncRequest syncRequest = manager.createSaveBatchSyncRequest(collection, networkManager, saveItems);
         GenericJson resultItem = manager.executeRequest(client, syncRequest);
         if (resultItem instanceof KinveySyncSaveBatchResponse) {
             return ((KinveySyncSaveBatchResponse) resultItem);

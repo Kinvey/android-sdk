@@ -187,13 +187,6 @@ public class SyncManager {
         requestCache.save(syncRequests);
     }
 
-    public <T extends GenericJson> void enqueueSaveBatchRequest(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
-        ICache<SyncRequest> requestCache = cacheManager.getCache(SYNC, SyncRequest.class, Long.MAX_VALUE);
-        SyncRequest request = createSyncRequest(collectionName, networkManager.saveBatchBlocking(ret));
-        request.getEntityID().bunchData = true;
-        requestCache.save(request);
-    }
-
     public <T extends GenericJson> void enqueueSaveRequests(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
         ICache<SyncItem> requestCache = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem.class, Long.MAX_VALUE);
         List<SyncItem> syncRequests = new ArrayList<>();
@@ -248,6 +241,13 @@ public class SyncManager {
         entityID.customheader = networkManager.getCustomRequestProperties() != null ?
                 (String) networkManager.getCustomRequestProperties().get("X-Kinvey-Custom-Request-Properties") : null;
         return new SyncItem(httpMethod, entityID, collectionName);
+    }
+
+
+    public <T extends GenericJson> SyncRequest createSaveBatchSyncRequest(String collectionName, NetworkManager<T> networkManager, List<T> ret) throws IOException {
+        SyncRequest request = createSyncRequest(collectionName, networkManager.saveBatchBlocking(ret));
+        request.getEntityID().bunchData = true;
+        return request;
     }
 
     public SyncRequest createSyncRequest(String collectionName, AbstractKinveyClientRequest clientRequest) throws IOException {
