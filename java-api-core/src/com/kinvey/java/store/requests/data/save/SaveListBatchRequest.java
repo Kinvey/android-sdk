@@ -31,12 +31,14 @@ import com.kinvey.java.store.WritePolicy;
 import com.kinvey.java.store.requests.data.IRequest;
 import com.kinvey.java.store.requests.data.PushBatchRequest;
 import com.kinvey.java.sync.SyncManager;
+import com.kinvey.java.sync.dto.SyncItem;
 import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kinvey.java.Constants._ID;
 import static com.kinvey.java.network.NetworkManager.ID_FIELD_NAME;
 
 public class SaveListBatchRequest<T extends GenericJson> implements IRequest<List<T>> {
@@ -91,8 +93,8 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         Logger.INFO("Start saving entities");
         filterObjects((List<T>) objects);
         KinveySaveBatchResponse<T> response = null;
-        List<T> batchRespEntities = null;
-        List<KinveyBatchInsertError> batchRespErrors = null;
+        List<T> batchSaveEntities = null;
+        List<KinveyBatchInsertError> batchSaveErrors = null;
         List<T> retList = new ArrayList<>();
 
         KinveyUpdateObjectsResponse updateResponse = updateObjects(updateList);
@@ -100,48 +102,74 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
 
         if (!saveList.isEmpty()) {
             try {
-                response = networkManager.saveBatchBlocking(saveList).execute();
+                List<T> batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, saveList);
+                response = networkManager.saveBatchBlocking(batchList).execute();
             } catch(KinveyJsonResponseException e) {
                 throw e;
             } catch (IOException e) {
                 wasException = true;
-                enqueueSaveRequests(saveList);
+                batchSaveEntities = saveList;
+                enqueueSaveRequests(saveList, SyncRequest.HttpVerb.POST);
             }
             if (response != null) {
-                batchRespEntities = response.getEntities();
+                batchSaveEntities = response.getEntities();
                 if (!response.haveErrors()) {
-                    if (batchRespEntities != null) {
-                        retList.addAll(batchRespEntities);
+                    if (batchSaveEntities != null) {
+                        retList.addAll(batchSaveEntities);
                     }
                 } else {
                     wasException = true;
-                    batchRespErrors = response.getErrors();
-                    enqueueBatchErrorsRequests(response);
+                    batchSaveErrors = response.getErrors();
+                    enqueueBatchErrorsRequests(saveList, response);
                 }
+                removeSuccessBatchItemsFromCache(saveList, batchSaveErrors);
             }
         }
-
         if (wasException) {
-            exception = new KinveySaveBatchException(batchRespErrors, updateResponse.getErrors(), batchRespEntities);
+            exception = new KinveySaveBatchException(batchSaveErrors, updateResponse.getErrors(), batchSaveEntities);
         }
         Logger.INFO("Finish saving entities");
         return retList;
     }
 
-    private void enqueueBatchErrorsRequests(KinveySaveBatchResponse<T> response) throws IOException {
-        List<T> respResultList = response.getEntities();
-        List<T> errorItems = new ArrayList<>();
-        if (respResultList != null) {
-            for (KinveyBatchInsertError err : response.getErrors()) {
-                T item = respResultList.get(err.getIndex());
-                errorItems.add(item);
-            }
+    private List<T> prepareSaveItems(SyncRequest.HttpVerb requestType, List<T> itemsList) {
+        List<T> resultList = new ArrayList<>();
+        T resultItem;
+        for(T item : itemsList) {
+            resultItem = checkEntityId(requestType, item);
+            resultList.add(resultItem);
         }
-        enqueueSaveRequests(errorItems);
+        return resultList;
     }
 
-    private void enqueueSaveRequests(List<T> errorItems) throws IOException {
-        syncManager.enqueueSaveRequests(networkManager.getCollectionName(), networkManager, errorItems);
+    private T checkEntityId(SyncRequest.HttpVerb requestType, T entity) {
+        if (SyncRequest.HttpVerb.POST.equals(requestType)) {
+            if (entity.get(_ID) != null) {
+                // Remvove the _id, since this is a create operation
+                return (T) entity.clone().set(_ID, null);
+            }
+        }
+        return entity;
+    }
+
+    private void enqueueBatchErrorsRequests(List<T> saveList, KinveySaveBatchResponse<T> response) throws IOException {
+        List<T> errorItems = new ArrayList<>();
+        List<Integer> errIndexes = getErrIndexes(response.getErrors());
+        if (saveList != null) {
+            for (int idx : errIndexes) {
+                if (saveList.size() < idx) {
+                    T item = saveList.get(idx);
+                    errorItems.add(item);
+                }
+            }
+        }
+        enqueueSaveRequests(errorItems, SyncRequest.HttpVerb.POST);
+    }
+
+    private void enqueueSaveRequests(List<T> errorItems, SyncRequest.HttpVerb requestType) throws IOException {
+        for (T item : errorItems) {
+            syncManager.enqueueRequest(networkManager.getCollectionName(), networkManager, requestType, (String) item.get(Constants._ID));
+        }
     }
 
     private void doPushRequest() {
@@ -177,16 +205,53 @@ public class SaveListBatchRequest<T extends GenericJson> implements IRequest<Lis
         for (T object : items) {
             try {
                 ret.add(networkManager.saveBlocking(object).execute());
+                removeFromCache(object);
             } catch (IOException e) {
                 wasException = true;
                 errors.add(new KinveyUpdateSingleItemError(e, object));
                 syncManager.enqueueRequest(networkManager.getCollectionName(),
-                        networkManager, SyncRequest.HttpVerb.PUT, (String) object.get(Constants._ID));
+                        networkManager, SyncRequest.HttpVerb.PUT, (String) object.get(_ID));
             }
         }
         result.setEntities(ret);
         result.setErrors(errors);
         return result;
+    }
+
+    private List<Integer> getErrIndexes(List<KinveyBatchInsertError> errList) {
+        List<Integer> indexesList = new ArrayList<>();
+        if (errList != null && !errList.isEmpty()) {
+            for (KinveyBatchInsertError err : errList) {
+                indexesList.add(err.getIndex());
+            }
+        }
+        return indexesList;
+    }
+
+    private void removeSuccessBatchItemsFromCache(List<T> saveList, List<KinveyBatchInsertError> errList) {
+        if (cache == null) {
+            return;
+        }
+        List<Integer> errIndexes = getErrIndexes(errList);
+        int curIdx = 0;
+        for (T item : saveList) {
+            if (!errIndexes.contains(curIdx)) {
+                removeFromCache(item);
+            }
+        }
+    }
+
+    private String removeFromCache(T item) {
+        String itemId = "";
+        if (cache == null) {
+            return itemId;
+        }
+        Object itemObj = item.get(_ID);
+        if (itemObj != null) {
+            itemId = itemObj.toString();
+            cache.delete(itemId);
+        }
+        return itemId;
     }
 
     @Override

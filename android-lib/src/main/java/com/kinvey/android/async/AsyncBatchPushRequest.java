@@ -43,6 +43,8 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kinvey.java.Constants._ID;
+
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
@@ -165,7 +167,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
                         GenericJson resultItem = runSingleSyncRequest(syncRequest);
                         resultSingleItems.add(resultItem);
                         pushResponse.setSuccessCount(++progress);
-                        manager.deleteCachedItem((String) syncItem.get(Constants._ID));
+                        manager.deleteCachedItem((String) syncItem.get(_ID));
                     }
                 } catch (IOException e) {
                     KinveyUpdateSingleItemError err = new KinveyUpdateSingleItemError(e, item);
@@ -181,17 +183,14 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
 
     private KinveySyncSaveBatchResponse processBatchSyncRequest(List<SyncItem> syncItems, List<T> saveItems) throws IOException {
         SyncRequest syncRequest = manager.createSaveBatchSyncRequest(collection, networkManager, saveItems);
-        GenericJson resultItem = null;
+        KinveySyncSaveBatchResponse<T> resultList = null;
         try {
-            resultItem = manager.executeRequest(client, syncRequest);
-            removeBatchTempItems(syncItems);
+            resultList = manager.executeBatchRequest(client, networkManager, syncRequest);
+            removeBatchTempItems(syncItems, resultList);
         } catch (IOException e) {
             Logger.ERROR(e.getMessage());
         }
-        if (resultItem instanceof KinveySyncSaveBatchResponse) {
-            return ((KinveySyncSaveBatchResponse) resultItem);
-        }
-        return null;
+        return resultList;
     }
 
     private GenericJson runSingleSyncRequest(@Nullable SyncRequest syncRequest) throws IOException {
@@ -201,7 +200,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
                 String tempID = syncRequest.getEntityID().id;
                 resultItem = manager.executeRequest(client, syncRequest);
                 T temp = cache.get(tempID);
-                temp.set("_id", resultItem.get("_id"));
+                temp.set(_ID, resultItem.get(_ID));
                 cache.delete(tempID);
                 cache.save(temp);
             } else {
@@ -215,12 +214,24 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
         return resultItem;
     }
 
-    private void removeBatchTempItems(List<SyncItem> batchSyncItems) {
-        String tempID = "";
-        for (SyncItem item : batchSyncItems) {
-            tempID = (String) item.get(Constants._ID);
-            if (tempID != null && !tempID.isEmpty()) {
-                manager.deleteCachedItem(tempID);
+    private void removeBatchTempItems(List<SyncItem> batchSyncItems, KinveySyncSaveBatchResponse<T> result) {
+        String tempID;
+        String entityID;
+        if (batchSyncItems != null) {
+            for (SyncItem item : batchSyncItems) {
+                tempID = (String) item.get(_ID);
+                entityID = item.getEntityID().id;
+                if (tempID != null) {
+                    manager.deleteCachedItem(tempID);
+                    cache.delete(entityID);
+                }
+            }
+        }
+        if (result != null && result.getEntityList() != null) {
+            for (T item : result.getEntityList()) {
+                if (item != null) {
+                    cache.save(item);
+                }
             }
         }
     }

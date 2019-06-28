@@ -74,9 +74,9 @@ public class DataStoreMultiInsertTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AbstractClient.KINVEY_API_VERSION = "5";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        AbstractClient.KINVEY_API_VERSION = "5";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {

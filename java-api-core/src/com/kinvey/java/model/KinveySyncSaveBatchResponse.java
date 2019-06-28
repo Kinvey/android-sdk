@@ -5,23 +5,21 @@ import com.google.api.client.util.Key;
 
 import java.util.List;
 
-public class KinveySyncSaveBatchResponse extends GenericJson {
+public class KinveySyncSaveBatchResponse<T> extends GenericJson {
 
-    @Key
-    private List<GenericJson> entityList;
-    @Key
+    private List<T> entityList;
     private List<KinveyBatchInsertError> errors;
 
-    public KinveySyncSaveBatchResponse(List<GenericJson> entityList, List<KinveyBatchInsertError> errors) {
+    public KinveySyncSaveBatchResponse(List<T> entityList, List<KinveyBatchInsertError> errors) {
         this.entityList = entityList;
         this.errors = errors;
     }
 
-    public List<GenericJson> getEntityList() {
+    public List<T> getEntityList() {
         return entityList;
     }
 
-    public void setEntityList(List<GenericJson> entityList) {
+    public void setEntityList(List<T> entityList) {
         this.entityList = entityList;
     }
 
