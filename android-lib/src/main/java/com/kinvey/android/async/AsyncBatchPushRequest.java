@@ -26,6 +26,7 @@ import com.kinvey.android.sync.KinveyPushResponse;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveySyncSaveBatchResponse;
@@ -59,7 +60,10 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
     private KinveyPushCallback callback;
     private int progress = 0;
     private int fullCount = 0;
+    private ICache<T> cache;
+
     private List<Exception> errors = new ArrayList<>();
+    private List<SyncItem> batchSyncItems = new ArrayList<>();
 
     /**
      * Async push request constructor
@@ -84,6 +88,7 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
         this.networkManager = networkManager;
         this.storeItemType = storeItemType;
         this.callback = callback;
+        this.cache = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE);
     }
 
     @Override
@@ -94,21 +99,42 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
         KinveyPushBatchResponse pushResponse = new KinveyPushBatchResponse();
         List<SyncRequest> requests = manager.popSingleQueue(collection);
         List<SyncItem> syncItems = manager.popSingleItemQueue(collection);
+        List<GenericJson> resultAllItems = new ArrayList<>();
 
         processQueuedSyncRequests(requests, pushResponse);
 
         fullCount = requests != null ? requests.size() : 0;
         fullCount += syncItems != null ? syncItems.size() : 0;
 
-        List<GenericJson> resultAllItems = new ArrayList<>();
-        List<GenericJson> resultSingleItems = new ArrayList<>();
-        List<SyncItem> batchSyncItems = new ArrayList<>();
+        List<GenericJson> resultSingleItems = processSingleSyncItems(pushResponse, syncItems);
+        resultAllItems.addAll(resultSingleItems);
+        pushResponse.setListOfExceptions(errors);
 
+        KinveySyncSaveBatchResponse batchResponse = null;
+        if (!batchSyncItems.isEmpty()) {
+            List<T> saveItems = getSaveItems(batchSyncItems, cache);
+            batchResponse = processBatchSyncRequest(batchSyncItems, saveItems);
+        }
+        if (batchResponse != null) {
+            if (batchResponse.getEntityList() != null) {
+                resultAllItems.addAll(batchResponse.getEntityList());
+                progress += batchResponse.getEntityList().size();
+                pushResponse.setSuccessCount(progress);
+            }
+            if (batchResponse.getErrors() != null) {
+                pushResponse.setErrors(batchResponse.getErrors());
+            }
+        }
+
+        pushResponse.setEntities(resultAllItems);
+        return pushResponse;
+    }
+
+    private List<GenericJson> processSingleSyncItems(KinveyPushBatchResponse pushResponse, List<SyncItem> syncItems) throws IOException {
         String id;
         T item = null;
-        ICache<T> cache = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE);
         SyncRequest syncRequest = null;
-
+        List<GenericJson> resultSingleItems = new ArrayList<>();
         if (syncItems != null) {
             for (SyncItem syncItem : syncItems) {
                 id = syncItem.getEntityID().id;
@@ -139,64 +165,29 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
                         GenericJson resultItem = runSingleSyncRequest(syncRequest);
                         resultSingleItems.add(resultItem);
                         pushResponse.setSuccessCount(++progress);
+                        manager.deleteCachedItem((String) syncItem.get(Constants._ID));
                     }
-                } catch (AccessControlException | KinveyException e) { //TODO check Exception
+                } catch (IOException e) {
                     KinveyUpdateSingleItemError err = new KinveyUpdateSingleItemError(e, item);
                     errors.add(err);
                 } catch (Exception e) {
                     callback.onFailure(e);
                 }
-                manager.deleteCachedItem((String) syncItem.get(Constants._ID));
                 callback.onProgress(pushResponse.getSuccessCount(), fullCount);
             }
         }
-        pushResponse.setListOfExceptions(errors);
-        KinveySyncSaveBatchResponse batchResponse = null;
-        if (!batchSyncItems.isEmpty()) {
-            List<T> saveItems = getSaveItems(batchSyncItems, cache);
-            batchResponse = processBatchSyncRequest(saveItems);
-            removeBatchTempItems(batchSyncItems);
-        }
-        resultAllItems.addAll(resultSingleItems);
-        if (batchResponse != null) {
-            if (batchResponse.getEntityList() != null) {
-                resultAllItems.addAll(batchResponse.getEntityList());
-                progress += batchResponse.getEntityList().size();
-                pushResponse.setSuccessCount(progress);
-            }
-            if (batchResponse.getErrors() != null) {
-                pushResponse.setErrors(batchResponse.getErrors());
-            }
-        }
-        pushResponse.setEntities(resultAllItems);
-        return pushResponse;
+        return resultSingleItems;
     }
 
-    private void removeBatchTempItems(List<SyncItem> batchSyncItems) {
-        String tempID = "";
-        for (SyncItem item : batchSyncItems) {
-            tempID = (String) item.get(Constants._ID);
-            if (tempID != null && !tempID.isEmpty()) {
-                manager.deleteCachedItem(tempID);
-            }
-        }
-    }
-
-    private List<T> getSaveItems(List<SyncItem> batchSyncItems, ICache<T> cache) throws IOException {
-        List<T> saveItems = new ArrayList<>();
-        T cachedItem;
-        for (SyncItem s : batchSyncItems) {
-            cachedItem = cache.get(s.getEntityID().id);
-            if (cachedItem != null) {
-                saveItems.add(cachedItem);
-            }
-        }
-        return saveItems;
-    }
-
-    private KinveySyncSaveBatchResponse processBatchSyncRequest(List<T> saveItems) throws IOException {
+    private KinveySyncSaveBatchResponse processBatchSyncRequest(List<SyncItem> syncItems, List<T> saveItems) throws IOException {
         SyncRequest syncRequest = manager.createSaveBatchSyncRequest(collection, networkManager, saveItems);
-        GenericJson resultItem = manager.executeRequest(client, syncRequest);
+        GenericJson resultItem = null;
+        try {
+            resultItem = manager.executeRequest(client, syncRequest);
+            removeBatchTempItems(syncItems);
+        } catch (IOException e) {
+            Logger.ERROR(e.getMessage());
+        }
         if (resultItem instanceof KinveySyncSaveBatchResponse) {
             return ((KinveySyncSaveBatchResponse) resultItem);
         }
@@ -209,7 +200,6 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
             if (syncRequest.getHttpVerb() == SyncRequest.HttpVerb.POST) {
                 String tempID = syncRequest.getEntityID().id;
                 resultItem = manager.executeRequest(client, syncRequest);
-                ICache<T> cache = client.getCacheManager().getCache(syncRequest.getCollectionName(), this.storeItemType, Long.MAX_VALUE);
                 T temp = cache.get(tempID);
                 temp.set("_id", resultItem.get("_id"));
                 cache.delete(tempID);
@@ -223,6 +213,28 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
             }
         }
         return resultItem;
+    }
+
+    private void removeBatchTempItems(List<SyncItem> batchSyncItems) {
+        String tempID = "";
+        for (SyncItem item : batchSyncItems) {
+            tempID = (String) item.get(Constants._ID);
+            if (tempID != null && !tempID.isEmpty()) {
+                manager.deleteCachedItem(tempID);
+            }
+        }
+    }
+
+    private List<T> getSaveItems(List<SyncItem> syncItems, ICache<T> cache) {
+        List<T> saveItems = new ArrayList<>();
+        T cachedItem;
+        for (SyncItem s : syncItems) {
+            cachedItem = cache.get(s.getEntityID().id);
+            if (cachedItem != null) {
+                saveItems.add(cachedItem);
+            }
+        }
+        return saveItems;
     }
 
     private void processQueuedSyncRequests(List<SyncRequest> requests, KinveyPushResponse pushResponse) {

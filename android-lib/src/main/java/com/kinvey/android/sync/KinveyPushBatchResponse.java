@@ -10,15 +10,6 @@ public class KinveyPushBatchResponse extends KinveyPushResponse {
 
     private List<GenericJson> entities;
     private List<KinveyBatchInsertError> errors;
-    private int successCount;
-
-    public int getSuccessCount() {
-        return successCount;
-    }
-
-    public void setSuccessCount(int successSyncCount) {
-        this.successCount = successSyncCount;
-    }
 
     public List<GenericJson> getEntities() {
         return entities;

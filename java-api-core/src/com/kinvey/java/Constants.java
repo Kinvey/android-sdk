@@ -12,7 +12,11 @@ public final class Constants {
     public static final String Z = "Z";
     public static final String DOT = ".";
     public static final String QUERY = "query";
+
     public static final String _ID = "_id";
+    public static final String _KMD = "_acl";
+    public static final String _ACL = "_acl";
+
     public static final String DELETE = "DELETE";
     public static final String REQUEST_METHOD = "requestMethod";
 

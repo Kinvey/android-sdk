@@ -18,22 +18,6 @@ public class KinveySaveBatchException extends IOException {
         this.entities = entities;
     }
 
-    public List getEntities() {
-        return entities;
-    }
-
-    public void setEntities(List entities) {
-        this.entities = entities;
-    }
-
-    public List<KinveyBatchInsertError> getErrors() {
-        return postErrors;
-    }
-
-    public void setErrors(List<KinveyBatchInsertError> errors) {
-        this.postErrors = errors;
-    }
-
     public void setPutErrors(List<KinveyUpdateSingleItemError> putErrors) {
         this.putErrors = putErrors;
     }
@@ -45,5 +29,21 @@ public class KinveySaveBatchException extends IOException {
     public boolean haveErrors() {
         return (postErrors != null && !postErrors.isEmpty()) ||
                 (putErrors != null && !putErrors.isEmpty());
+    }
+
+    public List<KinveyBatchInsertError> getErrors() {
+        return postErrors;
+    }
+
+    public void setErrors(List<KinveyBatchInsertError> errors) {
+        this.postErrors = errors;
+    }
+
+    public List getEntities() {
+        return entities;
+    }
+
+    public void setEntities(List entities) {
+        this.entities = entities;
     }
 }
