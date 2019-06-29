@@ -374,11 +374,11 @@ public class DataStoreMultiInsertTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-            try {
-                store.save(persons, callback);
-            } catch (Exception e) {
-                callback.onFailure(e);
-            }
+                try {
+                    store.save(persons, callback);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
             }
         });
         looperThread.start();
@@ -574,7 +574,7 @@ public class DataStoreMultiInsertTest {
     }
 
     private <T extends GenericJson> boolean checkIfItemsAtRightIndex(List<T> srcList, List<T> resultList,
-                                             int[] checkIndexes, String checkField, boolean checkErr, boolean checkIsBackendItem) throws AssertionError {
+                                                                     int[] checkIndexes, String checkField, boolean checkErr, boolean checkIsBackendItem) throws AssertionError {
 
         assertNotNull(srcList);
         assertNotNull(resultList);

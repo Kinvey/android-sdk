@@ -2,7 +2,6 @@ package com.kinvey.java;
 
 import com.kinvey.java.model.KinveyBatchInsertError;
 import com.kinvey.java.model.KinveyUpdateSingleItemError;
-
 import java.io.IOException;
 import java.util.List;
 
