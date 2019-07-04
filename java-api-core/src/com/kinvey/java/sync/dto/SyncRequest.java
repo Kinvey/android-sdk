@@ -51,7 +51,7 @@ public class SyncRequest extends GenericJson implements Serializable {
         public static HttpVerb fromString(String verb){
             if (verb != null) {
                 for (HttpVerb v : HttpVerb.values()){
-                    if (v.query.equals(verb)){
+                    if (v.query.equalsIgnoreCase(verb)){
                         return v;
                     }
                 }

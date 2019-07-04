@@ -9,14 +9,14 @@ public class KinveyBatchInsertError {
     @Key
     private long code;
     @Key
-    private String errmsg;
+    private String errorMessage;
 
-    public String getErrmsg() {
-        return errmsg;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setErrmsg(String errmsg) {
-        this.errmsg = errmsg;
+    public void setErrorMessage(String value) {
+        this.errorMessage = value;
     }
 
     public long getCode() {

@@ -54,7 +54,6 @@ import com.kinvey.java.store.BaseDataStore;
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback;
 import com.kinvey.java.store.KinveyLiveServiceStatus;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.requests.data.save.SaveListBatchRequest;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -140,7 +139,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static final String KEY_SUBSCRIBE = "KEY_SUBSCRIBE";
     private static final String KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE";
 
-    private static final String KINVEY_API_VERSION_5 = "5";
+    private static final int KINVEY_API_VERSION_5 = 5;
 
     /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
@@ -153,6 +152,18 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     private static Map<String, Method> methodMap;
 
     private final String kinveyApiVersion = AbstractClient.KINVEY_API_VERSION;
+
+    public Integer getKinveyApiVersion() {
+        int version = 0;
+        try {
+            if (kinveyApiVersion != null) {
+                version =  Integer.valueOf(kinveyApiVersion);
+            }
+        } catch (Throwable t) {
+            Logger.ERROR(t.getMessage());
+        }
+        return version;
+    }
 
     /**
      * Constructor to instantiate the DataStore class.
@@ -549,7 +560,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
      * @param callback KinveyClientCallback<List<T>>
      */
     public void save(@NonNull List<T> entities, @NonNull KinveyClientCallback<List<T>> callback)  {
-         if (KINVEY_API_VERSION_5.equals(kinveyApiVersion)) {
+         if (getKinveyApiVersion() >= KINVEY_API_VERSION_5) {
              saveBatch(entities, callback);
          } else {
              saveV4(entities, callback);
@@ -686,7 +697,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
     public void push(@NonNull KinveyPushCallback callback) {
         Preconditions.checkNotNull(client, "client must not be null");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
-        if (KINVEY_API_VERSION_5.equals(kinveyApiVersion)) {
+        if (getKinveyApiVersion() >= KINVEY_API_VERSION_5) {
             pushBatch(callback);
         } else {
             pushV4(callback);

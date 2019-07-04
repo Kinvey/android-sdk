@@ -640,7 +640,7 @@ public class DataStoreMultiInsertTest {
             err = errors.get(curIdx);
             result &= idx == err.getIndex();
             if (checkErrMsg) {
-                result &= err.getErrmsg().contains(errMessages[curIdx]);
+                result &= err.getErrorMessage().contains(errMessages[curIdx]);
             }
             curIdx++;
         }
