@@ -1,8 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
+apply plugin: 'org.jetbrains.dokka-android'
+
 description = 'AndroidLib'
 
 android {
@@ -61,17 +63,24 @@ android {
     exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
   }
 
+  dokka {
+    outputFormat = 'javadoc'
+    jdkVersion = 8
+    outputDirectory = file("../../../devcenter/content/reference/android-v3.0/api/android-lib")
+    sourceDirs = files('src/main')
+  }
 }
 
-configurations {
-  jaxDoclet
-  classpaths
-  compile.exclude module: 'guava-jdk5'
-  testCompile
-}
+//configurations {
+//  jaxDoclet
+//  classpaths
+//  compile.exclude module: 'guava-jdk5'
+//  testCompile
+//}
 
 buildscript {
-  ext.kotlin_version = '1.3.31'
+  ext.kotlin_version = '1.3.40'
+  ext.dokkaVersion = '0.9.17'
   repositories {
     mavenCentral()
     jcenter()
@@ -86,42 +95,44 @@ buildscript {
     }
     google()
   }
+
   dependencies {
     classpath 'com.android.tools.build:gradle:3.4.1'
     classpath "io.realm:realm-gradle-plugin:5.8.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaVersion"
   }
 }
 
 dependencies {
-  jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-  compile project(':java-api-core')
+  //jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
+  implementation project(':java-api-core')
   // compile 'com.github.KeepSafe:ReLinker:1.1'
-  compile('com.google.api-client:google-api-client:1.19.0') {
+  implementation('com.google.api-client:google-api-client:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'android')
   }
-  compile('com.google.api-client:google-api-client-android:1.19.0') {
+  implementation('com.google.api-client:google-api-client-android:1.19.0') {
     exclude(module: 'google-play-services')
     exclude(module: 'xpp3')
   }
-  compile('com.google.http-client:google-http-client-android:1.19.0') {
+  implementation('com.google.http-client:google-http-client-android:1.19.0') {
     exclude(module: 'xpp3')
     exclude(module: 'httpclient')
     exclude(module: 'junit')
     exclude(module: 'android')
     exclude(module: 'guava-jdk5')
   }
-  compile('com.google.http-client:google-http-client-gson:1.19.0') {
+  implementation('com.google.http-client:google-http-client-gson:1.19.0') {
     exclude(module: 'xpp3')
   }
-  compile('com.google.http-client:google-http-client-jackson:1.19.0') {
+  implementation('com.google.http-client:google-http-client-jackson:1.19.0') {
     exclude(module: 'xpp3')
   }
-  compile 'com.google.guava:guava:24.1-jre'
+  implementation 'com.google.guava:guava:24.1-jre'
 
-  classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-28/android.jar'))
-  classpaths files('build/classes/release')
+  //classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/android-28/android.jar'))
+  //classpaths files('build/classes/release')
 
   // Required -- JUnit 4 framework
   androidTestImplementation 'junit:junit:4.12'
@@ -143,55 +154,55 @@ dependencies {
   testImplementation "org.powermock:powermock-classloading-xstream:1.6.5"
 
   // Optional -- Hamcrest library
-  androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-  compile 'org.codehaus.jackson:jackson-core-asl:1.9.12'
-  compile 'io.reactivex:rxjava:1.1.0'
-  compile 'com.google.code.gson:gson:2.8.5'
+  androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+  implementation 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  implementation 'io.reactivex:rxjava:1.1.0'
+  implementation 'com.google.code.gson:gson:2.8.5'
 
   // Android Support Libs
-  compile 'com.android.support:appcompat-v7:28.0.0'
-  compile 'com.android.support:support-v4:28.0.0'
-  compile 'com.android.support:support-annotations:28.0.0'
+  implementation 'com.android.support:appcompat-v7:28.0.0'
+  implementation 'com.android.support:support-v4:28.0.0'
+  implementation 'com.android.support:support-annotations:28.0.0'
 
   // Google Services Libs
-  compile 'com.google.android.gms:play-services-ads:16.0.0'
-  compile 'com.google.android.gms:play-services-identity:16.0.0'
+  implementation 'com.google.android.gms:play-services-ads:16.0.0'
+  implementation 'com.google.android.gms:play-services-identity:16.0.0'
 
   // Google Firebase Libs
-  compile 'com.google.firebase:firebase-core:16.0.0'
-  compile 'com.google.firebase:firebase-messaging:17.3.4'
+  implementation 'com.google.firebase:firebase-core:16.0.0'
+  implementation 'com.google.firebase:firebase-messaging:17.3.4'
 
   // Multidex Support
-  compile 'com.android.support:multidex:1.0.3'
+  implementation 'com.android.support:multidex:1.0.3'
   // Multidex Support for testing
-  androidTestCompile 'com.android.support:multidex-instrumentation:1.0.3'
+  androidTestImplementation 'com.android.support:multidex-instrumentation:1.0.3'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-task docgen(type: Javadoc) {
-
-  source = android.sourceSets.main.java.srcDirs
-
-  options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
-  options.doclet = "com.google.doclava.Doclava"
-  maxMemory = "1024m"
-  classpath = configurations.classpaths + configurations.compile + configurations.testCompile
-  title = null
-
-  options.bootClasspath = [
-      file(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar"),
-      file(System.getenv('ANDROID_HOME') + "/platforms/android-28/android.jar")
-  ]
-  options.overview = "javadoc/overview.html"
-  options.addStringOption("quiet")
-  options.addStringOption("hdf", "project.name AndroidLib")
-  options.addStringOption("stubs", "target/stubs")
-  options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
-  options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
-  options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api")
+//task docgen(type: Javadoc) {
+//
+//  source = android.sourceSets.main.java.srcDirs
+//
+//  options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
+//  options.doclet = "com.google.doclava.Doclava"
+//  maxMemory = "1024m"
+//  classpath = configurations.classpaths + configurations.compile + configurations.testCompile
+//  title = null
+//
+//  options.bootClasspath = [
+//      file(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar"),
+//      file(System.getenv('ANDROID_HOME') + "/platforms/android-28/android.jar")
+//  ]
+//  options.overview = "javadoc/overview.html"
+//  options.addStringOption("quiet")
+//  options.addStringOption("hdf", "project.name AndroidLib")
+//  options.addStringOption("stubs", "target/stubs")
+//  options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
+//  options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
+//  options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api")
   //options.addStringOption("d", "target/apidocs")
- // options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
-}
+  //options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
+//}
 
 task superJar(type: Jar) {
   from configurations.compile
@@ -200,6 +211,6 @@ task superJar(type: Jar) {
 }
 
 //cleanTest.mustRunAfter clean
-cleanDocgen.mustRunAfter clean
-build.mustRunAfter cleanDocgen
-docgen.mustRunAfter build
+cleanDokka.mustRunAfter clean
+build.mustRunAfter cleanDokka
+dokka.mustRunAfter build
