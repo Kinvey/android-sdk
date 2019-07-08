@@ -9,7 +9,7 @@ public class KinveyUpdateSingleItemError extends IOException {
 
     public KinveyUpdateSingleItemError(Exception e, GenericJson entity) {
         this.entity = entity;
-        this.errmsg = e.getMessage();
+        this.errorMessage = e.getMessage();
     }
 
     @Key
@@ -17,14 +17,14 @@ public class KinveyUpdateSingleItemError extends IOException {
     @Key
     private long code;
     @Key
-    private String errmsg;
+    private String errorMessage;
 
-    public String getErrmsg() {
-        return errmsg;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setErrmsg(String errmsg) {
-        this.errmsg = errmsg;
+    public void setErrorMessage(String errmsg) {
+        this.errorMessage = errmsg;
     }
 
     public long getCode() {
