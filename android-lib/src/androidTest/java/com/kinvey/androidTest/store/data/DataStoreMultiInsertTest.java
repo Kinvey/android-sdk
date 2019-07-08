@@ -74,9 +74,9 @@ public class DataStoreMultiInsertTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AbstractClient.KINVEY_API_VERSION = "5";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        AbstractClient.KINVEY_API_VERSION = "5";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -374,11 +374,11 @@ public class DataStoreMultiInsertTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-            try {
-                store.save(persons, callback);
-            } catch (Exception e) {
-                callback.onFailure(e);
-            }
+                try {
+                    store.save(persons, callback);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
             }
         });
         looperThread.start();
@@ -574,7 +574,7 @@ public class DataStoreMultiInsertTest {
     }
 
     private <T extends GenericJson> boolean checkIfItemsAtRightIndex(List<T> srcList, List<T> resultList,
-                                             int[] checkIndexes, String checkField, boolean checkErr, boolean checkIsBackendItem) throws AssertionError {
+                                                                     int[] checkIndexes, String checkField, boolean checkErr, boolean checkIsBackendItem) throws AssertionError {
 
         assertNotNull(srcList);
         assertNotNull(resultList);
@@ -640,7 +640,7 @@ public class DataStoreMultiInsertTest {
             err = errors.get(curIdx);
             result &= idx == err.getIndex();
             if (checkErrMsg) {
-                result &= err.getErrmsg().contains(errMessages[curIdx]);
+                result &= err.getErrorMessage().contains(errMessages[curIdx]);
             }
             curIdx++;
         }
@@ -1246,7 +1246,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushItemsListCombineWithIdAndWithoutIdMockedSync() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id - mocked");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
@@ -1351,7 +1350,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushShouldUseMultiInsertAfterSaveSync() throws InterruptedException {
         print("should use multi-insert even if the items have not been created in an array");
         // save an item without _id
@@ -1796,7 +1794,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushItemsListWithoutIdAuto() throws InterruptedException {
         print("should use multi insert for multiple items without _id");
         // create an array of items without _id
@@ -1829,7 +1826,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushItemsListCombineWithIdAndWithoutIdAuto() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
@@ -1862,7 +1858,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushItemsListCombineWithIdAndWithoutIdMockedAuto() throws InterruptedException {
         print("should combine POST and PUT requests for items with and without _id - mocked");
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]
@@ -1960,7 +1955,6 @@ public class DataStoreMultiInsertTest {
     }
 
     @Test
-    @Ignore("Fails for now, need improvements for push logic: https://kinvey.atlassian.net/browse/MLIBZ-3058")
     public void testPushShouldUseMultiInsertAfterSaveAuto() throws InterruptedException {
         print("should use multi-insert even if the items have not been created in an array");
         // save an item without _id

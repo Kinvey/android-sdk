@@ -125,6 +125,7 @@ public class DataStoreTest {
         AbstractClient.KINVEY_API_VERSION = "4";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        AbstractClient.KINVEY_API_VERSION = "4";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
