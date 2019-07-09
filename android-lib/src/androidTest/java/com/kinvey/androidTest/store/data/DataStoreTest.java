@@ -122,8 +122,10 @@ public class DataStoreTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        AbstractClient.KINVEY_API_VERSION = "4";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        AbstractClient.KINVEY_API_VERSION = "4";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {

@@ -13,6 +13,7 @@ public class Person extends GenericJson{
     public static final String USER_STORE = "UserStore";
     public static final String DELTA_SET_OFF_COLLECTION = "DeltaSetNotEnabled";
     public static final String COLLECTION_WITH_EXCEPTION = "CollectionWithException";
+    public static final String USERNAME_KEY = "username";
 
     public static final String LONG_NAME = "LoremIpsumissimplydummytextoftheprintingandtypesettingindustry";
 
@@ -20,6 +21,10 @@ public class Person extends GenericJson{
     }
 
     public Person(String username) {
+        this.username = username;
+    }
+    public Person(String id, String username) {
+        this.id = id;
         this.username = username;
     }
 
@@ -46,6 +51,9 @@ public class Person extends GenericJson{
 
     @Key("username")
     protected String username;
+
+    @Key("_geoloc")
+    protected String geoloc;
 
     public String getAge() {
         return age;
@@ -109,5 +117,13 @@ public class Person extends GenericJson{
 
     public void setIntVal(int intVal) {
         this.intVal = intVal;
+    }
+
+    public String getGeoloc() {
+        return geoloc;
+    }
+
+    public void setGeoloc(String geoloc) {
+        this.geoloc = geoloc;
     }
 }

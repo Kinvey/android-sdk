@@ -5,18 +5,18 @@ import com.google.api.client.util.Key;
 public class KinveyBatchInsertError {
 
     @Key
-    private long index;
+    private int index;
     @Key
     private long code;
     @Key
-    private String errmsg;
+    private String errorMessage;
 
-    public String getErrmsg() {
-        return errmsg;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setErrmsg(String errmsg) {
-        this.errmsg = errmsg;
+    public void setErrorMessage(String value) {
+        this.errorMessage = value;
     }
 
     public long getCode() {
@@ -27,11 +27,11 @@ public class KinveyBatchInsertError {
         this.code = code;
     }
 
-    public long getIndex() {
+    public int getIndex() {
         return index;
     }
 
-    public void setIndex(long index) {
+    public void setIndex(int index) {
         this.index = index;
     }
 }
