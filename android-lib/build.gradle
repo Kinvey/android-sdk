@@ -69,10 +69,7 @@ android {
 }
 
 configurations {
-//  jaxDoclet
-//  classpaths
   compile.exclude module: 'guava-jdk5'
-//  testCompile
 }
 
 buildscript {
@@ -102,7 +99,6 @@ buildscript {
 }
 
 dependencies {
-  //jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
   implementation project(':java-api-core')
   // compile 'com.github.KeepSafe:ReLinker:1.1'
   implementation('com.google.api-client:google-api-client:1.19.0') {
@@ -175,31 +171,6 @@ dependencies {
   androidTestImplementation 'com.android.support:multidex-instrumentation:1.0.3'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
-
-//task docgen(type: Javadoc) {
-//
-//  source = android.sourceSets.main.java.srcDirs
-//
-//  options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
-//  options.doclet = "com.google.doclava.Doclava"
-//  maxMemory = "1024m"
-//  classpath = configurations.classpaths + configurations.compile + configurations.testCompile
-//  title = null
-//
-//  options.bootClasspath = [
-//      file(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar"),
-//      file(System.getenv('ANDROID_HOME') + "/platforms/android-28/android.jar")
-//  ]
-//  options.overview = "javadoc/overview.html"
-//  options.addStringOption("quiet")
-//  options.addStringOption("hdf", "project.name AndroidLib")
-//  options.addStringOption("stubs", "target/stubs")
-//  options.addStringOption("federate com.kinvey.java", "http://devcenter.kinvey.com/android-v3.0/reference/api/java/reference/")
-//  options.addStringOption("federationxml com.kinvey.java", "../java-api-core/target/apidocs/api.xml")
-//  options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api")
-  //options.addStringOption("d", "target/apidocs")
-  //options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api")
-//}
 
 task superJar(type: Jar) {
   from configurations.compile
