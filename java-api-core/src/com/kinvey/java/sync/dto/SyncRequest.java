@@ -18,9 +18,11 @@ package com.kinvey.java.sync.dto;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.json.GenericJson;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Key;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -47,9 +49,11 @@ public class SyncRequest extends GenericJson implements Serializable {
         }
 
         public static HttpVerb fromString(String verb){
-            for (HttpVerb v : HttpVerb.values()){
-                if (v.query.equals(verb)){
-                    return v;
+            if (verb != null) {
+                for (HttpVerb v : HttpVerb.values()){
+                    if (v.query.equalsIgnoreCase(verb)){
+                        return v;
+                    }
                 }
             }
             return null;
@@ -141,19 +145,27 @@ public class SyncRequest extends GenericJson implements Serializable {
         @Key
         public String data;
 
+        @Key
+        public boolean bunchData = false;
+
         public SyncMetaData(){}
 
         public SyncMetaData(String id){
             this.id = id;
         }
 
-        public SyncMetaData(String id, String customerVersion, String customHeader){
+        public SyncMetaData(String id, String customerVersion, String customHeader) {
             this.id = id;
             this.customerVersion = customerVersion;
             this.customheader = customHeader;
         }
 
-        public SyncMetaData(String id, AbstractKinveyJsonClientRequest req){
+        public SyncMetaData(String id, String customerVersion, String customHeader, boolean bunchData) {
+            this(id, customerVersion, customHeader);
+            this.bunchData = bunchData;
+        }
+
+        public SyncMetaData(String id, AbstractKinveyJsonClientRequest req) {
             this.id = id;
             if (req != null){
                 this.customerVersion = req.getCustomerAppVersion();
@@ -161,7 +173,8 @@ public class SyncRequest extends GenericJson implements Serializable {
             }
 
         }
-        public SyncMetaData(GenericJson entity, AbstractKinveyJsonClientRequest req){
+
+        public SyncMetaData(GenericJson entity, AbstractKinveyJsonClientRequest req) {
             this.id = (String) entity.get("_id");
             if (req != null){
                 this.customerVersion = req.getCustomerAppVersion();
@@ -169,8 +182,17 @@ public class SyncRequest extends GenericJson implements Serializable {
             }
         }
 
-
-
+        public GenericJson getEntity() {
+            GenericJson entity = null;
+            try {
+                JsonFactory factory = getFactory();
+                if (factory != null && data != null) {
+                    entity = factory.createJsonParser(data).parse(GenericJson.class);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return entity;
+        }
     }
-
 }
