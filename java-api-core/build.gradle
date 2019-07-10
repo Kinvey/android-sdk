@@ -1,6 +1,5 @@
 
 buildscript {
-    ext.dokkaVersion = '0.9.17'
     repositories {
         jcenter()
     }
