@@ -63,7 +63,7 @@ import java.util.Map;
 public class UserStoreRequestManager<T extends BaseUser> {
 
 
-    public static final String USER_COLLECTION_NAME = "user";
+    public static final String USER_COLLECTION_NAME = "active_user_info";
     public static final String GRANT_TYPE = "grant_type";
     public static final String USERNAME_PARAM = "username";
     public static final String PASSWORD_PARAM = "password";
@@ -816,10 +816,16 @@ public class UserStoreRequestManager<T extends BaseUser> {
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                return initUser(credential, loggedUser);
+                initUser(credential, loggedUser);
+                T savedUser = client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                        .get(loggedUser.getId());
+                return savedUser != null ? initUser(savedUser) : loggedUser;
             }
             loggedUser = this.request.execute(myClazz);
-            //if (response.)
+            if (client.getUserCacheManager() != null) {
+                client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                        .save(loggedUser);
+            }
             return initUser(loggedUser);
         }
     }

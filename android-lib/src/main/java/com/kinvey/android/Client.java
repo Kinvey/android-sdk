@@ -61,6 +61,8 @@ import java.util.List;
 
 import io.realm.Realm;
 
+import static com.kinvey.java.store.UserStoreRequestManager.USER_COLLECTION_NAME;
+
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
  * system.
@@ -91,6 +93,7 @@ public class Client<T extends User> extends AbstractClient<T> {
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
     private RealmCacheManager syncCacheManager;
+    private RealmCacheManager userCacheManager;
 
     private Context context = null;
 
@@ -141,6 +144,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         this.context = context;
         cacheManager = new RealmCacheManager(encryptionKey, this);
         syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
+        userCacheManager = new RealmCacheManager(encryptionKey, this);
         this.encryptionKey = encryptionKey;
     }
 
@@ -178,10 +182,11 @@ public class Client<T extends User> extends AbstractClient<T> {
         cacheManager.clear();
         //clear sync cache
         syncCacheManager.clear();
-
+        //clear user info cache
+        userCacheManager.clear();
         cacheManager = new RealmCacheManager(encryptionKey, this);
         syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
-
+        userCacheManager = new RealmCacheManager(encryptionKey, this);
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
             e.performLockdown(getActiveUser().getId());
@@ -251,6 +256,11 @@ public class Client<T extends User> extends AbstractClient<T> {
     @Override
     public ICacheManager getCacheManager() {
         return cacheManager;
+    }
+
+    @Override
+    public ICacheManager getUserCacheManager() {
+        return userCacheManager;
     }
 
     /**
@@ -889,6 +899,7 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (!Strings.isNullOrEmpty(this.instanceID)) {
                 client.setMICHostName(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH);
             }
+            client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

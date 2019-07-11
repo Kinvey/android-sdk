@@ -141,6 +141,11 @@ public abstract class KinveyMockUnitTest<T extends BaseUser> extends TestCase {
         }
 
         @Override
+        public ICacheManager getUserCacheManager() {
+            return null;
+        }
+
+        @Override
         public String getFileCacheFolder() {
             return null;
         }
