@@ -23,6 +23,7 @@ import com.google.api.client.util.GenericData;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
@@ -56,6 +57,8 @@ import com.kinvey.java.store.requests.user.UserExists;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.kinvey.java.Constants.ACCESS_ERROR;
 
 /**
  * Created by Prots on 2/12/16.
@@ -816,17 +819,37 @@ public class UserStoreRequestManager<T extends BaseUser> {
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                initUser(credential, loggedUser);
-                T savedUser = client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
-                        .get(loggedUser.getId());
+                initUser(credential, loggedUser); //only token and user_id is initialized here
+                T savedUser = null;
+                try {
+                    savedUser = client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                            .get(loggedUser.getId()); //getting full user info from cache
+                    if (savedUser != null) {
+                        savedUser.setAuthToken(loggedUser.getAuthToken());
+                        savedUser.setAuthTokenToKmd(loggedUser.getAuthToken());
+                    }
+                } catch (KinveyException e) {
+                    Logger.ERROR(e.getReason());
+                    if (!e.getReason().equals(ACCESS_ERROR)) {
+                        throw e;
+                    }
+                }
                 return savedUser != null ? initUser(savedUser) : loggedUser;
             }
             loggedUser = this.request.execute(myClazz);
-            if (client.getUserCacheManager() != null) {
-                client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
-                        .save(loggedUser);
+            initUser(loggedUser);
+            try {
+                if (client.getUserCacheManager() != null) {
+                    client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                            .save(loggedUser);
+                }
+            } catch (KinveyException e) {
+                Logger.ERROR(e.getReason());
+                if (!e.getReason().equals(ACCESS_ERROR)) {
+                    throw e;
+                }
             }
-            return initUser(loggedUser);
+            return loggedUser;
         }
     }
 

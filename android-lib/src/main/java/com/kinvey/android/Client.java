@@ -899,7 +899,6 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (!Strings.isNullOrEmpty(this.instanceID)) {
                 client.setMICHostName(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH);
             }
-            client.getUserCacheManager().getCache(USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE);
             try {
                 Credential credential = retrieveUserFromCredentialStore(client);
                 if (credential != null) {

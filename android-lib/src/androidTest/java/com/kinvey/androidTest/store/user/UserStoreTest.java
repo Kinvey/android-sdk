@@ -11,7 +11,6 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncUserDiscovery;
 import com.kinvey.android.AsyncUserGroup;
 import com.kinvey.android.Client;
@@ -26,26 +25,18 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
-import com.kinvey.androidTest.TestManager;
-import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.InternalUserEntity;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.model.TestUser;
-import com.kinvey.androidTest.store.data.DataStoreTest;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Query;
 import com.kinvey.java.UserGroup;
 import com.kinvey.java.auth.Credential;
-import com.kinvey.java.auth.CredentialStore;
-import com.kinvey.java.auth.InMemoryCredentialStore;
-import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.java.store.StoreType;
-import com.kinvey.java.store.UserStoreRequestManager;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -59,9 +50,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import static com.kinvey.androidTest.TestManager.USERNAME;
+
 import static com.kinvey.androidTest.TestManager.PASSWORD;
+import static com.kinvey.androidTest.TestManager.USERNAME;
+import static com.kinvey.java.Constants.AUTH_TOKEN;
+import static com.kinvey.java.model.KinveyMetaData.KMD;
+import static com.kinvey.java.store.UserStoreRequestManager.USER_COLLECTION_NAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -1930,4 +1926,20 @@ public class UserStoreTest {
         looperThread.mHandler.sendMessage(new Message());
         return callback;
     }
+
+    @Test
+    public void testUserInfoInRealmTable() throws InterruptedException {
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+        User user = client.getCacheManager().getCache(USER_COLLECTION_NAME, User.class, Long.MAX_VALUE).get().get(0);
+        assertNotNull(user.getUsername());
+        assertEquals(USERNAME, user.getUsername());
+        assertEquals(USERNAME, client.getActiveUser().getUsername());
+        assertNull(user.getAuthToken()); // check that realm doesn't keep auth_token
+        assertNull(((Map<String, String>) user.get(KMD)).get(AUTH_TOKEN)); // check that realm doesn't keep auth_token
+        assertNotNull(((Map<String, String>) client.getActiveUser().get(KMD)).get(AUTH_TOKEN)); // check that active user has auth_token
+        assertNull(logout(client).error);
+    }
+
 }

@@ -44,6 +44,8 @@ import io.realm.RealmResults;
 import io.realm.RealmSchema;
 import io.realm.exceptions.RealmFileException;
 
+import static com.kinvey.java.Constants.ACCESS_ERROR;
+
 /**
  * Created by Prots on 1/26/16.
  */
@@ -366,7 +368,7 @@ public class RealmCacheManager implements ICacheManager {
                 realm = DynamicRealm.getInstance(getRealmConfiguration());
             } catch (RealmFileException exception) {
                 if (exception.getKind() != null && exception.getKind().name().equals("ACCESS_ERROR")) {
-                    throw new KinveyException("Access Error", "Use correct encryption key", "You are using wrong encryption key");
+                    throw new KinveyException(ACCESS_ERROR, "Use correct encryption key", "You are using wrong encryption key");
                 } else {
                    throw exception;
                 }
