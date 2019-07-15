@@ -50,21 +50,10 @@ task copyAndroid(type: Copy)  {
 
 task zipAndroid(type: Zip) {
   from('release/build/android'){
-    include "**/*.jar"
-    into "libJar"
-
-  }
-  from('release/build/android'){
     include "*.aar"
     include "*core*.jar"
     into "/lib"
 
-  }
-
-  from('release/dependencies'){
-    include "*.jar"
-    include "*.aar"
-    into "/libJar"
   }
 
   from('release/dependencies'){
