@@ -6,6 +6,7 @@ allprojects  {
   version = '4.2.1'
   description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
   ext.kinveyApiVersion = '4'
+  ext.dokkaVersion = '0.9.17'
 }
 
 subprojects {
@@ -49,21 +50,10 @@ task copyAndroid(type: Copy)  {
 
 task zipAndroid(type: Zip) {
   from('release/build/android'){
-    include "**/*.jar"
-    into "libJar"
-
-  }
-  from('release/build/android'){
     include "*.aar"
     include "*core*.jar"
     into "/lib"
 
-  }
-
-  from('release/dependencies'){
-    include "*.jar"
-    include "*.aar"
-    into "/libJar"
   }
 
   from('release/dependencies'){
@@ -98,17 +88,17 @@ task cleanDir{
 task prepCore{
   prepCore.dependsOn(":java-api-core:clean")
   prepCore.dependsOn(":java-api-core:cleanTest")
-  prepCore.dependsOn(":java-api-core:cleanDocgen")
+  prepCore.dependsOn(":java-api-core:cleanDokka")
   prepCore.dependsOn(":java-api-core:build")
-  prepCore.dependsOn(":java-api-core:docgen")
+  prepCore.dependsOn(":java-api-core:dokka")
 }
 
 task prepAndroid{
   prepAndroid.dependsOn(":android-lib:clean")
   prepAndroid.dependsOn(":android-lib:cleanTest")
-  prepAndroid.dependsOn(":android-lib:cleanDocgen")
+  prepAndroid.dependsOn(":android-lib:cleanDokka")
   prepAndroid.dependsOn(":android-lib:build")
-  prepAndroid.dependsOn(":android-lib:docgen")
+  prepAndroid.dependsOn(":android-lib:dokka")
 }
 
 task prepSecure{
@@ -117,7 +107,7 @@ task prepSecure{
   prepSecure.dependsOn(":android-secure:build")
 }
 
-task release(dependsOn: ['cleanDir', 'prepCore', 'prepAndroid'/*, 'prepSecure'*/, 'makeAndroidJar', 'copyAndroid', 'zipAndroid', 'zipJava']){
+task release(dependsOn: ['cleanDir', 'prepCore', 'prepAndroid' /*, 'prepSecure'*/, 'makeAndroidJar', 'copyAndroid', 'zipAndroid', 'zipJava']){
     description 'Performs the complete release process (except for bumping version number!)'
 }
 

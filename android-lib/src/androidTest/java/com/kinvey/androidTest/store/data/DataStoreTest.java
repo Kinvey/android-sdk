@@ -911,7 +911,7 @@ public class DataStoreTest {
             DataStore.collection(PersonOver63CharsInFieldName.LONG_NAME, PersonOver63CharsInFieldName.class, StoreType.SYNC, client);
             assertFalse(true);
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Column names are currently limited to max 63 characters."));
+            assertTrue(e.getMessage().contains("limited to max 63 characters"));
         }
     }
 
