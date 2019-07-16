@@ -91,6 +91,7 @@ public class Client<T extends User> extends AbstractClient<T> {
     /** global TAG used in Android logging **/
     public final static String TAG = "Kinvey - Client";
     private RealmCacheManager syncCacheManager;
+    private RealmCacheManager userCacheManager;
 
     private Context context = null;
 
@@ -141,6 +142,7 @@ public class Client<T extends User> extends AbstractClient<T> {
         this.context = context;
         cacheManager = new RealmCacheManager(encryptionKey, this);
         syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
+        userCacheManager = new RealmCacheManager(encryptionKey, this);
         this.encryptionKey = encryptionKey;
     }
 
@@ -178,10 +180,11 @@ public class Client<T extends User> extends AbstractClient<T> {
         cacheManager.clear();
         //clear sync cache
         syncCacheManager.clear();
-
+        //clear user info cache
+        userCacheManager.clear();
         cacheManager = new RealmCacheManager(encryptionKey, this);
         syncCacheManager = new RealmCacheManager(encryptionKey, "sync_", this);
-
+        userCacheManager = new RealmCacheManager(encryptionKey, this);
         List<ClientExtension> extensions = getExtensions();
         for (ClientExtension e : extensions){
             e.performLockdown(getActiveUser().getId());
@@ -251,6 +254,11 @@ public class Client<T extends User> extends AbstractClient<T> {
     @Override
     public ICacheManager getCacheManager() {
         return cacheManager;
+    }
+
+    @Override
+    public ICacheManager getUserCacheManager() {
+        return userCacheManager;
     }
 
     /**

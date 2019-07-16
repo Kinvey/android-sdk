@@ -564,6 +564,8 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
 
     public abstract ICacheManager getCacheManager();
 
+    public abstract ICacheManager getUserCacheManager();
+
     public abstract String getFileCacheFolder();
 
     public BaseFileStore getFileStore(StoreType storeType){

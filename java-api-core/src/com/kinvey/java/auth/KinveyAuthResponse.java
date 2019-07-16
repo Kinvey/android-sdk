@@ -24,6 +24,8 @@ import com.google.api.client.util.Key;
 
 import java.io.IOException;
 
+import static com.kinvey.java.Constants.AUTH_TOKEN;
+
 /**
  * @author m0rganic
  * @since 2.0
@@ -69,7 +71,7 @@ public class KinveyAuthResponse extends GenericJson {
         @Key("lmt")
         private String lastModifiedTime;
 
-        @Key("authtoken")
+        @Key(AUTH_TOKEN)
         private String authToken;
 
         public KinveyUserMetadata() {}

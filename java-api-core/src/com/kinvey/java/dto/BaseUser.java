@@ -19,10 +19,16 @@ package com.kinvey.java.dto;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
+import java.util.Map;
+
+import static com.kinvey.java.Constants.AUTH_TOKEN;
+import static com.kinvey.java.model.KinveyMetaData.KMD;
+
 /**
  * Created by Prots on 2/12/16.
  */
 public class BaseUser extends GenericJson {
+
     @Key("_id")
     private String id;
 
@@ -48,6 +54,16 @@ public class BaseUser extends GenericJson {
 
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
+    }
+
+    public void setAuthTokenToKmd(String authToken) {
+        if (get(KMD) != null) {
+            Map<String, String> kmd = (Map<String, String>)get(KMD);
+            if (kmd != null) {
+                kmd.put(AUTH_TOKEN, authToken);
+                put(KMD, kmd);
+            }
+        }
     }
 
     public String getAuthToken() {

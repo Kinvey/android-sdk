@@ -16,12 +16,13 @@
 
 package com.kinvey.java.auth;
 
-import com.google.api.client.json.GenericJson;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 
 import java.util.Map;
+
+import static com.kinvey.java.Constants.AUTH_TOKEN;
 
 /**
  * @author m0rganic
@@ -32,7 +33,6 @@ public class Credential implements KinveyRequestInitializer, java.io.Serializabl
     private static final long serialVersionUID = 1L;
 
     private final static String AUTH_N_HEADER_FORMAT = "Kinvey %s";
-    private final static String AUTH_TOKEN = "authtoken";
     private final static String KMD = "_kmd";
 
     private String userId;
