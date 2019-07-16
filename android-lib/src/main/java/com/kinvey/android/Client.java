@@ -61,8 +61,6 @@ import java.util.List;
 
 import io.realm.Realm;
 
-import static com.kinvey.java.store.UserStoreRequestManager.USER_COLLECTION_NAME;
-
 /**
  * This class is an implementation of a {@link com.kinvey.java.AbstractClient} with default settings for the Android operating
  * system.

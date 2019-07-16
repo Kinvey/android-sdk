@@ -57,7 +57,6 @@ import static com.kinvey.androidTest.TestManager.PASSWORD;
 import static com.kinvey.androidTest.TestManager.USERNAME;
 import static com.kinvey.java.Constants.AUTH_TOKEN;
 import static com.kinvey.java.model.KinveyMetaData.KMD;
-import static com.kinvey.java.store.UserStoreRequestManager.USER_COLLECTION_NAME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -72,6 +71,7 @@ public class UserStoreTest {
     private Client client = null;
 
     public static final String INSUFFICIENT_CREDENTIAL_TYPE = "InsufficientCredentials";
+    private static final String ACTIVE_USER_COLLECTION_NAME = "active_user_info";
 
     private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
 
@@ -1932,7 +1932,7 @@ public class UserStoreTest {
         DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        User user = client.getCacheManager().getCache(USER_COLLECTION_NAME, User.class, Long.MAX_VALUE).get().get(0);
+        User user = client.getCacheManager().getCache(ACTIVE_USER_COLLECTION_NAME, User.class, Long.MAX_VALUE).get().get(0);
         assertNotNull(user.getUsername());
         assertEquals(USERNAME, user.getUsername());
         assertEquals(USERNAME, client.getActiveUser().getUsername());
