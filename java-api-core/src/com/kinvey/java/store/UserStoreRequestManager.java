@@ -23,6 +23,7 @@ import com.google.api.client.util.GenericData;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.KinveyException;
+import com.kinvey.java.Logger;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.CredentialManager;
@@ -57,6 +58,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.kinvey.java.Constants.ACCESS_ERROR;
+
 /**
  * Created by Prots on 2/12/16.
  */
@@ -64,6 +67,7 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
 
     public static final String USER_COLLECTION_NAME = "user";
+    private static final String ACTIVE_USER_COLLECTION_NAME = "active_user_info";
     public static final String GRANT_TYPE = "grant_type";
     public static final String USERNAME_PARAM = "username";
     public static final String PASSWORD_PARAM = "password";
@@ -655,7 +659,9 @@ public class UserStoreRequestManager<T extends BaseUser> {
 
         HttpContent content = new UrlEncodedContent(data) ;
         GetMICAccessToken getToken = new GetMICAccessToken(this, content);
-        getToken.setRequireAppCredentials(true);
+        getToken.setRequireAppCredentials(false);
+        getToken.setRequiredClientIdAuth(true);
+        ((KinveyClientRequestInitializer) client.getKinveyRequestInitializer()).setClientId(fullClientIdField);
         client.initializeRequest(getToken);
         return getToken;
     }
@@ -814,11 +820,37 @@ public class UserStoreRequestManager<T extends BaseUser> {
                 throw new NullPointerException(e.getMessage());
             }
             if (this.type == UserStoreRequestManager.LoginType.CREDENTIALSTORE) {
-                return initUser(credential, loggedUser);
+                initUser(credential, loggedUser); //only token and user_id is initialized here
+                T savedUser = null;
+                try {
+                    savedUser = client.getUserCacheManager().getCache(ACTIVE_USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                            .get(loggedUser.getId()); //getting full user info from cache
+                    if (savedUser != null) {
+                        savedUser.setAuthToken(loggedUser.getAuthToken());
+                        savedUser.setAuthTokenToKmd(loggedUser.getAuthToken());
+                    }
+                } catch (KinveyException e) {
+                    Logger.ERROR(e.getReason());
+                    if (!e.getReason().equals(ACCESS_ERROR)) {
+                        throw e;
+                    }
+                }
+                return savedUser != null ? initUser(savedUser) : loggedUser;
             }
             loggedUser = this.request.execute(myClazz);
-            //if (response.)
-            return initUser(loggedUser);
+            initUser(loggedUser);
+            try {
+                if (client.getUserCacheManager() != null) {
+                    client.getUserCacheManager().getCache(ACTIVE_USER_COLLECTION_NAME, client.getUserClass(), Long.MAX_VALUE)
+                            .save(loggedUser);
+                }
+            } catch (KinveyException e) {
+                Logger.ERROR(e.getReason());
+                if (!e.getReason().equals(ACCESS_ERROR)) {
+                    throw e;
+                }
+            }
+            return loggedUser;
         }
     }
 

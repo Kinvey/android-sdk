@@ -27,8 +27,6 @@ import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.UserStoreRequestManager;
-import com.kinvey.java.store.requests.user.GetMICTempURL;
-import com.kinvey.java.store.requests.user.LoginToTempURL;
 
 import java.io.IOException;
 import java.lang.reflect.Array;

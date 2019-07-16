@@ -122,8 +122,10 @@ public class DataStoreTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        AbstractClient.KINVEY_API_VERSION = "4";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
+        AbstractClient.KINVEY_API_VERSION = "4";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -909,7 +911,7 @@ public class DataStoreTest {
             DataStore.collection(PersonOver63CharsInFieldName.LONG_NAME, PersonOver63CharsInFieldName.class, StoreType.SYNC, client);
             assertFalse(true);
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Column names are currently limited to max 63 characters."));
+            assertTrue(e.getMessage().contains("limited to max 63 characters"));
         }
     }
 

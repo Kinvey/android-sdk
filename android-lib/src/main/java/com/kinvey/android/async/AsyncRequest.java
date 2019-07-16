@@ -45,7 +45,7 @@ public class AsyncRequest<T> extends AsyncClientRequest<T> {
 
     @Override
     public T executeAsync() throws IOException, InvocationTargetException, IllegalAccessException {
-        T ret = (T)mMethod.invoke(scope, args);
+        T ret = (T) mMethod.invoke(scope, args);
         return ret;
     }
 }
