@@ -20,6 +20,7 @@ import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
+import com.kinvey.androidTest.store.datastore.PaginationTest;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.KinveyAuthRequest;
@@ -522,8 +523,8 @@ public class TestManager<T extends GenericJson> {
         return baseDataStore;
     }
 
-    //use for Person.COLLECTION and for Person.class
+    //use for PaginationTest.COLLECTION and for Person.class
     public long getCacheSize(StoreType storeType, Client client) {
-        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
+        return client.getCacheManager().getCache(PaginationTest.COLLECTION, Person.class, storeType.ttl).get().size();
     }
 }

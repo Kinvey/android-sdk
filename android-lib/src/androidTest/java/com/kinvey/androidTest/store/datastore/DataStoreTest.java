@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data;
+package com.kinvey.androidTest.store.datastore;
 
 
 import android.content.Context;
@@ -105,6 +105,7 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 public class DataStoreTest {
 
+    private static final String COLLECTION = "PersonsNew";
     private static final String TEST_USERNAME = "Test_UserName";
     private static final String TEST_USERNAME_2 = "Test_UserName_2";
     private static final String TEST_TEMP_USERNAME = "Temp_UserName";
@@ -669,8 +670,8 @@ public class DataStoreTest {
     }
 
     private void testSave(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
+        client.getSyncManager().clear(COLLECTION);
         DefaultKinveyClientCallback callback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(callback.result);
         assertNotNull(callback.result.getUsername());
@@ -702,9 +703,9 @@ public class DataStoreTest {
     @Test
     public void testUpdateSyncPush() throws InterruptedException {
         // Setup
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(store);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
 
         // Save an entity locally
         Person person = createPerson(TEST_USERNAME);
@@ -735,8 +736,8 @@ public class DataStoreTest {
     }
 
     private void testUpdate(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback callback = save(store, person);
         assertNotNull(callback.result);
@@ -963,7 +964,7 @@ public class DataStoreTest {
     }
 
     private void testFindById(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
         if (storeType != StoreType.NETWORK) {
             cleanBackendDataStore(store);
         }
@@ -981,8 +982,8 @@ public class DataStoreTest {
 
     @Test
     public void testFindByIdWithCacheCallback() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -1007,8 +1008,8 @@ public class DataStoreTest {
 
     @Test
     public void testFindByIdForAutoType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -1038,8 +1039,8 @@ public class DataStoreTest {
 
     @Test
     public void testFindPersonsAutoType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
         clearBackend(store);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
@@ -1057,9 +1058,9 @@ public class DataStoreTest {
 
     @Test
     public void testFindPersonsCorrectDataAutoType() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
@@ -1115,9 +1116,9 @@ public class DataStoreTest {
     }
 
     private void testFindByQuery(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
         clearBackend(store);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -1135,11 +1136,11 @@ public class DataStoreTest {
 
     @Test
     public void testFindDataByQueryAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         Person personSecond = createPerson(TEST_USERNAME_2);
         personSecond.setWeight(2);
@@ -1164,10 +1165,10 @@ public class DataStoreTest {
 
     @Test
     public void testFindSortedDataDescendingAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         person.setWeight(1);
         DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
@@ -1194,10 +1195,10 @@ public class DataStoreTest {
 
     @Test
     public void testFindSortedDataAscendingAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         person.setWeight(1);
         DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
@@ -1224,11 +1225,11 @@ public class DataStoreTest {
 
     @Test
     public void testDeleteFromCacheAfterBackend() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
         assertNotNull(saveCallback.result);
@@ -1251,11 +1252,11 @@ public class DataStoreTest {
 
     @Test
     public void testFindDataSkipLimitAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME);
@@ -1274,7 +1275,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindDataInvalidQueryAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeAuto);
         Query query = client.query();
         query.setQueryString("{{test");
@@ -1285,12 +1286,12 @@ public class DataStoreTest {
 
     @Test
     public void testLocalDataNoConnectionAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
         DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, LONG_TIMEOUT);
@@ -1368,12 +1369,12 @@ public class DataStoreTest {
 
     @Test
     public void testSortedDataNoConnectionAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         person.setWeight(1);
         DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
@@ -1413,12 +1414,12 @@ public class DataStoreTest {
 
     @Test
     public void testDataWithLimitAndSkipNoConnectionAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
         createAndSavePerson(storeNetwork, USERNAME);
@@ -1437,12 +1438,12 @@ public class DataStoreTest {
 
     @Test
     public void testLocalDataNoConnectionAutoEliminated() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
         DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, LONG_TIMEOUT);
@@ -1470,8 +1471,8 @@ public class DataStoreTest {
 
     @Test
     public void testSaveConnectErrorAuto() throws InterruptedException { //SAVE
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeAuto);
         clearBackend(storeSync);
         mockInvalidConnection();
@@ -1482,19 +1483,19 @@ public class DataStoreTest {
         assertNotNull(findCallback.result);
         assertTrue(findCallback.result.getResult().size() == 1);
         cancelMockInvalidConnection();
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        List<SyncItem> syncItems = pendingSyncEntities(COLLECTION);
         assertTrue(syncItems.size() == 1);
         assertEquals(syncItems.get(0).getRequestMethod(), SyncRequest.HttpVerb.POST);
     }
     
     @Test
     public void testQueriedDataNoConnectionAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeAuto, TEST_USERNAME);
         Person personSecond = createPerson(TEST_USERNAME_2);
         personSecond.setWeight(2);
@@ -1520,11 +1521,11 @@ public class DataStoreTest {
 
     @Test
     public void testDeltasetAuto() throws InterruptedException { //FIND
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         storeAuto.setDeltaSetCachingEnabled(true);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
@@ -1549,9 +1550,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveIdBothStoreAuto() throws InterruptedException { //REMOVEBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1571,7 +1572,7 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveByNotExistingIdAuto() throws InterruptedException { //REMOVEBYID
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         DefaultKinveyDeleteCallback deleteCallback = delete(storeAuto, "notexist", DEFAULT_TIMEOUT);
         assertNotNull(deleteCallback.error);
         assertNull(deleteCallback.result);
@@ -1579,9 +1580,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveByIdAuto() throws InterruptedException { //REMOVEBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1600,9 +1601,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveByIdErrorAuto() throws InterruptedException { //REMOVEBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         Person person = createPerson(TEST_USERNAME);
@@ -1614,7 +1615,7 @@ public class DataStoreTest {
         DefaultKinveyDeleteCallback deleteCallback = delete(storeAuto, id, DEFAULT_TIMEOUT);
         assertNotNull(deleteCallback.error);
         assertNull(deleteCallback.result);
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        List<SyncItem> syncItems = pendingSyncEntities(COLLECTION);
         assertNotNull(syncItems);
         assertTrue(syncItems.size() == 1);
         assertEquals(syncItems.get(0).getRequestMethod(), SyncRequest.HttpVerb.DELETE);
@@ -1625,9 +1626,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveQuerySyncQueueAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1647,7 +1648,7 @@ public class DataStoreTest {
         DefaultKinveyDeleteCallback deleteCallback = delete(storeAuto, query);
         assertNotNull(deleteCallback.error);
         assertNull(deleteCallback.result);
-        List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
+        List<SyncItem> syncItems = pendingSyncEntities(COLLECTION);
         assertTrue(syncItems != null);
         assertTrue(syncItems.size() == 2);
         cancelMockInvalidConnection();
@@ -1655,9 +1656,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveBothStoreAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1681,9 +1682,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveQueryAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1712,9 +1713,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveQueryNoMatchedAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1728,9 +1729,9 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveBothQueryAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1754,7 +1755,7 @@ public class DataStoreTest {
 
     @Test
     public void testRemoveDataInvalidQueryAuto() throws InterruptedException { //REMOVE
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeAuto);
         Query query = client.query();
         query.setQueryString("{{test");
@@ -1765,7 +1766,7 @@ public class DataStoreTest {
 
     @Test
     public void testSaveWithoutIdAuto() throws InterruptedException { //SAVE
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeAuto);
         createAndSavePerson(storeAuto, TEST_USERNAME);
         DefaultKinveyReadCallback findCallback = find(storeAuto, LONG_TIMEOUT);
@@ -1776,7 +1777,7 @@ public class DataStoreTest {
 
     @Test
     public void testSaveWithIdAuto() throws InterruptedException { //SAVE
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeAuto);
         String id = "123456";
         Person person = createPerson(TEST_USERNAME);
@@ -1789,8 +1790,8 @@ public class DataStoreTest {
 
     @Test
     public void testSaveUpdateAuto() throws InterruptedException { //SAVE
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeAuto);
         String id = "123456";
         Person person = createPerson(TEST_USERNAME);
@@ -1811,43 +1812,43 @@ public class DataStoreTest {
 
     @Test
     public void testPendingSyncAuto() throws InterruptedException { //PENDINGSYNCCOUNT
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeSync, TEST_USERNAME);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
-        assertNotNull(pendingSyncEntities(Person.COLLECTION));
-        assertEquals(pendingSyncEntities(Person.COLLECTION).size(), 3);
+        assertNotNull(pendingSyncEntities(COLLECTION));
+        assertEquals(pendingSyncEntities(COLLECTION).size(), 3);
     }
 
     @Test
     public void testPendingSyncItemsAuto() throws InterruptedException { //PENDINGSYNCENTITIES
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeSync, TEST_USERNAME);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
-        assertNotNull(pendingSyncEntities(Person.COLLECTION));
+        assertNotNull(pendingSyncEntities(COLLECTION));
     }
 
     @Test
     public void testClearSyncAuto() throws InterruptedException { //CLEARSYNC
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
         createAndSavePerson(storeSync, TEST_USERNAME_2);
         storeAuto.clear();
-        assertNull(pendingSyncEntities(Person.COLLECTION));
+        assertNull(pendingSyncEntities(COLLECTION));
     }
 
     @Test
     public void testClearQuerySyncAuto() throws InterruptedException { //CLEARSYNC
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
         Person personSecond = createPerson(TEST_USERNAME_2);
@@ -1863,21 +1864,21 @@ public class DataStoreTest {
         Query query = client.query();
         query = query.equals("weight", 2);
         storeAuto.clear(query);
-        assertNotNull(pendingSyncEntities(Person.COLLECTION));
-        assertEquals(pendingSyncEntities(Person.COLLECTION).size(), 1);
+        assertNotNull(pendingSyncEntities(COLLECTION));
+        assertEquals(pendingSyncEntities(COLLECTION).size(), 1);
     }
 
     @Test
     public void testClearAllQueueAuto() throws InterruptedException { //CLEAR
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
         createAndSavePerson(storeAuto, TEST_USERNAME_2);
         storeAuto.clear();
-        assertNull(pendingSyncEntities(Person.COLLECTION));
+        assertNull(pendingSyncEntities(COLLECTION));
         DefaultKinveyReadCallback findCallbackSync = find(storeSync, LONG_TIMEOUT);
         assertNotNull(findCallbackSync.result);
         assertTrue(findCallbackSync.result.getResult().size() == 0);
@@ -1885,9 +1886,9 @@ public class DataStoreTest {
 
     @Test
     public void testClearQueryQueueAuto() throws InterruptedException { //CLEAR
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1912,15 +1913,15 @@ public class DataStoreTest {
         Query query = client.query();
         query = query.equals("weight", 2);
         storeAuto.clear(query);
-        assertTrue(pendingSyncEntities(Person.COLLECTION) != null);
-        assertTrue(pendingSyncEntities(Person.COLLECTION).size() == 1);
+        assertTrue(pendingSyncEntities(COLLECTION) != null);
+        assertTrue(pendingSyncEntities(COLLECTION).size() == 1);
     }
 
     @Test
     public void testClearQueryAuto() throws InterruptedException { //CLEAR
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1948,9 +1949,9 @@ public class DataStoreTest {
 
     @Test
     public void testClearAuto() throws InterruptedException { //CLEAR
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeAuto, TEST_USERNAME);
@@ -1963,9 +1964,9 @@ public class DataStoreTest {
 
     @Test
     public void testSyncAuto() throws InterruptedException { //SYNC
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -1988,9 +1989,9 @@ public class DataStoreTest {
 
     @Test
     public void testSyncQueryAuto() throws InterruptedException { //SYNC
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -2021,9 +2022,9 @@ public class DataStoreTest {
 
     @Test
     public void testSyncNoConnection() throws InterruptedException { //SYNC
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -2041,9 +2042,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullAfterDeleteAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         Person person = createPerson(TEST_USERNAME);
@@ -2077,9 +2078,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullBeforePushAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -2092,9 +2093,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
@@ -2108,7 +2109,7 @@ public class DataStoreTest {
 
     @Test
     public void testPullNoConnectionAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         mockInvalidConnection();
         DefaultKinveyPullCallback pullCallback = pull(storeAuto, null);
         assertNull(pullCallback.result);
@@ -2119,9 +2120,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullAfterDeleteAndUpdateAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         int countUpdatedItems = 0;
@@ -2160,9 +2161,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullUpdateAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         int countUpdatedItems = 0;
@@ -2198,9 +2199,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullAutopaginationAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
@@ -2217,9 +2218,9 @@ public class DataStoreTest {
 
     @Test
     public void testPullQueryAuto() throws InterruptedException { //PULL
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
@@ -2257,9 +2258,9 @@ public class DataStoreTest {
 
     @Test
     public void testPushRecreateAuto() throws InterruptedException { //PUSH
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -2288,9 +2289,9 @@ public class DataStoreTest {
 
     @Test
     public void testPushAuto() throws InterruptedException { //PUSH
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeSync, TEST_USERNAME);
@@ -2301,14 +2302,14 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
         assertNotNull(findCallback.result);
         assertEquals(findCallback.result.getResult().size(), 2);
-        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+        assertEquals(pendingSyncEntities(COLLECTION), null);
     }
 
     @Test
     public void testPushUpdateAuto() throws InterruptedException { //PUSH
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
@@ -2328,14 +2329,14 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
         assertNotNull(findCallback.result);
         assertEquals(findCallback.result.getResult().size(), 2);
-        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+        assertEquals(pendingSyncEntities(COLLECTION), null);
     }
 
     @Test
     public void testPushDeleteAuto() throws InterruptedException { //PUSH
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
         Person person = createPerson(TEST_USERNAME);
@@ -2364,17 +2365,17 @@ public class DataStoreTest {
         DefaultKinveyReadCallback findCallback = find(storeNetwork, LONG_TIMEOUT);
         assertNotNull(findCallback.result);
         assertEquals(findCallback.result.getResult().size(), 1);
-        assertEquals(pendingSyncEntities(Person.COLLECTION), null);
+        assertEquals(pendingSyncEntities(COLLECTION), null);
     }
 
     @Test
     public void testFindIdItemAuto() throws InterruptedException { //FINDBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
         assertNotNull(saveCallback.result);
@@ -2391,12 +2392,12 @@ public class DataStoreTest {
 
     @Test
     public void testFindIdDeleteItemAuto() throws InterruptedException { //FINDBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(storeAuto, person);
         assertNotNull(saveCallback.result);
@@ -2417,7 +2418,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindWithoutSpecifyingIdAuto() throws InterruptedException { //FINDBYID
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         String userId = "test";
         DefaultKinveyClientCallback findCallbackAuto = find(storeAuto, userId, DEFAULT_TIMEOUT, null);
         assertNull(findCallbackAuto.result);
@@ -2435,12 +2436,12 @@ public class DataStoreTest {
 
     @Test
     public void testLocalDataByIdNoConnectionAuto() throws InterruptedException { //FINDBYID
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(storeNetwork, person);
         assertNotNull(saveCallback.result);
@@ -2466,8 +2467,8 @@ public class DataStoreTest {
 
     @Test
     public void testCountAllItemsAuto() throws InterruptedException, IOException { //COUNT
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeNetwork);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
@@ -2478,8 +2479,8 @@ public class DataStoreTest {
 
     @Test
     public void testCountAllQueriedItemsAuto() throws InterruptedException, IOException { //COUNT
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         clearBackend(storeNetwork);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         Person personSecond = createPerson(TEST_USERNAME_2);
@@ -2501,12 +2502,12 @@ public class DataStoreTest {
 
     @Test
     public void testCountLocallyStoredNoConnectionAuto() throws InterruptedException, IOException { //COUNT
-        DataStore<Person> storeNetwork = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        DataStore<Person> storeAuto = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
-        DataStore<Person> storeSync = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> storeNetwork = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> storeAuto = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> storeSync = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         clearBackend(storeNetwork);
         clearBackend(storeSync);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         createAndSavePerson(storeNetwork, TEST_USERNAME);
         createAndSavePerson(storeNetwork, TEST_USERNAME_2);
         DefaultKinveyReadCallback findCallbackAuto = find(storeAuto, LONG_TIMEOUT);
@@ -2534,7 +2535,7 @@ public class DataStoreTest {
     @Test
     public void testMongoQueryStringBuilder() {
         // Arrange
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
         Query myQuery = client.query();
         String expectedMongoQuery;
         String mongoQuery;
@@ -2719,9 +2720,9 @@ public class DataStoreTest {
     }
 
     private void testFindCount(StoreType storeType, boolean isCachedCallbackUsed) throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
         if (storeType != StoreType.NETWORK) {
-            client.getSyncManager().clear(Person.COLLECTION);
+            client.getSyncManager().clear(COLLECTION);
         }
 
         clearBackend(store);
@@ -2804,8 +2805,8 @@ public class DataStoreTest {
     }
 
     private void testDelete(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -2839,8 +2840,8 @@ public class DataStoreTest {
     }
     
     private void testDeleteNullId(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -2887,8 +2888,8 @@ public class DataStoreTest {
     }
 
     private void testDeleteArray(StoreType storeType) throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, storeType, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, storeType, client);
+        client.getSyncManager().clear(COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result);
@@ -2918,7 +2919,7 @@ public class DataStoreTest {
         removeFiles(customPath);
         File file = new File(customPath);
         assertFalse(file.exists());
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(file.exists());
     }*/
 
@@ -2960,36 +2961,36 @@ public class DataStoreTest {
 
     @Test
     public void testPurge() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         DefaultKinveyPurgeCallback purgeCallback = purge(null, store);
         assertNull(purgeCallback.error);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
 
         store.clear();
         save(store, createPerson(TEST_USERNAME));
         save(store, createPerson(TEST_USERNAME_2));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 2);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 2);
         purgeCallback = purge(new Query().equals("username", TEST_USERNAME), store);
         assertNull(purgeCallback.error);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
 
         purgeCallback = purge(new Query(), store);
         assertNull(purgeCallback.error);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testPurgeInvalidDataStoreType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         DefaultKinveyPurgeCallback purgeCallback = purge(null, store);
         assertNotNull(purgeCallback.error);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     private DefaultKinveySyncCallback sync(final DataStore<Person> store, int seconds) throws InterruptedException {
@@ -3024,28 +3025,28 @@ public class DataStoreTest {
 
     @Test
     public void testSync() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNull(syncCallback.error);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testSyncInvalidDataStoreType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
         assertNotNull(syncCallback.error);
         assertNull(syncCallback.kinveyPushResponse);
         assertNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
@@ -3059,8 +3060,8 @@ public class DataStoreTest {
         client = new Client.Builder(client.getContext())
                 .setHttpRequestInitializer(initializer)
                 .build();
-        client.getSyncManager().clear(Person.COLLECTION);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
         DefaultKinveySyncCallback syncCallback = sync(store, 120);
@@ -3070,15 +3071,15 @@ public class DataStoreTest {
 
     @Test
     public void testSyncNoCompletionHandler() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         DefaultKinveySyncCallback syncCallback = sync(store, DEFAULT_TIMEOUT);
         assertFalse(syncCallback.error == null && syncCallback.kinveyPullResponse == null && syncCallback.kinveyPushResponse == null);
         assertNotNull(syncCallback.kinveyPushResponse);
         assertNotNull(syncCallback.kinveyPullResponse);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     private DefaultKinveyPushCallback push(final DataStore<Person> store, int seconds) throws InterruptedException {
@@ -3098,114 +3099,114 @@ public class DataStoreTest {
 
     @Test
     public void testPush() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
         Log.d("DataStoreTest", "id: " + person.getId());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testPushBatching() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         final int LIMIT = 25;
         for (int i = 0; i < LIMIT; i++) {
             Person person = createPerson(TEST_USERNAME);
             save(store, person);
             Log.d("DataStoreTest", "id: " + person.getId());
-            assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == i+1);
+            assertTrue(client.getSyncManager().getCount(COLLECTION) == i+1);
         }
 
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testPushBlocking() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         store.pushBlocking();
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testSyncBlocking() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         store.pushBlocking();
         person = createPerson(TEST_USERNAME_2);
         save(store, person);
         store.syncBlocking(new Query());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
     @Test
     public void testSyncBlocking2() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
-        client.getSyncManager().clear(Person.COLLECTION);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        client.getSyncManager().clear(COLLECTION);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         Person person = createPerson(TEST_USERNAME);
         save(store, person);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         person.setAge("237 y.o.");
         save(store, person);
-        long countAfterSave = client.getSyncManager().getCount(Person.COLLECTION);
+        long countAfterSave = client.getSyncManager().getCount(COLLECTION);
         assertTrue(countAfterSave == 1);
         person = createPerson(TEST_USERNAME_2);
         save(store, person);
-        long countAfter2ndSave = client.getSyncManager().getCount(Person.COLLECTION);
+        long countAfter2ndSave = client.getSyncManager().getCount(COLLECTION);
         assertTrue(countAfter2ndSave == 2);
         store.syncBlocking(new Query());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         DefaultKinveyCountCallback countCallback = findCount(store, DEFAULT_TIMEOUT, null);
         assertTrue(countCallback.result == 2);
     }
 
     @Test
     public void testPushInvalidDataStoreType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         DefaultKinveyPushCallback pushCallback = push(store, 120);
         assertTrue(pushCallback.error != null || pushCallback.result.getListOfExceptions() != null);
         assertNull(pushCallback.result);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     @Test
     public void testPushNoCompletionHandler() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson(TEST_USERNAME));
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         DefaultKinveyPushCallback pushCallback = push(store, DEFAULT_TIMEOUT);
         assertFalse(pushCallback.error == null && pushCallback.result == null);
         assertNull(pushCallback.error);
         assertTrue(pushCallback.result.getListOfExceptions().size() == 0);
         assertNotNull(pushCallback.result);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
     }
 
     private DefaultKinveyPullCallback pull(final DataStore<Person> store, final Query query) throws InterruptedException {
@@ -3300,21 +3301,21 @@ public class DataStoreTest {
         DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
     }
 
-    //use for Person.COLLECTION and for Person.class
+    //use for COLLECTION and for Person.class
     private long getCacheSize(StoreType storeType) {
-        return client.getCacheManager().getCache(Person.COLLECTION, Person.class, storeType.ttl).get().size();
+        return client.getCacheManager().getCache(COLLECTION, Person.class, storeType.ttl).get().size();
     }
 
     @Test
     public void testGettingItemsByIds() throws InterruptedException {
 
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         ICacheManager cacheManager = client.getCacheManager();
-        ICache<Person> cache = cacheManager.getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl);
+        ICache<Person> cache = cacheManager.getCache(COLLECTION, Person.class, StoreType.SYNC.ttl);
         cache.clear();
 
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> items = new ArrayList<>();
 
@@ -3332,7 +3333,7 @@ public class DataStoreTest {
             save(store, p);
         }
 
-        List<Person> cachedObjects = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
+        List<Person> cachedObjects = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
         assertEquals(100, cachedObjects.size());
 
         for (int i = 0; i < cachedObjects.size(); i++) {
@@ -3341,7 +3342,7 @@ public class DataStoreTest {
         }
 
         assertTrue(true);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
     }
 
     /**
@@ -3365,8 +3366,8 @@ public class DataStoreTest {
          */
     @Test
     public void testPull() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3383,7 +3384,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pulling all data from backend
         DefaultKinveyPullCallback pullCallback = pull(store, null);
@@ -3393,7 +3394,7 @@ public class DataStoreTest {
         assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.CACHE));
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
 
         //test pull only 1 item by query
         Query query = client.query();
@@ -3413,7 +3414,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
         //test pulling not existing data from backend
         query = client.query();
         query = query.equals(USERNAME, victor.getUsername());
@@ -3432,7 +3433,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         //test pulling 1 entity if only 1 entity exist at backend
         query = client.query();
@@ -3446,8 +3447,8 @@ public class DataStoreTest {
 
     @Test
     public void testPullPendingSyncItems() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         save(store, createPerson("TestPullPendingSyncItems"));
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.result);
@@ -3456,8 +3457,8 @@ public class DataStoreTest {
 
     @Test
     public void testSkipLimitInPullBlocking() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3475,7 +3476,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3498,8 +3499,8 @@ public class DataStoreTest {
 
     @Test
     public void testSkipLimitInPullAsync() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3517,7 +3518,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3549,8 +3550,8 @@ public class DataStoreTest {
      */
     @Test
     public void testPullOrderWithSkipLimitQuery() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3558,7 +3559,7 @@ public class DataStoreTest {
             save(store, createPerson(TEST_USERNAME + Constants.UNDERSCORE + i));
         }
         sync(store, DEFAULT_TIMEOUT);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
@@ -3572,8 +3573,8 @@ public class DataStoreTest {
 
     @Test
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestSortById() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         DefaultKinveyPullCallback pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
@@ -3597,8 +3598,8 @@ public class DataStoreTest {
 
     @Test
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTest() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         KinveyPullResponse pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
@@ -3621,8 +3622,8 @@ public class DataStoreTest {
 
     @Test
     public void testPullOrderWithSkipLimitQueryWithCachedItemsBeforeTestWithAutoPagination() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         KinveyPullResponse pullResponse;
         for (int j = 0; j < 10; j++) {
             cleanBackendDataStore(store);
@@ -3643,8 +3644,8 @@ public class DataStoreTest {
      */
     @Test
     public void testFindInCacheOrderWithSkipLimitQuery() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         for (int i = 0; i < 5; i++) {
             save(store, createPerson(TEST_USERNAME + Constants.UNDERSCORE + i));
@@ -3668,8 +3669,8 @@ public class DataStoreTest {
      */
     @Test
     public void testSyncUpdateCacheInCorrectWay() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3679,7 +3680,7 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
         List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result.getResult();
         assertEquals(5, findResult.size());
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         List<Person> pullResults;
         int resultCount;
@@ -3695,7 +3696,7 @@ public class DataStoreTest {
         assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
 
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         int limit = 2;
@@ -3715,8 +3716,8 @@ public class DataStoreTest {
 
     @Test
     public void testSkipLimitInSyncBlocking() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3734,7 +3735,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3759,8 +3760,8 @@ public class DataStoreTest {
 
     @Test
     public void testSkipLimitInSyncAsync() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         cleanBackendDataStore(store);
 
@@ -3778,7 +3779,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3801,8 +3802,8 @@ public class DataStoreTest {
 
     @Test
     public void testPullInvalidDataStoreType() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(COLLECTION);
 
         DefaultKinveyPullCallback pullCallback = pull(store, null);
         assertNull(pullCallback.result);
@@ -3812,8 +3813,8 @@ public class DataStoreTest {
     @Test
     public void testExpiredTTL() throws InterruptedException {
         StoreType.SYNC.ttl = 1;
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result);
@@ -3840,7 +3841,7 @@ public class DataStoreTest {
     @Test
     public void testSaveAndFind10SkipLimit() throws IOException, InterruptedException {
         assertNotNull(client.getActiveUser());
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         cleanBackendDataStore(store);
         sync(store, 120);
 
@@ -3944,8 +3945,8 @@ public class DataStoreTest {
 
     @Test
     public void testSyncCount() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -3962,10 +3963,10 @@ public class DataStoreTest {
 
     @Test
     public void testSaveKmd() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, 60L).clear();
-        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
+        client.getCacheManager().getCache(COLLECTION, Person.class, 60L).clear();
+        clearBackend(DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client));
         store.clear();
         Person person = createPerson(TEST_TEMP_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
@@ -3982,15 +3983,15 @@ public class DataStoreTest {
         assertNotNull(((GenericJson)savedPerson.get(KMD)).get(LMT));
         delete(store, savedPerson.getId(), DEFAULT_TIMEOUT);
         push(store, DEFAULT_TIMEOUT);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
     }
 
     @Test
     public void testUpdateLmt() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         store.clear();
-        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        clearBackend(DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client));
         Person person = createPerson(TEST_TEMP_USERNAME);
         Person savedPerson = store.save(person);
         sync(store, DEFAULT_TIMEOUT);
@@ -4015,14 +4016,14 @@ public class DataStoreTest {
         assertNotEquals(savedLmd, updatedLmd);
         delete(store, updatedSyncedPerson.getId(), DEFAULT_TIMEOUT);
         push(store, DEFAULT_TIMEOUT);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
     }
 
     @Test
     public void testSaveList() throws InterruptedException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         ArrayList<Person> persons = new ArrayList<>();
         persons.add(new Person(TEST_USERNAME));
 
@@ -4037,7 +4038,7 @@ public class DataStoreTest {
         client.enableDebugLogging();
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
         ArrayList<Person> persons = new ArrayList<>();
         persons.add(new Person(TEST_USERNAME));
         persons.add(new Person(TEST_USERNAME_2));
@@ -4046,7 +4047,7 @@ public class DataStoreTest {
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
         assertNotNull(saveCallback.getResult());
         assertEquals(3, saveCallback.getResult().size());
-        List<Person> cachedItems = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).get();
+        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).get();
         assertEquals(3, cachedItems.size());
     }
 
@@ -4054,8 +4055,8 @@ public class DataStoreTest {
     public void testClear() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
@@ -4098,7 +4099,7 @@ public class DataStoreTest {
         client.enableDebugLogging();
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         ArrayList<Person> persons = new ArrayList<>();
         persons.add(new Person(TEST_USERNAME));
         persons.add(new Person(TEST_USERNAME_2));
@@ -4107,7 +4108,7 @@ public class DataStoreTest {
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
         assertNotNull(saveCallback.getResult());
         assertEquals(3, saveCallback.getResult().size());
-        List<Person> cachedItems = client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.AUTO.ttl).get();
+        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).get();
         assertEquals(3, cachedItems.size());
     }
 
@@ -4116,8 +4117,8 @@ public class DataStoreTest {
     public void testQueryClear() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
@@ -4152,8 +4153,8 @@ public class DataStoreTest {
     public void testQueryPurge() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
@@ -4191,7 +4192,7 @@ public class DataStoreTest {
     public void testSelfReferenceClass() throws InterruptedException {
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
         assertNotNull(store);
     }
 
@@ -4202,7 +4203,7 @@ public class DataStoreTest {
         client.enableDebugLogging();
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
         SelfReferencePerson person1 = new SelfReferencePerson("person1");
         SelfReferencePerson person2 = new SelfReferencePerson("person2");
         SelfReferencePerson person3 = new SelfReferencePerson("person3");
@@ -4236,7 +4237,7 @@ public class DataStoreTest {
         client.enableDebugLogging();
         TestManager<SelfReferencePerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<SelfReferencePerson> store = DataStore.collection(Person.COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
+        DataStore<SelfReferencePerson> store = DataStore.collection(COLLECTION, SelfReferencePerson.class, StoreType.SYNC, client);
         for (int i = 0; i < 10; i++) {
             SelfReferencePerson person1 = new SelfReferencePerson("person1");
             SelfReferencePerson person2 = new SelfReferencePerson("person2");
@@ -4267,7 +4268,7 @@ public class DataStoreTest {
     public void testSelfReferenceClassInList() throws InterruptedException {
         TestManager<PersonList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        DataStore<PersonList> store = DataStore.collection(COLLECTION, PersonList.class, StoreType.SYNC, client);
         assertNotNull(store);
     }
 
@@ -4279,7 +4280,7 @@ public class DataStoreTest {
         TestManager<PersonList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        DataStore<PersonList> store = DataStore.collection(COLLECTION, PersonList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonList person1 = new PersonList("person1");
@@ -4334,7 +4335,7 @@ public class DataStoreTest {
         TestManager<PersonList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        DataStore<PersonList> store = DataStore.collection(COLLECTION, PersonList.class, StoreType.SYNC, client);
         assertNotNull(store);
         for (int i = 0; i < 5; i++) {
             PersonList person1 = new PersonList("person1_" + i);
@@ -4413,7 +4414,7 @@ public class DataStoreTest {
         TestManager<PersonList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        DataStore<PersonList> store = DataStore.collection(COLLECTION, PersonList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonList person1 = new PersonList("person1");
@@ -4504,7 +4505,7 @@ public class DataStoreTest {
         TestManager<PersonWithAddress> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonWithAddress> store = DataStore.collection(Person.COLLECTION, PersonWithAddress.class, StoreType.SYNC, client);
+        DataStore<PersonWithAddress> store = DataStore.collection(COLLECTION, PersonWithAddress.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonWithAddress person = new PersonWithAddress("person");
@@ -4528,7 +4529,7 @@ public class DataStoreTest {
         TestManager<PersonWithPersonAndList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonWithPersonAndList> store = DataStore.collection(Person.COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
+        DataStore<PersonWithPersonAndList> store = DataStore.collection(COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonWithPersonAndList person = new PersonWithPersonAndList("person");
@@ -4544,14 +4545,14 @@ public class DataStoreTest {
         DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 1);
 
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_person", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_list", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_list", realm) + "_person", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_person", realm) + "_list", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm) + "_person", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm) + "_list", realm)).count(), 0);
 
             realm.commitTransaction();
         } finally {
@@ -4566,7 +4567,7 @@ public class DataStoreTest {
         TestManager<PersonWithPersonAndList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonWithPersonAndList> store = DataStore.collection(Person.COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
+        DataStore<PersonWithPersonAndList> store = DataStore.collection(COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonWithPersonAndList person = new PersonWithPersonAndList("person");
@@ -4589,7 +4590,7 @@ public class DataStoreTest {
         TestManager<PersonWithPersonAndList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonWithPersonAndList> store = DataStore.collection(Person.COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
+        DataStore<PersonWithPersonAndList> store = DataStore.collection(COLLECTION, PersonWithPersonAndList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonWithPersonAndList person = new PersonWithPersonAndList("person");
@@ -4627,7 +4628,7 @@ public class DataStoreTest {
         TestManager<PersonRoomAddressPerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonRoomAddressPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomAddressPerson.class, StoreType.SYNC, client);
+        DataStore<PersonRoomAddressPerson> store = DataStore.collection(COLLECTION, PersonRoomAddressPerson.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonRoomAddressPerson person = new PersonRoomAddressPerson();
@@ -4661,7 +4662,7 @@ public class DataStoreTest {
         TestManager<PersonRoomPerson> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonRoomPerson> store = DataStore.collection(Person.COLLECTION, PersonRoomPerson.class, StoreType.SYNC, client);
+        DataStore<PersonRoomPerson> store = DataStore.collection(COLLECTION, PersonRoomPerson.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonRoomPerson person = new PersonRoomPerson();
@@ -4708,7 +4709,7 @@ public class DataStoreTest {
         TestManager<PersonList> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<PersonList> store = DataStore.collection(Person.COLLECTION, PersonList.class, StoreType.SYNC, client);
+        DataStore<PersonList> store = DataStore.collection(COLLECTION, PersonList.class, StoreType.SYNC, client);
         assertNotNull(store);
 
         PersonList person1 = new PersonList("person1");
@@ -4759,7 +4760,7 @@ public class DataStoreTest {
     public void testDeleteInternalTables() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
@@ -4775,7 +4776,7 @@ public class DataStoreTest {
         int resSize;
         try {
             realm.beginTransaction();
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size();
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4787,7 +4788,7 @@ public class DataStoreTest {
         realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size();
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4800,7 +4801,7 @@ public class DataStoreTest {
     public void testClearInternalTables() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
@@ -4816,7 +4817,7 @@ public class DataStoreTest {
         int resSize;
         try {
             realm.beginTransaction();
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size();
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4828,7 +4829,7 @@ public class DataStoreTest {
         realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).findAll().size();
+            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size();
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4841,7 +4842,7 @@ public class DataStoreTest {
     public void testClearCollectionIfModelClassChanged() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
@@ -4855,14 +4856,14 @@ public class DataStoreTest {
         Context mockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mockContext).build();
 
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 1);
         assertTrue(store.count() == 1);
 
         DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            RealmCacheManagerUtil.setTableHash(client, Person.COLLECTION, "hashTest", realm);
+            RealmCacheManagerUtil.setTableHash(client, COLLECTION, "hashTest", realm);
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4871,7 +4872,7 @@ public class DataStoreTest {
         mockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mockContext).build();
 
-        store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
@@ -4886,7 +4887,7 @@ public class DataStoreTest {
         realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            isOneTable = isCollectionHasOneTable(Person.COLLECTION, realm);
+            isOneTable = isCollectionHasOneTable(COLLECTION, realm);
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4912,7 +4913,7 @@ public class DataStoreTest {
     public void testGrowCollectionExponentially() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.pullCustom(store, client.query());
         testManager.cleanBackendDataStore(store);
         testManager.push(store);
@@ -4933,7 +4934,7 @@ public class DataStoreTest {
         DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            checkInternalTablesHasItems(3, COLLECTION, realm);
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4946,7 +4947,7 @@ public class DataStoreTest {
         realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            checkInternalTablesHasItems(3, Person.COLLECTION, realm);
+            checkInternalTablesHasItems(3, COLLECTION, realm);
             realm.commitTransaction();
         } finally {
             realm.close();
@@ -4982,7 +4983,7 @@ public class DataStoreTest {
     public void testSaveItemToInternalTable() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
@@ -4997,14 +4998,14 @@ public class DataStoreTest {
         DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 1);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 1);
 
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 1);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).count(), 1);
 
-            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm));
-            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__acl", realm));
 
             realm.commitTransaction();
         } finally {
@@ -5016,21 +5017,21 @@ public class DataStoreTest {
     public void testInitializationInternalTable() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<>();
         testManager.login(TestManager.USERNAME, TestManager.PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.syncCount() == 0);
         assertTrue(store.count() == 0);
 
         DynamicRealm realm = RealmCacheManagerUtil.getRealm(client);
         try {
             realm.beginTransaction();
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(Person.COLLECTION, realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__kmd", realm)).count(), 0);
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "__acl", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 0);
 
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm)).count(), 0);
+            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).count(), 0);
 
-            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__kmd", realm));
-            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(Person.COLLECTION, realm) + "_author", realm) + "__acl", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__kmd", realm));
+            assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__acl", realm));
 
             assertEquals(realm.where(TableNameManagerUtil.getShortName("sync", realm)).count(), 0);
             assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm)).count(), 0);
@@ -5053,8 +5054,8 @@ public class DataStoreTest {
 
     @Test
     public void testHashCode() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         cleanBackendDataStore(store);
         store.syncBlocking(null);
         Person person = createPerson(TEST_USERNAME);
@@ -5093,9 +5094,9 @@ public class DataStoreTest {
     @Ignore //ignore while test app won't support delta cache
     public void testDeltaCache() throws InterruptedException, IOException {
         client.setUseDeltaCache(true);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertTrue(store.isDeltaSetCachingEnabled());
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         clearBackend(store);
 
         Person person = new Person();
@@ -5127,14 +5128,14 @@ public class DataStoreTest {
 
     @Test
     public void testDeltaCacheAfterDataStoreInitialization() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         store.setDeltaSetCachingEnabled(true);
         assertTrue(store.isDeltaSetCachingEnabled());
     }
 
     @Test
     public void testUpdateInternalObject() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person();
         person.setUsername("person_name");
@@ -5196,9 +5197,9 @@ public class DataStoreTest {
 
     @Test
     public void testCreateUpdateDeleteSync() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
-        clearBackend(DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client));
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
+        clearBackend(DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client));
         store.clear();
 
         Person person = createPerson(TEST_USERNAME);
@@ -5220,13 +5221,13 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
 
         assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
-        assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
+        assertEquals(0, client.getSyncManager().getCount(COLLECTION));
     }
 
     @Test
     public void testCreateDeleteSync() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback callback = save(store, person);
         assertNotNull(callback.result);
@@ -5238,7 +5239,7 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
 
         assertEquals(0, find(store, client.query().equals(Constants._ID, callback.result.getId()), DEFAULT_TIMEOUT).result.getResult().size());
-        assertEquals(0, client.getSyncManager().getCount(Person.COLLECTION));
+        assertEquals(0, client.getSyncManager().getCount(COLLECTION));
     }
 
     @Test
@@ -5247,7 +5248,7 @@ public class DataStoreTest {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+                DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
                 AsyncPullRequest pullRequest = new AsyncPullRequest(store, new Query(), null);
                 assertNotNull(pullRequest);
                 latch.countDown();
@@ -5260,9 +5261,9 @@ public class DataStoreTest {
 
     @Test
     public void testFindByIds() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         store.clear();
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         List<String> ids = new ArrayList<>();
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result.getId());
@@ -5279,7 +5280,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindByIdsCached() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
         TestManager<Person> testManager = new TestManager<>();
         testManager.cleanBackend(store, StoreType.CACHE);
         List<String> ids = new ArrayList<>();
@@ -5304,7 +5305,7 @@ public class DataStoreTest {
 
     @Test
     public void testFindByIdsAuto() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
         TestManager<Person> testManager = new TestManager<>();
         testManager.cleanBackend(store, StoreType.AUTO);
         List<String> ids = new ArrayList<>();
@@ -5345,9 +5346,9 @@ public class DataStoreTest {
 
     @Test
     public void testCount() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         store.clear();
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         DefaultKinveyClientCallback saveCallback = save(store, createPerson(TEST_USERNAME));
         assertNotNull(saveCallback.result.getId());
         saveCallback = save(store, createPerson(TEST_USERNAME_2));
@@ -5359,7 +5360,7 @@ public class DataStoreTest {
 
     @Test
     public void testQuery() {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         assertNotNull(store.query());
     }
 
