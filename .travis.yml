@@ -14,11 +14,15 @@ cache:
 env:
   global:
     - CI = true
-    - ANDROID_API=28
+    - ANDROID_API=27
     - EMULATOR_API_LEVEL=21
-    - ANDROID_ABI=armeabi-v7a
+    - EMU_FLAVOR=default
+    - ANDROID_HOME=/usr/local/android-sdk
+    - ANDROID_ABI=x86_64
     - ADB_INSTALL_TIMEOUT=10 # minutes
     - GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=1024m -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
+    - TOOLS=${ANDROID_HOME}/tools
+    - PATH=${ANDROID_HOME}:${ANDROID_HOME}/emulator:${TOOLS}:${TOOLS}/bin:${ANDROID_HOME}/platform-tools:${PATH}
   matrix:
     - PACKAGE=store.data
     - PACKAGE=store.file
@@ -27,26 +31,46 @@ env:
 android:
   components:
     - tools
-    - platform-tools
-    - build-tools
-    - android-$ANDROID_API
-    - android-$EMULATOR_API_LEVEL
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository # for design library
-    - addon-google_apis-google-$ANDROID_API # google play services
-    - sys-img-$ANDROID_ABI-$EMULATOR_API_LEVEL
-before_script:
-  - chmod +x gradlew
-  - echo -e "y\ny" | sdkmanager --update
-  - sdkmanager "system-images;android-$EMULATOR_API_LEVEL;google_apis;$ANDROID_ABI"
-  - sdkmanager --list
-  - echo no | avdmanager create avd --force -n test -k "system-images;android-$EMULATOR_API_LEVEL;google_apis;$ANDROID_ABI" --abi $ANDROID_ABI
-  - mksdcard -l mySdCard 1024M mySdCardFile.img
-  - emulator -memory 2048 -avd test -sdcard mySdCardFile.img -no-window &
+
+#    - platform-tools
+#    - build-tools
+#    - android-$ANDROID_API
+#    - android-$EMULATOR_API_LEVEL
+#    - extra-google-google_play_services
+#    - extra-google-m2repository
+#    - extra-android-m2repository # for design library
+#    - addon-google_apis-google-$ANDROID_API # google play services
+#    - sys-img-$ANDROID_ABI-$EMULATOR_API_LEVEL
+licenses:
+  - 'android-sdk-preview-license-.+'
+  - 'android-sdk-license-.+'
+  - 'google-gdk-license-.+'
+  # Emulator Management: Create, Start and Wait
+install:
+  - echo 'count=0' > /home/travis/.android/repositories.cfg # Avoid harmless sdkmanager warning
+  - echo y | sdkmanager "platform-tools" >/dev/null
+  - echo y | sdkmanager "tools" >/dev/null # A second time per Travis docs, gets latest versions
+  - echo y | sdkmanager "build-tools;28.0.3" >/dev/null # Implicit gradle dependency - gradle drives changes
+  - echo y | sdkmanager "platforms;android-$ANDROID_API" >/dev/null # We need the API of the emulator we will run
+  - echo y | sdkmanager "platforms;android-28" >/dev/null # We need the API of the current compileSdkVersion from gradle.properties
+  - echo y | sdkmanager --channel=4 "emulator" # Experiment with canary, specifying 28.0.3 (prior version) did not work
+  - echo y | sdkmanager "extras;android;m2repository" >/dev/null
+  - echo y | sdkmanager "system-images;android-$ANDROID_API;$EMU_FLAVOR;$ANDROID_ABI" #>/dev/null # install our emulator
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-$ANDROID_API;$EMU_FLAVOR;$ANDROID_ABI" -c 10M
+  - emulator -verbose -avd test -no-accel -no-snapshot -no-window -no-audio -camera-back none -camera-front none -selinux permissive -qemu -m 2048 &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
-  - ./gradlew --stop
+#before_script:
+#  - chmod +x gradlew
+#  - echo -e "y\ny" | sdkmanager --update
+#  - sdkmanager "system-images;android-$EMULATOR_API_LEVEL;google_apis;$ANDROID_ABI"
+#  - sdkmanager --list
+#  - echo no | avdmanager create avd --force -n test -k "system-images;android-$EMULATOR_API_LEVEL;google_apis;$ANDROID_ABI" --abi $ANDROID_ABI
+#  - mksdcard -l mySdCard 1024M mySdCardFile.img
+#  - emulator -memory 2048 -avd test -sdcard mySdCardFile.img -no-window &
+#  - android-wait-for-emulator
+#  - adb shell input keyevent 82 &
+#  - ./gradlew --stop
 script: 
   - ./gradlew clean release --no-daemon 
   - travis_wait 60 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.kinvey.androidTest.$PACKAGE -PdisablePreDex --stacktrace --no-daemon
