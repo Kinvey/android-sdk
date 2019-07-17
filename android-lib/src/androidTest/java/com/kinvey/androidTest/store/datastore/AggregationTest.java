@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data;
+package com.kinvey.androidTest.store.datastore;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -40,6 +40,7 @@ import static junit.framework.Assert.assertTrue;
 @SmallTest
 public class AggregationTest {
 
+    private static final String COLLECTION = "PersonsNew";
     private Client client;
 
     @Before
@@ -52,7 +53,7 @@ public class AggregationTest {
     public void testCountLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person(TEST_USERNAME);
         person.setHeight(170);
@@ -78,7 +79,7 @@ public class AggregationTest {
     public void testCountNetwork() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -106,7 +107,7 @@ public class AggregationTest {
     public void testMinLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -135,7 +136,7 @@ public class AggregationTest {
     public void testMinNetwork() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -163,7 +164,7 @@ public class AggregationTest {
     public void testCountAuto() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.AUTO, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -191,7 +192,7 @@ public class AggregationTest {
     public void testMaxLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person(TEST_USERNAME);
         person.setCarNumber(1);
@@ -218,7 +219,7 @@ public class AggregationTest {
     public void testMaxNetwork() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -247,7 +248,7 @@ public class AggregationTest {
     public void testAverageLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person(TEST_USERNAME);
         person.setCarNumber(1);
@@ -290,7 +291,7 @@ public class AggregationTest {
     public void testAverageNetwork() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -324,7 +325,7 @@ public class AggregationTest {
     public void testSumLocally() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person(TEST_USERNAME);
         person.setCarNumber(1);
@@ -355,7 +356,7 @@ public class AggregationTest {
     public void testSumNetwork() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
 
         testManager.cleanBackendDataStore(store);
 
@@ -388,7 +389,7 @@ public class AggregationTest {
     public void testSumForStringFieldsError() throws InterruptedException, IOException {
         TestManager<Person> testManager = new TestManager<Person>();
         testManager.login(USERNAME, PASSWORD, client);
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         Person person = new Person(TEST_USERNAME);
         person.setCarNumber(1);
