@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 public class PaginationTest {
 
-    private static final String COLLECTION = "PersonsNew";
+    public static final String COLLECTION = "PersonsNew";
     private Client client;
     private TestManager<Person> testManager;
 
