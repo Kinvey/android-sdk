@@ -113,6 +113,11 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
     }
 
     @Override
+    public ICacheManager getUserCacheManager() {
+        return null;
+    }
+
+    @Override
     public String getFileCacheFolder() {
         return null;
     }

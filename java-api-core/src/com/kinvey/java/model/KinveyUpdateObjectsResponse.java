@@ -4,13 +4,13 @@ import com.google.api.client.util.Key;
 
 import java.util.List;
 
-public class KinveySaveBatchResponse<T> extends KinveyErrorResponse {
+public class KinveyUpdateObjectsResponse<T> extends KinveyErrorResponse {
 
     @Key
     private List<T> entities;
 
     @Key
-    private List<KinveyBatchInsertError> errors;
+    private List<KinveyUpdateSingleItemError> errors;
 
     public List<T> getEntities() {
         return entities;
@@ -20,11 +20,11 @@ public class KinveySaveBatchResponse<T> extends KinveyErrorResponse {
         this.entities = entities;
     }
 
-    public List<KinveyBatchInsertError> getErrors() {
+    public List<KinveyUpdateSingleItemError> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<KinveyBatchInsertError> errors) {
+    public void setErrors(List<KinveyUpdateSingleItemError> errors) {
         this.errors = errors;
     }
 

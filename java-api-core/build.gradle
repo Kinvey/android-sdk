@@ -1,8 +1,20 @@
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}"
+    }
+}
+
 plugins {
     id 'de.fuerstenau.buildconfig' version '1.1.8'
 }
 
 apply plugin: 'java'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'de.fuerstenau.buildconfig'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -24,8 +36,6 @@ buildConfig {
     charset = 'UTF-8'            // sets charset of the generated class,
 }
 
-apply plugin: 'de.fuerstenau.buildconfig'
-
 sourceSets {
     main {
         java {
@@ -44,57 +54,36 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-configurations {
-    jaxDoclet
+dokka {
+    outputFormat = 'javadoc'
+    jdkVersion = 8
+    outputDirectory = file("../../../devcenter/content/reference/android-v3.0/api/java")
+    sourceDirs = files('src')
 }
 
-
 dependencies {
-    jaxDoclet(group: 'com.kinvey', name: 'doclava-kinvey-custom', version: '1.0.6a')
-    compile 'com.google.guava:guava:18.0'
-    compile 'com.google.http-client:google-http-client-jackson:1.19.0'
-    compile 'com.google.code.gson:gson:2.1'
-    testCompile('com.google.http-client:google-http-client-gson:1.19.0') {
+    implementation 'com.google.guava:guava:24.1-jre'
+    implementation 'com.google.http-client:google-http-client-jackson:1.19.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    testImplementation('com.google.http-client:google-http-client-gson:1.19.0') {
         exclude(module: 'xpp3')
     }
-    testCompile 'junit:junit:4.10'
-    testCompile 'org.mockito:mockito-all:1.9.0'
-    compile('com.google.http-client:google-http-client:1.19.0') {
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-all:1.9.0'
+    implementation('com.google.http-client:google-http-client:1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'httpclient')
         exclude(module: 'junit')
         exclude(module: 'android')
         exclude(module: 'guava-jdk5')
     }
-    compile 'com.google.dexmaker:dexmaker:1.2'
-    compile 'org.apache.ant:ant:1.8.0'
-    compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
-    compile group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
+    implementation 'com.google.dexmaker:dexmaker:1.2'
+    implementation 'org.apache.ant:ant:1.8.0'
+    implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
+    implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
 }
-
-task docgen(type: Javadoc) {
-    
-
-    source = sourceSets.main.java.srcDirs + "${buildDir}/gen/buildconfig/src/main/"
-
-    options.docletpath = files("../tools/doclava-kinvey-custom.jar").asType(List)
-    options.doclet = "com.google.doclava.Doclava"
-    maxMemory = "1024m"
-    classpath = configurations.compile
-    title = null
-
-    options.bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-    options.addStringOption("hdf", "project.name JavaApiCore")
-    options.addStringOption("stubs", "target/stubs")
-    options.addStringOption("apixml", "target/apidocs/api.xml")
-    options.destinationDirectory = file("../../../devcenter/content/reference/android-v3.0/api/java")
-    //options.addStringOption("d", "../../../devcenter/content/reference/android-v3.0/api/java")
-
-}
-
-
 
 cleanTest.mustRunAfter clean
-cleanDocgen.mustRunAfter cleanTest
-build.mustRunAfter cleanDocgen
-docgen.mustRunAfter build
+cleanDokka.mustRunAfter cleanTest
+build.mustRunAfter cleanDokka
+dokka.mustRunAfter build

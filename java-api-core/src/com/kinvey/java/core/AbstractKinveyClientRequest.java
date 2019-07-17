@@ -108,6 +108,11 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
      */
     boolean overrideRedirect = false;
 
+    /**
+     * Does this request require the client_id/appsecret for authentication
+     */
+    private boolean requiredClientIdAuth = false;
+
     @Key
     private String appKey;
 
@@ -479,7 +484,15 @@ public abstract class AbstractKinveyClientRequest<T> extends GenericData {
     public boolean isRequireAppCredentials() {
         return requireAppCredentials;
     }
-    
+
+    public void setRequiredClientIdAuth(boolean value){
+        this.requiredClientIdAuth = value;
+    }
+
+    public boolean isRequiredClientIdAuth() {
+        return this.requiredClientIdAuth;
+    }
+
     public void setTemplateExpand(boolean expand){
     	this.templateExpand = expand;
     }

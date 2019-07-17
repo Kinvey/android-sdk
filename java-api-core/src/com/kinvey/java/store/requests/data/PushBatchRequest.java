@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2019, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -31,10 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * Created by Prots on 2/8/16.
- */
 public class PushBatchRequest<T extends GenericJson> extends AbstractKinveyExecuteRequest<T> {
 
     private static final String IGNORED_EXCEPTION_MESSAGE = "EntityNotFound";
@@ -113,15 +109,16 @@ public class PushBatchRequest<T extends GenericJson> extends AbstractKinveyExecu
         return null;
     }
 
-    private void executeSaveRequest(List<T> saveItems) throws IOException {
+    private KinveySaveBatchResponse executeSaveRequest(List<T> saveItems) throws IOException {
         KinveySaveBatchResponse response = networkManager.saveBatchBlocking(saveItems).execute();
-        List<T> resultItems = null;
+        List<T> resultItems;
         if (response != null) {
             resultItems = response.getEntities();
             if (resultItems != null) {
                 cache.save(resultItems);
             }
         }
+        return response;
     }
 
     private void removeBatchTempItems(List<SyncItem> batchSyncItems) {
