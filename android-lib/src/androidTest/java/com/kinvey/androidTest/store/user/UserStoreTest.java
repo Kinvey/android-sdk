@@ -619,14 +619,11 @@ public class UserStoreTest {
     private DefaultKinveyClientCallback login(final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
-        LooperThread looperThread = new LooperThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UserStore.login(client, callback);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        LooperThread looperThread = new LooperThread(() -> {
+            try {
+                UserStore.login(client, callback);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         looperThread.start();
@@ -1940,6 +1937,16 @@ public class UserStoreTest {
         assertNull(((Map<String, String>) user.get(KMD)).get(AUTH_TOKEN)); // check that realm doesn't keep auth_token
         assertNotNull(((Map<String, String>) client.getActiveUser().get(KMD)).get(AUTH_TOKEN)); // check that active user has auth_token
         assertNull(logout(client).error);
+    }
+
+    @Test
+    public void testLoginError() throws InterruptedException {
+        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        MockedClient<User> mockedClient = new MockedClient.Builder<>(mMockContext).build();
+        DefaultKinveyClientCallback callback = login(mockedClient);
+        assertTrue(mockedClient.isUserLoggedIn());
+
+
     }
 
 }
