@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data;
+package com.kinvey.androidTest.store.datastore;
 
 import android.content.Context;
 import android.os.Message;
@@ -43,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 public class PaginationTest {
 
+    private static final String COLLECTION = "PersonsNew";
     private Client client;
     private TestManager<Person> testManager;
 
@@ -70,8 +71,8 @@ public class PaginationTest {
 
     @Test
     public void testPagedPull() throws InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         testManager.cleanBackendDataStore(store);
 
@@ -84,7 +85,7 @@ public class PaginationTest {
         testManager.save(store,moe);
         long cacheSizeBefore = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBefore == 3);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBetween == 0);
 
@@ -100,8 +101,8 @@ public class PaginationTest {
 
     @Test
     public void testPagedPullBlocking() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
+        client.getSyncManager().clear(COLLECTION);
 
         testManager.cleanBackendDataStore(store);
 
@@ -115,7 +116,7 @@ public class PaginationTest {
         testManager.save(store,theodore);
         long cacheSizeBefore = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBefore == 3);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
         long cacheSizeBetween = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBetween == 0);
 
@@ -128,27 +129,27 @@ public class PaginationTest {
 
     @Test
     public void testSyncBlockingPaged() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         Person person = new Person(TEST_USERNAME);
         testManager.save(store,person);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 1);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 1);
         store.pushBlocking();
         person = new Person(TEST_USERNAME_2);
         testManager.save(store,person);
         store.syncBlocking(client.query(), 1);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         assertTrue(testManager.find(store, client.query()).getResult().getResult().size() == 2);
     }
 
     @Test
     public void testSyncPaged() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         testManager.createPersons(store, 10);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 10);
         CustomKinveySyncCallback syncCallback = testManager.sync(store, null, 1);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
@@ -156,17 +157,17 @@ public class PaginationTest {
         assertNotNull(syncCallback.getResult());
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
         assertEquals(10, syncCallback.getResult().getCount());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         assertEquals(10, store.find().getResult().size());
     }
 
     @Test
     public void testSyncPagedWithQuery() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         testManager.createPersons(store, 10);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 10);
         CustomKinveySyncCallback syncCallback = testManager.sync(store, client.query().equals("username", TEST_USERNAME + 0).or(client.query().equals("username", TEST_USERNAME + 1)), 1);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
@@ -174,7 +175,7 @@ public class PaginationTest {
         assertNotNull(syncCallback.getResult());
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
         assertEquals(2, syncCallback.getResult().getCount());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         assertEquals(10, store.find().getResult().size());
     }
 
@@ -190,11 +191,11 @@ public class PaginationTest {
     }
 
     private void syncAutoPaginationAsync(boolean isAutoPagination) throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         testManager.cleanBackend(store, StoreType.SYNC);
-        client.getSyncManager().clear(Person.COLLECTION);
+        client.getSyncManager().clear(COLLECTION);
         testManager.createPersons(store, 10);
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 10);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 10);
         CustomKinveySyncCallback syncCallback = testManager.sync(store, null, isAutoPagination);
         assertNull(syncCallback.getError());
         assertNotNull(syncCallback.getKinveyPushResponse().getSuccessCount());
@@ -202,7 +203,7 @@ public class PaginationTest {
         assertNotNull(syncCallback.getResult());
         assertEquals(0, syncCallback.getResult().getListOfExceptions().size());
         assertEquals(10, syncCallback.getResult().getCount());
-        assertTrue(client.getSyncManager().getCount(Person.COLLECTION) == 0);
+        assertTrue(client.getSyncManager().getCount(COLLECTION) == 0);
         assertEquals(10, store.find().getResult().size());
     }
 
@@ -219,13 +220,13 @@ public class PaginationTest {
 
     @Test
     public void testPullBlockingWithAutoPagination() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         testManager.cleanBackend(store, StoreType.SYNC);
 
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         assertEquals(5, store.pullBlocking(client.query(), true).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
@@ -233,13 +234,13 @@ public class PaginationTest {
 
     @Test
     public void testPullBlockingWithoutAutoPagination() throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
 
         testManager.cleanBackend(store, StoreType.SYNC);
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
 
         assertEquals(5, store.pullBlocking(client.query(), false).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
@@ -256,22 +257,22 @@ public class PaginationTest {
     }
 
     private void pullAutoPaginationAsync(boolean isAutoPagination) throws InterruptedException, IOException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        client.getSyncManager().clear(COLLECTION);
         testManager.cleanBackend(store, StoreType.SYNC);
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
         assertEquals(5, testManager.pullCustom(store, client.query(), isAutoPagination).getResult().getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
-        client.getCacheManager().getCache(Person.COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
         assertEquals(5, testManager.pullCustom(store, null, isAutoPagination).getResult().getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }
 
     @Test
     public void testPagedPullPrecondition() {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
         try {
             store.pull(client.query(), -1, null);
             assertFalse(true);
@@ -282,7 +283,7 @@ public class PaginationTest {
 
     @Test
     public void testPagedPullPreconditionWithoutQuery() {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.CACHE, client);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
         try {
             store.pull(-1, null);
             assertFalse(true);
@@ -293,9 +294,9 @@ public class PaginationTest {
 
     @Test
     public void testDeletingItemsFromTheCacheIfItemsWereDeletedAtTheBackendUsingAP() throws IOException, InterruptedException {
-        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
-        DataStore<Person> networkStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
-        client.getSyncManager().clear(Person.COLLECTION);
+        DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> networkStore = DataStore.collection(COLLECTION, Person.class, StoreType.NETWORK, client);
+        client.getSyncManager().clear(COLLECTION);
         testManager.cleanBackend(networkStore, StoreType.NETWORK);
         for (int i = 0; i < 30; i++) {
             testManager.save(networkStore, new Person(TEST_USERNAME_2));
