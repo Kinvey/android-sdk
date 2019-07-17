@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data;
+package com.kinvey.androidTest.store.datastore;
 
 import android.content.Context;
 import android.os.Looper;
