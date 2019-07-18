@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data;
+package com.kinvey.androidTest.store.datastore;
 
 import android.content.Context;
 import android.os.Message;
@@ -46,6 +46,7 @@ import static org.junit.Assert.assertNull;
 @SmallTest
 public class EncryptionTest {
 
+    private static final String COLLECTION = "PersonsNew";
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
     private static final String ACCESS_ERROR = "Access Error";
@@ -220,13 +221,13 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> encryptedStore = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(USERNAME);
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
-        DataStore<Person> notEncryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, secondClient);
+        DataStore<Person> notEncryptedStore = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, secondClient);
         PersonKinveyClientCallback findCallback = find(notEncryptedStore, saveCallback.result.getId());
         Assert.assertNotNull(findCallback.result);
         assertNull(findCallback.error);
@@ -242,7 +243,7 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> encryptedStore = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(USERNAME);
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
@@ -250,7 +251,7 @@ public class EncryptionTest {
         Client clientWithoutEncryption = new Client.Builder(mContext).build();
         KinveyException fileException = null;
         try {
-            DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, clientWithoutEncryption);
+            DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, clientWithoutEncryption);
         } catch (KinveyException exception) {
             fileException = exception;
         }
@@ -266,7 +267,7 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> encryptedStore = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(USERNAME);
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
@@ -275,7 +276,7 @@ public class EncryptionTest {
         KinveyException kinveyException = null;
         DataStore<Person> otherStore = null;
         try {
-            otherStore = DataStore.collection(Person.COLLECTION + "_OTHER", Person.class, StoreType.SYNC, clientWithoutEncryption);
+            otherStore = DataStore.collection(COLLECTION + "_OTHER", Person.class, StoreType.SYNC, clientWithoutEncryption);
         } catch (KinveyException exception) {
             kinveyException = exception;
         }
@@ -292,13 +293,13 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        DataStore<Person> encryptedStore = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
+        DataStore<Person> encryptedStore = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         Person person = createPerson(USERNAME);
         PersonKinveyClientCallback saveCallback = save(encryptedStore, person);
         Assert.assertNotNull(saveCallback.result);
         assertNull(saveCallback.error);
         Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
-        DataStore<Person> otherStore = DataStore.collection(Person.COLLECTION + "_OTHER", Person.class, StoreType.SYNC, secondClient);
+        DataStore<Person> otherStore = DataStore.collection(COLLECTION + "_OTHER", Person.class, StoreType.SYNC, secondClient);
         assertNotNull(otherStore);
     }
 
