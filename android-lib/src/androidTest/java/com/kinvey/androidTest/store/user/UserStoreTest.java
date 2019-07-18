@@ -73,33 +73,6 @@ public class UserStoreTest {
     public static final String INSUFFICIENT_CREDENTIAL_TYPE = "InsufficientCredentials";
     private static final String ACTIVE_USER_COLLECTION_NAME = "active_user_info";
 
-    private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
-
-        private CountDownLatch latch;
-        private User result;
-        private Throwable error;
-
-        private DefaultKinveyClientCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(User user) {
-            this.result = user;
-            finish();
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        private void finish() {
-            latch.countDown();
-        }
-    }
-
     private static class DefaultKinveyUserListCallback implements KinveyUserListCallback {
 
         private CountDownLatch latch;
@@ -489,7 +462,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback get(final String userName) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -546,7 +519,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -565,7 +538,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback signUp() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -580,7 +553,7 @@ public class UserStoreTest {
 
     private CustomKinveyClientCallback signUp(final TestUser user) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.CustomKinveyClientCallback callback = new UserStoreTest.CustomKinveyClientCallback(latch);
+        final CustomKinveyClientCallback callback = new CustomKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -1937,16 +1910,6 @@ public class UserStoreTest {
         assertNull(((Map<String, String>) user.get(KMD)).get(AUTH_TOKEN)); // check that realm doesn't keep auth_token
         assertNotNull(((Map<String, String>) client.getActiveUser().get(KMD)).get(AUTH_TOKEN)); // check that active user has auth_token
         assertNull(logout(client).error);
-    }
-
-    @Test
-    public void testLoginError() throws InterruptedException {
-        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        MockedClient<User> mockedClient = new MockedClient.Builder<>(mMockContext).build();
-        DefaultKinveyClientCallback callback = login(mockedClient);
-        assertTrue(mockedClient.isUserLoggedIn());
-
-
     }
 
 }

@@ -8,6 +8,7 @@ import com.google.api.client.json.Json;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.gson.Gson;
+import com.kinvey.android.model.User;
 
 public class MockHttpTransport extends HttpTransport {
 
@@ -24,8 +25,10 @@ public class MockHttpTransport extends HttpTransport {
                     return oauthAuth();
                 } else if (url.contains("tempURL")) {
                     return tempURL();
-                }else if(url.contains("/login")){
+                } else if (url.contains("/login")) {
                     return userLogin();
+                } else if (url.contains("/user/appkey/")) {
+                    return userRetrieve();
                 }
                 return null;
             }
@@ -54,20 +57,23 @@ public class MockHttpTransport extends HttpTransport {
     }
 
     private  MockLowLevelHttpResponse userLogin() {
-
         MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
-
         GenericJson content = new GenericJson();
-
         content.put("_id", "123");
-
-
         response.setContentType(Json.MEDIA_TYPE);
-
         response.setContent(new Gson().toJson(content));
         response.setStatusCode(200);
+        return response;
+    }
 
-        return response;	}
-
+    private  MockLowLevelHttpResponse userRetrieve() {
+        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+        User content = new User();
+        content.put("_id", "123");
+        response.setContentType(Json.MEDIA_TYPE);
+        response.setContent(new Gson().toJson(content));
+        response.setStatusCode(200);
+        return response;
+    }
 
 }

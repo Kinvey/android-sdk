@@ -13,16 +13,17 @@ import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
 import com.kinvey.java.core.KinveyHeaders;
 
-public class MockedClient<T extends User> extends Client<T> {
+public class MockClient<T extends User> extends Client<T> {
 
 
-    private MockedClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store, BackOffPolicy requestPolicy, byte[] encryptionKey, Context context) {
+    private MockClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl, String servicePath, JsonObjectParser objectParser, KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store, BackOffPolicy requestPolicy, byte[] encryptionKey, Context context) {
         super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy, encryptionKey, context);
     }
 
-    public static class Builder<T extends User> extends Client.Builder {
+    public static class Builder<T extends User> extends Client.Builder<T> {
 
         Context context;
+        private Class userClass = null;
 
         public Builder(Context context) {
             super(context);
@@ -30,9 +31,17 @@ public class MockedClient<T extends User> extends Client<T> {
         }
 
         @Override
-        public MockedClient build() {
-            return new MockedClient(new MockHttpTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(),
+        public MockClient.Builder setUserClass(Class<T> userClass) {
+            this.userClass = userClass;
+            return this;
+        }
+
+        @Override
+        public MockClient<T> build() {
+            MockClient<T> client = new MockClient<>(new MockHttpTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(),
                     getObjectParser(), new MockKinveyClientRequestInitializer(), null, null, null, context);
+            client.setUserClass(userClass != null ? userClass : (Class<T>) User.class);
+            return client;
         }
 
     }
