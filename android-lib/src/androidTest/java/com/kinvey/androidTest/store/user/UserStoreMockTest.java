@@ -10,6 +10,7 @@ import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
+import com.kinvey.java.core.KinveyJsonResponseException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +20,10 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import static com.kinvey.androidTest.TestManager.PASSWORD;
+import static com.kinvey.androidTest.TestManager.USERNAME;
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
@@ -34,10 +38,8 @@ public class UserStoreMockTest {
         if (mMockContext == null) {
             mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         }
-        client = new Client.Builder(mMockContext).build();
-//        client.enableDebugLogging();
-        if (client.isUserLoggedIn()) {
-//            logout(client);
+        if (client == null) {
+            client = new Client.Builder(mMockContext).build();
         }
     }
 
@@ -55,11 +57,27 @@ public class UserStoreMockTest {
 
     @Test
     public void testLogin() throws InterruptedException {
-        Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         MockClient<User> mockedClient = new MockClient.Builder<>(mMockContext).build();
         DefaultKinveyClientCallback callback = login(mockedClient);
         assertNull(callback.error);
         assertNotNull(callback.result);
+    }
+
+    @Test
+    public void testLoginWithUsernameAndPassword() throws InterruptedException {
+        MockClient<User> mockedClient = new MockClient.Builder<>(mMockContext).build();
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD, mockedClient);
+        assertNull(callback.error);
+        assertNotNull(callback.result);
+    }
+
+    @Test
+    public void testLoginError() throws InterruptedException {
+        MockClient<User> mockedClient = new MockClient.Builder<>(mMockContext).build(new MockHttpErrorTransport());
+        DefaultKinveyClientCallback callback = login(USERNAME, PASSWORD, mockedClient);
+        assertNotNull(callback.error);
+        assertNull(callback.result);
+        assertEquals(500, ((KinveyJsonResponseException) callback.error).getStatusCode());
     }
 
     private DefaultKinveyClientCallback login(final Client client) throws InterruptedException {
@@ -68,6 +86,22 @@ public class UserStoreMockTest {
         LooperThread looperThread = new LooperThread(() -> {
             try {
                 UserStore.login(client, callback);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private DefaultKinveyClientCallback login(final String username, final String password, final Client client) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
+        LooperThread looperThread = new LooperThread(() -> {
+            try {
+                UserStore.login(username, password, client, callback);
             } catch (IOException e) {
                 e.printStackTrace();
             }
