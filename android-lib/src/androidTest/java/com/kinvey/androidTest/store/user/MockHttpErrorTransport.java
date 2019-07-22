@@ -12,6 +12,9 @@ import com.kinvey.android.model.User;
 
 public class MockHttpErrorTransport extends HttpTransport {
 
+    static final String ERROR_500 = "KinveyInternalErrorRetry";
+    static final String DESCRIPTION_500 = "The Kinvey server encountered an unexpected error. Please retry your request";
+
     @Override
     public LowLevelHttpRequest buildRequest(String method, final String url) {
 
@@ -27,6 +30,8 @@ public class MockHttpErrorTransport extends HttpTransport {
                     return tempURL();
                 } else if (url.contains("/login")) {
                     return userLoginError();
+                } else if (url.contains("/user/")) {
+                    return userRetrieve();
                 }
                 return null;
             }
@@ -57,7 +62,19 @@ public class MockHttpErrorTransport extends HttpTransport {
     private  MockLowLevelHttpResponse userLoginError() {
         MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
         GenericJson content = new GenericJson();
-        content.put("_id", "123");
+        content.put("error", ERROR_500);
+        content.put("description", DESCRIPTION_500);
+        response.setContentType(Json.MEDIA_TYPE);
+        response.setContent(new Gson().toJson(content));
+        response.setStatusCode(500);
+        return response;
+    }
+
+    private  MockLowLevelHttpResponse userRetrieve() {
+        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+        User content = new User();
+        content.put("error", ERROR_500);
+        content.put("description", DESCRIPTION_500);
         response.setContentType(Json.MEDIA_TYPE);
         response.setContent(new Gson().toJson(content));
         response.setStatusCode(500);

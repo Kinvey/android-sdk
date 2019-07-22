@@ -48,6 +48,7 @@ public class MockClient<T extends User> extends Client<T> {
             MockClient<T> client = new MockClient<>(transport, getHttpRequestInitializer(), getBaseUrl(), getServicePath(),
                     getObjectParser(), new MockKinveyClientRequestInitializer(), null, null, null, context);
             client.setUserClass(userClass != null ? userClass : (Class<T>) User.class);
+            initUserFromCredentialStore(client);
             return client;
         }
 

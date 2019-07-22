@@ -27,7 +27,7 @@ public class MockHttpTransport extends HttpTransport {
                     return tempURL();
                 } else if (url.contains("/login")) {
                     return userLogin();
-                } else if (url.contains("/user/appkey/")) {
+                } else if (url.contains("/user/")) {
                     return userRetrieve();
                 }
                 return null;

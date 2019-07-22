@@ -180,33 +180,6 @@ public class UserStoreTest {
         }
     }
 
-    private static class DefaultKinveyVoidCallback implements KinveyClientCallback<Void> {
-
-        private CountDownLatch latch;
-        private Void result;
-        private Throwable error;
-
-        private DefaultKinveyVoidCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-            this.result = result;
-            finish();
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        private void finish() {
-            latch.countDown();
-        }
-    }
-
     private static class UserGroupResponseCallback implements KinveyClientCallback<UserGroup.UserGroupResponse> {
 
         private CountDownLatch latch;
