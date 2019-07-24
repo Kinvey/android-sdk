@@ -58,7 +58,6 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
     private final AbstractClient client;
     private StoreType storeType;
     private NetworkManager<T> networkManager;
-    private Class<T> storeItemType;
     private KinveyPushCallback callback;
     private int progress = 0;
     private int fullCount = 0;
@@ -88,7 +87,6 @@ public class AsyncBatchPushRequest<T extends GenericJson> extends AsyncClientReq
         this.client = client;
         this.storeType = storeType;
         this.networkManager = networkManager;
-        this.storeItemType = storeItemType;
         this.callback = callback;
         this.cache = client.getCacheManager().getCache(collection, storeItemType, Long.MAX_VALUE);
     }

@@ -417,7 +417,7 @@ public class SyncManager {
                 List<T> resultItems = dataStore.saveBatch(entityList);
                 result = new KinveySyncSaveBatchResponse<T>(resultItems, null);
             } catch (KinveySaveBatchException e) {
-                result = new KinveySyncSaveBatchResponse<T>(e.getEntities(), e.getErrors());
+                result = new KinveySyncSaveBatchResponse<T>((List) e.getEntities(), e.getErrors());
                 //throw e;
             } catch (Exception e) {
                 enqueueRequest(request);

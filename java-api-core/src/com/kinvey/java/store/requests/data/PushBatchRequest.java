@@ -22,6 +22,7 @@ import com.kinvey.java.Constants;
 import com.kinvey.java.cache.ICache;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveySaveBatchResponse;
+import com.kinvey.java.model.KinveySyncSaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.SyncManager;
 import com.kinvey.java.sync.dto.SyncItem;
@@ -109,16 +110,18 @@ public class PushBatchRequest<T extends GenericJson> extends AbstractKinveyExecu
         return null;
     }
 
-    private KinveySaveBatchResponse executeSaveRequest(List<T> saveItems) throws IOException {
-        KinveySaveBatchResponse response = networkManager.saveBatchBlocking(saveItems).execute();
+    private void executeSaveRequest(List<T> saveItems) throws IOException {
+        SyncRequest syncRequest = syncManager.createSaveBatchSyncRequest(collection, networkManager, saveItems);
+        //KinveySyncSaveBatchResponse resultList = null;
+        //resultList = networkManager.saveBatchBlocking(saveItems).execute();
+        KinveySyncSaveBatchResponse<T> response = syncManager.executeBatchRequest(client, networkManager, syncRequest);
         List<T> resultItems;
         if (response != null) {
-            resultItems = response.getEntities();
+            resultItems = response.getEntityList();
             if (resultItems != null) {
                 cache.save(resultItems);
             }
         }
-        return response;
     }
 
     private void removeBatchTempItems(List<SyncItem> batchSyncItems) {
