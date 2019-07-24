@@ -134,13 +134,6 @@ class SaveListBatchRequest<T : GenericJson>(
                 return item.clone().set(_ID, null) as T
             }
         }
-
-//        if (SyncRequest.HttpVerb.POST == requestType) {
-//            if (entity[_ID] != null) {
-//                // Remvove the _id, since this is a create operation
-//                return entity.clone().set(_ID, null) as T
-//            }
-//        }
         return entity
     }
 
@@ -161,7 +154,7 @@ class SaveListBatchRequest<T : GenericJson>(
 
     private fun doPushRequest() {
         val pushRequest = PushBatchRequest(networkManager.collectionName,
-                cache, networkManager, networkManager.client)
+        cache as ICache<T>, networkManager, networkManager.client)
         try {
             pushRequest.execute()
         } catch (t: Throwable) {
@@ -225,7 +218,6 @@ class SaveListBatchRequest<T : GenericJson>(
         return itemId
     }
 
-    override fun cancel() {
-        //TODO: put async and track cancel
-    }
+    //TODO: put async and track cancel
+    override fun cancel() {}
 }
