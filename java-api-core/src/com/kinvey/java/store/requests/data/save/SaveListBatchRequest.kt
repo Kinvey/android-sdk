@@ -87,9 +87,8 @@ class SaveListBatchRequest<T : GenericJson>(
         val updateResponse = updateObjects(updateList)
         saveEntities.addAll(updateResponse.entities)
 
-        if (saveList?.isNotEmpty() == true) {
-            val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, saveList)
-            postSaveBatchRequest(batchList, saveEntities, batchSaveErrors)
+        if (saveList?.isNotEmpty() == true && saveList is List<T>) {
+            postSaveBatchRequest(saveList as List<T>, saveEntities, batchSaveErrors)
         }
         if (wasException) {
             exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, saveEntities)
@@ -103,7 +102,8 @@ class SaveListBatchRequest<T : GenericJson>(
         batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>): KinveySaveBatchResponse<*>? {
         var response: KinveySaveBatchResponse<*>? = null
         try {
-            response = networkManager.saveBatchBlocking(entities).execute()
+            val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, entities)
+            response = networkManager.saveBatchBlocking(batchList).execute()
         } catch (e: KinveyJsonResponseException) {
             throw e
         } catch (e: IOException) {
@@ -163,6 +163,8 @@ class SaveListBatchRequest<T : GenericJson>(
     }
 
     private fun filterObjects(list: List<T>) {
+        saveList = mutableListOf()
+        updateList = mutableListOf()
         list.onEach { itm ->
             val sourceId = itm[ID_FIELD_NAME] as String?
             val isTempId = networkManager.isTempId(itm)
