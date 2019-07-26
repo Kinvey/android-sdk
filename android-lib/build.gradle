@@ -4,7 +4,9 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'com.github.dcendents.android-maven'
 
+group = "com.github.Kinvey"
 description = 'AndroidLib'
 
 android {
@@ -92,6 +94,7 @@ buildscript {
     classpath "io.realm:realm-gradle-plugin:5.8.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaVersion"
+    classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
   }
 }
 
