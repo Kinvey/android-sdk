@@ -98,6 +98,7 @@ task prepAndroid{
   prepAndroid.dependsOn(":android-lib:cleanTest")
   prepAndroid.dependsOn(":android-lib:cleanDokka")
   prepAndroid.dependsOn(":android-lib:build")
+  prepAndroid.dependsOn(":android-lib:lint")
   prepAndroid.dependsOn(":android-lib:dokka")
 }
 
