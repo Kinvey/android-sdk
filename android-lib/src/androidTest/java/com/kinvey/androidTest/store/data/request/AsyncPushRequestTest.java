@@ -141,7 +141,7 @@ public class AsyncPushRequestTest {
         verify(mockPushCallback, times(1)).onFailure(any(Throwable.class));
     }
 
-    private static class DefaultKinveyPushCallback implements KinveyPushCallback {
+    protected static class DefaultKinveyPushCallback implements KinveyPushCallback {
 
         private CountDownLatch latch;
         KinveyPushResponse result;
@@ -215,7 +215,7 @@ public class AsyncPushRequestTest {
             @Override
             public void run() {
                 NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
-                SyncManager syncManager = spy(mock(SyncManager.class));
+                SyncManager syncManager = mock(SyncManager.class);
                 List<SyncRequest> syncRequests = new ArrayList<>();
                 syncRequests.add(new SyncRequest());
                 when(syncManager.popSingleQueue(any(String.class))).thenReturn(syncRequests);
