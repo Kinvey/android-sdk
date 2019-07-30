@@ -53,7 +53,8 @@ import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class DataStoreMultiInsertTest {
+@Ignore("Ignored tests in Kotlin for now while Kotlin migration is not done")
+class DataStoreMultiInsertTestKotlin {
 
     private var client: Client<User>? = null
 
