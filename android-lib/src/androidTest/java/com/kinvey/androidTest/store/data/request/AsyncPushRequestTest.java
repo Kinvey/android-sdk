@@ -68,12 +68,12 @@ public class AsyncPushRequestTest {
     @Test
     public void testPushSyncRequestOnProgress() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final KinveyPushCallback mockPushCallback = spy(createSpyPushCallback (latch));
+        final KinveyPushCallback mockPushCallback = spy(new KinveyPushCallbackAdapter(latch));
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
                 NetworkManager<Person> spyNetworkManager = spy(new NetworkManager<>(Person.TEST_COLLECTION, Person.class, client));
-                SyncManager syncManager = spy(mock(SyncManager.class));
+                SyncManager syncManager = mock(SyncManager.class);
                 try {
                     when(syncManager.executeRequest(any(Client.class), any(SyncRequest.class))).thenReturn(new GenericJson());
                 } catch (IOException e) {
@@ -94,28 +94,34 @@ public class AsyncPushRequestTest {
         verify(mockPushCallback, times(1)).onProgress(any(long.class), any(long.class));
     }
 
-    private KinveyPushCallback createSpyPushCallback(final CountDownLatch latch) {
-        return new KinveyPushCallback() {
-            @Override
-            public void onSuccess(KinveyPushResponse result) {
-                latch.countDown();
-            }
+    protected static class KinveyPushCallbackAdapter implements KinveyPushCallback {
 
-            @Override
-            public void onFailure(Throwable error) {
-                latch.countDown();
-            }
+        private CountDownLatch latch;
 
-            @Override
-            public void onProgress(long current, long all) {
-            }
-        };
+        protected KinveyPushCallbackAdapter(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void onSuccess(KinveyPushResponse result) {
+            latch.countDown();
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+            latch.countDown();
+        }
+
+        @Override
+        public void onProgress(long current, long all) {
+        }
+
     }
 
     @Test
     public void testPushSyncRequestOnFailure() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final KinveyPushCallback mockPushCallback = spy(createSpyPushCallback (latch));
+        final KinveyPushCallback mockPushCallback = spy(new KinveyPushCallbackAdapter(latch));
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
