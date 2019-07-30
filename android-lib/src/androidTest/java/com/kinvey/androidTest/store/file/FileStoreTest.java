@@ -112,7 +112,7 @@ public class FileStoreTest {
         }
     }
 
-    private static class DefaultDownloadProgressListener implements AsyncDownloaderProgressListener<FileMetaData> {
+    protected static class DefaultDownloadProgressListener implements AsyncDownloaderProgressListener<FileMetaData> {
 
         private CountDownLatch latch;
         private FileMetaData fileMetaDataResult;
