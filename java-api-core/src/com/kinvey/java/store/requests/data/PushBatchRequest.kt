@@ -19,6 +19,7 @@ package com.kinvey.java.store.requests.data
 import com.google.api.client.json.GenericJson
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
+import com.kinvey.java.Constants.META_ID
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.network.NetworkManager
@@ -52,19 +53,20 @@ class PushBatchRequest<T : GenericJson>(
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
                 val httpVerb = syncItem.requestMethod
+                val itemId = syncItem.entityID.id
                 when (httpVerb) {
                     SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
                     SyncRequest.HttpVerb.POST,
                     SyncRequest.HttpVerb.PUT -> {
-                        val item = itemsCache.get(syncItem.entityID.id)
+                        val item = itemsCache.get(itemId)
                         if (item == null) {
                             // check that item wasn't deleted before
-                            syncManager.deleteCachedItems(client.query().equals("meta.id", syncItem.entityID.id).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
+                            syncManager.deleteCachedItems(client.query().equals(META_ID, itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else if (httpVerb != SyncRequest.HttpVerb.POST) {
-                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(itemsCache.get(syncItem.entityID.id)))
+                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(itemsCache.get(itemId)))
                         }
                     }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(syncItem.entityID.id))
+                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
                     else -> {}
                 }
                 try {
@@ -91,8 +93,6 @@ class PushBatchRequest<T : GenericJson>(
     @Throws(IOException::class)
     private fun executeSaveRequest(saveItems: List<T>) {
         val syncRequest = syncManager.createSaveBatchSyncRequest(collection, networkManager, saveItems)
-        //KinveySyncSaveBatchResponse resultList = null;
-        //resultList = networkManager.saveBatchBlocking(saveItems).execute();
         val response = syncManager.executeBatchRequest(client, networkManager, syncRequest)
         val resultItems = response?.entityList
         resultItems?.let { list -> itemsCache.save(list) }

@@ -24,6 +24,7 @@ import com.kinvey.android.sync.KinveyPushCallback
 import com.kinvey.android.sync.KinveyPushResponse
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
+import com.kinvey.java.Constants.*
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
@@ -39,8 +40,6 @@ import com.kinvey.java.sync.dto.SyncRequest
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.security.AccessControlException
-
-import com.kinvey.java.Constants._ID
 
 /**
  * Class represents internal implementation of Async push request that is used to create push
@@ -98,28 +97,27 @@ class AsyncBatchPushRequest<T : GenericJson>(
 
     @Throws(IOException::class)
     private fun processSingleSyncItems(pushResponse: KinveyPushBatchResponse, syncItems: List<SyncItem>?): List<GenericJson> {
-        var id: String
         var item: T? = null
         var syncRequest: SyncRequest? = null
         val resultSingleItems = mutableListOf<GenericJson>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                id = syncItem.entityID.id
+                val itemId = syncItem.entityID.id
                 val requestMethod = syncItem.requestMethod
                 when (requestMethod) {
                     SyncRequest.HttpVerb.SAVE, // the SAVE case need for backward compatibility
                     SyncRequest.HttpVerb.POST,
                     SyncRequest.HttpVerb.PUT -> {
-                        item = cache.get(id)
+                        item = cache.get(itemId)
                         if (item == null) {
                             // check that item wasn't deleted before
                             // if item wasn't found, it means that the item was deleted from the Cache by Delete request and the item will be deleted in case:DELETE
-                            manager.deleteCachedItems(client.query().equals("meta.id", syncItem.entityID.id).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
+                            manager.deleteCachedItems(client.query().equals(META_ID, itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else if (requestMethod != SyncRequest.HttpVerb.POST) {
                             syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(item))
                         }
                     }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(id))
+                    SyncRequest.HttpVerb.DELETE -> syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
                     else -> {}
                 }
                 try {
@@ -164,9 +162,12 @@ class AsyncBatchPushRequest<T : GenericJson>(
                 val tempID = syncRequest.entityID.id
                 resultItem = manager.executeRequest(client, syncRequest)
                 val temp = cache.get(tempID)
-                temp!!.set(_ID, resultItem[_ID])
-                cache.delete(tempID)
-                cache.save(temp)
+                val resultValue = resultItem[_ID]
+                temp?.let { item ->
+                    if (resultItem != null) { item.set(_ID, resultValue) }
+                    cache.delete(tempID)
+                    cache.save(item)
+                }
             } else {
                 resultItem = manager.executeRequest(client, syncRequest)
             }
