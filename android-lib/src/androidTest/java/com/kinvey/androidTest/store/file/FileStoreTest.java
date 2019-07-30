@@ -66,7 +66,7 @@ public class FileStoreTest {
     private static final int UPLOAD_CHUNK_SIZE_MB = 4;
     private static final int DOWNLOAD_CHUNK_SIZE_MB = 2;
 
-    private static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
+    protected static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
         private FileMetaData fileMetaDataResult;
         private Throwable error;
