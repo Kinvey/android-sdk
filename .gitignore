@@ -10,5 +10,6 @@ build/
 release/zipped
 .idea
 .gradle/
-.iml
+# IntelliJ
+*.iml
 local.properties
