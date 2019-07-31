@@ -359,32 +359,38 @@ class DataStoreMultiInsertTestKotlin {
 
     // create an array with a few items that have _id property or have not.
     private fun createPersonsList(count: Int, withId: Boolean): List<Person> {
-        val items = ArrayList<Person>()
-        for (i in 0 until count) {
+        return 1.rangeTo(count).map { i ->
             val person = createPerson(TEST_USERNAME + i.toString())
             if (withId) {
                 val id = "123456$i"
                 person.id = id
             }
-            items.add(person)
+            person
         }
-        return items
     }
 
     private fun createPersonsList(withId: Boolean): List<Person> {
         return createPersonsList(MAX_PERSONS_COUNT, withId)
     }
 
+    private fun createEntityList(itemsCount: Int): List<EntitySet> {
+        return 1.rangeTo(itemsCount).map { i ->
+            val entity = EntitySet()
+            entity.description = "entity #$i"
+            entity
+        }
+    }
+
     // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no _id, _id]
     private fun createCombineList(): List<Person> {
         val items = ArrayList<Person>()
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         items.add(person1)
-        val person2 = Person("76575", TEST_USERNAME + 2.toString())
+        val person2 = Person("76575", "$TEST_USERNAME${2}")
         items.add(person2)
-        val person3 = Person(TEST_USERNAME + 3.toString())
+        val person3 = Person("$TEST_USERNAME${3}")
         items.add(person3)
-        val person4 = Person("53521", TEST_USERNAME + 4.toString())
+        val person4 = Person("53521", "$TEST_USERNAME${4}")
         items.add(person4)
         return items
     }
@@ -393,13 +399,13 @@ class DataStoreMultiInsertTestKotlin {
     private fun createPushErrList(): List<Person> {
         val items = ArrayList<Person>()
         val errStr = ERR_GEOLOC
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         person1.geoloc = errStr
         items.add(person1)
-        val person2 = Person(TEST_USERNAME + 2.toString())
+        val person2 = Person("$TEST_USERNAME${2}")
         person2.geoloc = errStr
         items.add(person2)
-        val person3 = Person(TEST_USERNAME + 3.toString())
+        val person3 = Person("$TEST_USERNAME${3}")
         items.add(person3)
         return items
     }
@@ -408,10 +414,10 @@ class DataStoreMultiInsertTestKotlin {
     private fun createErrList(): List<Person> {
         val items = ArrayList<Person>()
         val errStr = ERR_GEOLOC
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         person1.geoloc = errStr
         items.add(person1)
-        val person2 = Person(TEST_USERNAME + 2.toString())
+        val person2 = Person("$TEST_USERNAME${2}")
         person2.geoloc = errStr
         items.add(person2)
         return items
@@ -420,9 +426,9 @@ class DataStoreMultiInsertTestKotlin {
     // create an array of items with no _id and the second of them should have invalid _geoloc params
     private fun createErrList1(): List<Person> {
         val items = ArrayList<Person>()
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         items.add(person1)
-        val person2 = Person(TEST_USERNAME + 2.toString())
+        val person2 = Person("$TEST_USERNAME${2}")
         person2.geoloc = ERR_GEOLOC
         items.add(person2)
         return items
@@ -431,12 +437,12 @@ class DataStoreMultiInsertTestKotlin {
     // create an array of items with no _id and the second of them should have invalid _geoloc params
     private fun createErrList2(): List<Person> {
         val items = ArrayList<Person>()
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         items.add(person1)
-        val person2 = Person(TEST_USERNAME + 2.toString())
+        val person2 = Person("$TEST_USERNAME${2}")
         person2.geoloc = ERR_GEOLOC
         items.add(person2)
-        val person3 = Person(TEST_USERNAME + 3.toString())
+        val person3 = Person("$TEST_USERNAME${3}")
         items.add(person3)
         return items
     }
@@ -445,27 +451,16 @@ class DataStoreMultiInsertTestKotlin {
     private fun createErrListGeoloc(): List<Person> {
         val items = ArrayList<Person>()
         val errStr = ERR_GEOLOC
-        val person1 = Person(TEST_USERNAME + 1.toString())
+        val person1 = Person("$TEST_USERNAME${1}")
         person1.geoloc = errStr
         items.add(person1)
-        val person2 = Person("76575", TEST_USERNAME + 2.toString())
+        val person2 = Person("76575", "$TEST_USERNAME${2}")
         items.add(person2)
-        val person3 = Person("343275", TEST_USERNAME + 3.toString())
+        val person3 = Person("343275", "$TEST_USERNAME${3}")
         person1.geoloc = errStr
         items.add(person3)
-        val person4 = Person(TEST_USERNAME + 4.toString())
+        val person4 = Person("$TEST_USERNAME${4}")
         items.add(person4)
-        return items
-    }
-
-    private fun createEntityList(itemsCount: Int): List<EntitySet> {
-        val items = ArrayList<EntitySet>()
-        var entity: EntitySet? = null
-        for (i in 0 until itemsCount) {
-            entity = EntitySet()
-            entity.description = "entity #$i"
-            items.add(entity)
-        }
         return items
     }
 
@@ -596,7 +591,7 @@ class DataStoreMultiInsertTestKotlin {
 
         val personsList = createPersonsList(2, false)
 
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
+        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
         val personStore = DataStore(Person.COLLECTION, Person::class.java, client, storeType, netManager)
         val storeSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, netManager)
 
@@ -604,9 +599,7 @@ class DataStoreMultiInsertTestKotlin {
         clearBackend(storeSync)
         client?.syncManager?.clear(Person.COLLECTION)
 
-        for (item in personsList) {
-            save(storeSync, item)
-        }
+        personsList.onEach { item -> save(storeSync, item) }
 
         netManager.clear()
         val pushCallback = push(personStore, LONG_TIMEOUT)
@@ -664,7 +657,7 @@ class DataStoreMultiInsertTestKotlin {
 
         val syncItems = pendingSyncEntities(Person.COLLECTION)
         assertNotNull(syncItems)
-        assertEquals(syncItems!!.size.toLong(), 1)
+        assertEquals(syncItems?.count(), 1)
 
         val findCallbackNet = find(personStoreNet, LONG_TIMEOUT)
         val findCallbackSync = find(personStoreSync, LONG_TIMEOUT)
@@ -1181,7 +1174,7 @@ class DataStoreMultiInsertTestKotlin {
         // find using syncstore, should return the items with ect and lmt
         val personsList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
+        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
         val storeSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
         clearBackend(storeSync)
         client?.syncManager?.clear(Person.COLLECTION)
@@ -1536,7 +1529,7 @@ class DataStoreMultiInsertTestKotlin {
 
         val personList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
+        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
         val autoStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
         val syncStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
         val netStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
@@ -1812,7 +1805,7 @@ class DataStoreMultiInsertTestKotlin {
         // find() using networkstore, should return the items from step 1
         val personsList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
+        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
         val autoSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
         val netSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
 
@@ -1925,6 +1918,24 @@ class DataStoreMultiInsertTestKotlin {
         // find() using networkstore, should return the valid items
         // find using syncstore, should return all items including the invalid one
         testSyncItemsList(true, StoreType.AUTO)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testSaveMultipleBatchRequests() {
+        print("should send multiple multi-insert POST requests")
+        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
+        val store = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
+        clearBackend(store)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        val itemsList = createPersonsList(200, false)
+
+        val saveCallback = saveList(store, itemsList)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+
+        assertEquals(netManager.multiPostCount, 2)
     }
 
     companion object {
