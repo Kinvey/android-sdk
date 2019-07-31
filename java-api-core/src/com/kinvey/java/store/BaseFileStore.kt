@@ -115,10 +115,10 @@ open class BaseFileStore
                 saveCacheFile(FileInputStream(file), fileMetadataWithPath)
                 metadata = fileMetadataWithPath
             }
-            WritePolicy.FORCE_NETWORK -> metadata = upload.execute()
+            WritePolicy.FORCE_NETWORK -> upload.execute()?.let { metadata = it }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 try {
-                    metadata = upload.execute()
+                    upload.execute()?.let { metadata = it }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -162,11 +162,11 @@ open class BaseFileStore
                 saveCacheFile(`is`, fileMetadataWithPath)
                 metadata = fileMetadataWithPath
             }
-            WritePolicy.FORCE_NETWORK -> metadata = upload.execute()
+            WritePolicy.FORCE_NETWORK -> upload.execute()?.let { metadata = it }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 saveCacheFile(`is`, fileMetadataWithPath)
                 try {
-                    metadata = upload.execute()
+                    upload.execute()?.let { metadata = it }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
