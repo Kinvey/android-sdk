@@ -14,21 +14,26 @@
  *
  */
 
-package com.kinvey.java.core;
+package com.kinvey.java.core
 
-import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.FileMetaData
 
 /**
- * This class is an extension of the {@link DownloaderProgressListener}, which also provides a method for the retrieval of the metadata.
+ * This class is an extension of the [DownloaderProgressListener], which also provides a method for the retrieval of the metadata.
  *
  *
  * @author edwardf
  */
-public abstract class MetaDownloadProgressListener implements DownloaderProgressListener {
+abstract class MetaDownloadProgressListener : DownloaderProgressListener {
 
 
-    private FileMetaData metadata;
-    public MetaDownloadProgressListener(){}
+    /**
+     * Get the [FileMetaData] object associated with this download
+     *
+     * @return the FileMetaData object
+     */
+    var metadata: FileMetaData? = null
+        private set
 
 
     /**
@@ -36,21 +41,9 @@ public abstract class MetaDownloadProgressListener implements DownloaderProgress
      *
      * @param meta the metadata object of the file being downloaded.
      */
-    public void metaDataRetrieved(FileMetaData meta){
-        this.metadata = meta;
-
+    fun metaDataRetrieved(meta: FileMetaData) {
+        this.metadata = meta
     }
-
-    /**
-     * Get the {@link FileMetaData} object associated with this download
-     *
-     * @return the FileMetaData object
-     */
-    public FileMetaData getMetadata(){
-        return metadata;
-    }
-
-
 
 
 }

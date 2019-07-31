@@ -401,7 +401,7 @@ public class EncryptionTest {
             public void run() {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
-                    fileStore.download(metaFile, fos, listener, null);
+                    fileStore.download(metaFile, fos, listener);
                 } catch (IOException e) {
                     listener.onFailure(e);
                 }
