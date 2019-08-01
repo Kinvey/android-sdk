@@ -27,6 +27,7 @@ targetCompatibility = 1.8
 
 apply plugin: "jacoco"
 description = 'JavaApiCore'
+group = 'com.kinvey'
 
 compileJava.options.encoding = 'UTF-8'
 
