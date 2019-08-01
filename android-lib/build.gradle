@@ -51,8 +51,10 @@ android {
   }
 
   lintOptions {
-    abortOnError false
+    disable 'DuplicatePlatformClasses','GradleCompatible', 'ProtectedPermissions'
+    abortOnError true
   }
+
   packagingOptions {
     exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
     exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
