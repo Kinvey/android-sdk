@@ -897,21 +897,7 @@ public class Client<T extends User> extends AbstractClient<T> {
             if (!Strings.isNullOrEmpty(this.instanceID)) {
                 client.setMICHostName(Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH);
             }
-            try {
-                Credential credential = retrieveUserFromCredentialStore(client);
-                if (credential != null) {
-                    loginWithCredential(client, credential);
-                }
-
-            } catch (AndroidCredentialStoreException ex) {
-                Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
-                client.setActiveUser(null);
-            } catch (IOException ex) {
-                Logger.ERROR("Credential store failed to load");
-                client.setActiveUser(null);
-            }
-
-
+            initUserFromCredentialStore(client);
             return client;
         }
 
@@ -928,6 +914,20 @@ public class Client<T extends User> extends AbstractClient<T> {
             new Build(buildCallback).execute();
         }
 
+        protected void initUserFromCredentialStore(Client client) {
+            try {
+                Credential credential = retrieveUserFromCredentialStore(client);
+                if (credential != null) {
+                    loginWithCredential(client, credential);
+                }
+            } catch (AndroidCredentialStoreException ex) {
+                Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt");
+                client.setActiveUser(null);
+            } catch (IOException ex) {
+                Logger.ERROR("Credential store failed to load");
+                client.setActiveUser(null);
+            }
+        }
 
         /**
          * Define how credentials will be stored

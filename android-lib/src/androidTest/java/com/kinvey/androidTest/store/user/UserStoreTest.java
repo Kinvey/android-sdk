@@ -73,33 +73,6 @@ public class UserStoreTest {
     public static final String INSUFFICIENT_CREDENTIAL_TYPE = "InsufficientCredentials";
     private static final String ACTIVE_USER_COLLECTION_NAME = "active_user_info";
 
-    private static class DefaultKinveyClientCallback implements KinveyClientCallback<User> {
-
-        private CountDownLatch latch;
-        private User result;
-        private Throwable error;
-
-        private DefaultKinveyClientCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(User user) {
-            this.result = user;
-            finish();
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        private void finish() {
-            latch.countDown();
-        }
-    }
-
     private static class DefaultKinveyUserListCallback implements KinveyUserListCallback {
 
         private CountDownLatch latch;
@@ -193,33 +166,6 @@ public class UserStoreTest {
 
         @Override
         public void onSuccess(Void result) {
-            finish();
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-            this.error = error;
-            finish();
-        }
-
-        private void finish() {
-            latch.countDown();
-        }
-    }
-
-    private static class DefaultKinveyVoidCallback implements KinveyClientCallback<Void> {
-
-        private CountDownLatch latch;
-        private Void result;
-        private Throwable error;
-
-        private DefaultKinveyVoidCallback(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-            this.result = result;
             finish();
         }
 
@@ -489,7 +435,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback get(final String userName) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -546,7 +492,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback login(final String userName, final String password) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -565,7 +511,7 @@ public class UserStoreTest {
 
     private DefaultKinveyClientCallback signUp() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.DefaultKinveyClientCallback callback = new UserStoreTest.DefaultKinveyClientCallback(latch);
+        final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -580,7 +526,7 @@ public class UserStoreTest {
 
     private CustomKinveyClientCallback signUp(final TestUser user) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final UserStoreTest.CustomKinveyClientCallback callback = new UserStoreTest.CustomKinveyClientCallback(latch);
+        final CustomKinveyClientCallback callback = new CustomKinveyClientCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
@@ -619,14 +565,11 @@ public class UserStoreTest {
     private DefaultKinveyClientCallback login(final Client client) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyClientCallback callback = new DefaultKinveyClientCallback(latch);
-        LooperThread looperThread = new LooperThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UserStore.login(client, callback);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        LooperThread looperThread = new LooperThread(() -> {
+            try {
+                UserStore.login(client, callback);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         looperThread.start();
