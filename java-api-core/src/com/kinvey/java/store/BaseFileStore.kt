@@ -108,7 +108,7 @@ open class BaseFileStore
 
         val upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath,
                 FileContent(fileMetadataWithPath.mimetype, file), listener)
-        setUploader(upload.uploader)
+        upload.uploader?.let { setUploader(it) }
 
         when (storeType!!.writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
@@ -154,8 +154,7 @@ open class BaseFileStore
         }
 
         val upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath, InputStreamContent(null, `is`), listener)
-        setUploader(upload.uploader)
-
+        upload.uploader?.let { setUploader(it) }
 
         when (storeType!!.writePolicy) {
             WritePolicy.FORCE_LOCAL -> {

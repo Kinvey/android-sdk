@@ -32,7 +32,7 @@ public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson
         super(client, client.getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
         String MICApiVersion = client.getMICApiVersion();
         if (MICApiVersion != null && MICApiVersion.length() > 0) {
-            this.uriTemplate = MICApiVersion + "/" + this.uriTemplate;
+            this.setUriTemplate(MICApiVersion + "/" + this.getUriTemplate());
         }
     }
 }

@@ -53,7 +53,7 @@ public abstract class AbstractKinveyReadRequest<T> extends AbstractKinveyJsonCli
 
         KinveyReadResponse<T> ret = new KinveyReadResponse<>();
 
-        if (overrideRedirect){
+        if (getOverrideRedirect()){
             return onRedirect(response.getHeaders().getLocation());
         }
 
