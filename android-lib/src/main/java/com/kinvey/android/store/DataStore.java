@@ -578,8 +578,6 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(entities, "Entity cannot be null.");
         Preconditions.checkState(entities.size() > 0,"Entity list cannot be empty.");
-        //Preconditions.checkPositionIndex(entities.size(), MAX_MULTI_INSERT_SIZE,
-        //     String.format(Locale.US, "Reached maximum of %d items per request.", MAX_MULTI_INSERT_SIZE));
         Logger.INFO("Calling DataStore#saveBatch(listObjects)");
         new SaveListBatchRequest(entities, callback).execute();
     }
