@@ -1111,7 +1111,7 @@ public class UserStore {
 
         @Override
         protected T executeAsync() throws IOException {
-            UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+            UserStoreRequestManager requestManager = new UserStoreRequestManager<>(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getMICToken(token, clientId).execute();
 
@@ -1147,7 +1147,7 @@ public class UserStore {
 
         @Override
         protected T executeAsync() throws IOException {
-            UserStoreRequestManager requestManager = new UserStoreRequestManager(client, createBuilder(client));
+            UserStoreRequestManager requestManager = new UserStoreRequestManager<>(client, createBuilder(client));
             requestManager.setMICRedirectURI(redirectURI);
             GenericJson result = requestManager.getOAuthToken(clientId, username, password).execute();
             T ret =  BaseUserStore.loginMobileIdentity(result.get(ACCESS_TOKEN).toString(), client);

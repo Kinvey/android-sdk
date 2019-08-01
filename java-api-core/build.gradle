@@ -1,8 +1,8 @@
-
 buildscript {
     ext.kotlin_version = '1.3.41'
     repositories {
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}"
@@ -12,12 +12,16 @@ buildscript {
 
 plugins {
     id 'de.fuerstenau.buildconfig' version '1.1.8'
+
+    // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
+    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
 }
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'de.fuerstenau.buildconfig'
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -84,7 +88,12 @@ dependencies {
     implementation 'org.apache.ant:ant:1.8.0'
     implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
     implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
+    // Use the Kotlin JDK 8 standard library.
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    // Use the Kotlin test library.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    // Use the Kotlin JUnit integration.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 }
 
 cleanTest.mustRunAfter clean
@@ -93,6 +102,7 @@ build.mustRunAfter cleanDokka
 dokka.mustRunAfter build
 repositories {
     mavenCentral()
+    jcenter()
 }
 compileKotlin {
     kotlinOptions {
