@@ -43,10 +43,11 @@ abstract class MetaUploadProgressListener : UploaderProgressListener {
      */
     fun metaDataRetrieved(meta: FileMetaData) {
         //        this.metadata = meta;
-        this.metadata = FileMetaData()
-        this.metadata!!.fileName = meta.fileName
-        this.metadata!!.id = meta.id
-        Logger.INFO("cache meta: " + this.metadata!!.fileName + " and id: " + this.metadata!!.id)
+        val metadata = FileMetaData()
+        metadata.fileName = meta.fileName
+        metadata.id = meta.id
+        this.metadata = metadata
+        Logger.INFO("cache meta: " + metadata.fileName + " and id: " + metadata.id)
     }
 
 

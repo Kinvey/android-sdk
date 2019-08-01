@@ -572,6 +572,6 @@ open class BaseFileStore
 
     companion object {
 
-        private val CACHE_FILE_PATH = "KinveyCachePath"
+        private const val CACHE_FILE_PATH = "KinveyCachePath"
     }
 }
