@@ -41,6 +41,9 @@ open class FileMetaData : GenericJson {
     @Key("size")
     var fileSize: Long = 0
 
+    override val size: Int
+        get() = fileSize.toInt()
+
     @Key("mimeType")
     var mimetype: String? = null
 

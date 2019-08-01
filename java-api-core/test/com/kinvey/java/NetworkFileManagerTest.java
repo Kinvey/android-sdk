@@ -66,7 +66,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
             }
         });
         HttpRequest request = upload.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?tls=true";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -77,7 +77,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
         FileMetaData meta = new FileMetaData("testfilename.txt");
         NetworkFileManager.DownloadMetadataAndFile download = networkFileManagerApi.prepDownloadBlocking(meta);
         HttpRequest request = download.buildHttpRequest();
-        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt";
+        String expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?tls=true";
         assertEquals(expectedPath, request.getUrl().toString());
     }
 
@@ -127,7 +127,7 @@ public class NetworkFileManagerTest extends KinveyMockUnitTest {
             fail("file api should throw exception on null filename");
         } catch (IOException e) {
             fail("file api should throw a NullPointerException on null filename");
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException e) {
             // expected
         }
     }
