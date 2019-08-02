@@ -65,7 +65,7 @@ android {
   dokka {
     outputFormat = 'javadoc'
     jdkVersion = 8
-    outputDirectory = file("../../../devcenter/content/reference/android-v3.0/api/android-lib")
+    outputDirectory = file("../../devcenter/content/reference/android-v3.0/api/android-lib")
     sourceDirs = files('src/main')
   }
 }
@@ -129,7 +129,6 @@ dependencies {
   androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
   androidTestImplementation group: 'androidx.test', name: 'runner', version: androidx_version
   androidTestImplementation group: 'androidx.test', name: 'rules', version: androidx_version
-  androidTestImplementation group: 'androidx.test.ext', name: 'junit', version: '1.1.2-alpha02'
 
   // Unit Testing
   testImplementation 'io.reactivex:rxjava:1.1.0'
