@@ -308,10 +308,22 @@ public class FileStoreTest {
         return fileMetaData;
     }
 
-    private void nullUpload(StoreType storeType) throws IOException, InterruptedException {
+    private void nullFileUpload(StoreType storeType) throws IOException, InterruptedException {
         DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, null, null);
         assertNotNull(listener.error);
-        assertEquals(listener.error.getMessage(), "file must not be null");
+        assertEquals(listener.error.getMessage(), "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter file");
+    }
+
+    private void nullMetadataUpload(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile(DEFAULT_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, null);
+        assertNotNull(listener.error);
+        assertEquals(listener.error.getMessage(), "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata");
+    }
+
+    private void nullUpload(StoreType storeType) throws IOException, InterruptedException {
+        nullFileUpload(storeType);
+        nullMetadataUpload(storeType);
     }
 
     @Test
@@ -342,7 +354,7 @@ public class FileStoreTest {
             public void run() {
                 try {
                     client.getFileStore(storeType).upload(f, metaData, listener);
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
@@ -357,7 +369,7 @@ public class FileStoreTest {
     private void nullDownload(StoreType storeType) throws IOException, InterruptedException {
         DefaultDownloadProgressListener listener = downloadFile(storeType, null);
         assertNotNull(listener.error);
-        assertEquals(listener.error.getMessage(), "metadata must not be null");
+        assertEquals(listener.error.getMessage(), "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata");
     }
 
     @Test
@@ -535,7 +547,7 @@ public class FileStoreTest {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(storeType).download(metaFile, fos, listener,
                             storeType == StoreType.CACHE ? createCachedClientCallback() : null);
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     listener.onFailure(e);
                 }
             }
@@ -1421,7 +1433,7 @@ public class FileStoreTest {
                 try {
                     final FileOutputStream fos = new FileOutputStream(createFile());
                     client.getFileStore(StoreType.NETWORK).download(listener.fileMetaDataResult,
-                            fos, downloadProgressListener,null);
+                            fos, downloadProgressListener);
 
                 } catch (IOException e) {
                     downloadProgressListener.onFailure(e);

@@ -47,7 +47,7 @@ public abstract class AbstractKinveyQueryCacheReadRequest<T> extends AbstractKin
     @Override
     public KinveyQueryCacheResponse<T> execute() throws IOException {
         HttpResponse response = executeUnparsed() ;
-        if (overrideRedirect){
+        if (getOverrideRedirect()){
             return onRedirect(response.getHeaders().getLocation());
         }
         // special class to handle void or empty responses

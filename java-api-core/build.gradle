@@ -77,7 +77,8 @@ dependencies {
         exclude(module: 'xpp3')
     }
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-all:1.9.0'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.0.0'
+    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
     implementation('com.google.http-client:google-http-client:1.19.0') {
         exclude(module: 'xpp3')
         exclude(module: 'httpclient')
@@ -91,6 +92,7 @@ dependencies {
     implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
     // Use the Kotlin JDK 8 standard library.
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     // Use the Kotlin JUnit integration.

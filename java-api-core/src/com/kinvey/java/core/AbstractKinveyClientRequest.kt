@@ -78,13 +78,7 @@ protected constructor(
     /**
      * @return the uriTemplate
      */
-    @JvmField
-    protected var uriTemplate: String
-
-    public fun getUriTemplate(): String {
-        return uriTemplate
-    }
-
+    var uriTemplate: String
 
     /**
      * http headers to be sent along with the request *
@@ -148,12 +142,8 @@ protected constructor(
     /**
      * Should the request intercept redirects and route them to an override
      */
-    @JvmField
     protected var overrideRedirect = false
-
-    public fun setOverrideRedirect(overrideRedirect: Boolean) {
-        this.overrideRedirect = overrideRedirect
-    }
+        set
 
     /**
      * Does this request require the client_id/appsecret for authentication

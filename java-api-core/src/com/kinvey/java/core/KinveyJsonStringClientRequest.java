@@ -98,7 +98,7 @@ public class KinveyJsonStringClientRequest<T> extends AbstractKinveyClientReques
         Logger.INFO("Start execute for network request");
         HttpResponse response = executeUnparsed();
 
-        if (overrideRedirect){
+        if (getOverrideRedirect()){
             Logger.INFO("overrideRedirect == true");
             return onRedirect(response.getHeaders().getLocation());
         }
