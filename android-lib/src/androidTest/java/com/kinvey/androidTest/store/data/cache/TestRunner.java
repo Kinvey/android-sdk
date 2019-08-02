@@ -2,7 +2,8 @@ package com.kinvey.androidTest.store.data.cache;
 
 import android.os.Bundle;
 import android.support.multidex.MultiDex;
-import android.support.test.runner.AndroidJUnitRunner;
+
+import androidx.test.runner.AndroidJUnitRunner;
 
 /**
  * Created by Prots on 1/27/16.
