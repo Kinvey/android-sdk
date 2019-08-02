@@ -7,11 +7,13 @@ import com.kinvey.java.sync.dto.SyncRequest;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MockMultiInsertNetworkManager<T extends GenericJson> extends NetworkManager<T> {
 
     private boolean useSingleSave = false;
     private boolean useMultiInsertSave = false;
+    private AtomicInteger multiPostCount = new AtomicInteger(0);
 
     /**
      * Constructor to instantiate the NetworkManager class.
@@ -36,12 +38,18 @@ public class MockMultiInsertNetworkManager<T extends GenericJson> extends Networ
     @Override
     public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
         useMultiInsertSave = true;
+        multiPostCount.incrementAndGet();
         return super.saveBatchBlocking(list);
     }
 
     public void clear() {
+        multiPostCount.set(0);
         useSingleSave = false;
         useMultiInsertSave = false;
+    }
+
+    public int getMultiPostCount() {
+        return multiPostCount.get();
     }
 
     public boolean useMultiInsertSave() {
