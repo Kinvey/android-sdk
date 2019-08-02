@@ -1,7 +1,6 @@
 package com.kinvey.androidTest.store.data.cache;
 
 import android.content.Context;
-import android.support.v4.util.SimpleArrayMap;
 
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;

@@ -1,8 +1,8 @@
 package com.kinvey.androidTest.store.data.cache;
 
 import android.os.Bundle;
-import android.support.multidex.MultiDex;
 
+import androidx.multidex.MultiDex;
 import androidx.test.runner.AndroidJUnitRunner;
 
 /**

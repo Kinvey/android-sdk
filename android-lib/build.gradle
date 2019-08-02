@@ -134,9 +134,7 @@ dependencies {
   // Unit Testing
   testImplementation 'io.reactivex:rxjava:1.1.0'
   testImplementation 'junit:junit:4.12'
-  testImplementation "org.robolectric:robolectric:4.3"
   testImplementation "org.mockito:mockito-core:2.28.2"
-  testImplementation 'org.robolectric:shadows-support-v4:3.0'
   testImplementation "org.powermock:powermock-module-junit4:1.6.5"
   testImplementation "org.powermock:powermock-module-junit4-rule:1.6.5"
   testImplementation "org.powermock:powermock-api-mockito:1.6.5"
@@ -148,13 +146,9 @@ dependencies {
   implementation 'io.reactivex:rxjava:1.1.0'
   implementation 'com.google.code.gson:gson:2.8.5'
 
-  // Google Services Libs
-  implementation 'com.google.android.gms:play-services-ads:16.0.0'
-  implementation 'com.google.android.gms:play-services-identity:16.0.0'
-
   // Google Firebase Libs
-  implementation 'com.google.firebase:firebase-core:16.0.0'
-  implementation 'com.google.firebase:firebase-messaging:17.3.4'
+  implementation 'com.google.firebase:firebase-core:17.0.1'
+  implementation 'com.google.firebase:firebase-messaging:19.0.1'
 
   // Multidex Support
   implementation group: 'androidx.multidex', name: 'multidex', version: '2.0.1'
