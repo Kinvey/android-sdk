@@ -17,6 +17,9 @@ public final class Constants {
     public static final String AUTH_TOKEN = "authtoken";
     public static final String _KMD = "_acl";
     public static final String _ACL = "_acl";
+
+    public static final String META_ID = "meta.id";
+
     public static final String ACCESS_ERROR = "Access Error";
 
     public static final String DELETE = "DELETE";

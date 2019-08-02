@@ -50,6 +50,8 @@ class SaveListBatchRequest<T : GenericJson>(
     private var exception: KinveySaveBatchException? = null
     private var wasException = false
 
+    val MAX_POST_ITEMS = 100
+
     @Throws(IOException::class)
     override fun execute(): List<T> {
         var retList: List<T> = ArrayList()
@@ -88,13 +90,19 @@ class SaveListBatchRequest<T : GenericJson>(
         saveEntities.addAll(updateResponse.entities)
 
         if (saveList?.isNotEmpty() == true && saveList is List<T>) {
-            postSaveBatchRequest(saveList as List<T>, saveEntities, batchSaveErrors)
+            postBatchItems(saveList as List<T>, saveEntities, batchSaveErrors)
         }
         if (wasException) {
             exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, saveEntities)
         }
         Logger.INFO("Finish saving entities")
         return saveEntities
+    }
+
+    private fun postBatchItems(entities: List<T>, batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>) {
+        entities.chunked(MAX_POST_ITEMS).onEach { items ->
+            postSaveBatchRequest(items, batchSaveEntities, batchSaveErrors)
+        }
     }
 
     @Throws(IOException::class)
