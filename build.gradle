@@ -3,8 +3,8 @@ apply plugin: 'java'
 allprojects  {
   apply plugin: 'maven'
   group = 'com.kinvey'
-  version = '4.3.0'
-  description = "The Kinvey SDK makes it easy to write Android and Java apps with Kinvey"
+  version = '4.3.1'
+  description = "The Kinvey SDK makes it easy to write Android apps with Kinvey"
   ext.kinveyApiVersion = '4'
   ext.dokkaVersion = '0.9.17'
 }
@@ -98,6 +98,7 @@ task prepAndroid{
   prepAndroid.dependsOn(":android-lib:cleanTest")
   prepAndroid.dependsOn(":android-lib:cleanDokka")
   prepAndroid.dependsOn(":android-lib:build")
+  prepAndroid.dependsOn(":android-lib:lint")
   prepAndroid.dependsOn(":android-lib:dokka")
 }
 
