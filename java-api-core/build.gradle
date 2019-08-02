@@ -18,6 +18,7 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'de.fuerstenau.buildconfig'
 apply plugin: 'kotlin'
@@ -88,13 +89,10 @@ dependencies {
     implementation 'org.apache.ant:ant:1.8.0'
     implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
     implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
-
     // Use the Kotlin JDK 8 standard library.
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
-
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 }
@@ -103,7 +101,6 @@ cleanTest.mustRunAfter clean
 cleanDokka.mustRunAfter cleanTest
 build.mustRunAfter cleanDokka
 dokka.mustRunAfter build
-
 repositories {
     mavenCentral()
     jcenter()
