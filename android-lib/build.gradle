@@ -127,7 +127,6 @@ dependencies {
   // Optional -- Mockito framework
   androidTestImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
   androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
-  androidTestImplementation 'com.android.support:support-annotations:28.0.0'
   androidTestImplementation group: 'androidx.test', name: 'runner', version: androidx_version
   androidTestImplementation group: 'androidx.test', name: 'rules', version: androidx_version
   androidTestImplementation group: 'androidx.test.ext', name: 'junit', version: '1.1.2-alpha02'
@@ -149,11 +148,6 @@ dependencies {
   implementation 'io.reactivex:rxjava:1.1.0'
   implementation 'com.google.code.gson:gson:2.8.5'
 
-  // Android Support Libs
-  implementation 'com.android.support:appcompat-v7:28.0.0'
-  implementation 'com.android.support:support-v4:28.0.0'
-  implementation 'com.android.support:support-annotations:28.0.0'
-
   // Google Services Libs
   implementation 'com.google.android.gms:play-services-ads:16.0.0'
   implementation 'com.google.android.gms:play-services-identity:16.0.0'
@@ -163,9 +157,9 @@ dependencies {
   implementation 'com.google.firebase:firebase-messaging:17.3.4'
 
   // Multidex Support
-  implementation 'com.android.support:multidex:1.0.3'
+  implementation group: 'androidx.multidex', name: 'multidex', version: '2.0.1'
   // Multidex Support for testing
-  androidTestImplementation 'com.android.support:multidex-instrumentation:1.0.3'
+  androidTestImplementation group: 'androidx.multidex', name: 'multidex-instrumentation', version: '2.0.0'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
