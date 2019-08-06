@@ -91,13 +91,12 @@ public class KinveyMetaData extends GenericJson{
 //        private static final String W = "w";
 //        private static final String GROUPS = "groups";
 
-
         @Key(CREATOR)
-        private String creator;
-        @Key(GR)
-        private boolean globallyReadable;
-        @Key(GW)
-        private boolean globallyWritable;
+        private String creator = null;
+//        @Key(GR)
+//        private Boolean globallyReadable;
+//        @Key(GW)
+//        private Boolean globallyWritable;
 
 //        @Key(R)
 //        private ArrayList<String> read;
@@ -141,12 +140,12 @@ public class KinveyMetaData extends GenericJson{
                     accessControlList.put(CREATOR, acl.get(CREATOR));
                 }
 
-                if (acl.containsKey(GR) && acl.get(GR) != null) {
-                    accessControlList.put(GR, acl.get(GR));
-                }
-                if (acl.containsKey(GW) && acl.get(GW) != null) {
-                    accessControlList.put(GW, acl.get(GW));
-                }
+//                if (acl.containsKey(GR) && acl.get(GR) != null) {
+//                    accessControlList.put(GR, acl.get(GR));
+//                }
+//                if (acl.containsKey(GW) && acl.get(GW) != null) {
+//                    accessControlList.put(GW, acl.get(GW));
+//                }
 
 //                if (acl.containsKey(R) && acl.get(R) != null) {
 //                    accessControlList.put(R, acl.get(R));
@@ -155,42 +154,47 @@ public class KinveyMetaData extends GenericJson{
 //                    accessControlList.put(W, acl.get(W));
 //                }
 
-
-                /*ArrayList<AclGroups> aclGroupses = new ArrayList<>();
-                if (acl.containsKey(GROUPS) && acl.get(GROUPS) != null) {
-                    for (AclGroups groups : (ArrayList<AclGroups>)acl.get(GROUPS)) {
-                        AclGroups aclGroups = new AclGroups();
-                        if (groups.containsKey(R) && groups.get(R) != null) {
-                            aclGroups.put(R, acl.get(R));
-                        }
-                        if (groups.containsKey(W) && groups.get(W) != null) {
-                            aclGroups.put(W, acl.get(W));
-                        }
-                        aclGroupses.add(aclGroups);
-                    }
-                } else {
-                    aclGroupses.add(new AclGroups());
-                }
-                accessControlList.put(GROUPS, aclGroupses);*/
+//                ArrayList<AclGroups> aclGroupses = new ArrayList<>();
+//                if (acl.containsKey(GROUPS) && acl.get(GROUPS) != null) {
+//                    for (AclGroups groups : (ArrayList<AclGroups>)acl.get(GROUPS)) {
+//                        AclGroups aclGroups = new AclGroups();
+//                        if (groups.containsKey(R) && groups.get(R) != null) {
+//                            aclGroups.put(R, acl.get(R));
+//                        }
+//                        if (groups.containsKey(W) && groups.get(W) != null) {
+//                            aclGroups.put(W, acl.get(W));
+//                        }
+//                        aclGroupses.add(aclGroups);
+//                    }
+//                } else {
+//                    aclGroupses.add(new AclGroups());
+//                }
+//                accessControlList.put(GROUPS, aclGroupses);
 
             }
             return accessControlList;
         }
 
         public boolean isGloballyReadable() {
-            return globallyReadable;
+            if (containsKey(GR) && get(GR) != null) {
+                return (boolean) get(GR);
+            }
+            return false;
         }
 
         public void setGloballyReadable(boolean globallyReadable) {
-            this.globallyReadable = globallyReadable;
+            set(GR, globallyReadable);
         }
 
         public boolean isGloballyWritable() {
-            return globallyWritable;
+            if (containsKey(GW) && get(GW) != null) {
+                return (boolean) get(GW);
+            }
+            return false;
         }
 
         public void setGloballyWritable(boolean globallyWritable) {
-            this.globallyWritable = globallyWritable;
+            set(GW, globallyWritable);
         }
 
 //        public ArrayList<String> getRead() {
