@@ -81,54 +81,56 @@ public class KinveyMetaData extends GenericJson{
 
     public static class AccessControlList extends GenericJson{
 
-        public static final String JSON_FIELD_NAME = "_acl";
+//        public static final String JSON_FIELD_NAME = "_acl";
         public static final String ACL = "_acl";
         private static final String CREATOR = "creator";
-/*        private static final String GR = "gr";
+        private static final String GR = "gr";
         private static final String GW = "gw";
-        private static final String R = "r";
-        private static final String W = "w";
-        private static final String GROUPS = "groups";*/
+
+//        private static final String R = "r";
+//        private static final String W = "w";
+//        private static final String GROUPS = "groups";
+
 
         @Key(CREATOR)
         private String creator;
-/*         @Key(GR)
+        @Key(GR)
         private boolean globallyReadable;
         @Key(GW)
-        private boolean globallyWritable;*/
+        private boolean globallyWritable;
 
 //        @Key(R)
 //        private ArrayList<String> read;
 //        @Key(W)
 //        private ArrayList<String> write;
 
-/*        @Key(GROUPS)
-        private ArrayList<AclGroups> groups;
-
-        public static class AclGroups extends GenericJson {
-            @Key(R)
-            String read;
-            @Key(W)
-            String write;
-
-            public AclGroups(){}
-
-            public String getRead() {
-                return read;
-            }
-
-            public void setRead(String read) {
-                this.read = read;
-            }
-
-            public String getWrite() {
-                return write;
-            }
-
-            public void setWrite(String write) {
-                this.write = write;
-            }
-        }*/
+//        @Key(GROUPS)
+//        private ArrayList<AclGroups> groups;
+//
+//        public static class AclGroups extends GenericJson {
+//            @Key(R)
+//            String read;
+//            @Key(W)
+//            String write;
+//
+//            public AclGroups(){}
+//
+//            public String getRead() {
+//                return read;
+//            }
+//
+//            public void setRead(String read) {
+//                this.read = read;
+//            }
+//
+//            public String getWrite() {
+//                return write;
+//            }
+//
+//            public void setWrite(String write) {
+//                this.write = write;
+//            }
+//        }
 
         public static AccessControlList fromMap(Map acl) {
             AccessControlList accessControlList = new AccessControlList();
@@ -139,13 +141,13 @@ public class KinveyMetaData extends GenericJson{
                     accessControlList.put(CREATOR, acl.get(CREATOR));
                 }
 
-
-/*                if (acl.containsKey(GR) && acl.get(GR) != null) {
+                if (acl.containsKey(GR) && acl.get(GR) != null) {
                     accessControlList.put(GR, acl.get(GR));
                 }
                 if (acl.containsKey(GW) && acl.get(GW) != null) {
                     accessControlList.put(GW, acl.get(GW));
-                }*/
+                }
+
 //                if (acl.containsKey(R) && acl.get(R) != null) {
 //                    accessControlList.put(R, acl.get(R));
 //                }
@@ -175,7 +177,7 @@ public class KinveyMetaData extends GenericJson{
             return accessControlList;
         }
 
-/*        public boolean isGloballyReadable() {
+        public boolean isGloballyReadable() {
             return globallyReadable;
         }
 
@@ -189,7 +191,7 @@ public class KinveyMetaData extends GenericJson{
 
         public void setGloballyWritable(boolean globallyWritable) {
             this.globallyWritable = globallyWritable;
-        }*/
+        }
 
 //        public ArrayList<String> getRead() {
 //            return read;
@@ -207,13 +209,13 @@ public class KinveyMetaData extends GenericJson{
 //            this.write = write;
 //        }
 
-/*        public ArrayList<AclGroups> getGroups() {
-            return groups;
-        }
-
-        public void setGroups(ArrayList<AclGroups> groups) {
-            this.groups = groups;
-        }*/
+//        public ArrayList<AclGroups> getGroups() {
+//            return groups;
+//        }
+//
+//        public void setGroups(ArrayList<AclGroups> groups) {
+//            this.groups = groups;
+//        }
 
         public AccessControlList(){}
 
@@ -225,7 +227,4 @@ public class KinveyMetaData extends GenericJson{
             this.creator = creator;
         }
     }
-
-
-
 }
