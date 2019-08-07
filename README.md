@@ -158,6 +158,21 @@ See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIB
 
 [Kinvey](https://www.progress.com/kinvey) is a high-productivity serverless application development platform that provides developers tools to build robust, multi-channel applications utilizing a cloud backend and front-end SDKs. As a platform, Kinvey provides many solutions to common development needs, such as a data store, data integration, single sign-on integration, and file storage. With Kinvey, developers can focus on building what provides value for their app - the user experience (UX) and business logic of the application. This approach increases developer productivity and aims to enable higher quality apps by leveraging Kinvey's pre-built components.
 
+# Features
+
+The Kinvey Android SDK repository represents the package that can be used to develop Android apps on the Kinvey platform. The Kinvey SDK is developed using a mix of Kotlin and Java code, with a gradual transition being made to a completely Kotlin codebase.
+
+## Contents
+
+The following is a high-level overview of the most important projects in the solution:
+
+* `java-api-core` The core of the library. Most of the library functionality is written here. This project contains most of the underlying networking, user management, caching logic. Things that are Android-platform specific are represented as interfaces / abstract classes, and implemented in the `android-lib` library described below.
+* `android-lib`: The wrapper library for Android, built on top of `java-api-core`. All the Android-specific implementation is located here, and most of the classes in this library extend from the ones in `java-api-core`.
+
+## Using the SDK
+
+Refer to the Kinvey [DevCenter](http://devcenter.kinvey.com/android) for guides and documentation on using Kinvey.
+
 # Releases
 
 Versioning of the Kinvey SDK follows the guidelines stated in [Semantic Version 2.0.0](http://semver.org/).
