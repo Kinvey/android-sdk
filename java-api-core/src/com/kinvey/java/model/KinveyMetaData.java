@@ -140,12 +140,12 @@ public class KinveyMetaData extends GenericJson{
                     accessControlList.put(CREATOR, acl.get(CREATOR));
                 }
 
-//                if (acl.containsKey(GR) && acl.get(GR) != null) {
-//                    accessControlList.put(GR, acl.get(GR));
-//                }
-//                if (acl.containsKey(GW) && acl.get(GW) != null) {
-//                    accessControlList.put(GW, acl.get(GW));
-//                }
+                if (acl.containsKey(GR) && acl.get(GR) != null) {
+                    accessControlList.put(GR, acl.get(GR));
+                }
+                if (acl.containsKey(GW) && acl.get(GW) != null) {
+                    accessControlList.put(GW, acl.get(GW));
+                }
 
 //                if (acl.containsKey(R) && acl.get(R) != null) {
 //                    accessControlList.put(R, acl.get(R));
@@ -182,8 +182,9 @@ public class KinveyMetaData extends GenericJson{
             return false;
         }
 
-        public void setGloballyReadable(boolean globallyReadable) {
+        public KinveyMetaData.AccessControlList setGloballyReadable(boolean globallyReadable) {
             set(GR, globallyReadable);
+            return this;
         }
 
         public boolean isGloballyWritable() {
@@ -193,8 +194,9 @@ public class KinveyMetaData extends GenericJson{
             return false;
         }
 
-        public void setGloballyWritable(boolean globallyWritable) {
+        public KinveyMetaData.AccessControlList setGloballyWritable(boolean globallyWritable) {
             set(GW, globallyWritable);
+            return this;
         }
 
 //        public ArrayList<String> getRead() {
@@ -227,8 +229,9 @@ public class KinveyMetaData extends GenericJson{
             return creator;
         }
 
-        public void setCreator(String creator) {
+        public KinveyMetaData.AccessControlList setCreator(String creator) {
             this.creator = creator;
+            return this;
         }
     }
 }

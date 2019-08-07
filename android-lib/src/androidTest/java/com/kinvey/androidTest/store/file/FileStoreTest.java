@@ -21,6 +21,7 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.KinveyMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
 
@@ -1044,7 +1045,6 @@ public class FileStoreTest {
         return listener;
     }
 
-
     @Test
     public void tesUploadFileWithOutMetadataNetwork() throws InterruptedException, IOException {
         testUploadFileWithOutMetadata(StoreType.NETWORK);
@@ -1475,6 +1475,44 @@ public class FileStoreTest {
         assertNotNull(listener.error);
     }
 
+    @Test
+    public void testUploadGloballyReadableFile(StoreType storeType) throws IOException, InterruptedException {
+
+        FileMetaData fileMetaData = testMetadata();
+        fileMetaData.setPublic(true);
+        fileMetaData.setAcl(new KinveyMetaData.AccessControlList().setGloballyReadable(true)); //allow all users to see this file
+
+        File file = createFile(DEFAULT_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, fileMetaData);
+        file.delete();
+
+        assertNotNull(listener.fileMetaDataResult);
+        DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
+        assertNull(downloadListener.error);
+
+        assertNotNull(downloadListener.fileMetaDataResult);
+        assertTrue(downloadListener.fileMetaDataResult.isPublic());
+
+        assertNotNull(downloadListener.fileMetaDataResult.getAcl());
+        assertTrue(downloadListener.fileMetaDataResult.getAcl().isGloballyReadable());
+
+        removeFile(storeType, listener.fileMetaDataResult);
+    }
+
+    @Test
+    public void testUploadGloballyReadableFileNetwork() throws IOException, InterruptedException {
+        testUploadGloballyReadableFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testUploadGloballyReadableFileSync() throws IOException, InterruptedException {
+        testUploadGloballyReadableFile(StoreType.SYNC);
+    }
+
+    @Test
+    public void testUploadGloballyReadableFileAuto() throws IOException, InterruptedException {
+        testUploadGloballyReadableFile(StoreType.AUTO);
+    }
 
     @After
     public void tearDown() {
