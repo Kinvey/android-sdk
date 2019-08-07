@@ -156,6 +156,10 @@ See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIB
 
 [Kinvey](https://www.progress.com/kinvey) is a high-productivity serverless application development platform that provides developers tools to build robust, multi-channel applications utilizing a cloud backend and front-end SDKs. As a platform, Kinvey provides many solutions to common development needs, such as a data store, data integration, single sign-on integration, and file storage. With Kinvey, developers can focus on building what provides value for their app - the user experience (UX) and business logic of the application. This approach increases developer productivity and aims to enable higher quality apps by leveraging Kinvey's pre-built components.
 
+# Releases
+
+Versioning of the Kinvey SDK follows the guidelines stated in [Semantic Version 2.0.0](http://semver.org/).
+
 # API Reference
 
 Docuemntation for using the Kinvey SDK as well as other parts of the Kinvey platform can be found in the Kinvey DevCenter [reference](https://devcenter.kinvey.com/android/reference/) guide.
