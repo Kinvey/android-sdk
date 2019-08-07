@@ -139,7 +139,9 @@ Push to origin master
 See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIBUTING.md) for details on reporting bugs and making contributions.
 
 ====================X====================
+
 ====================X====================
+
 ====================X====================
 
 <p align="left">
@@ -159,6 +161,27 @@ See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIB
 # Releases
 
 Versioning of the Kinvey SDK follows the guidelines stated in [Semantic Version 2.0.0](http://semver.org/).
+
+# Build Instructions
+
+In order to build this repository, the following pre-requisites must be in place:
+
+* [android sdk](http://developer.android.com/sdk/index.html)
+* Set JAVA_HOME
+* Set ANDROID_HOME
+* Download android_sdk/platforms/android-19, android_sdk/platforms/android-10
+
+Once these are set, you can run the following commands:
+
+```
+./gradlew clean
+```
+
+```
+./gradlew release
+```
+
+After performing these commands, a `.zip` file with generated `.aar` and `.jar` files should be in the `/release/zipped` diretory.
 
 # API Reference
 
