@@ -137,3 +137,25 @@ Push to origin master
 
 ## Contribute
 See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIBUTING.md) for details on reporting bugs and making contributions.
+
+====================X====================
+====================X====================
+====================X====================
+
+<p align="left">
+  <a href="https://www.progress.com/kinvey" style="display: inline-block;">
+    <img src="logo-progresskinvey.png">
+  </a>
+</p>
+
+# [Kinvey Android SDK](https://devcenter.kinvey.com/android)
+
+![badge-jitpack] ![badge-status] ![badge-coverage]
+
+# License
+
+See [LICENSE](LICENSE.txt) for details.
+
+[badge-jitpack]: https://img.shields.io/jitpack/v/github/Kinvey/android-sdk
+[badge-status]: https://api.cirrus-ci.com/github/Kinvey/android-sdk.svg?branch=master
+[badge-coverage]: https://codecov.io/gh/Kinvey/android-sdk/graph/badge.svg
