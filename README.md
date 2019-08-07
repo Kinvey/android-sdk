@@ -152,6 +152,12 @@ See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIB
 
 ![badge-jitpack] ![badge-status] ![badge-coverage]
 
+# Contribute
+
+Feedback on our SDK is welcome and encouraged. Please, use [GitHub Issues](https://github.com/Kinvey/android-sdk/issues) on this repository for reporting a bug or requesting a feature for this SDK. Please reference our [contribution guide](CONTRIBUTING.md) for more information.
+
+We would also love to have your contributions! You may also reference our [contribution guide](CONTRIBUTING.md) for details on how to submit a pull request (PR) for this repository.
+
 # License
 
 See [LICENSE](LICENSE.txt) for details.
