@@ -183,6 +183,23 @@ Once these are set, you can run the following commands:
 
 After performing these commands, a `.zip` file with generated `.aar` and `.jar` files should be in the `/release/zipped` diretory.
 
+# Test Instructions
+
+```
+./gradlew test jacocoTestReport
+```
+
+Before running the tests:
+
+ * Connect android device or start emulator with min SDK version 15
+ * Add app.key and app.secret to android-lib/src/androidTest/assets/kinvey.properties
+ * Create User with username: test password: test in your console app
+ * Custom endpoints tests and Social networks tests should be configured additionally
+
+```
+./gradlew connectedAndroidTest --info
+```
+
 # API Reference
 
 Docuemntation for using the Kinvey SDK as well as other parts of the Kinvey platform can be found in the Kinvey DevCenter [reference](https://devcenter.kinvey.com/android/reference/) guide.
