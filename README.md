@@ -152,6 +152,10 @@ See [CONTRIBUTING.md](https://github.com/Kinvey/java-library/blob/master/CONTRIB
 
 ![badge-jitpack] ![badge-status] ![badge-coverage]
 
+# API Reference
+
+Docuemntation for using the Kinvey SDK as well as other parts of the Kinvey platform can be found in the Kinvey DevCenter [reference](https://devcenter.kinvey.com/android/reference/) guide.
+
 # Contribute
 
 Feedback on our SDK is welcome and encouraged. Please, use [GitHub Issues](https://github.com/Kinvey/android-sdk/issues) on this repository for reporting a bug or requesting a feature for this SDK. Please reference our [contribution guide](CONTRIBUTING.md) for more information.
