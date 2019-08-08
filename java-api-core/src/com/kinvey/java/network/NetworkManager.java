@@ -1015,7 +1015,7 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     /** used internally **/
-    enum SaveMode {
+    public enum SaveMode {
         POST,
         PUT
     }
