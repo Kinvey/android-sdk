@@ -13,25 +13,23 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.android.model.User;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.store.UserStoreRequestManager;
+import com.kinvey.android.model.User
+import com.kinvey.java.core.KinveyClientCallback
+import com.kinvey.java.store.UserStoreRequestManager
 
 /**
- * This callback is typed for a {@link UserStoreRequestManager} object, use it for operations on Users.
+ * This callback is typed for a [UserStoreRequestManager] object, use it for operations on Users.
  *
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserCallback<T extends User> extends KinveyClientCallback<T> {
+interface KinveyUserCallback<T : User> : KinveyClientCallback<T> {
 
 
-    @Override
-    public void onSuccess(T result);
+    override fun onSuccess(result: T)
 
-    @Override
-    public void onFailure(Throwable error);
+    override fun onFailure(error: Throwable)
 
 }

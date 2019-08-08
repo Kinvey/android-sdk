@@ -14,29 +14,26 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.store.requests.user
 
-import com.google.api.client.util.Key;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.store.UserStoreRequestManager;
+import com.google.api.client.util.Key
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest
+import com.kinvey.java.store.UserStoreRequestManager
 
 /**
  * ResetPassword Request Class, extends AbstractKinveyJsonClientRequest<BaseUser>.  Constructs the HTTP request object
  * for ResetPassword BaseUser requests.
- */
-public final class ResetPassword extends AbstractKinveyJsonClientRequest<Void> {
-    private static final String REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate";
+</BaseUser> */
+class ResetPassword(private val userStoreRequestManager: UserStoreRequestManager<*>, @field:Key
+private val userID: String) : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "POST", REST_PATH, null, Void::class.java) {
 
-    private UserStoreRequestManager userStoreRequestManager;
-    @Key
-    private String userID;
+    init {
+        this.isRequireAppCredentials = true
 
-    public ResetPassword(UserStoreRequestManager userStoreRequestManager, String usernameOrEmail) {
-        super(userStoreRequestManager.getClient(), "POST", REST_PATH, null,  Void.class);
-        this.userStoreRequestManager = userStoreRequestManager;
-        this.userID = usernameOrEmail;
-        this.setRequireAppCredentials(true);
+    }
 
+    companion object {
+        private val REST_PATH = "/rpc/{appKey}/{userID}/user-password-reset-initiate"
     }
 }

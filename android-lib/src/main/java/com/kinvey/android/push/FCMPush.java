@@ -38,6 +38,7 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.store.BaseUserStore;
 
 import java.io.IOException;
 import java.util.AbstractMap;

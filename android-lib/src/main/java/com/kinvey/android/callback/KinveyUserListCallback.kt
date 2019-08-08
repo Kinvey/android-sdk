@@ -13,34 +13,31 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.android.model.User
+import com.kinvey.java.core.KinveyClientCallback
 
 /**
- * This callback is used for User Management operations, such as sending emails or password reset forms.
- * <p>
- * This methods which use this callback do not provide any return values, instead they either "ran" or "didn't run".
- * </p>
+ * This callback is typed for an array of [User] objects, use it for bulk operations on the User collection..
  *
- *
- * @author mjsalinger
+ * @author edwardf
  * @since 2.0
  */
-public interface KinveyUserManagementCallback extends KinveyClientCallback<Void> {
+interface KinveyUserListCallback : KinveyClientCallback<Array<User>> {
 
     /**
-     * Method invoked when a user operation completes.
+     * Method invoked after a successful request against a set of Users
      *
-     * @param result - typed to {@code Void} because there is no usable return value.
+     * @param result - the modified users
      */
-    @Override
-    public void onSuccess(Void result);
+    override fun onSuccess(result: Array<User>)
 
     /**
-     * Method invoked when a user operation fails to complete.
-     * @param error - details about the error.
+     * Method invoked after a failed request against a set of Users
+     *
+     * @param error - details about the error
      */
-    @Override
-    public void onFailure(Throwable error);
+    override fun onFailure(error: Throwable)
+
 }
