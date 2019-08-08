@@ -18,7 +18,8 @@ package com.kinvey.android;
 
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.ExponentialBackOffPolicy;

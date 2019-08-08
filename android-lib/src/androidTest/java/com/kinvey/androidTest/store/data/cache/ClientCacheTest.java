@@ -1,9 +1,8 @@
 package com.kinvey.androidTest.store.data.cache;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.cache.RealmCacheManager;
@@ -25,7 +24,7 @@ public class ClientCacheTest {
     Client client;
     @Before
     public void setUp(){
-        Client.Builder builder = new Client.Builder(InstrumentationRegistry.getContext());
+        Client.Builder builder = new Client.Builder(InstrumentationRegistry.getInstrumentation().getContext());
         client = builder.build();
     }
     @Test

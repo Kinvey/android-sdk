@@ -1,11 +1,11 @@
 package com.kinvey.androidTest.store.data.cache;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.util.SimpleArrayMap;
 
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;

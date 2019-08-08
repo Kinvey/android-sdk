@@ -27,8 +27,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings.Secure;
-import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * @see <a href="http://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id">
