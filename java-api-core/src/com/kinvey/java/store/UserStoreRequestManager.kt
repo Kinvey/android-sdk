@@ -16,7 +16,6 @@
 
 package com.kinvey.java.store
 
-import com.google.api.client.http.HttpContent
 import com.google.api.client.http.UrlEncodedContent
 import com.google.api.client.json.GenericJson
 import com.google.api.client.util.GenericData
@@ -31,7 +30,6 @@ import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.auth.KinveyAuthResponse
 import com.kinvey.java.auth.ThirdPartyIdentity
 import com.kinvey.java.core.KinveyClientRequestInitializer
-import com.kinvey.java.core.KinveyHeaders
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.dto.DeviceId
 import com.kinvey.java.dto.Email
@@ -62,7 +60,7 @@ import com.kinvey.java.Constants.ACCESS_ERROR
 /**
  * Created by Prots on 2/12/16.
  */
-class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T>, private val builder: KinveyAuthRequest.Builder<T>) {
+class UserStoreRequestManager<T : BaseUser> {
     private val myClazz: Class<T>
     private lateinit var user: T
     private val clientAppVersion: String?
@@ -78,7 +76,21 @@ class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T
         @JvmName("setMICRedirectURI")
         set
 
-    fun getBuilder(): KinveyAuthRequest.Builder<*> {
+    private val client: AbstractClient<T>
+    private val builder: KinveyAuthRequest.Builder<T>
+
+    constructor(client: AbstractClient<T>?, builder: KinveyAuthRequest.Builder<T>?) {
+        Preconditions.checkNotNull(client, "client must not be null.")
+        Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null")
+        this.client = client!!
+        this.builder = builder!!
+        this.myClazz = client.userClass
+        this.builder.setUser(client.activeUser)
+        this.clientAppVersion = client.clientAppVersion
+        this.customRequestProperties = client.customRequestProperties
+    }
+
+    fun getBuilder(): KinveyAuthRequest.Builder<*>? {
         return builder
     }
 
@@ -108,15 +120,6 @@ class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T
 
     fun getClient() : AbstractClient<T> {
         return client
-    }
-
-    init {
-        Preconditions.checkNotNull(client, "client must not be null.")
-        Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null")
-        this.myClazz = client.userClass
-        this.builder.setUser(client.activeUser)
-        this.clientAppVersion = client.clientAppVersion
-        this.customRequestProperties = client.customRequestProperties
     }
 
     constructor(user: T, client: AbstractClient<T>, builder: KinveyAuthRequest.Builder<T>) : this(client, builder) {
@@ -214,7 +217,7 @@ class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun loginBlocking(username: String, password: String): LoginRequest {
+    fun loginBlocking(username: String?, password: String?): LoginRequest {
         Preconditions.checkNotNull(username, "Username cannot be null.")
         Preconditions.checkNotNull(password, "Password cannot be null.")
         return LoginRequest(username, password, false).buildAuthRequest()
@@ -595,7 +598,7 @@ class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun resetPasswordBlocking(usernameOrEmail: String): ResetPassword {
+    fun resetPasswordBlocking(usernameOrEmail: String?): ResetPassword {
         Preconditions.checkNotNull(usernameOrEmail, "username must not be null!")
         val reset = ResetPassword(this, usernameOrEmail)
         client.initializeRequest(reset)
@@ -788,14 +791,14 @@ class UserStoreRequestManager<T : BaseUser>(private val client: AbstractClient<T
             this.type = LoginType.IMPLICIT
         }
 
-        constructor(username: String, password: String, setCreate: Boolean) {
+        constructor(username: String?, password: String?, setCreate: Boolean) {
             builder.setUsernameAndPassword(username, password)
             builder.setCreate(setCreate)
             builder.setUser(client.activeUser)
             this.type = LoginType.KINVEY
         }
 
-        constructor(username: String, password: String, user: T, setCreate: Boolean) {
+        constructor(username: String?, password: String?, user: T, setCreate: Boolean) {
             builder.setUsernameAndPassword(username, password)
             builder.setCreate(setCreate)
             builder.setUser(user)

@@ -26,7 +26,7 @@ import com.kinvey.java.store.UserStoreRequestManager
  * for ResetPassword BaseUser requests.
 </BaseUser> */
 class ResetPassword(private val userStoreRequestManager: UserStoreRequestManager<*>, @field:Key
-private val userID: String) : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "POST", REST_PATH, null, Void::class.java) {
+private val userID: String?) : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "POST", REST_PATH, null, Void::class.java) {
 
     init {
         this.isRequireAppCredentials = true
