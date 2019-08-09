@@ -26,7 +26,8 @@ android {
     minSdkVersion 16
     targetSdkVersion 29
     multiDexEnabled true
-    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
   }
   buildTypes {
     release {
