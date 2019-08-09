@@ -22,12 +22,17 @@ android {
     javaMaxHeapSize "4g"
   }
 
+  sourceSets {
+    androidTest {
+      java.srcDirs += [ 'src/androidTest/java' ]
+    }
+  }
+
   defaultConfig {
     minSdkVersion 16
     targetSdkVersion 29
     multiDexEnabled true
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-//    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
+    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
   }
   buildTypes {
     release {
