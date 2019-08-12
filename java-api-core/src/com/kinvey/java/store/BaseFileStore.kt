@@ -174,7 +174,6 @@ open class BaseFileStore
                 cache.save(fileMetadataWithPath)
             }
         }
-
         return metadata
     }
 

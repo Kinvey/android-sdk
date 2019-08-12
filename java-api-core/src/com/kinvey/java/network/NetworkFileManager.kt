@@ -151,6 +151,7 @@ open class NetworkFileManager
         this.customRequestProperties = GenericJson()
     }
 
+    var fileMetaDataWithUploadUrl: FileMetaData? = null
 
     /**
      * Calculate and set metadata for file upload request according FileMetadata
@@ -160,11 +161,7 @@ open class NetworkFileManager
     protected fun setUploadHeader(metaData: FileMetaData?, request: AbstractKinveyJsonClientRequest<*>) {
         if (metaData != null) {
             if (metaData.mimetype == null) {
-                if (mimeTypeFinder != null) {
-                    mimeTypeFinder!!.getMimeType(metaData)
-                }
-            }
-            if (metaData.mimetype == null) {
+                mimeTypeFinder?.getMimeType(metaData)
                 metaData.mimetype = "application/octet-stream"
             }
             request.getRequestHeaders()["x-Kinvey-content-type"] = metaData.mimetype

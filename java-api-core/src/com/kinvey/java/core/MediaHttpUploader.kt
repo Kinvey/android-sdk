@@ -477,7 +477,6 @@ constructor (mediaContent: AbstractInputStreamContent,
 
         var response: HttpResponse? = null
         var statusCode: Int
-
         while (!isCancelled) {
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null)
             currentRequest?.suppressUserAgentSuffix = true
@@ -623,6 +622,7 @@ constructor (mediaContent: AbstractInputStreamContent,
             }
         } finally {
             initialResponse.disconnect()
+            fileMetaDataForUploading = meta
         }
     }
 

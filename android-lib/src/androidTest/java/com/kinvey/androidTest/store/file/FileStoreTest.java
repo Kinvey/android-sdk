@@ -16,15 +16,20 @@ import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.LooperThread;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
+import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.KinveyCachedClientCallback;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.MediaHttpDownloader;
 import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.MetaUploadProgressListener;
+import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;
 import com.kinvey.java.query.MongoQueryFilter;
 import com.kinvey.java.store.StoreType;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -70,9 +75,9 @@ public class FileStoreTest {
     protected static class DefaultUploadProgressListener implements AsyncUploaderProgressListener<FileMetaData> {
         private CountDownLatch latch;
         private FileMetaData fileMetaDataResult;
+
         private Throwable error;
         private boolean isCancelled = false;
-        private boolean isResumed = false;
         private boolean onCancelled = false;
         private int progressChangedCounter = 0;
 
@@ -107,6 +112,35 @@ public class FileStoreTest {
         public void onFailure(Throwable error) {
             this.error = error;
             finish();
+        }
+
+        private void finish() {
+            latch.countDown();
+        }
+    }
+
+    protected static class ResumeUploadProgressListener
+        extends MetaUploadProgressListener implements UploaderProgressListener {
+        private CountDownLatch latch;
+
+        private int progressChangedCounter = 0;
+        public FileMetaData uploadMetadata = null;
+
+        private ResumeUploadProgressListener(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void metaDataRetrieved(@Nullable FileMetaData meta) {
+            uploadMetadata = meta;
+        }
+
+        @Override
+        public void progressChanged(@NotNull MediaHttpUploader uploader) throws IOException {
+            progressChangedCounter++;
+            if (progressChangedCounter == 1) {
+                finish();
+            }
         }
 
         private void finish() {
@@ -1167,12 +1201,11 @@ public class FileStoreTest {
 
     private void testCancelFileUploading(StoreType storeType) throws IOException, InterruptedException {
         File file = createFile(CUSTOM_FILE_SIZE_MB);
-        DefaultUploadProgressListener listener = cancelAndResumeFileUploading(storeType, file);
+        DefaultUploadProgressListener listener = cancelFileUploading(storeType, file);
         file.delete();
         assertTrue(listener.onCancelled);
-        assertTrue(listener.isResumed);
         assertNull(listener.error);
-        assertNotNull(listener.fileMetaDataResult);
+        assertNull(listener.fileMetaDataResult);
     }
 
     @Test
@@ -1192,10 +1225,9 @@ public class FileStoreTest {
 
     private void testCancelAndResumeFileUploading(StoreType storeType) throws IOException, InterruptedException {
         File file = createFile(CUSTOM_FILE_SIZE_MB);
-        DefaultUploadProgressListener listener = cancelAndResumeFileUploading(storeType, file);
+        FileMetaData metadata = testMetadata();
+        DefaultUploadProgressListener listener = cancelAndResumeFileUploading(storeType, metadata, file);
         file.delete();
-        assertTrue(listener.onCancelled);
-        assertTrue(listener.isResumed);
         assertNull(listener.error);
         assertNotNull(listener.fileMetaDataResult);
     }
@@ -1223,31 +1255,33 @@ public class FileStoreTest {
     }
 
 
-    private DefaultUploadProgressListener cancelAndResumeFileUploading(final StoreType storeType, final File f) throws InterruptedException, IOException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
+    private DefaultUploadProgressListener cancelAndResumeFileUploading(final StoreType storeType, final FileMetaData metadata, final File f) throws InterruptedException, IOException {
+
+        final CountDownLatch latchCancelListener = new CountDownLatch(1);
+        final CountDownLatch latchUploadListener = new CountDownLatch(1);
+        final ResumeUploadProgressListener cancelListener = new ResumeUploadProgressListener(latchCancelListener);
+        final DefaultUploadProgressListener uploadListener = new DefaultUploadProgressListener(latchUploadListener);
+
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    client.getFileStore(storeType).upload(f, listener);
-
-                    listener.isCancelled = true;
-                    client.getFileStore(storeType).cancelUploading();
-                    Thread.sleep(2000);
-                    listener.isResumed = true;
-                    client.getFileStore(storeType).upload(f, listener);
-
+                    client.getFileStore(storeType).upload(f, metadata, cancelListener);
+                    FileMetaData fileMetaDataWithUploadUrl = cancelListener.uploadMetadata;
+                    if (fileMetaDataWithUploadUrl == null) {
+                        fileMetaDataWithUploadUrl = metadata;
+                    }
+                    client.getFileStore(storeType).upload(f, fileMetaDataWithUploadUrl, uploadListener);
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    listener.onFailure(e);
                 }
             }
         });
         looperThread.start();
-        latch.await();
+        latchCancelListener.await();
+        latchUploadListener.await();
         looperThread.mHandler.sendMessage(new Message());
-        return listener;
+        return uploadListener;
     }
 
     @Test
