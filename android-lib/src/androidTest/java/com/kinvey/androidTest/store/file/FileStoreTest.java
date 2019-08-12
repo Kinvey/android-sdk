@@ -72,6 +72,7 @@ public class FileStoreTest {
         private FileMetaData fileMetaDataResult;
         private Throwable error;
         private boolean isCancelled = false;
+        private boolean isResumed = false;
         private boolean onCancelled = false;
         private int progressChangedCounter = 0;
 
@@ -1166,11 +1167,37 @@ public class FileStoreTest {
 
     private void testCancelFileUploading(StoreType storeType) throws IOException, InterruptedException {
         File file = createFile(CUSTOM_FILE_SIZE_MB);
-        DefaultUploadProgressListener listener = cancelFileUploading(storeType, file);
+        DefaultUploadProgressListener listener = cancelAndResumeFileUploading(storeType, file);
         file.delete();
         assertTrue(listener.onCancelled);
+        assertTrue(listener.isResumed);
         assertNull(listener.error);
-        assertNull(listener.fileMetaDataResult);
+        assertNotNull(listener.fileMetaDataResult);
+    }
+
+    @Test
+    public void testCancelAndResumeFileUploadingNetwork() throws InterruptedException, IOException {
+        testCancelAndResumeFileUploading(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testCancelAndResumeFileUploadingAuto() throws InterruptedException, IOException {
+        testCancelAndResumeFileUploading(StoreType.AUTO);
+    }
+
+    @Test
+    public void testCancelAndResumeFileUploadingSync() throws InterruptedException, IOException {
+        testCancelAndResumeFileUploading(StoreType.SYNC);
+    }
+
+    private void testCancelAndResumeFileUploading(StoreType storeType) throws IOException, InterruptedException {
+        File file = createFile(CUSTOM_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = cancelAndResumeFileUploading(storeType, file);
+        file.delete();
+        assertTrue(listener.onCancelled);
+        assertTrue(listener.isResumed);
+        assertNull(listener.error);
+        assertNotNull(listener.fileMetaDataResult);
     }
 
     private DefaultUploadProgressListener cancelFileUploading(final StoreType storeType, final File f) throws InterruptedException, IOException {
@@ -1184,6 +1211,34 @@ public class FileStoreTest {
                     listener.isCancelled = true;
                     client.getFileStore(storeType).cancelUploading();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                    listener.onFailure(e);
+                }
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return listener;
+    }
+
+
+    private DefaultUploadProgressListener cancelAndResumeFileUploading(final StoreType storeType, final File f) throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultUploadProgressListener listener = new DefaultUploadProgressListener(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.getFileStore(storeType).upload(f, listener);
+
+                    listener.isCancelled = true;
+                    client.getFileStore(storeType).cancelUploading();
+                    Thread.sleep(2000);
+                    listener.isResumed = true;
+                    client.getFileStore(storeType).upload(f, listener);
+
+                } catch (Throwable e) {
                     e.printStackTrace();
                     listener.onFailure(e);
                 }
