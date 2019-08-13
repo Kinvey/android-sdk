@@ -627,8 +627,8 @@ open class NetworkFileManager
         protected fun initializeMediaHttpUploader(content: AbstractInputStreamContent, progressListener: UploaderProgressListener) {
             val requestFactory = networkFileManager.client.requestFactory
             uploader = createMediaHttpUploader(content, requestFactory)
-            uploader?.directUploadEnabled = false
-            uploader?.progressListener = progressListener
+            uploader?.setDirectUploadEnabled(false)
+            uploader?.setProgressListener(progressListener)
         }
 
         /**
