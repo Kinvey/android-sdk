@@ -1213,16 +1213,6 @@ public class FileStoreTest {
         testCancelAndResumeFileUploading(StoreType.NETWORK);
     }
 
-    @Test
-    public void testCancelAndResumeFileUploadingAuto() throws InterruptedException, IOException {
-        testCancelAndResumeFileUploading(StoreType.AUTO);
-    }
-
-    @Test
-    public void testCancelAndResumeFileUploadingSync() throws InterruptedException, IOException {
-        testCancelAndResumeFileUploading(StoreType.SYNC);
-    }
-
     private void testCancelAndResumeFileUploading(StoreType storeType) throws IOException, InterruptedException {
         File file = createFile(CUSTOM_FILE_SIZE_MB);
         FileMetaData metadata = testMetadata();
