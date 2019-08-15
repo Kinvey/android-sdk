@@ -1555,6 +1555,36 @@ public class FileStoreTest {
         assertNotNull(listener.error);
     }
 
+    @Test
+    public void testUploadFileCheckUploadUrlCache() throws InterruptedException, IOException {
+        testUploadPubliclyReadableFile(StoreType.NETWORK);
+    }
+
+    @Test
+    public void testUploadFileCheckUploadUrlAuto() throws InterruptedException, IOException {
+        testUploadFileCheckUploadUrl(StoreType.AUTO);
+    }
+
+    @Test
+    public void testUploadFileCheckUploadUrlSync() throws InterruptedException, IOException {
+        testUploadFileCheckUploadUrl(StoreType.SYNC);
+    }
+
+    private void testUploadFileCheckUploadUrl(StoreType storeType) throws IOException, InterruptedException {
+        FileMetaData fileMetaData = testMetadata();
+        fileMetaData.setPublic(true);
+        File file = createFile(DEFAULT_FILE_SIZE_MB);
+        DefaultUploadProgressListener listener = uploadFileWithMetadata(storeType, file, fileMetaData);
+        file.delete();
+        assertNotNull(listener.fileMetaDataResult);
+        assertNull(listener.fileMetaDataResult.getUploadUrl());
+        DefaultDownloadProgressListener downloadListener = downloadFile(storeType, listener.fileMetaDataResult);
+        assertNull(downloadListener.error);
+        assertNotNull(downloadListener.fileMetaDataResult);
+        assertTrue(downloadListener.fileMetaDataResult.isPublic());
+        assertNull(listener.fileMetaDataResult.getUploadUrl());
+        removeFile(storeType, listener.fileMetaDataResult);
+    }
 
     @After
     public void tearDown() {

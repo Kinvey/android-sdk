@@ -512,6 +512,7 @@ constructor (mediaContent: AbstractInputStreamContent,
                     if (mediaContent.closeInputStream) {
                         contentInputStream?.close()
                     }
+                    meta?.uploadUrl = null
                     updateStateAndNotifyListener(UploadState.UPLOAD_COMPLETE)
                     return meta
                 }
