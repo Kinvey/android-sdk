@@ -84,19 +84,18 @@ public class KinveyMetaData extends GenericJson{
 //        public static final String JSON_FIELD_NAME = "_acl";
         public static final String ACL = "_acl";
         private static final String CREATOR = "creator";
-        private static final String GR = "gr";
-        private static final String GW = "gw";
-
-//        private static final String R = "r";
-//        private static final String W = "w";
-//        private static final String GROUPS = "groups";
+        public static final String GR = "gr";
+        public static final String GW = "gw";
+        public static final String R = "r";
+        public static final String W = "w";
+        public static final String GROUPS = "groups";
 
         @Key(CREATOR)
         private String creator = null;
-//        @Key(GR)
-//        private Boolean globallyReadable;
-//        @Key(GW)
-//        private Boolean globallyWritable;
+        @Key(GR)
+        private Boolean globallyReadable = null;
+        @Key(GW)
+        private Boolean globallyWritable = null;
 
 //        @Key(R)
 //        private ArrayList<String> read;
@@ -176,26 +175,26 @@ public class KinveyMetaData extends GenericJson{
         }
 
         public boolean isGloballyReadable() {
-            if (containsKey(GR) && get(GR) != null) {
-                return (boolean) get(GR);
+            if (globallyReadable != null) {
+                return globallyReadable;
             }
             return false;
         }
 
         public KinveyMetaData.AccessControlList setGloballyReadable(boolean globallyReadable) {
-            set(GR, globallyReadable);
+            this.globallyReadable = globallyReadable;
             return this;
         }
 
         public boolean isGloballyWritable() {
-            if (containsKey(GW) && get(GW) != null) {
-                return (boolean) get(GW);
+            if (globallyWritable != null) {
+                return globallyWritable;
             }
             return false;
         }
 
         public KinveyMetaData.AccessControlList setGloballyWritable(boolean globallyWritable) {
-            set(GW, globallyWritable);
+            this.globallyWritable = globallyWritable;
             return this;
         }
 

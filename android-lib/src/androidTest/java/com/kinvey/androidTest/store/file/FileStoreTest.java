@@ -1475,7 +1475,6 @@ public class FileStoreTest {
         assertNotNull(listener.error);
     }
 
-    @Test
     public void testUploadGloballyReadableFile(StoreType storeType) throws IOException, InterruptedException {
 
         FileMetaData fileMetaData = testMetadata();
