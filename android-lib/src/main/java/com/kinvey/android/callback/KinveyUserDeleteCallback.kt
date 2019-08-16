@@ -13,20 +13,18 @@
  * contents is a violation of applicable laws.
  *
  */
+package com.kinvey.android.callback
 
-package com.kinvey.java.store.requests.user;
+import com.kinvey.java.core.KinveyClientCallback
 
-import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.dto.UserNameExists;
+/**
+ * This class provides callbacks for an asynchronous Deletion of a User
+ *
+ * @author mjsalinger
+ * @since 2.0
+ */
+interface KinveyUserDeleteCallback : KinveyClientCallback<Void> {
+    override fun onSuccess(result: Void)
 
-
-public final class UserExists extends AbstractKinveyJsonClientRequest<UserNameExists> {
-    private static final String REST_PATH = "rpc/{appKey}/check-username-exists";
-
-    public UserExists(AbstractClient client, GenericJson username) {
-        super(client, "POST", REST_PATH, username, UserNameExists.class);
-        this.setRequireAppCredentials(true);
-    }
+    override fun onFailure(error: Throwable)
 }

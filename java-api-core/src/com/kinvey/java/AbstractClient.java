@@ -588,8 +588,8 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         return userModelClass;
     }
 
-    public Class getUserArrayClass(){
-        return Array.newInstance(getUserClass(), 0).getClass();
+    public Class<T[]> getUserArrayClass(){
+        return (Class<T[]>) Array.newInstance(getUserClass(), 0).getClass();
     }
 
     public void setUserClass(Class<T> userClass){

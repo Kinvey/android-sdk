@@ -14,18 +14,34 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.model
 
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.dto.Email;
+/**
+ * @author mjsalinger
+ * @since 2.0
+ */
 
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
-public final class ForgotUsername extends AbstractKinveyJsonClientRequest<Void> {
-    private static final String REST_PATH = "rpc/{appKey}/user-forgot-username";
+/**
+ * Construct a user lookup object via [com.kinvey.java.UserDiscovery.userLookup].
+ *
+ *
+ * After configuring the lookup set it using [com.kinvey.java.UserDiscovery.lookupBlocking]
+ */
+class UserLookup : GenericJson() {
 
-    public ForgotUsername(AbstractClient client, Email email) {
-        super(client, "POST", REST_PATH, email, Void.class);
-        this.setRequireAppCredentials(true);
-    }
+    @Key("_id")
+    var id: String? = null
+    @Key
+    var username: String? = null
+    @Key("first_name")
+    var firstName: String? = null
+    @Key("last_name")
+    var lastName: String? = null
+    @Key
+    var email: String? = null
+    @Key("_socialIdentity.facebook.id")
+    var facebookID: String? = null
 }
