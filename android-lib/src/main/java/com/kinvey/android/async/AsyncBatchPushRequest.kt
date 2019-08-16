@@ -17,7 +17,7 @@
 package com.kinvey.android.async
 
 import com.google.api.client.json.GenericJson
-import com.google.api.client.repackaged.com.google.common.base.Preconditions.checkArgument
+import com.google.api.client.util.Preconditions.checkArgument
 import com.kinvey.android.AsyncClientRequest
 import com.kinvey.android.sync.KinveyPushBatchResponse
 import com.kinvey.android.sync.KinveyPushCallback
