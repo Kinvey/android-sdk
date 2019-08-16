@@ -184,7 +184,6 @@ In order to build this repository, the following pre-requisites must be in place
 * [android sdk](http://developer.android.com/sdk/index.html)
 * Set JAVA_HOME
 * Set ANDROID_HOME
-* Download android_sdk/platforms/android-19, android_sdk/platforms/android-10
 
 Once these are set, you can run the following commands:
 
@@ -217,7 +216,7 @@ Before running the tests:
 
 # API Reference
 
-Docuemntation for using the Kinvey SDK as well as other parts of the Kinvey platform can be found in the Kinvey DevCenter [reference](https://devcenter.kinvey.com/android/reference/) guide.
+Documentation for using the Kinvey SDK as well as other parts of the Kinvey platform can be found in the Kinvey DevCenter [reference](https://devcenter.kinvey.com/android/reference/) guide.
 
 # Contribute
 
