@@ -2,7 +2,7 @@ package com.kinvey.androidTest.store.data.request;
 
 import android.content.Context;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.kinvey.android.Client;

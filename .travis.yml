@@ -14,6 +14,7 @@ cache:
 env:
   global:
     - CI = true
+    - BUILD_TOOLS=29.0.2
     - ANDROID_API=27
     - EMULATOR_API_LEVEL=21
     - EMU_FLAVOR=default
@@ -51,7 +52,7 @@ install:
   - echo 'count=0' > /home/travis/.android/repositories.cfg # Avoid harmless sdkmanager warning
   - echo y | sdkmanager "platform-tools" >/dev/null
   - echo y | sdkmanager "tools" >/dev/null # A second time per Travis docs, gets latest versions
-  - echo y | sdkmanager "build-tools;28.0.3" >/dev/null # Implicit gradle dependency - gradle drives changes
+  - echo y | sdkmanager "build-tools;$BUILD_TOOLS" >/dev/null # Implicit gradle dependency - gradle drives changes
   - echo y | sdkmanager "platforms;android-$ANDROID_API" >/dev/null # We need the API of the emulator we will run
   - echo y | sdkmanager "platforms;android-28" >/dev/null # We need the API of the current compileSdkVersion from gradle.properties
   - echo y | sdkmanager --channel=4 "emulator" # Experiment with canary, specifying 28.0.3 (prior version) did not work

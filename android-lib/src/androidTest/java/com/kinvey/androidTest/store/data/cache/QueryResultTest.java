@@ -2,15 +2,11 @@ package com.kinvey.androidTest.store.data.cache;
 
 import android.content.Context;
 
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
-import com.kinvey.android.cache.RealmCache;
-import com.kinvey.android.cache.RealmCacheManager;
 import com.kinvey.android.model.User;
 import com.kinvey.java.Query;
 import com.kinvey.java.cache.ICache;
@@ -18,16 +14,12 @@ import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.query.AbstractQuery;
 import com.kinvey.java.query.MongoQueryFilter;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.UUID;
 import java.util.List;
 
 
