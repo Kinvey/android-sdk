@@ -1015,9 +1015,6 @@ public class NetworkManager<T extends GenericJson> {
         }
     }
 
-   /* Using in network manager classes */
-
-
     /**
      * Generic Save<T> class.  Constructs the HTTP request object for
      * Create / Update requests.

@@ -215,12 +215,12 @@ constructor (mediaContent: AbstractInputStreamContent,
      * If value is set to `false` then the upload uses the resumable media upload protocol to
      * upload in data chunks. Defaults to `false`.
      */
-    var directUploadEnabled: Boolean = false
+    private var directUploadEnabled: Boolean = false
 
     /**
      * Progress listener to send progress notifications to or `null` for none.
      */
-    var progressListener: UploaderProgressListener? = null
+    private var progressListener: UploaderProgressListener? = null
 
     /**
      * The media content length is used in the "Content-Range" header. If we reached the end of the
@@ -623,6 +623,7 @@ constructor (mediaContent: AbstractInputStreamContent,
             }
         } finally {
             initialResponse.disconnect()
+            fileMetaDataForUploading = meta
         }
     }
 
@@ -744,7 +745,7 @@ constructor (mediaContent: AbstractInputStreamContent,
      * package-level for testing
      */
     @Throws(IOException::class)
-    internal fun parse(initationResponseParser: JsonObjectParser, response: HttpResponse): FileMetaData {
+    fun parse(initationResponseParser: JsonObjectParser, response: HttpResponse): FileMetaData {
         return try {
             initationResponseParser.parseAndClose(response.content, response.contentCharset, FileMetaData::class.java)
         } catch (e: Exception) {
@@ -968,7 +969,7 @@ constructor (mediaContent: AbstractInputStreamContent,
      *
      * @since 1.9
      */
-    //fun isDirectUploadEnabled(): Boolean = directUploadEnabled
+    fun isDirectUploadEnabled(): Boolean = directUploadEnabled
 
     /**
      * Sets the progress listener to send progress notifications to or `null` for none.
@@ -981,7 +982,7 @@ constructor (mediaContent: AbstractInputStreamContent,
     /**
      * Returns the progress listener to send progress notifications to or `null` for none.
      */
-    //fun getProgressListener(): UploaderProgressListener? = progressListener
+    fun getProgressListener(): UploaderProgressListener? = progressListener
 
     /**
      * Sets the maximum size of individual chunks that will get uploaded by single HTTP requests. The

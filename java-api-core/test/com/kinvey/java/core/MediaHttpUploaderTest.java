@@ -47,13 +47,13 @@ public class MediaHttpUploaderTest extends TestCase {
         //setup and stub out the mocks
         AbstractInputStreamContent mockContent = mock(AbstractInputStreamContent.class);
         when(mockContent.getInputStream())
-                .thenReturn(mock(InputStream.class));
+           .thenReturn(mock(InputStream.class));
         MediaHttpUploader objectUnderTest = spy(new MediaHttpUploader(mockContent, new MockHttpTransport(), null));
         FileMetaData mockUriResponse = mock(FileMetaData.class);
         when(mockUriResponse.getUploadUrl()).thenReturn(HttpTesting.SIMPLE_URL);
         doReturn(mockUriResponse)
-                .when(objectUnderTest)
-                .parse(any(JsonObjectParser.class), any(HttpResponse.class));
+           .when(objectUnderTest)
+           .parse(any(JsonObjectParser.class), any(HttpResponse.class));
 
         // Record UploadState values passed to progress listener
         final Stack<MediaHttpUploader.UploadState> argValueRecorder = new Stack<MediaHttpUploader.UploadState>();
