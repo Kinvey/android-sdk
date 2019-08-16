@@ -5,10 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.Message;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.api.client.http.HttpResponseException;
 import com.kinvey.android.AsyncUserDiscovery;
@@ -51,6 +52,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import static com.kinvey.androidTest.TestManager.PASSWORD;
@@ -878,6 +880,8 @@ public class UserStoreTest {
         String refreshToken = null;
         String newRefreshToken = null;
         DefaultKinveyUserCallback userCallback = loginMICCodeApi(client, redirectURI);
+        assertNull(userCallback.error);
+        assertNotNull(userCallback.result);
         Credential cred = client.getStore().load(userCallback.result.getId());
         if (cred != null) {
             refreshToken = cred.getRefreshToken();
@@ -1698,8 +1702,9 @@ public class UserStoreTest {
             public void run() {
                 try {
                     UserStore.login(credential, client, callback);
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
+                    callback.onFailure(e);
                 }
             }
         });
@@ -1711,7 +1716,7 @@ public class UserStoreTest {
 
     @Test
     public void testChangePassword() throws InterruptedException {
-        String userName = "testUser123";
+        String userName = String.format("testUser123-%s", UUID.randomUUID());
         String newPassword = "testUser123Password";
         signUp(userName, PASSWORD, client);
         assertTrue(client.isUserLoggedIn());

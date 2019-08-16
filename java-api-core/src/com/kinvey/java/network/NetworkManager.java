@@ -44,6 +44,7 @@ import com.kinvey.java.model.KinveyReadResponse;
 import com.kinvey.java.model.KinveyDeleteResponse;
 import com.kinvey.java.model.KinveyQueryCacheResponse;
 import com.kinvey.java.model.KinveySaveBatchResponse;
+import com.kinvey.java.model.SaveMode;
 import com.kinvey.java.query.MongoQueryFilter;
 
 import java.io.IOException;
@@ -1012,12 +1013,6 @@ public class NetworkManager<T extends GenericJson> {
                 this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
-    }
-
-    /** used internally **/
-    enum SaveMode {
-        POST,
-        PUT
     }
 
     /**

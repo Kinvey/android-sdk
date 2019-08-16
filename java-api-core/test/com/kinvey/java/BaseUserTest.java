@@ -102,7 +102,9 @@ public class BaseUserTest extends KinveyMockUnitTest {
         try {
             requestManager.login(ThirdPartyIdentity.Type.FACEBOOK, null).execute();
             fail("NullPointerException should be thrown");
-        } catch (NullPointerException ex) {}
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Parameter specified as non-null is null: method com.kinvey.java.store.UserStoreRequestManager.login, parameter args", ex.getMessage());
+        }
     }
 
     public void testLoginFacebookTooFewArguments() throws IOException {

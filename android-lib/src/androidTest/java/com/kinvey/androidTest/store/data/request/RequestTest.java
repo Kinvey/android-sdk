@@ -1,9 +1,10 @@
 package com.kinvey.androidTest.store.data.request;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.kinvey.android.Client;
 import com.kinvey.android.store.DataStore;

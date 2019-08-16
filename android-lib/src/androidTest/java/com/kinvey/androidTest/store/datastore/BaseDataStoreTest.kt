@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.store.datastore
 
 import android.os.Message
-import android.support.test.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.callback.KinveyDeleteCallback

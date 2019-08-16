@@ -32,6 +32,7 @@ import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.store.UserStoreRequestManager
+import org.apache.tools.ant.filters.StringInputStream
 
 /**
  * @author m0rganic
@@ -313,7 +314,7 @@ protected constructor(
         if (response.getStatusCode() == 401 && !hasRetryed) {
             //get the refresh token
             Logger.INFO("get the refresh token")
-            val cred = client.store.load(client.activeUser.id)
+            val cred = client.store.load(client.activeUser?.id)
             var refreshToken: String? = null
 
             if (cred != null) {
@@ -455,7 +456,7 @@ protected constructor(
     }
 
     @Throws(IOException::class)
-    open fun onRedirect(newLocation: String?): T? {
+    open fun onRedirect(newLocation: String): T? {
         Logger.ERROR("Override Redirect in response is expected, but not implemented!")
         return null
     }

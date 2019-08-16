@@ -18,8 +18,9 @@ package com.kinvey.android.push;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -37,6 +38,7 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.Logger;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.store.BaseUserStore;
 
 import java.io.IOException;
 import java.util.AbstractMap;

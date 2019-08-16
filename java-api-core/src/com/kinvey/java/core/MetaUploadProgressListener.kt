@@ -35,20 +35,17 @@ abstract class MetaUploadProgressListener : UploaderProgressListener {
     var metadata: FileMetaData? = null
         private set
 
-
     /**
      * Called when metadata has been successfully retrieved from blob, this will occur before the actual file is downloaded.
      *
      * @param meta the metadata object of the file being downloaded.
      */
-    fun metaDataRetrieved(meta: FileMetaData) {
-        //        this.metadata = meta;
+    open fun metaDataRetrieved(meta: FileMetaData?) {
+        // this.metadata = meta;
         val metadata = FileMetaData()
-        metadata.fileName = meta.fileName
-        metadata.id = meta.id
+        metadata.fileName = meta?.fileName
+        metadata.id = meta?.id
         this.metadata = metadata
         Logger.INFO("cache meta: " + metadata.fileName + " and id: " + metadata.id)
     }
-
-
 }

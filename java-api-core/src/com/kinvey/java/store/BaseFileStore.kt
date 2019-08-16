@@ -97,7 +97,7 @@ open class BaseFileStore
         Preconditions.checkNotNull(metadata, "metadata must not be null")
         Preconditions.checkNotNull(listener, "listener must not be null")
 
-        metadata!!.fileSize = file.length()
+        metadata.fileSize = file.length()
 
         val fileMetadataWithPath = FileMetadataWithPath()
         fileMetadataWithPath.putAll(metadata)
@@ -110,7 +110,7 @@ open class BaseFileStore
                 FileContent(fileMetadataWithPath.mimetype, file), listener)
         upload.uploader?.let { setUploader(it) }
 
-        when (storeType!!.writePolicy) {
+        when (storeType?.writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 saveCacheFile(FileInputStream(file), fileMetadataWithPath)
                 metadata = fileMetadataWithPath
@@ -123,7 +123,7 @@ open class BaseFileStore
                     e.printStackTrace()
                 }
 
-                fileMetadataWithPath.putAll(metadata!!)
+                fileMetadataWithPath.putAll(metadata)
                 saveCacheFile(FileInputStream(file), fileMetadataWithPath)
             }
         }
@@ -147,7 +147,7 @@ open class BaseFileStore
         Preconditions.checkNotNull(listener, "listener must not be null")
 
         val fileMetadataWithPath = FileMetadataWithPath()
-        fileMetadataWithPath.putAll(metadata!!)
+        fileMetadataWithPath.putAll(metadata)
 
         if (fileMetadataWithPath.id == null) {
             fileMetadataWithPath.id = UUID.randomUUID().toString()
@@ -156,7 +156,7 @@ open class BaseFileStore
         val upload = networkFileManager.prepUploadBlocking(fileMetadataWithPath, InputStreamContent(null, `is`), listener)
         upload.uploader?.let { setUploader(it) }
 
-        when (storeType!!.writePolicy) {
+        when (storeType?.writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 saveCacheFile(`is`, fileMetadataWithPath)
                 metadata = fileMetadataWithPath
@@ -170,11 +170,10 @@ open class BaseFileStore
                     e.printStackTrace()
                 }
 
-                fileMetadataWithPath.putAll(metadata!!)
+                fileMetadataWithPath.putAll(metadata)
                 cache.save(fileMetadataWithPath)
             }
         }
-
         return metadata
     }
 
@@ -210,16 +209,16 @@ open class BaseFileStore
     fun remove(metadata: FileMetaData): Int? {
         Preconditions.checkNotNull(metadata.id, "metadata must not be null")
         return metadata.id?.let {
-            when (storeType!!.writePolicy) {
+            when (storeType?.writePolicy) {
                 WritePolicy.FORCE_LOCAL -> {
                     cache.delete(it)
                     return 1
                 }
                 WritePolicy.LOCAL_THEN_NETWORK -> {
                     cache.delete(it)
-                    return networkFileManager.deleteBlocking(it).execute()!!.count
+                    return networkFileManager.deleteBlocking(it).execute()?.count
                 }
-                WritePolicy.FORCE_NETWORK -> return networkFileManager.deleteBlocking(it).execute()!!.count
+                WritePolicy.FORCE_NETWORK -> return networkFileManager.deleteBlocking(it).execute()?.count
                 else -> return 0
             }
         }
@@ -239,7 +238,7 @@ open class BaseFileStore
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         val download = networkFileManager.prepDownloadBlocking(q)
         var metaData: Array<FileMetaData>? = null
-        when (storeType!!.readPolicy) {
+        when (storeType?.readPolicy) {
             ReadPolicy.FORCE_LOCAL -> metaData = getFileMetaDataFromCache(q)
             ReadPolicy.BOTH -> {
                 cachedCallback?.onSuccess(getFileMetaDataFromCache(q))
@@ -366,24 +365,24 @@ open class BaseFileStore
             resultMetadata = metadata.id?.let { find(it, null) }
         }
         sendMetadata(resultMetadata, progressListener)
-        return getFile(resultMetadata, os, storeType!!.readPolicy, progressListener, cachedOs, cachedCallback)
+        return getFile(resultMetadata, os, storeType?.readPolicy, progressListener, cachedOs, cachedCallback)
     }
 
     fun cancelDownloading(): Boolean {
-        if (downloader != null) {
-            downloader!!.cancel()
-            return true
+        return if (downloader != null) {
+            downloader?.cancel()
+            true
         } else {
-            return false
+            false
         }
     }
 
     fun cancelUploading(): Boolean {
-        if (this.uploader != null) {
-            this.uploader!!.cancel()
-            return true
+        return if (this.uploader != null) {
+            this.uploader?.cancel()
+            true
         } else {
-            return false
+            false
         }
     }
 
@@ -426,11 +425,11 @@ open class BaseFileStore
     private fun getCachedFile(metadata: FileMetaData?): File? {
         Preconditions.checkNotNull(metadata, "metadata must not be null")
         var ret: File? = null
-        if (metadata!!.containsKey(CACHE_FILE_PATH)) {
-            val cacheFilePath = metadata[CACHE_FILE_PATH]!!.toString()
+        if (metadata?.containsKey(CACHE_FILE_PATH) == true) {
+            val cacheFilePath = metadata[CACHE_FILE_PATH].toString()
             ret = File(cacheFilePath)
         }
-        if (ret == null && metadata.containsKey("_id") && metadata.id != null) {
+        if (ret == null && metadata?.containsKey("_id") == true && metadata.id != null) {
             ret = File(cacheStorage(), metadata.id)
         }
         return if (ret == null || !ret.exists()) null else ret
@@ -439,7 +438,7 @@ open class BaseFileStore
     @Throws(IOException::class)
     private fun getFile(metadata: FileMetaData?,
                         os: OutputStream,
-                        readPolicy: ReadPolicy,
+                        readPolicy: ReadPolicy?,
                         listener: DownloaderProgressListener,
                         cachedOs: OutputStream?,
                         cachedCallback: KinveyCachedClientCallback<FileMetaData>?): FileMetaData? {
@@ -465,14 +464,14 @@ open class BaseFileStore
                         if (cachedOs != null) {
                             FileUtils.copyStreams(FileInputStream(cachedFile), cachedOs)
                         } else {
-                            metadata!!.path = cachedFile.absolutePath
+                            metadata?.path = cachedFile.absolutePath
                         }
                         cachedCallback.onSuccess(metadata)
                     }
                 }
                 val fmd = getNetworkFile(metadata, os, listener)
                 if (fmd != null) {
-                    f = File(cacheStorage(), metadata!!.id)
+                    f = File(cacheStorage(), metadata?.id)
                     if (!f.exists()) {
                         f.createNewFile()
                     }
@@ -490,7 +489,7 @@ open class BaseFileStore
                 try {
                     val fm = getNetworkFile(metadata, os, listener)
                     if (fm != null) {
-                        f = File(cacheStorage(), metadata!!.id)
+                        f = File(cacheStorage(), metadata?.id)
                         if (!f.exists()) {
                             f.createNewFile()
                         }

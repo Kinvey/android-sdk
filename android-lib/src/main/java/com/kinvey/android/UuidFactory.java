@@ -24,11 +24,8 @@ import com.google.gson.Gson;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings.Secure;
-import android.support.v4.content.ContextCompat;
-import android.telephony.TelephonyManager;
 
 /**
  * @see <a href="http://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id">
@@ -89,8 +86,7 @@ class UuidFactory {
                             if (androidId != null && !"9774d56d682e549c".equals(androidId)) {
                                 uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8"));
                             } else {
-                                String deviceId = phoneDeviceId(context);
-                                uuid = deviceId != null ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")) : UUID.randomUUID();
+                                uuid = UUID.randomUUID();
                             }
                         } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
@@ -101,18 +97,6 @@ class UuidFactory {
                 }
             }
         }
-    }
-
-    private String phoneDeviceId(Context context) {
-        String deviceId = "";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                deviceId = ((TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-            }
-        } else {
-            deviceId = ((TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        }
-        return deviceId;
     }
 
     /**

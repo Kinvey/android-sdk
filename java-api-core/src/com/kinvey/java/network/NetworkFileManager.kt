@@ -25,9 +25,7 @@ import com.google.api.client.util.Key
 import com.google.common.base.Preconditions
 import com.google.gson.Gson
 
-import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
 
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.MimeTypeFinder
@@ -38,6 +36,8 @@ import com.kinvey.java.core.MediaHttpUploader
 import com.kinvey.java.core.UploaderProgressListener
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.model.KinveyDeleteResponse
+import com.kinvey.java.model.SaveMode
+import com.kinvey.java.network.NetworkManager.ID_FIELD_NAME
 import com.kinvey.java.query.AbstractQuery
 
 /**
@@ -152,30 +152,24 @@ open class NetworkFileManager
         this.customRequestProperties = GenericJson()
     }
 
+    var fileMetaDataWithUploadUrl: FileMetaData? = null
 
     /**
      * Calculate and set metadata for file upload request according FileMetadata
      * @param metaData
      * @param request
      */
-    private fun setUploadHeader(metaData: FileMetaData?, request: AbstractKinveyJsonClientRequest<*>) {
+    protected fun setUploadHeader(metaData: FileMetaData?, request: AbstractKinveyJsonClientRequest<*>) {
         if (metaData != null) {
             if (metaData.mimetype == null) {
-                if (mimeTypeFinder != null) {
-                    mimeTypeFinder!!.getMimeType(metaData)
-                }
-            }
-            if (metaData.mimetype == null) {
+                mimeTypeFinder?.getMimeType(metaData)
                 metaData.mimetype = "application/octet-stream"
             }
-
             request.getRequestHeaders()["x-Kinvey-content-type"] = metaData.mimetype
-
         } else {
             request.getRequestHeaders()["x-Kinvey-content-type"] = "application/octet-stream"
         }
     }
-
 
     init {
         this.client = Preconditions.checkNotNull(client)
@@ -204,17 +198,15 @@ open class NetworkFileManager
     fun prepUploadBlocking(fileMetaData: FileMetaData, content: AbstractInputStreamContent,
                            uploadProgressListener: UploaderProgressListener): UploadMetadataAndFile {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null")
-        val mode: NetworkManager.SaveMode
-        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
-            mode = NetworkManager.SaveMode.PUT
+        val mode = if (fileMetaData.containsKey(ID_FIELD_NAME)) {
+            SaveMode.PUT
         } else {
-            mode = NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
 
-        val upload = UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener)
+        val upload = UploadMetadataAndFile(this, fileMetaData, mode, content, uploadProgressListener)
 
         client.initializeRequest(upload)
-
         return upload
     }
 
@@ -231,20 +223,17 @@ open class NetworkFileManager
     fun uploadBlocking(fileMetaData: FileMetaData, content: AbstractInputStreamContent,
                        uploadProgressListener: UploaderProgressListener): UploadMetadataAndFile {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null")
-        val mode: NetworkManager.SaveMode
-        if (fileMetaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
-            mode = NetworkManager.SaveMode.PUT
+        val mode = if (fileMetaData.containsKey(ID_FIELD_NAME)) {
+            SaveMode.PUT
         } else {
-            mode = NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
 
-        val upload = UploadMetadataAndFile(fileMetaData, mode, content, uploadProgressListener)
+        val upload = UploadMetadataAndFile(this, fileMetaData, mode, content, uploadProgressListener)
 
         client.initializeRequest(upload)
-
         return upload
     }
-
 
     /**
      * Prepares a request to upload a given file and its contents to the Kinvey file service.
@@ -294,7 +283,7 @@ open class NetworkFileManager
      */
     @Throws(IOException::class)
     fun prepDownloadBlocking(metaData: FileMetaData): DownloadMetadataAndFile {
-        val download = DownloadMetadataAndFile(metaData, downloaderProgressListener)
+        val download = DownloadMetadataAndFile(this, metaData, downloaderProgressListener)
         client.initializeRequest(download)
         return download
     }
@@ -311,7 +300,7 @@ open class NetworkFileManager
     @Deprecated("use the download methods which take an `Outputstream` or a `NetworkFileManager`")
     @Throws(IOException::class)
     fun downloadBlocking(metaData: FileMetaData): DownloadMetadataAndFile {
-        val download = DownloadMetadataAndFile(metaData, downloaderProgressListener)
+        val download = DownloadMetadataAndFile(this, metaData, downloaderProgressListener)
         client.initializeRequest(download)
         return download
     }
@@ -328,7 +317,6 @@ open class NetworkFileManager
         val download = DownloadMetadataQuery(this, null, q)
         client.initializeRequest(download)
         return download
-
     }
 
     /**
@@ -344,7 +332,6 @@ open class NetworkFileManager
         val download = DownloadMetadataQuery(this, null, q)
         client.initializeRequest(download)
         return download
-
     }
 
     /**
@@ -371,11 +358,9 @@ open class NetworkFileManager
     </pre> */
     @Throws(IOException::class)
     fun prepDownloadBlocking(id: String, q: Query): DownloadMetadataQuery {
-
         val download = DownloadMetadataQuery(this, id, q)
         client.initializeRequest(download)
         return download
-
     }
 
     /**
@@ -403,11 +388,9 @@ open class NetworkFileManager
     @Deprecated("use the download methods which take an `Outputstream` or a `NetworkFileManager`")
     @Throws(IOException::class)
     fun downloadBlocking(id: String, q: Query): DownloadMetadataQuery {
-
         val download = DownloadMetadataQuery(this, id, q)
         client.initializeRequest(download)
         return download
-
     }
 
     /**
@@ -480,7 +463,6 @@ open class NetworkFileManager
         client.initializeRequest(download)
         download.getRequestHeaders()["x-Kinvey-content-type"] = "application/octet-stream"
         return download
-
     }
 
     /**
@@ -502,7 +484,6 @@ open class NetworkFileManager
         client.initializeRequest(download)
         download.getRequestHeaders()["x-Kinvey-content-type"] = "application/octet-stream"
         return download
-
     }
 
 
@@ -547,7 +528,6 @@ open class NetworkFileManager
         return delete
     }
 
-
     /**
      * Uploads metadata for a file, without modifying the file iteself.
      *
@@ -557,17 +537,15 @@ open class NetworkFileManager
      */
     @Throws(IOException::class)
     fun uploadMetaDataBlocking(metaData: FileMetaData): UploadMetadata {
-        val mode: NetworkManager.SaveMode
-        if (metaData.containsKey(NetworkManager.ID_FIELD_NAME)) {
-            mode = NetworkManager.SaveMode.PUT
+        val mode = if (metaData.containsKey(ID_FIELD_NAME)) {
+            SaveMode.PUT
         } else {
-            mode = NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
-        val upload = UploadMetadata(metaData, mode)
+        val upload = UploadMetadata(this, metaData, mode)
         client.initializeRequest(upload)
         return upload
     }
-
 
     /**
      * Downloads metadata for a file, without returning the file iteself.
@@ -578,11 +556,10 @@ open class NetworkFileManager
      */
     @Throws(IOException::class)
     fun downloadMetaDataBlocking(id: String): DownloadMetadata {
-        val download = DownloadMetadata(id)
+        val download = DownloadMetadata(this, id)
         client.initializeRequest(download)
         return download
     }
-
 
     /**
      * @param uploadProgressListener the listener to receive notifications as the upload progresses
@@ -598,15 +575,13 @@ open class NetworkFileManager
         this.downloaderProgressListener = downloaderProgressListener
     }
 
-    open class MetadataRequest protected constructor(client: AbstractClient<*>,
-                                                           httpMethod: String, jsonContent: GenericJson?, responseClass: Class<FileMetaData>) : AbstractKinveyJsonClientRequest<FileMetaData>(client, httpMethod, REST_URL, jsonContent, responseClass) {
+    open class MetadataRequest (client: AbstractClient<*>,
+            httpMethod: String, jsonContent: GenericJson?, responseClass: Class<FileMetaData>) :
+            AbstractKinveyJsonClientRequest<FileMetaData>(client, httpMethod, REST_URL, jsonContent, responseClass) {
         companion object {
-
             private val REST_URL = "blob/{appKey}/{id}?tls=true"
         }
-
     }
-
 
     //----------------------------------------------------Client Requests
 
@@ -615,8 +590,9 @@ open class NetworkFileManager
      *
      *
      */
-    inner class UploadMetadataAndFile internal constructor(meta: FileMetaData, verb: NetworkManager.SaveMode, mediaContent: AbstractInputStreamContent, progressListener: UploaderProgressListener) : MetadataRequest(client, verb.toString(), meta, FileMetaData::class.java) {
-
+    class UploadMetadataAndFile (private val networkFileManager: NetworkFileManager, val meta: FileMetaData, val mode: SaveMode,
+                                 mediaContent: AbstractInputStreamContent, progressListener: UploaderProgressListener):
+            MetadataRequest(networkFileManager.client, mode.toString(), meta, FileMetaData::class.java) {
 
         @Key
         private var id: String? = null
@@ -626,21 +602,20 @@ open class NetworkFileManager
 
         init {
             initializeMediaHttpUploader(mediaContent, progressListener)
-            if (verb == NetworkManager.SaveMode.PUT) {
+            if (mode == SaveMode.PUT) {
                 this.id = Preconditions.checkNotNull(meta.id)
             }
-            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = this@NetworkFileManager.clientAppVersion
-            if (this@NetworkFileManager.customRequestProperties != null && !this@NetworkFileManager.customRequestProperties!!.isEmpty()) {
-                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkFileManager.customRequestProperties)
+            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
+            if (networkFileManager.customRequestProperties?.isEmpty() == false) {
+                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkFileManager.customRequestProperties)
             }
-
-            setUploadHeader(meta, this)
-            uploader!!.fileMetaDataForUploading = meta
+            networkFileManager.setUploadHeader(meta, this)
+            uploader?.fileMetaDataForUploading = meta
         }
 
         @Throws(IOException::class)
         override fun execute(): FileMetaData? {
-            return uploader!!.upload(this)
+            return uploader?.upload(this)
         }
 
         /**
@@ -651,10 +626,10 @@ open class NetworkFileManager
          * Optional `null` can be passed in.
          */
         protected fun initializeMediaHttpUploader(content: AbstractInputStreamContent, progressListener: UploaderProgressListener) {
-            val requestFactory = client.requestFactory
+            val requestFactory = networkFileManager.client.requestFactory
             uploader = createMediaHttpUploader(content, requestFactory)
-            uploader!!.isDirectUploadEnabled = false
-            uploader!!.progressListener = progressListener
+            uploader?.setDirectUploadEnabled(false)
+            uploader?.setProgressListener(progressListener)
         }
 
         /**
@@ -667,7 +642,6 @@ open class NetworkFileManager
         protected fun createMediaHttpUploader(content: AbstractInputStreamContent, requestFactory: HttpRequestFactory): MediaHttpUploader {
             return MediaHttpUploader(content, requestFactory.transport, requestFactory.initializer)
         }
-
     }
 
     /**
@@ -675,20 +649,21 @@ open class NetworkFileManager
      *
      * Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
-    inner class UploadMetadata internal constructor(meta: FileMetaData, verb: NetworkManager.SaveMode) : MetadataRequest(client, verb.toString(), meta, FileMetaData::class.java) {
+    class UploadMetadata (private val networkFileManager: NetworkFileManager, meta: FileMetaData, val mode: SaveMode):
+            MetadataRequest(networkFileManager.client, mode.toString(), meta, FileMetaData::class.java) {
 
         @Key
         private var id: String? = null
 
         init {
-            if (verb == NetworkManager.SaveMode.PUT) {
+            if (mode == SaveMode.PUT) {
                 this.id = Preconditions.checkNotNull(meta.id)
             }
-            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = this@NetworkFileManager.clientAppVersion
-            if (this@NetworkFileManager.customRequestProperties != null && !this@NetworkFileManager.customRequestProperties!!.isEmpty()) {
-                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkFileManager.customRequestProperties)
+            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
+            if (networkFileManager.customRequestProperties?.isEmpty() == false) {
+                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkFileManager.customRequestProperties)
             }
-            setUploadHeader(meta, this)
+            networkFileManager.setUploadHeader(meta, this)
         }
     }
 
@@ -697,44 +672,42 @@ open class NetworkFileManager
      *
      * Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
-    inner class DownloadMetadata internal constructor(@field:Key
-                                                     private val id: String) : MetadataRequest(client, "GET", null, FileMetaData::class.java) {
-
+    class DownloadMetadata(private val networkFileManager: NetworkFileManager, @Key private val id: String) :
+            MetadataRequest(networkFileManager.client, "GET", null, FileMetaData::class.java) {
         init {
-            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = this@NetworkFileManager.clientAppVersion
-            if (this@NetworkFileManager.customRequestProperties != null && !this@NetworkFileManager.customRequestProperties!!.isEmpty()) {
-                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkFileManager.customRequestProperties)
+            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
+            if (networkFileManager.customRequestProperties?.isEmpty() == false) {
+                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkFileManager.customRequestProperties)
             }
         }
-
     }
-
 
     /**
      * This class gets a [FileMetaData] object from Kinvey, and then downloads the associated NetworkFileManager
      */
-    inner class DownloadMetadataAndFile internal constructor(meta: FileMetaData, progressListener: DownloaderProgressListener?) : MetadataRequest(client, "GET", null, FileMetaData::class.java) {
+    class DownloadMetadataAndFile(private val networkFileManager: NetworkFileManager, meta: FileMetaData, progressListener: DownloaderProgressListener?) :
+        MetadataRequest(networkFileManager.client, "GET", null, FileMetaData::class.java) {
 
         @Key
         private val id: String?
 
-
         init {
             this.id = Preconditions.checkNotNull(meta.id)
-            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = this@NetworkFileManager.clientAppVersion
-            if (this@NetworkFileManager.customRequestProperties != null && !this@NetworkFileManager.customRequestProperties!!.isEmpty()) {
-                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkFileManager.customRequestProperties)
+            this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
+            if (networkFileManager.customRequestProperties?.isEmpty() == false) {
+                this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkFileManager.customRequestProperties)
             }
-            setUploadHeader(meta, this)
+            networkFileManager.setUploadHeader(meta, this)
         }
-
     }
 
     /**
      * This class gets a [FileMetaData] object from Kinvey, and then downloads the associated NetworkFileManager
      */
-    class DownloadMetadataQuery internal constructor(private val networkFileManager: NetworkFileManager, @field:Key("id")
-                                                          private val id: String?, query: Query) : AbstractKinveyJsonClientRequest<Array<FileMetaData>>(networkFileManager.client, "GET", REST_URL, null, Array<FileMetaData>::class.java) {
+    class DownloadMetadataQuery (private val networkFileManager: NetworkFileManager,
+                                 @Key private val id: String?, query: Query):
+            AbstractKinveyJsonClientRequest<Array<FileMetaData>>(networkFileManager.client, "GET",
+            REST_URL, null, Array<FileMetaData>::class.java) {
 
         @Key("query")
         private val queryFilter: String?
@@ -745,29 +718,26 @@ open class NetworkFileManager
         @Key("skip")
         private val skip: String?
 
-
         init {
             this.queryFilter = query.getQueryFilterJson(networkFileManager.client.jsonFactory)
             val queryLimit = query.limit
             val querySkip = query.skip
-            this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
-            this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
+            this.limit = if (queryLimit > 0) queryLimit.toString() else null
+            this.skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query.sortString
             this.sortFilter = if (sortString != "") sortString else null
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
-            if (customRequestProperties != null && !customRequestProperties!!.isEmpty()) {
+            if (customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
             }
             getRequestHeaders()["x-Kinvey-content-type"] = "application/octet-stream"
         }
 
         companion object {
-
             //private final static String REST_URL = "blob/{appKey}/{id}" + "?query={query}";
             private val REST_URL = "blob/{appKey}/{id}" + "{?query,sort,limit,skip}"
         }
     }
-
 
     class DeleteFile : AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
 
@@ -778,11 +748,13 @@ open class NetworkFileManager
         //        @Key("query")
         //        private String queryFilter;
 
-        constructor(networkFileManager: NetworkFileManager, metaData: FileMetaData) : super(networkFileManager.client, "DELETE", REST_URL, null, KinveyDeleteResponse::class.java) {
+        constructor(networkFileManager: NetworkFileManager, metaData: FileMetaData) : super(networkFileManager.client,
+                "DELETE", REST_URL, null, KinveyDeleteResponse::class.java) {
+
             this.networkFileManager = networkFileManager
             this.id = Preconditions.checkNotNull(metaData.id, "cannot remove a file without an _id!")
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
-            if (customRequestProperties != null && !customRequestProperties!!.isEmpty()) {
+            if (customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
             }
             networkFileManager.setUploadHeader(metaData, this)
@@ -795,23 +767,18 @@ open class NetworkFileManager
         //
         //        }
 
-        constructor(networkFileManager: NetworkFileManager, id: String) : super(networkFileManager.client, "DELETE", REST_URL, null, KinveyDeleteResponse::class.java) {
+        constructor(networkFileManager: NetworkFileManager, id: String) : super(networkFileManager.client, "DELETE",
+                REST_URL, null, KinveyDeleteResponse::class.java) {
             this.networkFileManager = networkFileManager
             this.id = Preconditions.checkNotNull(id)
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
-            if (customRequestProperties != null && !customRequestProperties!!.isEmpty()) {
+            if (customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
             }
-
-
         }
 
         companion object {
-
             private val REST_URL = "blob/{appKey}/{id}"// + "{?query}";
         }
-
     }
-
-
 }
