@@ -27,15 +27,15 @@ public class ACLTest extends KinveyMockUnitTest {
         assertEquals("today", kmd.getLastModifiedTime());
     }
 
-//    public void testACLFields(){
-//        acl = new KinveyMetaData.AccessControlList();
-//        acl.setGloballyReadable(true);
-//        assertTrue(acl.isGloballyReadable());
-//        acl.setGloballyWritable(true);
-//        assertTrue(acl.isGloballyReadable());
-//        acl.setCreator("creator");
-//        assertEquals("creator", acl.getCreator());
-//
+    public void testACLFields(){
+        acl = new KinveyMetaData.AccessControlList();
+        acl.setGloballyReadable(true);
+        assertTrue(acl.isGloballyReadable());
+        acl.setGloballyWritable(true);
+        assertTrue(acl.isGloballyReadable());
+        acl.setCreator("creator");
+        assertEquals("creator", acl.getCreator());
+
 //        ArrayList<String> readers = new ArrayList<String>();
 //        readers.add("reader");
 //        acl.setRead(readers);
@@ -47,20 +47,20 @@ public class ACLTest extends KinveyMockUnitTest {
 //        acl.setWrite(writers);
 //        assertEquals(1, acl.getWrite().size());
 //        assertEquals("writer", acl.getWrite().get(0));
+    }
+
+//    public void testACLGroup(){
+//        acl = new KinveyMetaData.AccessControlList();
+//        KinveyMetaData.AccessControlList.AclGroups gr = new KinveyMetaData.AccessControlList.AclGroups();
+//        gr.setRead("read");
+//        gr.setWrite("write");
+//
+//        ArrayList groups = new ArrayList();
+//        groups.add(gr);
+//
+//        acl.setGroups(groups);
+//        assertEquals("read", acl.getGroups().get(0).getRead());
+//        assertEquals("write", acl.getGroups().get(0).getWrite());
+//
 //    }
-
-/*    public void testACLGroup(){
-        acl = new KinveyMetaData.AccessControlList();
-        KinveyMetaData.AccessControlList.AclGroups gr = new KinveyMetaData.AccessControlList.AclGroups();
-        gr.setRead("read");
-        gr.setWrite("write");
-
-        ArrayList groups = new ArrayList();
-        groups.add(gr);
-
-        acl.setGroups(groups);
-        assertEquals("read", acl.getGroups().get(0).getRead());
-        assertEquals("write", acl.getGroups().get(0).getWrite());
-
-    }*/
 }

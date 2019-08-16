@@ -49,6 +49,11 @@ import io.realm.RealmList;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
 
+import static com.kinvey.java.model.KinveyMetaData.AccessControlList.GR;
+import static com.kinvey.java.model.KinveyMetaData.AccessControlList.GW;
+import static com.kinvey.java.model.KinveyMetaData.AccessControlList.R;
+import static com.kinvey.java.model.KinveyMetaData.AccessControlList.W;
+
 /**
  * Created by Prots on 1/27/16.
  */
@@ -635,7 +640,6 @@ public abstract class ClassHash {
                         DynamicRealmObject dynamicRealmObject = null;
                         for (Object o : (Collection) collection) {
                             dynamicRealmObject = realm.createObject(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + fieldInfo.getName(), realm), UUID.randomUUID().toString());
-
                             for (Class c : ALLOWED) {
                                 if (underlying.equals(c)) {
 
@@ -789,9 +793,13 @@ public abstract class ClassHash {
             ClassInfo classInfo = ClassInfo.of(objectClass);
             FieldInfo info;
             Object o;
-            for (String field : dynamic.getFieldNames()){
+            for (String field : dynamic.getFieldNames()) {
 
                 info = classInfo.getFieldInfo(field);
+
+                if (isAclPermissionField(field) && dynamic.isNull(field)) {
+                    continue;
+                }
 
                 o = dynamic.get(field);
                 if (info == null){
@@ -882,6 +890,15 @@ public abstract class ClassHash {
         return ret;
     }
 
+    private static boolean isAclPermissionField(String field) {
+        switch(field) {
+            case GW:
+            case GR:
+            case R:
+            case W: return true;
+            default: return false;
+        }
+    }
 
     public boolean isAllowed(FieldInfo f){
         boolean allowed = false;

@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.kinvey.java.Constants._ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -1976,5 +1977,57 @@ public class DataStoreMultiInsertTest {
         // find() using networkstore, should return the valid items
         // find using syncstore, should return all items including the invalid one
         testSyncItemsList(true, StoreType.AUTO);
+    }
+
+    private <T extends GenericJson> DefaultKinveyReadCallback find(final DataStore<T> store, final Query query, int seconds) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyReadCallback callback = new DefaultKinveyReadCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.find(query, callback);
+            }
+        });
+        looperThread.start();
+        latch.await();
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private <T extends GenericJson> DefaultKinveyDeleteCallback delete(final DataStore<T> store, final List<String> ids) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
+        LooperThread looperThread = new LooperThread(new Runnable() {
+            @Override
+            public void run() {
+                store.delete(ids, callback);
+            }
+        });
+        looperThread.start();
+        latch.await(120, TimeUnit.SECONDS);
+        looperThread.mHandler.sendMessage(new Message());
+        return callback;
+    }
+
+    private <T extends GenericJson> void clearBackend1(DataStore<T> store) throws InterruptedException {
+        Query query = client.query();
+        query = query.notEqual("age", "100500");
+        //DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        DefaultKinveyReadCallback findCallback = find(store, query, 120);
+        assertNotNull(findCallback.result);
+        List<String> ids = new ArrayList<String>();
+        for (Object obj : findCallback.result.getResult()) {
+            if (obj instanceof GenericJson) {
+                ids.add((String) ((GenericJson) obj).get(_ID));
+            }
+        }
+        DefaultKinveyDeleteCallback deleteCallback = delete(store, ids);
+        assertEquals(ids.size(), deleteCallback.result.longValue());
+    }
+
+    @Test
+    public <T extends GenericJson> void testClearBackend() throws InterruptedException {
+        DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.NETWORK, client);
+        clearBackend1(store);
     }
 }
