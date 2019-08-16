@@ -609,7 +609,6 @@ open class NetworkFileManager
             if (networkFileManager.customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkFileManager.customRequestProperties)
             }
-
             networkFileManager.setUploadHeader(meta, this)
             uploader?.fileMetaDataForUploading = meta
         }
