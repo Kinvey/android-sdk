@@ -64,7 +64,7 @@ class UserStoreRequestManager<T : BaseUser> {
     private val myClazz: Class<T>
     private lateinit var user: T
     private val clientAppVersion: String?
-    private val customRequestProperties: GenericData
+    private val customRequestProperties: GenericData?
     private val authToken: String? = null
 
     /**
