@@ -928,7 +928,7 @@ constructor (mediaContent: AbstractInputStreamContent,
     /**
      * Returns the HTTP content of the media to be uploaded.
      */
-    //fun getMediaContent(): HttpContent = mediaContent
+    fun getMediaContent(): HttpContent = mediaContent
 
     /**
      * Sets whether the back off policy is enabled or disabled. If value is set to `false` then
