@@ -65,7 +65,7 @@ jacoco {
 dokka {
     outputFormat = 'javadoc'
     jdkVersion = 8
-    outputDirectory = file("../../../devcenter/content/reference/android-v3.0/api/java")
+    outputDirectory = file("../../devcenter/content/reference/android-v3.0/api/java")
     sourceDirs = files('src')
 }
 

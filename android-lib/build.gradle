@@ -11,7 +11,7 @@ description = 'AndroidLib'
 
 android {
   compileSdkVersion 29
-  buildToolsVersion "29.0.1"
+  buildToolsVersion "29.0.2"
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -20,6 +20,12 @@ android {
 
   dexOptions {
     javaMaxHeapSize "4g"
+  }
+
+  sourceSets {
+    androidTest {
+      java.srcDirs += [ 'src/androidTest/java' ]
+    }
   }
 
   defaultConfig {
@@ -53,7 +59,6 @@ android {
   }
 
   lintOptions {
-    disable 'DuplicatePlatformClasses','GradleCompatible', 'ProtectedPermissions'
     abortOnError true
   }
 
@@ -65,18 +70,22 @@ android {
   dokka {
     outputFormat = 'javadoc'
     jdkVersion = 8
-    outputDirectory = file("../../../devcenter/content/reference/android-v3.0/api/android-lib")
+    outputDirectory = file("../../devcenter/content/reference/android-v3.0/api/android-lib")
     sourceDirs = files('src/main')
   }
 }
 
 configurations {
   compile.exclude module: 'guava-jdk5'
+  all {
+    exclude module: 'httpclient'
+  }
 }
 
 buildscript {
   ext.kotlin_version = '1.3.41'
   ext.androidx_version = '1.2.0'
+  ext.google_http_client_version = '1.29.2'
   repositories {
     mavenCentral()
     jcenter()
@@ -104,17 +113,17 @@ dependencies {
     exclude(module: 'google-play-services')
     exclude(module: 'xpp3')
   }
-  implementation('com.google.http-client:google-http-client-android:1.19.0') {
+  implementation(group: 'com.google.http-client', name: 'google-http-client-android', version: google_http_client_version) {
     exclude(module: 'xpp3')
     exclude(module: 'httpclient')
     exclude(module: 'junit')
     exclude(module: 'android')
     exclude(module: 'guava-jdk5')
   }
-  implementation('com.google.http-client:google-http-client-gson:1.19.0') {
+  implementation(group: 'com.google.http-client', name: 'google-http-client-gson', version: google_http_client_version) {
     exclude(module: 'xpp3')
   }
-  implementation('com.google.http-client:google-http-client-jackson:1.19.0') {
+  implementation(group: 'com.google.http-client', name: 'google-http-client-jackson', version: google_http_client_version) {
     exclude(module: 'xpp3')
   }
   implementation 'com.google.guava:guava:24.1-jre'
@@ -129,20 +138,15 @@ dependencies {
   androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
   androidTestImplementation group: 'androidx.test', name: 'runner', version: androidx_version
   androidTestImplementation group: 'androidx.test', name: 'rules', version: androidx_version
-  androidTestImplementation group: 'androidx.test.ext', name: 'junit', version: '1.1.2-alpha02'
 
   // Unit Testing
   testImplementation 'io.reactivex:rxjava:1.1.0'
   testImplementation 'junit:junit:4.12'
-  testImplementation "org.mockito:mockito-core:2.28.2"
-  testImplementation "org.powermock:powermock-module-junit4:1.6.5"
-  testImplementation "org.powermock:powermock-module-junit4-rule:1.6.5"
-  testImplementation "org.powermock:powermock-api-mockito:1.6.5"
-  testImplementation "org.powermock:powermock-classloading-xstream:1.6.5"
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
 
   // Optional -- Hamcrest library
   androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
-  implementation 'org.codehaus.jackson:jackson-core-asl:1.9.12'
+  implementation group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
   implementation 'io.reactivex:rxjava:1.1.0'
   implementation 'com.google.code.gson:gson:2.8.5'
 

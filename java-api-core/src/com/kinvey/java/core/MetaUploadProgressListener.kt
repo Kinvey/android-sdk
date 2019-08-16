@@ -41,7 +41,7 @@ abstract class MetaUploadProgressListener : UploaderProgressListener {
      * @param meta the metadata object of the file being downloaded.
      */
     open fun metaDataRetrieved(meta: FileMetaData?) {
-        //        this.metadata = meta;
+        // this.metadata = meta;
         val metadata = FileMetaData()
         metadata.fileName = meta?.fileName
         metadata.id = meta?.id

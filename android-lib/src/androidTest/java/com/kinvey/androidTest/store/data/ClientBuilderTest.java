@@ -2,7 +2,7 @@ package com.kinvey.androidTest.store.data;
 
 import android.content.Context;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.api.client.testing.http.MockHttpTransport;

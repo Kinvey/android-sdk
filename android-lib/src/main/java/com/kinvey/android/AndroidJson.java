@@ -53,14 +53,13 @@ public class AndroidJson {
      */
     public static JsonFactory newCompatibleJsonFactory(JSONPARSER parser) {
         switch (parser){
-            case GSON:
-                return (Build.VERSION.SDK_INT >= HONEYCOMB) ? new AndroidJsonFactory() : new GsonFactory();
             case JACKSON:
                 return new JacksonFactory();
             case RAW:
                 return new RawJsonFactory();
+            case GSON:
             default:
-                return (Build.VERSION.SDK_INT >= HONEYCOMB) ? new AndroidJsonFactory() : new GsonFactory();
+                return new AndroidJsonFactory();
         }
 
     }

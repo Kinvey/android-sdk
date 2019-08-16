@@ -13,33 +13,18 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
 
-import com.kinvey.android.model.User;
-import com.kinvey.java.core.KinveyClientCallback;
+package com.kinvey.java.store.requests.user
+
+import com.google.api.client.json.GenericJson
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest
+import com.kinvey.java.store.UserStoreRequestManager
 
 /**
- * This callback is typed for an array of {@link User} objects, use it for bulk operations on the User collection..
- *
- * @author edwardf
- * @since 2.0
+ * Created by Prots on 2/12/16.
  */
-public interface KinveyUserListCallback extends KinveyClientCallback<User[]> {
-
-    /**
-     * Method invoked after a successful request against a set of Users
-     *
-     * @param result - the modified users
-     */
-    @Override
-    public void onSuccess(User[] result);
-
-    /**
-     * Method invoked after a failed request against a set of Users
-     *
-     * @param error - details about the error
-     */
-    @Override
-    public void onFailure(Throwable error);
-
+class LockDownUser(private val userStoreRequestManager: UserStoreRequestManager<*>, lock: GenericJson) : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "POST", REST_PATH, lock, Void::class.java) {
+    companion object {
+        private val REST_PATH = "rpc/{appKey}/lockdown-user"
+    }
 }

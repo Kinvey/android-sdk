@@ -1,6 +1,6 @@
 package com.kinvey.androidTest.store.datastore
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client

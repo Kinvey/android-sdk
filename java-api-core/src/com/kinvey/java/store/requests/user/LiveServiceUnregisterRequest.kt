@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -14,24 +14,18 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.store.requests.user
 
-import com.kinvey.java.AbstractClient;
+import com.google.api.client.util.Key
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest
+import com.kinvey.java.dto.DeviceId
 
-/**
- * Logout Request Class for soft logout.  Constructs the HTTP request object for soft logout
- * requests. For internal SDK use only.
- */
 
-public final class LogoutSoftRequest {
+class LiveServiceUnregisterRequest(client: AbstractClient<*>, @field:Key
+private val userID: String, deviceId: DeviceId) : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, deviceId, Void::class.java) {
+    companion object {
 
-    private AbstractClient client;
-
-    public LogoutSoftRequest(AbstractClient client) {
-        this.client = client;
-    }
-
-    public void execute() {
-        client.setActiveUser(null);
+        private val REST_PATH = "user/{appKey}/{userID}/unregister-realtime"
     }
 }
