@@ -36,6 +36,7 @@ import com.kinvey.java.core.MediaHttpUploader
 import com.kinvey.java.core.UploaderProgressListener
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.model.KinveyDeleteResponse
+import com.kinvey.java.model.SaveMode
 import com.kinvey.java.network.NetworkManager.ID_FIELD_NAME
 import com.kinvey.java.query.AbstractQuery
 
@@ -204,9 +205,9 @@ open class NetworkFileManager
                            uploadProgressListener: UploaderProgressListener): UploadMetadataAndFile {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null")
         val mode = if (fileMetaData.containsKey(ID_FIELD_NAME)) {
-            NetworkManager.SaveMode.PUT
+            SaveMode.PUT
         } else {
-            NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
 
         val upload = UploadMetadataAndFile(this, fileMetaData, mode, content, uploadProgressListener)
@@ -230,9 +231,9 @@ open class NetworkFileManager
                        uploadProgressListener: UploaderProgressListener): UploadMetadataAndFile {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null")
         val mode = if (fileMetaData.containsKey(ID_FIELD_NAME)) {
-            NetworkManager.SaveMode.PUT
+            SaveMode.PUT
         } else {
-            NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
 
         val upload = UploadMetadataAndFile(this, fileMetaData, mode, content, uploadProgressListener)
@@ -555,9 +556,9 @@ open class NetworkFileManager
     @Throws(IOException::class)
     fun uploadMetaDataBlocking(metaData: FileMetaData): UploadMetadata {
         val mode = if (metaData.containsKey(ID_FIELD_NAME)) {
-            NetworkManager.SaveMode.PUT
+            SaveMode.PUT
         } else {
-            NetworkManager.SaveMode.POST
+            SaveMode.POST
         }
         val upload = UploadMetadata(this, metaData, mode)
         client.initializeRequest(upload)
@@ -610,7 +611,7 @@ open class NetworkFileManager
      *
      *
      */
-    class UploadMetadataAndFile (private val networkFileManager: NetworkFileManager, val meta: FileMetaData, val mode: NetworkManager.SaveMode,
+    class UploadMetadataAndFile (private val networkFileManager: NetworkFileManager, val meta: FileMetaData, val mode: SaveMode,
                                  mediaContent: AbstractInputStreamContent, progressListener: UploaderProgressListener):
             MetadataRequest(networkFileManager.client, mode.toString(), meta, FileMetaData::class.java) {
 
@@ -622,7 +623,7 @@ open class NetworkFileManager
 
         init {
             initializeMediaHttpUploader(mediaContent, progressListener)
-            if (mode == NetworkManager.SaveMode.PUT) {
+            if (mode == SaveMode.PUT) {
                 this.id = Preconditions.checkNotNull(meta.id)
             }
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
@@ -670,14 +671,14 @@ open class NetworkFileManager
      *
      * Note it is not recommended to change the filename without ensuring a file exists with the new name.
      */
-    class UploadMetadata (private val networkFileManager: NetworkFileManager, meta: FileMetaData, val mode: NetworkManager.SaveMode):
+    class UploadMetadata (private val networkFileManager: NetworkFileManager, meta: FileMetaData, val mode: SaveMode):
             MetadataRequest(networkFileManager.client, mode.toString(), meta, FileMetaData::class.java) {
 
         @Key
         private var id: String? = null
 
         init {
-            if (mode == NetworkManager.SaveMode.PUT) {
+            if (mode == SaveMode.PUT) {
                 this.id = Preconditions.checkNotNull(meta.id)
             }
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
