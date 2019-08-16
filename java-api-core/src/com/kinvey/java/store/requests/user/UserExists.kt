@@ -14,24 +14,21 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.store.requests.user
 
-import com.google.api.client.util.Key;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.dto.DeviceId;
-import com.kinvey.java.dto.LiveServiceRegisterResponse;
+import com.google.api.client.json.GenericJson
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest
+import com.kinvey.java.dto.UserNameExists
 
 
-public final class LiveServiceRegisterRequest extends AbstractKinveyJsonClientRequest<LiveServiceRegisterResponse> {
+class UserExists(client: AbstractClient<*>, username: GenericJson) : AbstractKinveyJsonClientRequest<UserNameExists>(client, "POST", REST_PATH, username, UserNameExists::class.java) {
 
-    private static final String REST_PATH = "user/{appKey}/{userID}/register-realtime";
+    init {
+        this.isRequireAppCredentials = true
+    }
 
-    @Key
-    private String userID;
-
-    public LiveServiceRegisterRequest(AbstractClient client, String userId, DeviceId deviceId) {
-        super(client, "POST", REST_PATH, deviceId, LiveServiceRegisterResponse.class);
-        this.userID = userId;
+    companion object {
+        private val REST_PATH = "rpc/{appKey}/check-username-exists"
     }
 }

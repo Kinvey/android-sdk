@@ -5,7 +5,7 @@ import android.os.Message;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.kinvey.android.Client;

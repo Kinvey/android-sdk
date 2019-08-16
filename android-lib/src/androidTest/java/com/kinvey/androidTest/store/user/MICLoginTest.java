@@ -4,7 +4,7 @@ package com.kinvey.androidTest.store.user;
 import android.content.Context;
 import android.os.Looper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 

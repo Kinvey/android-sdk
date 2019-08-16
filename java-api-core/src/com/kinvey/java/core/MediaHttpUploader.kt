@@ -477,6 +477,7 @@ constructor (mediaContent: AbstractInputStreamContent,
 
         var response: HttpResponse? = null
         var statusCode: Int
+
         while (!isCancelled) {
             currentRequest = requestFactory.buildPutRequest(uploadUrl, null)
             currentRequest?.suppressUserAgentSuffix = true
@@ -915,7 +916,7 @@ constructor (mediaContent: AbstractInputStreamContent,
     /**
      * Returns HTTP content metadata for the media request or `null` for none.
      */
-    //fun getMetadata(): HttpContent? = metadata
+    fun getMetadata(): HttpContent? = metadata
 
     /**
      * Sets HTTP content metadata for the media request or `null` for none.

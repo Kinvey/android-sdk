@@ -50,6 +50,7 @@ import com.kinvey.java.auth.CredentialManager;
 import com.kinvey.java.auth.CredentialStore;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.kinvey.java.dto.BaseUser;
 import com.kinvey.java.network.NetworkFileManager;
 import com.kinvey.java.store.BaseUserStore;
 import com.kinvey.java.store.StoreType;

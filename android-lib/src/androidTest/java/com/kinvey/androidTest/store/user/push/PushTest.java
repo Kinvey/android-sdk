@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Message;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
