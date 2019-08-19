@@ -30,18 +30,17 @@ import com.google.api.client.util.Key
  *
  * After configuring the lookup set it using [com.kinvey.java.UserDiscovery.lookupBlocking]
  */
-class UserLookup : GenericJson() {
-
+data class UserLookup(
     @Key("_id")
-    var id: String? = null
+    var id: String? = null,
     @Key
-    var username: String? = null
+    var username: String? = null,
     @Key("first_name")
-    var firstName: String? = null
+    var firstName: String? = null,
     @Key("last_name")
-    var lastName: String? = null
+    var lastName: String? = null,
     @Key
-    var email: String? = null
+    var email: String? = null,
     @Key("_socialIdentity.facebook.id")
     var facebookID: String? = null
-}
+) : GenericJson()
