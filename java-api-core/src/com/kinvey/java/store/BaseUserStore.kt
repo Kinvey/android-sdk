@@ -105,7 +105,7 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> login(credential: Credential, client: AbstractClient<T>): T {
+    fun <T : BaseUser> login(credential: Credential, client: AbstractClient<T>?): T {
         return UserStoreRequestManager(client, createBuilder(client)).login(credential).execute()
     }
 
@@ -117,7 +117,7 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> logout(client: AbstractClient<T>) {
+    fun <T : BaseUser> logout(client: AbstractClient<T>?) {
         UserStoreRequestManager(client, createBuilder(client)).logout().execute()
     }
 
@@ -141,7 +141,7 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> convenience(client: AbstractClient<T>): T {
+    fun <T : BaseUser> convenience(client: AbstractClient<T>?): T {
         return UserStoreRequestManager(client, createBuilder(client)).retrieveMetadataBlocking()
     }
 
@@ -243,12 +243,14 @@ object BaseUserStore {
         }
     }
 
-    private fun <T : BaseUser> createBuilder(client: AbstractClient<T>): KinveyAuthRequest.Builder<T> {
-        val appKey = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
-        val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
-
-        return KinveyAuthRequest.Builder(client.requestFactory.transport,
-                client.jsonFactory, client.baseUrl, appKey, appSecret, null)
+    private fun <T : BaseUser> createBuilder(client: AbstractClient<T>?): KinveyAuthRequest.Builder<T>? {
+        client?.let { c ->
+            val appKey = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+            val appSecret = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
+            return KinveyAuthRequest.Builder(c.requestFactory.transport,
+                    c.jsonFactory, c.baseUrl, appKey, appSecret, null)
+        }
+        return null
     }
 
 }
