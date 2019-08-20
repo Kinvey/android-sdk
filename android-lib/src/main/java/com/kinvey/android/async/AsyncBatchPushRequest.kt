@@ -130,7 +130,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
                         manager.deleteCachedItem(syncItem[_ID] as String?)
                     }
                 } catch (e: IOException) {
-                    val err = KinveyUpdateSingleItemError(e, item)
+                    val err = KinveyUpdateSingleItemError(e, item as GenericJson)
                     errors.add(err)
                 } catch (e: Exception) {
                     callback.onFailure(e)

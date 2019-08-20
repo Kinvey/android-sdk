@@ -5,20 +5,15 @@ import com.google.api.client.util.Key
 
 import java.io.IOException
 
-class KinveyUpdateSingleItemError(e: Exception, entity: GenericJson) : IOException() {
+class KinveyUpdateSingleItemError(e: Exception, entity: GenericJson?) : IOException() {
 
     @Key
-    var entity: GenericJson? = null
+    var entity: GenericJson? = entity
         private set
     @Key
     var code: Long = 0
     @Key
-    var errorMessage: String? = null
-
-    init {
-        this.entity = entity
-        this.errorMessage = e.message
-    }
+    var errorMessage: String? = e.message
 
     fun setIndex(entity: GenericJson) {
         this.entity = entity

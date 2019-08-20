@@ -76,7 +76,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
-        assertTrue(results[0].result.intValue() == 2);
+        assertTrue(results[0].getResult().intValue() == 2);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
-        assertTrue(results[0].result.intValue() == 1);
+        assertTrue(results[0].getResult().intValue() == 1);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
-        assertTrue(results[0].result.intValue() == 1);
+        assertTrue(results[0].getResult().intValue() == 1);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.COUNT, fields, null, query);
 
-        assertTrue(results[0].result.intValue() == 1);
+        assertTrue(results[0].getResult().intValue() == 1);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.MIN, fields, "height", query);
 
-        assertTrue(results[0].result.intValue() == 170);
+        assertTrue(results[0].getResult().intValue() == 170);
     }
 
     @Test
@@ -216,7 +216,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.MAX, fields, "height", query);
 
-        assertTrue(results[0].result.intValue() == 180);
+        assertTrue(results[0].getResult().intValue() == 180);
     }
 
     @Test
@@ -244,7 +244,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.AVERAGE, fields, "height", query);
 
-        assertTrue(results[0].result.intValue() == 175);
+        assertTrue(results[0].getResult().intValue() == 175);
     }
 
     @Test
@@ -272,7 +272,7 @@ public class CacheAggregationTest {
         fields.add("username");
         Aggregation.Result[] results = cache.group(AggregateType.SUM, fields, "height", query);
 
-        assertTrue(results[0].result.intValue() == 350);
+        assertTrue(results[0].getResult().intValue() == 350);
     }
 
     @Test
@@ -305,22 +305,22 @@ public class CacheAggregationTest {
 
         fields.add("carNumber");
         Aggregation.Result[] results = cache.group(AggregateType.SUM, fields, "height", query);
-        assertTrue(results[0].result.intValue() == 360);
+        assertTrue(results[0].getResult().intValue() == 360);
 
         fields.clear();
         fields.add("isUseAndroid");
         results = cache.group(AggregateType.SUM, fields, "height", query);
-        assertTrue(results[0].result.intValue() == 360);
+        assertTrue(results[0].getResult().intValue() == 360);
 
         fields.clear();
         fields.add("height");
         results = cache.group(AggregateType.SUM, fields, "height", query);
-        assertTrue(results[0].result.intValue() == 360);
+        assertTrue(results[0].getResult().intValue() == 360);
 
         fields.clear();
         fields.add("time");
         results = cache.group(AggregateType.SUM, fields, "height", query);
-        assertTrue(results[0].result.intValue() == 360);
+        assertTrue(results[0].getResult().intValue() == 360);
 
 
 //commented out because of MLIBZ-2643

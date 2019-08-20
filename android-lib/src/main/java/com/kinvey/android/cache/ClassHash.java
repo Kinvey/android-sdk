@@ -206,15 +206,15 @@ public abstract class ClassHash {
     public static RealmObjectSchema createScheme(String name, DynamicRealm realm, Class<? extends GenericJson> clazz){
         RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
         String shortName = TableNameManager.getShortName(name, realm);
-        if (!schema.hasField(KinveyMetaData.Companion.getKMD()) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD()) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(), realm, KinveyMetaData.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
-            schema.addRealmObjectField(KinveyMetaData.Companion.getKMD(), innerScheme);
+        if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm, KinveyMetaData.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
+            schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
-        if (!schema.hasField(KinveyMetaData.AccessControlList.Companion.getACL())
-                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())
-                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
-            schema.addRealmObjectField(KinveyMetaData.AccessControlList.Companion.getACL(), innerScheme);
+        if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
+                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)){
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
+            schema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
         }
         if (!schema.hasField(TTL)){
             schema.addField(TTL, Long.class);
@@ -267,38 +267,38 @@ public abstract class ClassHash {
         }
 
         // remove unnecessary tables ..._acl_kmd
-        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL() + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())) {
-            RealmObjectSchema objectSchema = schema.get(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL());
-            objectSchema.removeField(KinveyMetaData.Companion.getKMD());
-            schema.remove(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL() + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD());
+        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
+            RealmObjectSchema objectSchema = schema.get(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL);
+            objectSchema.removeField(KinveyMetaData.KMD);
+            schema.remove(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD);
         }
 
         // rename _kmd table
-        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())) {
-            schema.rename(oldName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(),
-                    TableNameManager.createShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(), realm));
+        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
+            schema.rename(oldName + Constants.UNDERSCORE + KinveyMetaData.KMD,
+                    TableNameManager.createShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm));
         }
 
         // rename or create _acl table
-        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())) {
-            schema.rename(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(),
-                    TableNameManager.createShortName(TableNameManager.getShortName(oldName, realm) + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm));
+        if (schema.contains(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)) {
+            schema.rename(oldName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
+                    TableNameManager.createShortName(TableNameManager.getShortName(oldName, realm) + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm));
         } else {
             RealmObjectSchema objectSchema = schema.get(shortName);
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>()); // TODO: 24.11.2017 check
-            objectSchema.addRealmObjectField(KinveyMetaData.AccessControlList.Companion.getACL(), innerScheme);
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm, KinveyMetaData.AccessControlList.class, SelfReferenceState.DEFAULT, new ArrayList<String>()); // TODO: 24.11.2017 check
+            objectSchema.addRealmObjectField(KinveyMetaData.AccessControlList.ACL, innerScheme);
             //get table
             List<DynamicRealmObject> results = realm.where(shortName).findAll();
             //add "_acl" field to each item
             for (DynamicRealmObject realmObject : results) {
                 KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
                 acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(),
+                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,
                         acl, SelfReferenceState.DEFAULT,
                         new ArrayList<String>());
-                realmObject.setObject(KinveyMetaData.AccessControlList.Companion.getACL(), innerObject);
+                realmObject.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
             }
         }
 
@@ -312,10 +312,10 @@ public abstract class ClassHash {
      */
     static void checkAclKmdFields(String name, DynamicRealm realm, Class<? extends GenericJson> clazz) {
         RealmSchema schema = realm.getSchema();
-        if (schema.contains(name + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL() + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())) {
-            RealmObjectSchema objectSchema = schema.get(TableNameManager.getShortName(TableNameManager.getShortName(name, realm) + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm));
-            objectSchema.removeField(KinveyMetaData.Companion.getKMD());
-            schema.remove(name + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL() + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD());
+        if (schema.contains(name + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
+            RealmObjectSchema objectSchema = schema.get(TableNameManager.getShortName(TableNameManager.getShortName(name, realm) + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm));
+            objectSchema.removeField(KinveyMetaData.KMD);
+            schema.remove(name + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD);
         }
         fillNewAclFields(name, false, realm, clazz);
     }
@@ -348,19 +348,19 @@ public abstract class ClassHash {
         }
         if (isFill) {
             // fill _acl table
-            if (schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm))) {
+            if (schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm))) {
                 List<DynamicRealmObject> results = realm.where(shortName).findAll();
                 //add "_acl" field to each item
                 for (DynamicRealmObject realmObject : results) {
                     if (realmObject.get("_acl") == null) {
                         KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
                         acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-                        DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(),
+                        DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                                 realm,
                                 KinveyMetaData.AccessControlList.class,
                                 acl, SelfReferenceState.DEFAULT,
                                 new ArrayList<String>());
-                        realmObject.setObject(KinveyMetaData.AccessControlList.Companion.getACL(), innerObject);
+                        realmObject.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
                     }
                 }
             }
@@ -476,34 +476,34 @@ public abstract class ClassHash {
         DynamicRealmObject realmObject = saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, new ArrayList<String>());
         String shortName = TableNameManager.getShortName(name, realm);
 
-        if (!obj.containsKey(KinveyMetaData.Companion.getKMD()) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD()) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())){
+        if (!obj.containsKey(KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)){
             KinveyMetaData metadata = new KinveyMetaData();
-            metadata.set(KinveyMetaData.Companion.getLMT(), String.format(Locale.US, Constants.TIME_FORMAT,
+            metadata.set(KinveyMetaData.LMT, String.format(Locale.US, Constants.TIME_FORMAT,
                     Calendar.getInstance(TimeZone.getTimeZone(Constants.Z))));
-            metadata.set(KinveyMetaData.Companion.getECT(), String.format(Locale.US, Constants.TIME_FORMAT,
+            metadata.set(KinveyMetaData.ECT, String.format(Locale.US, Constants.TIME_FORMAT,
                     Calendar.getInstance(TimeZone.getTimeZone(Constants.Z))));
 
-            DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(),
+            DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD,
                     realm,
                     KinveyMetaData.class,
                     metadata,
                     SelfReferenceState.DEFAULT,
                     new ArrayList<String>());
-            realmObject.setObject(KinveyMetaData.Companion.getKMD(), innerObject);
+            realmObject.setObject(KinveyMetaData.KMD, innerObject);
         }
 
-        if (!obj.containsKey(KinveyMetaData.AccessControlList.Companion.getACL())
-                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())
-                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm))){
+        if (!obj.containsKey(KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)
+                && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm))){
             KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
             acl.set("creator", Client.sharedInstance().getActiveUser().getId());
-            DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(),
+            DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                     realm,
                     KinveyMetaData.AccessControlList.class,
                     acl, SelfReferenceState.DEFAULT,
                     new ArrayList<String>());
-            realmObject.setObject(KinveyMetaData.AccessControlList.Companion.getACL(), innerObject);
+            realmObject.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
         }
         //set dynamic fields
         if (realmObject.get(TTL) != obj.get(TTL)){
@@ -535,44 +535,44 @@ public abstract class ClassHash {
         if (object == null){
             object = realm.createObject(shortName, obj.get(ID));
         } else {
-            if (object.hasField(KinveyMetaData.Companion.getKMD())
-                    && object.getObject(KinveyMetaData.Companion.getKMD()) != null) {
-                kmdId = object.getObject(KinveyMetaData.Companion.getKMD()).getString(ID);
+            if (object.hasField(KinveyMetaData.KMD)
+                    && object.getObject(KinveyMetaData.KMD) != null) {
+                kmdId = object.getObject(KinveyMetaData.KMD).getString(ID);
             }
-            if (object.hasField(KinveyMetaData.AccessControlList.Companion.getACL())
-                    && object.getObject(KinveyMetaData.AccessControlList.Companion.getACL()) != null) {
-                aclId = object.getObject(KinveyMetaData.AccessControlList.Companion.getACL()).getString(ID);
+            if (object.hasField(KinveyMetaData.AccessControlList.ACL)
+                    && object.getObject(KinveyMetaData.AccessControlList.ACL) != null) {
+                aclId = object.getObject(KinveyMetaData.AccessControlList.ACL).getString(ID);
             }
         }
 
-        if (obj.containsKey(KinveyMetaData.Companion.getKMD())
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(), realm))){
-            Map kmd = (Map)obj.get(KinveyMetaData.Companion.getKMD());
+        if (obj.containsKey(KinveyMetaData.KMD)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm))){
+            Map kmd = (Map)obj.get(KinveyMetaData.KMD);
             if (kmd != null) {
-                KinveyMetaData metadata = KinveyMetaData.Companion.fromMap(kmd);
+                KinveyMetaData metadata = KinveyMetaData.fromMap(kmd);
                 metadata.set(ID, kmdId);
-                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(),
+                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD,
                         realm,
                         KinveyMetaData.class,
                         metadata,
                         selfReferenceState,
                         new ArrayList<String>());
-                object.setObject(KinveyMetaData.Companion.getKMD(), innerObject);
+                object.setObject(KinveyMetaData.KMD, innerObject);
             }
         }
 
-        if (obj.containsKey(KinveyMetaData.AccessControlList.Companion.getACL())
-                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm))){
-            Map acl = (Map)obj.get(KinveyMetaData.AccessControlList.Companion.getACL());
+        if (obj.containsKey(KinveyMetaData.AccessControlList.ACL)
+                && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm))){
+            Map acl = (Map)obj.get(KinveyMetaData.AccessControlList.ACL);
             if (acl != null) {
-                KinveyMetaData.AccessControlList accessControlList = KinveyMetaData.AccessControlList.Companion.fromMap(acl);
+                KinveyMetaData.AccessControlList accessControlList = KinveyMetaData.AccessControlList.fromMap(acl);
                 accessControlList.set(ID, aclId);
-                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(),
+                DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,
                         accessControlList,
                         selfReferenceState, new ArrayList<String>());
-                object.setObject(KinveyMetaData.AccessControlList.Companion.getACL(), innerObject);
+                object.setObject(KinveyMetaData.AccessControlList.ACL, innerObject);
             }
         }
         SelfReferenceState state;
@@ -759,21 +759,21 @@ public abstract class ClassHash {
                 }
             }
         }
-        if (realmObject.hasField(KinveyMetaData.AccessControlList.Companion.getACL())
-                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())
-                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())
-                && realmObject.getObject(KinveyMetaData.AccessControlList.Companion.getACL()) != null
-                && realmObject.getObject(KinveyMetaData.AccessControlList.Companion.getACL()).hasField(ID)) {
-            deleteClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL(), realm,
-                    KinveyMetaData.AccessControlList.class, realmObject.getObject(KinveyMetaData.AccessControlList.Companion.getACL()).getString(ID));
+        if (realmObject.hasField(KinveyMetaData.AccessControlList.ACL)
+                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
+                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)
+                && realmObject.getObject(KinveyMetaData.AccessControlList.ACL) != null
+                && realmObject.getObject(KinveyMetaData.AccessControlList.ACL).hasField(ID)) {
+            deleteClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm,
+                    KinveyMetaData.AccessControlList.class, realmObject.getObject(KinveyMetaData.AccessControlList.ACL).getString(ID));
         }
-        if (realmObject.hasField(KinveyMetaData.Companion.getKMD())
-                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())
-                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL())
-                && realmObject.getObject(KinveyMetaData.Companion.getKMD()) != null
-                && realmObject.getObject(KinveyMetaData.Companion.getKMD()).hasField(ID)) {
-            deleteClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(), realm,
-                    KinveyMetaData.class, realmObject.getObject(KinveyMetaData.Companion.getKMD()).getString(ID));
+        if (realmObject.hasField(KinveyMetaData.KMD)
+                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
+                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)
+                && realmObject.getObject(KinveyMetaData.KMD) != null
+                && realmObject.getObject(KinveyMetaData.KMD).hasField(ID)) {
+            deleteClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm,
+                    KinveyMetaData.class, realmObject.getObject(KinveyMetaData.KMD).getString(ID));
         }
         realmObject.deleteFromRealm();
         return size;
@@ -879,8 +879,8 @@ public abstract class ClassHash {
                 }
 
             }
-            if (!isEmbedded && !ret.containsKey(KinveyMetaData.Companion.getKMD()) && dynamic.hasField(KinveyMetaData.Companion.getKMD())){
-                ret.put(KinveyMetaData.Companion.getKMD(), realmToObject(dynamic.getObject(KinveyMetaData.Companion.getKMD()), KinveyMetaData.class, true));
+            if (!isEmbedded && !ret.containsKey(KinveyMetaData.KMD) && dynamic.hasField(KinveyMetaData.KMD)){
+                ret.put(KinveyMetaData.KMD, realmToObject(dynamic.getObject(KinveyMetaData.KMD), KinveyMetaData.class, true));
             }
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -892,10 +892,10 @@ public abstract class ClassHash {
 
     private static boolean isAclPermissionField(String field) {
         switch(field) {
-            case Companion.getGW():
-            case Companion.getGR():
-            case Companion.getR():
-            case Companion.getW(): return true;
+            case GW:
+            case GR:
+            case R:
+            case W: return true;
             default: return false;
         }
     }

@@ -20,7 +20,7 @@ import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 
 import com.kinvey.java.Constants.AUTH_TOKEN
-import com.kinvey.java.model.KinveyMetaData.KMD
+import com.kinvey.java.model.KinveyMetaData.Companion.KMD
 
 /**
  * Created by Prots on 2/12/16.

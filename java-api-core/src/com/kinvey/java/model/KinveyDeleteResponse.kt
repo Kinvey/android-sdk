@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -14,18 +14,21 @@
  *
  */
 
-package com.kinvey.java.model;
+package com.kinvey.java.model
 
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
-public abstract class AbstractKinveyHeadersResponse {
-
-    private String lastRequestTime;
-
-    public String getLastRequestTime() {
-        return lastRequestTime;
-    }
-
-    public void setLastRequestTime(String lastRequestTime) {
-        this.lastRequestTime = lastRequestTime;
-    }
-}
+/**
+ * Used in request to client to delete appdata.
+ *
+ * @author edwardf
+ * @since 2.0
+ */
+data class KinveyDeleteResponse(
+    /**
+     * The number of objects successfully deleted.
+     */
+    @Key
+    var count: Int = 0
+) : GenericJson()

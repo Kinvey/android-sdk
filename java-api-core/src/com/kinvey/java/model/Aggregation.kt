@@ -14,13 +14,10 @@
  *
  */
 
-package com.kinvey.java.model;
+package com.kinvey.java.model
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
 /**
  * This class wraps the response of an Aggregation Request.
@@ -29,16 +26,9 @@ import java.util.List;
  *
  * @author edwardf
  */
-public class Aggregation {
+class Aggregation(var res: List<Result>?) {
 
-    public List<Result> results;
-
-    public Aggregation(List<Result> res){
-        if (res == null){
-            res = new ArrayList<>();
-        }
-        this.results = res;
-    }
+    var results: List<Result> = res ?: mutableListOf()
 
     /**
      * Return a list of result values from the aggregation
@@ -47,28 +37,22 @@ public class Aggregation {
      * @param value the value of the key to search for
      * @return a list of numbers containing the results for the provided key/value
      */
-    public ArrayList<Number> getResultsFor(String key, String value){
-        ArrayList<Number> ret = new ArrayList<Number>();
-        for (Result a : results){
-            if (a.containsKey(key)){
-                if (a.get(key).toString().equals(value)){
-                    ret.add(a.result);
-                }
-            }
+    fun getResultsFor(key: String, value: String): List<Number> {
+        return results.filter { item ->
+            item.containsKey(key) && item[key].toString() == value
+        }.map { item ->
+            val num = item.result ?: 0
+            num
         }
-        return ret;
     }
-
-
+    
     /**
      * This class represents an individual result of an Aggregation request.
      *
      */
-    public static class Result extends GenericJson{
+    class Result : GenericJson() {
         @Key("_result")
-        public Number result;
-
-        public Result(){}
+        var result: Number? = null
     }
 
 

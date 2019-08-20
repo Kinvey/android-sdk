@@ -144,6 +144,7 @@ open class KinveyMetaData : GenericJson() {
             //            }
             //        }
 
+            @JvmStatic
             fun fromMap(acl: Map<*, *>?): AccessControlList {
                 val accessControlList = AccessControlList()
                 if (acl != null) {
@@ -191,12 +192,12 @@ open class KinveyMetaData : GenericJson() {
     }
 
     companion object {
-
         const val KMD = "_kmd"
         const val LMT = "lmt"
         const val META = "_meta"
         const val ECT = "ect"
 
+        @JvmStatic
         fun fromMap(kmd: Map<String, Any>?): KinveyMetaData {
             val metaData = KinveyMetaData()
             if (kmd != null) {

@@ -136,7 +136,7 @@ public class RealmCacheManager implements ICacheManager {
                         // check and remove unnecessary tables like ..._acl_kmd
                         mRealm.beginTransaction();
                         RealmSchema schema = mRealm.getSchema();
-                        if (schema.contains(collection + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL() + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD())) {
+                        if (schema.contains(collection + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
                             cache.checkAclKmdFields(mRealm);
                         }
                         mRealm.commitTransaction();
@@ -144,7 +144,7 @@ public class RealmCacheManager implements ICacheManager {
 
                     mRealm.beginTransaction();
                     // Check that ACL and KMD fields don't exist in embedded objects (like sync_meta_kmd)
-                    boolean isRemoveMetadata = mRealm.getSchema().contains(TableNameManager.getShortName(TableNameManager.getShortName(TableNameManager.getShortName(SYNC_COLLECTION, mRealm) + KinveyMetaData.Companion.getMETA(), mRealm) + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD(), mRealm));
+                    boolean isRemoveMetadata = mRealm.getSchema().contains(TableNameManager.getShortName(TableNameManager.getShortName(TableNameManager.getShortName(SYNC_COLLECTION, mRealm) + KinveyMetaData.META, mRealm) + Constants.UNDERSCORE + KinveyMetaData.KMD, mRealm));
                     mRealm.commitTransaction();
                     if (isRemoveMetadata) {
                         mRealm.beginTransaction();
@@ -228,11 +228,11 @@ public class RealmCacheManager implements ICacheManager {
                     if (originalName == null) {
                         continue;
                     }
-                    if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.Companion.getKMD()))) {
-                        schema.removeField(KinveyMetaData.Companion.getKMD());
+                    if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.KMD))) {
+                        schema.removeField(KinveyMetaData.KMD);
                         schemasToDelete.add(subClassSchema.getClassName());
-                    } else if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.Companion.getACL()))) {
-                        schema.removeField(KinveyMetaData.AccessControlList.Companion.getACL());
+                    } else if (isEmbedded && (originalName.equals(className + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL))) {
+                        schema.removeField(KinveyMetaData.AccessControlList.ACL);
                         schemasToDelete.add(subClassSchema.getClassName());
                     } else if (originalName.startsWith(className + Constants.UNDERSCORE)) {
                         schemasToDelete.addAll(prepareToRemoveMetadataSchemasFromEmbeddedObjects(originalName, realm, true));

@@ -87,7 +87,7 @@ class SaveListBatchRequest<T : GenericJson>(
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
 
         val updateResponse = updateObjects(updateList)
-        saveEntities.addAll(updateResponse.entities)
+        saveEntities.addAll(updateResponse.entities as Collection<T>)
 
         if (saveList?.isNotEmpty() == true && saveList is List<T>) {
             postBatchItems(saveList as List<T>, saveEntities, batchSaveErrors)
