@@ -865,13 +865,13 @@ public class BaseDataStore<T extends GenericJson> {
         Aggregation ret = null;
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             try {
-                ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute()));
+                ret = new Aggregation(Arrays.asList(new AggregationRequest(type, (ICache<Aggregation.Result>) cache, ReadPolicy.FORCE_LOCAL, (NetworkManager<Aggregation.Result>) networkManager, fields, field, query).execute()));
             } catch (IOException e) {
                 cachedCallback.onFailure(e);
             }
             cachedCallback.onSuccess(ret);
         }
-        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, this.storeType.getReadPolicy(), networkManager, fields, field, query).execute()));
+        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, (ICache<Aggregation.Result>) cache, this.storeType.getReadPolicy(), (NetworkManager<Aggregation.Result>) networkManager, fields, field, query).execute()));
         return ret;
     }
 

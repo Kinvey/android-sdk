@@ -14,14 +14,29 @@
  *
  */
 
-package com.kinvey.java.store.requests.data;
+package com.kinvey.java.store.requests.data
 
-import java.io.IOException;
+import com.google.api.client.json.GenericJson
+import com.kinvey.java.cache.ICache
+import com.kinvey.java.network.NetworkManager
 
 /**
  * Created by Prots on 2/8/16.
  */
-public interface IRequest<T> {
-    T execute() throws IOException;
-    void cancel();
+abstract class AbstractKinveyDataRequest<T : GenericJson> : IRequest<T> {
+
+    //configuration options for the request.
+    //In strong typed languages, this can be a RequestConfig class that allows the developer to specify timeout, custom headers etc.
+    protected var requestConfig: RequestConfig? = null
+
+    //What collection we are operating on
+    protected var collection: String? = null
+
+    //The cache that backs the collection
+    protected var cache: ICache<T>? = null
+
+    //Network manager
+    protected var networkMgr: NetworkManager<*>? = null
+
+    class RequestConfig
 }
