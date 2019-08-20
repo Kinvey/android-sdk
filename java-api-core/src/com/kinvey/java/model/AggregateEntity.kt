@@ -32,21 +32,19 @@ import com.kinvey.java.core.AbstractKinveyJsonClient
  * @author mjsalinger
  * @since 2.0
  */
-class AggregateEntity(fields: ArrayList<String>, type: AggregateType, aggregateField: String, query: Query?,
-                      client: AbstractKinveyJsonClient) : GenericJson() {
+class AggregateEntity(fields: ArrayList<String>?, type: AggregateType?, aggregateField: String?, query: Query?,
+                      client: AbstractKinveyJsonClient?) : GenericJson() {
     @Key
-    val key: Map<String, Boolean>
+    val key: Map<String, Boolean>?
     @Key
-    val initial: HashMap<String, Any>
+    val initial: HashMap<String, Any>?
     @Key
     var reduce: String? = null
-        private set
     @Key
     var condition: LinkedHashMap<String, Any>? = null
-        private set
 
     init {
-        key = fields.map { str -> str to true }.toMap()
+        key = fields?.map { str -> str to true }?.toMap()
         reduce = ""
         condition = query?.queryFilterMap as LinkedHashMap<String, Any>? ?: LinkedHashMap()
         initial = HashMap()

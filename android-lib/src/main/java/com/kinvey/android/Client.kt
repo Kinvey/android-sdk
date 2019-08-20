@@ -164,7 +164,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         }
     }
 
-    override fun getActiveUser(): T {
+    override fun getActiveUser(): T? {
         synchronized(lock) {
             return this.user
         }
@@ -182,7 +182,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         userCacheManager = RealmCacheManager(encryptionKey, this)
         val extensions = extensions
         for (e in extensions) {
-            e.performLockdown(activeUser.id)
+            e.performLockdown(activeUser?.id)
         }
     }
 
@@ -541,7 +541,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * loading additional properties from file
          * @param properties InputStream of properties file
          */
-        private fun loadProperties(properties: InputStream) {
+        private fun loadProperties(properties: InputStream?) {
 
             try {
                 super.getProps().load(properties)
@@ -656,7 +656,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param transport - custom user http transport
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream, transport: HttpTransport, context: Context) : super(transport, null) {
+        constructor(properties: InputStream?, transport: HttpTransport, context: Context) : super(transport, null) {
 
             Preconditions.checkNotNull(properties, "properties must be not null")
             loadProperties(properties)
@@ -712,7 +712,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param properties - InputStream of properties file
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream, context: Context) : this(properties, newCompatibleTransport(), context) {}
+        constructor(properties: InputStream?, context: Context) : this(properties, newCompatibleTransport(), context) {}
 
         /*
          * (non-Javadoc)

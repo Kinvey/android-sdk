@@ -37,7 +37,7 @@ class Aggregation(var res: List<Result>?) {
      * @param value the value of the key to search for
      * @return a list of numbers containing the results for the provided key/value
      */
-    fun getResultsFor(key: String, value: String): List<Number> {
+    fun getResultsFor(key: String?, value: String?): List<Number> {
         return results.filter { item ->
             item.containsKey(key) && item[key].toString() == value
         }.map { item ->
