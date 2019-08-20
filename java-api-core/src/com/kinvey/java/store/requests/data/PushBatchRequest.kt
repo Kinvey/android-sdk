@@ -52,8 +52,8 @@ class PushBatchRequest<T : GenericJson>(
         val batchSyncItems = ArrayList<SyncItem>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val httpVerb = syncItem.requestMethod
-                val itemId = syncItem.entityID.id
+                val httpVerb = syncItem.getRequestMethod()
+                val itemId = syncItem.entityID?.id ?: ""
                 when (httpVerb) {
                     SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
                     SyncRequest.HttpVerb.POST,

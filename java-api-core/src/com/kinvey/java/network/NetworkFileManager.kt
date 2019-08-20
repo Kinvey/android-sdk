@@ -720,8 +720,8 @@ open class NetworkFileManager
 
         init {
             this.queryFilter = query.getQueryFilterJson(networkFileManager.client.jsonFactory)
-            val queryLimit = query.limit
-            val querySkip = query.skip
+            val queryLimit = query.getLimit()
+            val querySkip = query.getSkip()
             this.limit = if (queryLimit > 0) queryLimit.toString() else null
             this.skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query.sortString

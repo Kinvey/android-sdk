@@ -123,7 +123,7 @@ public class BaseDataStore<T extends GenericJson> {
         this.collection = collection;
         this.storeItemType = itemType;
         if (storeType != StoreType.NETWORK) {
-            cache = client.getCacheManager().getCache(collection, itemType, storeType.ttl);
+            cache = client.getCacheManager().getCache(collection, itemType, storeType.getTtl());
         }
         this.networkManager = networkManager;
         this.deltaSetCachingEnabled = client.isUseDeltaCache();
@@ -154,7 +154,7 @@ public class BaseDataStore<T extends GenericJson> {
             ret = new ReadSingleRequest<>(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute();
             cachedCallback.onSuccess(ret);
         }
-        ret = new ReadSingleRequest<>(cache, id, this.storeType.readPolicy, networkManager).execute();
+        ret = new ReadSingleRequest<>(cache, id, this.storeType.getReadPolicy(), networkManager).execute();
         return ret;
     }
 
@@ -187,14 +187,14 @@ public class BaseDataStore<T extends GenericJson> {
                 Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
                 return findBlockingDeltaSync(query);
             } else {
-                return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+                return new ReadIdsRequest<>(cache, networkManager, this.storeType.getReadPolicy(), ids).execute();
             }
         } else {
             if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
                 Query query = client.query().in("_id", Iterables.toArray(ids, String.class));
                 return findBlockingDeltaSync(query);
             } else {
-                return new ReadIdsRequest<>(cache, networkManager, this.storeType.readPolicy, ids).execute();
+                return new ReadIdsRequest<>(cache, networkManager, this.storeType.getReadPolicy(), ids).execute();
             }
         }
     }
@@ -229,13 +229,13 @@ public class BaseDataStore<T extends GenericJson> {
             if (deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 return findBlockingDeltaSync(query);
             } else {
-                return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+                return new ReadQueryRequest<>(cache, networkManager, this.storeType.getReadPolicy(), query).execute();
             }
         } else {
             if (storeType == StoreType.AUTO && deltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 return findBlockingDeltaSync(query);
             } else {
-                return new ReadQueryRequest<>(cache, networkManager, this.storeType.readPolicy, query).execute();
+                return new ReadQueryRequest<>(cache, networkManager, this.storeType.getReadPolicy(), query).execute();
             }
         }
     }
@@ -268,13 +268,13 @@ public class BaseDataStore<T extends GenericJson> {
             if (deltaSetCachingEnabled) {
                 return findBlockingDeltaSync(client.query());
             } else {
-                return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+                return new ReadAllRequest<>(cache, this.storeType.getReadPolicy(), networkManager).execute();
             }
         } else {
             if (storeType == StoreType.AUTO && deltaSetCachingEnabled) {
                 return findBlockingDeltaSync(client.query());
             } else {
-                return new ReadAllRequest<>(cache, this.storeType.readPolicy, networkManager).execute();
+                return new ReadAllRequest<>(cache, this.storeType.getReadPolicy(), networkManager).execute();
             }
         }
     }
@@ -313,7 +313,7 @@ public class BaseDataStore<T extends GenericJson> {
             Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.getSyncManager()).execute().getCount();
             cachedCallback.onSuccess(ret);
         }
-        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, null, client.getSyncManager()).execute().getCount();
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.getReadPolicy(), null, client.getSyncManager()).execute().getCount();
     }
 
     /**
@@ -330,7 +330,7 @@ public class BaseDataStore<T extends GenericJson> {
             Integer ret = new ReadCountRequest<T>(cache, networkManager, ReadPolicy.FORCE_LOCAL, query, client.getSyncManager()).execute().getCount();
             cachedCallback.onSuccess(ret);
         }
-        return new ReadCountRequest<T>(cache, networkManager, this.storeType.readPolicy, query, client.getSyncManager()).execute().getCount();
+        return new ReadCountRequest<T>(cache, networkManager, this.storeType.getReadPolicy(), query, client.getSyncManager()).execute().getCount();
     }
 
     /**
@@ -368,7 +368,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
         Logger.INFO("Calling BaseDataStore#save(listObjects)");
-        return new SaveListRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
+        return new SaveListRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), objects, client.getSyncManager()).execute();
     }
 
     /**
@@ -383,7 +383,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(objects, "objects must not be null.");
         Logger.INFO("Calling BaseDataStore#save(listObjects)");
-        return new SaveListBatchRequest<T>(cache, networkManager, this.storeType.writePolicy, objects, client.getSyncManager()).execute();
+        return new SaveListBatchRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), objects, client.getSyncManager()).execute();
     }
 
     /**
@@ -398,7 +398,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(object, "object must not be null.");
         Logger.INFO("Calling BaseDataStore#save(object)");
-        return new SaveRequest<T>(cache, networkManager, this.storeType.writePolicy, object, client.getSyncManager()).execute();
+        return new SaveRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), object, client.getSyncManager()).execute();
     }
 
     /**
@@ -437,7 +437,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(id, "id must not be null.");
-        return new DeleteSingleRequest<T>(cache, networkManager, this.storeType.writePolicy, id, client.getSyncManager()).execute();
+        return new DeleteSingleRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), id, client.getSyncManager()).execute();
     }
 
     /**
@@ -451,7 +451,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(query, "query must not be null.");
-        return new DeleteQueryRequest<T>(cache, networkManager, this.storeType.writePolicy, query, client.getSyncManager()).execute();
+        return new DeleteQueryRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), query, client.getSyncManager()).execute();
     }
 
     /**
@@ -465,7 +465,7 @@ public class BaseDataStore<T extends GenericJson> {
         Preconditions.checkNotNull(client, "client must not be null.");
         Preconditions.checkArgument(client.isInitialize(), "client must be initialized.");
         Preconditions.checkNotNull(ids, "ids must not be null.");
-        return new DeleteIdsRequest<T>(cache, networkManager, this.storeType.writePolicy, ids, client.getSyncManager()).execute();
+        return new DeleteIdsRequest<T>(cache, networkManager, this.storeType.getWritePolicy(), ids, client.getSyncManager()).execute();
     }
 
     /**
@@ -871,7 +871,7 @@ public class BaseDataStore<T extends GenericJson> {
             }
             cachedCallback.onSuccess(ret);
         }
-        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()));
+        ret = new Aggregation(Arrays.asList(new AggregationRequest(type, cache, this.storeType.getReadPolicy(), networkManager, fields, field, query).execute()));
         return ret;
     }
 
