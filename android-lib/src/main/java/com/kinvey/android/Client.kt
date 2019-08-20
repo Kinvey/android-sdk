@@ -100,10 +100,10 @@ open class Client<T : User>
  * @param requestPolicy a [BackOffPolicy] for retrying HTTP Requests
  * @param context a [Context] android application context
  */
-protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer, rootUrl: String,
-                      servicePath: String, objectParser: JsonObjectParser,
-                      kinveyRequestInitializer: KinveyClientRequestInitializer, store: CredentialStore,
-                      requestPolicy: BackOffPolicy, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
+protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
+                      servicePath: String?, objectParser: JsonObjectParser?,
+                      kinveyRequestInitializer: KinveyClientRequestInitializer?, store: CredentialStore?,
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
 
     private var syncCacheManager: RealmCacheManager? = null
     private var userCacheManager: RealmCacheManager? = null

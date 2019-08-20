@@ -1885,8 +1885,8 @@ public class UserStoreTest {
         assertEquals(USERNAME, user.getUsername());
         assertEquals(USERNAME, client.getActiveUser().getUsername());
         assertNull(user.getAuthToken()); // check that realm doesn't keep auth_token
-        assertNull(((Map<String, String>) user.get(Companion.getKMD())).get(AUTH_TOKEN)); // check that realm doesn't keep auth_token
-        assertNotNull(((Map<String, String>) client.getActiveUser().get(Companion.getKMD())).get(AUTH_TOKEN)); // check that active user has auth_token
+        assertNull(((Map<String, String>) user.get(KMD)).get(AUTH_TOKEN)); // check that realm doesn't keep auth_token
+        assertNotNull(((Map<String, String>) client.getActiveUser().get(KMD)).get(AUTH_TOKEN)); // check that active user has auth_token
         assertNull(logout(client).error);
     }
 

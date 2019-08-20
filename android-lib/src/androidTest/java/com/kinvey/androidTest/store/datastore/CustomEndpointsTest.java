@@ -132,7 +132,7 @@ public class CustomEndpointsTest {
     */
     @Test
     public void testAsyncCustomEndpoints() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(GenericJson.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(GenericJson.class);
         GenericJson genericJson = new GenericJson();
         final int i = 1;
         genericJson.set(ID, i);
@@ -152,7 +152,7 @@ public class CustomEndpointsTest {
 
     @Test
     public void testAsyncCustomEndpointsNotExist() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(GenericJson.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(GenericJson.class);
         GenericJson genericJson = new GenericJson();
         final int i = 1;
         genericJson.set(ID, i);
@@ -162,7 +162,7 @@ public class CustomEndpointsTest {
 
     @Test
     public void testAsyncCustomEndpointsInputNotExist() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(GenericJson.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(GenericJson.class);
         DefaultKinveyClientCallback<GenericJson> callback = callEndpoint(X2, endpoints, null);
         assertNotNull(callback.result);
     }
@@ -176,7 +176,7 @@ public class CustomEndpointsTest {
      */
     @Test
     public void testCustomEndpointsCustomClass() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(Person.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(Person.class);
         DefaultKinveyClientCallback<Person> callback = callCustomJsonEndpointAsync(GET_PERSON, endpoints, null);
         assertNotNull(callback.result);
         assertTrue(callback.result instanceof Person);
@@ -184,7 +184,7 @@ public class CustomEndpointsTest {
 
     @Test
     public void testCustomEndpointsWrongCustomClass() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(Person[].class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(Person[].class);
         DefaultKinveyClientCallback<Person> callback = callCustomJsonEndpointAsync(GET_PERSON, endpoints, null);
         assertNotNull(callback.error);
     }
@@ -198,7 +198,7 @@ public class CustomEndpointsTest {
      */
     @Test
     public void testCustomEndpointsCustomClassArray() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(Person.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(Person.class);
         DefaultKinveyListCallback<Person> callback = callCustomJsonEndpointListAsync(GET_PERSON_LIST, endpoints, null);
         assertNotNull(callback.result);
         assertTrue(callback.result instanceof List);
@@ -207,14 +207,14 @@ public class CustomEndpointsTest {
 
     @Test
     public void testCustomEndpointsWrongCustomClassArray() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(Person[].class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(Person[].class);
         DefaultKinveyListCallback<Person> callback = callCustomJsonEndpointListAsync(GET_PERSON_LIST, endpoints, null);
         assertNotNull(callback.error);
     }
 
     @Test
     public void testCustomEndpointsCustomClassArrayNotExist() throws IOException, InterruptedException {
-        AsyncCustomEndpoints endpoints = client.customEndpoints(Person.class);
+        AsyncCustomEndpoints endpoints = (AsyncCustomEndpoints) client.customEndpoints(Person.class);
         DefaultKinveyListCallback<Person> callback = callCustomJsonEndpointListAsync(NOT_EXIST_CUSTOM_ENDPOINT, endpoints, null);
         assertNotNull(callback.error);
     }
