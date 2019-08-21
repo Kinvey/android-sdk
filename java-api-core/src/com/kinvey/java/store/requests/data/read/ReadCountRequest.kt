@@ -14,30 +14,27 @@
  *
  */
 
-package com.kinvey.java.store.requests.data
+package com.kinvey.java.store.requests.data.read
 
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
-import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.network.NetworkManager
+import com.kinvey.java.store.ReadPolicy
+import com.kinvey.java.sync.SyncManager
 
-/**
- * Created by Prots on 2/8/16.
- */
-abstract class AbstractKinveyReadRequest<T : GenericJson> : IRequest<KinveyReadResponse<T>> {
+import java.io.IOException
 
-    //configuration options for the request.
-    //In strong typed languages, this can be a RequestConfig class that allows the developer to specify timeout, custom headers etc.
-    protected var requestConfig: RequestConfig? = null
+class ReadCountRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
+                                        private val query: Query?, syncManager: SyncManager)
+    : AbstractReadCountRequest<T>(cache, readPolicy, networkManager, syncManager) {
 
-    //What collection we are operating on
-    protected var collection: String? = null
+    override fun countCached(): Int {
+        return cache.count(query).toInt()
+    }
 
-    //The cache that backs the collection
-    var cache: ICache<T>? = null
-
-    //Network manager
-    protected var networkManager: NetworkManager<T>? = null
-
-    class RequestConfig
+    @Throws(IOException::class)
+    override fun countNetwork(): NetworkManager<T>.GetCount {
+        return if (query != null) networkManager.getCountBlocking(query) else networkManager.countBlocking
+    }
 }

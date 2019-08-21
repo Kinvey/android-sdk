@@ -14,30 +14,31 @@
  *
  */
 
-package com.kinvey.java.store.requests.data
+package com.kinvey.java.store.requests.data.read
 
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.network.NetworkManager
+import com.kinvey.java.store.ReadPolicy
+
+import java.io.IOException
 
 /**
- * Created by Prots on 2/8/16.
+ * Created by Prots on 2/15/16.
  */
-abstract class AbstractKinveyReadRequest<T : GenericJson> : IRequest<KinveyReadResponse<T>> {
+class ReadQueryRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
+                                        private val query: Query) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
-    //configuration options for the request.
-    //In strong typed languages, this can be a RequestConfig class that allows the developer to specify timeout, custom headers etc.
-    protected var requestConfig: RequestConfig? = null
-
-    //What collection we are operating on
-    protected var collection: String? = null
-
-    //The cache that backs the collection
-    var cache: ICache<T>? = null
-
-    //Network manager
-    protected var networkManager: NetworkManager<T>? = null
-
-    class RequestConfig
+    override val cached: KinveyReadResponse<T>?
+        get() {
+            val response = KinveyReadResponse<T>()
+            response.result = cache?.get(query)
+            return response
+        }
+    override val network: KinveyReadResponse<T>?
+        get() {
+            return networkData.getBlocking(query).execute()
+        }
 }
