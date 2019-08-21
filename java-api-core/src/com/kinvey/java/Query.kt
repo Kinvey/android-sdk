@@ -117,7 +117,7 @@ open class Query
      * @param order Order to sort values (Ascending/Descending)
      * @return  Query object
      */
-    override fun addSort(field: String, order: SortOrder): Query {
+    override fun addSort(field: String, order: SortOrder?): Query {
         super.addSort(field, order)
         return this
     }
@@ -307,23 +307,24 @@ open class Query
     /**
      * @return current sort string
      */
-    override fun getSortString(): String {
-        val sortStringBuilder = StringBuilder()
-        if (sort.size > 0) {
-            sortStringBuilder.append("{")
-            for (field in sort.keys) {
-                sortStringBuilder.append("\"")
-                sortStringBuilder.append(field)
-                sortStringBuilder.append("\" : ")
-                sortStringBuilder.append(if (sort[field] == SortOrder.ASC) 1 else -1)
-                sortStringBuilder.append(",")
+    override val sortString: String
+        get() {
+            val sortStringBuilder = StringBuilder()
+            if (sort.size > 0) {
+                sortStringBuilder.append("{")
+                for (field in sort.keys) {
+                    sortStringBuilder.append("\"")
+                    sortStringBuilder.append(field)
+                    sortStringBuilder.append("\" : ")
+                    sortStringBuilder.append(if (sort[field] == SortOrder.ASC) 1 else -1)
+                    sortStringBuilder.append(",")
+                }
+                sortStringBuilder.deleteCharAt(sortStringBuilder.length - 1)
+                sortStringBuilder.append("}")
             }
-            sortStringBuilder.deleteCharAt(sortStringBuilder.length - 1)
-            sortStringBuilder.append("}")
+            return sortStringBuilder.toString()
         }
-        return sortStringBuilder.toString()
-    }
-
+    
     /**
      * Sets the number of records to skip before returning the results (useful for pagination).
      *
