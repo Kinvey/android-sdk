@@ -1284,7 +1284,11 @@ class UserStore {
                 }
 
                 override fun onSuccess(result: User?) {
-                    callback?.onSuccess(result)
+                    if (result == null) {
+                        callback?.onFailure(Throwable ("User result is null"))
+                    } else {
+                        callback?.onSuccess(result)
+                    }
                 }
 
                 override fun onFailure(error: Throwable) {
