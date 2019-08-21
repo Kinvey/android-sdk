@@ -28,9 +28,9 @@ import com.kinvey.java.sync.SyncManager
 
 import java.io.IOException
 
-abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: ICache<T>, private val readPolicy: ReadPolicy,
-                                                         protected var networkManager: NetworkManager<T>,
-                                                         private val syncManager: SyncManager) : IRequest<KinveyCountResponse> {
+abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: ICache<T>?, private val readPolicy: ReadPolicy,
+                                                         protected var networkManager: NetworkManager<T>?,
+                                                         private val syncManager: SyncManager?) : IRequest<KinveyCountResponse> {
 
     @Throws(IOException::class)
     override fun execute(): KinveyCountResponse? {
@@ -46,8 +46,8 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
             ReadPolicy.FORCE_LOCAL -> ret?.count = countCached()
             ReadPolicy.FORCE_NETWORK -> ret = request?.execute()
             ReadPolicy.BOTH -> {
-                val pushRequest = PushRequest(networkManager.collectionName,
-                        cache, networkManager, networkManager.client)
+                val pushRequest = PushRequest(networkManager?.collectionName,
+                        cache, networkManager, networkManager?.client)
                 try {
                     pushRequest.execute()
                 } catch (t: Throwable) {
@@ -56,8 +56,8 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
                 ret = request?.execute()
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
-                val pushAutoRequest = PushRequest(networkManager.collectionName,
-                        cache, networkManager, networkManager.client)
+                val pushAutoRequest = PushRequest(networkManager?.collectionName,
+                        cache, networkManager, networkManager?.client)
                 try {
                     pushAutoRequest.execute()
                 } catch (t: Throwable) {
@@ -86,5 +86,5 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
     protected abstract fun countCached(): Int
 
     @Throws(IOException::class)
-    protected abstract fun countNetwork(): NetworkManager<T>.GetCount
+    protected abstract fun countNetwork(): NetworkManager<T>.GetCount?
 }

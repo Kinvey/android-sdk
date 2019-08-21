@@ -25,16 +25,17 @@ import com.kinvey.java.sync.SyncManager
 
 import java.io.IOException
 
-class ReadCountRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
-                                        private val query: Query?, syncManager: SyncManager)
+class ReadCountRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy,
+                                        private val query: Query?, syncManager: SyncManager?)
     : AbstractReadCountRequest<T>(cache, readPolicy, networkManager, syncManager) {
 
     override fun countCached(): Int {
-        return cache.count(query).toInt()
+        return cache?.count(query)?.toInt() ?: 0
     }
 
     @Throws(IOException::class)
-    override fun countNetwork(): NetworkManager<T>.GetCount {
-        return if (query != null) networkManager.getCountBlocking(query) else networkManager.countBlocking
+    override fun countNetwork(): NetworkManager<T>.GetCount? {
+        return if (query != null) networkManager?.getCountBlocking(query)
+               else networkManager?.countBlocking
     }
 }

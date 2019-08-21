@@ -31,24 +31,21 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-class PushRequest<T : GenericJson>(collectionName: String, cache: ICache<T>,
-                                   private val networkManager: NetworkManager<T>, private val client: AbstractClient<*>) : AbstractKinveyExecuteRequest<T>() {
-    private val syncManager: SyncManager
+class PushRequest<T : GenericJson>(collectionName: String?, cache: ICache<T>?,
+                                   private val networkManager: NetworkManager<T>?, private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
+    private val syncManager: SyncManager?
 
     init {
         this.cache = cache
         this.collection = collectionName
-        this.syncManager = client.syncManager
+        this.syncManager = client?.syncManager
     }
 
     @Throws(IOException::class)
     override fun execute(): Void? {
-        val requests = syncManager.popSingleQueue(collection)
-        for (syncRequest in requests) {
-            syncManager.executeRequest(client, syncRequest)
-        }
-
-        val syncItems = syncManager.popSingleItemQueue(collection)
+        val requests = syncManager?.popSingleQueue(collection)
+        requests?.forEach { syncRequest -> syncManager?.executeRequest(client, syncRequest) }
+        val syncItems = syncManager?.popSingleItemQueue(collection)
         var syncRequest: SyncRequest? = null
 
         if (syncItems != null) {
@@ -62,30 +59,32 @@ class PushRequest<T : GenericJson>(collectionName: String, cache: ICache<T>,
                         val item = cache?.get(itemId)
                         if (item == null) {
                             // check that item wasn't deleted before
-                            syncManager.deleteCachedItems(client.query().equals("meta.id", itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
+                            syncManager?.deleteCachedItems(client?.query()?.equals("meta.id", itemId)?.notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else {
-                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(item))
+                            syncRequest = syncManager?.createSyncRequest(collection, networkManager?.saveBlocking(item))
                         }
                     }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
+                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager?.createSyncRequest(collection, networkManager?.deleteBlocking(itemId))
                 }
                 try {
                     if (httpVerb == SyncRequest.HttpVerb.POST) {
                         val tempID = syncRequest?.entityID?.id ?: ""
-                        val result = syncManager.executeRequest(client, syncRequest)
+                        val result = syncManager?.executeRequest(client, syncRequest)
                         val temp = cache?.get(tempID)
-                        temp?.set(Constants._ID, result[Constants._ID])
+                        var resultId = ""
+                        result?.let {res -> resultId = res[Constants._ID] as String }
+                        temp?.set(Constants._ID, resultId)
                         cache?.delete(tempID)
                         temp?.let { t -> cache?.save(t) }
                     } else {
-                        syncManager.executeRequest(client, syncRequest)
+                        syncManager?.executeRequest(client, syncRequest)
                     }
                 } catch (e: KinveyJsonResponseException) {
                     if (e.statusCode != IGNORED_EXCEPTION_CODE && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) {
                         throw e
                     }
                 }
-                syncManager.deleteCachedItem(syncItem[Constants._ID] as String?)
+                syncManager?.deleteCachedItem(syncItem[Constants._ID] as String?)
             }
         }
         return null

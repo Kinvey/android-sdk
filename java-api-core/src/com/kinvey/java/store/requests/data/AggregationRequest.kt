@@ -19,10 +19,10 @@ import java.util.ArrayList
 
 class AggregationRequest(private val type: AggregateType, private val cache: ICache<Aggregation.Result>?,
                          private val readPolicy: ReadPolicy?, private val networkManager: NetworkManager<Aggregation.Result>?,
-                         private val fields: ArrayList<String>, private val reduceField: String, private val query: Query) : IRequest<Array<Aggregation.Result>> {
+                         private val fields: ArrayList<String>, private val reduceField: String?, private val query: Query) : IRequest<Array<Aggregation.Result>> {
 
     protected val cached: Array<Aggregation.Result>?
-        get() = cache?.group(type, fields, reduceField, query)
+        get() = cache?.group(type, fields, reduceField ?: "", query)
 
     protected val network: Array<Aggregation.Result>?
         @Throws(IOException::class)

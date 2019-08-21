@@ -28,8 +28,8 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-abstract class AbstractReadRequest<T : GenericJson>(cache: ICache<T>, private val readPolicy: ReadPolicy,
-                                                    protected val networkData: NetworkManager<T>) : AbstractKinveyReadRequest<T>() {
+abstract class AbstractReadRequest<T : GenericJson>(cache: ICache<T>?, private val readPolicy: ReadPolicy?,
+                                                    protected val networkData: NetworkManager<T>?) : AbstractKinveyReadRequest<T>() {
 
     protected abstract val cached: KinveyReadResponse<T>?
     protected abstract val network: KinveyReadResponse<T>?

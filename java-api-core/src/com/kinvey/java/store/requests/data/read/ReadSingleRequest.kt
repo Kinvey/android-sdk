@@ -27,8 +27,8 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-class ReadSingleRequest<T : GenericJson>(cache: ICache<T>, private val id: String, private val readPolicy: ReadPolicy,
-                                         private val networkManager: NetworkManager<T>) : AbstractKinveyDataRequest<T>() {
+class ReadSingleRequest<T : GenericJson>(cache: ICache<T>?, private val id: String, private val readPolicy: ReadPolicy?,
+                                         private val networkManager: NetworkManager<T>?) : AbstractKinveyDataRequest<T>() {
 
     init {
         this.cache = cache
@@ -40,15 +40,15 @@ class ReadSingleRequest<T : GenericJson>(cache: ICache<T>, private val id: Strin
         when (readPolicy) {
             ReadPolicy.FORCE_LOCAL -> ret = cache?.get(id)
             ReadPolicy.FORCE_NETWORK ->  // Logic for getting cached data implemented before running Request
-                ret = networkManager.getEntityBlocking(id).execute()
+                ret = networkManager?.getEntityBlocking(id)?.execute()
             ReadPolicy.BOTH -> {
-                ret = networkManager.getEntityBlocking(id).execute()
+                ret = networkManager?.getEntityBlocking(id)?.execute()
                 ret?.let { cache?.save(it) }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
-                    ret = networkManager.getEntityBlocking(id).execute()
+                    ret = networkManager?.getEntityBlocking(id)?.execute()
                     ret?.let { cache?.save(it) }
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {

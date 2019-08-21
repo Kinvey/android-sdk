@@ -29,21 +29,21 @@ import java.io.IOException
 /**
  * Created by Prots on 2/15/16.
  */
-class DeleteQueryRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, writePolicy: WritePolicy,
-                                          private val query: Query, syncManager: SyncManager)
+class DeleteQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, writePolicy: WritePolicy,
+                                          private val query: Query, syncManager: SyncManager?)
     : AbstractDeleteRequest<T>(cache, writePolicy, networkManager, syncManager) {
 
     override fun deleteCached(): Int? {
-        return cache.delete(query)
+        return cache?.delete(query)
     }
 
     @Throws(IOException::class)
-    override fun deleteNetwork(): NetworkManager<T>.Delete {
-        return networkManager.deleteBlocking(query)
+    override fun deleteNetwork(): NetworkManager<T>.Delete? {
+        return networkManager?.deleteBlocking(query)
     }
 
     @Throws(IOException::class)
-    override fun enqueueRequest(collectionName: String, networkManager: NetworkManager<T>) {
-        syncManager.enqueueDeleteRequests(collectionName, networkManager, cache.get(query))
+    override fun enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?) {
+        syncManager?.enqueueDeleteRequests(collectionName, networkManager, cache?.get(query))
     }
 }

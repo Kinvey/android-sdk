@@ -28,7 +28,7 @@ import java.util.Arrays
 /**
  * Created by Prots on 2/15/16.
  */
-class ReadAllRequest<T : GenericJson>(cache: ICache<T>, readPolicy: ReadPolicy, networkManager: NetworkManager<T>)
+class ReadAllRequest<T : GenericJson>(cache: ICache<T>?, readPolicy: ReadPolicy?, networkManager: NetworkManager<T>?)
     : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
     override val cached: KinveyReadResponse<T>?
@@ -40,5 +40,5 @@ class ReadAllRequest<T : GenericJson>(cache: ICache<T>, readPolicy: ReadPolicy, 
 
     override val network: KinveyReadResponse<T>?
         @Throws(IOException::class)
-        get() = networkData.blocking.execute()
+        get() = networkData?.blocking?.execute()
 }

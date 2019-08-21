@@ -43,5 +43,5 @@ class ReadIdsRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkM
 
     override val network: KinveyReadResponse<T>?
         @Throws(IOException::class)
-        get() = networkData.getBlocking(Iterables.toArray(ids, String::class.java)).execute()
+        get() = networkData?.getBlocking(Iterables.toArray(ids, String::class.java))?.execute()
 }

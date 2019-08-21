@@ -28,7 +28,7 @@ import java.io.IOException
 /**
  * Created by Prots on 2/15/16.
  */
-class ReadQueryRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
+class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy?,
                                         private val query: Query) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
     override val cached: KinveyReadResponse<T>?
@@ -37,8 +37,9 @@ class ReadQueryRequest<T : GenericJson>(cache: ICache<T>, networkManager: Networ
             response.result = cache?.get(query)
             return response
         }
+
     override val network: KinveyReadResponse<T>?
         get() {
-            return networkData.getBlocking(query).execute()
+            return networkData?.getBlocking(query)?.execute()
         }
 }
