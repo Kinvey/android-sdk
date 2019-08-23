@@ -9,6 +9,7 @@ import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+import com.pubnub.api.models.consumer.pubsub.PNSignalResult;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,6 +70,11 @@ public class LiveServiceRouter {
                     @Override
                     public void presence(PubNub pubnub, PNPresenceEventResult presence) {
                         /* presence not currently supported */
+                    }
+
+                    @Override
+                    public void signal(PubNub pubnub, PNSignalResult signal) {
+                        /* signal not currently supported */
                     }
                 };
                 pubnubClient.addListener(subscribeCallback);
