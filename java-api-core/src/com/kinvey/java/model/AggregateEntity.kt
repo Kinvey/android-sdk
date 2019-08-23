@@ -32,8 +32,13 @@ import com.kinvey.java.core.AbstractKinveyJsonClient
  * @author mjsalinger
  * @since 2.0
  */
-class AggregateEntity(fields: ArrayList<String>?, type: AggregateType?, aggregateField: String?, query: Query?,
-                      client: AbstractKinveyJsonClient?) : GenericJson() {
+class AggregateEntity(
+    fields: ArrayList<String>?,
+    type: AggregateType,
+    aggregateField: String?,
+    query: Query?,
+    client: AbstractKinveyJsonClient?
+) : GenericJson() {
     @Key
     val key: Map<String, Boolean>?
     @Key
