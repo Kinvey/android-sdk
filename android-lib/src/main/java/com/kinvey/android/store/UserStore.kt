@@ -1280,11 +1280,15 @@ class UserStore {
                     i.putExtra(MICLoginActivity.KEY_LOGIN_URL, myURLToRender)
                     i.putExtra(MICLoginActivity.KEY_CLIENT_ID, clientId)
                     i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    client.context.startActivity(i)
+                    client.context?.startActivity(i)
                 }
 
-                override fun onSuccess(result: User) {
-                    callback?.onSuccess(result)
+                override fun onSuccess(result: User?) {
+                    if (result == null) {
+                        callback?.onFailure(Throwable ("User result is null"))
+                    } else {
+                        callback?.onSuccess(result)
+                    }
                 }
 
                 override fun onFailure(error: Throwable) {

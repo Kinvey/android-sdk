@@ -168,7 +168,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
     }
 
     public boolean isUserLoggedIn() {
-        return getActiveUser() != null && getActiveUser().getId() !=null;
+        return getActiveUser() != null && getActiveUser().getId() != null;
     }
 
 
@@ -205,7 +205,7 @@ public abstract class AbstractClient<T extends BaseUser> extends AbstractKinveyJ
         this.store = store;
     }
 
-    public static AbstractClient sharedInstance(){
+    public static AbstractClient sharedInstance() {
         return sharedInstance;
     }
 

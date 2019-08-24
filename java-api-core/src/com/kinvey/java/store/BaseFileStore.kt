@@ -21,7 +21,6 @@ import com.google.api.client.http.InputStreamContent
 import com.google.api.client.util.Key
 import com.google.common.base.Preconditions
 import com.google.common.io.Closer
-import com.kinvey.java.AbstractClient
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
@@ -45,7 +44,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
 
-
 open class BaseFileStore
 /**
  * File store constructor
@@ -55,13 +53,13 @@ open class BaseFileStore
  * @param storeType Store type to be used
  * @param cacheFolder local cache folder to be used on device
  */
-(private val networkFileManager: NetworkFileManager, private val cacheManager: ICacheManager, private val ttl: Long?, private var storeType: StoreType?, protected val cacheFolder: String) {
-    protected val cache: ICache<FileMetadataWithPath>
+(private val networkFileManager: NetworkFileManager, private val cacheManager: ICacheManager?, private val ttl: Long?, private var storeType: StoreType?, protected val cacheFolder: String?) {
+    protected val cache: ICache<FileMetadataWithPath>?
     private var downloader: MediaHttpDownloader? = null
     private var uploader: MediaHttpUploader? = null
 
     init {
-        this.cache = cacheManager.getCache("__KinveyFile__", FileMetadataWithPath::class.java, ttl)
+        this.cache = cacheManager?.getCache("__KinveyFile__", FileMetadataWithPath::class.java, ttl)
     }
 
     /**
@@ -171,7 +169,7 @@ open class BaseFileStore
                 }
 
                 fileMetadataWithPath.putAll(metadata)
-                cache.save(fileMetadataWithPath)
+                cache?.save(fileMetadataWithPath)
             }
         }
         return metadata
@@ -211,11 +209,11 @@ open class BaseFileStore
         return metadata.id?.let {
             when (storeType?.writePolicy) {
                 WritePolicy.FORCE_LOCAL -> {
-                    cache.delete(it)
+                    cache?.delete(it)
                     return 1
                 }
                 WritePolicy.LOCAL_THEN_NETWORK -> {
-                    cache.delete(it)
+                    cache?.delete(it)
                     return networkFileManager.deleteBlocking(it).execute()?.count
                 }
                 WritePolicy.FORCE_NETWORK -> return networkFileManager.deleteBlocking(it).execute()?.count
@@ -272,7 +270,7 @@ open class BaseFileStore
      * @throws IOException
      */
     private fun getFileMetaDataFromCache(q: Query): Array<FileMetaData> {
-        val list = ArrayList(cache.get(q))
+        val list = ArrayList(cache?.get(q))
         val metaData: Array<FileMetaData?> = arrayOfNulls(list.size)
         return list.toArray(metaData)
     }
@@ -291,11 +289,11 @@ open class BaseFileStore
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         val download = networkFileManager.downloadMetaDataBlocking(id)
         var metaData: FileMetaData? = null
-        when (storeType!!.readPolicy) {
-            ReadPolicy.FORCE_LOCAL -> metaData = cache.get(id)
+        when (storeType?.readPolicy) {
+            ReadPolicy.FORCE_LOCAL -> metaData = cache?.get(id)
             ReadPolicy.BOTH -> {
                 if (storeType == StoreType.CACHE && cachedCallback != null) {
-                    metaData = cache.get(id)
+                    metaData = cache?.get(id)
                     cachedCallback.onSuccess(metaData)
                 }
                 metaData = download.execute()
@@ -314,7 +312,7 @@ open class BaseFileStore
 
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
-                    metaData = cache.get(id)
+                    metaData = cache?.get(id)
                 }
             }
         }
@@ -479,7 +477,7 @@ open class BaseFileStore
                     os.write(f.absolutePath.toByteArray())
                     fmdWithPath.putAll(fmd)
                     fmdWithPath.path = f.absolutePath
-                    cache.save(fmdWithPath)
+                    cache?.save(fmdWithPath)
                 }
                 return fmd
             }
@@ -497,7 +495,7 @@ open class BaseFileStore
                         os.write(f.absolutePath.toByteArray())
                         fmdWithPath.putAll(fm)
                         fmdWithPath.path = f.absolutePath
-                        cache.save(fmdWithPath)
+                        cache?.save(fmdWithPath)
                     }
                     return fm
                 } catch (e: IOException) {
@@ -548,7 +546,7 @@ open class BaseFileStore
             closer.close()
         }
 
-        cache.save(metadata)
+        cache?.save(metadata)
 
     }
 

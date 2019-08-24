@@ -1,10 +1,10 @@
-package com.kinvey.java.model;
+package com.kinvey.java.model
 
 /**
  * Created by yuliya on 10/12/17.
  */
 
-public enum AggregateType {
+enum class AggregateType {
     COUNT,
     SUM,
     MIN,
