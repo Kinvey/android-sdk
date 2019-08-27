@@ -208,7 +208,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
      *
      * @return Instance of [com.kinvey.java.UserDiscovery] for the defined collection
      */
-    @Deprecated("")
+    @Deprecated("It is deprected now, use more extended version customEndpoints(Class<O> myClass)")
     fun <I : GenericJson, O> customEndpoints(): AsyncCustomEndpoints<I, O> {
         synchronized(lock) {
             return AsyncCustomEndpoints(GenericJson::class.java as Class<O>, this)
@@ -244,7 +244,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         }
     }*/
 
-    override fun <I : GenericJson?, O : Any?> customEndpoints(myClass: Class<O>?): CustomEndpoints<I, O> {
+    override fun <I : GenericJson?, O : Any?> customEndpoints(myClass: Class<O>?): AsyncCustomEndpoints<I, O> {
         synchronized(lock) {
             return AsyncCustomEndpoints(myClass as Class<O>, this)
         }
@@ -970,11 +970,14 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             if (exception != null) {
                 retrieveUserCallback?.onFailure(exception)
             } else {
-                retrieveUserCallback?.onSuccess(client?.activeUser)
+                val activeUser = client?.activeUser
+                if (activeUser == null) {
+                    retrieveUserCallback?.onFailure(Throwable("Active User is null"))
+                } else {
+                    retrieveUserCallback?.onSuccess(activeUser)
+                }
             }
         }
-
-
         /** Get setting value of delta set caching  */
         fun isDeltaSetCache(): Boolean {
             return deltaSetCache

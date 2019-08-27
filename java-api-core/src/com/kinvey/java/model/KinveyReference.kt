@@ -55,13 +55,15 @@ import com.kinvey.java.Logger
  */
 data class KinveyReference(
     @Key("_collection")
-    var collection: String?,
+    var collection: String? = null,
     @Key("_id")
-    var id: String?
+    var id: String? = null
 ) : GenericJson() {
 
     @Key("_type")
     var type: String? = "KinveyRef"
+        get
+        set(value) {}
 
     val resolvedObject: GenericJson?
         get() {

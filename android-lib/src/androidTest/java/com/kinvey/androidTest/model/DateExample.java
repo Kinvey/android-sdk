@@ -28,11 +28,11 @@ public class DateExample extends GenericJson {
     }
 
     public String getId() {
-        return field;
+        return id;
     }
 
     public void setId(String id) {
-        this.field = id;
+        this.id = id;
     }
 
     public Date getDate() {
