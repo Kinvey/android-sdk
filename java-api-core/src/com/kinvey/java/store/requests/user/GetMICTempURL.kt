@@ -14,25 +14,27 @@
  *
  */
 
-package com.kinvey.java.store.requests.user;
+package com.kinvey.java.store.requests.user
 
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.json.GenericJson;
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyClientRequest;
+import com.google.api.client.http.HttpContent
+import com.google.api.client.json.GenericJson
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.core.AbstractKinveyClientRequest
 
 /**
  * Created by Prots on 2/12/16.
  */
-public final class GetMICTempURL extends AbstractKinveyClientRequest<GenericJson> {
-    private static final String REST_PATH = "oauth/auth?scope=openid";
+class GetMICTempURL(client: AbstractClient<*>, content: HttpContent) : AbstractKinveyClientRequest<GenericJson>(client, client.micHostName, "POST", REST_PATH, content, GenericJson::class.java) {
 
 
-    public GetMICTempURL(AbstractClient client, HttpContent content) {
-        super(client, client.getMICHostName(), "POST", REST_PATH, content, GenericJson.class);
-        String MICApiVersion = client.getMICApiVersion();
-        if (MICApiVersion != null && MICApiVersion.length() > 0) {
-            this.setUriTemplate(MICApiVersion + "/" + this.getUriTemplate());
+    init {
+        val MICApiVersion = client.micApiVersion
+        if (MICApiVersion != null && MICApiVersion.length > 0) {
+            this.uriTemplate = MICApiVersion + "/" + this.uriTemplate
         }
+    }
+
+    companion object {
+        private val REST_PATH = "oauth/auth?scope=openid"
     }
 }
