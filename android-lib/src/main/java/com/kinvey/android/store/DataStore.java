@@ -149,7 +149,7 @@ public class DataStore<T extends GenericJson> extends BaseDataStore<T> {
 
     private static Map<String, Method> methodMap;
 
-    private final String kinveyApiVersion = AbstractClient.KINVEY_API_VERSION;
+    private final String kinveyApiVersion = AbstractClient.Companion.getKINVEY_API_VERSION();
 
     public Integer getKinveyApiVersion() {
         int version = 0;

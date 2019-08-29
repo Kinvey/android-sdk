@@ -30,8 +30,8 @@ public class KinveyHeaders extends HttpHeaders {
     public static final String VERSION = BuildConfig.VERSION;
 
     @Key("X-Kinvey-api-Version")
-    private String kinveyApiVersion = AbstractClient.KINVEY_API_VERSION != null ?
-            AbstractClient.KINVEY_API_VERSION : BuildConfig.KINVEY_API_VERSION;
+    private String kinveyApiVersion = AbstractClient.Companion.getKINVEY_API_VERSION() != null ?
+            AbstractClient.Companion.getKINVEY_API_VERSION() : BuildConfig.KINVEY_API_VERSION;
 
     private String userAgent = "android-kinvey-http/"+ VERSION;
 

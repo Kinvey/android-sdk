@@ -87,6 +87,6 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
     }
 
     companion object {
-        private val REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}"
+        private const val REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}"
     }
 }

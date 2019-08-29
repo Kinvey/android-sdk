@@ -49,7 +49,7 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
     @Key("retainReferences")
     private var retainReferences: String? = null
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userID: String) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().getUserClass() as Class<T>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userID: String) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass as Class<T>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.userID = userID
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
@@ -58,7 +58,7 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().getUserClass() as Class<T>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass as Class<T>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
         val queryLimit = query.limit
@@ -73,7 +73,7 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userID: String, resolve: Array<String>, resolve_depth: Int, retain: Boolean) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().getUserClass() as Class<T>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userID: String, resolve: Array<String>, resolve_depth: Int, retain: Boolean) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass as Class<T>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.userID = userID
 
@@ -87,7 +87,7 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query, resolve: Array<String>, resolve_depth: Int, retain: Boolean) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().getUserClass() as Class<T>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query, resolve: Array<String>, resolve_depth: Int, retain: Boolean) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass as Class<T>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
         val queryLimit = query.limit

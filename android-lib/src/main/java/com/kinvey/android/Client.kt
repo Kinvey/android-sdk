@@ -544,7 +544,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         private fun loadProperties(properties: InputStream) {
 
             try {
-                super.getProps().load(properties)
+                super.props.load(properties)
             } catch (e: IOException) {
                 Logger.WARNING("Couldn't load properties. Please make sure that your properties file is valid")
                 throw RuntimeException("Couldn't load properties. Please make sure that your properties file is valid")
@@ -788,9 +788,9 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
             client.batchSize = this.batchSize
             client.isUseDeltaCache = this.deltaSetCache
             if (this.MICVersion != null) {
-                client.setMICApiVersion(this.MICVersion)
+                client.micApiVersion = this.MICVersion
             } else {
-                client.setMICApiVersion(AbstractClient.DEFAULT_MIC_API_VERSION)
+                client.micApiVersion = AbstractClient.DEFAULT_MIC_API_VERSION
             }
             if (this.MICBaseURL != null) {
                 client.micHostName = this.MICBaseURL

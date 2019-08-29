@@ -77,7 +77,7 @@ public class DataStoreMultiInsertTest {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        AbstractClient.KINVEY_API_VERSION = "5";
+        AbstractClient.Companion.setKINVEY_API_VERSION("5");
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -444,7 +444,7 @@ public class DataStoreMultiInsertTest {
         assert field != null;
         field.setAccessible(true);
         try {
-            field.set(client, AbstractClient.DEFAULT_BASE_URL);
+            field.set(client, AbstractClient.Companion.getDEFAULT_BASE_URL());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

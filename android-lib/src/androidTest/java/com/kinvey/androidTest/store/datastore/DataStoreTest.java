@@ -124,10 +124,10 @@ public class DataStoreTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AbstractClient.KINVEY_API_VERSION = "4";
+        AbstractClient.Companion.setKINVEY_API_VERSION("4");
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        AbstractClient.KINVEY_API_VERSION = "4";
+        AbstractClient.Companion.setKINVEY_API_VERSION("4");
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -1332,7 +1332,7 @@ public class DataStoreTest {
         assert field != null;
         field.setAccessible(true);
         try {
-            field.set(client, AbstractClient.DEFAULT_BASE_URL);
+            field.set(client, AbstractClient.Companion.getDEFAULT_BASE_URL());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

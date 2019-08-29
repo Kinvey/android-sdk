@@ -14,17 +14,13 @@
  *
  */
 
-package com.kinvey.java;
+package com.kinvey.java
 
 /**
  * @author edwardf
  */
-public interface ClientExtension {
-
-    public void performLockdown(String userid);
-
-
-
+interface ClientExtension {
+    fun performLockdown(userid: String)
 }
 
 

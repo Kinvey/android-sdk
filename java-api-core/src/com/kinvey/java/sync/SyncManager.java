@@ -224,7 +224,7 @@ public class SyncManager {
                                                                     NetworkManager<T> networkManager,
                                                                     SyncItem.HttpVerb httpMethod,
                                                                     String syncItemId) throws IOException {
-        Query entityQuery = AbstractClient.sharedInstance().query();
+        Query entityQuery = AbstractClient.getSharedInstance().query();
         entityQuery.equals(META_DOT_ID, syncItemId);
         List<SyncItem> itemsList = requestCache.get(entityQuery);
         if (itemsList.isEmpty()) {
