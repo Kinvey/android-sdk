@@ -218,11 +218,9 @@ public class RealmCache<T extends GenericJson> implements ICache<T> {
         return ret;
     }
 
-
-
     @NonNull
     @Override
-    public List<T> save(@NonNull Iterable<T> items) {
+    public List<T> save(@NonNull Iterable<? extends T> items) {
         DynamicRealm mRealm = mCacheManager.getDynamicRealm();
         List<T> ret = new ArrayList<T>();
         try {
