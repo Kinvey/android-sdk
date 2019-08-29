@@ -49,7 +49,7 @@ protected constructor(
         /**
          * Kinvey JSON client *
          */
-        private val client: AbstractClient<BaseUser>, private val hostName: String,
+        private val client: AbstractClient<*>, private val hostName: String,
         /**
          * HTTP method *
          */

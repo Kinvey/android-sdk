@@ -1283,12 +1283,8 @@ class UserStore {
                     client.context?.startActivity(i)
                 }
 
-                override fun onSuccess(result: User?) {
-                    if (result == null) {
-                        callback?.onFailure(Throwable ("User result is null"))
-                    } else {
-                        callback?.onSuccess(result)
-                    }
+                override fun onSuccess(result: User) {
+                    callback?.onSuccess(result)
                 }
 
                 override fun onFailure(error: Throwable) {
