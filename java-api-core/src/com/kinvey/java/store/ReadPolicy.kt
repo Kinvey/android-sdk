@@ -14,18 +14,16 @@
  *
  */
 
-package com.kinvey.java.store;
+package com.kinvey.java.store
 
 /**
  * Created by Prots on 2/4/16.
  */
-public enum ReadPolicy {
+enum class ReadPolicy {
     FORCE_LOCAL,
     FORCE_NETWORK,
-    /**
-     *  @deprecated use {@link ReadPolicy#NETWORK_OTHERWISE_LOCAL}
-     */
-    @Deprecated
+
+    @Deprecated("use {@link ReadPolicy#NETWORK_OTHERWISE_LOCAL}")
     BOTH,
     NETWORK_OTHERWISE_LOCAL
 }
