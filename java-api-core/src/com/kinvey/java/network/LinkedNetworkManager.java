@@ -29,7 +29,6 @@ import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.SaveMode;
-import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
 import java.lang.reflect.Array;

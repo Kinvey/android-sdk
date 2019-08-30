@@ -16,7 +16,6 @@
 
 package com.kinvey.android.store;
 
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.LinkedResources.LinkedGenericJson;
 import com.kinvey.java.network.LinkedNetworkManager;
 import com.kinvey.java.store.StoreType;

@@ -14,7 +14,6 @@ import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.TestUser;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.store.UserStoreRequestManager;

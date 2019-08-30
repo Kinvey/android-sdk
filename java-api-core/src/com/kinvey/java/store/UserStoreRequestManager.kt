@@ -110,7 +110,7 @@ class UserStoreRequestManager<T : BaseUser> {
     }
 
 
-    fun getCustomRequestProperties(): GenericData {
+    fun getCustomRequestProperties(): GenericData? {
         return client.customRequestProperties
     }
 
@@ -144,10 +144,10 @@ class UserStoreRequestManager<T : BaseUser> {
             currentUser = myClazz.newInstance()
         } catch (e: InstantiationException) {
             e.printStackTrace()
-            throw KinveyException(e.message)
+            throw KinveyException(e.message ?: "")
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
-            throw KinveyException(e.message)
+            throw KinveyException(e.message ?: "")
         }
 
         currentUser.id = response.userId
@@ -266,12 +266,11 @@ class UserStoreRequestManager<T : BaseUser> {
                 currentUser = myClazz.newInstance()
             } catch (e: InstantiationException) {
                 e.printStackTrace()
-                throw KinveyException(e.message)
+                throw KinveyException(e.message ?: "")
             } catch (e: IllegalAccessException) {
                 e.printStackTrace()
-                throw KinveyException(e.message)
+                throw KinveyException(e.message ?: "")
             }
-
         } else {
             currentUser = client.activeUser as T
         }
@@ -354,10 +353,10 @@ class UserStoreRequestManager<T : BaseUser> {
             currentUser = myClazz.newInstance()
         } catch (e: InstantiationException) {
             e.printStackTrace()
-            throw KinveyException(e.message)
+            throw KinveyException(e.message ?: "")
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
-            throw KinveyException(e.message)
+            throw KinveyException(e.message ?: "")
         }
 
         currentUser!!.authToken = authToken
@@ -459,8 +458,8 @@ class UserStoreRequestManager<T : BaseUser> {
     fun deleteBlocking(hardDelete: Boolean): Delete {
 
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
-        val delete = Delete(this, client.activeUser.id!!, hardDelete)
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        val delete = Delete(this, client.activeUser?.id ?: "", hardDelete)
         client.initializeRequest(delete)
         return delete
     }
@@ -473,9 +472,10 @@ class UserStoreRequestManager<T : BaseUser> {
      */
     @Throws(IOException::class)
     fun retrieveBlocking(): Retrieve<T> {
+        val userId = client.activeUser?.id
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
-        val retrieve = Retrieve<T>(this, client.activeUser.id!!)
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        val retrieve = Retrieve<T>(this, client.activeUser?.id!!)
         client.initializeRequest(retrieve)
         return retrieve
     }
@@ -503,8 +503,8 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun retrieveBlocking(resolves: Array<String>): Retrieve<T> {
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
-        val retrieve = Retrieve(this, client.activeUser.id!!, resolves, 1, true)
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        val retrieve = Retrieve(this, client.activeUser?.id!!, resolves, 1, true)
         client.initializeRequest(retrieve)
         return retrieve
     }
@@ -534,8 +534,8 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun updateBlocking(): Update<T> {
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
-        val update = Update(this, client.activeUser, myClazz)
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        val update = Update(this, client.activeUser as T, myClazz)
         client.initializeRequest(update)
         return update
     }
@@ -559,10 +559,10 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun changePassword(newPassword: String): Update<T> {
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
         val passwordRequest = PasswordRequest()
         passwordRequest.password = newPassword
-        val update = Update(this, client.activeUser, passwordRequest, myClazz)
+        val update = Update(this, client.activeUser as T, passwordRequest, myClazz)
         client.initializeRequest(update)
         return update
     }
@@ -614,8 +614,8 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun sendEmailVerificationBlocking(): EmailVerification {
         Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser.id, "currentUser ID must not be null")
-        val verify =  EmailVerification(this, client.activeUser.id!!)
+        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        val verify =  EmailVerification(this, client.activeUser?.id!!)
         client.initializeRequest(verify)
         return verify
     }
@@ -713,7 +713,7 @@ class UserStoreRequestManager<T : BaseUser> {
         data["refresh_token"] = refreshToken
         data["redirect_uri"] = micRedirectURI
         var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
-        val clientId = client.store.load(client.activeUser.id).clientId
+        val clientId = client.store.load(client.activeUser?.id).clientId
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }

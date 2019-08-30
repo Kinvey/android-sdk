@@ -28,15 +28,15 @@ import java.io.IOException
  * Delete Request Class, extends AbstractKinveyJsonClientRequest<Void>.  Constructs the HTTP request object for
  * Delete BaseUser requests.
 </Void> */
-class Delete(private val userStoreRequestManager: UserStoreRequestManager<*>, @field:Key
-private val userID: String, hard: Boolean) : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "DELETE", REST_PATH, null, Void::class.java) {
+class Delete(private val userStoreRequestManager: UserStoreRequestManager<*>, @Key private val userID: String, hard: Boolean)
+    : AbstractKinveyJsonClientRequest<Void>(userStoreRequestManager.getClient(), "DELETE", REST_PATH, null, Void::class.java) {
     @Key
     private var hard = false
 
     init {
         this.hard = hard
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager?.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(userStoreRequestManager.getCustomRequestProperties())
         }
     }
@@ -46,12 +46,12 @@ private val userID: String, hard: Boolean) : AbstractKinveyJsonClientRequest<Voi
         super.execute()
         userStoreRequestManager.removeFromStore(userID)
         userStoreRequestManager.logoutSoft().execute()
-        (abstractKinveyClient.getKinveyRequestInitializer() as KinveyClientRequestInitializer).setCredential(null)
+        (abstractKinveyClient.kinveyRequestInitializer as KinveyClientRequestInitializer).setCredential(null)
         abstractKinveyClient.performLockDown()
         return null
     }
 
     companion object {
-        private val REST_PATH = "user/{appKey}/{userID}?hard={hard}"
+        private const val REST_PATH = "user/{appKey}/{userID}?hard={hard}"
     }
 }

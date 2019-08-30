@@ -101,9 +101,9 @@ open class CustomEndpoints<I : GenericJson, O> {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun callEndpointBlocking(endpoint: String, input: I): CustomCommand {
+    fun callEndpointBlocking(endpoint: String, input: I): CustomCommand< I, O> {
         Preconditions.checkNotNull(endpoint, "commandName must not be null")
-        val command = CustomCommand(endpoint, input, currentResponseClass)
+        val command = CustomCommand(client as AbstractClient<*>, endpoint, input, currentResponseClass as Class<O>)
         client?.initializeRequest(command)
         return command
     }
@@ -117,11 +117,11 @@ open class CustomEndpoints<I : GenericJson, O> {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun callEndpointArrayBlocking(endpoint: String, input: I): CustomCommandArray {
+    fun callEndpointArrayBlocking(endpoint: String, input: I): CustomCommandArray<I, O> {
         Preconditions.checkNotNull(endpoint, "commandName must not be null")
-        val command = CustomCommandArray(endpoint, input, Array.newInstance(currentResponseClass, 0).javaClass)
+        val command = CustomCommandArray(client as AbstractClient<*>, endpoint, input, Array.newInstance(currentResponseClass, 0).javaClass)
         client?.initializeRequest(command)
-        return command
+        return command as CustomCommandArray<I, O>
     }
 
     /**

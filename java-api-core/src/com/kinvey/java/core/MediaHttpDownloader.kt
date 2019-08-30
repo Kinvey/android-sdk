@@ -330,7 +330,7 @@ class MediaHttpDownloader
                     retryBackOffCounter++
                     continue
                 } else {
-                    val kinveyUploadFileException = KinveyDownloadFileException(e.message)
+                    val kinveyUploadFileException = KinveyDownloadFileException(e.message ?: "")
                     val hashMap = HashMap<String, Any>()
                     hashMap["LastBytePosition"] = lastBytePosition
                     hashMap["NumBytesDownloaded"] = numBytesDownloaded
@@ -353,7 +353,7 @@ class MediaHttpDownloader
                     retryBackOffCounter++
                     continue
                 } else {
-                    val kinveyUploadFileException = KinveyDownloadFileException(e.message)
+                    val kinveyUploadFileException = KinveyDownloadFileException(e.message ?: "")
                     val hashMap = HashMap<String, Any>()
                     hashMap["LastBytePosition"] = lastBytePosition
                     hashMap["NumBytesDownloaded"] = numBytesDownloaded

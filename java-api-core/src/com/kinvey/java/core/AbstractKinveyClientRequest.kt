@@ -341,9 +341,9 @@ protected constructor(
                 userStoreRequestManager.loginMobileIdentityBlocking(result!!["access_token"]!!.toString()).execute()
 
                 //store the new refresh token
-                val currentCred = client.store.load(client.activeUser.id)
+                val currentCred = client.store.load(client.activeUser?.id)
                 currentCred.refreshToken = result["refresh_token"]!!.toString()
-                client.store.store(client.activeUser.id, currentCred)
+                client.store.store(client.activeUser?.id, currentCred)
                 currentCred.initialize(this)
                 return executeUnparsed()
             }

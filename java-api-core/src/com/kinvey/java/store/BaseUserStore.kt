@@ -196,7 +196,7 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun <T : BaseUser> update(): T? {
-        val client = AbstractClient.sharedInstance() as AbstractClient<T>
+        val client = AbstractClient.sharedInstance as AbstractClient<T>
         return UserStoreRequestManager(client, createBuilder(client)).save().execute()
     }
 
@@ -207,20 +207,20 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun registerLiveService() {
-        if (AbstractClient.sharedInstance().activeUser == null) {
+        if (AbstractClient.sharedInstance?.activeUser == null) {
             throw KinveyException("User object has to be the active user in order to register for LiveService messages")
         }
-        if (!LiveServiceRouter.getInstance().isInitialized) {
-            val response = UserStoreRequestManager(AbstractClient.sharedInstance(),
-                    createBuilder(AbstractClient.sharedInstance()))
-                    .liveServiceRegister(AbstractClient.sharedInstance().activeUser.id!!,
-                            AbstractClient.sharedInstance().deviceId).execute()
-            LiveServiceRouter.getInstance().initialize(
-                    response!!.userChannelGroup,
-                    response.publishKey,
-                    response.subscribeKey,
-                    AbstractClient.sharedInstance().activeUser.authToken,
-                    AbstractClient.sharedInstance())
+        if (LiveServiceRouter.instance?.isInitialized == false) {
+            val response = UserStoreRequestManager(AbstractClient.sharedInstance,
+            createBuilder(AbstractClient.sharedInstance))
+            .liveServiceRegister(AbstractClient.sharedInstance?.activeUser?.id ?: "",
+            AbstractClient.sharedInstance?.deviceId ?: "").execute()
+            LiveServiceRouter.instance?.initialize(
+                    response?.userChannelGroup,
+                    response?.publishKey,
+                    response?.subscribeKey,
+                    AbstractClient.sharedInstance?.activeUser?.authToken,
+                    AbstractClient.sharedInstance as AbstractClient)
         }
     }
 
@@ -231,19 +231,19 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun unRegisterLiveService() {
-        if (AbstractClient.sharedInstance().activeUser == null) {
+        if (AbstractClient.sharedInstance?.activeUser == null) {
             throw KinveyException("User object has to be the active user in order to register for LiveService messages")
         }
-        if (LiveServiceRouter.getInstance().isInitialized) {
-            LiveServiceRouter.getInstance().uninitialize()
-            UserStoreRequestManager(AbstractClient.sharedInstance(),
-                    createBuilder(AbstractClient.sharedInstance()))
-                    .liveServiceUnregister(AbstractClient.sharedInstance().activeUser.id!!,
-                            AbstractClient.sharedInstance().deviceId).execute()
+        if (LiveServiceRouter.instance?.isInitialized == true) {
+            LiveServiceRouter.instance?.uninitialize()
+            UserStoreRequestManager(AbstractClient.sharedInstance,
+            createBuilder(AbstractClient.sharedInstance))
+            .liveServiceUnregister(AbstractClient.sharedInstance?.activeUser?.id ?: "",
+            AbstractClient.sharedInstance?.deviceId ?: "").execute()
         }
     }
 
-    private fun <T : BaseUser> createBuilder(client: AbstractClient<T>?): KinveyAuthRequest.Builder<T>? {
+    private fun <T : BaseUser> createBuilder(client: AbstractClient<*>?): KinveyAuthRequest.Builder<T>? {
         client?.let { c ->
             val appKey = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
             val appSecret = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret

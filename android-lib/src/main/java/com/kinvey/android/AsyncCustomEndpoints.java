@@ -17,7 +17,6 @@ package com.kinvey.android;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.callback.KinveyListCallback;
-import com.kinvey.java.AbstractClient;
 import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
 

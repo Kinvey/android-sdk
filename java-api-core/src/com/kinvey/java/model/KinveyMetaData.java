@@ -21,7 +21,6 @@ import com.google.api.client.util.Key;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
@@ -134,7 +133,7 @@ public class KinveyMetaData extends GenericJson{
             AccessControlList accessControlList = new AccessControlList();
             if (acl != null) {
                 if (!acl.containsKey(CREATOR) || acl.get(CREATOR) == null) {
-                    accessControlList.put(CREATOR, AbstractClient.sharedInstance().getActiveUser().getId());
+                    accessControlList.put(CREATOR, AbstractClient.getSharedInstance().getActiveUser().getId());
                 } else {
                     accessControlList.put(CREATOR, acl.get(CREATOR));
                 }

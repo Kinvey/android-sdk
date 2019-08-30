@@ -48,7 +48,7 @@ public abstract class AbstractKinveyJsonClientRequest<T> extends AbstractKinveyC
    * @param responseClass response class to parse into
    */
   protected AbstractKinveyJsonClientRequest(AbstractClient abstractKinveyJsonClient,
-      String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
+                                            String requestMethod, String uriTemplate, GenericJson jsonContent, Class<T> responseClass) {
     super(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent == null
         ? null : new JsonHttpContent(abstractKinveyJsonClient.getJsonFactory(), jsonContent),
         responseClass);

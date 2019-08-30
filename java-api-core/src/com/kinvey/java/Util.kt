@@ -14,34 +14,28 @@
  *
  */
 
-package com.kinvey.java;
+package com.kinvey.java
 
-import com.google.api.client.json.GenericJson;
-import com.google.common.base.Preconditions;
+import com.google.api.client.json.GenericJson
+import com.google.common.base.Preconditions
 
-import java.io.IOException;
+import java.io.IOException
 
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
+import com.kinvey.java.core.AbstractKinveyJsonClientRequest
 
 /**
  * @author mjsalinger
  * @since 2.0
  */
-public class Util {
-    private AbstractClient client;
-
-    public Util(AbstractClient client) {
-        Preconditions.checkNotNull(client, "client must not be null.");
-        this.client = client;
-    }
-
+class Util(
     /**
      * Gets current client for this Util
      * @return current client instance
      */
-    protected AbstractClient getClient(){
-        return this.client;
+    protected val client: AbstractClient<*>) {
+
+    init {
+        Preconditions.checkNotNull(client, "client must not be null.")
     }
 
     /**
@@ -50,18 +44,18 @@ public class Util {
      * @return Ping object
      * @throws java.io.IOException
      */
-    public Ping pingBlocking() throws IOException {
-        Ping ping = new Ping();
-        ping.setRequireAppCredentials(true);
-        client.initializeRequest(ping);
-        return ping;
+    @Throws(IOException::class)
+    fun pingBlocking(): Ping {
+        val ping = Ping(client)
+        ping.isRequireAppCredentials = true
+        client.initializeRequest(ping)
+        return ping
     }
 
-    public class Ping extends AbstractKinveyJsonClientRequest<GenericJson> {
-        private static final String REST_PATH = "appdata/{appKey}";
-
-        Ping() {
-            super(client, "GET", REST_PATH, null, null);
+    class Ping(client: AbstractClient<*>)
+        : AbstractKinveyJsonClientRequest<GenericJson>(client, "GET", REST_PATH, null, null) {
+        companion object {
+            private val REST_PATH = "appdata/{appKey}"
         }
     }
 }
