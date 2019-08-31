@@ -65,7 +65,7 @@ abstract class AbstractClient<T : BaseUser>
  * @param requestPolicy            BackoffPolicy
  */
 protected constructor(transport: HttpTransport,
-                      httpRequestInitializer: HttpRequestInitializer, rootUrl: String,
+                      httpRequestInitializer: HttpRequestInitializer?, rootUrl: String,
                       servicePath: String, objectParser: JsonObjectParser,
                       kinveyRequestInitializer: KinveyClientRequestInitializer, val store: CredentialStore?,
                       requestPolicy: BackOffPolicy) : AbstractKinveyJsonClient(transport, httpRequestInitializer,
@@ -386,11 +386,11 @@ protected constructor(transport: HttpTransport,
          * @return The value of the setting
          */
         fun getString(opt: Option): String {
-            return props.getProperty(opt.value)
+            return props.getProperty(opt.value) ?: ""
         }
 
         fun getString(opt: Option, defaultValue: String): String {
-            return props.getProperty(opt.value, defaultValue)
+            return props.getProperty(opt.value, defaultValue) ?: ""
         }
 
         /**
@@ -413,7 +413,7 @@ protected constructor(transport: HttpTransport,
          *
          *
          */
-        enum class Option private constructor(internal val value: String) {
+        enum class Option constructor(val value: String?) {
             /** Optional. Used to base url generating  */
             INSTANCE_ID("instance.id"),
             /** Optional. Usually the base url minus the port e.g. `http://api.kinvey.com`  */

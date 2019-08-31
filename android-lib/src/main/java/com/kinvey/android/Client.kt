@@ -100,7 +100,7 @@ open class Client<T : User>
  * @param requestPolicy a [BackOffPolicy] for retrying HTTP Requests
  * @param context a [Context] android application context
  */
-protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer, rootUrl: String,
+protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String,
                       servicePath: String, objectParser: JsonObjectParser,
                       kinveyRequestInitializer: KinveyClientRequestInitializer, credentialStore: CredentialStore?,
                       requestPolicy: BackOffPolicy, private val encryptionKey: ByteArray?, context: Context)
@@ -436,7 +436,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         private var context: Context? = null
         private var retrieveUserCallback: KinveyUserCallback<T>? = null
         //GCM Push Fields
-        private var FCM_SenderID = ""
+        private var FCM_SenderID: String? = ""
         private var FCM_Enabled = false
         private var GCM_InProduction = true
         private var debugMode = false
@@ -525,8 +525,8 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                 FCM_Enabled = true
                 FCM_SenderID = BuildConfig.SENDER_ID
             } else {
-                key = Preconditions.checkNotNull(super.getString(AbstractClient.Builder.Option.APP_KEY), "app.key must be defined in your kinvey.properties")
-                secret = Preconditions.checkNotNull(super.getString(AbstractClient.Builder.Option.APP_SECRET), "app.secret must be defined in your kinvey.properties")
+                key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties")
+                secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties")
             }
 
             val initializer = KinveyClientRequestInitializer(key, secret, KinveyHeaders(context))
@@ -542,7 +542,6 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                 } catch (ex: IOException) {
                     Logger.ERROR("Credential store failed to load")
                 }
-
             }
         }
 
@@ -560,66 +559,65 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                 throw RuntimeException("Couldn't load properties. Please make sure that your properties file is valid")
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BASE_URL) != null) {
-                this.baseUrl = super.getString(AbstractClient.Builder.Option.BASE_URL)
+            if (super.getString(Option.BASE_URL).isNotEmpty()) {
+                this.baseUrl = super.getString(Option.BASE_URL)
             }
 
-            if (super.getString(AbstractClient.Builder.Option.INSTANCE_ID) != null) {
-                this.setInstanceID(super.getString(AbstractClient.Builder.Option.INSTANCE_ID))
+            if (super.getString(Option.INSTANCE_ID).isNotEmpty()) {
+                this.setInstanceID(super.getString(Option.INSTANCE_ID))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.REQUEST_TIMEOUT) != null) {
+            if (super.getString(Option.REQUEST_TIMEOUT).isNotEmpty()) {
                 try {
-                    this.setRequestTimeout(Integer.parseInt(super.getString(AbstractClient.Builder.Option.REQUEST_TIMEOUT)))
+                    this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)))
                 } catch (e: Exception) {
-                    Logger.WARNING(AbstractClient.Builder.Option.REQUEST_TIMEOUT.name + " should have an integer value")
+                    Logger.WARNING(Option.REQUEST_TIMEOUT.name + " should have an integer value")
                 }
-
             }
 
-            if (super.getString(AbstractClient.Builder.Option.PORT) != null) {
-                this.baseUrl = String.format("%s:%s", super.getBaseUrl(), super.getString(AbstractClient.Builder.Option.PORT))
+            if (super.getString(Option.PORT).isNotEmpty()) {
+                this.baseUrl = String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.DELTA_SET_CACHE) != null) {
-                this.useDeltaCache = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.DELTA_SET_CACHE))
+            if (super.getString(Option.DELTA_SET_CACHE).isNotEmpty()) {
+                this.useDeltaCache = java.lang.Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.FCM_PUSH_ENABLED) != null) {
-                this.FCM_Enabled = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.FCM_PUSH_ENABLED))
+            if (super.getString(Option.FCM_PUSH_ENABLED).isNotEmpty()) {
+                this.FCM_Enabled = java.lang.Boolean.parseBoolean(super.getString(Option.FCM_PUSH_ENABLED))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.GCM_PROD_MODE) != null) {
-                this.GCM_InProduction = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.GCM_PROD_MODE))
+            if (super.getString(Option.GCM_PROD_MODE).isNotEmpty()) {
+                this.GCM_InProduction = java.lang.Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.FCM_SENDER_ID) != null) {
-                this.FCM_SenderID = super.getString(AbstractClient.Builder.Option.FCM_SENDER_ID)
+            if (super.getString(Option.FCM_SENDER_ID).isNotEmpty()) {
+                this.FCM_SenderID = super.getString(Option.FCM_SENDER_ID)
             }
 
-            if (super.getString(AbstractClient.Builder.Option.DEBUG_MODE) != null) {
-                this.debugMode = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.DEBUG_MODE))
+            if (super.getString(Option.DEBUG_MODE).isNotEmpty()) {
+                this.debugMode = java.lang.Boolean.parseBoolean(super.getString(Option.DEBUG_MODE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.CLIENT_REQUEST_MULTITHREADING) != null) {
-                this.clientRequestMultithreading = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.CLIENT_REQUEST_MULTITHREADING))
+            if (super.getString(Option.CLIENT_REQUEST_MULTITHREADING).isNotEmpty()) {
+                this.clientRequestMultithreading = java.lang.Boolean.parseBoolean(super.getString(Option.CLIENT_REQUEST_MULTITHREADING))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.NUMBER_THREAD_POOL) != null) {
-                this.numberThreadPool = Integer.parseInt(super.getString(AbstractClient.Builder.Option.NUMBER_THREAD_POOL))
+            if (super.getString(Option.NUMBER_THREAD_POOL).isNotEmpty()) {
+                this.numberThreadPool = Integer.parseInt(super.getString(Option.NUMBER_THREAD_POOL))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BATCH_SIZE) != null) {
-                this.batchSize = Integer.parseInt(super.getString(AbstractClient.Builder.Option.BATCH_SIZE))
+            if (super.getString(Option.BATCH_SIZE).isNotEmpty()) {
+                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BATCH_RATE) != null) {
-                this.batchRate = java.lang.Long.parseLong(super.getString(AbstractClient.Builder.Option.BATCH_RATE))
+            if (super.getString(Option.BATCH_RATE).isNotEmpty()) {
+                this.batchRate = java.lang.Long.parseLong(super.getString(Option.BATCH_RATE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.PARSER) != null) {
+            if (super.getString(Option.PARSER).isNotEmpty()) {
                 try {
-                    val parser = AndroidJson.JSONPARSER.valueOf(super.getString(AbstractClient.Builder.Option.PARSER))
+                    val parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER))
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser)
                 } catch (e: Exception) {
                     Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions())
@@ -627,18 +625,17 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                     //                    e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON)
                 }
-
             }
             setJsonFactory(factory)
 
-            if (super.getString(AbstractClient.Builder.Option.MIC_BASE_URL) != null) {
-                this.MICBaseURL = super.getString(AbstractClient.Builder.Option.MIC_BASE_URL)
+            if (super.getString(Option.MIC_BASE_URL).isNotEmpty()) {
+                this.MICBaseURL = super.getString(Option.MIC_BASE_URL)
             }
-            if (super.getString(AbstractClient.Builder.Option.MIC_VERSION) != null) {
-                this.MICVersion = super.getString(AbstractClient.Builder.Option.MIC_VERSION)
+            if (super.getString(Option.MIC_VERSION).isNotEmpty()) {
+                this.MICVersion = super.getString(Option.MIC_VERSION)
             }
-            if (super.getString(AbstractClient.Builder.Option.KINVEY_API_VERSION) != null) {
-                AbstractClient.KINVEY_API_VERSION = super.getString(AbstractClient.Builder.Option.KINVEY_API_VERSION)
+            if (super.getString(Option.KINVEY_API_VERSION).isNotEmpty()) {
+                KINVEY_API_VERSION = super.getString(Option.KINVEY_API_VERSION)
             }
         }
 
@@ -895,7 +892,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param callback
          * @return
          */
-        fun setRetrieveUserCallback(callback: KinveyUserCallback<User>?): Client.Builder<T> {
+        fun setRetrieveUserCallback(callback: KinveyUserCallback<User>?): Builder<T> {
             this.retrieveUserCallback = callback as KinveyUserCallback<T>?
             return this
         }
@@ -906,7 +903,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param fcmEnabled - should push use FCM, defaults to true
          * @return the current instance of the builder
          */
-        fun enableFCM(fcmEnabled: Boolean): Client.Builder<*> {
+        fun enableFCM(fcmEnabled: Boolean): Builder<*> {
             this.FCM_Enabled = fcmEnabled
             return this
         }
@@ -917,7 +914,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param senderID - the senderID to register
          * @return the current instance of the builder
          */
-        fun setSenderIDs(senderID: String): Client.Builder<*> {
+        fun setSenderIDs(senderID: String): Builder<*> {
             this.FCM_SenderID = senderID
             return this
         }
@@ -926,12 +923,12 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          *
          * @see  com.kinvey.java.core.AbstractKinveyJsonClient.Builder.setBaseUrl
          */
-        override fun setBaseUrl(baseUrl: String): Client.Builder<*> {
+        override fun setBaseUrl(baseUrl: String): Builder<*> {
             super.setBaseUrl(baseUrl)
             return this
         }
 
-        fun setGcmInProduction(inProduction: Boolean): Client.Builder<*> {
+        fun setGcmInProduction(inProduction: Boolean): Builder<*> {
             this.GCM_InProduction = inProduction
             return this
         }
