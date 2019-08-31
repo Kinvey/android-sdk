@@ -24,7 +24,6 @@ class LiveServiceRouter {
     private var subscribeCallback: SubscribeCallback? = null
     private var mapChannelToCallback: MutableMap<String, KinveyLiveServiceCallback<String>>? = null
 
-
     val isInitialized: Boolean
         get() = pubnubClient != null
 
@@ -70,7 +69,7 @@ class LiveServiceRouter {
                 pubnubClient?.removeListener(subscribeCallback)
                 pubnubClient?.unsubscribe()?.channelGroups(listOf<String>(channelGroup ?: ""))?.execute()
                 this.mapChannelToCallback = null
-                pubnubClient!!.destroy()
+                pubnubClient?.destroy()
                 pubnubClient = null
                 channelGroup = null
                 client = null
@@ -79,17 +78,21 @@ class LiveServiceRouter {
         }
     }
 
-    internal fun subscribeCollection(collectionName: String, liveServiceCallback: KinveyLiveServiceCallback<String>): Boolean {
+    fun subscribeCallback(collectionName: String, callback: KinveyLiveServiceCallback<String>): Boolean {
         if (isInitialized) {
             synchronized(lock) {
-                addChannel(getChannel(collectionName), liveServiceCallback)
+                addChannel(getChannel(collectionName), callback)
                 return true
             }
         }
         return false
     }
 
-    internal fun unsubscribeCollection(collectionName: String) {
+    fun subscribeCallback(channel: String, message: String) {
+        mapChannelToCallback?.let { map -> map[channel]?.onNext(message) }
+    }
+
+    fun unsubscribeCallback(collectionName: String) {
         if (isInitialized) {
             synchronized(lock) {
                 removeChannel(getChannel(collectionName))
@@ -108,10 +111,6 @@ class LiveServiceRouter {
 
     private fun removeChannel(channel: String) {
         mapChannelToCallback?.remove(channel)
-    }
-
-    private fun subscribeCallback(channel: String, message: String) {
-        mapChannelToCallback?.let { map -> map[channel]?.onNext(message) }
     }
 
     private fun handleStatusMessage(status: PNStatus) {}

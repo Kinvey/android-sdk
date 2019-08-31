@@ -14,6 +14,7 @@ import com.kinvey.android.callback.KinveyMICCallback;
 import com.kinvey.android.model.User;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.androidTest.model.TestUser;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.auth.Credential;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.store.UserStoreRequestManager;
@@ -61,7 +62,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMicHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
     }
 
     // Check clientId (should be absent second part of client_id) in auth link for MICLoginPage
@@ -70,7 +71,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMICApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMicHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
     }
 
     // Check that myURLToRender contains openId parameter
@@ -194,13 +195,13 @@ public class MICLoginTest {
 
     @Test
     public void testMICDefaultAPIVersion() throws IOException {
-        assertEquals("v3", client.getMICApiVersion());
+        assertEquals("v3", client.getMicApiVersion());
     }
 
     @Test
     public void testMICCustomAPIVersion() throws IOException {
-        client.setMICApiVersion("1");
-        assertEquals("v1", client.getMICApiVersion());
+        client.setMicApiVersion("1");
+        assertEquals("v1", client.getMicApiVersion());
     }
 
 }

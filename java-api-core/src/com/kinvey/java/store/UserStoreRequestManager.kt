@@ -161,7 +161,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val credentialManager = CredentialManager(client.store)
         (client.kinveyRequestInitializer as KinveyClientRequestInitializer)
                 .setCredential(credentialManager.createAndStoreCredential(response, userObject.id))
-        client.clientUser.user = currentUser.id
+        client.clientUser?.user = currentUser.id
         client.activeUser = currentUser
         return currentUser
     }
@@ -178,7 +178,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val credentialManager = CredentialManager(client.store)
         (client.kinveyRequestInitializer as KinveyClientRequestInitializer)
                 .setCredential(credentialManager.createAndStoreCredential(userObject))
-        client.clientUser.user = userObject.id
+        client.clientUser?.user = userObject.id
         client.activeUser = userObject
         return userObject
     }
@@ -713,7 +713,7 @@ class UserStoreRequestManager<T : BaseUser> {
         data["refresh_token"] = refreshToken
         data["redirect_uri"] = micRedirectURI
         var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
-        val clientId = client.store.load(client.activeUser?.id).clientId
+        val clientId = client.store?.load(client.activeUser?.id)?.clientId
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
@@ -846,8 +846,8 @@ class UserStoreRequestManager<T : BaseUser> {
                 initUser(credential, loggedUser) //only token and user_id is initialized here
                 var savedUser: T? = null
                 try {
-                    savedUser = client.userCacheManager.getCache(ACTIVE_USER_COLLECTION_NAME, client.userClass, java.lang.Long.MAX_VALUE)
-                            .get(loggedUser.id!!) //getting full user info from cache
+                    savedUser = client.userCacheManager?.getCache(ACTIVE_USER_COLLECTION_NAME,
+                                client.userClass, java.lang.Long.MAX_VALUE)?.get(loggedUser.id!!) //getting full user info from cache
                     if (savedUser != null) {
                         savedUser.authToken = loggedUser.authToken
                         savedUser.setAuthTokenToKmd(loggedUser.authToken!!)
@@ -865,8 +865,8 @@ class UserStoreRequestManager<T : BaseUser> {
             initUser(loggedUser)
             try {
                 if (client.userCacheManager != null) {
-                    client.userCacheManager.getCache(ACTIVE_USER_COLLECTION_NAME, client.userClass, java.lang.Long.MAX_VALUE)
-                            .save(loggedUser)
+                    client.userCacheManager?.getCache(ACTIVE_USER_COLLECTION_NAME,
+                            client.userClass, java.lang.Long.MAX_VALUE)?.save(loggedUser)
                 }
             } catch (e: KinveyException) {
                 Logger.ERROR(e.reason)

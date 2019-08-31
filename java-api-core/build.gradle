@@ -87,9 +87,9 @@ dependencies {
         exclude(module: 'guava-jdk5')
     }
     implementation 'com.google.dexmaker:dexmaker:1.2'
-    implementation 'org.apache.ant:ant:1.8.0'
-    implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
-    implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.16'
+    //implementation 'org.apache.ant:ant:1.8.0'
+    implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.26.1'
+    implementation group: 'org.codehaus.mojo', name: 'animal-sniffer-annotations', version: '1.18'
     // Use the Kotlin JDK 8 standard library.
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 

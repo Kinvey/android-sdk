@@ -32,6 +32,7 @@ import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.sync.KinveyPullCallback;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.model.KinveyPullResponse;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;

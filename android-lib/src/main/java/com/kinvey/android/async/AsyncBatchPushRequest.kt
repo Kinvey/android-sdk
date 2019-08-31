@@ -55,7 +55,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
 
     private var progress = 0
     private var fullCount = 0
-    private val cache: ICache<T> = client.cacheManager.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
+    private val cache: ICache<T>? = client.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
 
     private val errors = mutableListOf<Exception>()
     private val batchSyncItems = mutableListOf<SyncItem>()
@@ -108,7 +108,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
                     SyncRequest.HttpVerb.SAVE, // the SAVE case need for backward compatibility
                     SyncRequest.HttpVerb.POST,
                     SyncRequest.HttpVerb.PUT -> {
-                        item = cache.get(itemId)
+                        item = cache?.get(itemId)
                         if (item == null) {
                             // check that item wasn't deleted before
                             // if item wasn't found, it means that the item was deleted from the Cache by Delete request and the item will be deleted in case:DELETE
@@ -161,12 +161,12 @@ class AsyncBatchPushRequest<T : GenericJson>(
             if (syncRequest?.httpVerb == SyncRequest.HttpVerb.POST) {
                 val tempID = syncRequest.entityID.id
                 resultItem = manager.executeRequest(client, syncRequest)
-                val temp = cache.get(tempID)
+                val temp = cache?.get(tempID)
                 val resultValue = resultItem[_ID]
                 temp?.let { item ->
                     if (resultItem != null) { item.set(_ID, resultValue) }
-                    cache.delete(tempID)
-                    cache.save(item)
+                    cache?.delete(tempID)
+                    cache?.save(item)
                 }
             } else {
                 resultItem = manager.executeRequest(client, syncRequest)
@@ -183,8 +183,8 @@ class AsyncBatchPushRequest<T : GenericJson>(
             val tempID = item[_ID] as String?
             val entityID = item.entityID.id
             if (tempID != null) { manager.deleteCachedItem(tempID) }
-            if (entityID != null) { cache.delete(entityID) }
-            result?.entityList?.filterNotNull()?.onEach { resultItem -> cache.save(resultItem) }
+            if (entityID != null) { cache?.delete(entityID) }
+            result?.entityList?.filterNotNull()?.onEach { resultItem -> cache?.save(resultItem) }
         }
     }
 
@@ -192,7 +192,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private fun getSaveItems(syncItems: List<SyncItem>): List<T> {
         return syncItems.mapNotNull { s ->
             val id = s.entityID?.id
-            if (id?.isNotEmpty() == true) { cache.get(id) } else null
+            if (id?.isNotEmpty() == true) { cache?.get(id) } else null
         }
     }
 

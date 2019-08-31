@@ -309,7 +309,7 @@ public class EncryptionTest {
         byte[] key = new byte[64];
         new SecureRandom().nextBytes(key);
         client = new Client.Builder(mContext).setEncryptionKey(key).build();
-        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = (FileStore) client.getFileStore(StoreType.SYNC);
         assertNotNull(fileStore);
     }
 
@@ -318,7 +318,7 @@ public class EncryptionTest {
         byte[] key = new byte[64];
         new SecureRandom().nextBytes(key);
         client = new Client.Builder(mContext).setEncryptionKey(key).build();
-        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = (FileStore) client.getFileStore(StoreType.SYNC);
         assertNotNull(fileStore);
         Client clientWithoutEncryption = new Client.Builder(mContext).build();
         KinveyException kinveyException = null;
@@ -335,10 +335,10 @@ public class EncryptionTest {
         byte[] key = new byte[64];
         new SecureRandom().nextBytes(key);
         client = new Client.Builder(mContext).setEncryptionKey(key).build();
-        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = (FileStore) client.getFileStore(StoreType.SYNC);
         assertNotNull(fileStore);
         Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
-        FileStore secondFileStore = secondClient.getFileStore(StoreType.SYNC);
+        FileStore secondFileStore = (FileStore) secondClient.getFileStore(StoreType.SYNC);
         assertNotNull(secondFileStore);
     }
 
@@ -350,7 +350,7 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = (FileStore) client.getFileStore(StoreType.SYNC);
         File file = createFile();
         DefaultUploadProgressListener listener = uploadFileWithMetadata(fileStore, file, testMetadata());
         assertNotNull(listener.fileMetaDataResult);
@@ -366,14 +366,14 @@ public class EncryptionTest {
         UserKinveyClientCallback callback = login(USERNAME, PASSWORD);
         assertNull(callback.error);
         assertNotNull(callback.result);
-        FileStore fileStore = client.getFileStore(StoreType.SYNC);
+        FileStore fileStore = (FileStore) client.getFileStore(StoreType.SYNC);
         File file = createFile();
         DefaultUploadProgressListener listener = uploadFileWithMetadata(fileStore, file, testMetadata());
         assertNotNull(listener.fileMetaDataResult);
         assertNull(listener.error);
         file.delete();
         Client secondClient = new Client.Builder(mContext).setEncryptionKey(key).build();
-        FileStore secondFileStore = secondClient.getFileStore(StoreType.SYNC);
+        FileStore secondFileStore = (FileStore) secondClient.getFileStore(StoreType.SYNC);
         assertNotNull(secondFileStore);
         DefaultDownloadProgressListener downloadListener = downloadFile(secondFileStore, listener.fileMetaDataResult);
         assertNotNull(downloadListener.fileMetaDataResult);

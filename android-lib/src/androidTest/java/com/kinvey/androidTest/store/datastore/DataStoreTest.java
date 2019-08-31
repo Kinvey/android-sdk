@@ -25,6 +25,7 @@ import com.kinvey.android.sync.KinveyPullCallback;
 import com.kinvey.androidTest.model.DateExample;
 import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.PersonArray;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.core.AbstractKinveyClient;
 import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.KinveyPullResponse;
@@ -120,10 +121,10 @@ public class DataStoreTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AbstractClient.Companion.setKINVEY_API_VERSION("4");
+        AbstractClient.KINVEY_API_VERSION = "4";
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        AbstractClient.Companion.setKINVEY_API_VERSION("4");
+        AbstractClient.KINVEY_API_VERSION = "4";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -1328,7 +1329,7 @@ public class DataStoreTest {
         assert field != null;
         field.setAccessible(true);
         try {
-            field.set(client, AbstractClient.Companion.getDEFAULT_BASE_URL());
+            field.set(client, AbstractClient.DEFAULT_BASE_URL);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

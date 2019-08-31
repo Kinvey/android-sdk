@@ -45,8 +45,8 @@ import com.kinvey.java.auth.CredentialManager
 import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
 import com.kinvey.java.core.KinveyClientRequestInitializer
-import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkFileManager
+import com.kinvey.java.store.BaseFileStore
 import com.kinvey.java.store.BaseUserStore
 import com.kinvey.java.store.StoreType
 
@@ -102,11 +102,9 @@ open class Client<T : User>
  */
 protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer, rootUrl: String,
                       servicePath: String, objectParser: JsonObjectParser,
-                      kinveyRequestInitializer: KinveyClientRequestInitializer, store: CredentialStore,
-                      requestPolicy: BackOffPolicy, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
-
-    private var syncCacheManager: RealmCacheManager? = null
-    private var userCacheManager: RealmCacheManager? = null
+                      kinveyRequestInitializer: KinveyClientRequestInitializer, credentialStore: CredentialStore?,
+                      requestPolicy: BackOffPolicy, private val encryptionKey: ByteArray?, context: Context)
+    : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, credentialStore, requestPolicy) {
 
     /**
      * Get a reference to the Application Context used to create this instance of the Client
@@ -121,7 +119,19 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
     private var pushProvider: AbstractPush? = null
     private var userDiscovery: AsyncUserDiscovery? = null
     private var userGroup: AsyncUserGroup? = null
-    private var clientUser: ClientUser? = null
+
+    override var clientUser: ClientUser? = null
+        get() {
+            val ctx = this.context ?: return null
+            synchronized(lock) {
+                if (field == null) {
+                    field = AndroidUserStore.getUserStore(ctx)
+                }
+            }
+            return field
+        }
+
+
     //    private AsyncUser currentUser;
     /**
      * How long, in milliseconds, should offline wait before retrying a failed request
@@ -138,8 +148,55 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         private set
     var isClientRequestMultithreading: Boolean = false
         private set
-    private var cacheManager: RealmCacheManager? = null
+
+    override var cacheManager: ICacheManager? = null
+
     var pushServiceClass: Class<*>? = null
+
+    override var activeUser: T? = null
+        get() {
+            synchronized(lock) {
+                return field
+            }
+        }
+        set(value) {
+            synchronized(lock) {
+                field = value
+            }
+        }
+
+    override var userCacheManager: ICacheManager? = null
+        get() = super.userCacheManager
+        set(value) {
+            field = value
+        }
+
+    override var syncCacheManager: ICacheManager? = null
+
+    override var user: T? = null
+        get () {
+            synchronized(lock) {
+                return field
+            }
+        }
+
+    override val deviceId: String
+        get() = UuidFactory(context).deviceUuid.toString()
+
+    override var fileCacheFolder: String? = null
+        get() {
+            return context?.getExternalFilesDir("KinveyFiles")?.absolutePath
+        }
+
+    override fun getFileStore(storeType: StoreType): FileStore {
+        return FileStore(NetworkFileManager(this),
+                cacheManager, 60 * 1000 * 1000L,
+                storeType, fileCacheFolder)
+    }
+
+    //override fun getSyncCacheManager(): ICacheManager? {
+    //    return syncCacheManager
+    //}
 
     init {
         Logger.init(AndroidLogger())
@@ -148,26 +205,6 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         cacheManager = RealmCacheManager(encryptionKey, this)
         syncCacheManager = RealmCacheManager(encryptionKey, "sync_", this)
         userCacheManager = RealmCacheManager(encryptionKey, this)
-    }
-
-
-    @Deprecated("Renamed to {@link #setActiveUser(T)}")
-    fun setUser(user: T) {
-        synchronized(lock) {
-            this.user = user
-        }
-    }
-
-    override fun setActiveUser(user: T?) {
-        synchronized(lock) {
-            this.user = user
-        }
-    }
-
-    override fun getActiveUser(): T {
-        synchronized(lock) {
-            return this.user
-        }
     }
 
     override fun performLockDown() {
@@ -181,9 +218,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         syncCacheManager = RealmCacheManager(encryptionKey, "sync_", this)
         userCacheManager = RealmCacheManager(encryptionKey, this)
         val extensions = extensions
-        for (e in extensions) {
-            e.performLockdown(activeUser.id)
-        }
+        extensions?.onEach { e -> e.performLockdown(activeUser?.id ?: "") }
     }
 
     /**
@@ -238,24 +273,10 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
      * @return Instance of [com.kinvey.java.UserDiscovery] for the defined collection
      */
 
-    /*    public <I extends GenericJson, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-        synchronized (lock) {
-            return new AsyncCustomEndpoints(myClass, this);
-        }
-    }*/
-
-    override fun <I : GenericJson?, O : Any?> customEndpoints(myClass: Class<O>?): CustomEndpoints<I, O> {
+    override fun <I : GenericJson, O> customEndpoints(myClass: Class<O>?): AsyncCustomEndpoints<I, O> {
         synchronized(lock) {
             return AsyncCustomEndpoints(myClass as Class<O>, this)
         }
-    }
-
-    override fun getCacheManager(): ICacheManager? {
-        return cacheManager
-    }
-
-    override fun getUserCacheManager(): ICacheManager? {
-        return userCacheManager
     }
 
     /**
@@ -322,18 +343,6 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         }
 
     }
-
-    /** {@inheritDoc}  */
-    override fun getClientUser(): ClientUser? {
-        val ctx = this.context ?: return null
-        synchronized(lock) {
-            if (this.clientUser == null) {
-                this.clientUser = AndroidUserStore.getUserStore(ctx)
-            }
-            return this.clientUser
-        }
-    }
-
 
     /**
      * Push factory method
@@ -458,12 +467,13 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param transport HttpTransport
          */
         @JvmOverloads
-        constructor(appKey: String, appSecret: String, context: Context, transport: HttpTransport = newCompatibleTransport()) : super(transport, null, KinveyClientRequestInitializer(appKey, appSecret, KinveyHeaders(context))) {
+        constructor(appKey: String, appSecret: String, context: Context, transport: HttpTransport = newCompatibleTransport())
+                : super(transport, null, KinveyClientRequestInitializer(appKey, appSecret, KinveyHeaders(context))) {
             this.setJsonFactory(factory)
             this.context = context.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
 
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
                     this.setCredentialStore(AndroidCredentialStore(this.context!!))
                 } catch (ex: Exception) {
@@ -524,7 +534,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
 
             this.context = context.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
                     this.setCredentialStore(AndroidCredentialStore(this.context!!))
                 } catch (ex: AndroidCredentialStoreException) {
@@ -676,7 +686,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
 
             this.context = context.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
                     this.setCredentialStore(AndroidCredentialStore(this.context!!))
                 } catch (ex: AndroidCredentialStoreException) {
@@ -763,7 +773,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
             Realm.init(ctx)
             val client = Client<T>(transport,
                     httpRequestInitializer, baseUrl,
-                    servicePath, this.objectParser, kinveyClientRequestInitializer, credentialStore,
+                    servicePath, this.objectParser, kinveyClientRequestInitializer, store,
                     requestBackoffPolicy, this.encryptionKey, ctx)
 
             client.clientUser = AndroidUserStore.getUserStore(ctx)
@@ -790,10 +800,10 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
             if (this.MICVersion != null) {
                 client.micApiVersion = this.MICVersion
             } else {
-                client.micApiVersion = AbstractClient.DEFAULT_MIC_API_VERSION
+                client.micApiVersion = DEFAULT_MIC_API_VERSION
             }
             if (this.MICBaseURL != null) {
-                client.micHostName = this.MICBaseURL
+                client.micHostName = this.MICBaseURL ?: ""
             }
             if (!Strings.isNullOrEmpty(this.instanceID)) {
                 client.micHostName = Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH
@@ -824,12 +834,11 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                 }
             } catch (ex: AndroidCredentialStoreException) {
                 Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
-                client?.setActiveUser(null)
+                client?.activeUser = null
             } catch (ex: IOException) {
                 Logger.ERROR("Credential store failed to load")
-                client?.setActiveUser(null)
+                client?.activeUser = null
             }
-
         }
 
         /**
@@ -931,10 +940,9 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         private fun retrieveUserFromCredentialStore(client: Client<T>?): Credential? {
             var credential: Credential? = null
             if (client?.isUserLoggedIn == false) {
-                val userID = client.getClientUser()?.user
+                val userID = client.clientUser?.user
                 if (userID != null && userID != "") {
-                    var store: CredentialStore? = credentialStore
-
+                    var store: CredentialStore? = store
                     if (store == null) {
                         store = AndroidCredentialStore(context!!)
                     }
@@ -952,10 +960,9 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
             } catch (ex: IOException) {
                 Logger.ERROR("Could not retrieve user Credentials")
             }
-
             var exception: Exception? = null
             try {
-                client?.setActiveUser(BaseUserStore.convenience(client))
+                client?.activeUser = BaseUserStore.convenience(client)
             } catch (error: Exception) {
                 exception = error
                 if (error is HttpResponseException) {
@@ -1083,25 +1090,6 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
      * @param context - Your Android Application Context
      */
 
-
-    fun getKinveyHandlerThread(): KinveyHandlerThread? {
-        return kinveyHandlerThread
-    }
-
-    override fun getFileCacheFolder(): String? {
-        return context?.getExternalFilesDir("KinveyFiles")?.absolutePath
-    }
-
-    override fun getFileStore(storeType: StoreType): FileStore {
-        return FileStore(NetworkFileManager(this),
-                getCacheManager(), 60 * 60 * 1000L, storeType, fileCacheFolder
-        )
-    }
-
-    override fun getSyncCacheManager(): ICacheManager? {
-        return syncCacheManager
-    }
-
     /**
      * Terminates KinveyHandlerThread.
      * Should be called if the Client instance is not used anymore to prevent from memory leaks.
@@ -1113,16 +1101,13 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         kinveyHandlerThread?.interrupt()
     }
 
-    override fun getDeviceId(): String {
-        return UuidFactory(context).deviceUuid.toString()
-    }
-
     companion object {
 
         /** global TAG used in Android logging  */
         const val TAG = "Kinvey - Client"
 
-        private var kinveyHandlerThread: KinveyHandlerThread? = null
+        @JvmStatic
+        var kinveyHandlerThread: KinveyHandlerThread? = null
 
         @JvmStatic
         private var sharedInstance: Client<User>? = null

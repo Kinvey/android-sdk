@@ -67,14 +67,21 @@ abstract class AbstractClient<T : BaseUser>
 protected constructor(transport: HttpTransport,
                       httpRequestInitializer: HttpRequestInitializer, rootUrl: String,
                       servicePath: String, objectParser: JsonObjectParser,
-                      kinveyRequestInitializer: KinveyClientRequestInitializer, val store: CredentialStore,
-                      requestPolicy: BackOffPolicy) : AbstractKinveyJsonClient(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy) {
+                      kinveyRequestInitializer: KinveyClientRequestInitializer, val store: CredentialStore?,
+                      requestPolicy: BackOffPolicy) : AbstractKinveyJsonClient(transport, httpRequestInitializer,
+                      rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy) {
 
     /** used to synchronized access to the local api wrappers  */
     protected val lock = Any()
 
     /** List of extensions, if they need to be locked down  */
-    private var extensions: List<ClientExtension>? = mutableListOf()
+    protected var extensions: List<ClientExtension>? = mutableListOf()
+        get(): List<ClientExtension>? {
+            if (field == null) {
+                field = mutableListOf()
+            }
+            return field
+        }
 
     /** Class to use for representing a BaseUser  */
     var userClass: Class<T> = BaseUser::class.java as Class<T>
@@ -99,7 +106,7 @@ protected constructor(transport: HttpTransport,
     @set:Deprecated("use {@link BaseDataStore#setDeltaSetCachingEnabled(boolean)} ()} instead.")
     var isUseDeltaCache: Boolean = false
 
-    protected var user: T? = null
+    protected open var user: T? = null
 
     /**
      * The hostname to use for MIC authentication
@@ -130,17 +137,22 @@ protected constructor(transport: HttpTransport,
     val isInitialize: Boolean
         get() = (kinveyRequestInitializer as KinveyClientRequestInitializer).appKey != null && (kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret != null
 
-    abstract val clientUser: ClientUser
+    open var clientUser: ClientUser? = null
 
-    abstract var activeUser: T?
+    open var activeUser: T? = null
 
-    abstract val cacheManager: ICacheManager
+    open var cacheManager: ICacheManager? = null
 
-    abstract val userCacheManager: ICacheManager
+    open var userCacheManager: ICacheManager? = null
 
-    abstract val fileCacheFolder: String
+    open var fileCacheFolder: String? = null
 
-    protected abstract val syncCacheManager: ICacheManager
+    protected open var syncCacheManager: ICacheManager? = null
+
+    val credentialStore: CredentialStore?
+        get() {
+            return store
+        }
 
     /**
      *
@@ -152,7 +164,7 @@ protected constructor(transport: HttpTransport,
     val userArrayClass: Class<*>
         get() = Array.newInstance(userClass, 0)::class.java
 
-    abstract val deviceId: String
+    open val deviceId: String = ""
 
     fun setClientAppVersion(major: Int, minor: Int, revision: Int) {
         clientAppVersion = "$major.$minor.$revision"
@@ -183,11 +195,11 @@ protected constructor(transport: HttpTransport,
         return Query(MongoQueryFilter.MongoQueryFilterBuilder())
     }
 
-    abstract fun userDiscovery(): UserDiscovery<*>
+    abstract fun userDiscovery(): UserDiscovery<*>?
 
-    abstract fun userGroup(): UserGroup
+    abstract fun userGroup(): UserGroup?
 
-    abstract fun <I : GenericJson, O> customEndpoints(myClass: Class<O>): CustomEndpoints<I, O>
+    abstract fun <I : GenericJson, O> customEndpoints(myClass: Class<O>?): CustomEndpoints<I, O>
 
     /**
      * Pings the Kinvey backend service with a logged in user.
@@ -250,13 +262,6 @@ protected constructor(transport: HttpTransport,
         (extensions as MutableList).add(extension)
     }
 
-    fun getExtensions(): List<ClientExtension> {
-        if (extensions == null) {
-            extensions = mutableListOf()
-        }
-        return extensions as List<ClientExtension>
-    }
-
     /**
      * Disable logging for the HttpTransport class to Level.FINEST.
      */
@@ -271,17 +276,17 @@ protected constructor(transport: HttpTransport,
      */
     abstract class Builder : AbstractKinveyJsonClient.Builder {
         protected var instanceID: String = ""
-        private var store: CredentialStore? = null
         protected val props = Properties()
         protected var requestTimeout = DEFAULT_REQUEST_TIMEOUT
         var useDeltaCache: Boolean = false
+        var store: CredentialStore? = null
 
         /**
          * @param transport              HttpTransport
          * @param httpRequestInitializer HttpRequestInitializer
          */
         constructor(transport: HttpTransport,
-                    httpRequestInitializer: HttpRequestInitializer) : super(transport, DEFAULT_BASE_URL,
+                    httpRequestInitializer: HttpRequestInitializer?) : super(transport, DEFAULT_BASE_URL,
                 DEFAULT_SERVICE_PATH, httpRequestInitializer) {
         }
 
@@ -291,7 +296,7 @@ protected constructor(transport: HttpTransport,
          * @param clientRequestInitializer KinveyClientRequestInitializer
          */
         constructor(transport: HttpTransport,
-                    httpRequestInitializer: HttpRequestInitializer,
+                    httpRequestInitializer: HttpRequestInitializer?,
                     clientRequestInitializer: KinveyClientRequestInitializer) : super(transport, DEFAULT_BASE_URL,
                 DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer) {
         }
@@ -324,10 +329,6 @@ protected constructor(transport: HttpTransport,
         open fun setCredentialStore(store: CredentialStore): Builder {
             this.store = store
             return this
-        }
-
-        fun getCredentialStore(): CredentialStore? {
-            return store
         }
 
         /*
@@ -499,8 +500,8 @@ protected constructor(transport: HttpTransport,
         /**
          * Non-default version of API. Developer should initialize it for change API version
          */
-        @JvmStatic
-        var KINVEY_API_VERSION: String? = null
+        @JvmStatic lateinit var KINVEY_API_VERSION: String
+
 
         @JvmStatic
         var sharedInstance: AbstractClient<*>? = null

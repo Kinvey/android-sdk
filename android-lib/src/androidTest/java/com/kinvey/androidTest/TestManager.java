@@ -20,6 +20,7 @@ import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.store.datastore.PaginationTest;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Query;
 import com.kinvey.java.auth.KinveyAuthRequest;
 import com.kinvey.java.core.KinveyCachedAggregateCallback;

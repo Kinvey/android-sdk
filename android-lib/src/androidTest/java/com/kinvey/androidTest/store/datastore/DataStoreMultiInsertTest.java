@@ -22,6 +22,7 @@ import com.kinvey.androidTest.TestManager;
 import com.kinvey.androidTest.model.EntitySet;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveySaveBatchException;
 import com.kinvey.java.Logger;
@@ -76,7 +77,7 @@ public class DataStoreMultiInsertTest {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        AbstractClient.Companion.setKINVEY_API_VERSION("5");
+        AbstractClient.KINVEY_API_VERSION = "5";
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {
@@ -443,7 +444,7 @@ public class DataStoreMultiInsertTest {
         assert field != null;
         field.setAccessible(true);
         try {
-            field.set(client, AbstractClient.Companion.getDEFAULT_BASE_URL());
+            field.set(client, AbstractClient.DEFAULT_BASE_URL);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

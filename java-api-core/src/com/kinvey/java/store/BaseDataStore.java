@@ -945,14 +945,14 @@ public class BaseDataStore<T extends GenericJson> {
                     liveServiceCallback.onStatus(status);
                 }
             };
-            success = LiveServiceRouter.getInstance().subscribeCollection(collection, callback);
+            success = LiveServiceRouter.getInstance().subscribeCallback(collection, callback);
         }
         return success;
     }
 
     public void unsubscribe() {
         liveServiceCallback = null;
-        LiveServiceRouter.getInstance().unsubscribeCollection(collection);
+        LiveServiceRouter.getInstance().unsubscribeCallback(collection);
     }
 
     private boolean isQueryContainSkipLimit(@Nonnull Query query) {

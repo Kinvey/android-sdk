@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.kinvey.android.AsyncClientRequest;
 import com.kinvey.android.sync.KinveyPushCallback;
 import com.kinvey.android.sync.KinveyPushResponse;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.Constants;
 import com.kinvey.java.KinveyException;
 import com.kinvey.java.network.NetworkManager;

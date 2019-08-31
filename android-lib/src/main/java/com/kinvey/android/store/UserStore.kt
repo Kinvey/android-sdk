@@ -190,12 +190,12 @@ class UserStore {
 
             val ret = BaseUserStore.loginMobileIdentity(result!!["access_token"]!!.toString(), client)
 
-            val currentCred = client.store.load(client.activeUser.id)
+            val currentCred = client.store?.load(client.activeUser?.id)
             if (result[REFRESH_TOKEN] != null) {
-                currentCred.refreshToken = result["refresh_token"]!!.toString()
+                currentCred?.refreshToken = result["refresh_token"]!!.toString()
             }
-            currentCred.clientId = clientId
-            client.store.store(client.activeUser.id, currentCred)
+            currentCred?.clientId = clientId
+            client.store?.store(client.activeUser?.id, currentCred)
 
             return ret
         }
@@ -209,12 +209,12 @@ class UserStore {
             requestManager.micRedirectURI = redirectURI
             val result = requestManager.getOAuthToken(clientId, username, password).execute()
             val ret = BaseUserStore.loginMobileIdentity(result!![ACCESS_TOKEN]!!.toString(), client)
-            val currentCred = client.store.load(client.activeUser.id)
+            val currentCred = client.store?.load(client.activeUser?.id)
             if (result[REFRESH_TOKEN] != null) {
-                currentCred.refreshToken = result[REFRESH_TOKEN]!!.toString()
+                currentCred?.refreshToken = result[REFRESH_TOKEN]!!.toString()
             }
-            currentCred.clientId = clientId
-            client.store.store(client.activeUser.id, currentCred)
+            currentCred?.clientId = clientId
+            client.store?.store(client.activeUser?.id, currentCred)
             return ret
         }
     }

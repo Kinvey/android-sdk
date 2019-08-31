@@ -28,11 +28,9 @@ import com.google.common.base.Preconditions
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
-import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.store.UserStoreRequestManager
-import org.apache.tools.ant.filters.StringInputStream
 
 /**
  * @author m0rganic
@@ -314,7 +312,7 @@ protected constructor(
         if (response.getStatusCode() == 401 && !hasRetryed) {
             //get the refresh token
             Logger.INFO("get the refresh token")
-            val cred = client.store.load(client.activeUser?.id)
+            val cred = client.store?.load(client.activeUser?.id)
             var refreshToken: String? = null
 
             if (cred != null) {
@@ -341,10 +339,10 @@ protected constructor(
                 userStoreRequestManager.loginMobileIdentityBlocking(result!!["access_token"]!!.toString()).execute()
 
                 //store the new refresh token
-                val currentCred = client.store.load(client.activeUser?.id)
-                currentCred.refreshToken = result["refresh_token"]!!.toString()
-                client.store.store(client.activeUser?.id, currentCred)
-                currentCred.initialize(this)
+                val currentCred = client.store?.load(client.activeUser?.id)
+                currentCred?.refreshToken = result["refresh_token"]!!.toString()
+                client.store?.store(client.activeUser?.id, currentCred)
+                currentCred?.initialize(this)
                 return executeUnparsed()
             }
 

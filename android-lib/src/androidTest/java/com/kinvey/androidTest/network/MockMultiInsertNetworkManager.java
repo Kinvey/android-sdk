@@ -1,6 +1,7 @@
 package com.kinvey.androidTest.network;
 
 import com.google.api.client.json.GenericJson;
+import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
