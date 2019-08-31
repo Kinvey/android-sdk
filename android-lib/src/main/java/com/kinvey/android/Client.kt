@@ -550,7 +550,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * loading additional properties from file
          * @param properties InputStream of properties file
          */
-        private fun loadProperties(properties: InputStream) {
+        private fun loadProperties(properties: InputStream?) {
 
             try {
                 super.props.load(properties)
@@ -663,7 +663,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param transport - custom user http transport
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream, transport: HttpTransport, context: Context) : super(transport, null) {
+        constructor(properties: InputStream?, transport: HttpTransport, context: Context) : super(transport, null) {
 
             Preconditions.checkNotNull(properties, "properties must be not null")
             loadProperties(properties)
@@ -719,7 +719,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
          * @param properties - InputStream of properties file
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream, context: Context) : this(properties, newCompatibleTransport(), context) {}
+        constructor(properties: InputStream?, context: Context) : this(properties, newCompatibleTransport(), context) {}
 
         /*
          * (non-Javadoc)

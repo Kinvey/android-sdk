@@ -170,7 +170,7 @@ protected constructor(transport: HttpTransport,
         clientAppVersion = "$major.$minor.$revision"
     }
 
-    fun setCustomRequestProperties(customheaders: GenericJson) {
+    fun setCustomRequestProperties(customheaders: GenericJson?) {
         this.customRequestProperties = customheaders
     }
 
