@@ -14,17 +14,23 @@
  *
  */
 
-package com.kinvey.android.callback;
+package com.kinvey.java.model
 
-import com.kinvey.android.model.User;
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
 /**
- * This Callback implementation provides the `onReadyToRender` method, which is called when the login page URL is ready to be displayed to the end user.
- *
- * @author  edwardf
+ * @author edwardf
  */
-public interface KinveyMICCallback<T extends User> extends KinveyUserCallback<T>{
-	
-	void onReadyToRender(String myURLToRender);
+data class KinveyFile(
+
+    @Key("_id")
+    var id: String? = null
+
+
+) : GenericJson() {
+
+    @Key("_type")
+    private val type = "KinveyRef"
 
 }

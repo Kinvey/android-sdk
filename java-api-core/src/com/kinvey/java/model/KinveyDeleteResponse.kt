@@ -14,33 +14,21 @@
  *
  */
 
-package com.kinvey.java.model;
+package com.kinvey.java.model
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
 /**
+ * Used in request to client to delete appdata.
+ *
  * @author edwardf
+ * @since 2.0
  */
-public class KinveyFile extends GenericJson {
-
-    @Key("_type")
-    private String type = "KinveyRef";
-
-    @Key("_id")
-    private String id;
-
-    public KinveyFile(){}
-
-    public KinveyFile(String id){
-        this.setId(id);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-}
+data class KinveyDeleteResponse(
+    /**
+     * The number of objects successfully deleted.
+     */
+    @Key
+    var count: Int = 0
+) : GenericJson()

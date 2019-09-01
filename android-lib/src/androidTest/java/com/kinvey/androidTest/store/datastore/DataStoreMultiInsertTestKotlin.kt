@@ -113,7 +113,7 @@ class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
 
         val findCallback = find(personStore, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertTrue(checkPersonIfSameObjects(personList, findCallback.result?.getResult()))
+        assertTrue(checkPersonIfSameObjects(personList, findCallback.result?.result))
     }
 
     @Test

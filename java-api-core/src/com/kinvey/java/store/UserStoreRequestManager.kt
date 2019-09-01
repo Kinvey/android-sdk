@@ -79,12 +79,12 @@ class UserStoreRequestManager<T : BaseUser> {
     private val client: AbstractClient<T>
     private val builder: KinveyAuthRequest.Builder<T>
 
-    constructor(client: AbstractClient<T>?, builder: KinveyAuthRequest.Builder<T>?) {
+    constructor(client: AbstractClient<*>?, builder: KinveyAuthRequest.Builder<T>?) {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null")
-        this.client = client!!
+        this.client = client!! as AbstractClient<T>
         this.builder = builder!!
-        this.myClazz = client.userClass
+        this.myClazz = client.userClass as Class<T>
         this.builder.setUser(client.activeUser)
         this.clientAppVersion = client.clientAppVersion
         this.customRequestProperties = client.customRequestProperties

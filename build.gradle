@@ -124,7 +124,7 @@ zipAndroid.mustRunAfter copyAndroid
 zipJava.mustRunAfter zipAndroid
 release.mustRunAfter zipJava
 buildscript {
-  ext.kotlin_version = '1.3.41'
+  ext.kotlin_version = '1.3.50'
   repositories {
     mavenCentral()
   }

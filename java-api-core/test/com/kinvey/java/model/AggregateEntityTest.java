@@ -29,7 +29,7 @@ public class AggregateEntityTest extends TestCase {
 
         try {
             ae = new AggregateEntity(fields, null, "field", new Query(), null);
-            assertFalse("should have errored out on null!", true);
+            fail("should have errored out on null!");
         }catch(Exception e){}
 
 

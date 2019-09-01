@@ -207,7 +207,7 @@ public abstract class ClassHash {
         RealmObjectSchema schema = createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, new ArrayList<String>());
         String shortName = TableNameManager.getShortName(name, realm);
         if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)){
-            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD , realm, KinveyMetaData.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
+            RealmObjectSchema innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm, KinveyMetaData.class, SelfReferenceState.DEFAULT, new ArrayList<String>());
             schema.addRealmObjectField(KinveyMetaData.KMD, innerScheme);
         }
         if (!schema.hasField(KinveyMetaData.AccessControlList.ACL)
@@ -761,7 +761,7 @@ public abstract class ClassHash {
         }
         if (realmObject.hasField(KinveyMetaData.AccessControlList.ACL)
                 && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
-                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL )
+                && !collection.endsWith(Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL)
                 && realmObject.getObject(KinveyMetaData.AccessControlList.ACL) != null
                 && realmObject.getObject(KinveyMetaData.AccessControlList.ACL).hasField(ID)) {
             deleteClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm,

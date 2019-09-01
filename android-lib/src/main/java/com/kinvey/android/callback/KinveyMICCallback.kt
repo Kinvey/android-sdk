@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -14,18 +14,17 @@
  *
  */
 
-package com.kinvey.java.model;
+package com.kinvey.android.callback
 
+import com.kinvey.android.model.User
 
-public abstract class AbstractKinveyHeadersResponse {
+/**
+ * This Callback implementation provides the `onReadyToRender` method, which is called when the login page URL is ready to be displayed to the end user.
+ *
+ * @author  edwardf
+ */
+interface KinveyMICCallback<T : User> : KinveyUserCallback<T> {
 
-    private String lastRequestTime;
+    fun onReadyToRender(myURLToRender: String)
 
-    public String getLastRequestTime() {
-        return lastRequestTime;
-    }
-
-    public void setLastRequestTime(String lastRequestTime) {
-        this.lastRequestTime = lastRequestTime;
-    }
 }

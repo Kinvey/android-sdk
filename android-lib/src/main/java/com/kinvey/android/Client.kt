@@ -45,8 +45,8 @@ import com.kinvey.java.auth.CredentialManager
 import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
 import com.kinvey.java.core.KinveyClientRequestInitializer
+import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkFileManager
-import com.kinvey.java.store.BaseFileStore
 import com.kinvey.java.store.BaseUserStore
 import com.kinvey.java.store.StoreType
 
@@ -100,11 +100,13 @@ open class Client<T : User>
  * @param requestPolicy a [BackOffPolicy] for retrying HTTP Requests
  * @param context a [Context] android application context
  */
-protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String,
-                      servicePath: String, objectParser: JsonObjectParser,
-                      kinveyRequestInitializer: KinveyClientRequestInitializer, credentialStore: CredentialStore?,
-                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context)
-    : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, credentialStore, requestPolicy) {
+protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
+                      servicePath: String?, objectParser: JsonObjectParser?,
+                      kinveyRequestInitializer: KinveyClientRequestInitializer?, store: CredentialStore?,
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
+
+    private var syncCacheManager: RealmCacheManager? = null
+    private var userCacheManager: RealmCacheManager? = null
 
     /**
      * Get a reference to the Application Context used to create this instance of the Client
@@ -239,7 +241,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
      *
      * @return Instance of [com.kinvey.java.UserDiscovery] for the defined collection
      */
-    @Deprecated("")
+    @Deprecated("It is deprected now, use more extended version customEndpoints(Class<O> myClass)")
     fun <I : GenericJson, O> customEndpoints(): AsyncCustomEndpoints<I, O> {
         synchronized(lock) {
             return AsyncCustomEndpoints(GenericJson::class.java as Class<O>, this)
