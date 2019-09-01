@@ -13,30 +13,29 @@
  * contents is a violation of applicable laws.
  *
  */
+package com.kinvey.android
 
-package com.kinvey.java.core;
+import android.content.Context
 
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.util.Key;
-import com.kinvey.BuildConfig;
-import com.kinvey.java.AbstractClient;
+import com.google.api.client.util.Key
 
 /**
+ * Standard Kinvey specific headers are added to all requests.
  * @author m0rganic
  * @since 2.0
  */
-public class KinveyHeaders extends HttpHeaders {
+class KinveyHeaders(context: Context) : com.kinvey.java.core.KinveyHeaders() {
 
-    public static final String VERSION = BuildConfig.VERSION;
+    @Key("x-kinvey-device-information")
+    private val deviceInformation: String
 
-    @Key("X-Kinvey-api-Version")
-    private String kinveyApiVersion = AbstractClient.Companion.getKINVEY_API_VERSION() != null ?
-            AbstractClient.Companion.getKINVEY_API_VERSION() : BuildConfig.KINVEY_API_VERSION;
+    @Key("x-kinvey-device-info")
+    private val deviceInfo: String
 
-    private String userAgent = "android-kinvey-http/"+ VERSION;
-
-    public KinveyHeaders() {
-        super();
-        setUserAgent(userAgent);
+    init {
+        val uuidFactory = UuidFactory(context)
+        deviceInformation = uuidFactory.getDeviceInfoHeader(context)
+        deviceInfo = uuidFactory.getDeviceInfoHeader(VERSION)
     }
+
 }

@@ -24,7 +24,8 @@ import com.kinvey.android.sync.KinveyPushCallback
 import com.kinvey.android.sync.KinveyPushResponse
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
-import com.kinvey.java.Constants.*
+import com.kinvey.java.Constants.META_ID
+import com.kinvey.java.Constants._ID
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache

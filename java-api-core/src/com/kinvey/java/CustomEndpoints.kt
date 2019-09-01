@@ -101,7 +101,7 @@ open class CustomEndpoints<I : GenericJson, O> {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun callEndpointBlocking(endpoint: String, input: I): CustomCommand< I, O> {
+    fun callEndpointBlocking(endpoint: String?, input: I?): CustomCommand< I, O> {
         Preconditions.checkNotNull(endpoint, "commandName must not be null")
         val command = CustomCommand(client as AbstractClient<*>, endpoint, input, currentResponseClass as Class<O>)
         client?.initializeRequest(command)
@@ -117,7 +117,7 @@ open class CustomEndpoints<I : GenericJson, O> {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun callEndpointArrayBlocking(endpoint: String, input: I): CustomCommandArray<I, O> {
+    fun callEndpointArrayBlocking(endpoint: String, input: I?): CustomCommandArray<I, O> {
         Preconditions.checkNotNull(endpoint, "commandName must not be null")
         val command = CustomCommandArray(client as AbstractClient<*>, endpoint, input, Array.newInstance(currentResponseClass, 0).javaClass)
         client?.initializeRequest(command)
@@ -128,8 +128,8 @@ open class CustomEndpoints<I : GenericJson, O> {
      * A JSON client request which executes against a custom endpoint returning a single JSON object.
      *
      */
-    class CustomCommand<I : GenericJson, O> constructor(client: AbstractClient<*>, @Key private val endpoint: String,
-                                             args: I, responseClass: Class<O>)
+    class CustomCommand<I : GenericJson, O> constructor(client: AbstractClient<*>, @Key private val endpoint: String?,
+                                             args: I?, responseClass: Class<O>)
         : AbstractKinveyJsonClientRequest<O>(client, "POST", REST_PATH, args, responseClass) {
 
         init {
@@ -148,7 +148,7 @@ open class CustomEndpoints<I : GenericJson, O> {
      * A JSON client request which executes against a custom endpoint returning an array.
      *
      */
-    class CustomCommandArray<I : GenericJson, O> constructor(client: AbstractClient<*>, @Key private val endpoint: String, args: I, responseClass: Class<O>)
+    class CustomCommandArray<I : GenericJson, O> constructor(client: AbstractClient<*>, @Key private val endpoint: String?, args: I?, responseClass: Class<O>)
         : AbstractKinveyJsonClientRequest<O>(client, "POST", REST_PATH, args, responseClass) {
 
         init {

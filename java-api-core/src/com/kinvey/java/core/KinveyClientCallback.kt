@@ -14,13 +14,13 @@
  *
  */
 
-package com.kinvey.java.store;
+package com.kinvey.java.core
+
 
 /**
- * Created by Prots on 2/4/16.
+ * @author edwardf
  */
-public enum WritePolicy {
-    LOCAL_THEN_NETWORK,
-    FORCE_NETWORK,
-    FORCE_LOCAL
+interface KinveyClientCallback<T> {
+    fun onSuccess(result: T)
+    fun onFailure(error: Throwable)
 }

@@ -13,17 +13,28 @@
  * contents is a violation of applicable laws.
  *
  */
-
-package com.kinvey.java.core;
-
+package com.kinvey.android
 
 /**
- * @author edwardf
  *
+ * AndroidCredentialStoreException class.
+ *
+ * @author mjsalinger
+ * @since 2.0
+ * @version $Id: $
  */
-public interface KinveyClientCallback<T> {
+class AndroidCredentialStoreException : Exception {
+    /**
+     *
+     * Constructor for AndroidCredentialStoreException.
+     */
+    constructor() : super("There was an error while attempting to load the credential store.")
 
-    public void onSuccess(T result);
-
-    public void onFailure(Throwable error);
+    /**
+     * AndroidCredentialStoreException constructor
+     *
+     * @param errMsg
+     * error message to use
+     */
+    constructor(errMsg: String) : super(errMsg)
 }

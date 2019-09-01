@@ -14,25 +14,13 @@
  *
  */
 
-package com.kinvey.java.store;
-
-import com.kinvey.java.AbstractClient;
-import com.kinvey.java.model.FileMetaData;
-
-import java.io.FileInputStream;
-import java.io.InputStream;
+package com.kinvey.java.store
 
 /**
- * @author edwardf
+ * Created by Prots on 2/4/16.
  */
-public interface FileCache {
-
-
-    public FileInputStream get(AbstractClient client, String id);
-
-    public String getFilenameForID(AbstractClient client, String id);
-
-    public void save(AbstractClient client, FileMetaData meta, InputStream is);
-
-    public void remove(AbstractClient client, String id);
+enum class WritePolicy {
+    LOCAL_THEN_NETWORK,
+    FORCE_NETWORK,
+    FORCE_LOCAL
 }

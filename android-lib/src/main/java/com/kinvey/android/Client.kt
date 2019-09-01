@@ -103,7 +103,7 @@ open class Client<T : User>
 protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String,
                       servicePath: String, objectParser: JsonObjectParser,
                       kinveyRequestInitializer: KinveyClientRequestInitializer, credentialStore: CredentialStore?,
-                      requestPolicy: BackOffPolicy, private val encryptionKey: ByteArray?, context: Context)
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context)
     : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, credentialStore, requestPolicy) {
 
     /**
@@ -166,10 +166,6 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
         }
 
     override var userCacheManager: ICacheManager? = null
-        get() = super.userCacheManager
-        set(value) {
-            field = value
-        }
 
     override var syncCacheManager: ICacheManager? = null
 
@@ -620,7 +616,7 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
                     val parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER))
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser)
                 } catch (e: Exception) {
-                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions())
+                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.options)
                     Logger.WARNING("Defaulting to: GSON")
                     //                    e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON)
@@ -974,10 +970,9 @@ protected constructor(transport: HttpTransport, httpRequestInitializer: HttpRequ
             if (exception != null) {
                 retrieveUserCallback?.onFailure(exception)
             } else {
-                retrieveUserCallback?.onSuccess(client?.activeUser)
+                client?.activeUser?.let { retrieveUserCallback?.onSuccess(it) }
             }
         }
-
 
         /** Get setting value of delta set caching  */
         fun isDeltaSetCache(): Boolean {

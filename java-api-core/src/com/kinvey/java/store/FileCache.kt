@@ -14,18 +14,24 @@
  *
  */
 
-package com.kinvey.java.store;
+package com.kinvey.java.store
+
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.model.FileMetaData
+
+import java.io.FileInputStream
+import java.io.InputStream
 
 /**
- * Created by Prots on 2/4/16.
+ * @author edwardf
  */
-public enum ReadPolicy {
-    FORCE_LOCAL,
-    FORCE_NETWORK,
-    /**
-     *  @deprecated use {@link ReadPolicy#NETWORK_OTHERWISE_LOCAL}
-     */
-    @Deprecated
-    BOTH,
-    NETWORK_OTHERWISE_LOCAL
+interface FileCache {
+
+    operator fun get(client: AbstractClient<*>, id: String): FileInputStream
+
+    fun getFilenameForID(client: AbstractClient<*>, id: String): String
+
+    fun save(client: AbstractClient<*>, meta: FileMetaData, `is`: InputStream)
+
+    fun remove(client: AbstractClient<*>, id: String)
 }

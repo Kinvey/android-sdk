@@ -13,30 +13,21 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android;
 
+package com.kinvey.java.store
+
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.LinkedResources.LinkedGenericJson
+import com.kinvey.java.network.LinkedNetworkManager
+
+class LinkedBaseDataStore<T : LinkedGenericJson>
 /**
- * <p>AndroidCredentialStoreException class.</p>
+ * Constructor for creating LinkedBaseDataStore for given collection that will be mapped to itemType class
  *
- * @author mjsalinger
- * @since 2.0
- * @version $Id: $
+ * @param client     Kinvey client instance to work with
+ * @param collection collection name
+ * @param itemType   class that data should be mapped to
+ * @param storeType  type of storage that client want to use
  */
-public class AndroidCredentialStoreException extends Exception {
-    /**
-     * <p>Constructor for AndroidCredentialStoreException.</p>
-     */
-    public AndroidCredentialStoreException() {
-        super("There was an error while attempting to load the credential store.");
-    }
-
-    /**
-     * AndroidCredentialStoreException constructor
-     *
-     * @param errMsg
-     *            error message to use
-     */
-    public AndroidCredentialStoreException(final String errMsg) {
-        super(errMsg);
-    }
-}
+(client: AbstractClient<*>, collection: String, itemType: Class<T>, storeType: StoreType)
+    : BaseDataStore<T>(client, collection, itemType, storeType, LinkedNetworkManager<T>(collection, itemType, client))

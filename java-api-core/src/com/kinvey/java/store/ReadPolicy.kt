@@ -13,19 +13,17 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback
 
-import com.kinvey.android.model.User
-import com.kinvey.java.core.KinveyClientCallback
-import com.kinvey.java.store.UserStoreRequestManager
+package com.kinvey.java.store
 
 /**
- * This callback is typed for a [UserStoreRequestManager] object, use it for operations on Users.
- *
- * @author edwardf
- * @since 2.0
+ * Created by Prots on 2/4/16.
  */
-interface KinveyUserCallback<T : User> : KinveyClientCallback<T> {
-    override fun onSuccess(result: T)
-    override fun onFailure(error: Throwable)
+enum class ReadPolicy {
+    FORCE_LOCAL,
+    FORCE_NETWORK,
+
+    @Deprecated("use {@link ReadPolicy#NETWORK_OTHERWISE_LOCAL}")
+    BOTH,
+    NETWORK_OTHERWISE_LOCAL
 }
