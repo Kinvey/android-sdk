@@ -14,7 +14,7 @@
  *
  */
 
-package com.kinvey.java.core;
+package com.kinvey.java.core
 
 /**
  * This interface defines an async implementation that can be notified.  As async execution occurs in a background thread,
@@ -22,15 +22,12 @@ package com.kinvey.java.core;
  *
  * @author edwardf
  */
-public interface AsyncExecutor<T> {
+interface AsyncExecutor<T> {
 
     /**
      * An event has occured in a background thread that needs to be delegated to the calling thread.
      *
-     * @param object the message
+     * @param event the message
      */
-    public void notify(T object);
-
-
-
+    fun notify(event: T)
 }

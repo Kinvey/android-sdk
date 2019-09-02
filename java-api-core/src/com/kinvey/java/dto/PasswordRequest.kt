@@ -14,21 +14,13 @@
  *
  */
 
-package com.kinvey.java.dto;
+package com.kinvey.java.dto
 
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
-public class PasswordRequest extends GenericJson {
+class PasswordRequest : GenericJson() {
     @Key("password")
-    private String password;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    var password: String? = null
 }

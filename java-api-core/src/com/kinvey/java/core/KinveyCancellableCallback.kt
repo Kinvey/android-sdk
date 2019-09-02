@@ -14,34 +14,34 @@
  *
  */
 
-package com.kinvey.java.core;
+package com.kinvey.java.core
 
 /**
  * @author edwardf
  */
-public interface KinveyCancellableCallback<T> extends KinveyClientCallback<T> {
-
+interface KinveyCancellableCallback<T> : KinveyClientCallback<T> {
 
     /**
      * Have this method return true if the pending request should be cancelled.
      * This return value of this method will be checked regularly while execution occurs, and before the callback is made.
-     * <p/>
+     *
+     *
      * If a request has already been sent over the network, having this method return true will only result in callbacks being ignored.
-     * <p/>
+     *
+     *
      * Once a request has been sent over the network this functionality will ONLY have a client-side effect.
      *
      *
      * @return true if request should be cancelled, false if it should not
      */
-    public boolean isCancelled();
-
+    val isCancelled: Boolean
 
     /**
      * Called on the UI thread after a request has been cancelled.
-     * <p/>
+     *
+     *
      * Depending on the reason for cancellation, this method can either do nothing, or update the UI.
      *
      */
-    public void onCancelled();
-
+    fun onCancelled()
 }

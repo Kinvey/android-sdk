@@ -14,21 +14,17 @@
  *
  */
 
-package com.kinvey.java.dto;
+package com.kinvey.java.core
 
+import com.kinvey.java.model.Aggregation
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
+/**
+ * @author edwardf
+ */
+abstract class KinveyAggregateCallback : KinveyClientCallback<Aggregation> {
 
-public class Email extends GenericJson {
-    @Key("email")
-    private String email;
+    abstract override fun onFailure(error: Throwable)
 
-    public String getEmail() {
-        return email;
-    }
+    abstract override fun onSuccess(response: Aggregation)
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }

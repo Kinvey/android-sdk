@@ -14,7 +14,7 @@
  *
  */
 
-package com.kinvey.java.LinkedResources;
+package com.kinvey.java.linkedResources;
 
 import com.google.api.client.json.GenericJson;
 import com.kinvey.java.AbstractClient;

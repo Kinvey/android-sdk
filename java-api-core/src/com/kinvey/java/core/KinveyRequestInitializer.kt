@@ -14,16 +14,17 @@
  *
  */
 
-package com.kinvey.java.core;
+package com.kinvey.java.core
 
-import java.io.IOException;
+import java.io.IOException
 
 
 /**
  * @author morgan
  */
-public interface KinveyRequestInitializer {
+interface KinveyRequestInitializer {
 
-    public void initialize(AbstractKinveyClientRequest<?> request) throws IOException;
+    @Throws(IOException::class)
+    fun initialize(request: AbstractKinveyClientRequest<*>)
 
 }

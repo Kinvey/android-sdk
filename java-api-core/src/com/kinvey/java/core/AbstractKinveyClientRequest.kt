@@ -185,7 +185,7 @@ protected constructor(
      * @param httpContent object to send as the message body or `null` if none
      * @param responseClass expected type in the response of this request
      */
-    protected constructor(abstractKinveyClient: AbstractClient<BaseUser>,
+    protected constructor(abstractKinveyClient: AbstractClient<*>,
                           requestMethod: String, uriTemplate: String, httpContent: HttpContent?,
                           responseClass: Class<T>?) : this(abstractKinveyClient, abstractKinveyClient.baseUrl, requestMethod, uriTemplate, httpContent, responseClass) {
     }

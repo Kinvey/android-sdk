@@ -23,7 +23,7 @@ import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.LinkedNetworkManager;
 import com.kinvey.java.Query;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
+import com.kinvey.java.linkedResources.LinkedGenericJson;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.UploaderProgressListener;

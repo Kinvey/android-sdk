@@ -14,47 +14,40 @@
  *
  */
 
-package com.kinvey.java.LinkedResources;
+package com.kinvey.java.linkedResources
 
-import com.google.api.client.json.GenericJson;
-
-import java.util.HashMap;
+import com.google.api.client.json.GenericJson
 
 /**
- * Use this class as a base Entity instead of {@code com.google.api.client.json.GenericJson} when using the LinkedNetworkManager API.
- * <p>
- * This class maintains a Map of linked files, using the JSONKey of the field as the key and a {@code com.kinvey.java.LinkedResources.LinkedFile} as the value.
- * </p>
- * <p>
+ * Use this class as a base Entity instead of `com.google.api.client.json.GenericJson` when using the LinkedNetworkManager API.
+ *
+ *
+ * This class maintains a Map of linked files, using the JSONKey of the field as the key and a `com.kinvey.java.LinkedResources.LinkedFile` as the value.
+ *
+ *
+ *
  * The LinkedNetworkManager API uses this map to determine if there are any attachments to download.
- * </p>
+ *
  *
  * @author mjsalinger
  * @since 2.0
  */
-public abstract class LinkedGenericJson extends GenericJson {
-    private HashMap<String, LinkedFile> files;
+abstract class LinkedGenericJson : GenericJson() {
+
+    val allFiles = mutableMapOf<String, LinkedFile?>()
 
     /**
      * General constructor, initializes map of LinkedFiles
      */
-    public LinkedGenericJson() {
-        super();
-        files = new HashMap<String, LinkedFile>();
+    fun putFile(key: String, file: LinkedFile) {
+        allFiles[key] = file
     }
 
-    public void putFile(String key, LinkedFile file) {
-        files.put(key, file);
-    }
-    public void putFile(String key) {
-        files.put(key, null);
+    fun putFile(key: String) {
+        allFiles[key] = null
     }
 
-    public LinkedFile getFile(String key) {
-        return files.get(key);
-    }
-
-    public HashMap<String,LinkedFile> getAllFiles() {
-        return files;
+    fun getFile(key: String): LinkedFile? {
+        return allFiles[key]
     }
 }

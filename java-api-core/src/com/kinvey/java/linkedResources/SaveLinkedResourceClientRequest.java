@@ -14,7 +14,7 @@
  *
  */
 
-package com.kinvey.java.LinkedResources;
+package com.kinvey.java.linkedResources;
 
 import java.io.IOException;
 import java.io.InputStream;

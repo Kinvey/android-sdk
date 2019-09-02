@@ -14,21 +14,12 @@
  *
  */
 
-package com.kinvey.java.dto;
+package com.kinvey.java.dto
 
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.util.Key;
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
-public class Username extends GenericJson {
+class Username : GenericJson() {
     @Key("username")
-    private String username;
-
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    var username: String? = null
 }
