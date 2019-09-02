@@ -24,9 +24,9 @@ class KinveyHandlerThread : HandlerThread {
 
     @Synchronized
     fun postTask(task: Runnable) {
-        if (Client.sharedInstance()?.isClientRequestMultithreading == true) {
+        if (Client.sharedInstance.isClientRequestMultithreading) {
             if (executor == null) {
-                executor = Executors.newFixedThreadPool(Client.sharedInstance()?.numberThreadPool ?: 1)
+                executor = Executors.newFixedThreadPool(Client.sharedInstance.numberThreadPool)
             }
             executor?.submit(task)
         } else {
@@ -41,13 +41,7 @@ class KinveyHandlerThread : HandlerThread {
     @Synchronized
     override fun onLooperPrepared() {
         mWorkerHandler = Handler(looper)
-        pendingQueue?.let { queue ->
-            if (queue.size > 0) {
-                for (task in queue) {
-                    postTask(task)
-                }
-            }
-        }
+        pendingQueue?.onEach { task -> postTask(task) }
     }
 
     @Synchronized

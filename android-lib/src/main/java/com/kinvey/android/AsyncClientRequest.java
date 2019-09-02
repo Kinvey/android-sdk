@@ -52,7 +52,7 @@ public abstract class AsyncClientRequest<Result> implements Runnable, AsyncExecu
 
     public void execute() {
         Logger.INFO("Calling AsyncClientRequest#execute");
-        Client.sharedInstance().getKinveyHandlerThread().postTask(this);
+        Client.getKinveyHandlerThread().postTask(this);
     }
 
     @Override

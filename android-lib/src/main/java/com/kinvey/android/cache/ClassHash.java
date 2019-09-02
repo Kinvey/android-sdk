@@ -292,7 +292,7 @@ public abstract class ClassHash {
             //add "_acl" field to each item
             for (DynamicRealmObject realmObject : results) {
                 KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-                acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+                acl.set("creator", Client.sharedInstance.getActiveUser().getId());
                 DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                         realm,
                         KinveyMetaData.AccessControlList.class,
@@ -354,7 +354,7 @@ public abstract class ClassHash {
                 for (DynamicRealmObject realmObject : results) {
                     if (realmObject.get("_acl") == null) {
                         KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-                        acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+                        acl.set("creator", Client.sharedInstance.getActiveUser().getId());
                         DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                                 realm,
                                 KinveyMetaData.AccessControlList.class,
@@ -497,7 +497,7 @@ public abstract class ClassHash {
                 && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
                 && realm.getSchema().contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL, realm))){
             KinveyMetaData.AccessControlList acl = new KinveyMetaData.AccessControlList();
-            acl.set("creator", Client.sharedInstance().getActiveUser().getId());
+            acl.set("creator", Client.sharedInstance.getActiveUser().getId());
             DynamicRealmObject innerObject = saveClassData(shortName + Constants.UNDERSCORE + KinveyMetaData.AccessControlList.ACL,
                     realm,
                     KinveyMetaData.AccessControlList.class,
