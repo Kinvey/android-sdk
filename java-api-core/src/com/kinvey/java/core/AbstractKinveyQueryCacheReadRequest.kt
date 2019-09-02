@@ -35,7 +35,7 @@ abstract class AbstractKinveyQueryCacheReadRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String, jsonContent: GenericJson, private val queryResponseClass: Class<T>?)
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String, jsonContent: GenericJson?, private val queryResponseClass: Class<T>?)
     : AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
 
     @Throws(IOException::class)

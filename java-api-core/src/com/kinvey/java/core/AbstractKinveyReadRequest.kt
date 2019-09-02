@@ -35,7 +35,7 @@ abstract class AbstractKinveyReadRequest<T>
  * @param responseClass            response class to parse into
  */
 protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String,
-                      jsonContent: GenericJson, var requestResponseClass: Class<T>)
+                      jsonContent: GenericJson?, var requestResponseClass: Class<T>)
     : AbstractKinveyJsonClientRequest<KinveyReadResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
 
     @Throws(IOException::class)
