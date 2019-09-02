@@ -64,10 +64,10 @@ abstract class AbstractClient<T : BaseUser>
  * @param kinveyRequestInitializer KinveyRequestInitializer
  * @param requestPolicy            BackoffPolicy
  */
-protected constructor(transport: HttpTransport,
-                      httpRequestInitializer: HttpRequestInitializer?, rootUrl: String,
-                      servicePath: String, objectParser: JsonObjectParser,
-                      kinveyRequestInitializer: KinveyClientRequestInitializer, val store: CredentialStore?,
+protected constructor(transport: HttpTransport?,
+                      httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
+                      servicePath: String?, objectParser: JsonObjectParser?,
+                      kinveyRequestInitializer: KinveyClientRequestInitializer?, val store: CredentialStore?,
                       requestPolicy: BackOffPolicy?) : AbstractKinveyJsonClient(transport, httpRequestInitializer,
                       rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy) {
 

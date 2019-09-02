@@ -103,10 +103,8 @@ open class Client<T : User>
 protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
                       servicePath: String?, objectParser: JsonObjectParser?,
                       kinveyRequestInitializer: KinveyClientRequestInitializer?, store: CredentialStore?,
-                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
-
-    private var syncCacheManager: RealmCacheManager? = null
-    private var userCacheManager: RealmCacheManager? = null
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context)
+    : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
 
     /**
      * Get a reference to the Application Context used to create this instance of the Client
@@ -404,7 +402,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
     }
 
 
-    private class Ping constructor(val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
+    private class Ping (val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {
