@@ -35,7 +35,7 @@ import com.kinvey.java.model.FileMetaData
  *
  * @author edwardf
  */
-class AndroidMimeTypeFinder : MimeTypeFinder {
+open class AndroidMimeTypeFinder : MimeTypeFinder {
 
     /**
      * Calculate MimeType from an InputStream
@@ -90,14 +90,14 @@ class AndroidMimeTypeFinder : MimeTypeFinder {
      * @param meta the [FileMetaData] to populate
      * @param file the file of the data
      */
-    override fun getMimeType(meta: FileMetaData, file: File) {
+    override fun getMimeType(meta: FileMetaData, file: File?) {
         if (file == null || file.name == null || meta == null) {
             Logger.WARNING("cannot calculate mimetype without a file or filename!")
             meta.mimetype = "application/octet-stream"
             return
         }
 
-        if (meta.mimetype != null && meta.mimetype!!.length > 0) {
+        if (meta.mimetype != null && meta.mimetype?.isNotEmpty() == true) {
             Logger.INFO("Mimetype already set")
             return
         }
@@ -109,20 +109,20 @@ class AndroidMimeTypeFinder : MimeTypeFinder {
         val mimetype: String?
         var fileExt = ""
 
-        if (meta.fileName != null && meta.fileName!!.length > 0 && meta.fileName!!.lastIndexOf("") > 0) {
+        if (meta.fileName?.isNotEmpty() == true && meta.fileName!!.lastIndexOf("") > 0) {
             fileExt = meta.fileName!!.substring(meta.fileName!!.lastIndexOf('.'), meta.fileName!!.length)
         }
 
-        if (file.name != null && file.name.lastIndexOf("") > 0) {
-            if (fileExt.length == 0) {
+        if (file.name.lastIndexOf("") > 0) {
+            if (fileExt.isEmpty()) {
                 fileExt = file.name.substring(file.name.lastIndexOf('.'), file.name.length)
             }
         }
         //did we get it from file extension? if not, attempt to get it from file contents
-        if (fileExt.isNotEmpty()) {
-            mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt.substring(1, fileExt.length))
+        mimetype = if (fileExt.isNotEmpty()) {
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt.substring(1, fileExt.length))
         } else {
-            mimetype = "application/octet-stream"
+            "application/octet-stream"
         }
         meta.mimetype = mimetype
         meta.setSize(file.length())
@@ -151,4 +151,3 @@ class AndroidMimeTypeFinder : MimeTypeFinder {
         metaData.mimetype = mimetype
     }
 }
-

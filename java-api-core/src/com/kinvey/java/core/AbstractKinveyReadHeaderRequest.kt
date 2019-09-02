@@ -46,7 +46,7 @@ abstract class AbstractKinveyReadHeaderRequest<T : AbstractKinveyHeadersResponse
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  */
 protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String,
-                      uriTemplate: String, jsonContent: GenericJson, responseClass: Class<T>)
+                      uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>)
     : AbstractKinveyJsonClientRequest<T>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, responseClass) {
 
     @Throws(IOException::class)

@@ -87,7 +87,7 @@ class AsyncCustomEndpoints<I : GenericJson, O> : CustomEndpoints<I, O> {
      * @param input - any required input, can be `null`
      * @param callback - get results of the command as an array of JSON objects.
      */
-    fun callEndpoint(commandName: String, input: I, callback: KinveyListCallback<O>) {
+    fun callEndpoint(commandName: String, input: I?, callback: KinveyListCallback<O>) {
         AsyncCommandArray(this, commandName, input, callback).execute()
     }
 
@@ -101,7 +101,7 @@ class AsyncCustomEndpoints<I : GenericJson, O> : CustomEndpoints<I, O> {
     }
 
     class AsyncCommandArray<I: GenericJson, O>(val endpoints: AsyncCustomEndpoints<I, O>,
-        private val commandName: String, private val input: I, callback: KinveyListCallback<O>) : AsyncClientRequest<List<O>>(callback) {
+        private val commandName: String, private val input: I?, callback: KinveyListCallback<O>) : AsyncClientRequest<List<O>>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): List<O> {

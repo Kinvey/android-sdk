@@ -1,5 +1,11 @@
 buildscript {
     ext.kotlin_version = '1.3.50'
+    //ext.google_http_client_version = '1.31.0'
+    //ext.google_http_client_gson = '1.31.0'
+    //ext.google_http_client_jackson = '1.29.2'
+    ext.google_http_client_version = '1.19.0'
+    ext.google_http_client_gson = '1.19.0'
+    ext.google_http_client_jackson = '1.19.0'
     repositories {
         jcenter()
         mavenCentral()
@@ -71,15 +77,15 @@ dokka {
 
 dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
-    implementation 'com.google.http-client:google-http-client-jackson:1.29.2'
+    implementation "com.google.http-client:google-http-client-jackson:$google_http_client_jackson"
     implementation 'com.google.code.gson:gson:2.8.5'
-    testImplementation('com.google.http-client:google-http-client-gson:1.31.0') {
+    testImplementation("com.google.http-client:google-http-client-gson:$google_http_client_gson") {
         exclude(module: 'xpp3')
     }
     testImplementation 'junit:junit:4.12'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.0.0'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
-    implementation('com.google.http-client:google-http-client:1.31.0') {
+    implementation("com.google.http-client:google-http-client:$google_http_client_version") {
         exclude(module: 'xpp3')
         exclude(module: 'httpclient')
         exclude(module: 'junit')

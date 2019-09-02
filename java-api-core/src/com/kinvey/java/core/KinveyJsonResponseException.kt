@@ -34,13 +34,13 @@ import java.io.InputStream
 /**
  * @author m0rganic
  */
-class KinveyJsonResponseException
+open class KinveyJsonResponseException
 /**
  * @param response raw http response
  * @param details  detail message give by the response
  * @param message  general message
  */
-private constructor(response: HttpResponse?, val details: KinveyJsonError?, override val message: String)
+private constructor(response: HttpResponse?, open val details: KinveyJsonError?, override val message: String)
     : HttpResponseException(response) {
 
     companion object {
