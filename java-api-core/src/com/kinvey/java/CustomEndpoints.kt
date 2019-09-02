@@ -134,7 +134,7 @@ open class CustomEndpoints<I : GenericJson, O> {
 
         init {
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = client.clientAppVersion
-            if (client.customRequestProperties != null && client.customRequestProperties?.isEmpty() == false) {
+            if (client.customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(client.customRequestProperties)
             }
         }
@@ -153,7 +153,7 @@ open class CustomEndpoints<I : GenericJson, O> {
 
         init {
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = client.clientAppVersion
-            if (client.customRequestProperties != null && client.customRequestProperties?.isEmpty() == false) {
+            if (client.customRequestProperties?.isEmpty() == false) {
                 this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(client.customRequestProperties)
             }
         }
