@@ -15,11 +15,8 @@
  */
 package com.kinvey.android
 
-import android.os.Build
-
 import com.google.api.client.extensions.android.json.AndroidJsonFactory
 import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.kinvey.java.core.RawJsonFactory
 
@@ -37,16 +34,10 @@ class AndroidJson {
         RAW;
 
         companion object {
+            @JvmStatic
             val options: String
                 get() {
-                    val values = StringBuilder()
-                    for (p in JSONPARSER.values()) {
-                        values.append("$p, ")
-                    }
-
-                    values.setLength(values.length - 2)
-
-                    return values.toString()
+                    return values().joinToString(", ") { p -> "$p" }
                 }
         }
     }

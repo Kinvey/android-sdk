@@ -6,6 +6,7 @@ import androidx.test.runner.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.api.client.testing.http.MockHttpTransport;
+import com.kinvey.android.AndroidJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.androidTest.model.TestUser;
@@ -182,6 +183,13 @@ public class ClientBuilderTest {
         client = new Client.Builder(mContext).setBaseUrl("https://baseurl.com").setInstanceID("TestInstanceId").build();
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMicHostName());
+    }
+
+    @Test
+    public void testAndroidJsonOptions() throws IOException {
+        String options1 = AndroidJson.JSONPARSER.getOptions();
+        String options2 = AndroidJson.JSONPARSER.getOptions1();
+        assertEquals(options1, options2);
     }
 
 }

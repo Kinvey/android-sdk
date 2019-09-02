@@ -58,7 +58,7 @@ class AsyncCustomEndpoints<I : GenericJson, O> : CustomEndpoints<I, O> {
      *
      * @param client
      */
-    @Deprecated("")
+    @Deprecated("It is deprected now, use more extended constructor: constructor(responseClass: Class<O>, client: AbstractClient<*>)")
     constructor(client: AbstractClient<*>) : super(client)
 
     /**
