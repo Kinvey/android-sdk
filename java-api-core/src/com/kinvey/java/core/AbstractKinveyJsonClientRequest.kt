@@ -45,7 +45,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>,
      /**
       * @return the jsonContent
       */
-    val jsonContent: GenericJson, responseClass: Class<T>?)
+    val jsonContent: GenericJson?, responseClass: Class<T>?)
     : AbstractKinveyClientRequest<T>(abstractKinveyJsonClient, requestMethod, uriTemplate,
         if (jsonContent == null) null
         else JsonHttpContent(abstractKinveyJsonClient.jsonFactory, jsonContent), responseClass) {

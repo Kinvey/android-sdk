@@ -36,10 +36,10 @@ abstract class AbstractKinveyQueryCacheReadRequest<T>
  * @param responseClass            response class to parse into
  */
 protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String, jsonContent: GenericJson, private val queryResponseClass: Class<T>?)
-    : AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse<*>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
+    : AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
 
     @Throws(IOException::class)
-    override fun execute(): KinveyQueryCacheResponse<*>? {
+    override fun execute(): KinveyQueryCacheResponse<T>? {
         val response = executeUnparsed()
         if (overrideRedirect) {
             return onRedirect(response.headers.location)

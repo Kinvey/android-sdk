@@ -44,6 +44,7 @@ import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.CredentialManager
 import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
+import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientRequestInitializer
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkFileManager
@@ -1000,7 +1001,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         class Build (val clientBuilder: Builder<*>, builderCallback: KinveyClientBuilderCallback) : AsyncClientRequest<Client<*>>(builderCallback) {
 
             override fun executeAsync(): Client<*>? {
-                return clientBuilder.build()
+                return clientBuilder.build() as Client<*>?
             }
         }
 

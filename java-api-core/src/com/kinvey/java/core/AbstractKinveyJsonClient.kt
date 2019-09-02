@@ -53,10 +53,10 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
      * @param kinveyRequestInitializer initializer to handle kinvey specific headers and authorization tokens
      * @param requestPolicy the [BackOffPolicy] to use for HTTP requests
      */
-    protected constructor(transport: HttpTransport,
-                          httpRequestInitializer: HttpRequestInitializer, rootUrl: String, servicePath: String,
-                          objectParser: JsonObjectParser, kinveyRequestInitializer: KinveyRequestInitializer,
-                          requestPolicy: BackOffPolicy)
+    protected constructor(transport: HttpTransport?,
+                          httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?, servicePath: String?,
+                          objectParser: JsonObjectParser?, kinveyRequestInitializer: KinveyRequestInitializer?,
+                          requestPolicy: BackOffPolicy?)
             : super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy)
 
     override fun getObjectParser(): JsonObjectParser {
@@ -71,8 +71,8 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
          * @param defaultServicePath the service path
          * @param httpRequestInitializer the http request initializer
          */
-        protected constructor(transport: HttpTransport, defaultRootUrl: String,
-                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer)
+        protected constructor(transport: HttpTransport?, defaultRootUrl: String,
+                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer?)
                 : super(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer)
         /**
          * @param transport  HTTP transport
@@ -82,13 +82,13 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
          * @param kinveyRequestInitializer initializer to handle kinvey specific headers and authorization tokens
          */
         protected constructor(transport: HttpTransport, defaultRootUrl: String,
-                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer, kinveyRequestInitializer: KinveyClientRequestInitializer)
+                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer?, kinveyRequestInitializer: KinveyClientRequestInitializer)
                 : super(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer, kinveyRequestInitializer)
 
         /* (non-Javadoc)
      * @see com.kinvey.java.core.AbstractKinveyClient.Builder#build()
      */
-        abstract override fun build(): AbstractKinveyClient
+        abstract override fun build(): AbstractKinveyClient?
 
         /* (non-Javadoc)
      * @see com.kinvey.java.core.AbstractKinveyClient.Builder#getObjectParser()

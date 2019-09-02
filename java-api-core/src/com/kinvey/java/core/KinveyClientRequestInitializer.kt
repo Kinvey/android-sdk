@@ -68,7 +68,7 @@ open class KinveyClientRequestInitializer
      * @param credential valid authorization context obtained from [com.kinvey.java.auth.KinveyAuthRequest]
      * @return client request initializer
      */
-    fun setCredential(credential: Credential): KinveyClientRequestInitializer {
+    fun setCredential(credential: Credential?): KinveyClientRequestInitializer {
         this.credential = credential
         return this
     }
