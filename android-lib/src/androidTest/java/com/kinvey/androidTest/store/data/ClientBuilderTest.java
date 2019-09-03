@@ -184,12 +184,4 @@ public class ClientBuilderTest {
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMicHostName());
     }
-
-    @Test
-    public void testAndroidJsonOptions() throws IOException {
-        String options1 = AndroidJson.JSONPARSER.getOptions();
-        String options2 = AndroidJson.JSONPARSER.getOptions1();
-        assertEquals(options1, options2);
-    }
-
 }
