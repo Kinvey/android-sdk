@@ -8,6 +8,7 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
