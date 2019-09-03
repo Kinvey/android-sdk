@@ -119,7 +119,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(id, "id must not be null.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
-        var ret: T
+        var ret: T?
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = ReadSingleRequest(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute()
             cachedCallback.onSuccess(ret)
@@ -136,7 +136,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(ids: Iterable<String>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(ids: Iterable<String>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")
@@ -168,7 +168,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(query: Query, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(query: Query, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
@@ -197,7 +197,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
@@ -235,15 +235,15 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return items count in collection
      */
     @Throws(IOException::class)
-    fun count(cachedCallback: KinveyCachedClientCallback<Int>?): Int {
+    fun count(cachedCallback: KinveyCachedClientCallback<Int>?): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.syncManager).execute().count
+            val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.syncManager).execute()?.count
             cachedCallback.onSuccess(ret)
         }
-        return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, null, client.syncManager).execute().count
+        return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, null, client.syncManager).execute()?.count
     }
 
     /**
@@ -252,15 +252,15 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return count of queried items in collection
      */
     @Throws(IOException::class)
-    fun count(cachedCallback: KinveyCachedClientCallback<Int>?, query: Query): Int {
+    fun count(cachedCallback: KinveyCachedClientCallback<Int>?, query: Query): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE && cachedCallback != null) {
-            val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query, client.syncManager).execute().count
+            val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query, client.syncManager).execute()?.count
             cachedCallback.onSuccess(ret)
         }
-        return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, query, client.syncManager).execute().count
+        return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, query, client.syncManager).execute()?.count
     }
 
     /**
@@ -268,10 +268,10 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return items count in collection on the server
      */
     @Throws(IOException::class)
-    fun countNetwork(): Int {
+    fun countNetwork(): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
-        return ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.syncManager).execute().count
+        return ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.syncManager).execute()?.count
     }
 
     /**
@@ -280,7 +280,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return items count in collection on the server
      */
     @Throws(IOException::class)
-    private fun internalCountNetwork(): KinveyCountResponse {
+    private fun internalCountNetwork(): KinveyCountResponse? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         return ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.syncManager).execute()
@@ -293,7 +293,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun save(objects: Iterable<T>): List<T> {
+    fun save(objects: Iterable<T>): List<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(objects, "objects must not be null.")
@@ -323,7 +323,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun save(`object`: T): T {
+    fun save(`object`: T): T? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(`object`, "object must not be null.")
@@ -377,7 +377,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun delete(query: Query): Int {
+    fun delete(query: Query): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
@@ -391,7 +391,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun delete(ids: Iterable<String>): Int {
+    fun delete(ids: Iterable<String>): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")
@@ -492,8 +492,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
 
         // First, get the count of all the items to pull
         val countResponse = internalCountNetwork()
-        val totalItemNumber = countResponse.count
-        val lastRequestTime = countResponse.lastRequestTime
+        val totalItemNumber = countResponse?.count ?: 0
+        val lastRequestTime = countResponse?.lastRequestTime
         var pulledItemCount = 0
         val totalPagesNumber = Math.abs(totalItemNumber / pageSize) + 1
         val batchSize = BATCH_SIZE // batch size for concurrent push requests
@@ -807,14 +807,14 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         var ret: Aggregation? = null
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             try {
-                ret = Aggregation(Arrays.asList(*AggregationRequest(type, cache, ReadPolicy.FORCE_LOCAL, networkManager, fields, field, query).execute()))
+                ret = Aggregation(AggregationRequest(type, cache as ICache<Aggregation.Result>?, ReadPolicy.FORCE_LOCAL, networkManager as NetworkManager<Aggregation.Result>, fields, field, query).execute()?.toList())
             } catch (e: IOException) {
                 cachedCallback.onFailure(e)
             }
 
             cachedCallback.onSuccess(ret)
         }
-        ret = Aggregation(Arrays.asList(*AggregationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()))
+        ret = Aggregation(AggregationRequest(type, cache as ICache<Aggregation.Result>?, this.storeType.readPolicy, networkManager as NetworkManager<Aggregation.Result>, fields, field, query).execute()?.toList())
         return ret
     }
 
