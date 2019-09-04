@@ -814,7 +814,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
 
             cachedCallback.onSuccess(ret)
         }
-        ret = Aggregation(Arrays.asList(*AggregationRequest(type, cache as ICache<Aggregation.Result>, this.storeType.readPolicy, networkManager as NetworkManager<Aggregation.Result>, fields, field, query).execute()))
+        ret = Aggregation(Arrays.asList(*AggregationRequest(type, cache as ICache<Aggregation.Result>?, this.storeType.readPolicy, networkManager as NetworkManager<Aggregation.Result>, fields, field, query).execute()))
         return ret
     }
 
