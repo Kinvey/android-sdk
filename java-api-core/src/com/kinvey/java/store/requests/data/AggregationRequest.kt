@@ -1,6 +1,5 @@
 package com.kinvey.java.store.requests.data
 
-import com.google.api.client.json.GenericJson
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache

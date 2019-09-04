@@ -31,7 +31,7 @@ import java.util.Arrays
 /**
  * Created by Prots on 2/15/16.
  */
-class ReadIdsRequest<T : GenericJson>(cache: ICache<T>, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
+class ReadIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
                                       private val ids: Iterable<String>) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
     override val cached: KinveyReadResponse<T>?

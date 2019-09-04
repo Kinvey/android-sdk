@@ -41,17 +41,17 @@ import java.util.concurrent.FutureTask
 /**
  * Created by Prots on 2/5/16.
  */
-class SaveListRequest<T : GenericJson>(private val cache: ICache<T>, private val networkManager: NetworkManager<T>,
+class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>,
                                        private val writePolicy: WritePolicy, private val objects: Iterable<T>,
                                        private val syncManager: SyncManager) : IRequest<List<T>> {
     var exception: IOException? = null
 
     @Throws(IOException::class)
     override fun execute(): List<T>? {
-        var ret: MutableList<T> = ArrayList()
+        var ret: List<T>? = ArrayList()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                ret = cache.save(objects)
+                ret = cache?.save(objects)
                 syncManager.enqueueSaveRequests(networkManager.collectionName, networkManager, ret)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
@@ -63,7 +63,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>, private val
                     t.printStackTrace()
                     // silent fall, will be synced next time
                 }
-                cache.save(objects)
+                cache?.save(objects)
                 ret = objects.mapNotNull { item ->
                       var result: T? = null
                       try {
@@ -77,7 +77,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>, private val
                       }
                       result
                 }.toMutableList()
-                cache.save(ret)
+                cache?.save(ret)
                 exception?.let { throw it }
             }
             WritePolicy.FORCE_NETWORK -> {
@@ -104,7 +104,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>, private val
                 }
                 for (task in tasks) {
                     try {
-                        ret.add(task.get())
+                        (ret as ArrayList).add(task.get())
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     } catch (e: ExecutionException) {
