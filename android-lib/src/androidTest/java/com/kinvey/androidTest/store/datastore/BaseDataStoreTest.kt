@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit
 
 open class BaseDataStoreTest {
 
-    protected var client: Client<User>? = null
+    protected lateinit var client: Client<User>
 
     companion object {
         const val TEST_USERNAME = "Test_UserName"
@@ -55,11 +55,11 @@ open class BaseDataStoreTest {
     fun setUp() {
         val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
         client = Client.Builder<User>(mMockContext).build()
-        client?.enableDebugLogging()
+        client.enableDebugLogging()
         AbstractClient.KINVEY_API_VERSION = "5"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
-        if (client?.isUserLoggedIn == false) {
+        if (client.isUserLoggedIn == false) {
             looperThread = LooperThread(Runnable {
                 try {
                     UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {

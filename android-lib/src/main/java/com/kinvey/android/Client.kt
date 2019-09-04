@@ -46,7 +46,6 @@ import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
 import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientRequestInitializer
-import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkFileManager
 import com.kinvey.java.store.BaseUserStore
 import com.kinvey.java.store.StoreType
@@ -760,10 +759,10 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @return an instantiated Kinvey Android Client,
          * which contains factory methods for accessing various functionality.
          */
-        override fun build(): Client<T>? {
+        override fun build(): Client<T> {
             kinveyHandlerThread = KinveyHandlerThread("KinveyHandlerThread")
             kinveyHandlerThread?.start()
-            val ctx = context ?: return null
+            val ctx = context!!
             Realm.init(ctx)
             val client = Client<T>(transport,
                     httpRequestInitializer, baseUrl,

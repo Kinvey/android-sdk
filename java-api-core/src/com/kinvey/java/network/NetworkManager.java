@@ -906,6 +906,7 @@ public class NetworkManager<T extends GenericJson> {
         }
 
         @Override
+        @Nonnull
         public KinveyQueryCacheResponse<T> execute() throws IOException {
             return super.execute();
         }

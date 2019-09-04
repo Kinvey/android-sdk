@@ -14,52 +14,62 @@
  *
  */
 
-package com.kinvey.java.cache;
+package com.kinvey.java.cache
 
-import com.google.api.client.json.GenericJson;
-import com.kinvey.java.Query;
-import com.kinvey.java.model.AggregateType;
-import com.kinvey.java.model.Aggregation;
+import com.google.api.client.json.GenericJson
+import com.kinvey.java.Query
+import com.kinvey.java.model.AggregateType
+import com.kinvey.java.model.Aggregation
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.ArrayList
 
 /**
  * Created by Prots on 1/26/16.
  */
-public interface ICache<T extends GenericJson> {
+interface ICache<T : GenericJson> {
+
+
+    /**
+     * gets the first item from the cache
+     * @return first item
+     */
+    val first: T?
+
+    /**
+     * get current ttl value
+     * @return current ttl value
+     */
+    /**
+     * sets current ttl value
+     * @param ttl ttl value to be set in milliseconds
+     */
+    var ttl: Long
+
     /**
      * Query cache for objects matching query
      * @param query
      * @return
      */
-    @Nonnull
-    List<T> get(@Nonnull Query query);   //run query
+    operator fun get(query: Query): List<T>    //run query
 
     /**
      * Query cache for objects with given ids
      * @param ids
      * @return
      */
-    @Nonnull
-    List<T> get (@Nonnull Iterable<String> ids);    //get
+    operator fun get(ids: Iterable<String>): List<T>     //get
 
     /**
      * Get Single object from cache with given id
      * @return Object
      */
-    @Nullable
-    T get(@Nonnull String id);    //get all
+    operator fun get(id: String): T?     //get all
 
     /**
      * Get all objects from cache
      * @return
      */
-    @Nonnull
-    List<T> get();    //get all
+    fun get(): List<T>     //get all
 
     /**
      * Saving all given item
@@ -68,8 +78,7 @@ public interface ICache<T extends GenericJson> {
      * @param items
      * @return ids of saved items
      */
-    @Nonnull
-    List<T> save (@Nonnull Iterable<T> items);
+    fun save(items: Iterable<T>): List<T>
 
     /**
      * Saving given item
@@ -78,74 +87,51 @@ public interface ICache<T extends GenericJson> {
      * @param item
      * @return id of saved items
      */
-    @Nonnull
-    T save (@Nonnull T item);   //store objects in cache
+    fun save(item: T): T    //store objects in cache
 
     /**
      * Delete all object that matches query
      * @param query
      */
-    int delete(@Nonnull Query query);
+    fun delete(query: Query): Int
 
     /**
      * Delete all object with given ids
      * @param ids
      */
-    int delete(@Nonnull Iterable<String> ids);
+    fun delete(ids: Iterable<String>): Int
 
     /**
      * Delete all object with given ids
      * @param id
      */
-    int delete(@Nonnull String id);
+    fun delete(id: String): Int
 
     /**
      * Delete all object from cache
      */
-    void clear();
-
-
-    /**
-     * gets the first item from the cache
-     * @return first item
-     */
-    @Nullable
-    T getFirst();
+    fun clear()
 
     /**
      * gets the first item from the cache matched query
      * @return first item
      */
-    @Nullable
-    T getFirst(@Nonnull Query q);
+    fun getFirst(q: Query): T?
 
     /**
      * gets the count of matching elements from the cache
      * @return first the count of matching elements from the cache
      */
-    long count(@Nullable Query q);
-
-    /**
-     * get current ttl value
-     * @return current ttl value
-     */
-    long getTtl();
-
-    /**
-     * sets current ttl value
-     * @param ttl ttl value to be set in milliseconds
-     */
-    void setTtl(long ttl);
+    fun count(q: Query?): Long
 
     /**
      * Grouping allows you to collect all entities with the same value for fields,
      * and then apply a reduce function (such as count or average) on all those items.
-     * @param aggregateType {@link AggregateType}
+     * @param aggregateType [AggregateType]
      * @param fields fields for group by
      * @param reduceField field for apply reduce function
      * @param q query to filter results
      * @return the array of groups containing the result of the reduce function
      */
-    @Nonnull
-    Aggregation.Result[] group(@Nonnull AggregateType aggregateType, @Nonnull ArrayList<String> fields, @Nonnull String reduceField, @Nonnull Query q);
+    fun group(aggregateType: AggregateType, fields: ArrayList<String>, reduceField: String, q: Query): Array<Aggregation.Result>
 }

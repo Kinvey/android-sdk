@@ -95,7 +95,7 @@ class PushBatchRequest<T : GenericJson>(
         val syncRequest = syncManager.createSaveBatchSyncRequest(collection, networkManager, saveItems)
         val response = syncManager.executeBatchRequest(client as AbstractClient<*>, networkManager, syncRequest)
         val resultItems = response?.entityList
-        resultItems?.let { list -> itemsCache.save(list) }
+        resultItems?.let { list -> itemsCache.save(list.mapNotNull { it }) }
     }
 
     private fun removeBatchTempItems(batchSyncItems: List<SyncItem>) {
