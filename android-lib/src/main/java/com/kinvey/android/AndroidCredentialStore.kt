@@ -36,7 +36,7 @@ class AndroidCredentialStore(context: Context) : CredentialStore {
     /** {@inheritDoc}  */
     @Throws(IOException::class)
     override fun load(userId: String): Credential {
-        return credentials[userId]!!
+        return credentials[userId] ?: Credential.from("", "")
     }
 
     /** {@inheritDoc}  */
