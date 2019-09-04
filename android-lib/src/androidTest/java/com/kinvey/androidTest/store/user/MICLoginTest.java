@@ -62,7 +62,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(CLIENT_ID, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMicHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "." + CLIENT_ID));
     }
 
     // Check clientId (should be absent second part of client_id) in auth link for MICLoginPage
@@ -71,7 +71,7 @@ public class MICLoginTest {
         DefaultKinveyMICCallback userCallback = loginWithAuthorizationCodeLoginPage(null, REDIRECT_URI, client);
         assertNotNull(userCallback.myURLToRender);
         assertTrue(!userCallback.myURLToRender.isEmpty());
-        assertTrue(userCallback.myURLToRender.startsWith(client.getMicHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
+        assertTrue(userCallback.myURLToRender.startsWith(client.getMICHostName() + client.getMicApiVersion() + "/oauth/auth?client_id=" + APP_KEY + "&"));
     }
 
     // Check that myURLToRender contains openId parameter

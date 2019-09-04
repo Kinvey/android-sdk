@@ -113,12 +113,15 @@ protected constructor(transport: HttpTransport?,
      */
     var micHostName = "https://auth.kinvey.com/"
         @Throws(IllegalArgumentException::class)
+        @JvmName("setMICHostName")
         set(MICHostName) {
             if (!MICHostName.startsWith(Constants.PROTOCOL_HTTPS)) {
                 throw IllegalArgumentException("MIC url should be sercure url")
             }
             field = if (MICHostName.endsWith("/")) MICHostName else "$MICHostName/"
         }
+        @JvmName("getMICHostName")
+        get() = field
 
     var micApiVersion: String? = null
         set(version) {
