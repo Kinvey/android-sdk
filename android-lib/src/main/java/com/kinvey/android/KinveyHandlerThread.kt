@@ -24,9 +24,9 @@ class KinveyHandlerThread : HandlerThread {
 
     @Synchronized
     fun postTask(task: Runnable) {
-        if (Client.sharedInstance.isClientRequestMultithreading) {
+        if (Client.sharedInstance().isClientRequestMultithreading) {
             if (executor == null) {
-                executor = Executors.newFixedThreadPool(Client.sharedInstance.numberThreadPool)
+                executor = Executors.newFixedThreadPool(Client.sharedInstance().numberThreadPool)
             }
             executor?.submit(task)
         } else {

@@ -39,7 +39,7 @@ public abstract class KinveyFCMService extends FirebaseMessagingService {
     public static final String TRIGGER = "KINVEY_ACTION";
     public static final String REG_ID = "REGID";
 
-    private Client client = Client.sharedInstance;
+    private Client client = Client.sharedInstance();
 
     /**
      * Called when message is received.
@@ -77,9 +77,9 @@ public abstract class KinveyFCMService extends FirebaseMessagingService {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                String regid = Client.sharedInstance.getContext().getSharedPreferences(FCMPush.shared_pref, Context.MODE_PRIVATE).getString(FCMPush.pref_regid, "");
-                if (Client.sharedInstance.isUserLoggedIn() && !regid.isEmpty()) {
-                    Client.sharedInstance.push(Client.sharedInstance.getPushServiceClass()).initialize(getApplication());
+                String regid = Client.sharedInstance().getContext().getSharedPreferences(FCMPush.shared_pref, Context.MODE_PRIVATE).getString(FCMPush.pref_regid, "");
+                if (Client.sharedInstance().isUserLoggedIn() && !regid.isEmpty()) {
+                    Client.sharedInstance().push(Client.sharedInstance().getPushServiceClass()).initialize(getApplication());
                 }
             }
         });

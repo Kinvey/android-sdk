@@ -597,7 +597,7 @@ public class UserStoreTest {
 
     @Test
     public void testSharedClientLoginAsync() throws InterruptedException {
-        DefaultKinveyClientCallback userCallback = login(Client.sharedInstance);
+        DefaultKinveyClientCallback userCallback = login(Client.sharedInstance());
         assertNotNull(userCallback.result);
         assertTrue(client.isUserLoggedIn());
         assertNull(logout(client).error);

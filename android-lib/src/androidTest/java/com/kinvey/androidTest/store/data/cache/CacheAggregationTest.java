@@ -56,7 +56,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
 
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
@@ -85,7 +85,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -113,7 +113,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -141,7 +141,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -169,7 +169,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -197,7 +197,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -225,7 +225,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -253,7 +253,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<Person> store = DataStore.collection(Person.COLLECTION, Person.class, StoreType.SYNC, client);
         ICache<Person> cache = client.getCacheManager().getCache(Person.COLLECTION, Person.class, Long.MAX_VALUE);
 
@@ -281,7 +281,7 @@ public class CacheAggregationTest {
 //        testManager.login(USERNAME, PASSWORD, client);
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
         DataStore<ModelWithDifferentTypeFields> store = DataStore.collection(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, StoreType.SYNC, client);
         ICache<ModelWithDifferentTypeFields> cache = client.getCacheManager().getCache(ModelWithDifferentTypeFields.COLLECTION, ModelWithDifferentTypeFields.class, Long.MAX_VALUE);
 

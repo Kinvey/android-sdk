@@ -1102,12 +1102,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         @JvmStatic
         var kinveyHandlerThread: KinveyHandlerThread? = null
 
-        lateinit var sharedInstance: Client<User>
-
-        //@JvmStatic
-        //fun sharedInstance(): Client<User>? {
-        //    return sharedInstance
-        //}
+        //lateinit var sharedInstance: Client<User>
+        @JvmStatic
+        fun sharedInstance(): Client<User> {
+            return sharedInstance as Client<User>
+        }
     }
 }
 

@@ -46,7 +46,7 @@ public class QueryResultTest {
 
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
     }
 
     @Test

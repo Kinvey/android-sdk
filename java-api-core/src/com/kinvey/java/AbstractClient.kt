@@ -505,7 +505,6 @@ protected constructor(transport: HttpTransport?,
          */
         @JvmStatic lateinit var KINVEY_API_VERSION: String
 
-
         @JvmStatic
         var sharedInstance: AbstractClient<*>? = null
     }

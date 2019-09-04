@@ -37,7 +37,7 @@ public class CacheTest {
         cacheManager = new Client.Builder(mMockContext).build().getCacheManager();
         User user = new User();
         user.setId("testId");
-        Client.sharedInstance.setActiveUser(user);
+        Client.sharedInstance().setActiveUser(user);
     }
 
     @Test
