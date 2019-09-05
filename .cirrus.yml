@@ -6,7 +6,7 @@ container:
 env:
   CI: "true"
   BUILD_TOOLS: "29.0.2"
-  ANDROID_API: "18"
+  ANDROID_API: "24"
   EMU_FLAVOR: default
   ANDROID_ABI: armeabi-v7a
   ADB_INSTALL_TIMEOUT: "10" # minutes
