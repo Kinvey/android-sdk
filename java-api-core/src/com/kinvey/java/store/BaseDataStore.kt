@@ -101,7 +101,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         if (storeType != StoreType.NETWORK) {
-            cache = client.cacheManager.getCache(collectionName, currentClass, storeType.ttl)
+            cache = client.cacheManager?.getCache(collectionName, currentClass, storeType.ttl)
         }
         this.isDeltaSetCachingEnabled = client.isUseDeltaCache
     }
@@ -136,25 +136,25 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(ids: Iterable<String>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(ids: Iterable<String>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE) {
             cachedCallback?.onSuccess(ReadIdsRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute())
-            if (isDeltaSetCachingEnabled) {
+            return if (isDeltaSetCachingEnabled) {
                 val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java))
-                return findBlockingDeltaSync(query)
+                findBlockingDeltaSync(query)
             } else {
-                return ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
+                ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
             }
         } else {
-            if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled) {
+            return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled) {
                 val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java))
-                return findBlockingDeltaSync(query)
+                findBlockingDeltaSync(query)
             } else {
-                return ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
+                ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
             }
         }
     }
@@ -168,7 +168,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(query: Query, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(query: Query, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
@@ -197,7 +197,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T> {
+    fun find(cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
@@ -338,9 +338,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
-        client.cacheManager.clearCollection(collectionName, currentClass, java.lang.Long.MAX_VALUE)
+        client.cacheManager?.clearCollection(collectionName, currentClass, java.lang.Long.MAX_VALUE)
         if (isDeltaSetCachingEnabled && queryCache != null) {
-            queryCache!!.clear()
+            queryCache?.clear()
         }
         purge()
     }
@@ -353,7 +353,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         purge(query)
-        client.cacheManager.getCache(collectionName, currentClass, java.lang.Long.MAX_VALUE).delete(query)
+        client.cacheManager?.getCache(collectionName, currentClass, java.lang.Long.MAX_VALUE)?.delete(query)
     }
 
     /**
@@ -424,14 +424,14 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(client.syncManager.getCount(collectionName) == 0L, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.")
         query = query ?: client.query()
         val response: KinveyPullResponse
-        if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query!!)) {
+        if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
             response = pullBlockingDeltaSync(query)
         } else {
             response = KinveyPullResponse()
-            val readResponse = networkManager.getBlocking(query!!).execute()
-            cache!!.delete(query)
-            response.count = cache!!.save(readResponse!!.result!!).size
-            response.listOfExceptions = if (readResponse.listOfExceptions != null) readResponse.listOfExceptions else ArrayList()
+            val readResponse = networkManager.getBlocking(query).execute()
+            cache?.delete(query)
+            readResponse?.result?.let { list -> response.count = cache?.save(list)?.size ?: 0 }
+            response.listOfExceptions = if (readResponse?.listOfExceptions != null) readResponse.listOfExceptions else ArrayList()
         }
         return response
     }
@@ -467,10 +467,10 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(client.syncManager.getCount(collectionName) == 0L, "InvalidOperation. You must push all pending sync items before new data is pulled. Call push() on the data store instance to push pending items, or purge() to remove them.")
         query = query ?: client.query()
         var cacheItem: QueryCacheItem? = null
-        if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query!!)) {
+        if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
             cacheItem = getQueryCacheItem(query)
         }
-        return if (cacheItem != null) pullBlockingDeltaSync(cacheItem, query!!, pageSize) else pullBlockingPaged(query!!, pageSize)
+        return if (cacheItem != null) pullBlockingDeltaSync(cacheItem, query, pageSize) else pullBlockingPaged(query, pageSize)
     }
 
     /**
@@ -501,7 +501,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         var tasks: MutableList<FutureTask<PullTaskResponse<T>>>
         var pullRequest: NetworkManager<*>.Get
         var ft: FutureTask<PullTaskResponse<T>>
-        cache!!.delete(query.setSkip(0).setLimit(0))// To be sure that skip and limit are 0,
+        cache?.delete(query.setSkip(0).setLimit(0))// To be sure that skip and limit are 0,
         // because in next lines custom skip and limit are set anyway
         var i = 0
         while (i < totalPagesNumber) {
@@ -530,8 +530,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             for (task in tasks) {
                 try {
                     val tempResponse = task.get()
-                    pulledItemCount += cache!!.save(tempResponse.kinveyReadResponse.result!!).size
-                    exceptions.addAll(tempResponse.kinveyReadResponse.listOfExceptions!!)
+                    pulledItemCount += cache?.save(tempResponse.kinveyReadResponse?.result!!)?.size ?: 0
+                    exceptions.addAll(tempResponse.kinveyReadResponse?.listOfExceptions!!)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 } catch (e: ExecutionException) {
@@ -555,9 +555,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         val queryCacheItem = getQueryCacheItem(stringQuery)
         if (queryCacheItem != null) {
             queryCacheItem.lastRequestTime = lastRequestTime
-            queryCache!!.save(queryCacheItem)
+            queryCache?.save(queryCacheItem)
         } else {
-            queryCache!!.save(QueryCacheItem(collectionName, stringQuery, lastRequestTime))
+            queryCache?.save(QueryCacheItem(collectionName, stringQuery, lastRequestTime))
         }
     }
 
@@ -568,7 +568,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(query: Query): KinveyReadResponse<T> {
+    private fun findBlockingDeltaSync(query: Query): KinveyReadResponse<T>? {
         val cacheItem = getQueryCacheItem(query) //one is correct number of query cache item count for any request.
         return if (cacheItem != null) findBlockingDeltaSync(cacheItem, query) else getBlocking(query)
     }
@@ -595,8 +595,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
     private fun pullBlockingRegular(query: Query): KinveyPullResponse {
         val readResponse = getBlocking(query)
         val pullResponse = KinveyPullResponse()
-        pullResponse.count = readResponse.result!!.size
-        pullResponse.listOfExceptions = if (readResponse.listOfExceptions != null) readResponse.listOfExceptions else ArrayList()
+        pullResponse.count = readResponse?.result?.size ?: 0
+        pullResponse.listOfExceptions = if (readResponse?.listOfExceptions != null) readResponse.listOfExceptions else ArrayList()
         return pullResponse
     }
 
@@ -607,11 +607,13 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun getBlocking(query: Query): KinveyReadResponse<T> {
+    private fun getBlocking(query: Query): KinveyReadResponse<T>? {
         val response = networkManager.getBlocking(query).execute()
-        cache!!.delete(query)
-        cache!!.save(response!!.result!!)
-        saveQueryCacheItem(query.queryFilterMap.toString(), response.lastRequestTime!!)
+        cache?.delete(query)
+        response?.result?.let { list -> cache?.save(list) }
+        response?.lastRequestTime?.let { timeStr ->
+            saveQueryCacheItem(query.queryFilterMap.toString(), timeStr)
+        }
         return response
     }
 
@@ -623,7 +625,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query): KinveyReadResponse<T> {
+    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query): KinveyReadResponse<T>? {
         try {
             val response = KinveyReadResponse<T>()
             val queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.lastRequestTime).execute()
@@ -645,9 +647,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         } catch (responseException: KinveyJsonResponseException) {
             val statusCode = responseException.statusCode
             val jsonError = responseException.details
-            return if (statusCode == 400 && jsonError.error == RESULT_SIZE_ERROR ||
-                    statusCode == 400 && jsonError.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
-                    statusCode == 403 && jsonError.error == MISSING_CONFIGURATION_ERROR) {
+            return if (statusCode == 400 && jsonError?.error == RESULT_SIZE_ERROR ||
+                    statusCode == 400 && jsonError?.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
+                    statusCode == 403 && jsonError?.error == MISSING_CONFIGURATION_ERROR) {
                 getBlocking(query)
             } else {
                 throw responseException
@@ -683,9 +685,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         } catch (responseException: KinveyJsonResponseException) {
             val statusCode = responseException.statusCode
             val jsonError = responseException.details
-            return if (statusCode == 400 && jsonError.error == RESULT_SIZE_ERROR ||
-                    statusCode == 400 && jsonError.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
-                    statusCode == 403 && jsonError.error == MISSING_CONFIGURATION_ERROR) {
+            return if (statusCode == 400 && jsonError?.error == RESULT_SIZE_ERROR ||
+                    statusCode == 400 && jsonError?.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
+                    statusCode == 403 && jsonError?.error == MISSING_CONFIGURATION_ERROR) {
                 if (pageSize > 0) pullBlockingPaged(query, pageSize) else pullBlockingRegular(query)
             } else {
                 throw responseException
@@ -699,7 +701,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
 
     private fun getQueryCacheItem(stringQuery: String): QueryCacheItem? {
         if (queryCache == null) {
-            queryCache = client.cacheManager.getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem::class.java, java.lang.Long.MAX_VALUE)
+            queryCache = client.cacheManager?.getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem::class.java, java.lang.Long.MAX_VALUE)
         }
         val queryCacheItems = queryCache!![client.query().equals(Constants.QUERY, stringQuery)]
         // In usual case, queryCacheItems always 1 or 0.
@@ -811,8 +813,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             } catch (e: IOException) {
                 cachedCallback.onFailure(e)
             }
-
-            cachedCallback.onSuccess(ret)
+            ret?.let { cachedCallback.onSuccess(it) }
         }
         ret = Aggregation(Arrays.asList(*AggregationRequest(type, cache, this.storeType.readPolicy, networkManager, fields, field, query).execute()))
         return ret
@@ -843,14 +844,14 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
                     liveServiceCallback!!.onStatus(status)
                 }
             }
-            success = LiveServiceRouter.getInstance().subscribeCollection(collectionName, callback)
+            success = LiveServiceRouter.instance?.subscribeCallback(collectionName, callback) ?: false
         }
         return success
     }
 
     fun unsubscribe() {
         liveServiceCallback = null
-        LiveServiceRouter.getInstance().unsubscribeCollection(collectionName)
+        LiveServiceRouter.instance?.unsubscribeCallback(collectionName)
     }
 
     private fun isQueryContainSkipLimit(query: Query): Boolean {
