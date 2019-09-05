@@ -1,7 +1,7 @@
 container:
-  image: cirrusci/android-sdk:29
+  image: cirrusci/android-sdk:24
   cpu: 4
-  memory: 10G
+  memory: 4G
 
 env:
   CI: "true"
@@ -22,7 +22,7 @@ task:
       - PACKAGE: store.user
       - PACKAGE: store.datastore
   nproc_script: nproc
-  free_script: free
+  free_script: free -h
   # apt_update_script: sudo apt update
   # apt_install_script: sudo apt install libpulse0 libglu1-mesa lib32z1 qemu-kvm libvirt0 virt-manager -y
   accept_licenses_script: echo -e "y\ny\ny\ny\ny" | sdkmanager --licenses
