@@ -1,7 +1,7 @@
 container:
   image: cirrusci/android-sdk:24
   cpu: 4
-  memory: 4G
+  memory: 10G
 
 env:
   CI: "true"
