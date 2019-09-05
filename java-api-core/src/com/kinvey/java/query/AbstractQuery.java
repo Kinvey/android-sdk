@@ -65,10 +65,10 @@ public abstract class AbstractQuery implements Serializable{
         this.sort = new LinkedHashMap<String, SortOrder>();
     }
 
-    
+
     /**
      * Sets the raw query string
-     * 
+     *
      * @param queryString
      * @return this
      */
@@ -201,7 +201,7 @@ public abstract class AbstractQuery implements Serializable{
                         generator.writeFieldName(entry.getKey());
                         buildQueryString(generator, (LinkedHashMap) entry.getValue());
                     } else if (valueClass.getComponentType() != null &&
-                               valueClass.getComponentType().equals(LinkedHashMap.class)) {
+                            valueClass.getComponentType().equals(LinkedHashMap.class)) {
                         if (valueClass.isArray()) {
                             // Value is a map, so this is a nested query. Recursively call into it.
                             generator.writeFieldName(entry.getKey());

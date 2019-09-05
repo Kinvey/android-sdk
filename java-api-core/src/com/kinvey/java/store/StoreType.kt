@@ -16,23 +16,16 @@
 
 package com.kinvey.java.store
 
-import com.kinvey.java.Query
-
 /**
  * Created by Prots on 2/4/16.
  */
-enum class StoreType(
-    val readPolicy: ReadPolicy,
-    val writePolicy: WritePolicy,
-    @JvmField
-    var ttl: Long
-) {
+enum class StoreType (var readPolicy: ReadPolicy, var writePolicy: WritePolicy, var ttl: Long) {
     /**
      * This StoreType means that all changes will be done locally, and sending the local changes to the server is done via [BaseDataStore.pushBlocking]
      * updating local storage could be done via [BaseDataStore.pullBlocking]
      * to perform both operation in batch use [BaseDataStore.syncBlocking]
      */
-    SYNC(ReadPolicy.FORCE_LOCAL, WritePolicy.FORCE_LOCAL, Long.MAX_VALUE),
+    SYNC(ReadPolicy.FORCE_LOCAL, WritePolicy.FORCE_LOCAL, java.lang.Long.MAX_VALUE),
     /**
      * This StoreType means that all fetch request may have 2 callbacks:
      * - Callback when cached data will be retreived
@@ -41,17 +34,17 @@ enum class StoreType(
      * all the changes will be stored both locally and remotely and sync in case of network failtures
      */
     @Deprecated("use {@link StoreType#AUTO}")
-    CACHE(ReadPolicy.BOTH, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
+    CACHE(ReadPolicy.BOTH, WritePolicy.LOCAL_THEN_NETWORK, java.lang.Long.MAX_VALUE),
     /**
      * This StoreType that will always try to retrieve `find` results from the network.
      * If successful, it will store those results in the local database.If a subsequent call to `find`
      * fails to retrieve results from the network because of connectivity
      * issues, then results will be returned from the local database
      */
-    AUTO(ReadPolicy.NETWORK_OTHERWISE_LOCAL, WritePolicy.LOCAL_THEN_NETWORK, Long.MAX_VALUE),
+    AUTO(ReadPolicy.NETWORK_OTHERWISE_LOCAL, WritePolicy.LOCAL_THEN_NETWORK, java.lang.Long.MAX_VALUE),
     /**
      * This store type means that all the changes goes dirrectly to the server
      * no caching will be used
      */
-    NETWORK(ReadPolicy.FORCE_NETWORK, WritePolicy.FORCE_NETWORK, 0L);
+    NETWORK(ReadPolicy.FORCE_NETWORK, WritePolicy.FORCE_NETWORK, 0L)
 }

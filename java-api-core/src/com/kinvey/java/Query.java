@@ -126,7 +126,7 @@ public class Query extends AbstractQuery implements Serializable {
         builder.addFilter(builder.getOperator(QueryFilterBuilder.Operators.LESSTHANEQUAL), key, value);
         return this;
     }
-    
+
     /**
      * Adds a sort  sort condition to the Query
      *
@@ -135,13 +135,13 @@ public class Query extends AbstractQuery implements Serializable {
      * @return  Query object
      */
     public Query addSort(String field, SortOrder order) {
-    	super.addSort(field, order);
-    	return this;
+        super.addSort(field, order);
+        return this;
     }
-    
+
     /**
      * Sets the raw query string
-     * 
+     *
      * @param queryString
      * @return this
      */

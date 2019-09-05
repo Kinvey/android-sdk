@@ -981,7 +981,7 @@ public class DataStoreTest {
     @Test
     public void testFindByIdWithCacheCallback() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.CACHE, client);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -1007,7 +1007,7 @@ public class DataStoreTest {
     @Test
     public void testFindByIdForAutoType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.getTtl()).clear();
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
         assertNotNull(saveCallback.result);
@@ -1038,7 +1038,7 @@ public class DataStoreTest {
     @Test
     public void testFindPersonsAutoType() throws InterruptedException {
         DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.AUTO, client);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.getTtl()).clear();
         clearBackend(store);
         Person person = createPerson(TEST_USERNAME);
         DefaultKinveyClientCallback saveCallback = save(store, person);
@@ -3301,7 +3301,7 @@ public class DataStoreTest {
 
     //use for COLLECTION and for Person.class
     private long getCacheSize(StoreType storeType) {
-        return client.getCacheManager().getCache(COLLECTION, Person.class, storeType.ttl).get().size();
+        return client.getCacheManager().getCache(COLLECTION, Person.class, storeType.getTtl()).get().size();
     }
 
     @Test
@@ -3310,10 +3310,10 @@ public class DataStoreTest {
         DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
 
         ICacheManager cacheManager = client.getCacheManager();
-        ICache<Person> cache = cacheManager.getCache(COLLECTION, Person.class, StoreType.SYNC.ttl);
+        ICache<Person> cache = cacheManager.getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl());
         cache.clear();
 
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         List<Person> items = new ArrayList<>();
 
@@ -3331,7 +3331,7 @@ public class DataStoreTest {
             save(store, p);
         }
 
-        List<Person> cachedObjects = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).get(ids);
+        List<Person> cachedObjects = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).get(ids);
         assertEquals(100, cachedObjects.size());
 
         for (int i = 0; i < cachedObjects.size(); i++) {
@@ -3382,7 +3382,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
 
         //test pulling all data from backend
         DefaultKinveyPullCallback pullCallback = pull(store, null);
@@ -3392,7 +3392,7 @@ public class DataStoreTest {
         assertTrue(pullCallback.result.getCount() == getCacheSize(StoreType.CACHE));
 
         //cleaning cache store
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
 
         //test pull only 1 item by query
         Query query = client.query();
@@ -3412,7 +3412,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
         //test pulling not existing data from backend
         query = client.query();
         query = query.equals(USERNAME, victor.getUsername());
@@ -3431,7 +3431,7 @@ public class DataStoreTest {
         assertNotNull(pushCallback.result);
 
         //cleaning cache store
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         //test pulling 1 entity if only 1 entity exist at backend
         query = client.query();
@@ -3474,7 +3474,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3516,7 +3516,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3557,7 +3557,7 @@ public class DataStoreTest {
             save(store, createPerson(TEST_USERNAME + Constants.UNDERSCORE + i));
         }
         sync(store, DEFAULT_TIMEOUT);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         Query query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         query.setLimit(1);
@@ -3678,7 +3678,7 @@ public class DataStoreTest {
         sync(store, DEFAULT_TIMEOUT);
         List<Person> findResult = find(store, client.query(), DEFAULT_TIMEOUT).result.getResult();
         assertEquals(5, findResult.size());
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         List<Person> pullResults;
         int resultCount;
@@ -3694,7 +3694,7 @@ public class DataStoreTest {
         assertEquals(5, findResult.size());
         assertEquals(5, getCacheSize(StoreType.SYNC));
 
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         query = client.query().addSort(ID, AbstractQuery.SortOrder.ASC);
         int limit = 2;
@@ -3733,7 +3733,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3777,7 +3777,7 @@ public class DataStoreTest {
         save(store, kate);
         long cacheSizeBefore = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBefore == 5);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = getCacheSize(StoreType.CACHE);
         assertTrue(cacheSizeBetween == 0);
 
@@ -3810,7 +3810,7 @@ public class DataStoreTest {
 
     @Test
     public void testExpiredTTL() throws InterruptedException {
-        StoreType.SYNC.ttl = 1;
+        StoreType.SYNC.setTtl(1);
         DataStore<Person> store = DataStore.collection(COLLECTION, Person.class, StoreType.SYNC, client);
         client.getSyncManager().clear(COLLECTION);
 
@@ -3829,7 +3829,7 @@ public class DataStoreTest {
         assertNull(findCallback.error);
         assertNotNull(findCallback.result);
         assertTrue(findCallback.result.getResult().size() == 0);
-        StoreType.SYNC.ttl = Long.MAX_VALUE;
+        StoreType.SYNC.setTtl(Long.MAX_VALUE);
     }
 
     /**
@@ -4045,7 +4045,7 @@ public class DataStoreTest {
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
         assertNotNull(saveCallback.getResult());
         assertEquals(3, saveCallback.getResult().size());
-        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).get();
+        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).get();
         assertEquals(3, cachedItems.size());
     }
 
@@ -4106,7 +4106,7 @@ public class DataStoreTest {
         CustomKinveyListCallback<Person> saveCallback = testManager.saveCustomList(store, persons);
         assertNotNull(saveCallback.getResult());
         assertEquals(3, saveCallback.getResult().size());
-        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.ttl).get();
+        List<Person> cachedItems = client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.AUTO.getTtl()).get();
         assertEquals(3, cachedItems.size());
     }
 

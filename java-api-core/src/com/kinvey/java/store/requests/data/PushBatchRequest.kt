@@ -52,8 +52,8 @@ class PushBatchRequest<T : GenericJson>(
         val batchSyncItems = ArrayList<SyncItem>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val httpVerb = syncItem.requestMethod
-                val itemId = syncItem.entityID.id
+                val httpVerb = syncItem.getRequestMethod()
+                val itemId = syncItem.entityID?.id ?: ""
                 when (httpVerb) {
                     SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
                     SyncRequest.HttpVerb.POST,
@@ -63,7 +63,7 @@ class PushBatchRequest<T : GenericJson>(
                             // check that item wasn't deleted before
                             syncManager.deleteCachedItems(client.query().equals(META_ID, itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else if (httpVerb != SyncRequest.HttpVerb.POST) {
-                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(itemsCache.get(itemId)))
+                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(item))
                         }
                     }
                     SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))

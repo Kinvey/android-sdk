@@ -86,7 +86,7 @@ public class PaginationTest {
         testManager.save(store,moe);
         long cacheSizeBefore = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBefore == 3);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBetween == 0);
 
@@ -117,7 +117,7 @@ public class PaginationTest {
         testManager.save(store,theodore);
         long cacheSizeBefore = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBefore == 3);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.CACHE.getTtl()).clear();
         long cacheSizeBetween = testManager.getCacheSize(StoreType.CACHE, client);
         assertTrue(cacheSizeBetween == 0);
 
@@ -227,7 +227,7 @@ public class PaginationTest {
 
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         assertEquals(5, store.pullBlocking(client.query(), true).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
@@ -241,7 +241,7 @@ public class PaginationTest {
         testManager.cleanBackend(store, StoreType.SYNC);
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
 
         assertEquals(5, store.pullBlocking(client.query(), false).getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
@@ -263,10 +263,10 @@ public class PaginationTest {
         testManager.cleanBackend(store, StoreType.SYNC);
         testManager.createPersons(store, 5);
         testManager.push(store);
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
         assertEquals(5, testManager.pullCustom(store, client.query(), isAutoPagination).getResult().getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
-        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.ttl).clear();
+        client.getCacheManager().getCache(COLLECTION, Person.class, StoreType.SYNC.getTtl()).clear();
         assertEquals(5, testManager.pullCustom(store, null, isAutoPagination).getResult().getCount());
         assertEquals(5, testManager.getCacheSize(StoreType.SYNC, client));
     }

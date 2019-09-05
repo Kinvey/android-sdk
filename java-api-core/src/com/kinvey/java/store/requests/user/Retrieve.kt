@@ -63,8 +63,8 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
         : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
-        val queryLimit = query.limit
-        val querySkip = query.skip
+        val queryLimit = query.getLimit()
+        val querySkip = query.getSkip()
         this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
         this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
         this.sortFilter = query.sortString
@@ -94,8 +94,8 @@ class Retrieve<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
         : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userClass) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
-        val queryLimit = query.limit
-        val querySkip = query.skip
+        val queryLimit = query.getLimit()
+        val querySkip = query.getSkip()
         this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
         this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
         this.sortFilter = query.sortString

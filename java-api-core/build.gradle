@@ -6,6 +6,7 @@ buildscript {
     ext.google_http_client_version = '1.19.0'
     ext.google_http_client_gson = '1.19.0'
     ext.google_http_client_jackson = '1.19.0'
+
     repositories {
         jcenter()
         mavenCentral()

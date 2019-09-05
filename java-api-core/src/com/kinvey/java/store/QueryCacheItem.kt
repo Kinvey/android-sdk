@@ -7,6 +7,18 @@ import com.google.api.client.util.Key
  * Created by yuliya on 03/06/18.
  */
 
-class QueryCacheItem(@Key var collectionName: String?, @Key var query: String?, @Key var lastRequestTime: String?) : GenericJson() {
-    constructor(): this(null, null, null)
+class QueryCacheItem() : GenericJson() {
+
+    @Key
+    var collectionName: String? = null
+    @Key
+    var query: String? = null
+    @Key
+    var lastRequestTime: String? = null
+
+    constructor(collectionName: String, query: String, lastRequestTime: String): this() {
+        this.collectionName = collectionName
+        this.query = query
+        this.lastRequestTime = lastRequestTime
+    }
 }

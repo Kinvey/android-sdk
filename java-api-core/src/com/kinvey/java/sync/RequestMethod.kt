@@ -9,10 +9,9 @@ enum class RequestMethod (private val query: String) {
     DELETE("DELETE");
 
     companion object {
-
         @JvmStatic
         fun fromString(verb: String): RequestMethod? {
-            for (v in values()) {
+            for (v in RequestMethod.values()) {
                 if (v.query == verb) {
                     return v
                 }

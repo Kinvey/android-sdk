@@ -23,14 +23,9 @@ import com.google.api.client.util.Key
  * @author edwardf
  */
 data class KinveyFile(
-
     @Key("_id")
-    var id: String? = null
-
-
-) : GenericJson() {
-
+    var id: String? = null)
+: GenericJson() {
     @Key("_type")
-    private val type = "KinveyRef"
-
+    var type: String? = "KinveyRef"
 }

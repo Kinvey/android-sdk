@@ -1065,7 +1065,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     private inner class SaveRequest(internal var entity: T, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             Logger.INFO("Calling SaveRequest#executeAsync()")
             return super@DataStore.save(entity)
         }
@@ -1074,7 +1074,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     private inner class SaveListRequest internal constructor(internal var entities: List<T>, callback: KinveyClientCallback<List<T>>) : AsyncClientRequest<List<T>>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): List<T> {
+        override fun executeAsync(): List<T>? {
             Logger.INFO("Calling SaveListRequest#executeAsync()")
             return super@DataStore.save(entities)
         }
