@@ -26,9 +26,9 @@ import com.google.api.client.util.Key
  *
  * @author edwardf
  */
-class Aggregation(var res: List<Result>?) {
+class Aggregation(var res: List<out Result>?) {
 
-    var results: List<Result> = res ?: mutableListOf()
+    var results: List<out Result> = res ?: mutableListOf()
 
     /**
      * Return a list of result values from the aggregation

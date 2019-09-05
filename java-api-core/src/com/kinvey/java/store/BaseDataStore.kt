@@ -235,7 +235,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return items count in collection
      */
     @Throws(IOException::class)
-    fun count(cachedCallback: KinveyCachedClientCallback<Int>?): Int {
+    fun count(cachedCallback: KinveyCachedClientCallback<Int>?): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
@@ -252,7 +252,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return count of queried items in collection
      */
     @Throws(IOException::class)
-    fun count(cachedCallback: KinveyCachedClientCallback<Int>?, query: Query): Int {
+    fun count(cachedCallback: KinveyCachedClientCallback<Int>?, query: Query): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
@@ -268,7 +268,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @return items count in collection on the server
      */
     @Throws(IOException::class)
-    fun countNetwork(): Int {
+    fun countNetwork(): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         return ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_NETWORK, null, client.syncManager).execute()?.count ?: 0
@@ -377,7 +377,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun delete(query: Query): Int {
+    fun delete(query: Query): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
@@ -391,7 +391,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun delete(ids: Iterable<String>): Int {
+    fun delete(ids: Iterable<String>): Int? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")

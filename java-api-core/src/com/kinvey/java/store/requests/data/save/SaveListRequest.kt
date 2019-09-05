@@ -48,7 +48,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
 
     @Throws(IOException::class)
     override fun execute(): List<T>? {
-        var ret: List<T>? = ArrayList()
+        var ret: List<T>? = mutableListOf()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 ret = cache?.save(objects)

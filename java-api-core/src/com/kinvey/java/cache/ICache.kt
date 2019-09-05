@@ -133,5 +133,5 @@ interface ICache<T : GenericJson> {
      * @param q query to filter results
      * @return the array of groups containing the result of the reduce function
      */
-    fun group(aggregateType: AggregateType, fields: ArrayList<String>, reduceField: String, q: Query): Array<Aggregation.Result>
+    fun group(aggregateType: AggregateType, fields: ArrayList<String>, reduceField: String?, q: Query): Array<Aggregation.Result>
 }
