@@ -29,5 +29,4 @@ class LinkedBaseDataStore<T : LinkedGenericJson>
  * @param itemType   class that data should be mapped to
  * @param storeType  type of storage that client want to use
  */
-(client: AbstractClient<*>, collection: String, itemType: Class<T>, storeType: StoreType)
-    : BaseDataStore<T>(client, collection, itemType, storeType, LinkedNetworkManager<T>(collection, itemType, client))
+(client: AbstractClient<*>, collection: String, itemType: Class<T>, storeType: StoreType) : BaseDataStore<T>(client, collection, itemType, storeType, LinkedNetworkManager<T>(collection, itemType, client))
