@@ -24,11 +24,7 @@ import java.io.InputStream
  * @author edwardf
  */
 interface MimeTypeFinder {
-
     fun getMimeType(meta: FileMetaData, stream: InputStream)
-
-    fun getMimeType(meta: FileMetaData, file: java.io.File?)
-
+    fun getMimeType(meta: FileMetaData, file: java.io.File)
     fun getMimeType(metaData: FileMetaData)
-
 }
