@@ -64,10 +64,11 @@ task:
   #   -camera-front none
   #   -selinux permissive
   #   -qemu -m 2048
-  wait_for_emulator_script:
-    - sleep 30
-    - adb wait-for-device
-    - adb shell input keyevent 82
+  # wait_for_emulator_script:
+  #   - adb wait-for-device
+  #   - adb shell input keyevent 82
+  wait_for_emulator_script: adb wait-for-device
+  input_keyevent_script: adb shell input keyevent 82
   emulator_api_level_script: adb shell getprop ro.build.version.sdk
   emulator_boot_animation_script: while [ "`adb shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] ; do sleep 1; done
   emulator_bootanim_exit_script: while [ "`adb shell getprop service.bootanim.exit | tr -d '\r' `" != "1" ] ; do sleep 1; done
