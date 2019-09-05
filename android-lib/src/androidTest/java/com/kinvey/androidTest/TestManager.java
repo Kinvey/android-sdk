@@ -525,6 +525,6 @@ public class TestManager<T extends GenericJson> {
 
     //use for PaginationTest.COLLECTION and for Person.class
     public long getCacheSize(StoreType storeType, Client client) {
-        return client.getCacheManager().getCache(PaginationTest.COLLECTION, Person.class, storeType.ttl).get().size();
+        return client.getCacheManager().getCache(PaginationTest.COLLECTION, Person.class, storeType.getTtl()).get().size();
     }
 }

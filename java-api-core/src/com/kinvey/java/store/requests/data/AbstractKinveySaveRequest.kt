@@ -14,14 +14,18 @@
  *
  */
 
-package com.kinvey.java.store.requests.data;
+package com.kinvey.java.store.requests.data
 
-import java.io.IOException;
+import java.io.IOException
 
 /**
- * Created by Prots on 2/8/16.
+ * Created by Prots on 2/15/16.
  */
-public interface IRequest<T> {
-    T execute() throws IOException;
-    void cancel();
+class AbstractKinveySaveRequest<T> : IRequest<T> {
+    @Throws(IOException::class)
+    override fun execute(): T? {
+        return null
+    }
+
+    override fun cancel() {}
 }

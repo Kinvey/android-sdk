@@ -14,18 +14,29 @@
  *
  */
 
-package com.kinvey.java.model
+package com.kinvey.java.store.requests.data
 
 import com.google.api.client.json.GenericJson
-import com.google.api.client.util.Key
+import com.kinvey.java.cache.ICache
+import com.kinvey.java.network.NetworkManager
 
 /**
- * @author edwardf
+ * Created by Prots on 2/8/16.
  */
-data class KinveyFile(
-    @Key("_id")
-    var id: String? = null)
-: GenericJson() {
-    @Key("_type")
-    var type: String? = "KinveyRef"
+abstract class AbstractKinveyDataRequest<T : GenericJson> : IRequest<T> {
+
+    //configuration options for the request.
+    //In strong typed languages, this can be a RequestConfig class that allows the developer to specify timeout, custom headers etc.
+    protected var requestConfig: RequestConfig? = null
+
+    //What collection we are operating on
+    protected var collection: String? = null
+
+    //The cache that backs the collection
+    protected var cache: ICache<T>? = null
+
+    //Network manager
+    protected var networkMgr: NetworkManager<*>? = null
+
+    class RequestConfig
 }

@@ -14,21 +14,17 @@
  *
  */
 
-package com.kinvey.java.store.requests.data;
+package com.kinvey.java
 
-import java.io.IOException;
+import com.kinvey.java.model.FileMetaData
+
+import java.io.InputStream
 
 /**
- * Created by Prots on 2/15/16.
+ * @author edwardf
  */
-public class AbstractKinveySaveRequest<T> implements IRequest<T> {
-    @Override
-    public T execute() throws IOException {
-        return null;
-    }
-
-    @Override
-    public void cancel() {
-
-    }
+interface MimeTypeFinder {
+    fun getMimeType(meta: FileMetaData, stream: InputStream)
+    fun getMimeType(meta: FileMetaData, file: java.io.File)
+    fun getMimeType(metaData: FileMetaData)
 }
