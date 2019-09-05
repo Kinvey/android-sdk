@@ -29,29 +29,31 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-class ReadRequest<T : GenericJson>(override val cache: ICache<T>?, query: Query?, private val readPolicy: ReadPolicy, private val maxValue: Long,
-                                   override val networkManager: NetworkManager<T>) : AbstractKinveyReadRequest<T>() {
+class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val readPolicy: ReadPolicy?, private val maxValue: Long,
+                                   networkManager: NetworkManager<T>?) : AbstractKinveyReadRequest<T>() {
     private val query: Query
 
     init {
+        this.cache = cache
         this.query = query ?: Query(MongoQueryFilter.MongoQueryFilterBuilder())
+        this.networkManager = networkManager
     }
 
     @Throws(IOException::class)
     override fun execute(): KinveyReadResponse<T>? {
-        query.limit = maxValue.toInt()
+        query.setLimit(maxValue.toInt())
         var ret: KinveyReadResponse<T>? = null
         when (readPolicy) {
             ReadPolicy.FORCE_LOCAL -> {
                 val response = KinveyReadResponse<T>()
-                response.result = cache?.let { it[query] }
+                response.result = cache?.get(query)
                 ret = response
             }
-            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = networkManager.getBlocking(query).execute()
+            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = networkManager?.getBlocking(query)?.execute()
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
-                    ret = networkManager.getBlocking(query).execute()
+                    ret = networkManager?.getBlocking(query)?.execute()
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
@@ -62,7 +64,7 @@ class ReadRequest<T : GenericJson>(override val cache: ICache<T>?, query: Query?
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
                     val res = KinveyReadResponse<T>()
-                    res.result = cache?.let { it[query] }
+                    res.result = cache?.get(query)
                     ret = res
                 }
             }
@@ -70,7 +72,5 @@ class ReadRequest<T : GenericJson>(override val cache: ICache<T>?, query: Query?
         return ret
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 }

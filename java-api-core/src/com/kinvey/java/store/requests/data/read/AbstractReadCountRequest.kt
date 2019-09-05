@@ -28,8 +28,9 @@ import com.kinvey.java.sync.SyncManager
 
 import java.io.IOException
 
-abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: ICache<T>?, private val readPolicy: ReadPolicy, protected var networkManager: NetworkManager<T>,
-                                                         private val syncManager: SyncManager) : IRequest<KinveyCountResponse> {
+abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: ICache<T>?, private val readPolicy: ReadPolicy,
+                                                         protected var networkManager: NetworkManager<T>?,
+                                                         private val syncManager: SyncManager?) : IRequest<KinveyCountResponse> {
 
     @Throws(IOException::class)
     override fun execute(): KinveyCountResponse? {
@@ -42,53 +43,48 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
         }
 
         when (readPolicy) {
-            ReadPolicy.FORCE_LOCAL -> ret!!.count = countCached() ?: 0
-            ReadPolicy.FORCE_NETWORK -> ret = request!!.execute()
+            ReadPolicy.FORCE_LOCAL -> ret?.count = countCached()
+            ReadPolicy.FORCE_NETWORK -> ret = request?.execute()
             ReadPolicy.BOTH -> {
-                val pushRequest = PushRequest(networkManager.collectionName,
-                        cache, networkManager, networkManager.client)
+                val pushRequest = PushRequest(networkManager?.collectionName,
+                        cache, networkManager, networkManager?.client)
                 try {
                     pushRequest.execute()
                 } catch (t: Throwable) {
                     // silent fall, will be synced next time
                 }
-
-                ret = request!!.execute()
+                ret = request?.execute()
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
-                val pushAutoRequest = PushRequest(networkManager.collectionName,
-                        cache, networkManager, networkManager.client)
+                val pushAutoRequest = PushRequest(networkManager?.collectionName,
+                        cache, networkManager, networkManager?.client)
                 try {
                     pushAutoRequest.execute()
                 } catch (t: Throwable) {
                     // silent fall, will be synced next time
                 }
-
                 var networkException: IOException? = null
                 try {
-                    ret = request!!.execute()
+                    ret = request?.execute()
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
                     }
                     networkException = e
                 }
-
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
-                    ret!!.count = countCached() ?: 0
+                    ret?.count = countCached()
                 }
             }
         }
         return ret
     }
 
-    override fun cancel() {
+    override fun cancel() {}
 
-    }
-
-    protected abstract fun countCached(): Int?
+    protected abstract fun countCached(): Int
 
     @Throws(IOException::class)
-    protected abstract fun countNetwork(): NetworkManager<T>.GetCount
+    protected abstract fun countNetwork(): NetworkManager<T>.GetCount?
 }

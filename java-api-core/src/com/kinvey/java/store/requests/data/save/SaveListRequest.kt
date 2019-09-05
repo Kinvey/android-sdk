@@ -17,7 +17,6 @@
 package com.kinvey.java.store.requests.data.save
 
 import com.google.api.client.json.GenericJson
-import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
@@ -28,6 +27,7 @@ import com.kinvey.java.store.requests.data.IRequest
 import com.kinvey.java.store.requests.data.PushRequest
 import com.kinvey.java.sync.SyncManager
 import com.kinvey.java.sync.dto.SyncRequest
+import org.checkerframework.checker.units.qual.A
 
 import java.io.IOException
 import java.security.AccessControlException
@@ -42,17 +42,17 @@ import java.util.concurrent.FutureTask
 /**
  * Created by Prots on 2/5/16.
  */
-class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>, private val writePolicy: WritePolicy, private val objects: Iterable<T>,
+class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>,
+                                       private val writePolicy: WritePolicy, private val objects: Iterable<T>,
                                        private val syncManager: SyncManager) : IRequest<List<T>> {
+    var exception: IOException? = null
 
     @Throws(IOException::class)
     override fun execute(): List<T>? {
-        var ret: MutableList<T> = ArrayList()
+        var ret: List<T>? = mutableListOf()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                cache?.save(objects)?.toMutableList()?.let {
-                    ret = it
-                }
+                ret = cache?.save(objects)
                 syncManager.enqueueSaveRequests(networkManager.collectionName, networkManager, ret)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
@@ -64,39 +64,35 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
                     t.printStackTrace()
                     // silent fall, will be synced next time
                 }
-
-                var exception: IOException? = null
                 cache?.save(objects)
-                for (`object` in objects) {
-                    try {
-                        networkManager.saveBlocking(`object`).execute()?.let {
-                            ret.add(it)
-                        }
-                    } catch (e: IOException) {
-                        syncManager.enqueueRequest(networkManager.collectionName,
-                                networkManager, if (networkManager.isTempId(`object`)) SyncRequest.HttpVerb.POST else SyncRequest.HttpVerb.PUT, `object`[Constants._ID] as String?)
-                        exception = e
-                    }
-
-                }
+                ret = objects.mapNotNull { item ->
+                      var result: T? = null
+                      try {
+                          result = networkManager.saveBlocking(item).execute()
+                      } catch (e: IOException) {
+                          val requestType = if (networkManager.isTempId(item)) SyncRequest.HttpVerb.POST
+                                            else SyncRequest.HttpVerb.PUT
+                          val itemId = item[Constants._ID] as String?
+                          syncManager.enqueueRequest(networkManager.collectionName, networkManager, requestType , itemId)
+                          exception = e
+                      }
+                      result
+                }.toMutableList()
                 cache?.save(ret)
-                if (exception != null) {
-                    throw exception
-                }
+                exception?.let { throw it }
             }
             WritePolicy.FORCE_NETWORK -> {
                 Logger.INFO("Start saving entities")
-                val executor: ExecutorService
+                val executor: ExecutorService = Executors.newFixedThreadPool(networkManager.client.numberThreadsForDataStoreSaveList)
                 val tasks: MutableList<FutureTask<T>>
                 var ft: FutureTask<T>
                 val items = objects as List<T>
-                executor = Executors.newFixedThreadPool(networkManager.client.numberThreadsForDataStoreSaveList)
                 tasks = ArrayList()
+
                 for (obj in objects) {
                     try {
-                        val save = SaveRequest(
-                                cache, networkManager, writePolicy, obj, syncManager)
-                        ft = FutureTask<T>(CallableAsyncSaveRequestHelper(save))
+                        val save = SaveRequest(cache, networkManager, writePolicy, obj, syncManager)
+                        ft = FutureTask(CallableAsyncSaveRequestHelper(save))
                         tasks.add(ft)
                         executor.execute(ft)
                     } catch (e: AccessControlException) {
@@ -110,13 +106,12 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
                 }
                 for (task in tasks) {
                     try {
-                        ret.add(task.get())
+                        (ret as ArrayList).add(task.get())
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     } catch (e: ExecutionException) {
                         e.printStackTrace()
                     }
-
                 }
                 executor.shutdown()
                 Logger.INFO("Finish saving entities")
@@ -125,8 +120,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
         return ret
     }
 
-    private inner class CallableAsyncSaveRequestHelper internal constructor(internal var save: SaveRequest<T>) : Callable<T> {
-
+    class CallableAsyncSaveRequestHelper<T : GenericJson> (var save: SaveRequest<T>) : Callable<T> {
         @Throws(Exception::class)
         override fun call(): T? {
             return save.execute()

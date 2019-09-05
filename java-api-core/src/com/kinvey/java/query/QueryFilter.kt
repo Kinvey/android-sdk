@@ -14,15 +14,22 @@
  *
  */
 
-package com.kinvey.java.query;
+package com.kinvey.java.query
 
-import java.util.AbstractMap;
-import java.util.LinkedHashMap;
+import java.util.AbstractMap
+import java.util.LinkedHashMap
 
 /**
  * A mechanism to filter resultsets within a query
  */
-public interface QueryFilter {
+interface QueryFilter {
+
+    /**
+     * Get the current filter
+     *
+     * @return Current filter
+     */
+    val filter: LinkedHashMap<String, Any>
 
     /**
      * Put a value in the QueryFilter
@@ -30,7 +37,7 @@ public interface QueryFilter {
      * @param key field
      * @param value value
      */
-    public void put(String key, Object value);
+    fun put(key: String, value: Any)
 
     /**
      * Put a value in the QueryFilter
@@ -39,7 +46,7 @@ public interface QueryFilter {
      * @param key field
      * @param value value
      */
-    public void put(String operation, String key, Object value);
+    fun put(operation: String, key: String, value: Any)
 
     /**
      * Put a value in the QueryFilter
@@ -48,7 +55,7 @@ public interface QueryFilter {
      * @param key field
      * @param value value
      */
-    public void put(String operation, String key, Object[] value);
+    fun put(operation: String, key: String, value: Array<Any>)
 
     /**
      * Join two filters together with a logical and/or
@@ -56,7 +63,7 @@ public interface QueryFilter {
      * @param operation and/or operator
      * @param newFilter new filter to join to the current filter
      */
-    public void joinFilters(String operation, LinkedHashMap<String, Object> newFilter);
+    fun joinFilters(operation: String, newFilter: LinkedHashMap<String, Any>)
 
     /**
      * Get a value within the current filter based on a specified key
@@ -64,28 +71,29 @@ public interface QueryFilter {
      * @param key
      * @return value
      */
-    public Object get(String key);
-
-    /**
-     * Get the current filter
-     *
-     * @return Current filter
-     */
-    public LinkedHashMap<String,Object> getFilter();
+    operator fun get(key: String): Any
 
     /**
      * Resets the current filter
      */
-    public void reset();
+    fun reset()
 
     /**
      * Builder for Query object
      */
-    public interface QueryFilterBuilder {
+    interface QueryFilterBuilder {
+
+        /**
+         * Gets the current filter map
+         *
+         * @return
+         */
+        val filterMap: AbstractMap<String, Any>
+
         /**
          * Possible filter operators
          */
-        public static enum Operators {
+        enum class Operators {
             GREATERTHAN,
             LESSTHAN,
             GREATERTHANEQUAL,
@@ -115,7 +123,7 @@ public interface QueryFilter {
          * @param field
          * @param value
          */
-        public void addFilter(String operator, String field, Object value);
+        fun addFilter(operator: String, field: String, value: Any)
 
         /**
          * Add a filter to the builder's QueryFilter
@@ -124,7 +132,7 @@ public interface QueryFilter {
          * @param field
          * @param value
          */
-        public void addFilter(String operator, String field, Object[] value);
+        fun addFilter(operator: String, field: String, value: Array<Any>)
 
         /**
          * Join the specified Query's filter to the current builder's queryfilter
@@ -132,7 +140,7 @@ public interface QueryFilter {
          * @param operator
          * @param newQuery
          */
-        public void joinFilter(String operator, AbstractQuery newQuery);
+        fun joinFilter(operator: String, newQuery: AbstractQuery)
 
         /**
          * Add a location filter
@@ -142,7 +150,7 @@ public interface QueryFilter {
          * @param point an array of type double[] containing the latitude/longitude points
          * @param distance
          */
-        public void addLocationFilter(String field, String operator, double[] point, double distance);
+        fun addLocationFilter(field: String, operator: String, point: DoubleArray, distance: Double)
 
         /**
          * Add a location where filter
@@ -151,13 +159,13 @@ public interface QueryFilter {
          * @param operator
          * @param points a 2D array of type double[][] containing points for geolocation
          */
-        public void addLocationWhereFilter(String field, String operator, double[][] points);
+        fun addLocationWhereFilter(field: String, operator: String, points: Array<DoubleArray>)
 
 
         /**
          * Negates the current query filter.
          */
-        public void negateQuery();
+        fun negateQuery()
 
         /**
          * Adds an equality comparison to the QueryFilter
@@ -165,12 +173,12 @@ public interface QueryFilter {
          * @param field
          * @param value
          */
-        public void equals(String field, Object value);
+        fun equals(field: String, value: Any)
 
         /**
          * Resets the current filter
          */
-        public void resetFilter();
+        fun resetFilter()
 
         /**
          * Helper method to get the concrete operator value from the passed in Operator
@@ -178,13 +186,6 @@ public interface QueryFilter {
          * @param operator
          * @return
          */
-        public String getOperator(Operators operator);
-
-        /**
-         * Gets the current filter map
-         *
-         * @return
-         */
-        public AbstractMap<String, Object> getFilterMap();
+        fun getOperator(operator: Operators): String
     }
 }

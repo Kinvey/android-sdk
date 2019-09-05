@@ -28,23 +28,23 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-class DeleteRequest<T : GenericJson> : AbstractKinveyDataRequest<T> {
+class DeleteRequest<T : GenericJson>() : AbstractKinveyDataRequest<T>() {
 
-    private val query: Query?
-    private val id: String?
-    private val writePolicy: WritePolicy
+    private var query: Query? = null
+    private var id: String? = null
+    private var writePolicy: WritePolicy? = null
 
-    constructor(cache: ICache<T>, id: String, writePolicy: WritePolicy, networkManager: NetworkManager<T>) {
-        this.networkManager = networkManager
-        query = null
+    constructor(cache: ICache<T>?, id: String?, writePolicy: WritePolicy?, networkManager: NetworkManager<T>?): this() {
         this.cache = cache
         this.id = id
         this.writePolicy = writePolicy
+        this.networkMgr = networkManager
     }
 
     constructor(client: AbstractClient<*>, collectionName: String, clazz: Class<T>,
-                cache: ICache<T>, query: Query, writePolicy: WritePolicy) {
+                cache: ICache<T>, query: Query, writePolicy: WritePolicy): this() {
         id = null
+        this.collection = collectionName
         this.cache = cache
         this.query = query
         this.writePolicy = writePolicy
@@ -52,11 +52,11 @@ class DeleteRequest<T : GenericJson> : AbstractKinveyDataRequest<T> {
 
     override fun execute(): T? {
         when (writePolicy) {
-            WritePolicy.FORCE_LOCAL -> cache?.delete(query!!)
+            WritePolicy.FORCE_LOCAL -> query?.let { q -> cache?.delete(q) }
             WritePolicy.FORCE_NETWORK ->
 
                 try {
-                    networkManager?.deleteBlocking(query)
+                    networkMgr?.deleteBlocking(query)
                 } catch (e: IOException) {
                     //TODO: add to sync
                     e.printStackTrace()
@@ -64,21 +64,18 @@ class DeleteRequest<T : GenericJson> : AbstractKinveyDataRequest<T> {
 
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 //write to local and network, push to sync if network fails
-                cache?.delete(query!!)
+                query?.let { q -> cache?.delete(q) }
                 try {
-                    networkManager?.deleteBlocking(query)
+                    networkMgr?.deleteBlocking(query)
                 } catch (e: IOException) {
                     //TODO: add to sync
                     e.printStackTrace()
                 }
-
             }
         }//TODO: write to sync
         //write to network, fallback to sync
         return null
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 }

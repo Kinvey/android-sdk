@@ -16,60 +16,50 @@ import java.util.ArrayList
  * Created by yuliya on 10/06/17.
  */
 
-class AggregationRequest<T: Aggregation.Result>(private val type: AggregateType, cache: ICache<T>?, private val readPolicy: ReadPolicy,
-                         networkManager: NetworkManager<T>,
-                         private val fields: ArrayList<String>, private val reduceField: String?, private val query: Query) : IRequest<Array<out Aggregation.Result>> {
-    private val cache: ICache<out T>?
-    private val networkManager: NetworkManager<out Aggregation.Result>
+class AggregationRequest(private val type: AggregateType, private val cache: ICache<Aggregation.Result>?,
+                         private val readPolicy: ReadPolicy?, private val networkManager: NetworkManager<Aggregation.Result>?,
+                         private val fields: ArrayList<String>, private val reduceField: String?, private val query: Query) : IRequest<Array<Aggregation.Result>> {
 
     protected val cached: Array<Aggregation.Result>?
-        get() = cache?.group(type, fields, reduceField, query)
+        get() = cache?.group(type, fields, reduceField ?: "", query)
 
-    protected val network: Array<out Aggregation.Result>?
+    protected val network: Array<Aggregation.Result>?
         @Throws(IOException::class)
         get() {
             when (type) {
-                AggregateType.COUNT -> return networkManager.countBlocking(fields, Array<Aggregation.Result>::class.java, query).execute()
-                AggregateType.SUM -> return networkManager.sumBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query).execute()
-                AggregateType.MIN -> return networkManager.minBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query).execute()
-                AggregateType.MAX -> return networkManager.maxBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query).execute()
-                AggregateType.AVERAGE -> return networkManager.averageBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query).execute()
+                AggregateType.COUNT -> return networkManager?.countBlocking(fields, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.SUM -> return networkManager?.sumBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.MIN -> return networkManager?.minBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.MAX -> return networkManager?.maxBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.AVERAGE -> return networkManager?.averageBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
                 else -> throw KinveyException(type.name + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.")
             }
         }
 
-    init {
-        this.cache = cache
-        this.networkManager = networkManager
-    }
-
     @Throws(IOException::class)
-    override fun execute(): Array<out Aggregation.Result>? {
-        var ret: Array<out Aggregation.Result>? = null
+    override fun execute(): Array<Aggregation.Result> {
+        var ret: Array<Aggregation.Result> = arrayOf()
         when (readPolicy) {
-            ReadPolicy.FORCE_LOCAL -> ret = cached
-            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = network
+            ReadPolicy.FORCE_LOCAL -> ret = cached ?: arrayOf()
+            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = network ?: arrayOf()
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
-                    ret = network
+                    ret = network ?: arrayOf()
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
                     }
                     networkException = e
                 }
-
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
-                    ret = cached
+                    ret = cached ?: arrayOf()
                 }
             }
         }
         return ret
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 }

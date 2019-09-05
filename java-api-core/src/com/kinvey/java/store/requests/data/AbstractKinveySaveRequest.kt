@@ -27,7 +27,5 @@ class AbstractKinveySaveRequest<T> : IRequest<T> {
         return null
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 }

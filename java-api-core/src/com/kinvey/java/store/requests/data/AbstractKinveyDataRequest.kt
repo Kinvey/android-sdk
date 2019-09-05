@@ -33,12 +33,10 @@ abstract class AbstractKinveyDataRequest<T : GenericJson> : IRequest<T> {
     protected var collection: String? = null
 
     //The cache that backs the collection
-    open var cache: ICache<T>? = null
+    protected var cache: ICache<T>? = null
 
     //Network manager
-    open var networkManager: NetworkManager<T>? = null
+    protected var networkMgr: NetworkManager<*>? = null
 
     class RequestConfig
-
-
 }

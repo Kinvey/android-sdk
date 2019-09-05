@@ -24,6 +24,5 @@ import java.io.IOException
 interface IRequest<T> {
     @Throws(IOException::class)
     fun execute(): T?
-
     fun cancel()
 }

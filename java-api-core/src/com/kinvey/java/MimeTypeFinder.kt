@@ -14,22 +14,17 @@
  *
  */
 
-package com.kinvey.java;
+package com.kinvey.java
 
-import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.model.FileMetaData
 
-import java.io.InputStream;
+import java.io.InputStream
 
 /**
  * @author edwardf
  */
-public interface MimeTypeFinder {
-
-    public void getMimeType(FileMetaData meta, InputStream stream);
-
-    public void getMimeType(FileMetaData meta, java.io.File file);
-
-    public void getMimeType(FileMetaData metaData);
-
-
+interface MimeTypeFinder {
+    fun getMimeType(meta: FileMetaData, stream: InputStream)
+    fun getMimeType(meta: FileMetaData, file: java.io.File)
+    fun getMimeType(metaData: FileMetaData)
 }

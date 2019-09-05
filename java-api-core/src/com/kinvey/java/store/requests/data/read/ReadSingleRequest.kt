@@ -23,47 +23,47 @@ import com.kinvey.java.store.ReadPolicy
 import com.kinvey.java.store.requests.data.AbstractKinveyDataRequest
 
 import java.io.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 /**
  * Created by Prots on 2/8/16.
  */
-class ReadSingleRequest<T : GenericJson>(override var cache: ICache<T>?, private val id: String, private val readPolicy: ReadPolicy, override var networkManager: NetworkManager<T>?) : AbstractKinveyDataRequest<T>() {
+class ReadSingleRequest<T : GenericJson>(cache: ICache<T>?, private val id: String, private val readPolicy: ReadPolicy?,
+                                         private val networkManager: NetworkManager<T>?) : AbstractKinveyDataRequest<T>() {
+
+    init {
+        this.cache = cache
+    }
 
     @Throws(IOException::class)
     override fun execute(): T? {
         var ret: T? = null
         when (readPolicy) {
-            ReadPolicy.FORCE_LOCAL -> ret = cache?.let { it[id] }
-            ReadPolicy.FORCE_NETWORK // Logic for getting cached data implemented before running Request
-            -> ret = networkManager?.getEntityBlocking(id)?.execute()
+            ReadPolicy.FORCE_LOCAL -> ret = cache?.get(id)
+            ReadPolicy.FORCE_NETWORK ->  // Logic for getting cached data implemented before running Request
+                ret = networkManager?.getEntityBlocking(id)?.execute()
             ReadPolicy.BOTH -> {
                 ret = networkManager?.getEntityBlocking(id)?.execute()
-                cache?.save(ret!!)
+                ret?.let { cache?.save(it) }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
                     ret = networkManager?.getEntityBlocking(id)?.execute()
-                    cache?.save(ret!!)
+                    ret?.let { cache?.save(it) }
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
                     }
                     networkException = e
                 }
-
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
-                    ret = cache?.let { it[id] }
+                    ret = cache?.get(id)
                 }
             }
         }
         return ret
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 }

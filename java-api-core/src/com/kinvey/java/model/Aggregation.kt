@@ -55,6 +55,5 @@ class Aggregation(var res: List<out Result>?) {
         var result: Number? = null
     }
 
-
 }
 //[{"_acl.creator":"5230dea6c5cf276b1200000f","_result":3},{"_acl.creator":"520a7096519e1429230000f5","_result":1},{"_acl.creator":"5238c3a29bb2741a3800015d","_result":3}]

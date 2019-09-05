@@ -31,22 +31,22 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICache<T>?, private val writePolicy: WritePolicy, protected var networkManager: NetworkManager<T>,
-                                                      protected var syncManager: SyncManager) : IRequest<Int> {
+abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICache<T>?, private val writePolicy: WritePolicy, protected var networkManager: NetworkManager<T>?,
+                                                      protected var syncManager: SyncManager?) : IRequest<Int> {
 
     @Throws(IOException::class)
     override fun execute(): Int? {
         var ret: Int? = 0
-        val request: AbstractKinveyJsonClientRequest<KinveyDeleteResponse>
+        val request: AbstractKinveyJsonClientRequest<KinveyDeleteResponse>?
 
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                enqueueRequest(networkManager.collectionName, networkManager)
+                enqueueRequest(networkManager?.collectionName, networkManager)
                 ret = deleteCached()
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
-                val pushRequest = PushRequest(networkManager.collectionName,
-                        cache, networkManager, networkManager.client)
+                val pushRequest = PushRequest(networkManager?.collectionName,
+                        cache, networkManager, networkManager?.client)
                 try {
                     pushRequest.execute()
                 } catch (t: Throwable) {
@@ -55,32 +55,28 @@ abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICach
 
                 try {
                     request = deleteNetwork()
-                    ret = request.execute()!!.count
+                    ret = request?.execute()?.count
                 } catch (e: IOException) {
-                    enqueueRequest(networkManager.collectionName, networkManager)
+                    enqueueRequest(networkManager?.collectionName, networkManager)
                     throw e
                 }
-
                 deleteCached()
             }
             WritePolicy.FORCE_NETWORK -> {
                 request = deleteNetwork()
-                val response = request.execute()
-                ret = response!!.count
+                val response = request?.execute()
+                ret = response?.count
             }
         }
         return ret
     }
 
-    override fun cancel() {
-
-    }
+    override fun cancel() {}
 
     protected abstract fun deleteCached(): Int?
     @Throws(IOException::class)
-    protected abstract fun enqueueRequest(collectionName: String, networkManager: NetworkManager<T>)
+    protected abstract fun enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?)
 
     @Throws(IOException::class)
-    protected abstract fun deleteNetwork(): AbstractKinveyJsonClientRequest<KinveyDeleteResponse>
-
+    protected abstract fun deleteNetwork(): AbstractKinveyJsonClientRequest<KinveyDeleteResponse>?
 }

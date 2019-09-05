@@ -28,10 +28,15 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-abstract class AbstractReadRequest<T : GenericJson>(override val cache: ICache<T>?, private val readPolicy: ReadPolicy, protected val networkData: NetworkManager<T>) : AbstractKinveyReadRequest<T>() {
+abstract class AbstractReadRequest<T : GenericJson>(cache: ICache<T>?, private val readPolicy: ReadPolicy?,
+                                                    protected val networkData: NetworkManager<T>?) : AbstractKinveyReadRequest<T>() {
 
-    protected abstract val cached: KinveyReadResponse<T>
+    protected abstract val cached: KinveyReadResponse<T>?
     protected abstract val network: KinveyReadResponse<T>?
+
+    init {
+        this.cache = cache
+    }
 
     @Throws(IOException::class)
     override fun execute(): KinveyReadResponse<T>? {
@@ -41,24 +46,19 @@ abstract class AbstractReadRequest<T : GenericJson>(override val cache: ICache<T
             ReadPolicy.FORCE_NETWORK -> ret = network
             ReadPolicy.BOTH -> {
                 ret = network
-                ret?.result?.let {
-                    cache?.save(it)
-                }
+                ret?.result?.let { cache?.save(it) }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
                     ret = network
-                    ret?.result?.let {
-                        cache?.save(it)
-                    }
+                    ret?.result?.let { cache?.save(it) }
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
                     }
                     networkException = e
                 }
-
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
                     ret = cached
@@ -68,8 +68,5 @@ abstract class AbstractReadRequest<T : GenericJson>(override val cache: ICache<T
         return ret
     }
 
-    override fun cancel() {
-
-    }
-
+    override fun cancel() {}
 }

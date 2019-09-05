@@ -34,15 +34,14 @@ import java.util.Arrays
 class ReadIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>, readPolicy: ReadPolicy,
                                       private val ids: Iterable<String>) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
-    override val cached: KinveyReadResponse<T>
+    override val cached: KinveyReadResponse<T>?
         get() {
             val response = KinveyReadResponse<T>()
-            response.result = cache?.let { it[ids] }
+            response.result = cache?.get(ids)
             return response
         }
 
     override val network: KinveyReadResponse<T>?
-        get() {
-            return networkData.getBlocking(Iterables.toArray(ids, String::class.java)).execute()
-        }
+        @Throws(IOException::class)
+        get() = networkData?.getBlocking(Iterables.toArray(ids, String::class.java))?.execute()
 }

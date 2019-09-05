@@ -31,22 +31,26 @@ import java.io.IOException
 /**
  * Created by Prots on 2/15/16.
  */
-class DeleteIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>, writePolicy: WritePolicy,
-                                        private val ids: Iterable<String>, syncManager: SyncManager) : AbstractDeleteRequest<T>(cache, writePolicy, networkManager, syncManager) {
+class DeleteIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, writePolicy: WritePolicy,
+                                        private val ids: Iterable<String>?, syncManager: SyncManager?)
+    : AbstractDeleteRequest<T>(cache, writePolicy, networkManager, syncManager) {
 
     override fun deleteCached(): Int? {
-        return cache?.delete(ids)
+        return if (ids != null) {
+            cache?.delete(ids)
+        } else 0
     }
 
     @Throws(IOException::class)
-    override fun deleteNetwork(): NetworkManager<T>.Delete {
+    override fun deleteNetwork(): NetworkManager<T>.Delete? {
         val q = Query(MongoQueryFilter.MongoQueryFilterBuilder())
-        q.`in`("_id", Iterables.toArray(ids, String::class.java))
-        return networkManager.deleteBlocking(q)
+        val idsArray = Iterables.toArray(ids, String::class.java)
+        q.`in`("_id", idsArray)
+        return networkManager?.deleteBlocking(q)
     }
 
     @Throws(IOException::class)
-    override fun enqueueRequest(collectionName: String, networkManager: NetworkManager<T>) {
-        syncManager.enqueueDeleteRequests(collectionName, networkManager, ids)
+    override fun enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?) {
+        syncManager?.enqueueDeleteRequests(collectionName, networkManager, ids)
     }
 }

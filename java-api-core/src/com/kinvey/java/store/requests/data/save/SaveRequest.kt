@@ -32,59 +32,55 @@ import java.io.IOException
 /**
  * Created by Prots on 2/5/16.
  */
-class SaveRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>,
-                                   private val writePolicy: WritePolicy, private val `object`: T,
-                                   private val syncManager: SyncManager) : IRequest<T> {
-
+class SaveRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>?,
+                                   private val writePolicy: WritePolicy?, private val item: T,
+                                   private val syncManager: SyncManager?) : IRequest<T> {
     @Throws(IOException::class)
     override fun execute(): T? {
         var ret: T? = null
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                ret = cache?.save(`object`)
-                syncManager.enqueueRequest(networkManager.collectionName,
-                        networkManager, if (networkManager.isTempId(ret)) SyncRequest.HttpVerb.POST else SyncRequest.HttpVerb.PUT, `object`[Constants._ID] as String?)
+                ret = cache?.save(item)
+                val requestType = if (networkManager?.isTempId(ret) == true) SyncRequest.HttpVerb.POST
+                                  else SyncRequest.HttpVerb.PUT
+                val itemId = item[Constants._ID] as String?
+                syncManager?.enqueueRequest(networkManager?.collectionName, networkManager, requestType, itemId)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
-                val pushRequest = PushRequest(networkManager.collectionName, cache, networkManager,
-                        networkManager.client)
+                val pushRequest = PushRequest(networkManager?.collectionName, cache, networkManager, networkManager?.client)
                 try {
                     pushRequest.execute()
                 } catch (t: Throwable) {
                     // silent fall, will be synced next time
                 }
-
                 // If object does not have an _id, then it is being created locally. The cache may
                 // provide an _id in this case, but before it is saved to the network, this temporary
                 // _id should be removed prior to saving to the backend. This way, the backend
                 // will generate a permanent _id that will be used by the cache. Once we get the
                 // result from the backend with the permanent _id, the record in the cache with the
                 // temporary _id should be removed, and the new record should be saved.
-                ret = cache?.save(`object`)
-                val id = ret!![Constants._ID]!!.toString()
-                val bRealmGeneratedId = networkManager.isTempId(ret)
-                if (bRealmGeneratedId) {
-                    ret.set(Constants._ID, null)
-                }
+                var id = ""
+                ret = cache?.save(item)
+                ret?.let { r -> id = r[Constants._ID].toString() }
+                val bRealmGeneratedId = networkManager?.isTempId(ret)
+                if (bRealmGeneratedId == true) { ret?.set(Constants._ID, null) }
                 try {
-                    ret = networkManager.saveBlocking(`object`).execute()
-                    if (bRealmGeneratedId) {
+                    ret = networkManager?.saveBlocking(item)?.execute()
+                    if (bRealmGeneratedId == true) {
                         // The result from the network has the entity with its permanent ID. Need
                         // to remove the entity from the local cache with the temporary ID.
                         cache?.delete(id)
                     }
-
                 } catch (e: IOException) {
-                    syncManager.enqueueRequest(networkManager.collectionName,
-                            networkManager, if (bRealmGeneratedId) SyncRequest.HttpVerb.POST else SyncRequest.HttpVerb.PUT, id)
+                    syncManager?.enqueueRequest(networkManager?.collectionName,
+                    networkManager, if (bRealmGeneratedId == true) SyncRequest.HttpVerb.POST else SyncRequest.HttpVerb.PUT, id)
                     throw e
                 }
-
-                cache?.save(ret!!)
+                ret?.let { cache?.save(it) }
             }
             WritePolicy.FORCE_NETWORK -> {
                 Logger.INFO("Start saving entity")
-                ret = networkManager.saveBlocking(`object`).execute()
+                ret = networkManager?.saveBlocking(item)?.execute()
                 Logger.INFO("Finish saving entity")
             }
         }
