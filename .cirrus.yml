@@ -35,8 +35,8 @@ task:
   install_platform_emulator_script: echo y | sdkmanager "platforms;android-$ANDROID_API"
   # install_extras_script: echo y | sdkmanager "extras;android;m2repository"
   install_image_script: echo y | sdkmanager "system-images;android-$ANDROID_API;$EMU_FLAVOR;$ANDROID_ABI"
-  # kinvey_properties_appkey_script: sed -i 's/app.key=<YOUR_APP_KEY_HERE>/app.key=$KINVEY_APP_KEY/g' android-lib/src/androidTest/assets/kinvey.properties
-  # kinvey_properties_appsecret_script: sed -i 's/app.secret=<YOUR_APP_SECRET_HERE>/app.secret=$KINVEY_APP_SECRET/g' android-lib/src/androidTest/assets/kinvey.properties
+  kinvey_properties_appkey_script: sed -i 's/app.key=<YOUR_APP_KEY_HERE>/app.key=$KINVEY_APP_KEY/g' android-lib/src/androidTest/assets/kinvey.properties
+  kinvey_properties_appsecret_script: sed -i 's/app.secret=<YOUR_APP_SECRET_HERE>/app.secret=$KINVEY_APP_SECRET/g' android-lib/src/androidTest/assets/kinvey.properties
   # local_properties_script: echo sdk.dir=$ANDROID_HOME > local.properties
   # cat_local_properties_script: cat local.properties
   # build_script: ./gradlew clean release --no-daemon
