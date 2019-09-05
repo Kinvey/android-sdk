@@ -31,7 +31,8 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICache<T>?, private val writePolicy: WritePolicy, protected var networkManager: NetworkManager<T>?,
+abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICache<T>?, private val writePolicy: WritePolicy,
+                                                      protected var networkManager: NetworkManager<T>?,
                                                       protected var syncManager: SyncManager?) : IRequest<Int> {
 
     @Throws(IOException::class)

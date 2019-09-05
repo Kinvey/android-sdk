@@ -27,7 +27,6 @@ import com.kinvey.java.store.requests.data.IRequest
 import com.kinvey.java.store.requests.data.PushRequest
 import com.kinvey.java.sync.SyncManager
 import com.kinvey.java.sync.dto.SyncRequest
-import org.checkerframework.checker.units.qual.A
 
 import java.io.IOException
 import java.security.AccessControlException
@@ -102,7 +101,6 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
                     } catch (e: Exception) {
                         throw e
                     }
-
                 }
                 for (task in tasks) {
                     try {
