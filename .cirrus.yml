@@ -21,6 +21,8 @@ task:
       - PACKAGE: store.file
       - PACKAGE: store.user
       - PACKAGE: store.datastore
+  nproc_script: nproc
+  free_script: free
   # apt_update_script: sudo apt update
   # apt_install_script: sudo apt install libpulse0 libglu1-mesa lib32z1 qemu-kvm libvirt0 virt-manager -y
   accept_licenses_script: echo -e "y\ny\ny\ny\ny" | sdkmanager --licenses
