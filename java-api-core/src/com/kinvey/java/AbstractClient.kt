@@ -124,6 +124,7 @@ protected constructor(transport: HttpTransport?,
         get() = field
 
     var micApiVersion: String? = null
+        @JvmName("setMICApiVersion")
         set(version) {
             var version = version
             if (version?.startsWith("v") == false) {
@@ -131,6 +132,9 @@ protected constructor(transport: HttpTransport?,
             }
             field = version
         }
+        @JvmName("getMICApiVersion")
+        get() = field
+
     var requestTimeout: Int = 0
     var numberThreadsForDataStoreSaveList = DEFAULT_NUMBER_OF_THREADS_FOR_DATASTORE_SAVE_OF_LIST
 
