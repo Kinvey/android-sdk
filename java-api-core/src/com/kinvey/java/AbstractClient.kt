@@ -196,6 +196,7 @@ protected constructor(transport: HttpTransport?,
     init {
         sharedInstance = this
         this.user = null
+        KINVEY_API_VERSION = ""
     }
 
     fun query(): Query {
@@ -507,7 +508,17 @@ protected constructor(transport: HttpTransport?,
         /**
          * Non-default version of API. Developer should initialize it for change API version
          */
-        @JvmStatic lateinit var KINVEY_API_VERSION: String
+        private lateinit var KINVEY_API_VERSION: String
+        @JvmStatic var kinveyApiVersion: String
+            get() {
+                if (!::KINVEY_API_VERSION.isInitialized) {
+                    KINVEY_API_VERSION = ""
+                }
+                return KINVEY_API_VERSION
+            }
+            set(value) {
+                KINVEY_API_VERSION = value
+            }
 
         @JvmStatic
         var sharedInstance: AbstractClient<*>? = null

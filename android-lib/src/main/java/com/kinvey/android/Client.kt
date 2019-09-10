@@ -103,7 +103,7 @@ open class Client<T : User>
 protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
                       servicePath: String?, objectParser: JsonObjectParser?,
                       kinveyRequestInitializer: KinveyClientRequestInitializer?, store: CredentialStore?,
-                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context)
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context?)
     : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
 
     /**
@@ -463,15 +463,15 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param transport HttpTransport
          */
         @JvmOverloads
-        constructor(appKey: String, appSecret: String, context: Context, transport: HttpTransport = newCompatibleTransport())
+        constructor(appKey: String, appSecret: String, context: Context?, transport: HttpTransport = newCompatibleTransport())
                 : super(transport, null, KinveyClientRequestInitializer(appKey, appSecret, KinveyHeaders(context))) {
             this.setJsonFactory(factory)
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
 
             if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: Exception) {
                     //TODO Add handling
                 }
@@ -499,11 +499,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param context - Your Android Application Context
          */
         @JvmOverloads
-        constructor(context: Context, transport: HttpTransport = newCompatibleTransport()) : super(transport, null) {
+        constructor(context: Context?, transport: HttpTransport = newCompatibleTransport()) : super(transport, null) {
 
             var properties: InputStream? = null
             try {
-                properties = context.assets.open("kinvey.properties")
+                properties = context?.assets?.open("kinvey.properties")
             } catch (e: IOException) {
                 Logger.WARNING("Couldn't load properties. Ensure there is a file: assets/kinvey.properties which is valid properties file")
                 throw RuntimeException("Builder cannot find properties file kinvey.properties in your assets.  Ensure this file exists, containing app.key and app.secret!")
@@ -528,11 +528,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             val initializer = KinveyClientRequestInitializer(key, secret, KinveyHeaders(context))
             this.kinveyClientRequestInitializer = initializer
 
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
             if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: AndroidCredentialStoreException) {
                     Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
                 } catch (ex: IOException) {
@@ -631,7 +631,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
                 this.MICVersion = super.getString(Option.MIC_VERSION)
             }
             if (super.getString(Option.KINVEY_API_VERSION).isNotEmpty()) {
-                KINVEY_API_VERSION = super.getString(Option.KINVEY_API_VERSION)
+                kinveyApiVersion = super.getString(Option.KINVEY_API_VERSION)
             }
         }
 
@@ -659,7 +659,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param transport - custom user http transport
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream?, transport: HttpTransport, context: Context) : super(transport, null) {
+        constructor(properties: InputStream?, transport: HttpTransport, context: Context?) : super(transport, null) {
 
             Preconditions.checkNotNull(properties, "properties must be not null")
             loadProperties(properties)
@@ -677,11 +677,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             val initializer = KinveyClientRequestInitializer(key, secret, KinveyHeaders(context))
             this.kinveyClientRequestInitializer = initializer
 
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
             if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: AndroidCredentialStoreException) {
                     Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
                 } catch (ex: IOException) {
@@ -715,7 +715,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param properties - InputStream of properties file
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream?, context: Context) : this(properties, newCompatibleTransport(), context) {}
+        constructor(properties: InputStream?, context: Context?) : this(properties, newCompatibleTransport(), context) {}
 
         /*
          * (non-Javadoc)
@@ -762,10 +762,9 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         override fun build(): Client<T> {
             kinveyHandlerThread = KinveyHandlerThread("KinveyHandlerThread")
             kinveyHandlerThread?.start()
-            val ctx = context!!
+            val ctx = context
             Realm.init(ctx)
-            val client = Client<T>(transport,
-                    httpRequestInitializer, baseUrl,
+            val client = Client<T>(transport, httpRequestInitializer, baseUrl,
                     servicePath, this.objectParser, kinveyClientRequestInitializer, store,
                     requestBackoffPolicy, this.encryptionKey, ctx)
 
@@ -937,7 +936,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
                 if (userID != null && userID != "") {
                     var store: CredentialStore? = store
                     if (store == null) {
-                        store = AndroidCredentialStore(context!!)
+                        store = AndroidCredentialStore(context)
                     }
                     val manager = CredentialManager(store)
                     credential = manager.loadCredential(userID)

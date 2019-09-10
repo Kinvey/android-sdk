@@ -117,20 +117,19 @@ import java.util.Locale
  */
 open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
-    private val kinveyApiVersion = AbstractClient.KINVEY_API_VERSION
-
-    fun getKinveyApiVersion(): Int {
-        var version = 0
-        try {
-            if (kinveyApiVersion != null) {
-                version = Integer.valueOf(kinveyApiVersion)
+    private val kinveyApiVersion: Int
+        get() {
+            var version = 0
+            try {
+                val versionStr = AbstractClient.kinveyApiVersion
+                if (versionStr.isNotEmpty()) {
+                    version = Integer.valueOf(versionStr)
+                }
+            } catch (t: Throwable) {
+                Logger.ERROR(t.message)
             }
-        } catch (t: Throwable) {
-            Logger.ERROR(t.message)
+            return version
         }
-
-        return version
-    }
 
     /**
      * Constructor to instantiate the DataStore class.
@@ -419,7 +418,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param callback KinveyClientCallback<List></List><T>>
     </T> */
     fun save(entities: List<T>, callback: KinveyClientCallback<List<T>>) {
-        if (getKinveyApiVersion() >= KINVEY_API_VERSION_5) {
+        if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
             saveBatch(entities, callback)
         } else {
             saveV4(entities, callback)
@@ -558,7 +557,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     fun push(callback: KinveyPushCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
-        if (getKinveyApiVersion() >= KINVEY_API_VERSION_5) {
+        if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
             pushBatch(callback)
         } else {
             pushV4(callback)

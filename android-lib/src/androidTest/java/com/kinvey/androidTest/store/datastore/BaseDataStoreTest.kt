@@ -56,7 +56,7 @@ open class BaseDataStoreTest {
         val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
         client = Client.Builder<User>(mMockContext).build()
         client.enableDebugLogging()
-        AbstractClient.KINVEY_API_VERSION = "5"
+        AbstractClient.kinveyApiVersion = "5"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
         if (client.isUserLoggedIn == false) {

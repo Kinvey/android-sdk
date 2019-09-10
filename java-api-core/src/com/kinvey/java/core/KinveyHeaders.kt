@@ -28,10 +28,8 @@ import com.kinvey.java.AbstractClient
 open class KinveyHeaders : HttpHeaders() {
 
     @Key("X-Kinvey-api-Version")
-    private val kinveyApiVersion = if (AbstractClient.KINVEY_API_VERSION != null)
-        AbstractClient.KINVEY_API_VERSION
-    else
-        BuildConfig.KINVEY_API_VERSION
+    private val kinveyApiVersion = if (AbstractClient.kinveyApiVersion.isNotEmpty()) AbstractClient.kinveyApiVersion
+                                   else BuildConfig.KINVEY_API_VERSION
 
     private val userAgentVal = "android-kinvey-http/$VERSION"
 

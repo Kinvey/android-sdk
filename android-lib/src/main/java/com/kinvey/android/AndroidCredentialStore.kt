@@ -30,9 +30,9 @@ import java.util.*
  * @author mjsalinger
  * @since 2.0
  */
-class AndroidCredentialStore(context: Context) : CredentialStore {
+class AndroidCredentialStore(context: Context?) : CredentialStore {
     private var credentials: HashMap<String, Credential>
-    private val appContext: Context
+    private var appContext: Context? = null
     /** {@inheritDoc}  */
     @Throws(IOException::class)
     override fun load(userId: String): Credential {
@@ -66,9 +66,9 @@ class AndroidCredentialStore(context: Context) : CredentialStore {
     private fun retrieveCredentialStore() {
         var fIn: FileInputStream? = null
         var objIn: ObjectInputStream? = null
-        if (appContext.getFileStreamPath("kinveyCredentials.bin").exists()) {
+        if (appContext?.getFileStreamPath("kinveyCredentials.bin")?.exists() == true) {
             try {
-                fIn = appContext.openFileInput("kinveyCredentials.bin")
+                fIn = appContext?.openFileInput("kinveyCredentials.bin")
                 objIn = ObjectInputStream(fIn)
                 credentials = objIn.readObject() as HashMap<String, Credential>
             } catch (ex: IOException) {
@@ -86,15 +86,15 @@ class AndroidCredentialStore(context: Context) : CredentialStore {
         }
     }
 
-    private class PersistCredentialStore(val context: Context, val credentials: HashMap<String, Credential>)
+    private class PersistCredentialStore(val context: Context?, val credentials: HashMap<String, Credential>)
         : AsyncTask<Void?, Void?, Void?>() {
         override fun doInBackground(vararg args: Void?): Void? {
             try {
-                val fStream: FileOutputStream = context.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE)
+                val fStream: FileOutputStream? = context?.openFileOutput("kinveyCredentials.bin", Context.MODE_PRIVATE)
                 val oStream = ObjectOutputStream(fStream)
                 oStream.writeObject(credentials)
                 oStream.flush()
-                fStream.fd.sync()
+                fStream?.fd?.sync()
                 oStream.close()
                 Logger.INFO("Serialization success")
             } catch (e: Exception) {
@@ -109,7 +109,7 @@ class AndroidCredentialStore(context: Context) : CredentialStore {
     }
 
     init {
-        appContext = context.applicationContext
+        appContext = context?.applicationContext
         credentials = HashMap()
         try {
             retrieveCredentialStore()

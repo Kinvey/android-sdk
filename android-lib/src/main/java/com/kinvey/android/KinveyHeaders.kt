@@ -24,7 +24,7 @@ import com.google.api.client.util.Key
  * @author m0rganic
  * @since 2.0
  */
-class KinveyHeaders(context: Context) : com.kinvey.java.core.KinveyHeaders() {
+class KinveyHeaders(context: Context?) : com.kinvey.java.core.KinveyHeaders() {
 
     @Key("x-kinvey-device-information")
     private val deviceInformation: String
