@@ -444,7 +444,7 @@ protected constructor(
         return executeUnparsed().content
     }
 
-    fun setAppKey(appKey: String): AbstractKinveyClientRequest<T> {
+    fun setAppKey(appKey: String?): AbstractKinveyClientRequest<T> {
         this.appKey = appKey
         return this
     }

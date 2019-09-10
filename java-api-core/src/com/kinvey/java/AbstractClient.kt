@@ -305,7 +305,7 @@ protected constructor(transport: HttpTransport?,
          */
         constructor(transport: HttpTransport,
                     httpRequestInitializer: HttpRequestInitializer?,
-                    clientRequestInitializer: KinveyClientRequestInitializer) : super(transport, DEFAULT_BASE_URL,
+                    clientRequestInitializer: KinveyClientRequestInitializer?) : super(transport, DEFAULT_BASE_URL,
                 DEFAULT_SERVICE_PATH, httpRequestInitializer, clientRequestInitializer) {
         }
 

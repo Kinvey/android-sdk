@@ -693,7 +693,7 @@ class UserStoreRequestManager<T : BaseUser> {
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
-        data[CLIENT_ID] = fullClientIdField
+        data[CLIENT_ID] = fullClientIdField ?: ""
         val content = UrlEncodedContent(data)
         val getToken = GetMICAccessToken(this, content)
         getToken.isRequireAppCredentials = true

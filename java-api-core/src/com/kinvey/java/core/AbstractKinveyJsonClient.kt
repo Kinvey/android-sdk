@@ -82,7 +82,7 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
          * @param kinveyRequestInitializer initializer to handle kinvey specific headers and authorization tokens
          */
         protected constructor(transport: HttpTransport, defaultRootUrl: String,
-                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer?, kinveyRequestInitializer: KinveyClientRequestInitializer)
+                              defaultServicePath: String, httpRequestInitializer: HttpRequestInitializer?, kinveyRequestInitializer: KinveyClientRequestInitializer?)
                 : super(transport, defaultRootUrl, defaultServicePath, httpRequestInitializer, kinveyRequestInitializer)
 
         /* (non-Javadoc)

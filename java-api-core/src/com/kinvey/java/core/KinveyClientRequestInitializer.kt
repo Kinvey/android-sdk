@@ -35,12 +35,12 @@ open class KinveyClientRequestInitializer
         /**
          * @return the appKey
          */
-        val appKey: String,
+        val appKey: String?,
         /** the app secret for the request  */
         /**
          * @return the appSecret
          */
-        val appSecret: String,
+        val appSecret: String?,
         /** authorization context for the request  */
         private var credential: Credential?,
         /** standard headers used across all of the kinvey api  */
@@ -57,9 +57,9 @@ open class KinveyClientRequestInitializer
      * @param appSecret application secret, used for user management methods
      * @param kinveyHeaders
      */
-    constructor(appKey: String, appSecret: String, kinveyHeaders: KinveyHeaders) : this(appKey, appSecret, null, kinveyHeaders) {}
+    constructor(appKey: String?, appSecret: String?, kinveyHeaders: KinveyHeaders) : this(appKey, appSecret, null, kinveyHeaders) {}
 
-    fun setClientId(clientId: String) {
+    fun setClientId(clientId: String?) {
         this.clientId = clientId
     }
 
