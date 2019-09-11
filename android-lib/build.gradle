@@ -29,6 +29,7 @@ android {
   }
 
   defaultConfig {
+    testApplicationId "com.progress.kinvey.androidTest"
     minSdkVersion 16
     targetSdkVersion 29
     multiDexEnabled true
@@ -166,7 +167,7 @@ dependencies {
   implementation group: 'androidx.multidex', name: 'multidex', version: '2.0.1'
   // Multidex Support for testing
   androidTestImplementation group: 'androidx.multidex', name: 'multidex-instrumentation', version: '2.0.0'
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 task superJar(type: Jar) {

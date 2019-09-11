@@ -1,12 +1,12 @@
 container:
-  image: cirrusci/android-sdk:18
+  image: cirrusci/android-sdk:24
   cpu: 4
   memory: 10G
 
 env:
   CI: "true"
   BUILD_TOOLS: "29.0.2"
-  ANDROID_API: "18"
+  ANDROID_API: "24"
   EMU_FLAVOR: default
   ANDROID_ABI: armeabi-v7a
   ADB_INSTALL_TIMEOUT: "10" # minutes
@@ -21,6 +21,8 @@ task:
       - PACKAGE: store.file
       - PACKAGE: store.user
       - PACKAGE: store.datastore
+  nproc_script: nproc
+  free_script: free -h
   # apt_update_script: sudo apt update
   # apt_install_script: sudo apt install libpulse0 libglu1-mesa lib32z1 qemu-kvm libvirt0 virt-manager -y
   accept_licenses_script: echo -e "y\ny\ny\ny\ny" | sdkmanager --licenses
@@ -33,11 +35,11 @@ task:
   install_platform_emulator_script: echo y | sdkmanager "platforms;android-$ANDROID_API"
   # install_extras_script: echo y | sdkmanager "extras;android;m2repository"
   install_image_script: echo y | sdkmanager "system-images;android-$ANDROID_API;$EMU_FLAVOR;$ANDROID_ABI"
-  # kinvey_properties_appkey_script: sed -i 's/app.key=<YOUR_APP_KEY_HERE>/app.key=$KINVEY_APP_KEY/g' android-lib/src/androidTest/assets/kinvey.properties
-  # kinvey_properties_appsecret_script: sed -i 's/app.secret=<YOUR_APP_SECRET_HERE>/app.secret=$KINVEY_APP_SECRET/g' android-lib/src/androidTest/assets/kinvey.properties
+  kinvey_properties_appkey_script: sed -i "s/app.key=<YOUR_APP_KEY_HERE>/app.key=$KINVEY_APP_KEY/g" android-lib/src/androidTest/assets/kinvey.properties
+  kinvey_properties_appsecret_script: sed -i "s/app.secret=<YOUR_APP_SECRET_HERE>/app.secret=$KINVEY_APP_SECRET/g" android-lib/src/androidTest/assets/kinvey.properties
   # local_properties_script: echo sdk.dir=$ANDROID_HOME > local.properties
   # cat_local_properties_script: cat local.properties
-  build_script: ./gradlew clean release --no-daemon
+  # build_script: ./gradlew clean release --no-daemon
   assemble_script: ./gradlew assemble assembleAndroidTest
   create_device_script:
     echo no | avdmanager create avd --force
@@ -62,9 +64,11 @@ task:
   #   -camera-front none
   #   -selinux permissive
   #   -qemu -m 2048
-  wait_for_emulator_script:
-    - adb wait-for-device
-    - adb shell input keyevent 82
+  # wait_for_emulator_script:
+  #   - adb wait-for-device
+  #   - adb shell input keyevent 82
+  wait_for_emulator_script: adb wait-for-device
+  # input_keyevent_script: adb shell input keyevent 82
   emulator_api_level_script: adb shell getprop ro.build.version.sdk
   emulator_boot_animation_script: while [ "`adb shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] ; do sleep 1; done
   emulator_bootanim_exit_script: while [ "`adb shell getprop service.bootanim.exit | tr -d '\r' `" != "1" ] ; do sleep 1; done

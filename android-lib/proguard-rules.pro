@@ -1,0 +1,5 @@
+-keep class androidx.test.** { *; }
+-keep class androidx.multidex.** { *; }
+-keep class org.junit.** { *; }
+-keep @org.junit.runner.RunWith public class * { *; }
+-keep public class com.kinvey.androidTest.** { *; }
