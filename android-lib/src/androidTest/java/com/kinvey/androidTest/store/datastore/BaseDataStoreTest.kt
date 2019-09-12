@@ -563,6 +563,16 @@ open class BaseDataStoreTest {
         return checkIfItemsAtRightIndex(srcList, resultList, checkIndexes, Person.USERNAME_KEY, checkErr, true)
     }
 
+    @Throws(AssertionError::class)
+    fun checkPersonListIfSameOrder(personList: List<Person>, resultPersonList: List<Person>?): Boolean {
+        Assert.assertTrue(personList.count() == resultPersonList?.count())
+        var result: Boolean? = false
+        resultPersonList?.let { list ->
+            result = personList.zip(list) { p, r ->  p.username == r.username}.min()
+        }
+        return result ?: false
+    }
+
     @Throws(InterruptedException::class)
     fun <T : GenericJson> testSaveEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
         val personStore = DataStore.collection(collection, cls, storeType, client)

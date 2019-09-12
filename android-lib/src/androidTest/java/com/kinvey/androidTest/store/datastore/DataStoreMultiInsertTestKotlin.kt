@@ -1,14 +1,13 @@
 package com.kinvey.androidTest.store.datastore
 
+import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
-import com.kinvey.java.AbstractClient
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
@@ -26,7 +25,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
-@SmallTest
+@LargeTest
 @Ignore("Ignored tests in Kotlin for now while Kotlin migration is not done")
 class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
 
