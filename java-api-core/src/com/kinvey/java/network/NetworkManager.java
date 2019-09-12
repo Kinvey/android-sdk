@@ -83,7 +83,7 @@ public class NetworkManager<T extends GenericJson> {
 
 
     private String clientAppVersion = null;
-    
+
     private GenericData customRequestProperties = new GenericData();
 
     public static boolean checkNetworkRuntimeExceptions(Exception e) {
@@ -94,7 +94,7 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     public void setClientAppVersion(String appVersion){
-    	this.clientAppVersion = appVersion;	
+        this.clientAppVersion = appVersion;
     }
 
     public String getClientAppVersion() {
@@ -106,25 +106,25 @@ public class NetworkManager<T extends GenericJson> {
     }
 
     public void setClientAppVersion(int major, int minor, int patch){
-    	setClientAppVersion(major + "." + minor + "." + patch);
+        setClientAppVersion(major + "." + minor + "." + patch);
     }
-    
+
     public void setCustomRequestProperties(GenericJson customheaders){
-    	this.customRequestProperties = customheaders;
+        this.customRequestProperties = customheaders;
     }
-    
+
     public void setCustomRequestProperty(String key, Object value){
-    	if (this.customRequestProperties == null){
-    		this.customRequestProperties = new GenericJson();
-    	}
-    	this.customRequestProperties.put(key, value);
+        if (this.customRequestProperties == null){
+            this.customRequestProperties = new GenericJson();
+        }
+        this.customRequestProperties.put(key, value);
     }
-    
+
     public void clearCustomRequestProperties(){
-    	this.customRequestProperties = new GenericJson();
+        this.customRequestProperties = new GenericJson();
     }
-    
-    
+
+
 
 
     /**
@@ -237,8 +237,8 @@ public class NetworkManager<T extends GenericJson> {
         client.initializeRequest(get);
         return get;
     }
-    
-    
+
+
     /**
      * Method to resolve a raw query string
      *
@@ -247,7 +247,7 @@ public class NetworkManager<T extends GenericJson> {
      * @throws java.io.IOException
      */
     public Get getBlocking(@Nonnull String queryString) throws IOException{
-    	Preconditions.checkNotNull(queryString);
+        Preconditions.checkNotNull(queryString);
         Get get = new Get(queryString, myClass);
         client.initializeRequest(get);
         return get;
@@ -640,7 +640,7 @@ public class NetworkManager<T extends GenericJson> {
      * @throws IOException
      */
     public Aggregate aggregate(ArrayList<String> fields, AggregateType type, String aggregateField,
-                               Class myClass, Query query) throws IOException {
+            Class myClass, Query query) throws IOException {
         AggregateEntity entity = new AggregateEntity(fields, type, aggregateField, query, client);
         Aggregate aggregate = new Aggregate(entity, myClass);
         client.initializeRequest(aggregate);
@@ -771,8 +771,8 @@ public class NetworkManager<T extends GenericJson> {
                 Get pageGet = new Get(query,
                         myClass,
                         resolve != null ? resolve.split(",") : new String[]{},
-                        resolve_depth != null ? Integer.parseInt(resolve_depth) : 0,
-                        retainReferences != null && Boolean.parseBoolean(retainReferences));
+                resolve_depth != null ? Integer.parseInt(resolve_depth) : 0,
+                retainReferences != null && Boolean.parseBoolean(retainReferences));
 
                 client.initializeRequest(pageGet);
                 KinveyReadResponse pageGetResult = pageGet.execute();
@@ -942,7 +942,7 @@ public class NetworkManager<T extends GenericJson> {
 
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
 
@@ -1036,12 +1036,12 @@ public class NetworkManager<T extends GenericJson> {
             }
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
 
         Save(T entity, Class<T> myClass, SaveMode update) {
-            this(entity, myClass, null, update);            
+            this(entity, myClass, null, update);
         }
     }
 
@@ -1056,7 +1056,7 @@ public class NetworkManager<T extends GenericJson> {
         @Key
         private String collectionName;
 
-       SaveBatch(List<T> itemsList, Class responseClassType, Class parClassType, SaveMode update) {
+        SaveBatch(List<T> itemsList, Class responseClassType, Class parClassType, SaveMode update) {
             super(getClient(), update.toString(), REST_PATH, new BatchList(itemsList).toString(), responseClassType, parClassType);
             this.collectionName = NetworkManager.this.getCollectionName();
             GenericData customRequestProperties = NetworkManager.this.getCustomRequestProperties();
@@ -1096,7 +1096,7 @@ public class NetworkManager<T extends GenericJson> {
             this.collectionName = NetworkManager.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
 
@@ -1112,7 +1112,7 @@ public class NetworkManager<T extends GenericJson> {
             this.sortFilter = !(sortString.equals("")) ? sortString : null;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
 
         }
@@ -1133,7 +1133,7 @@ public class NetworkManager<T extends GenericJson> {
             this.collectionName = NetworkManager.this.collectionName;
             this.getRequestHeaders().put("X-Kinvey-Client-App-Version", NetworkManager.this.clientAppVersion);
             if (NetworkManager.this.customRequestProperties != null && !NetworkManager.this.customRequestProperties.isEmpty()){
-            	this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
+                this.getRequestHeaders().put("X-Kinvey-Custom-Request-Properties", new Gson().toJson(NetworkManager.this.customRequestProperties) );
             }
         }
     }

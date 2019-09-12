@@ -1,7 +1,7 @@
 package com.kinvey.androidTest.store.data.network;
 
 import com.google.api.client.util.Key;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
+import com.kinvey.java.linkedResources.LinkedGenericJson;
 
 public class LinkedPerson extends LinkedGenericJson {
 

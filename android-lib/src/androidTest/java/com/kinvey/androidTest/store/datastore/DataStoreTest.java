@@ -13,7 +13,6 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
-import com.kinvey.android.KinveyHandlerThread;
 import com.kinvey.android.async.AsyncPullRequest;
 import com.kinvey.android.callback.KinveyCountCallback;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -39,7 +38,6 @@ import com.kinvey.androidTest.callback.CustomKinveyClientCallback;
 import com.kinvey.androidTest.callback.CustomKinveyListCallback;
 import com.kinvey.androidTest.callback.CustomKinveyReadCallback;
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
-import com.kinvey.androidTest.callback.CustomKinveySyncCallback;
 import com.kinvey.androidTest.model.Address;
 import com.kinvey.androidTest.model.Author;
 import com.kinvey.androidTest.model.LongClassNameLongClassNameLongClassNameLongClassNameLongClassName;
@@ -89,7 +87,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import io.realm.DynamicRealm;
 import io.realm.RealmObjectSchema;
@@ -124,10 +121,10 @@ public class DataStoreTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AbstractClient.KINVEY_API_VERSION = "4";
+        AbstractClient.setKinveyApiVersion("4");
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
-        AbstractClient.KINVEY_API_VERSION = "4";
+        AbstractClient.setKinveyApiVersion("4");
         final CountDownLatch latch = new CountDownLatch(1);
         LooperThread looperThread = null;
         if (!client.isUserLoggedIn()) {

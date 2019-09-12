@@ -17,7 +17,7 @@
 package com.kinvey.android.store
 
 import com.kinvey.java.AbstractClient
-import com.kinvey.java.LinkedResources.LinkedGenericJson
+import com.kinvey.java.linkedResources.LinkedGenericJson
 import com.kinvey.java.network.LinkedNetworkManager
 import com.kinvey.java.store.StoreType
 
@@ -33,4 +33,5 @@ class LinkedDataStore<T : LinkedGenericJson>
  * @param itemType   class that data should be mapped to
  * @param storeType  type of storage that client want to use
  */
-(client: AbstractClient<*>, collection: String, itemType: Class<T>, storeType: StoreType) : DataStore<T>(collection, itemType, client, storeType, LinkedNetworkManager<T>(collection, itemType, client))
+(client: AbstractClient<*>, collection: String, itemType: Class<T>, storeType: StoreType)
+    : DataStore<T>(collection, itemType, client, storeType, LinkedNetworkManager<T>(collection, itemType, client))

@@ -26,10 +26,6 @@ import com.kinvey.java.store.UserStoreRequestManager
  * @since 2.0
  */
 interface KinveyUserCallback<T : User> : KinveyClientCallback<T> {
-
-
     override fun onSuccess(result: T)
-
     override fun onFailure(error: Throwable)
-
 }

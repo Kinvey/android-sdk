@@ -17,7 +17,6 @@ import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyReadCallback;
-import com.kinvey.androidTest.callback.CustomKinveyPullCallback;
 import com.kinvey.androidTest.callback.DefaultKinveyPushCallback;
 import com.kinvey.androidTest.model.Person;
 import com.kinvey.androidTest.store.datastore.PaginationTest;

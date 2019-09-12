@@ -335,7 +335,7 @@ public class CacheAggregationTest {
     @After
     public void tearDown() {
         client.performLockDown();
-        if (client.getKinveyHandlerThread() != null) {
+        if (Client.getKinveyHandlerThread() != null) {
             try {
                 client.stopKinveyHandlerThread();
             } catch (Throwable throwable) {

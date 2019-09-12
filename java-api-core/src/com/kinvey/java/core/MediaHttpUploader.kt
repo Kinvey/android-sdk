@@ -41,7 +41,7 @@ import com.google.api.client.util.ByteStreams
 import com.google.api.client.util.Preconditions.checkState
 import com.google.common.base.Preconditions
 import com.kinvey.java.KinveyException
-import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest
+import com.kinvey.java.linkedResources.SaveLinkedResourceClientRequest
 import com.kinvey.java.KinveyUploadFileException
 import com.kinvey.java.Logger
 import com.kinvey.java.model.FileMetaData

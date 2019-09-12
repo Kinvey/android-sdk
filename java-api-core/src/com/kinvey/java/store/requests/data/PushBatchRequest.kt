@@ -93,7 +93,7 @@ class PushBatchRequest<T : GenericJson>(
     @Throws(IOException::class)
     private fun executeSaveRequest(saveItems: List<T>) {
         val syncRequest = syncManager.createSaveBatchSyncRequest(collection, networkManager, saveItems)
-        val response = syncManager.executeBatchRequest(client, networkManager, syncRequest)
+        val response = syncManager.executeBatchRequest(client as AbstractClient<*>, networkManager, syncRequest)
         val resultItems = response?.entityList
         resultItems?.let { list -> itemsCache.save(list.mapNotNull { it }) }
     }

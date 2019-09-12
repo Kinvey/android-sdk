@@ -6,6 +6,7 @@ import androidx.test.runner.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.api.client.testing.http.MockHttpTransport;
+import com.kinvey.android.AndroidJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.model.User;
 import com.kinvey.androidTest.model.TestUser;
@@ -183,5 +184,4 @@ public class ClientBuilderTest {
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_API + "/", client.getBaseUrl());
         assertEquals(Constants.PROTOCOL_HTTPS + "TestInstanceId" + Constants.HYPHEN + Constants.HOSTNAME_AUTH + "/", client.getMICHostName());
     }
-
 }

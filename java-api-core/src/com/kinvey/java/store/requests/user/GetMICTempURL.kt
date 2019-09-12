@@ -20,21 +20,23 @@ import com.google.api.client.http.HttpContent
 import com.google.api.client.json.GenericJson
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.core.AbstractKinveyClientRequest
+import com.kinvey.java.dto.BaseUser
 
 /**
  * Created by Prots on 2/12/16.
  */
-class GetMICTempURL(client: AbstractClient<*>, content: HttpContent) : AbstractKinveyClientRequest<GenericJson>(client, client.micHostName, "POST", REST_PATH, content, GenericJson::class.java) {
-
+class GetMICTempURL(client: AbstractClient<*>, content: HttpContent)
+    : AbstractKinveyClientRequest<GenericJson>(client as AbstractClient<BaseUser>, client.micHostName,
+        "POST", REST_PATH, content, GenericJson::class.java) {
 
     init {
-        val MICApiVersion = client.micApiVersion
-        if (MICApiVersion != null && MICApiVersion.length > 0) {
-            this.uriTemplate = MICApiVersion + "/" + this.uriTemplate
+        val micApiVersion = client.micApiVersion
+        if (micApiVersion?.isNotEmpty() == true) {
+            this.uriTemplate = micApiVersion + "/" + this.uriTemplate
         }
     }
 
     companion object {
-        private val REST_PATH = "oauth/auth?scope=openid"
+        private const val REST_PATH = "oauth/auth?scope=openid"
     }
 }

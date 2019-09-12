@@ -149,7 +149,7 @@ open class KinveyMetaData : GenericJson() {
                 val accessControlList = AccessControlList()
                 if (acl != null) {
                     if (!acl.containsKey(CREATOR) || acl[CREATOR] == null) {
-                        accessControlList[CREATOR] = AbstractClient.sharedInstance().activeUser.id
+                        accessControlList[CREATOR] = AbstractClient.sharedInstance?.activeUser?.id
                     } else {
                         accessControlList[CREATOR] = acl[CREATOR]
                     }

@@ -35,44 +35,44 @@ class Update<T : BaseUser> : AbstractKinveyJsonClientRequest<T> {
     @Key
     private var userID: String? = null
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, baseUser: BaseUser, userClass: Class<T>) : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, baseUser, userClass) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, baseUser: BaseUser, userClass: Class<T>)
+        : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, baseUser, userClass) {
         this.userStoreRequestManager = userStoreRequestManager
         this.userID = baseUser.id
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(userStoreRequestManager.getCustomRequestProperties())
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, baseUser: BaseUser, passwordRequest: PasswordRequest, userClass: Class<T>) : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, userClass) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, baseUser: BaseUser, passwordRequest: PasswordRequest, userClass: Class<T>)
+        : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, passwordRequest, userClass) {
         this.userStoreRequestManager = userStoreRequestManager
         this.userID = baseUser.id
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(userStoreRequestManager.getCustomRequestProperties())
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userId: String, userClass: Class<T>) : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, userClass) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, userId: String, userClass: Class<T>)
+        : super(userStoreRequestManager.getClient(), "PUT", REST_PATH, null, userClass) {
         this.userStoreRequestManager = userStoreRequestManager
         this.userID = userId
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(userStoreRequestManager.getCustomRequestProperties())
         }
     }
 
     @Throws(IOException::class)
     override fun execute(): T? {
-
         val updatedUser = super.execute()
-
-        if (updatedUser!!.id == null || updatedUser.id == null) {
+        if (updatedUser?.id == null) {
             return updatedUser
         }
-
         return if (updatedUser.id == userID) {
-            userStoreRequestManager!!.initUser(updatedUser)
+            userStoreRequestManager?.initUser(updatedUser)
         } else {
             updatedUser
         }

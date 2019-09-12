@@ -16,7 +16,6 @@
 
 package com.kinvey.java.sync;
 
-import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonParser;
@@ -29,7 +28,6 @@ import com.kinvey.java.cache.ICache;
 import com.kinvey.java.cache.ICacheManager;
 import com.kinvey.java.core.AbstractKinveyClientRequest;
 import com.kinvey.java.core.AbstractKinveyJsonClientRequest;
-import com.kinvey.java.model.KinveySaveBatchResponse;
 import com.kinvey.java.model.KinveySyncSaveBatchResponse;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.query.MongoQueryFilter;
@@ -45,7 +43,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -224,7 +221,7 @@ public class SyncManager {
                                                                     NetworkManager<T> networkManager,
                                                                     SyncItem.HttpVerb httpMethod,
                                                                     String syncItemId) throws IOException {
-        Query entityQuery = AbstractClient.sharedInstance().query();
+        Query entityQuery = AbstractClient.getSharedInstance().query();
         entityQuery.equals(META_DOT_ID, syncItemId);
         List<SyncItem> itemsList = requestCache.get(entityQuery);
         if (itemsList.isEmpty()) {

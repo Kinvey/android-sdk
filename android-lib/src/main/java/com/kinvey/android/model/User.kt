@@ -25,7 +25,7 @@ open class User : BaseUser() {
         UnregisterLiveService(callback).execute()
     }
 
-    private class Update<T : User> internal constructor(callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    private class Update<T : User> (callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -33,20 +33,20 @@ open class User : BaseUser() {
         }
     }
 
-    private class RegisterLiveService internal constructor(callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    private class RegisterLiveService(callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
-            BaseUserStore.registerLiveService()
+            BaseUserStore.registerLiveService<User>()
             return null
         }
     }
 
-    private class UnregisterLiveService internal constructor(callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    private class UnregisterLiveService(callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
-            BaseUserStore.unRegisterLiveService()
+            BaseUserStore.unRegisterLiveService<User>()
             return null
         }
     }

@@ -44,6 +44,7 @@ import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.CredentialManager
 import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
+import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientRequestInitializer
 import com.kinvey.java.network.NetworkFileManager
 import com.kinvey.java.store.BaseUserStore
@@ -102,10 +103,8 @@ open class Client<T : User>
 protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
                       servicePath: String?, objectParser: JsonObjectParser?,
                       kinveyRequestInitializer: KinveyClientRequestInitializer?, store: CredentialStore?,
-                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context) : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
-
-    private var syncCacheManager: RealmCacheManager? = null
-    private var userCacheManager: RealmCacheManager? = null
+                      requestPolicy: BackOffPolicy?, private val encryptionKey: ByteArray?, context: Context?)
+    : AbstractClient<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy) {
 
     /**
      * Get a reference to the Application Context used to create this instance of the Client
@@ -120,7 +119,19 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
     private var pushProvider: AbstractPush? = null
     private var userDiscovery: AsyncUserDiscovery? = null
     private var userGroup: AsyncUserGroup? = null
-    private var clientUser: ClientUser? = null
+
+    override var clientUser: ClientUser? = null
+        get() {
+            val ctx = this.context ?: return null
+            synchronized(lock) {
+                if (field == null) {
+                    field = AndroidUserStore.getUserStore(ctx)
+                }
+            }
+            return field
+        }
+
+
     //    private AsyncUser currentUser;
     /**
      * How long, in milliseconds, should offline wait before retrying a failed request
@@ -137,8 +148,51 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         private set
     var isClientRequestMultithreading: Boolean = false
         private set
-    private var cacheManager: RealmCacheManager? = null
+
+    override var cacheManager: ICacheManager? = null
+
     var pushServiceClass: Class<*>? = null
+
+    override var activeUser: T? = null
+        get() {
+            synchronized(lock) {
+                return field
+            }
+        }
+        set(value) {
+            synchronized(lock) {
+                field = value
+            }
+        }
+
+    override var userCacheManager: ICacheManager? = null
+
+    override var syncCacheManager: ICacheManager? = null
+
+    override var user: T? = null
+        get () {
+            synchronized(lock) {
+                return field
+            }
+        }
+
+    override val deviceId: String
+        get() = UuidFactory(context).deviceUuid.toString()
+
+    override var fileCacheFolder: String? = null
+        get() {
+            return context?.getExternalFilesDir("KinveyFiles")?.absolutePath
+        }
+
+    override fun getFileStore(storeType: StoreType): FileStore {
+        return FileStore(NetworkFileManager(this),
+                cacheManager, 60 * 1000 * 1000L,
+                storeType, fileCacheFolder)
+    }
+
+    //override fun getSyncCacheManager(): ICacheManager? {
+    //    return syncCacheManager
+    //}
 
     init {
         Logger.init(AndroidLogger())
@@ -147,26 +201,6 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         cacheManager = RealmCacheManager(encryptionKey, this)
         syncCacheManager = RealmCacheManager(encryptionKey, "sync_", this)
         userCacheManager = RealmCacheManager(encryptionKey, this)
-    }
-
-
-    @Deprecated("Renamed to {@link #setActiveUser(T)}")
-    fun setUser(user: T) {
-        synchronized(lock) {
-            this.user = user
-        }
-    }
-
-    override fun setActiveUser(user: T?) {
-        synchronized(lock) {
-            this.user = user
-        }
-    }
-
-    override fun getActiveUser(): T? {
-        synchronized(lock) {
-            return this.user
-        }
     }
 
     override fun performLockDown() {
@@ -180,9 +214,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         syncCacheManager = RealmCacheManager(encryptionKey, "sync_", this)
         userCacheManager = RealmCacheManager(encryptionKey, this)
         val extensions = extensions
-        for (e in extensions) {
-            e.performLockdown(activeUser?.id)
-        }
+        extensions?.onEach { e -> e.performLockdown(activeUser?.id ?: "") }
     }
 
     /**
@@ -237,24 +269,10 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
      * @return Instance of [com.kinvey.java.UserDiscovery] for the defined collection
      */
 
-    /*    public <I extends GenericJson, O> AsyncCustomEndpoints<I, O> customEndpoints(Class<O> myClass) {
-        synchronized (lock) {
-            return new AsyncCustomEndpoints(myClass, this);
-        }
-    }*/
-
-    override fun <I : GenericJson?, O : Any?> customEndpoints(myClass: Class<O>?): AsyncCustomEndpoints<I, O> {
+    override fun <I : GenericJson, O> customEndpoints(myClass: Class<O>?): AsyncCustomEndpoints<I, O> {
         synchronized(lock) {
             return AsyncCustomEndpoints(myClass as Class<O>, this)
         }
-    }
-
-    override fun getCacheManager(): ICacheManager? {
-        return cacheManager
-    }
-
-    override fun getUserCacheManager(): ICacheManager? {
-        return userCacheManager
     }
 
     /**
@@ -322,18 +340,6 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
 
     }
 
-    /** {@inheritDoc}  */
-    override fun getClientUser(): ClientUser? {
-        val ctx = this.context ?: return null
-        synchronized(lock) {
-            if (this.clientUser == null) {
-                this.clientUser = AndroidUserStore.getUserStore(ctx)
-            }
-            return this.clientUser
-        }
-    }
-
-
     /**
      * Push factory method
      *
@@ -396,7 +402,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
     }
 
 
-    private class Ping constructor(val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
+    private class Ping (val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {
@@ -426,7 +432,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         private var context: Context? = null
         private var retrieveUserCallback: KinveyUserCallback<T>? = null
         //GCM Push Fields
-        private var FCM_SenderID = ""
+        private var FCM_SenderID: String? = ""
         private var FCM_Enabled = false
         private var GCM_InProduction = true
         private var debugMode = false
@@ -457,14 +463,15 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param transport HttpTransport
          */
         @JvmOverloads
-        constructor(appKey: String, appSecret: String, context: Context, transport: HttpTransport = newCompatibleTransport()) : super(transport, null, KinveyClientRequestInitializer(appKey, appSecret, KinveyHeaders(context))) {
+        constructor(appKey: String, appSecret: String, context: Context?, transport: HttpTransport = newCompatibleTransport())
+                : super(transport, null, KinveyClientRequestInitializer(appKey, appSecret, KinveyHeaders(context))) {
             this.setJsonFactory(factory)
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
 
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: Exception) {
                     //TODO Add handling
                 }
@@ -492,11 +499,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param context - Your Android Application Context
          */
         @JvmOverloads
-        constructor(context: Context, transport: HttpTransport = newCompatibleTransport()) : super(transport, null) {
+        constructor(context: Context?, transport: HttpTransport = newCompatibleTransport()) : super(transport, null) {
 
             var properties: InputStream? = null
             try {
-                properties = context.assets.open("kinvey.properties")
+                properties = context?.assets?.open("kinvey.properties")
             } catch (e: IOException) {
                 Logger.WARNING("Couldn't load properties. Ensure there is a file: assets/kinvey.properties which is valid properties file")
                 throw RuntimeException("Builder cannot find properties file kinvey.properties in your assets.  Ensure this file exists, containing app.key and app.secret!")
@@ -514,24 +521,23 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
                 FCM_Enabled = true
                 FCM_SenderID = BuildConfig.SENDER_ID
             } else {
-                key = Preconditions.checkNotNull(super.getString(AbstractClient.Builder.Option.APP_KEY), "app.key must be defined in your kinvey.properties")
-                secret = Preconditions.checkNotNull(super.getString(AbstractClient.Builder.Option.APP_SECRET), "app.secret must be defined in your kinvey.properties")
+                key = Preconditions.checkNotNull(super.getString(Option.APP_KEY), "app.key must be defined in your kinvey.properties")
+                secret = Preconditions.checkNotNull(super.getString(Option.APP_SECRET), "app.secret must be defined in your kinvey.properties")
             }
 
             val initializer = KinveyClientRequestInitializer(key, secret, KinveyHeaders(context))
             this.kinveyClientRequestInitializer = initializer
 
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: AndroidCredentialStoreException) {
                     Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
                 } catch (ex: IOException) {
                     Logger.ERROR("Credential store failed to load")
                 }
-
             }
         }
 
@@ -543,91 +549,89 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         private fun loadProperties(properties: InputStream?) {
 
             try {
-                super.getProps().load(properties)
+                super.props.load(properties)
             } catch (e: IOException) {
                 Logger.WARNING("Couldn't load properties. Please make sure that your properties file is valid")
                 throw RuntimeException("Couldn't load properties. Please make sure that your properties file is valid")
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BASE_URL) != null) {
-                this.baseUrl = super.getString(AbstractClient.Builder.Option.BASE_URL)
+            if (super.getString(Option.BASE_URL).isNotEmpty()) {
+                this.baseUrl = super.getString(Option.BASE_URL)
             }
 
-            if (super.getString(AbstractClient.Builder.Option.INSTANCE_ID) != null) {
-                this.setInstanceID(super.getString(AbstractClient.Builder.Option.INSTANCE_ID))
+            if (super.getString(Option.INSTANCE_ID).isNotEmpty()) {
+                this.setInstanceID(super.getString(Option.INSTANCE_ID))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.REQUEST_TIMEOUT) != null) {
+            if (super.getString(Option.REQUEST_TIMEOUT).isNotEmpty()) {
                 try {
-                    this.setRequestTimeout(Integer.parseInt(super.getString(AbstractClient.Builder.Option.REQUEST_TIMEOUT)))
+                    this.setRequestTimeout(Integer.parseInt(super.getString(Option.REQUEST_TIMEOUT)))
                 } catch (e: Exception) {
-                    Logger.WARNING(AbstractClient.Builder.Option.REQUEST_TIMEOUT.name + " should have an integer value")
+                    Logger.WARNING(Option.REQUEST_TIMEOUT.name + " should have an integer value")
                 }
-
             }
 
-            if (super.getString(AbstractClient.Builder.Option.PORT) != null) {
-                this.baseUrl = String.format("%s:%s", super.getBaseUrl(), super.getString(AbstractClient.Builder.Option.PORT))
+            if (super.getString(Option.PORT).isNotEmpty()) {
+                this.baseUrl = String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.DELTA_SET_CACHE) != null) {
-                this.useDeltaCache = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.DELTA_SET_CACHE))
+            if (super.getString(Option.DELTA_SET_CACHE).isNotEmpty()) {
+                this.useDeltaCache = java.lang.Boolean.parseBoolean(super.getString(Option.DELTA_SET_CACHE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.FCM_PUSH_ENABLED) != null) {
-                this.FCM_Enabled = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.FCM_PUSH_ENABLED))
+            if (super.getString(Option.FCM_PUSH_ENABLED).isNotEmpty()) {
+                this.FCM_Enabled = java.lang.Boolean.parseBoolean(super.getString(Option.FCM_PUSH_ENABLED))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.GCM_PROD_MODE) != null) {
-                this.GCM_InProduction = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.GCM_PROD_MODE))
+            if (super.getString(Option.GCM_PROD_MODE).isNotEmpty()) {
+                this.GCM_InProduction = java.lang.Boolean.parseBoolean(super.getString(Option.GCM_PROD_MODE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.FCM_SENDER_ID) != null) {
-                this.FCM_SenderID = super.getString(AbstractClient.Builder.Option.FCM_SENDER_ID)
+            if (super.getString(Option.FCM_SENDER_ID).isNotEmpty()) {
+                this.FCM_SenderID = super.getString(Option.FCM_SENDER_ID)
             }
 
-            if (super.getString(AbstractClient.Builder.Option.DEBUG_MODE) != null) {
-                this.debugMode = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.DEBUG_MODE))
+            if (super.getString(Option.DEBUG_MODE).isNotEmpty()) {
+                this.debugMode = java.lang.Boolean.parseBoolean(super.getString(Option.DEBUG_MODE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.CLIENT_REQUEST_MULTITHREADING) != null) {
-                this.clientRequestMultithreading = java.lang.Boolean.parseBoolean(super.getString(AbstractClient.Builder.Option.CLIENT_REQUEST_MULTITHREADING))
+            if (super.getString(Option.CLIENT_REQUEST_MULTITHREADING).isNotEmpty()) {
+                this.clientRequestMultithreading = java.lang.Boolean.parseBoolean(super.getString(Option.CLIENT_REQUEST_MULTITHREADING))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.NUMBER_THREAD_POOL) != null) {
-                this.numberThreadPool = Integer.parseInt(super.getString(AbstractClient.Builder.Option.NUMBER_THREAD_POOL))
+            if (super.getString(Option.NUMBER_THREAD_POOL).isNotEmpty()) {
+                this.numberThreadPool = Integer.parseInt(super.getString(Option.NUMBER_THREAD_POOL))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BATCH_SIZE) != null) {
-                this.batchSize = Integer.parseInt(super.getString(AbstractClient.Builder.Option.BATCH_SIZE))
+            if (super.getString(Option.BATCH_SIZE).isNotEmpty()) {
+                this.batchSize = Integer.parseInt(super.getString(Option.BATCH_SIZE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.BATCH_RATE) != null) {
-                this.batchRate = java.lang.Long.parseLong(super.getString(AbstractClient.Builder.Option.BATCH_RATE))
+            if (super.getString(Option.BATCH_RATE).isNotEmpty()) {
+                this.batchRate = java.lang.Long.parseLong(super.getString(Option.BATCH_RATE))
             }
 
-            if (super.getString(AbstractClient.Builder.Option.PARSER) != null) {
+            if (super.getString(Option.PARSER).isNotEmpty()) {
                 try {
-                    val parser = AndroidJson.JSONPARSER.valueOf(super.getString(AbstractClient.Builder.Option.PARSER))
+                    val parser = AndroidJson.JSONPARSER.valueOf(super.getString(Option.PARSER))
                     this.factory = AndroidJson.newCompatibleJsonFactory(parser)
                 } catch (e: Exception) {
-                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.getOptions())
+                    Logger.WARNING("Invalid Parser name configured, must be one of: " + AndroidJson.JSONPARSER.options)
                     Logger.WARNING("Defaulting to: GSON")
                     //                    e.printStackTrace();
                     this.factory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.GSON)
                 }
-
             }
             setJsonFactory(factory)
 
-            if (super.getString(AbstractClient.Builder.Option.MIC_BASE_URL) != null) {
-                this.MICBaseURL = super.getString(AbstractClient.Builder.Option.MIC_BASE_URL)
+            if (super.getString(Option.MIC_BASE_URL).isNotEmpty()) {
+                this.MICBaseURL = super.getString(Option.MIC_BASE_URL)
             }
-            if (super.getString(AbstractClient.Builder.Option.MIC_VERSION) != null) {
-                this.MICVersion = super.getString(AbstractClient.Builder.Option.MIC_VERSION)
+            if (super.getString(Option.MIC_VERSION).isNotEmpty()) {
+                this.MICVersion = super.getString(Option.MIC_VERSION)
             }
-            if (super.getString(AbstractClient.Builder.Option.KINVEY_API_VERSION) != null) {
-                AbstractClient.KINVEY_API_VERSION = super.getString(AbstractClient.Builder.Option.KINVEY_API_VERSION)
+            if (super.getString(Option.KINVEY_API_VERSION).isNotEmpty()) {
+                kinveyApiVersion = super.getString(Option.KINVEY_API_VERSION)
             }
         }
 
@@ -655,7 +659,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param transport - custom user http transport
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream?, transport: HttpTransport, context: Context) : super(transport, null) {
+        constructor(properties: InputStream?, transport: HttpTransport, context: Context?) : super(transport, null) {
 
             Preconditions.checkNotNull(properties, "properties must be not null")
             loadProperties(properties)
@@ -673,11 +677,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             val initializer = KinveyClientRequestInitializer(key, secret, KinveyHeaders(context))
             this.kinveyClientRequestInitializer = initializer
 
-            this.context = context.applicationContext
+            this.context = context?.applicationContext
             this.requestBackoffPolicy = ExponentialBackOffPolicy()
-            if (credentialStore == null) {
+            if (store == null) {
                 try {
-                    this.setCredentialStore(AndroidCredentialStore(this.context!!))
+                    this.setCredentialStore(AndroidCredentialStore(this.context))
                 } catch (ex: AndroidCredentialStoreException) {
                     Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
                 } catch (ex: IOException) {
@@ -711,7 +715,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param properties - InputStream of properties file
          * @param context - Your Android Application Context
          */
-        constructor(properties: InputStream?, context: Context) : this(properties, newCompatibleTransport(), context) {}
+        constructor(properties: InputStream?, context: Context?) : this(properties, newCompatibleTransport(), context) {}
 
         /*
          * (non-Javadoc)
@@ -758,11 +762,10 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         override fun build(): Client<T> {
             kinveyHandlerThread = KinveyHandlerThread("KinveyHandlerThread")
             kinveyHandlerThread?.start()
-            val ctx = context!!
+            val ctx = context
             Realm.init(ctx)
-            val client = Client<T>(transport,
-                    httpRequestInitializer, baseUrl,
-                    servicePath, this.objectParser, kinveyClientRequestInitializer, credentialStore,
+            val client = Client<T>(transport, httpRequestInitializer, baseUrl,
+                    servicePath, this.objectParser, kinveyClientRequestInitializer, store,
                     requestBackoffPolicy, this.encryptionKey, ctx)
 
             client.clientUser = AndroidUserStore.getUserStore(ctx)
@@ -787,12 +790,12 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             client.batchSize = this.batchSize
             client.isUseDeltaCache = this.deltaSetCache
             if (this.MICVersion != null) {
-                client.setMICApiVersion(this.MICVersion)
+                client.micApiVersion = this.MICVersion
             } else {
-                client.setMICApiVersion(AbstractClient.DEFAULT_MIC_API_VERSION)
+                client.micApiVersion = DEFAULT_MIC_API_VERSION
             }
             if (this.MICBaseURL != null) {
-                client.micHostName = this.MICBaseURL
+                client.micHostName = this.MICBaseURL ?: ""
             }
             if (!Strings.isNullOrEmpty(this.instanceID)) {
                 client.micHostName = Constants.PROTOCOL_HTTPS + instanceID + Constants.HYPHEN + Constants.HOSTNAME_AUTH
@@ -823,12 +826,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
                 }
             } catch (ex: AndroidCredentialStoreException) {
                 Logger.ERROR("Credential store was in a corrupted state and had to be rebuilt")
-                client?.setActiveUser(null)
+                client?.activeUser = null
             } catch (ex: IOException) {
                 Logger.ERROR("Credential store failed to load")
-                client?.setActiveUser(null)
+                client?.activeUser = null
             }
-
         }
 
         /**
@@ -885,7 +887,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param callback
          * @return
          */
-        fun setRetrieveUserCallback(callback: KinveyUserCallback<User>?): Client.Builder<T> {
+        fun setRetrieveUserCallback(callback: KinveyUserCallback<User>?): Builder<T> {
             this.retrieveUserCallback = callback as KinveyUserCallback<T>?
             return this
         }
@@ -896,7 +898,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param fcmEnabled - should push use FCM, defaults to true
          * @return the current instance of the builder
          */
-        fun enableFCM(fcmEnabled: Boolean): Client.Builder<*> {
+        fun enableFCM(fcmEnabled: Boolean): Builder<*> {
             this.FCM_Enabled = fcmEnabled
             return this
         }
@@ -907,7 +909,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param senderID - the senderID to register
          * @return the current instance of the builder
          */
-        fun setSenderIDs(senderID: String): Client.Builder<*> {
+        fun setSenderIDs(senderID: String): Builder<*> {
             this.FCM_SenderID = senderID
             return this
         }
@@ -916,12 +918,12 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          *
          * @see  com.kinvey.java.core.AbstractKinveyJsonClient.Builder.setBaseUrl
          */
-        override fun setBaseUrl(baseUrl: String): Client.Builder<*> {
+        override fun setBaseUrl(baseUrl: String): Builder<*> {
             super.setBaseUrl(baseUrl)
             return this
         }
 
-        fun setGcmInProduction(inProduction: Boolean): Client.Builder<*> {
+        fun setGcmInProduction(inProduction: Boolean): Builder<*> {
             this.GCM_InProduction = inProduction
             return this
         }
@@ -930,12 +932,11 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         private fun retrieveUserFromCredentialStore(client: Client<T>?): Credential? {
             var credential: Credential? = null
             if (client?.isUserLoggedIn == false) {
-                val userID = client.getClientUser()?.user
+                val userID = client.clientUser?.user
                 if (userID != null && userID != "") {
-                    var store: CredentialStore? = credentialStore
-
+                    var store: CredentialStore? = store
                     if (store == null) {
-                        store = AndroidCredentialStore(context!!)
+                        store = AndroidCredentialStore(context)
                     }
                     val manager = CredentialManager(store)
                     credential = manager.loadCredential(userID)
@@ -951,10 +952,9 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             } catch (ex: IOException) {
                 Logger.ERROR("Could not retrieve user Credentials")
             }
-
             var exception: Exception? = null
             try {
-                client?.setActiveUser(BaseUserStore.convenience(client))
+                client?.activeUser = BaseUserStore.convenience(client)
             } catch (error: Exception) {
                 exception = error
                 if (error is HttpResponseException) {
@@ -969,14 +969,10 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             if (exception != null) {
                 retrieveUserCallback?.onFailure(exception)
             } else {
-                val activeUser = client?.activeUser
-                if (activeUser == null) {
-                    retrieveUserCallback?.onFailure(Throwable("Active User is null"))
-                } else {
-                    retrieveUserCallback?.onSuccess(activeUser)
-                }
+                client?.activeUser?.let { retrieveUserCallback?.onSuccess(it) }
             }
         }
+
         /** Get setting value of delta set caching  */
         fun isDeltaSetCache(): Boolean {
             return deltaSetCache
@@ -1003,7 +999,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         class Build (val clientBuilder: Builder<*>, builderCallback: KinveyClientBuilderCallback) : AsyncClientRequest<Client<*>>(builderCallback) {
 
             override fun executeAsync(): Client<*>? {
-                return clientBuilder.build()
+                return clientBuilder.build() as Client<*>?
             }
         }
 
@@ -1085,25 +1081,6 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
      * @param context - Your Android Application Context
      */
 
-
-    fun getKinveyHandlerThread(): KinveyHandlerThread? {
-        return kinveyHandlerThread
-    }
-
-    override fun getFileCacheFolder(): String? {
-        return context?.getExternalFilesDir("KinveyFiles")?.absolutePath
-    }
-
-    override fun getFileStore(storeType: StoreType): FileStore {
-        return FileStore(NetworkFileManager(this),
-                getCacheManager(), 60 * 60 * 1000L, storeType, fileCacheFolder
-        )
-    }
-
-    override fun getSyncCacheManager(): ICacheManager? {
-        return syncCacheManager
-    }
-
     /**
      * Terminates KinveyHandlerThread.
      * Should be called if the Client instance is not used anymore to prevent from memory leaks.
@@ -1115,23 +1092,18 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         kinveyHandlerThread?.interrupt()
     }
 
-    override fun getDeviceId(): String {
-        return UuidFactory(context).deviceUuid.toString()
-    }
-
     companion object {
 
         /** global TAG used in Android logging  */
         const val TAG = "Kinvey - Client"
 
-        private var kinveyHandlerThread: KinveyHandlerThread? = null
-
         @JvmStatic
-        private var sharedInstance: Client<User>? = null
+        var kinveyHandlerThread: KinveyHandlerThread? = null
 
+        //lateinit var sharedInstance: Client<User>
         @JvmStatic
-        fun sharedInstance(): Client<User>? {
-            return sharedInstance
+        fun sharedInstance(): Client<User> {
+            return sharedInstance as Client<User>
         }
     }
 }

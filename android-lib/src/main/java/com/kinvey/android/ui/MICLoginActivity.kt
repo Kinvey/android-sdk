@@ -61,9 +61,9 @@ class MICLoginActivity : Activity() {
 
         super.onNewIntent(intent)
         if (clientId != null && !clientId!!.isEmpty()) {
-            UserStore.onOAuthCallbackReceived(intent, clientId, Client.sharedInstance()!!)
+            UserStore.onOAuthCallbackReceived(intent, clientId, Client.sharedInstance())
         } else {
-            UserStore.onOAuthCallbackReceived(intent, null, Client.sharedInstance()!!)
+            UserStore.onOAuthCallbackReceived(intent, null, Client.sharedInstance())
         }
         this.finish()
     }

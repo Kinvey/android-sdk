@@ -21,15 +21,14 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.kinvey.java.AbstractClient;
-import com.kinvey.java.LinkedResources.GetLinkedResourceClientRequest;
-import com.kinvey.java.LinkedResources.LinkedGenericJson;
-import com.kinvey.java.LinkedResources.SaveLinkedResourceClientRequest;
+import com.kinvey.java.linkedResources.GetLinkedResourceClientRequest;
+import com.kinvey.java.linkedResources.LinkedGenericJson;
+import com.kinvey.java.linkedResources.SaveLinkedResourceClientRequest;
 import com.kinvey.java.MimeTypeFinder;
 import com.kinvey.java.Query;
 import com.kinvey.java.core.DownloaderProgressListener;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.SaveMode;
-import com.kinvey.java.network.NetworkManager;
 
 import java.io.IOException;
 import java.lang.reflect.Array;

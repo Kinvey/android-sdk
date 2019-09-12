@@ -60,13 +60,14 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
         this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
         this.sortFilter = query.sortString
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson()
                     .toJson(userStoreRequestManager.getCustomRequestProperties())
         }
     }
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query, resolve: Array<String>, resolve_depth: Int, retain: Boolean) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query, resolve: Array<String>, resolve_depth: Int, retain: Boolean)
+        : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
         val queryLimit = query.getLimit()
@@ -79,7 +80,7 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
         this.resolve_depth = if (resolve_depth > 0) Integer.toString(resolve_depth) else null
         this.retainReferences = java.lang.Boolean.toString(retain)
         this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = userStoreRequestManager.getClientAppVersion()
-        if (userStoreRequestManager.getCustomRequestProperties() != null && !userStoreRequestManager.getCustomRequestProperties().isEmpty()) {
+        if (userStoreRequestManager.getCustomRequestProperties()?.isEmpty() == false) {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson()
                     .toJson(userStoreRequestManager.getCustomRequestProperties())
         }
@@ -87,6 +88,6 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
     }
 
     companion object {
-        private val REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}"
+        private const val REST_PATH = "user/{appKey}/{userID}{?query,sort,limit,skip,resolve,resolve_depth,retainReference}"
     }
 }

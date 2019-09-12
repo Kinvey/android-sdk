@@ -17,7 +17,7 @@
 package com.kinvey.java.store
 
 import com.kinvey.java.AbstractClient
-import com.kinvey.java.LinkedResources.LinkedGenericJson
+import com.kinvey.java.linkedResources.LinkedGenericJson
 import com.kinvey.java.network.LinkedNetworkManager
 
 class LinkedBaseDataStore<T : LinkedGenericJson>

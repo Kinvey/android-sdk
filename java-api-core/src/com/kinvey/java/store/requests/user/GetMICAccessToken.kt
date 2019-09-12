@@ -18,16 +18,20 @@ package com.kinvey.java.store.requests.user
 
 import com.google.api.client.http.HttpContent
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.core.AbstractKinveyClientRequest
+import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.store.UserStoreRequestManager
 
 /**
  * Created by Prots on 2/12/16.
  */
-class GetMICAccessToken(private val userStoreRequestManager: UserStoreRequestManager<*>, content: HttpContent) : AbstractKinveyClientRequest<GenericJson>(userStoreRequestManager.getClient(), userStoreRequestManager.getClient().micHostName, "POST",
+class GetMICAccessToken(private val userStoreRequestManager: UserStoreRequestManager<*>, content: HttpContent)
+    : AbstractKinveyClientRequest<GenericJson>(userStoreRequestManager.getClient() as AbstractClient<BaseUser>,
+        userStoreRequestManager.getClient().micHostName, "POST",
         "/" + userStoreRequestManager.getClient().micApiVersion + "/" + BASE_TOKEN_PATH, content, GenericJson::class.java) {
     companion object {
         // Base path, without the MIC API version.
-        private val BASE_TOKEN_PATH = "oauth/token"
+        private const val BASE_TOKEN_PATH = "oauth/token"
     }
 }

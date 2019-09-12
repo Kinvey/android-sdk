@@ -18,7 +18,6 @@ package com.kinvey.java.testing;
 import com.google.api.client.http.BackOffPolicy;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
@@ -39,9 +38,6 @@ import com.kinvey.java.dto.BaseUser;
 */
 public class MockKinveyJsonClient extends AbstractClient {
 
-
-
-    
     protected MockKinveyJsonClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer, String rootUrl,
             String servicePath, JsonObjectParser objectParser,
             KinveyClientRequestInitializer kinveyRequestInitializer, CredentialStore store,
@@ -68,7 +64,6 @@ super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kin
             return new MockKinveyJsonClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(), getObjectParser(), getKinveyClientRequestInitializer(), null, null);
         }
     }
-
 
 	@Override
 	public UserDiscovery userDiscovery() {

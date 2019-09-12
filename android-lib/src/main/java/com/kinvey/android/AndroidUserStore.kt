@@ -24,23 +24,23 @@ import com.kinvey.java.auth.ClientUser
  * @author mjsalinger
  * @since 2.0
  */
-internal class AndroidUserStore private constructor(context: Context) : ClientUser {
+internal class AndroidUserStore private constructor(context: Context?) : ClientUser {
     private var userID: String? = null
-    var userPreferences: SharedPreferences
-    var appContext: Context
+    var userPreferences: SharedPreferences?
+    var appContext: Context? = null
 
     init {
-        appContext = context.applicationContext
-        userPreferences = appContext.getSharedPreferences(
-                appContext.packageName, Context.MODE_PRIVATE)
+        appContext = context?.applicationContext
+        userPreferences = appContext?.getSharedPreferences(
+                appContext?.packageName, Context.MODE_PRIVATE)
 
-        userID = userPreferences.getString("userID", "")
+        userID = userPreferences?.getString("userID", "")
     }
 
     private fun persistData() {
-        val editor = userPreferences.edit()
-        editor.putString("userID", userID)
-        editor.commit()
+        val editor = userPreferences?.edit()
+        editor?.putString("userID", userID)
+        editor?.commit()
     }
 
     /** {@inheritDoc}  */
@@ -62,7 +62,7 @@ internal class AndroidUserStore private constructor(context: Context) : ClientUs
         private var _instance: AndroidUserStore? = null
 
         @JvmStatic
-        fun getUserStore(context: Context): AndroidUserStore {
+        fun getUserStore(context: Context?): AndroidUserStore {
             if (_instance == null) {
                 _instance = AndroidUserStore(context)
             }
