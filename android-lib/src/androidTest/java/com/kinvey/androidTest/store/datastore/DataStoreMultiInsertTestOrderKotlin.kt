@@ -16,7 +16,6 @@ import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@Ignore("Ignored tests in Kotlin for now while Kotlin migration is not done")
 class DataStoreMultiInsertItemsOrderTestKotlin : BaseDataStoreTest() {
 
     @Test

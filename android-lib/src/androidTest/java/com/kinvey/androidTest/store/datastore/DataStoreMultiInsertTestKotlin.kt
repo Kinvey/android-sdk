@@ -1278,40 +1278,4 @@ class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
         // find using syncstore, should return all items including the invalid one
         testSyncItemsList(true, StoreType.AUTO)
     }
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testSaveMultipleBatchRequests() {
-        print("should send multiple multi-insert POST requests")
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val store = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
-        clearBackend(store)
-        client?.syncManager?.clear(Person.COLLECTION)
-
-        val itemsList = createPersonsList(200, false)
-
-        val saveCallback = saveList(store, itemsList)
-        assertNotNull(saveCallback.result)
-        assertNull(saveCallback.error)
-
-        assertEquals(netManager.multiPostCount, 2)
-    }
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testSaveMultipleBatchRequestsIfWasErrors() {
-        print("should send multiple multi-insert POST requests, if was errors then should return empty array and array of errors")
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val store = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
-        clearBackend(store)
-        client?.syncManager?.clear(Person.COLLECTION)
-
-        val itemsList = createPersonsList(200, false)
-
-        val saveCallback = saveList(store, itemsList)
-        assertNotNull(saveCallback.result)
-        assertNull(saveCallback.error)
-
-        assertEquals(netManager.multiPostCount, 2)
-    }
 }
