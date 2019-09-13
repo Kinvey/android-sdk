@@ -50,7 +50,7 @@ class SaveListBatchRequest<T : GenericJson>(
     private var exception: KinveySaveBatchException? = null
     private var wasException = false
 
-    val MAX_POST_ITEMS = 100
+    private val MAX_POST_ITEMS = 100
 
     @Throws(IOException::class)
     override fun execute(): List<T> {
@@ -83,20 +83,22 @@ class SaveListBatchRequest<T : GenericJson>(
     private fun runSaveItemsRequest(objects: Iterable<T>): List<T> {
         Logger.INFO("Start saving entities")
         filterObjects(objects as List<T>)
-        val saveEntities = ArrayList<T>()
+        val postEntities = ArrayList<T>()
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
 
         val updateResponse = updateObjects(updateList)
-        updateResponse.entities?.let { list -> saveEntities.addAll(list) }
+        //updateResponse.entities?.let { list -> saveEntities.addAll(list) }
 
         if (saveList?.isNotEmpty() == true && saveList is List<T>) {
-            postBatchItems(saveList as List<T>, saveEntities, batchSaveErrors)
+            postBatchItems(saveList as List<T>, postEntities, batchSaveErrors)
         }
         if (wasException) {
-            exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, saveEntities)
+            exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, postEntities)
         }
         Logger.INFO("Finish saving entities")
-        return saveEntities
+        val putEntities = updateResponse.entities ?: mutableListOf()
+        val resultItems = recoverItemsOrder(objects, postEntities, putEntities)
+        return resultItems
     }
 
     private fun postBatchItems(entities: List<T>, batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>) {
@@ -129,6 +131,22 @@ class SaveListBatchRequest<T : GenericJson>(
             removeSuccessBatchItemsFromCache(entities, batchSaveErrors)
         }
         return response
+    }
+
+    private fun recoverItemsOrder(srcItems: List<T>, postItems: List<T>, putItems: List<T>): List<T> {
+        var postIdx = 0
+        var putIdx = 0
+        if (srcItems.count() != postItems.count() + putItems.count()) {
+            return postItems + putItems
+        }
+        return srcItems.mapNotNull { item ->
+            if (item[_ID] != null
+             && item[_ID] == putItems.getOrNull(putIdx)?.getValue(_ID)) {
+                putItems.getOrNull(putIdx++)
+            } else {
+                postItems.getOrNull(postIdx++)
+            }
+        }
     }
 
     private fun prepareSaveItems(requestType: SyncRequest.HttpVerb, itemsList: List<T>?): List<T> {
