@@ -124,7 +124,7 @@ class SaveListBatchRequest<T : GenericJson>(
             if (!response.haveErrors) {
                 response.entities?.let { list -> batchSaveEntities.addAll(list as List<T>) }
             } else {
-                wasException = true
+                //wasException = true
                 response.errors?.let{ errors -> batchSaveErrors.addAll(errors) }
                 enqueueBatchErrorsRequests(entities, response)
             }
