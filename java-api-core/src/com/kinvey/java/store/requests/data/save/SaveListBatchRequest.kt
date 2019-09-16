@@ -47,7 +47,7 @@ class SaveListBatchRequest<T : GenericJson>(
 
     private var updateList: MutableList<T>? = null
     private var saveList: MutableList<T>? = null
-    private var exception: KinveySaveBatchException? = null
+    private var exception: IOException? = null
     private var wasException = false
 
     private val MAX_POST_ITEMS = 100
@@ -92,7 +92,7 @@ class SaveListBatchRequest<T : GenericJson>(
         if (saveList?.isNotEmpty() == true && saveList is List<T>) {
             postBatchItems(saveList as List<T>, postEntities, batchSaveErrors)
         }
-        if (wasException) {
+        if (wasException && exception == null) {
             exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, postEntities)
         }
         Logger.INFO("Finish saving entities")
@@ -118,6 +118,7 @@ class SaveListBatchRequest<T : GenericJson>(
             throw e
         } catch (e: IOException) {
             wasException = true
+            exception = e
             enqueueSaveRequests(entities, SyncRequest.HttpVerb.POST)
         }
         if (response != null) {

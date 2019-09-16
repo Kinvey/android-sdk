@@ -151,6 +151,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
             removeBatchTempItems(syncItems, resultList)
         } catch (e: IOException) {
             Logger.ERROR(e.message)
+            throw e
         }
         return resultList
     }

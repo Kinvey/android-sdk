@@ -54,12 +54,13 @@ open class BaseDataStoreTest {
     @Throws(InterruptedException::class, IOException::class)
     fun setUp() {
         val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
+        AbstractClient.kinveyApiVersion = "5"
         client = Client.Builder<User>(mMockContext).build()
         client.enableDebugLogging()
         AbstractClient.kinveyApiVersion = "5"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
-        if (client.isUserLoggedIn == false) {
+        if (!client.isUserLoggedIn) {
             looperThread = LooperThread(Runnable {
                 try {
                     UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
