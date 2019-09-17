@@ -18,6 +18,7 @@ import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
 import com.kinvey.java.*
+import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
 import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.model.KinveyBatchInsertError
@@ -30,7 +31,7 @@ import org.junit.Assert
 import org.junit.Before
 import java.io.IOException
 import java.lang.reflect.Field
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -54,12 +55,13 @@ open class BaseDataStoreTest {
     @Throws(InterruptedException::class, IOException::class)
     fun setUp() {
         val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
+        kinveyApiVersion = "5"
         client = Client.Builder<User>(mMockContext).build()
         client.enableDebugLogging()
-        AbstractClient.kinveyApiVersion = "5"
+        kinveyApiVersion = "5"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
-        if (client.isUserLoggedIn == false) {
+        if (!client.isUserLoggedIn) {
             looperThread = LooperThread(Runnable {
                 try {
                     UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
