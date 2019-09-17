@@ -73,9 +73,9 @@ install:
 #  - android-wait-for-emulator
 #  - adb shell input keyevent 82 &
 #  - ./gradlew --stop
-script: 
-  - ./gradlew clean release --no-daemon 
-  - travis_wait 60 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.kinvey.androidTest.$PACKAGE -PdisablePreDex --stacktrace --no-daemon
+script:
+  - ./gradlew clean release --no-daemon
+  - travis_wait 90 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.kinvey.androidTest.$PACKAGE -PdisablePreDex --stacktrace --no-daemon
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t $CODECOV_GIT_TOKEN
