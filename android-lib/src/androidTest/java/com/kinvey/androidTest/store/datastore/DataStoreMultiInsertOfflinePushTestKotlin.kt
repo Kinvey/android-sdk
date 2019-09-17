@@ -5,12 +5,9 @@ import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertNull
+import junit.framework.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
