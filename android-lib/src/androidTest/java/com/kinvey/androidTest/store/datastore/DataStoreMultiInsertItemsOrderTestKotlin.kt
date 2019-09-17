@@ -12,7 +12,6 @@ import org.junit.runner.RunWith
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest

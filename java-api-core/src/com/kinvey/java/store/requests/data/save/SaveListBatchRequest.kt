@@ -64,14 +64,14 @@ class SaveListBatchRequest<T : GenericJson>(
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
                 val itemsToSend = cache?.save(objects)
-                retList = runSaveItemsRequest(itemsToSend as List<T>)
+                retList = runSaveItemsRequest(itemsToSend)
                 cache?.save(retList)
                 if (exception is IOException) {
                     throw exception as IOException
                 }
             }
             WritePolicy.FORCE_NETWORK -> {
-                retList = runSaveItemsRequest(objects as List<T>, false)
+                retList = runSaveItemsRequest(objects, false)
                 if (exception is IOException) {
                     throw exception as IOException
                 }
@@ -81,10 +81,10 @@ class SaveListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun runSaveItemsRequest(objects: List<T>, useCache: Boolean = true): List<T> {
+    private fun runSaveItemsRequest(objects: Iterable<T>?, useCache: Boolean = true): List<T> {
         Logger.INFO("Start saving entities")
         filterObjects(objects as List<T>)
-        val postEntities = ArrayList<T?>()
+        val postEntities = ArrayList<T>()
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
         val updateResponse = updateObjects(updateList)
         //updateResponse.entities?.let { list -> saveEntities.addAll(list) }
@@ -103,7 +103,7 @@ class SaveListBatchRequest<T : GenericJson>(
         return resultItems
     }
 
-    private fun postBatchItems(entities: List<T>, batchSaveEntities: MutableList<T?>, batchSaveErrors: MutableList<KinveyBatchInsertError>, useCache: Boolean = true) {
+    private fun postBatchItems(entities: List<T>, batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>, useCache: Boolean = true) {
         entities.chunked(MAX_POST_ITEMS).onEach { items ->
             postSaveBatchRequest(items, batchSaveEntities, batchSaveErrors, useCache)
         }
@@ -111,7 +111,7 @@ class SaveListBatchRequest<T : GenericJson>(
 
     @Throws(IOException::class)
     private fun postSaveBatchRequest(entities: List<T>,
-        batchSaveEntities: MutableList<T?>, batchSaveErrors: MutableList<KinveyBatchInsertError>, useCache: Boolean = true): KinveySaveBatchResponse<*>? {
+        batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>, useCache: Boolean = true): KinveySaveBatchResponse<*>? {
         var response: KinveySaveBatchResponse<*>? = null
         try {
             val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, entities)
@@ -134,8 +134,8 @@ class SaveListBatchRequest<T : GenericJson>(
             }
             removeSuccessBatchItemsFromCache(entities, batchSaveErrors)
         } else if (multipleRequests) {
-            val emptyList = listOf(*Array<Any?>(entities.count()) { GenericJson() })
-            batchSaveEntities.addAll(emptyList as List<T?>)
+            val emptyList = listOf(*Array<Any>(entities.count()) { GenericJson() })
+            batchSaveEntities.addAll(emptyList as List<T>)
         }
         return response
     }
