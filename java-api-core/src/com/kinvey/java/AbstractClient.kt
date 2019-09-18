@@ -25,14 +25,11 @@ import com.google.api.client.util.GenericData
 
 import java.io.IOException
 import java.lang.reflect.Array
-import java.net.URL
-import java.util.ArrayList
 import java.util.Properties
 import java.util.logging.Level
 import java.util.logging.Logger
 
 import com.kinvey.java.auth.ClientUser
-import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.CredentialManager
 import com.kinvey.java.auth.CredentialStore
 import com.kinvey.java.cache.ICacheManager
@@ -42,7 +39,6 @@ import com.kinvey.java.core.KinveyClientRequestInitializer
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkFileManager
 import com.kinvey.java.query.MongoQueryFilter
-import com.kinvey.java.store.BaseDataStore
 import com.kinvey.java.store.BaseFileStore
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.SyncManager
@@ -196,7 +192,6 @@ protected constructor(transport: HttpTransport?,
     init {
         sharedInstance = this
         this.user = null
-        KINVEY_API_VERSION = ""
     }
 
     fun query(): Query {
@@ -508,17 +503,7 @@ protected constructor(transport: HttpTransport?,
         /**
          * Non-default version of API. Developer should initialize it for change API version
          */
-        private lateinit var KINVEY_API_VERSION: String
-        @JvmStatic var kinveyApiVersion: String
-            get() {
-                if (!::KINVEY_API_VERSION.isInitialized) {
-                    KINVEY_API_VERSION = ""
-                }
-                return KINVEY_API_VERSION
-            }
-            set(value) {
-                KINVEY_API_VERSION = value
-            }
+        @JvmStatic var kinveyApiVersion: String = ""
 
         @JvmStatic
         var sharedInstance: AbstractClient<*>? = null
