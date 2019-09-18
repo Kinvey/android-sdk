@@ -75,6 +75,7 @@ public class DataStoreMultiInsertTest {
     @Before
     public void setUp() throws InterruptedException, IOException {
         Context mMockContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        AbstractClient.setKinveyApiVersion("5");
         client = new Client.Builder(mMockContext).build();
         client.enableDebugLogging();
         AbstractClient.setKinveyApiVersion("5");
