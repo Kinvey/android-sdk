@@ -119,7 +119,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
     private val kinveyApiVersion: Int
         get() {
-            var version = 5
+            var version = DEFAULT_KINVEY_API_VERSION
             try {
                 val versionStr = AbstractClient.kinveyApiVersion
                 if (versionStr.isNotEmpty()) {
@@ -1152,6 +1152,8 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         private const val KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE"
 
         private const val KINVEY_API_VERSION_5 = 5
+
+        private const val DEFAULT_KINVEY_API_VERSION = 4
 
         /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
