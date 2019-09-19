@@ -5,6 +5,7 @@ import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.store.StoreType
+
 import junit.framework.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,5 +66,8 @@ class DataStoreMultiInsertOfflinePushTestKotlin : BaseDataStoreTest() {
         val syncItems = pendingSyncEntities(Person.COLLECTION)
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
+    
+        assertNotNull(saveResult.error)
+        assertNotNull(pushResult.error)
     }
 }
