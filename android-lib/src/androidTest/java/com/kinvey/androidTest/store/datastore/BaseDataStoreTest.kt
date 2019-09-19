@@ -18,6 +18,7 @@ import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
 import com.kinvey.java.*
+import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
 import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.model.KinveyBatchInsertError
@@ -54,12 +55,13 @@ open class BaseDataStoreTest {
     @Throws(InterruptedException::class, IOException::class)
     fun setUp() {
         val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
+        kinveyApiVersion = "5"
         client = Client.Builder<User>(mMockContext).build()
         client.enableDebugLogging()
-        AbstractClient.kinveyApiVersion = "5"
+        kinveyApiVersion = "5"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
-        if (client.isUserLoggedIn == false) {
+        if (!client.isUserLoggedIn) {
             looperThread = LooperThread(Runnable {
                 try {
                     UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
@@ -350,15 +352,26 @@ open class BaseDataStoreTest {
     }
 
     // create an array with a few items that have _id property or have not.
-    fun createPersonsList(count: Int, withId: Boolean): List<Person> {
+    fun createPersonsList(count: Int, error: Boolean = false, withId: Boolean = false): List<Person> {
         return 1.rangeTo(count).map { i ->
             val person = createPerson(TEST_USERNAME + i.toString())
             if (withId) {
                 val id = "123456$i"
                 person.id = id
             }
+            if (error) {
+                person.geoloc = ERR_GEOLOC
+            }
             person
         }
+    }
+
+    // create an array with a few items that have _id property or have not.
+    fun createPersonsListErr(count: Int, errCount: Int, errPos: Int = count): List<Person> {
+        val items = createPersonsList(count, error = false, withId = false)
+        val itemsErr = createPersonsList(errCount, error = true, withId = false)
+        (items as MutableList).addAll(errPos, itemsErr)
+        return items
     }
 
     fun createPersonsList(withId: Boolean): List<Person> {
