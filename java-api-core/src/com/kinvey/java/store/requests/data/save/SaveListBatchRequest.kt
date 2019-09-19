@@ -55,7 +55,7 @@ class SaveListBatchRequest<T : GenericJson>(
 
     @Throws(IOException::class)
     override fun execute(): List<T> {
-        var retList: List<T> = ArrayList()
+        var retList: List<T> = mutableListOf()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 retList = cache?.save(objects) ?: ArrayList()
@@ -87,7 +87,6 @@ class SaveListBatchRequest<T : GenericJson>(
         val postEntities = ArrayList<T>()
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
         val updateResponse = updateObjects(updateList)
-        //updateResponse.entities?.let { list -> saveEntities.addAll(list) }
         val count = saveList?.count() ?: 0
         multipleRequests = count > MAX_POST_ITEMS
 
