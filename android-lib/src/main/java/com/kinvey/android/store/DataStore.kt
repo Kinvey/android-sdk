@@ -1128,30 +1128,30 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
     companion object {
 
-        private val PAGINATION_IS_NOT_USED = 0
-        private val MIN_PAGE_SIZE = 0
-        private val MAX_MULTI_INSERT_SIZE = 100
+        private const val PAGINATION_IS_NOT_USED = 0
+        private const val MIN_PAGE_SIZE = 0
+        private const val MAX_MULTI_INSERT_SIZE = 100
 
         //Every AbstractClient Request wrapper provided by the core NetworkManager gets a KEY here.
         //The below declared methodMap will map this key to a an appropriate method wrapper in the core NetworkManager.
         //This makes it very easy to add new wrappers, and allows for a single implementation of an async client request.
-        private val KEY_GET_BY_ID = "KEY_GET_BY_ID"
-        private val KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY"
-        private val KEY_GET_ALL = "KEY_GET_ALL"
-        private val KEY_GET_BY_IDS = "KEY_GET_BY_IDS"
+        private const val KEY_GET_BY_ID = "KEY_GET_BY_ID"
+        private const val KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY"
+        private const val KEY_GET_ALL = "KEY_GET_ALL"
+        private const val KEY_GET_BY_IDS = "KEY_GET_BY_IDS"
 
-        private val KEY_GET_COUNT = "KEY_GET_COUNT"
+        private const val KEY_GET_COUNT = "KEY_GET_COUNT"
 
-        private val KEY_DELETE_BY_ID = "KEY_DELETE_BY_ID"
-        private val KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY"
-        private val KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS"
+        private const val KEY_DELETE_BY_ID = "KEY_DELETE_BY_ID"
+        private const val KEY_DELETE_BY_QUERY = "KEY_DELETE_BY_QUERY"
+        private const val KEY_DELETE_BY_IDS = "KEY_DELETE_BY_IDS"
 
-        private val KEY_PURGE = "KEY_PURGE"
-        private val KEY_PURGE_BY_QUERY = "KEY_PURGE_BY_QUERY"
-        private val KEY_SUBSCRIBE = "KEY_SUBSCRIBE"
-        private val KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE"
+        private const val KEY_PURGE = "KEY_PURGE"
+        private const val KEY_PURGE_BY_QUERY = "KEY_PURGE_BY_QUERY"
+        private const val KEY_SUBSCRIBE = "KEY_SUBSCRIBE"
+        private const val KEY_UNSUBSCRIBE = "KEY_UNSUBSCRIBE"
 
-        private val KINVEY_API_VERSION_5 = 5
+        private const val KINVEY_API_VERSION_5 = 5
 
         private const val DEFAULT_KINVEY_API_VERSION = 4
 

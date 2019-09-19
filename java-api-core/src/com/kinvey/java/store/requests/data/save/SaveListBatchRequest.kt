@@ -47,7 +47,7 @@ class SaveListBatchRequest<T : GenericJson>(
 
     private var updateList: MutableList<T>? = null
     private var saveList: MutableList<T>? = null
-    private var exception: KinveySaveBatchException? = null
+    private var exception: IOException? = null
     private var wasException = false
     private var multipleRequests = false
 
@@ -94,7 +94,7 @@ class SaveListBatchRequest<T : GenericJson>(
         if (saveList?.isNotEmpty() == true && saveList is List<T>) {
             postBatchItems(saveList as List<T>, postEntities, batchSaveErrors, useCache)
         }
-        if (wasException) {
+        if (wasException && exception == null) {
             exception = KinveySaveBatchException(batchSaveErrors, updateResponse.errors, postEntities)
         }
         Logger.INFO("Finish saving entities")
@@ -116,12 +116,11 @@ class SaveListBatchRequest<T : GenericJson>(
         try {
             val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, entities)
             response = networkManager.saveBatchBlocking(batchList).execute()
-        }
-        catch (e: KinveyJsonResponseException) {
+        } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
-        }
-        catch (e: IOException) {
-            //wasException = true
+        } catch (e: IOException) {
+            wasException = true
+            exception = e
             if (useCache) { enqueueSaveRequests(entities, SyncRequest.HttpVerb.POST) }
         }
         if (response != null) {
@@ -130,7 +129,7 @@ class SaveListBatchRequest<T : GenericJson>(
             } else {
                 //wasException = true
                 response.errors?.let{ errors -> batchSaveErrors.addAll(errors) }
-                enqueueBatchErrorsRequests(entities, response)
+                if (useCache) { enqueueBatchErrorsRequests(entities, response) }
             }
             removeSuccessBatchItemsFromCache(entities, batchSaveErrors)
         } else if (multipleRequests) {
