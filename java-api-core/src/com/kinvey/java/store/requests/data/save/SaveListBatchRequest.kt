@@ -117,7 +117,7 @@ class SaveListBatchRequest<T : GenericJson>(
             val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, entities)
             response = networkManager.saveBatchBlocking(batchList).execute()
         } catch (e: KinveyJsonResponseException) {
-            throw e
+            if (!multipleRequests) throw e
         } catch (e: IOException) {
             wasException = true
             exception = e
@@ -129,7 +129,7 @@ class SaveListBatchRequest<T : GenericJson>(
             } else {
                 //wasException = true
                 response.errors?.let{ errors -> batchSaveErrors.addAll(errors) }
-                enqueueBatchErrorsRequests(entities, response)
+                if (useCache) { enqueueBatchErrorsRequests(entities, response) }
             }
             removeSuccessBatchItemsFromCache(entities, batchSaveErrors)
         } else if (multipleRequests) {

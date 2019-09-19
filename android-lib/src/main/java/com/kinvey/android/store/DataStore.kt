@@ -1155,8 +1155,6 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
         private const val DEFAULT_KINVEY_API_VERSION = 4
 
-        private const val DEFAULT_KINVEY_API_VERSION = 4
-
         /*private static final String KEY_GET_BY_ID_WITH_REFERENCES = "KEY_GET_BY_ID_WITH_REFERENCES";
     private static final String KEY_GET_QUERY_WITH_REFERENCES = "KEY_GET_QUERY_WITH_REFERENCES";
     private static final String KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER = "KEY_GET_BY_ID_WITH_REFERENCES_WRAPPER";
