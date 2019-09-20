@@ -71,12 +71,12 @@ class SaveRequest<T : GenericJson>(private val cache: ICache<T>?, private val ne
                         // to remove the entity from the local cache with the temporary ID.
                         cache?.delete(id)
                     }
+                    ret?.let { cache?.save(it) }
                 } catch (e: IOException) {
                     syncManager?.enqueueRequest(networkManager?.collectionName,
                     networkManager, if (bRealmGeneratedId == true) SyncRequest.HttpVerb.POST else SyncRequest.HttpVerb.PUT, id)
-                    throw e
+                    //throw e
                 }
-                ret?.let { cache?.save(it) }
             }
             WritePolicy.FORCE_NETWORK -> {
                 Logger.INFO("Start saving entity")

@@ -86,7 +86,7 @@ class SaveListBatchRequest<T : GenericJson>(
         filterObjects(objects as List<T>)
         val postEntities = ArrayList<T>()
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
-        val updateResponse = updateObjects(updateList)
+        val updateResponse = updateObjects(updateList, useCache)
         val count = saveList?.count() ?: 0
         multipleRequests = count > MAX_POST_ITEMS
 
@@ -118,8 +118,10 @@ class SaveListBatchRequest<T : GenericJson>(
         } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
         } catch (e: IOException) {
-            wasException = true
-            exception = e
+            if (!useCache) {
+                wasException = true
+                exception = e
+            }
             if (useCache) { enqueueSaveRequests(entities, SyncRequest.HttpVerb.POST) }
         }
         if (response != null) {
@@ -208,7 +210,7 @@ class SaveListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun updateObjects(items: List<T>?): KinveyUpdateObjectsResponse<T> {
+    private fun updateObjects(items: List<T>?, useCache: Boolean = true): KinveyUpdateObjectsResponse<T> {
         val errors = ArrayList<KinveyUpdateSingleItemError>()
         val result = KinveyUpdateObjectsResponse<T>()
         val ret = items?.mapNotNull { itm ->
@@ -217,8 +219,10 @@ class SaveListBatchRequest<T : GenericJson>(
                 res = networkManager.saveBlocking(itm).execute()
                 removeFromCache(itm)
             } catch (e: IOException) {
-                wasException = true
-                errors.add(KinveyUpdateSingleItemError(e, itm))
+                if (!useCache) {
+                    wasException = true
+                    errors.add(KinveyUpdateSingleItemError(e, itm))
+                }
                 syncManager.enqueueRequest(networkManager.collectionName,
                         networkManager, SyncRequest.HttpVerb.PUT, itm[_ID] as String?)
             }
