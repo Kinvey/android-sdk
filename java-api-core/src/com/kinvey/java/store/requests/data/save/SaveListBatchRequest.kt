@@ -16,6 +16,7 @@
 
 package com.kinvey.java.store.requests.data.save
 
+import com.google.api.client.http.HttpResponseException
 import com.google.api.client.json.GenericJson
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.Logger
@@ -67,13 +68,13 @@ class SaveListBatchRequest<T : GenericJson>(
                 retList = runSaveItemsRequest(itemsToSend)
                 cache?.save(retList)
                 if (exception is IOException) {
-                    throw exception as IOException
+                    throw IOException(exception)
                 }
             }
             WritePolicy.FORCE_NETWORK -> {
                 retList = runSaveItemsRequest(objects, false)
                 if (exception is IOException) {
-                    throw exception as IOException
+                    throw IOException(exception)
                 }
             }
         }
@@ -118,7 +119,7 @@ class SaveListBatchRequest<T : GenericJson>(
         } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
         } catch (e: IOException) {
-            if (!useCache) {
+            if (!useCache || (e is HttpResponseException && e.statusCode == 401)) {
                 wasException = true
                 exception = e
             }
@@ -219,7 +220,7 @@ class SaveListBatchRequest<T : GenericJson>(
                 res = networkManager.saveBlocking(itm).execute()
                 removeFromCache(itm)
             } catch (e: IOException) {
-                if (!useCache) {
+                if (!useCache || (e is HttpResponseException && e.statusCode == 401)) {
                     wasException = true
                     errors.add(KinveyUpdateSingleItemError(e, itm))
                 }

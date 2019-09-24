@@ -1463,8 +1463,8 @@ public class DataStoreTest {
     public void testSaveNoAccess() throws InterruptedException { //SAVE
         DataStore<EntitySet> storeAuto = DataStore.collection(EntitySet.COLLECTION, EntitySet.class, StoreType.AUTO, client);
         DefaultKinveyEntityCallback defaultKinveyEntityCallback  = saveEntitySet(storeAuto, new EntitySet());
-        assertNull(defaultKinveyEntityCallback.error);
-        //assertEquals(defaultKinveyEntityCallback.error.getClass(), KinveyJsonResponseException.class);
+        assertNotNull(defaultKinveyEntityCallback.error);
+        assertEquals(defaultKinveyEntityCallback.error.getClass(), KinveyJsonResponseException.class);
     }
 
     @Test
