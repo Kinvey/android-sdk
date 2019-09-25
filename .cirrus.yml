@@ -1,15 +1,15 @@
 container:
-  image: cirrusci/android-sdk:27
+  image: cirrusci/android-sdk:24
   cpu: 4
   memory: 10G
 
 env:
   CI: "true"
   BUILD_TOOLS: "29.0.2"
-  ANDROID_API: "27"
+  ANDROID_API: "24"
   EMU_FLAVOR: default
   ANDROID_ABI: armeabi-v7a
-  ADB_INSTALL_TIMEOUT: "10" # minutes
+  ADB_INSTALL_TIMEOUT: "20" # minutes
   KINVEY_APP_KEY: ENCRYPTED[8471c9d1a011d1632ad737a5686ce7e131384faabd193322f6c47e902e034ae8d329f4a1c05b7f0a6801d8332e1ee2d1]
   KINVEY_APP_SECRET: ENCRYPTED[122cdf1a7a68e55b0e39a81c10256708cdc0e317dd47af5f2724de52fea530d9f7ecc6907069b053a27ec80fa685ca7f]
 
@@ -67,8 +67,9 @@ task:
   # wait_for_emulator_script:
   #   - adb wait-for-device
   #   - adb shell input keyevent 82
-  wait_for_emulator_script: adb wait-for-device
+  #wait_for_emulator_script: adb wait-for-device
   # input_keyevent_script: adb shell input keyevent 82
+  wait_for_emulator_script: adb wait-for-device
   emulator_api_level_script: adb shell getprop ro.build.version.sdk
   emulator_boot_animation_script: while [ "`adb shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] ; do sleep 1; done
   emulator_bootanim_exit_script: while [ "`adb shell getprop service.bootanim.exit | tr -d '\r' `" != "1" ] ; do sleep 1; done
