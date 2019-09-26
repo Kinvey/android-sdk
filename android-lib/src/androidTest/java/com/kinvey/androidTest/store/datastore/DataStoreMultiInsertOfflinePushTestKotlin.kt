@@ -33,7 +33,7 @@ class DataStoreMultiInsertOfflinePushTestKotlin : BaseDataStoreTest() {
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
 
-        assertNotNull(saveResult.error)
+        assertNull(saveResult.error)
         assertNotNull(pushResult.error)
     }
 
@@ -55,9 +55,6 @@ class DataStoreMultiInsertOfflinePushTestKotlin : BaseDataStoreTest() {
         val pushResult = push(autoStore, LONG_TIMEOUT)
         cancelMockInvalidConnection()
 
-        assertNotNull(saveResult.error)
-        assertNotNull(pushResult.error)
-
         val findResult = find(syncStore, LONG_TIMEOUT)
         assertNotNull(findResult.result)
         assertNull(findResult.error)
@@ -67,7 +64,29 @@ class DataStoreMultiInsertOfflinePushTestKotlin : BaseDataStoreTest() {
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
     
-        assertNotNull(saveResult.error)
+        assertNull(saveResult.error)
         assertNotNull(pushResult.error)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testSaveItemWithConnectivityErrorAuto() {
+        print("should save item in local cache")
+
+        val person = Person(TEST_USERNAME)
+        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
+        clearBackend(autoStore)
+        client.syncManager.clear(Person.COLLECTION)
+
+        mockInvalidConnection()
+        val saveResult = save(autoStore, person)
+        cancelMockInvalidConnection()
+
+        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        assertNotNull(syncItems)
+        assertEquals(1, syncItems?.count())
+
+        assertNotNull(saveResult.result)
+        assertNull(saveResult.error)
     }
 }
