@@ -14,27 +14,24 @@
  *
  */
 
-package com.kinvey.java.store.file;
+package com.kinvey.java.store.file
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * Created by Prots on 2/18/16.
  */
-abstract public class FileUtils {
+object FileUtils {
+    private const val CHUNK_SIZE = 1024 * 1024 //1MB
 
-    private static final int CHUNK_SIZE = 1024*1024; //1MB
-
-
-    public static void copyStreams(InputStream is, OutputStream os) throws IOException {
-
-        byte[] chunk = new byte[CHUNK_SIZE];
-        int curChunk = 0;
-        while ((curChunk = is.read(chunk, 0, CHUNK_SIZE)) > 0){
-            os.write(chunk, 0, CHUNK_SIZE);
+    @Throws(IOException::class)
+    fun copyStreams(`is`: InputStream, os: OutputStream) {
+        val chunk = ByteArray(CHUNK_SIZE)
+        var curChunk = 0
+        while (`is`.read(chunk, 0, CHUNK_SIZE).also { curChunk = it } > 0) {
+            os.write(chunk, 0, CHUNK_SIZE)
         }
-
     }
 }
