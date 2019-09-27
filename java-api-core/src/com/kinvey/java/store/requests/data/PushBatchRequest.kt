@@ -77,7 +77,7 @@ class PushBatchRequest<T : GenericJson>(
                     }
                 } catch (e: KinveyJsonResponseException) {
                     if (e.statusCode != IGNORED_EXCEPTION_CODE
-                    && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
+                    && e.message.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
                 }
                 syncManager.deleteCachedItem(syncItem[Constants._ID] as String?)
             }

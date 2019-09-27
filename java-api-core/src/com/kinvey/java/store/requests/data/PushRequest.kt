@@ -32,7 +32,8 @@ import java.io.IOException
  * Created by Prots on 2/8/16.
  */
 class PushRequest<T : GenericJson>(collectionName: String?, cache: ICache<T>?,
-                                   private val networkManager: NetworkManager<T>?, private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
+                                   private val networkManager: NetworkManager<T>?,
+                                   private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
     private val syncManager: SyncManager?
 
     init {
@@ -48,44 +49,43 @@ class PushRequest<T : GenericJson>(collectionName: String?, cache: ICache<T>?,
         val syncItems = syncManager?.popSingleItemQueue(collection)
         var syncRequest: SyncRequest? = null
 
-        if (syncItems != null) {
-            for (syncItem in syncItems) {
-                val httpVerb = syncItem.requestMethod
-                val itemId = syncItem.entityID?.id ?: ""
-                when (httpVerb) {
-                    SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
-                    SyncRequest.HttpVerb.POST,
-                    SyncRequest.HttpVerb.PUT -> {
-                        val item = cache?.get(itemId)
-                        if (item == null) {
-                            // check that item wasn't deleted before
-                            syncManager?.deleteCachedItems(client?.query()?.equals("meta.id", itemId)?.notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
-                        } else {
-                            syncRequest = syncManager?.createSyncRequest(collection, networkManager?.saveBlocking(item))
-                        }
-                    }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager?.createSyncRequest(collection, networkManager?.deleteBlocking(itemId))
-                }
-                try {
-                    if (httpVerb == SyncRequest.HttpVerb.POST) {
-                        val tempID = syncRequest?.entityID?.id ?: ""
-                        val result = syncManager?.executeRequest(client, syncRequest)
-                        val temp = cache?.get(tempID)
-                        var resultId = ""
-                        result?.let {res -> resultId = res[Constants._ID] as String }
-                        temp?.set(Constants._ID, resultId)
-                        cache?.delete(tempID)
-                        temp?.let { t -> cache?.save(t) }
+
+        for (syncItem in syncItems) {
+            val httpVerb = syncItem.requestMethod
+            val itemId = syncItem.entityID.id ?: ""
+            when (httpVerb) {
+                SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
+                SyncRequest.HttpVerb.POST,
+                SyncRequest.HttpVerb.PUT -> {
+                    val item = cache?.get(itemId)
+                    if (item == null) {
+                        // check that item wasn't deleted before
+                        syncManager?.deleteCachedItems(client?.query()?.equals("meta.id", itemId)?.notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                     } else {
-                        syncManager?.executeRequest(client, syncRequest)
-                    }
-                } catch (e: KinveyJsonResponseException) {
-                    if (e.statusCode != IGNORED_EXCEPTION_CODE && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) {
-                        throw e
+                        syncRequest = syncManager?.createSyncRequest(collection, networkManager?.saveBlocking(item))
                     }
                 }
-                syncManager?.deleteCachedItem(syncItem[Constants._ID] as String?)
+                SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager?.createSyncRequest(collection, networkManager?.deleteBlocking(itemId))
             }
+            try {
+                if (httpVerb == SyncRequest.HttpVerb.POST) {
+                    val tempID = syncRequest?.entityID?.id ?: ""
+                    val result = syncManager?.executeRequest(client, syncRequest)
+                    val temp = cache?.get(tempID)
+                    var resultId = ""
+                    result?.let {res -> resultId = res[Constants._ID] as String }
+                    temp?.set(Constants._ID, resultId)
+                    cache?.delete(tempID)
+                    temp?.let { t -> cache?.save(t) }
+                } else {
+                    syncManager?.executeRequest(client, syncRequest)
+                }
+            } catch (e: KinveyJsonResponseException) {
+                if (e.statusCode != IGNORED_EXCEPTION_CODE && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) {
+                    throw e
+                }
+            }
+            syncManager?.deleteCachedItem(syncItem[Constants._ID] as String?)
         }
         return null
     }
