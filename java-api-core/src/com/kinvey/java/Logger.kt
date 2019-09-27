@@ -144,12 +144,12 @@ class Logger {
         /**
          * log levels
          */
-        private const val INFO = "INFO"
-        private const val DEBUG = "DEBUG"
-        private const val TRACE = "TRACE"
-        private const val NETWORK = "NETWORK"
-        private const val WARNING = "WARNING"
-        private const val ERROR = "ERROR"
+        const val INFO = "INFO"
+        const val DEBUG = "DEBUG"
+        const val TRACE = "TRACE"
+        const val NETWORK = "NETWORK"
+        const val WARNING = "WARNING"
+        const val ERROR = "ERROR"
         /***
          * Singleton pattern
          * @return
@@ -196,12 +196,13 @@ class Logger {
          * Log an info message
          * @param message
          */
-        fun INFO(message: String) {
+        @JvmStatic
+        fun INFO(message: String?) {
             if (instance?.isInitialized == false) {
                 return
             }
             instance?.activeMap?.let {
-                if (it[INFO] == true) {
+                if (it[INFO] == true && !message.isNullOrBlank()) {
                     instance?.platformLogger?.info(message)
                 }
             }
@@ -211,12 +212,13 @@ class Logger {
          * Log a debug message
          * @param message
          */
-        fun DEBUG(message: String) {
+        @JvmStatic
+        fun DEBUG(message: String?) {
             if (instance?.isInitialized == false) {
                 return
             }
             instance?.activeMap?.let {
-                if (it[DEBUG] == true) {
+                if (it[DEBUG] == true && !message.isNullOrBlank()) {
                     instance?.platformLogger?.debug(message)
                 }
             }
@@ -226,12 +228,13 @@ class Logger {
          * Log a trace message
          * @param message
          */
-        fun TRACE(message: String) {
+        @JvmStatic
+        fun TRACE(message: String?) {
             if (instance?.isInitialized == false) {
                 return
             }
             instance?.activeMap?.let {
-                if (it[TRACE] == true) {
+                if (it[TRACE] == true && !message.isNullOrBlank()) {
                     instance?.platformLogger?.trace(message)
                 }
             }
@@ -241,12 +244,13 @@ class Logger {
          * log a warning message
          * @param message
          */
-        fun WARNING(message: String) {
+        @JvmStatic
+        fun WARNING(message: String?) {
             if (instance?.isInitialized == false) {
                 return
             }
             instance?.activeMap?.let {
-                if (it[WARNING] == false) {
+                if (it[WARNING] == false && !message.isNullOrBlank()) {
                     instance?.platformLogger?.warning(message)
                 }
             }
@@ -256,12 +260,13 @@ class Logger {
          * Log an error message
          * @param message
          */
-        fun ERROR(message: String) {
+        @JvmStatic
+        fun ERROR(message: String?) {
             if (instance?.isInitialized == false) {
                 return
             }
             instance?.activeMap?.let {
-                if (it[ERROR] == false) {
+                if (it[ERROR] == false && !message.isNullOrBlank()) {
                     instance?.platformLogger?.error(message)
                 }
             }

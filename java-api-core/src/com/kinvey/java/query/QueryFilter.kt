@@ -173,7 +173,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun equals(field: String, value: Any)
+        fun equals(field: String, value: Any?)
 
         /**
          * Resets the current filter

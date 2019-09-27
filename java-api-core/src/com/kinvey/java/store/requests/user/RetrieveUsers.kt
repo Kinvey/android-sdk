@@ -54,8 +54,8 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
     constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
-        val queryLimit = query.getLimit()
-        val querySkip = query.getSkip()
+        val queryLimit = query.limit
+        val querySkip = query.limit
         this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
         this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
         this.sortFilter = query.sortString
@@ -70,8 +70,8 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
         : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
         this.userStoreRequestManager = userStoreRequestManager
         this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
-        val queryLimit = query.getLimit()
-        val querySkip = query.getSkip()
+        val queryLimit = query.limit
+        val querySkip = query.limit
         this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
         this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
         this.sortFilter = query.sortString

@@ -17,12 +17,10 @@
 
 /**
  * The main package where you can find the client and the main public interfaces.
- * <p>
+ *
+ *
  * This package contains the synchronous version of the api.
- * </p>
+ *
  *
  */
-package com.kinvey.java;
-
-
-
+package com.kinvey.java

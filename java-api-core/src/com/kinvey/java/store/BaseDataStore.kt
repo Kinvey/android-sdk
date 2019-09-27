@@ -508,7 +508,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             executor = Executors.newFixedThreadPool(batchSize)
             tasks = ArrayList()
             do {
-                query.setSkip(skipCount).limit = pageSize
+                query.setSkip(skipCount).setLimit(pageSize)
                 pullRequest = networkManager.getBlocking(query)
                 skipCount += pageSize
                 try {
@@ -542,7 +542,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             executor.shutdown()
             i += batchSize
         }
-        query.setSkip(0).limit = 0 // To set back default value of skip and limit
+        query.setSkip(0).setLimit(0) // To set back default value of skip and limit
         response.listOfExceptions = exceptions
         response.count = pulledItemCount
         if (isDeltaSetCachingEnabled && lastRequestTime != null) {

@@ -49,11 +49,13 @@ open class Query
      */
     var limit = 0
         private set
+
     /**
      * @return Current skip setting
      */
     var skip = 0
         private set
+
     val isQueryEmpty: Boolean
         get() = queryFilterMap.size == 0
 
@@ -67,7 +69,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun equals(key: String, value: Any): Query {
+    override fun equals(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.equals(key, value)
         return this
@@ -168,7 +170,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun `in`(key: String, value: Array<Any>): Query {
+    override fun `in`(key: String, value: Array<out Any>): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.IN), key, value)
         return this
