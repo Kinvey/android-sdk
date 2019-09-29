@@ -9,22 +9,22 @@ import com.google.api.client.util.Key
 
 class SyncItem : SyncRequest {
     @Key("requestMethod")
-    private var requestMethod: String? = null
+    private var requestMethodStr: String? = null
 
     constructor() {}
-    constructor(httpMethod: HttpVerb, entityID: SyncMetaData, collectionName: String?) {
-        requestMethod = httpMethod.name
+    constructor(httpMethod: HttpVerb?, entityID: SyncMetaData, collectionName: String?) {
+        requestMethod = httpMethod
         this.entityID = entityID
         this.collectionName = collectionName
     }
 
-    fun getRequestMethod(): HttpVerb? {
-        return HttpVerb.fromString(requestMethod)
-    }
-
-    fun setRequestMethod(requestMethod: HttpVerb) {
-        this.requestMethod = requestMethod.name
-    }
+    var requestMethod: HttpVerb? = null
+        get() {
+            return HttpVerb.fromString(requestMethodStr)
+        }
+        set (value: HttpVerb?) {
+            field = value
+        }
 
     val entity: GenericJson?
         get() {

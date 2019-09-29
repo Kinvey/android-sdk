@@ -49,42 +49,31 @@ import java.util.*
  * Created by Prots on 2/24/16.
  */
 class SyncManager(val cacheManager: ICacheManager?) {
+
     fun removeEntity(collectionName: String?, curEntityID: String?) {
         val query = Query(MongoQueryFilterBuilder())
-        query.equals(COLLECTION_NAME, collectionName)
-                .equals(META_ID, curEntityID)
-        cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE).delete(query)
+        query.equals(COLLECTION_NAME, collectionName).equals(META_ID, curEntityID)
+        cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)?.delete(query)
     }
 
     val collectionTables: List<String>
         get() {
             val collectionsCache = cacheManager?.getCache(SYNC_COLLECTIONS, SyncCollections::class.java, Long.MAX_VALUE)
             val collections = collectionsCache?.get()
-            val ret: MutableList<String> = ArrayList()
-            for (collection in collections) {
-                ret.add(collection.collectionName)
-            }
-            return ret
+            return collections?.mapNotNull { it.collectionName }?.toMutableList() as List<String>
         }
 
-    /**
-     * use [.popSingleItemQueue]
-     */
-    @Deprecated("")
-    fun popSingleQueue(collectionName: String?): List<SyncRequest?> {
+    @Deprecated("use [.popSingleItemQueue]")
+    fun popSingleQueue(collectionName: String?): List<SyncRequest>? {
         val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        val q = Query(MongoQueryFilterBuilder())
-                .equals(COLLECTION, collectionName)
-        val requests: List<SyncRequest?> = requestCache[q]
-
+        val q = Query(MongoQueryFilterBuilder()).equals(COLLECTION, collectionName)
+        var requests: List<SyncRequest>? = null
+        requestCache?.let {
+            requests = it[q]
+        }
         //delete request from the queue
-        if (requests.isNotEmpty()) {
-            val ids: MutableList<String> = ArrayList()
-            for (request in requests) {
-                if (request != null) {
-                    ids.add(request[ID].toString())
-                }
-            }
+        requests?.let { it ->
+            val ids = it.map { request -> request[ID].toString() }.toMutableList()
             requestCache?.delete(ids)
         }
         return requests
@@ -92,52 +81,39 @@ class SyncManager(val cacheManager: ICacheManager?) {
 
     fun popSingleItemQueue(collectionName: String?): List<SyncItem>? {
         val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val q = Query(MongoQueryFilterBuilder())
-                .equals(COLLECTION, collectionName)
-        return if (requestCache?.get()?.size != 0) requestCache[q] else null
+        val q = Query(MongoQueryFilterBuilder()).equals(COLLECTION, collectionName)
+        return requestCache?.run { if (this.get().isNotEmpty()) this[q] else null }
     }
 
-    /**
-     * use [.deleteCachedItem]
-     */
-    @Deprecated("")
+    @Deprecated("use [.deleteCachedItem]")
     fun deleteCachedRequest(id: String?): Int {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        return requestCache.delete(id!!)
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        return requestCache?.delete(id ?: "") ?: 0
     }
 
     fun deleteCachedItem(id: String?): Int {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        return requestCache.delete(id!!)
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        return requestCache?.delete(id ?: "") ?: 0
     }
 
     fun deleteCachedItems(q: Query?): Int {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        return requestCache.delete(q!!)
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        return requestCache?.delete(q!!) ?: 0
     }
 
-    /**
-     * use [.enqueueRequest]
-     */
-    @Deprecated("")
+    @Deprecated("use [.enqueueRequest]")
     @Throws(IOException::class)
     fun enqueueRequest(collectionName: String, clientRequest: AbstractKinveyJsonClientRequest<*>) {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        requestCache.save(createSyncRequest(collectionName, clientRequest))
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        requestCache?.save(createSyncRequest(collectionName, clientRequest))
     }
 
-    /**
-     * use [.enqueueRequests]
-     */
-    @Deprecated("")
+    @Deprecated("use [.enqueueRequests]")
     @Throws(IOException::class)
-    fun <T : GenericJson?> enqueueRequests(collectionName: String, networkManager: NetworkManager<T>, ret: List<T>) {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        val syncRequests: MutableList<SyncRequest> = ArrayList()
-        for (t in ret) {
-            syncRequests.add(createSyncRequest(collectionName, networkManager.saveBlocking(t)))
-        }
-        requestCache.save(syncRequests)
+    fun <T : GenericJson> enqueueRequests(collectionName: String, networkManager: NetworkManager<T>, ret: List<T>) {
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        val syncRequests = ret.map { item -> createSyncRequest(collectionName, networkManager.saveBlocking(item)) }
+        requestCache?.save(syncRequests)
     }
 
     /**
@@ -145,117 +121,96 @@ class SyncManager(val cacheManager: ICacheManager?) {
      * @param request Sync request to be saved
      */
     fun enqueueRequest(request: SyncRequest) {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        requestCache.save(request)
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        requestCache?.save(request)
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson?> enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?, httpMethod: HttpVerb?, id: String?) {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+    fun <T : GenericJson> enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?, httpMethod: HttpVerb?, id: String?) {
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         val syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, httpMethod, id)
-        if (syncItem != null) {
-            requestCache.save(syncItem)
-        }
+        syncItem?.let { requestCache?.save(it) }
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson?> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ret: List<T>?) {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val syncRequests: MutableList<SyncItem> = ArrayList()
-        var syncItemId: String?
-        var syncItem: SyncItem?
-        for (t in ret) {
-            syncItemId = t!![ID] as String?
-            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, syncItemId)
-            if (syncItem != null) {
-                syncRequests.add(syncItem)
-            }
+    fun <T : GenericJson> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ret: List<T>?) {
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val syncRequests = ret?.mapNotNull { item ->
+            val syncItemId = item[ID] as String?
+            prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, syncItemId)
         }
-        requestCache.save(syncRequests)
+        syncRequests?.let { requests -> requestCache?.save(requests) }
     }
 
     @Throws(IOException::class)
     fun <T : GenericJson> enqueueSaveRequests(collectionName: String, networkManager: NetworkManager<T>, ret: List<T>?) {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val syncRequests: MutableList<SyncItem> = ArrayList()
-        var syncItemId: String?
-        var syncItem: SyncItem?
-        for (t in ret) {
-            syncItemId = t[ID] as String?
-            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, if (networkManager.isTempId(t)) HttpVerb.POST else HttpVerb.PUT, syncItemId)
-            if (syncItem != null) {
-                syncRequests.add(syncItem)
-            }
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val syncRequests = ret?.mapNotNull { item ->
+            val syncItemId = item[ID] as String?
+            prepareSyncItemRequest(requestCache, collectionName, networkManager, if (networkManager.isTempId(item)) HttpVerb.POST else HttpVerb.PUT, syncItemId)
         }
-        requestCache.save(syncRequests)
+        syncRequests?.let { requests -> requestCache?.save(requests) }
     }
 
     @Throws(IOException::class)
     fun <T : GenericJson?> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ids: Iterable<String>?) {
-        val requestCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val syncRequests: MutableList<SyncItem> = ArrayList()
-        var syncItem: SyncItem?
-        for (syncItemId in ids) {
-            syncItem = prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, syncItemId)
-            if (syncItem != null) {
-                syncRequests.add(syncItem)
-            }
-        }
-        requestCache.save(syncRequests)
+        val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val syncRequests = ids?.map { id -> prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, id) }
+        syncRequests?.let { requests -> requestCache?.save(requests) }
     }
 
     @Throws(IOException::class)
     private fun <T : GenericJson?> prepareSyncItemRequest(requestCache: ICache<SyncItem>?,
                                                           collectionName: String?,
                                                           networkManager: NetworkManager<T>?,
-                                                          httpMethod: HttpVerb,
+                                                          httpMethod: HttpVerb?,
                                                           syncItemId: String?): SyncItem? {
         val entityQuery = sharedInstance?.query()
         entityQuery?.equals(META_DOT_ID, syncItemId)
-        entityQuery?.let { query ->
-            val itemsList = requestCache[query]
-            if (itemsList.isEmpty()) {
-                return createSyncItem(collectionName, httpMethod, networkManager, syncItemId)
-            } else if (httpMethod == HttpVerb.DELETE) {
-                requestCache?.delete(query)
-                return createSyncItem(collectionName, httpMethod, networkManager, syncItemId)
+        val cache = requestCache ?: return null
+        return entityQuery?.run {
+            val itemsList = cache[this]
+            when {
+                itemsList.isEmpty() -> createSyncItem(collectionName, httpMethod, networkManager, syncItemId)
+                httpMethod == HttpVerb.DELETE -> {
+                    cache.delete(this)
+                    createSyncItem(collectionName, httpMethod, networkManager, syncItemId)
+                }
+                else -> null
             }
         }
-        return null
     }
 
     @Throws(IOException::class)
-    private fun createSyncItem(collectionName: String?, httpMethod: HttpVerb, networkManager: NetworkManager<*>?, id: String?): SyncItem {
+    private fun createSyncItem(collectionName: String?, httpMethod: HttpVerb?, networkManager: NetworkManager<*>?, id: String?): SyncItem {
         val entityID = SyncMetaData()
         if (id != null) {
             entityID.id = id
         }
-        entityID.customerVersion = networkManager.clientAppVersion
-        entityID.customheader = if (networkManager.customRequestProperties != null) networkManager.customRequestProperties["X-Kinvey-Custom-Request-Properties"] as String? else null
+        entityID.customerVersion = networkManager?.clientAppVersion
+        entityID.customheader = if (networkManager?.customRequestProperties != null)
+                                    networkManager.customRequestProperties["X-Kinvey-Custom-Request-Properties"] as String? else null
         return SyncItem(httpMethod, entityID, collectionName)
     }
 
     @Throws(IOException::class)
-    fun createSyncRequest(collectionName: String?, clientRequest: AbstractKinveyJsonClientRequest<*>): SyncRequest {
-        val httpRequest = clientRequest.buildHttpRequest()
+    fun createSyncRequest(collectionName: String?, clientRequest: AbstractKinveyJsonClientRequest<*>?): SyncRequest {
+        val httpRequest = clientRequest?.buildHttpRequest()
         val entityID = SyncMetaData()
-        if (httpRequest.content != null) {
-            val os = ByteArrayOutputStream()
-            httpRequest.content.writeTo(os)
-            entityID.data = os.toString(UTF_8)
-        }
-        if (clientRequest.jsonContent != null) {
+        val os = ByteArrayOutputStream()
+        httpRequest?.content?.writeTo(os)
+        entityID.data = os.toString(UTF_8)
+        if (clientRequest?.jsonContent != null) {
             entityID.id = clientRequest.jsonContent[ID].toString()
         }
-        if (clientRequest.containsKey(ENTITY_ID)) {
+        if (clientRequest?.containsKey(ENTITY_ID) == true) {
             entityID.id = clientRequest[ENTITY_ID].toString()
         }
-        entityID.customerVersion = clientRequest.customerAppVersion
-        entityID.customheader = clientRequest.customRequestProperties
+        entityID.customerVersion = clientRequest?.customerAppVersion
+        entityID.customheader = clientRequest?.customRequestProperties
         return SyncRequest(
-                HttpVerb.valueOf(clientRequest.requestMethod.toUpperCase()),
-                entityID, httpRequest.url,
-                collectionName
+                HttpVerb.valueOf(clientRequest?.requestMethod?.toUpperCase() ?: ""),
+                entityID, httpRequest?.url, collectionName
         )
     }
 
@@ -265,10 +220,10 @@ class SyncManager(val cacheManager: ICacheManager?) {
      * @return the count of sync objects for given collection
      */
     fun getCount(collectionName: String?): Long {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        val requestItemCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        val requestItemCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         val q = Query(MongoQueryFilterBuilder()).equals(COLLECTION, collectionName)
-        return requestCache.count(q) + requestItemCache.count(q)
+        return (requestCache?.count(q) ?: 0) + (requestItemCache?.count(q) ?: 0)
     }
 
     /**
@@ -283,38 +238,41 @@ class SyncManager(val cacheManager: ICacheManager?) {
      */
     @Throws(IOException::class)
     fun executeRequest(client: AbstractClient<*>?, request: SyncRequest?): GenericJson? {
-        client.clientAppVersion = request.entityID?.customerVersion
-        client.setCustomRequestProperties(Gson().fromJson(request.entityID?.customheader, GenericJson::class.java))
+        client?.clientAppVersion = request?.entityID?.customerVersion
+        client?.setCustomRequestProperties(Gson().fromJson(request?.entityID?.customheader, GenericJson::class.java))
         var entity: GenericJson? = null
         var result: GenericJson? = null
         try {
-            if (request.entityID?.data != null) {
-                entity = client.jsonFactory.createJsonParser(request.entityID?.data).parse<GenericJson>(GenericJson::class.java)
+            if (request?.entityID?.data != null) {
+                entity = client?.jsonFactory?.createJsonParser(request.entityID?.data)?.parse<GenericJson>(GenericJson::class.java)
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        val networkDataStore: BaseDataStore<GenericJson> = collection(request.collectionName ?: "", GenericJson::class.java, StoreType.NETWORK, client)
-        if (request.httpVerb == HttpVerb.PUT || request.httpVerb == HttpVerb.POST) {
+        var networkDataStore: BaseDataStore<GenericJson>? = null
+        if (client != null) {
+            networkDataStore = collection(request?.collectionName ?: "", GenericJson::class.java, StoreType.NETWORK, client)
+        }
+        if (request?.httpVerb == HttpVerb.PUT || request?.httpVerb == HttpVerb.POST) {
             entity?. let  {
                 try {
                     if (request.httpVerb == HttpVerb.POST) {
                         // Remvove the _id, since this is a create operation
                         entity.set("_id", null)
                     }
-                    result = networkDataStore.save(it)
+                    result = networkDataStore?.save(it)
                 } catch (e: Exception) {
                     enqueueRequest(request)
                     throw e
                 }
             }
-        } else if (request.httpVerb == HttpVerb.DELETE) {
+        } else if (request?.httpVerb == HttpVerb.DELETE) {
             val curID: String? = request.entityID?.id
             if (curID != null && curID.startsWith("{") && curID.endsWith("}")) {
                 //it's a query
                 val q = Query().setQueryString(curID)
                 try {
-                    networkDataStore.delete(q)
+                    networkDataStore?.delete(q)
                 } catch (e: Exception) {
                     enqueueRequest(request)
                     throw e
@@ -334,7 +292,7 @@ class SyncManager(val cacheManager: ICacheManager?) {
                 }
                 val q = Query().setQueryString(decodedQuery)
                 try {
-                    networkDataStore.delete(q)
+                    networkDataStore?.delete(q)
                 } catch (e: Exception) {
                     enqueueRequest(request)
                     throw e
@@ -342,7 +300,7 @@ class SyncManager(val cacheManager: ICacheManager?) {
             } else {
                 //it's a single ID
                 try {
-                    networkDataStore.delete(request.entityID?.id?: "")
+                    networkDataStore?.delete(request.entityID?.id?: "")
                 } catch (e: Exception) {
                     //TODO: need to check the errors
                     //enqueueRequest(request);
@@ -438,19 +396,18 @@ class SyncManager(val cacheManager: ICacheManager?) {
     }
 
     fun clear(collectionName: String?): Int {
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        val requestItemCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val q = Query(MongoQueryFilterBuilder())
-                .equals(COLLECTION, collectionName)
-        return requestCache.delete(q) + requestItemCache.delete(q)
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        val requestItemCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val q = Query(MongoQueryFilterBuilder()).equals(COLLECTION, collectionName)
+        return (requestCache?.delete(q) ?: 0) + (requestItemCache?.delete(q) ?: 0)
     }
 
     fun clear(collectionName: String?, query: Query): Int {
         var query = query
-        val requestCache: ICache<SyncRequest> = cacheManager.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
-        val requestItemCache: ICache<SyncItem> = cacheManager.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
+        val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
+        val requestItemCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         query = query.equals(COLLECTION, collectionName)
-        return requestCache.delete(query) + requestItemCache.delete(query)
+        return (requestCache?.delete(query) ?: 0) + (requestItemCache?.delete(query) ?: 0)
     }
 
     companion object {

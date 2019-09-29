@@ -46,13 +46,13 @@ class PushBatchRequest<T : GenericJson>(
     @Throws(IOException::class)
     override fun execute(): Void? {
         val requests = syncManager.popSingleQueue(collection)
-        requests.onEach { syncRequest -> syncManager.executeRequest(client, syncRequest) }
+        requests?.onEach { syncRequest -> syncManager.executeRequest(client, syncRequest) }
         val syncItems = syncManager.popSingleItemQueue(collection)
         var syncRequest: SyncRequest? = null
         val batchSyncItems = ArrayList<SyncItem>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val httpVerb = syncItem.getRequestMethod()
+                val httpVerb = syncItem.requestMethod
                 val itemId = syncItem.entityID?.id ?: ""
                 when (httpVerb) {
                     SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
@@ -76,8 +76,7 @@ class PushBatchRequest<T : GenericJson>(
                         syncManager.executeRequest(client, syncRequest)
                     }
                 } catch (e: KinveyJsonResponseException) {
-                    if (e.statusCode != IGNORED_EXCEPTION_CODE
-                    && e.message.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
+                    if (e.statusCode != IGNORED_EXCEPTION_CODE && !e.message.contains(IGNORED_EXCEPTION_MESSAGE)) throw e
                 }
                 syncManager.deleteCachedItem(syncItem[Constants._ID] as String?)
             }

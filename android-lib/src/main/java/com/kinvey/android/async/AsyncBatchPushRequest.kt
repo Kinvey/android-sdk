@@ -103,7 +103,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
         val resultSingleItems = mutableListOf<GenericJson>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val itemId = syncItem.entityID.id
+                val itemId = syncItem.entityID?.id ?: ""
                 val requestMethod = syncItem.requestMethod
                 when (requestMethod) {
                     SyncRequest.HttpVerb.SAVE, // the SAVE case need for backward compatibility
@@ -161,10 +161,10 @@ class AsyncBatchPushRequest<T : GenericJson>(
         var resultItem: GenericJson? = null
         try {
             if (syncRequest?.httpVerb == SyncRequest.HttpVerb.POST) {
-                val tempID = syncRequest.entityID.id
+                val tempID = syncRequest.entityID?.id ?: ""
                 resultItem = manager.executeRequest(client, syncRequest)
                 val temp = cache?.get(tempID)
-                val resultValue = resultItem[_ID]
+                val resultValue = if (resultItem != null) resultItem[_ID] else ""
                 temp?.let { item ->
                     if (resultItem != null) { item.set(_ID, resultValue) }
                     cache?.delete(tempID)
@@ -174,8 +174,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
                 resultItem = manager.executeRequest(client, syncRequest)
             }
         } catch (e: KinveyJsonResponseException) {
-            if (e.statusCode != IGNORED_EXCEPTION_CODE
-            && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
+            if (e.statusCode != IGNORED_EXCEPTION_CODE && !e.message.contains(IGNORED_EXCEPTION_MESSAGE)) throw e
         }
         return resultItem
     }
@@ -183,7 +182,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private fun removeBatchTempItems(batchSyncItems: List<SyncItem>, result: KinveySyncSaveBatchResponse<T>?) {
         batchSyncItems.onEach { item ->
             val tempID = item[_ID] as String?
-            val entityID = item.entityID.id
+            val entityID = item.entityID?.id
             if (tempID != null) { manager.deleteCachedItem(tempID) }
             if (entityID != null) { cache?.delete(entityID) }
             result?.entityList?.filterNotNull()?.onEach { resultItem -> cache?.save(resultItem) }

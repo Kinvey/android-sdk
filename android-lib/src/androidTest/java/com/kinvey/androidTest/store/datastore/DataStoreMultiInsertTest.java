@@ -1531,7 +1531,7 @@ public class DataStoreMultiInsertTest {
         assertEquals(1, pendingList.size());
         SyncItem item = pendingList.get(0);
         assertNotNull(item);
-        assertEquals(testId, item.getEntityID().id);
+        assertEquals(testId, item.getEntityID().getId());
         assertEquals(SyncRequest.HttpVerb.PUT, item.getRequestMethod());
     }
 

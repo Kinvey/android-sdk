@@ -57,7 +57,7 @@ open class SyncRequest : GenericJson, Serializable {
     //The id of the entity, or the query string
     @Key("meta")
     var entityID: SyncMetaData? = null
-        protected set
+
     @Key("collection")
     var collectionName: String? = ""
     @Key("url")
@@ -65,7 +65,7 @@ open class SyncRequest : GenericJson, Serializable {
         private set
 
     constructor() {}
-    constructor(httpVerb: HttpVerb?, entityID: SyncMetaData?, url: GenericUrl, collectionName: String?) {
+    constructor(httpVerb: HttpVerb?, entityID: SyncMetaData?, url: GenericUrl?, collectionName: String?) {
         verb = httpVerb?.name
         this.entityID = entityID
         this.collectionName = collectionName

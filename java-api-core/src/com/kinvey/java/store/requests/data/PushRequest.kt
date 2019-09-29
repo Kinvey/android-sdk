@@ -49,10 +49,9 @@ class PushRequest<T : GenericJson>(collectionName: String?, cache: ICache<T>?,
         val syncItems = syncManager?.popSingleItemQueue(collection)
         var syncRequest: SyncRequest? = null
 
-
-        for (syncItem in syncItems) {
-            val httpVerb = syncItem.requestMethod
-            val itemId = syncItem.entityID.id ?: ""
+        syncItems?.forEach { syncItem ->
+            val httpVerb = syncItem.requestMethod ?: ""
+            val itemId = syncItem.entityID?.id ?: ""
             when (httpVerb) {
                 SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
                 SyncRequest.HttpVerb.POST,

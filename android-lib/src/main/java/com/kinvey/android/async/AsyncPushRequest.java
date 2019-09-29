@@ -118,8 +118,7 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
 
                 for (int j = 0; j < batchSize && j+i < totalNumberOfPendingEntities; j++) {
                     SyncItem syncItem = syncItems.get(j+i);
-                    id = syncItem.getEntityID().id;
-
+                    id = syncItem.getEntityID().getId();
                     switch (syncItem.getRequestMethod()) {
                         case SAVE: // the SAVE case need for backward compatibility
                         case POST:
@@ -128,7 +127,7 @@ public class AsyncPushRequest<T extends GenericJson> extends AsyncClientRequest<
                             if (t == null) {
                                 // check that item wasn't deleted before
                                 // if item wasn't found, it means that the item was deleted from the Cache by Delete request and the item will be deleted in case:DELETE
-                                manager.deleteCachedItems(client.query().equals("meta.id", syncItem.getEntityID().id).notEqual(Constants.REQUEST_METHOD, Constants.DELETE));
+                                manager.deleteCachedItems(client.query().equals("meta.id", syncItem.getEntityID().getId()).notEqual(Constants.REQUEST_METHOD, Constants.DELETE));
                                 continue;
                             }
                             syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(t));
