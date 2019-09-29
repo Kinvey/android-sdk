@@ -43,12 +43,11 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
-import java.util.*
 
 /**
  * Created by Prots on 2/24/16.
  */
-class SyncManager(val cacheManager: ICacheManager?) {
+open class SyncManager(val cacheManager: ICacheManager?) {
 
     fun removeEntity(collectionName: String?, curEntityID: String?) {
         val query = Query(MongoQueryFilterBuilder())
@@ -64,7 +63,7 @@ class SyncManager(val cacheManager: ICacheManager?) {
         }
 
     @Deprecated("use [.popSingleItemQueue]")
-    fun popSingleQueue(collectionName: String?): List<SyncRequest>? {
+    open fun popSingleQueue(collectionName: String?): List<SyncRequest>? {
         val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
         val q = Query(MongoQueryFilterBuilder()).equals(COLLECTION, collectionName)
         var requests: List<SyncRequest>? = null
@@ -237,14 +236,14 @@ class SyncManager(val cacheManager: ICacheManager?) {
      * @param request Sync request to be executed
      */
     @Throws(IOException::class)
-    fun executeRequest(client: AbstractClient<*>?, request: SyncRequest?): GenericJson? {
+    open fun executeRequest(client: AbstractClient<*>?, request: SyncRequest?): GenericJson? {
         client?.clientAppVersion = request?.entityID?.customerVersion
         client?.setCustomRequestProperties(Gson().fromJson(request?.entityID?.customheader, GenericJson::class.java))
         var entity: GenericJson? = null
         var result: GenericJson? = null
         try {
-            if (request?.entityID?.data != null) {
-                entity = client?.jsonFactory?.createJsonParser(request.entityID?.data)?.parse<GenericJson>(GenericJson::class.java)
+            if (!request?.entityID?.data.isNullOrEmpty()) {
+                entity = client?.jsonFactory?.createJsonParser(request?.entityID?.data)?.parse<GenericJson>(GenericJson::class.java)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -254,7 +253,7 @@ class SyncManager(val cacheManager: ICacheManager?) {
             networkDataStore = collection(request?.collectionName ?: "", GenericJson::class.java, StoreType.NETWORK, client)
         }
         if (request?.httpVerb == HttpVerb.PUT || request?.httpVerb == HttpVerb.POST) {
-            entity?. let  {
+            entity?.let {
                 try {
                     if (request.httpVerb == HttpVerb.POST) {
                         // Remvove the _id, since this is a create operation

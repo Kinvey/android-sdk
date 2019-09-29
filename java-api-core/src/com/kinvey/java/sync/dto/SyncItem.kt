@@ -7,7 +7,7 @@ import com.google.api.client.util.Key
  * Created by yuliya on 10/04/17.
  */
 
-class SyncItem : SyncRequest {
+open class SyncItem : SyncRequest {
     @Key("requestMethod")
     private var requestMethodStr: String? = null
 
@@ -22,8 +22,9 @@ class SyncItem : SyncRequest {
         get() {
             return HttpVerb.fromString(requestMethodStr)
         }
-        set (value: HttpVerb?) {
+        set (value) {
             field = value
+            requestMethodStr = value?.name
         }
 
     val entity: GenericJson?

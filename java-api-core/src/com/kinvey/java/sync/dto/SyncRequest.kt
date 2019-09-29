@@ -28,8 +28,13 @@ import java.io.Serializable
  * Created by Prots on 2/24/16.
  */
 open class SyncRequest : GenericJson, Serializable {
-    enum class HttpVerb(private val query: String) {
-        GET("GET"), PUT("PUT"), POST("POST"), DELETE("DELETE"), SAVE("SAVE"), // for backward compatibility with previous versions of keeping Sync requests
+
+    enum class HttpVerb(val query: String) {
+        GET("GET"),
+        PUT("PUT"),
+        POST("POST"),
+        DELETE("DELETE"),
+        SAVE("SAVE"), // for backward compatibility with previous versions of keeping Sync requests
         QUERY("QUERY");
 
         companion object {
@@ -44,7 +49,6 @@ open class SyncRequest : GenericJson, Serializable {
                 return null
             }
         }
-
     }
 
     //The Http verb of the client request ("GET", "PUT", "DELETE", "POST", "QUERY");
@@ -60,6 +64,7 @@ open class SyncRequest : GenericJson, Serializable {
 
     @Key("collection")
     var collectionName: String? = ""
+
     @Key("url")
     var url: String? = null
         private set
@@ -95,7 +100,7 @@ open class SyncRequest : GenericJson, Serializable {
      * This class represents the uniqueness of an entity, containing the _id, customerAppVersion, and any CustomHeaders.
      *
      */
-    class SyncMetaData : GenericJson {
+    open class SyncMetaData : GenericJson {
         @Key
         var id: String? = null
         @Key
