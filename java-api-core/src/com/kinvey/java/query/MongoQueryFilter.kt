@@ -55,14 +55,14 @@ open class MongoQueryFilter : QueryFilter, Serializable {
     }
 
     override fun put(operation: String, key: String, value: Array<Any?>) {
-        val nestedMap: LinkedHashMap<String, Any> = LinkedHashMap()
+        val nestedMap: LinkedHashMap<String, Any?> = LinkedHashMap()
         nestedMap[operation] = value
         if (filter.containsKey(key)) {
             val currentKey = filter[key]
             if (currentKey?.javaClass == String::class.java) {
                 filter[key] = nestedMap
             } else {
-                val currentMap = currentKey as LinkedHashMap<String, Any>
+                val currentMap = currentKey as LinkedHashMap<String, Any?>
                 currentMap[operation] = value
             }
         } else {
@@ -94,7 +94,7 @@ open class MongoQueryFilter : QueryFilter, Serializable {
             query.put(operator, key, value)
         }
 
-        override fun addFilter(operator: String, key: String, value: Array<Any>) {
+        override fun addFilter(operator: String, key: String, value: Array<Any?>?) {
             query.put(operator, key, value)
         }
 
@@ -154,7 +154,7 @@ open class MongoQueryFilter : QueryFilter, Serializable {
                     }
                 }
                 if (op == null && obj !is Map<*, *> && !processParent) {
-                    val newNotEqualMap: LinkedHashMap<String, Any> = LinkedHashMap()
+                    val newNotEqualMap: LinkedHashMap<String, Any?> = LinkedHashMap()
                     newNotEqualMap[getOperator(Operators.NOTEQUAL)] = obj
                     map[key] = newNotEqualMap
                 } else if (op != null) {

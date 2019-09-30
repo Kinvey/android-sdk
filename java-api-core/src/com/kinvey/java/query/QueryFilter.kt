@@ -132,7 +132,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun addFilter(operator: String, field: String, value: Array<Any>)
+        fun addFilter(operator: String, field: String, value: Array<Any?>?)
 
         /**
          * Join the specified Query's filter to the current builder's queryfilter
