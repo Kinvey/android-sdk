@@ -29,7 +29,7 @@ interface QueryFilter {
      *
      * @return Current filter
      */
-    val filter: LinkedHashMap<String, Any>
+    val filter: LinkedHashMap<String, Any?>
 
     /**
      * Put a value in the QueryFilter
@@ -37,16 +37,7 @@ interface QueryFilter {
      * @param key field
      * @param value value
      */
-    fun put(key: String, value: Any)
-
-    /**
-     * Put a value in the QueryFilter
-     *
-     * @param operation operator
-     * @param key field
-     * @param value value
-     */
-    fun put(operation: String, key: String, value: Any)
+    fun put(key: String, value: Any?)
 
     /**
      * Put a value in the QueryFilter
@@ -55,7 +46,16 @@ interface QueryFilter {
      * @param key field
      * @param value value
      */
-    fun put(operation: String, key: String, value: Array<Any>)
+    fun put(operation: String, key: String, value: Any?)
+
+    /**
+     * Put a value in the QueryFilter
+     *
+     * @param operation operator
+     * @param key field
+     * @param value value
+     */
+    fun put(operation: String, key: String, value: Array<Any?>)
 
     /**
      * Join two filters together with a logical and/or
@@ -63,7 +63,7 @@ interface QueryFilter {
      * @param operation and/or operator
      * @param newFilter new filter to join to the current filter
      */
-    fun joinFilters(operation: String, newFilter: LinkedHashMap<String, Any>)
+    fun joinFilters(operation: String, newFilter: LinkedHashMap<String, Any?>)
 
     /**
      * Get a value within the current filter based on a specified key
@@ -71,7 +71,7 @@ interface QueryFilter {
      * @param key
      * @return value
      */
-    operator fun get(key: String): Any
+    operator fun get(key: String): Any?
 
     /**
      * Resets the current filter
@@ -88,7 +88,7 @@ interface QueryFilter {
          *
          * @return
          */
-        val filterMap: AbstractMap<String, Any>
+        val filterMap: AbstractMap<String, Any?>
 
         /**
          * Possible filter operators
@@ -123,7 +123,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun addFilter(operator: String, field: String, value: Any)
+        fun addFilter(operator: String, field: String, value: Any?)
 
         /**
          * Add a filter to the builder's QueryFilter
@@ -140,7 +140,7 @@ interface QueryFilter {
          * @param operator
          * @param newQuery
          */
-        fun joinFilter(operator: String, newQuery: AbstractQuery)
+        fun joinFilter(operator: String, newQuery: AbstractQuery?)
 
         /**
          * Add a location filter

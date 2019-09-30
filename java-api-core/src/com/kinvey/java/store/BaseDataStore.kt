@@ -144,14 +144,14 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         if (storeType == StoreType.CACHE) {
             cachedCallback?.onSuccess(ReadIdsRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute())
             return if (isDeltaSetCachingEnabled) {
-                val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java))
+                val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java) as Array<Any?>)
                 findBlockingDeltaSync(query)
             } else {
                 ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
             }
         } else {
             return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled) {
-                val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java))
+                val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java) as Array<Any?>)
                 findBlockingDeltaSync(query)
             } else {
                 ReadIdsRequest(cache, networkManager, this.storeType.readPolicy, ids).execute()
@@ -484,7 +484,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
     private fun pullBlockingPaged(query: Query, pageSize: Int): KinveyPullResponse {
         val response = KinveyPullResponse()
         val stringQuery = query.queryFilterMap.toString()
-        if (query.sortString == null || query.sortString.isEmpty()) {
+        if (query.sortString.isNullOrEmpty()) {
             query.addSort(Constants._ID, AbstractQuery.SortOrder.ASC)
         }
         val exceptions = ArrayList<Exception>()

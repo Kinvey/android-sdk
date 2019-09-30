@@ -45,7 +45,7 @@ class DeleteIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
     override fun deleteNetwork(): NetworkManager<T>.Delete? {
         val q = Query(MongoQueryFilter.MongoQueryFilterBuilder())
         val idsArray = Iterables.toArray(ids, String::class.java)
-        q.`in`("_id", idsArray)
+        q.`in`("_id", idsArray as Array<Any?>)
         return networkManager?.deleteBlocking(q)
     }
 

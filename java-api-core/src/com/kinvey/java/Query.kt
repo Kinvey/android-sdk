@@ -82,7 +82,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun greaterThan(key: String, value: Any): Query {
+    override fun greaterThan(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.GREATERTHAN), key, value)
         return this
@@ -95,7 +95,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun lessThan(key: String, value: Any): Query {
+    override fun lessThan(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.LESSTHAN), key, value)
         return this
@@ -108,7 +108,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun greaterThanEqualTo(key: String, value: Any): Query {
+    override fun greaterThanEqualTo(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.GREATERTHANEQUAL), key, value)
         return this
@@ -121,7 +121,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun lessThanEqualTo(key: String, value: Any): Query {
+    override fun lessThanEqualTo(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.LESSTHANEQUAL), key, value)
         return this
@@ -134,7 +134,7 @@ open class Query
      * @param order Order to sort values (Ascending/Descending)
      * @return  Query object
      */
-    override fun addSort(field: String, order: SortOrder): Query {
+    override fun addSort(field: String, order: SortOrder?): Query {
         super.addSort(field, order)
         return this
     }
@@ -145,7 +145,7 @@ open class Query
      * @param queryString
      * @return this
      */
-    override fun setQueryString(queryString: String): Query {
+    override fun setQueryString(queryString: String?): Query {
         super.setQueryString(queryString)
         return this
     }
@@ -157,7 +157,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun notEqual(key: String, value: Any): Query {
+    override fun notEqual(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.NOTEQUAL), key, value)
         return this
@@ -170,7 +170,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun `in`(key: String, value: Array<out Any>): Query {
+    override fun `in`(key: String, value: Array<Any?>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.IN), key, value)
         return this
@@ -183,7 +183,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun notIn(key: String, value: Array<Any>): Query {
+    override fun notIn(key: String, value: Array<Any?>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.NOTIN), key, value)
         return this
@@ -201,7 +201,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun regEx(key: String, value: Any): Query {
+    override fun regEx(key: String, value: Any?): Query {
         if (value.toString().contains("/i")) {
             throw UnsupportedOperationException("Cannot perform regex which contains an `/i`")
         }
@@ -220,7 +220,7 @@ open class Query
      * @param value  Value condition for filter
      * @return Query object
      */
-    override fun startsWith(key: String, value: Any): Query {
+    override fun startsWith(key: String, value: Any?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.REGEX), key, "^$value")
         return this
@@ -248,7 +248,7 @@ open class Query
      * @param value An array of values Values
      * @return Query object
      */
-    override fun all(key: String, value: Array<Any>): Query {
+    override fun all(key: String, value: Array<Any?>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.ALL), key, value)
         return this
@@ -276,7 +276,7 @@ open class Query
      * @param query The query which contains the QueryFilter to be joined
      * @return Query object
      */
-    override fun and(query: AbstractQuery): Query {
+    override fun and(query: AbstractQuery?): Query {
         Preconditions.checkNotNull(query)
         builder.joinFilter(builder.getOperator(Operators.AND), query)
         return this
@@ -288,7 +288,7 @@ open class Query
      * @param query The query which contains the QueryFilter to be joined
      * @return Query object
      */
-    override fun or(query: AbstractQuery): Query {
+    override fun or(query: AbstractQuery?): Query {
         Preconditions.checkNotNull(query)
         builder.joinFilter(builder.getOperator(Operators.OR), query)
         return this
@@ -318,22 +318,23 @@ open class Query
     /**
      * @return current sort string
      */
-    override fun getSortString(): String {
-        val sortStringBuilder = StringBuilder()
-        if (sort.size > 0) {
-            sortStringBuilder.append("{")
-            for (field in sort.keys) {
-                sortStringBuilder.append("\"")
-                sortStringBuilder.append(field)
-                sortStringBuilder.append("\" : ")
-                sortStringBuilder.append(if (sort[field] == SortOrder.ASC) 1 else -1)
-                sortStringBuilder.append(",")
+    override val sortString: String?
+        get() {
+            val sortStringBuilder = StringBuilder()
+            if (sort.size > 0) {
+                sortStringBuilder.append("{")
+                for (field in sort.keys) {
+                    sortStringBuilder.append("\"")
+                    sortStringBuilder.append(field)
+                    sortStringBuilder.append("\" : ")
+                    sortStringBuilder.append(if (sort[field] == SortOrder.ASC) 1 else -1)
+                    sortStringBuilder.append(",")
+                }
+                sortStringBuilder.deleteCharAt(sortStringBuilder.length - 1)
+                sortStringBuilder.append("}")
             }
-            sortStringBuilder.deleteCharAt(sortStringBuilder.length - 1)
-            sortStringBuilder.append("}")
+            return sortStringBuilder.toString()
         }
-        return sortStringBuilder.toString()
-    }
 
     /**
      * Sets the number of records to skip before returning the results (useful for pagination).

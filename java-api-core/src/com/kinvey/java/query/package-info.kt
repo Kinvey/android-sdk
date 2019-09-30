@@ -17,7 +17,4 @@
 /**
  * Kinvey data query support.
  */
-package com.kinvey.java.query;
-
-
-
+package com.kinvey.java.query
