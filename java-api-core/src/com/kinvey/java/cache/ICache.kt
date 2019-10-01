@@ -26,7 +26,7 @@ import java.util.ArrayList
 /**
  * Created by Prots on 1/26/16.
  */
-interface ICache<T : GenericJson> {
+interface ICache<T : GenericJson?> {
 
 
     /**

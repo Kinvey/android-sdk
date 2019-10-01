@@ -37,7 +37,7 @@ import com.kinvey.java.core.UploaderProgressListener
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.model.KinveyDeleteResponse
 import com.kinvey.java.model.SaveMode
-import com.kinvey.java.network.NetworkManager.ID_FIELD_NAME
+import com.kinvey.java.network.NetworkManager.Companion.ID_FIELD_NAME
 import com.kinvey.java.query.AbstractQuery
 
 /**

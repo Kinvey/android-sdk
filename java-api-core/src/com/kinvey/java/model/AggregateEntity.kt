@@ -33,8 +33,8 @@ import com.kinvey.java.core.AbstractKinveyJsonClient
  * @since 2.0
  */
 class AggregateEntity(
-    fields: ArrayList<String>?,
-    type: AggregateType,
+    fields: List<String>?,
+    type: AggregateType?,
     aggregateField: String?,
     query: Query?,
     client: AbstractKinveyJsonClient?

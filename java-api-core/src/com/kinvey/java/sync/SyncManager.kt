@@ -152,14 +152,14 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson?> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ids: Iterable<String>?) {
+    fun <T : GenericJson> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ids: Iterable<String>?) {
         val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         val syncRequests = ids?.map { id -> prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, id) }
         syncRequests?.let { requests -> requestCache?.save(requests) }
     }
 
     @Throws(IOException::class)
-    private fun <T : GenericJson?> prepareSyncItemRequest(requestCache: ICache<SyncItem>?,
+    private fun <T : GenericJson> prepareSyncItemRequest(requestCache: ICache<SyncItem>?,
                                                           collectionName: String?,
                                                           networkManager: NetworkManager<T>?,
                                                           httpMethod: HttpVerb?,
@@ -187,8 +187,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
             entityID.id = id
         }
         entityID.customerVersion = networkManager?.clientAppVersion
-        entityID.customheader = if (networkManager?.customRequestProperties != null)
-                                    networkManager.customRequestProperties["X-Kinvey-Custom-Request-Properties"] as String? else null
+        entityID.customheader = networkManager?.customRequestProperties?.get("X-Kinvey-Custom-Request-Properties") as String?
         return SyncItem(httpMethod, entityID, collectionName)
     }
 
@@ -360,8 +359,8 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson?> createSaveBatchSyncRequest(collectionName: String?, networkManager: NetworkManager<T>, ret: List<T>?): SyncRequest {
-        val request = createSaveBatchSyncRequest(collectionName, networkManager.saveBatchBlocking(ret))
+    fun <T : GenericJson> createSaveBatchSyncRequest(collectionName: String?, networkManager: NetworkManager<T>, ret: List<T>?): SyncRequest {
+        val request = createSaveBatchSyncRequest(collectionName, networkManager.saveBatchBlocking(ret) as AbstractKinveyClientRequest<*>)
         request.entityID?.bunchData = true
         return request
     }

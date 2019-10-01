@@ -170,7 +170,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun `in`(key: String, value: Array<Any?>?): Query {
+    override fun `in`(key: String, value: Array<Any>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.IN), key, value)
         return this

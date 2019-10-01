@@ -245,7 +245,7 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
     abstract fun greaterThanEqualTo(key: String, value: Any?): AbstractQuery?
     abstract fun lessThanEqualTo(key: String, value: Any?): AbstractQuery?
     abstract fun notEqual(key: String, value: Any?): AbstractQuery?
-    abstract fun `in`(key: String, value: Array<Any?>?): AbstractQuery?
+    abstract fun `in`(key: String, value: Array<Any>?): AbstractQuery?
     abstract fun notIn(key: String, value: Array<Any?>?): AbstractQuery?
     abstract fun regEx(key: String, value: Any?): AbstractQuery?
     abstract fun startsWith(key: String, value: Any?): AbstractQuery?
