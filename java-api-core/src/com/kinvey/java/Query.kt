@@ -170,7 +170,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun `in`(key: String, value: Array<Any>?): Query {
+    override fun `in`(key: String, value: Array<out Any>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.IN), key, value)
         return this
@@ -183,7 +183,7 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun notIn(key: String, value: Array<Any?>?): Query {
+    override fun notIn(key: String, value: Array<out Any?>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.NOTIN), key, value)
         return this
@@ -248,7 +248,7 @@ open class Query
      * @param value An array of values Values
      * @return Query object
      */
-    override fun all(key: String, value: Array<Any?>?): Query {
+    override fun all(key: String, value: Array<out Any?>?): Query {
         Preconditions.checkNotNull(key)
         builder.addFilter(builder.getOperator(Operators.ALL), key, value)
         return this

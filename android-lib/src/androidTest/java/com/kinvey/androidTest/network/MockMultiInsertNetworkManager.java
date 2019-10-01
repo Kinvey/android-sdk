@@ -5,6 +5,8 @@ import com.kinvey.java.AbstractClient;
 import com.kinvey.java.network.NetworkManager;
 import com.kinvey.java.sync.dto.SyncRequest;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,8 +37,9 @@ public class MockMultiInsertNetworkManager<T extends GenericJson> extends Networ
         return result;
     }
 
+    @Nullable
     @Override
-    public SaveBatch saveBatchBlocking(List<T> list) throws IOException {
+    public SaveBatch saveBatchBlocking(@Nullable List<? extends T> list) throws IOException {
         useMultiInsertSave = true;
         multiPostCount.incrementAndGet();
         return super.saveBatchBlocking(list);

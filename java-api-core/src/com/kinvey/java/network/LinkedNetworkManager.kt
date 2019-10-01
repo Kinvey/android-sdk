@@ -96,7 +96,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     @Throws(IOException::class)
-    fun getEntityBlocking(entityID: String?, download: DownloaderProgressListener?, attachments: Array<String>?): GetEntity {
+    open fun getEntityBlocking(entityID: String?, download: DownloaderProgressListener?, attachments: Array<String>?): GetEntity {
         val getEntity = GetEntity(entityID ?: "", currentClass, attachments)
         getEntity.downloadProgressListener = download
         client.initializeRequest(getEntity)
@@ -382,8 +382,8 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
      * Generic Get class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for Get
      * requests.
      *
-    </T> */
-    inner class GetEntity : GetLinkedResourceClientRequest<T> {
+     */
+    open inner class GetEntity : GetLinkedResourceClientRequest<T> {
         private var attachments: Array<String>?
         @Key
         private var entityID: String
@@ -424,7 +424,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
      * Generic Save<T> class, extends AbstractKinveyJsonClientRequest<T>.  Constructs the HTTP request object for
      * Create / Update requests.
      *
-    </T></T> */
+     */
     inner class Save internal constructor(entity: T, myClass: Class<T>, entityID: String?, update: SaveMode)
         : SaveLinkedResourceClientRequest<T>(client, update.toString(), SAVE_REST_PATH, entity, myClass) {
         @Key
