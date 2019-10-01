@@ -52,7 +52,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 ret = cache?.save(objects)
-                syncManager.enqueueSaveRequests(networkManager.collectionName, networkManager, ret)
+                syncManager.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, ret)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 val pushRequest = PushRequest(networkManager.collectionName, cache, networkManager,
@@ -67,7 +67,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
                 ret = objects.mapNotNull { item ->
                       var result: T? = null
                       try {
-                          result = networkManager.saveBlocking(item).execute()
+                          result = networkManager.saveBlocking(item)?.execute()
                       } catch (e: IOException) {
                           val requestType = if (networkManager.isTempId(item)) SyncRequest.HttpVerb.POST
                                             else SyncRequest.HttpVerb.PUT
