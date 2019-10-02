@@ -7,7 +7,7 @@ import com.kinvey.java.network.NetworkManager
 import java.util.concurrent.Callable
 
 class CallableAsyncPullRequestHelper<T: GenericJson> internal constructor(private val pullRequest: NetworkManager<T>.Get?,
-                                                                          private val query: Query)
+                                                                          private val query: Query?)
     : Callable<PullTaskResponse<T>> {
 
     @Throws(Exception::class)

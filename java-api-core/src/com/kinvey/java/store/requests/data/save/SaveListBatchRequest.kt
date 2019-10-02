@@ -44,7 +44,7 @@ class SaveListBatchRequest<T : GenericJson>(
     private val networkManager: NetworkManager<T>,
     private val writePolicy: WritePolicy,
     private val objects: Iterable<T>,
-    private val syncManager: SyncManager) : IRequest<List<T>> {
+    private val syncManager: SyncManager?) : IRequest<List<T>> {
 
     private var updateList: MutableList<T>? = null
     private var saveList: MutableList<T>? = null
@@ -60,7 +60,7 @@ class SaveListBatchRequest<T : GenericJson>(
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 retList = cache?.save(objects) ?: ArrayList()
-                syncManager.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, retList)
+                syncManager?.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, retList)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
@@ -182,7 +182,7 @@ class SaveListBatchRequest<T : GenericJson>(
     @Throws(IOException::class)
     private fun enqueueSaveRequests(errorItems: List<T>, requestType: SyncRequest.HttpVerb) {
         errorItems.forEach { itm ->
-            syncManager.enqueueRequest(networkManager.collectionName, networkManager, requestType, itm[_ID] as String?)
+            syncManager?.enqueueRequest(networkManager.collectionName, networkManager, requestType, itm[_ID] as String?)
         }
     }
 
@@ -224,7 +224,7 @@ class SaveListBatchRequest<T : GenericJson>(
                     wasException = true
                     errors.add(KinveyUpdateSingleItemError(e, itm))
                 }
-                syncManager.enqueueRequest(networkManager.collectionName,
+                syncManager?.enqueueRequest(networkManager.collectionName,
                         networkManager, SyncRequest.HttpVerb.PUT, itm[_ID] as String?)
             }
             res

@@ -34,7 +34,7 @@ abstract class AbstractKinveyReadRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String,
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMethod: String, uriTemplate: String,
                       jsonContent: GenericJson?, var requestResponseClass: Class<*>?)
     : AbstractKinveyJsonClientRequest<KinveyReadResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
 

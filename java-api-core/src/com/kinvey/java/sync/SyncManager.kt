@@ -119,7 +119,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
      * Used to save sync requests that were not completed
      * @param request Sync request to be saved
      */
-    fun enqueueRequest(request: SyncRequest) {
+    fun enqueueRequest(request: SyncRequest?) {
         val requestCache = cacheManager?.getCache(SYNC, SyncRequest::class.java, Long.MAX_VALUE)
         requestCache?.save(request)
     }
@@ -320,28 +320,28 @@ open class SyncManager(val cacheManager: ICacheManager?) {
      * @param request Sync request to be executed
      */
     @Throws(IOException::class)
-    fun <T : GenericJson> executeBatchRequest(client: AbstractClient<*>, networkManager: NetworkManager<T>, request: SyncRequest): KinveySyncSaveBatchResponse<T>? {
-        client.clientAppVersion = request.entityID?.customerVersion
-        client.setCustomRequestProperties(Gson().fromJson(request.entityID?.customheader, GenericJson::class.java))
+    fun <T : GenericJson> executeBatchRequest(client: AbstractClient<*>?, networkManager: NetworkManager<T>, request: SyncRequest?): KinveySyncSaveBatchResponse<T>? {
+        client?.clientAppVersion = request?.entityID?.customerVersion
+        client?.setCustomRequestProperties(Gson().fromJson(request?.entityID?.customheader, GenericJson::class.java))
         var entityList: Collection<T>? = null
-        val bunchData = request.entityID?.bunchData ?: false
-        val dataJson: String? = request.entityID?.data
+        val bunchData = request?.entityID?.bunchData ?: false
+        val dataJson: String? = request?.entityID?.data
         try {
             if (dataJson != null) {
-                val parser: JsonParser = client.jsonFactory.createJsonParser(dataJson)
+                val parser = client?.jsonFactory?.createJsonParser(dataJson)
                 if (bunchData) {
-                    entityList = parser.parseArray(List::class.java, networkManager.currentClass)
+                    entityList = parser?.parseArray(List::class.java, networkManager.currentClass)
                 } else return null
             }
         } catch (e: IOException) {
             ERROR(e.message)
         }
-        val dataStoreNet: BaseDataStore<T> = collection(request.collectionName ?: "", networkManager.currentClass, StoreType.NETWORK, client)
+        val dataStoreNet: BaseDataStore<T> = collection(request?.collectionName ?: "", networkManager.currentClass, StoreType.NETWORK, client)
         return runSaveBatchSyncRequest(request, entityList, dataStoreNet)
     }
 
     @Throws(IOException::class)
-    private fun <T : GenericJson> runSaveBatchSyncRequest(request: SyncRequest,
+    private fun <T : GenericJson> runSaveBatchSyncRequest(request: SyncRequest?,
                                                            entityList: Collection<T>?, dataStore: BaseDataStore<T>): KinveySyncSaveBatchResponse<T>? {
         var result: KinveySyncSaveBatchResponse<T>? = null
         if (entityList != null) {

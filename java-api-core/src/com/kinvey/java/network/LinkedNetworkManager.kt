@@ -72,7 +72,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
     fun getEntityBlocking(entityID: String?, download: DownloaderProgressListener?): GetEntity {
         val getEntity = GetEntity(entityID ?: "", currentClass, null)
         getEntity.downloadProgressListener = download
-        client.initializeRequest(getEntity)
+        client?.initializeRequest(getEntity)
         return getEntity
     }
 
@@ -99,7 +99,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
     open fun getEntityBlocking(entityID: String?, download: DownloaderProgressListener?, attachments: Array<String>?): GetEntity {
         val getEntity = GetEntity(entityID ?: "", currentClass, attachments)
         getEntity.downloadProgressListener = download
-        client.initializeRequest(getEntity)
+        client?.initializeRequest(getEntity)
         return getEntity
     }
 
@@ -127,7 +127,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         val javaClass = currentClass as Class<List<T>>
         val get = Get(query, javaClass, null)
         get.downloadProgressListener = download
-        client.initializeRequest(get)
+        client?.initializeRequest(get)
         return get
     }
 
@@ -154,7 +154,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         val javaClass = currentClass as Class<List<T>>
         val get = Get(query, javaClass, attachments, resolves, resolve_depth, retain)
         get.downloadProgressListener = download
-        client.initializeRequest(get)
+        client?.initializeRequest(get)
         return get
     }
 
@@ -203,7 +203,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         val javaClass = currentClass as Class<List<T>>
         val get = Get(query, javaClass, attachments)
         get.downloadProgressListener = download
-        client.initializeRequest(get)
+        client?.initializeRequest(get)
         return get
     }
 
@@ -252,7 +252,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         val javaClass = currentClass as Class<List<T>>
         val get = Get(Query(), javaClass, attachments)
         get.downloadProgressListener = download
-        client.initializeRequest(get)
+        client?.initializeRequest(get)
         return get
     }
 
@@ -282,7 +282,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
             Save(entity, currentClass, SaveMode.POST)
         }
         save.upload = upload
-        client.initializeRequest(save)
+        client?.initializeRequest(save)
         return save
     }
 
@@ -312,7 +312,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
             Save(entity, currentClass, SaveMode.POST)
         }
         save.upload = upload
-        client.initializeRequest(save)
+        client?.initializeRequest(save)
         return save
     }
 
@@ -347,7 +347,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         constructor(query: Query, myClass: Class<List<T>>, attachments: Array<String>?) : super(client, GET_LIST_REST_PATH, null, myClass) {
             this.attachments = attachments
             this.collectionName = this@LinkedNetworkManager.collectionName
-            queryFilter = query.getQueryFilterJson(client.jsonFactory)
+            queryFilter = query.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query.limit
             val querySkip = query.skip
             limit = if (queryLimit > 0) queryLimit.toString() else null
@@ -359,7 +359,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
             : super(client, GET_LIST_REST_PATH, null, myClass) {
             this.attachments = attachments
             this.collectionName = this@LinkedNetworkManager.collectionName
-            queryFilter = query.getQueryFilterJson(client.jsonFactory)
+            queryFilter = query.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query.limit
             val querySkip = query.skip
             limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
@@ -396,7 +396,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
         @Key("retainReferences")
         private var retainReferences: String? = null
 
-        internal constructor(entityID: String, myClass: Class<T>, attachments: Array<String>?) : super(client, GET_ENTITY_REST_PATH, null, myClass) {
+        internal constructor(entityID: String, myClass: Class<T>?, attachments: Array<String>?) : super(client, GET_ENTITY_REST_PATH, null, myClass) {
             this.attachments = attachments
             this.collectionName = this@LinkedNetworkManager.collectionName
             this.entityID = entityID
@@ -425,14 +425,14 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
      * Create / Update requests.
      *
      */
-    inner class Save internal constructor(entity: T, myClass: Class<T>, entityID: String?, update: SaveMode)
+    inner class Save internal constructor(entity: T, myClass: Class<T>?, entityID: String?, update: SaveMode)
         : SaveLinkedResourceClientRequest<T>(client, update.toString(), SAVE_REST_PATH, entity, myClass) {
         @Key
         private val collectionName: String?
         @Key
         private var entityID: String? = null
 
-        internal constructor(entity: T, myClass: Class<T>, update: SaveMode) : this(entity, myClass, null, update) {}
+        internal constructor(entity: T, myClass: Class<T>?, update: SaveMode) : this(entity, myClass, null, update) {}
 
         init {
             setMimeTypeFinder(mimetypeFinder)

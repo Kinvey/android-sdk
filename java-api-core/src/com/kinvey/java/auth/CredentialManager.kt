@@ -86,7 +86,7 @@ class CredentialManager {
     fun createAndStoreCredential(baseUser: BaseUser?): Credential? {
         val userId = baseUser?.id
         val newCredential = Credential.from(baseUser)
-        if (userId != null && credentialStore != null) {
+        if (newCredential != null && userId != null && credentialStore != null) {
             credentialStore?.store(userId, newCredential)
         }
         return newCredential

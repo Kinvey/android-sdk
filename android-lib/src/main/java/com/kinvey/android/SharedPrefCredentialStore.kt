@@ -59,7 +59,7 @@ class SharedPrefCredentialStore(private val context: Context) : CredentialStore 
     }
 
     @Throws(IOException::class)
-    override fun store(userId: String, credential: Credential?) {
+    override fun store(userId: String?, credential: Credential?) {
         val edit = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE).edit()
         edit.putString(PREF_ID, userId)
         edit.putString(PREF_AUTH, credential?.authToken)

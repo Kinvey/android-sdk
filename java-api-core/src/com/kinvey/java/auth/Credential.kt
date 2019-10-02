@@ -70,8 +70,10 @@ class Credential : KinveyRequestInitializer, Serializable {
          */
         fun from(baseUser: BaseUser?): Credential? {
             return baseUser?.run {
-                val kmd = baseUser[KMD] as Map<String, String>
-                from(baseUser.id, kmd[AUTH_TOKEN])
+                val kmd = baseUser[KMD]
+                if (kmd != null) {
+                    from(baseUser.id, (kmd as Map<String, String>)[AUTH_TOKEN])
+                } else null
             }
         }
 

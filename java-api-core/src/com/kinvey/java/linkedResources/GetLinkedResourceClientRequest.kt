@@ -52,7 +52,7 @@ open class GetLinkedResourceClientRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>)
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>?)
     : AbstractKinveyJsonClientRequest<T>(abstractKinveyJsonClient, "GET", uriTemplate, jsonContent, responseClass) {
     var downloadProgressListener: DownloaderProgressListener? = null
     @Throws(IOException::class)

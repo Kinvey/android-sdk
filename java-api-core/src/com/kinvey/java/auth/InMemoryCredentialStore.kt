@@ -31,7 +31,7 @@ class InMemoryCredentialStore : CredentialStore {
         return store[userId]
     }
 
-    override fun store(userId: String, credential: Credential?) {
+    override fun store(userId: String?, credential: Credential?) {
         Preconditions.checkNotNull(credential, "credential must not be null")
         val cred = Credential(userId, credential?.authToken, credential?.refreshToken)
         if (userId != null) {

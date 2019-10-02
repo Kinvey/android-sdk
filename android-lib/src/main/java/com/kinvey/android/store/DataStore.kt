@@ -226,7 +226,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     @JvmOverloads
     fun find(entityID: String, callback: KinveyClientCallback<T>, cachedCallback: KinveyCachedClientCallback<T>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entityID, "entityID must not be null.")
         AsyncRequest(this, methodMap!![KEY_GET_BY_ID], callback, entityID, getWrappedCacheCallback(cachedCallback)).execute()
     }
@@ -261,7 +261,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     @JvmOverloads
     fun find(ids: Iterable<String>, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")
         AsyncRequest(this, methodMap!![KEY_GET_BY_IDS], callback, ids,
                 getWrappedCacheCallback(cachedCallback)).execute()
@@ -301,7 +301,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     @JvmOverloads
     fun find(query: Query, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "Query must not be null.")
         AsyncRequest(this, methodMap!![KEY_GET_BY_QUERY], callback, query,
                 getWrappedCacheCallback(cachedCallback)).execute()
@@ -336,7 +336,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     @JvmOverloads
     fun find(callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncRequest(this, methodMap!![KEY_GET_ALL], callback, getWrappedCacheCallback(cachedCallback)).execute()
     }
 
@@ -346,7 +346,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun count(callback: KinveyCountCallback) {
         Preconditions.checkNotNull(client, "client must not be null.")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         count(callback, null)
     }
 
@@ -357,7 +357,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun count(callback: KinveyCountCallback, cachedCallback: KinveyCachedClientCallback<Int>?) {
         Preconditions.checkNotNull(client, "client must not be null.")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         AsyncRequest(this, methodMap!![KEY_GET_COUNT], callback, cachedCallback).execute()
     }
@@ -387,7 +387,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     </T> */
     fun save(entity: T, callback: KinveyClientCallback<T>) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entity, "Entity cannot be null.")
         Logger.INFO("Calling DataStore#save(object)")
         SaveRequest(entity, callback).execute()
@@ -427,7 +427,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
     private fun saveV4(entities: List<T>, callback: KinveyClientCallback<List<T>>) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Logger.INFO("Calling DataStore#save(listObjects)")
         SaveListRequest(entities, callback).execute()
@@ -435,7 +435,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
     private fun saveBatch(entities: List<T>, callback: KinveyClientCallback<List<T>>) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Preconditions.checkState(entities.size > 0, "Entity list cannot be empty.")
         Logger.INFO("Calling DataStore#saveBatch(listObjects)")
@@ -526,7 +526,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun delete(query: Query, callback: KinveyDeleteCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "query cannot be null.")
         AsyncRequest(this, methodMap!![KEY_DELETE_BY_QUERY], callback, query).execute()
 
@@ -556,7 +556,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun push(callback: KinveyPushCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
             pushBatch(callback)
         } else {
@@ -565,11 +565,11 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     }
 
     private fun pushV4(callback: KinveyPushCallback) {
-        AsyncPushRequest(collectionName, client.syncManager, client, storeType, networkManager, currentClass, callback).execute()
+        AsyncPushRequest(collectionName, client?.syncManager, client, storeType, networkManager, currentClass, callback).execute()
     }
 
     private fun pushBatch(callback: KinveyPushCallback) {
-        AsyncBatchPushRequest(collectionName, client.syncManager, client, storeType, networkManager, currentClass, callback).execute()
+        AsyncBatchPushRequest(collectionName, client?.syncManager, client, storeType, networkManager, currentClass, callback).execute()
     }
 
     /**
@@ -596,7 +596,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun pull(callback: KinveyPullCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         this.pull(null, PAGINATION_IS_NOT_USED, callback)
     }
 
@@ -628,7 +628,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun pull(query: Query?, isAutoPagination: Boolean, callback: KinveyPullCallback?) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncPullRequest(this, query, isAutoPagination, callback).execute()
     }
 
@@ -658,7 +658,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     fun pull(pageSize: Int, callback: KinveyPullCallback?) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than $MIN_PAGE_SIZE")
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         this.pull(null, pageSize, callback)
     }
 
@@ -687,7 +687,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun pull(isAutoPagination: Boolean, callback: KinveyPullCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         this.pull(null, isAutoPagination, callback)
     }
 
@@ -721,7 +721,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     fun pull(query: Query?, pageSize: Int, callback: KinveyPullCallback?) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than $MIN_PAGE_SIZE")
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncPullRequest(this, query, pageSize, callback).execute()
     }
 
@@ -753,7 +753,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun pull(query: Query?, callback: KinveyPullCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         pull(query, PAGINATION_IS_NOT_USED, callback)
     }
 
@@ -781,7 +781,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun purge(callback: KinveyPurgeCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncRequest(this, methodMap!![KEY_PURGE], callback).execute()
     }
 
@@ -792,7 +792,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun purge(query: Query, callback: KinveyPurgeCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncRequest(this, methodMap!![KEY_PURGE_BY_QUERY], callback, query).execute()
     }
 
@@ -832,7 +832,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun sync(query: Query?, callback: KinveySyncCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
             override fun onSuccess(pushResult: KinveyPushResponse) {
@@ -898,7 +898,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun sync(query: Query?, isAutoPagination: Boolean, callback: KinveySyncCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
             override fun onSuccess(pushResult: KinveyPushResponse) {
@@ -966,7 +966,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     fun sync(query: Query?, pageSize: Int, callback: KinveySyncCallback) {
         Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, "pageSize mustn't be less than $MIN_PAGE_SIZE")
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
             override fun onSuccess(pushResult: KinveyPushResponse) {
@@ -1003,7 +1003,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun sync(callback: KinveySyncCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         sync(null, callback)
     }
 
@@ -1015,7 +1015,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      */
     fun sync(pageSize: Int, callback: KinveySyncCallback) {
         Preconditions.checkNotNull(client, "client must not be null")
-        Preconditions.checkArgument(client.isInitialize, "client must be initialized")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         sync(null, pageSize, callback)
     }
 
@@ -1028,7 +1028,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @return the count of sync objects for given collection
      */
     fun syncCount(): Long {
-        return client.syncManager.getCount(collectionName)
+        return client?.syncManager?.getCount(collectionName) ?: 0
     }
 
     /**

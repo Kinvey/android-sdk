@@ -55,7 +55,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
      */
     private val jsonFactory: JsonFactory
     /** kcs base url  */
-    private val baseUrl: String
+    private val baseUrl: String?
     /** backoff policy to use  */
     private var policy: BackOffPolicy
     /**
@@ -95,7 +95,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
      * @param password             password for the user or `null` if none is known
      */
     protected constructor(transport: HttpTransport?, jsonFactory: JsonFactory,
-                          baseUrl: String, appKeyAuthentication: BasicAuthentication, username: String?, password: String?,
+                          baseUrl: String?, appKeyAuthentication: BasicAuthentication, username: String?, password: String?,
                           user: GenericJson?, create: Boolean) {
         this.transport = transport
         this.jsonFactory = jsonFactory
@@ -112,7 +112,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
     }
 
     protected constructor(transport: HttpTransport?, jsonFactory: JsonFactory,
-                          baseUrl: String, appKeyAuthentication: BasicAuthentication, thirdPartyIdentity: ThirdPartyIdentity?,
+                          baseUrl: String?, appKeyAuthentication: BasicAuthentication, thirdPartyIdentity: ThirdPartyIdentity?,
                           user: GenericJson?, create: Boolean) {
         this.transport = transport
         this.jsonFactory = jsonFactory
@@ -241,7 +241,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
     </pre> *
      */
     open class Builder<T : BaseUser?>(transport: HttpTransport?, jsonFactory: JsonFactory,
-                                      val baseUrl: String, appKey: String, appSecret: String, user: GenericJson?) {
+                                      val baseUrl: String?, appKey: String, appSecret: String, user: GenericJson?) {
         /**
          * @return the http trasport
          */
@@ -278,6 +278,21 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
             private set
 
         var thirdPartyIdentity: ThirdPartyIdentity? = null
+            set (value) {
+                field = value
+                thirdPartyAuthStatus = value != null
+            }
+
+        //private fun setThirdPartyIdentity(identity: ThirdPartyIdentity?): Builder<*> {
+        //    thirdPartyIdentity = identity
+        //    thirdPartyAuthStatus = true
+        //    return this
+        //}
+
+        //fun setCreate(create: Boolean): Builder<*> {
+        //    this.create = create
+        //    return this
+        //}
 
         constructor(transport: HttpTransport, jsonFactory: JsonFactory, baseUrl: String, appKey: String, appSecret: String,
                     username: String, password: String, user: GenericJson) : this(transport, jsonFactory, baseUrl, appKey, appSecret, user) {
@@ -313,17 +328,6 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
             thirdPartyAuthStatus = false
             return this
         }
-
-        //private fun setThirdPartyIdentity(identity: ThirdPartyIdentity?): Builder<*> {
-        //    thirdPartyIdentity = identity
-        //    thirdPartyAuthStatus = true
-        //    return this
-        //}
-
-        //fun setCreate(create: Boolean): Builder<*> {
-        //    this.create = create
-        //    return this
-        //}
 
         fun setUser(user: GenericJson?): Builder<*> {
             this.user = user

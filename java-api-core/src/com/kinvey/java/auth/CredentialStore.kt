@@ -36,7 +36,7 @@ interface CredentialStore {
      * @throws IOException error in storing to low-level storage mechanism
      */
     @Throws(IOException::class)
-    fun store(userId: String, credential: Credential?)
+    fun store(userId: String?, credential: Credential?)
 
     /**
      * @param userId the unique identifier to the credential to purge

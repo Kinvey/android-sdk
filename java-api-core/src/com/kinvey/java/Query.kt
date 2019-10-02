@@ -42,7 +42,7 @@ open class Query
  *
  * @param builder that implements QueryFilter.builder
  */
-@JvmOverloads constructor(builder: QueryFilterBuilder = MongoQueryFilterBuilder()) : AbstractQuery(builder), Serializable {
+@JvmOverloads constructor(builder: QueryFilterBuilder? = MongoQueryFilterBuilder()) : AbstractQuery(builder), Serializable {
     /**
      *
      * @return Current limit
@@ -57,7 +57,7 @@ open class Query
         private set
 
     val isQueryEmpty: Boolean
-        get() = queryFilterMap.size == 0
+        get() = queryFilterMap?.size == 0
 
     // Comparison Operators
 
@@ -69,9 +69,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun equals(key: String, value: Any?): Query {
+    override fun equals(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.equals(key, value)
+        builder?.equals(key, value)
         return this
     }
 
@@ -82,9 +82,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun greaterThan(key: String, value: Any?): Query {
+    override fun greaterThan(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.GREATERTHAN), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.GREATERTHAN), key, value)
         return this
     }
 
@@ -95,9 +95,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun lessThan(key: String, value: Any?): Query {
+    override fun lessThan(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.LESSTHAN), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.LESSTHAN), key, value)
         return this
     }
 
@@ -108,9 +108,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun greaterThanEqualTo(key: String, value: Any?): Query {
+    override fun greaterThanEqualTo(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.GREATERTHANEQUAL), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.GREATERTHANEQUAL), key, value)
         return this
     }
 
@@ -121,9 +121,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun lessThanEqualTo(key: String, value: Any?): Query {
+    override fun lessThanEqualTo(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.LESSTHANEQUAL), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.LESSTHANEQUAL), key, value)
         return this
     }
 
@@ -134,7 +134,7 @@ open class Query
      * @param order Order to sort values (Ascending/Descending)
      * @return  Query object
      */
-    override fun addSort(field: String, order: SortOrder?): Query {
+    override fun addSort(field: String?, order: SortOrder?): Query {
         super.addSort(field, order)
         return this
     }
@@ -157,9 +157,9 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun notEqual(key: String, value: Any?): Query {
+    override fun notEqual(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.NOTEQUAL), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.NOTEQUAL), key, value)
         return this
     }
 
@@ -170,9 +170,9 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun `in`(key: String, value: Array<out Any>?): Query {
+    override fun `in`(key: String?, value: Array<out Any>?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.IN), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.IN), key, value)
         return this
     }
 
@@ -183,9 +183,9 @@ open class Query
      * @param value An array of values
      * @return Query object
      */
-    override fun notIn(key: String, value: Array<out Any?>?): Query {
+    override fun notIn(key: String?, value: Array<out Any?>?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.NOTIN), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.NOTIN), key, value)
         return this
     }
 
@@ -201,7 +201,7 @@ open class Query
      * @param value Value condition for filter
      * @return Query object
      */
-    override fun regEx(key: String, value: Any?): Query {
+    override fun regEx(key: String?, value: Any?): Query {
         if (value.toString().contains("/i")) {
             throw UnsupportedOperationException("Cannot perform regex which contains an `/i`")
         }
@@ -209,7 +209,7 @@ open class Query
             throw UnsupportedOperationException("All regex must be anchored, it must begin with a carat `^`")
         }
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.REGEX), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.REGEX), key, value)
         return this
     }
 
@@ -220,9 +220,9 @@ open class Query
      * @param value  Value condition for filter
      * @return Query object
      */
-    override fun startsWith(key: String, value: Any?): Query {
+    override fun startsWith(key: String?, value: Any?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.REGEX), key, "^$value")
+        builder?.addFilter(builder?.getOperator(Operators.REGEX), key, "^$value")
         return this
     }
 
@@ -248,9 +248,9 @@ open class Query
      * @param value An array of values Values
      * @return Query object
      */
-    override fun all(key: String, value: Array<out Any?>?): Query {
+    override fun all(key: String?, value: Array<out Any?>?): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.ALL), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.ALL), key, value)
         return this
     }
 
@@ -261,9 +261,9 @@ open class Query
      * @param value The expected size of the array
      * @return Query object
      */
-    override fun size(key: String, value: Int): Query {
+    override fun size(key: String?, value: Int): Query {
         Preconditions.checkNotNull(key)
-        builder.addFilter(builder.getOperator(Operators.SIZE), key, value)
+        builder?.addFilter(builder?.getOperator(Operators.SIZE), key, value)
         return this
     }
 
@@ -278,7 +278,7 @@ open class Query
      */
     override fun and(query: AbstractQuery?): Query {
         Preconditions.checkNotNull(query)
-        builder.joinFilter(builder.getOperator(Operators.AND), query)
+        builder?.joinFilter(builder?.getOperator(Operators.AND), query)
         return this
     }
 
@@ -290,7 +290,7 @@ open class Query
      */
     override fun or(query: AbstractQuery?): Query {
         Preconditions.checkNotNull(query)
-        builder.joinFilter(builder.getOperator(Operators.OR), query)
+        builder?.joinFilter(builder?.getOperator(Operators.OR), query)
         return this
     }
 
@@ -300,7 +300,7 @@ open class Query
      * @return Query object
      */
     override fun not(): Query {
-        builder.negateQuery()
+        builder?.negateQuery()
         return this
     }
 
@@ -358,7 +358,7 @@ open class Query
      * @return  Query object
      */
 
-    override fun nearSphere(field: String, lat: Double, lon: Double): Query {
+    override fun nearSphere(field: String?, lat: Double, lon: Double): Query {
         Preconditions.checkNotNull(field)
         Preconditions.checkArgument(lat >= -90 && lat <= 90, "Lat must be between -90 and 90")
         Preconditions.checkArgument(lon >= -180 && lon <= 180, "Lon must be between -180 and 180")
@@ -374,18 +374,18 @@ open class Query
      * @param maxDistance The maximum distance a geolocation point can be from the given point
      * @return
      */
-    override fun nearSphere(field: String, lat: Double, lon: Double, maxDistance: Double): Query {
+    override fun nearSphere(field: String?, lat: Double, lon: Double, maxDistance: Double): Query {
         Preconditions.checkNotNull(field)
         Preconditions.checkArgument(lat >= -90 && lat <= 90, "Lat must be between -90 and 90")
         Preconditions.checkArgument(lon >= -180 && lon <= 180, "Lon must be between -180 and 180")
         val arrayPoint = DoubleArray(2)
         arrayPoint[0] = lat
         arrayPoint[1] = lon
-        builder.addLocationFilter(field, builder.getOperator(Operators.NEARSPHERE), arrayPoint, maxDistance)
+        builder?.addLocationFilter(field, builder?.getOperator(Operators.NEARSPHERE), arrayPoint, maxDistance)
         return this
     }
 
-    override fun withinBox(field: String, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
+    override fun withinBox(field: String?, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
                            pointTwoLon: Double): AbstractQuery {
         Preconditions.checkNotNull(field)
         Preconditions.checkArgument(pointOneLat >= -90 && pointOneLat <= 90, "Lat must be between -90 and 90")
@@ -397,11 +397,11 @@ open class Query
         arrayPoints[0][1] = pointOneLon
         arrayPoints[1][0] = pointTwoLat
         arrayPoints[1][1] = pointTwoLon
-        builder.addLocationWhereFilter(field, builder.getOperator(Operators.WITHINBOX), arrayPoints)
+        builder?.addLocationWhereFilter(field, builder?.getOperator(Operators.WITHINBOX), arrayPoints)
         return this
     }
 
-    override fun withinPolygon(field: String, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
+    override fun withinPolygon(field: String?, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
                                pointTwoLon: Double, pointThreeLat: Double, pointThreeLon: Double,
                                pointFourLat: Double, pointFourLon: Double): AbstractQuery {
         Preconditions.checkNotNull(field)
@@ -422,7 +422,7 @@ open class Query
         arrayPoints[2][1] = pointThreeLon
         arrayPoints[3][0] = pointFourLat
         arrayPoints[3][1] = pointFourLon
-        builder.addLocationWhereFilter(field, builder.getOperator(Operators.WITHINPOLYGON), arrayPoints)
+        builder?.addLocationWhereFilter(field, builder?.getOperator(Operators.WITHINPOLYGON), arrayPoints)
         return this
     }
 

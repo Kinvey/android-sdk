@@ -34,7 +34,7 @@ import java.util.*
  * @author mjsalinger
  * @since 2.0
  */
-abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serializable {
+abstract class AbstractQuery(protected var builder: QueryFilterBuilder?) : Serializable {
     /**
      * Possible sort orders (Ascending and Descending)
      */
@@ -57,8 +57,8 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
      *
      * @return Query filter as AbstractMap<String></String>, Object>
      */
-    open val queryFilterMap: AbstractMap<String, Any?>
-        get() = builder.filterMap
+    open val queryFilterMap: AbstractMap<String, Any?>?
+        get() = builder?.filterMap
 
     /**
      *
@@ -86,27 +86,29 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
     }
 
     @Throws(IOException::class)
-    private fun buildQueryString(generator: JsonGenerator?, filterMap: AbstractMap<String, Any?>) {
+    private fun buildQueryString(generator: JsonGenerator?, filterMap: AbstractMap<String, Any?>?) {
         try {
-            val filterMapSize = filterMap.entries.size
+            val filterMapSize = filterMap?.entries?.size ?: 0
             var hasMultipleFilters = false
             var i = 0
-            for ((key, value) in filterMap) {
-                if (!hasMultipleFilters) {
-                    generator?.writeStartObject()
-                }
-                if (value == null) {
-                    generator?.writeFieldName(key)
-                    generator?.writeNull()
-                } else {
-                    generateJsonDataFromValue(generator, key, value)
-                }
-                i++
-                if (filterMapSize > 1 && i < filterMapSize) {
-                    // there are multiple filters and we have not reached the last one
-                    hasMultipleFilters = true
-                } else {
-                    generator?.writeEndObject()
+            filterMap?.let { map ->
+                for ((key, value) in map) {
+                    if (!hasMultipleFilters) {
+                        generator?.writeStartObject()
+                    }
+                    if (value == null) {
+                        generator?.writeFieldName(key)
+                        generator?.writeNull()
+                    } else {
+                        generateJsonDataFromValue(generator, key, value)
+                    }
+                    i++
+                    if (filterMapSize > 1 && i < filterMapSize) {
+                        // there are multiple filters and we have not reached the last one
+                        hasMultipleFilters = true
+                    } else {
+                        generator?.writeEndObject()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -223,13 +225,15 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
      * @param order Order to sort values (Ascending/Descending)
      * @return  Query object
      */
-    open fun addSort(field: String, order: SortOrder?): AbstractQuery {
+    open fun addSort(field: String?, order: SortOrder?): AbstractQuery {
         var order = order
         Preconditions.checkNotNull(field)
         if (order == null) {
             order = SortOrder.ASC
         }
-        sort[field] = order
+        if (field != null) {
+            sort[field] = order
+        }
         return this
     }
 
@@ -238,31 +242,31 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
     }
 
     // Abstract Methods
-    abstract fun equals(key: String, value: Any?): AbstractQuery?
+    abstract fun equals(key: String?, value: Any?): AbstractQuery?
 
-    abstract fun greaterThan(key: String, value: Any?): AbstractQuery?
-    abstract fun lessThan(key: String, value: Any?): AbstractQuery?
-    abstract fun greaterThanEqualTo(key: String, value: Any?): AbstractQuery?
-    abstract fun lessThanEqualTo(key: String, value: Any?): AbstractQuery?
-    abstract fun notEqual(key: String, value: Any?): AbstractQuery?
-    abstract fun `in`(key: String, value: Array<out Any>?): AbstractQuery?
-    abstract fun notIn(key: String, value: Array<out Any?>?): AbstractQuery?
-    abstract fun regEx(key: String, value: Any?): AbstractQuery?
-    abstract fun startsWith(key: String, value: Any?): AbstractQuery?
+    abstract fun greaterThan(key: String?, value: Any?): AbstractQuery?
+    abstract fun lessThan(key: String?, value: Any?): AbstractQuery?
+    abstract fun greaterThanEqualTo(key: String?, value: Any?): AbstractQuery?
+    abstract fun lessThanEqualTo(key: String?, value: Any?): AbstractQuery?
+    abstract fun notEqual(key: String?, value: Any?): AbstractQuery?
+    abstract fun `in`(key: String?, value: Array<out Any>?): AbstractQuery?
+    abstract fun notIn(key: String?, value: Array<out Any?>?): AbstractQuery?
+    abstract fun regEx(key: String?, value: Any?): AbstractQuery?
+    abstract fun startsWith(key: String?, value: Any?): AbstractQuery?
     //public abstract AbstractQuery endsWith(String key, Object value);
-    abstract fun all(key: String, value: Array<out Any?>?): AbstractQuery?
+    abstract fun all(key: String?, value: Array<out Any?>?): AbstractQuery?
 
-    abstract fun size(key: String, value: Int): AbstractQuery?
+    abstract fun size(key: String?, value: Int): AbstractQuery?
     abstract fun and(query: AbstractQuery?): AbstractQuery?
     abstract fun or(query: AbstractQuery?): AbstractQuery?
     abstract operator fun not(): AbstractQuery?
     abstract val sortString: String?
-    abstract fun nearSphere(field: String, lat: Double, lon: Double): AbstractQuery?
-    abstract fun nearSphere(field: String, lat: Double, lon: Double, maxDistance: Double): AbstractQuery?
-    abstract fun withinBox(field: String, pointOneLat: Double, pointOneLon: Double,
+    abstract fun nearSphere(field: String?, lat: Double, lon: Double): AbstractQuery?
+    abstract fun nearSphere(field: String?, lat: Double, lon: Double, maxDistance: Double): AbstractQuery?
+    abstract fun withinBox(field: String?, pointOneLat: Double, pointOneLon: Double,
                            pointTwoLat: Double, pointTwoLon: Double): AbstractQuery?
 
-    abstract fun withinPolygon(field: String, pointOneLat: Double, pointOneLon: Double,
+    abstract fun withinPolygon(field: String?, pointOneLat: Double, pointOneLon: Double,
                                pointTwoLat: Double, pointTwoLon: Double,
                                pointThreeLat: Double, pointThreeLon: Double,
                                pointFourLat: Double, pointFourLon: Double): AbstractQuery?

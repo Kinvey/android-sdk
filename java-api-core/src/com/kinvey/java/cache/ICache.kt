@@ -93,7 +93,7 @@ interface ICache<T : GenericJson?> {
      * Delete all object that matches query
      * @param query
      */
-    fun delete(query: Query): Int
+    fun delete(query: Query?): Int
 
     /**
      * Delete all object with given ids

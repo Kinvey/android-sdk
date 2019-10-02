@@ -30,7 +30,7 @@ import java.io.IOException
  * Created by Prots on 2/15/16.
  */
 class DeleteSingleRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, writePolicy: WritePolicy,
-                                           private val id: String, syncManager: SyncManager)
+                                           private val id: String, syncManager: SyncManager?)
     : AbstractDeleteRequest<T>(cache, writePolicy, networkManager, syncManager) {
 
     override fun deleteCached(): Int? {

@@ -37,7 +37,7 @@ interface QueryFilter {
      * @param key field
      * @param value value
      */
-    fun put(key: String, value: Any?)
+    fun put(key: String?, value: Any?)
 
     /**
      * Put a value in the QueryFilter
@@ -46,7 +46,7 @@ interface QueryFilter {
      * @param key field
      * @param value value
      */
-    fun put(operation: String, key: String, value: Any?)
+    fun put(operation: String?, key: String?, value: Any?)
 
     /**
      * Put a value in the QueryFilter
@@ -63,7 +63,7 @@ interface QueryFilter {
      * @param operation and/or operator
      * @param newFilter new filter to join to the current filter
      */
-    fun joinFilters(operation: String, newFilter: LinkedHashMap<String, Any?>)
+    fun joinFilters(operation: String?, newFilter: LinkedHashMap<String, Any?>)
 
     /**
      * Get a value within the current filter based on a specified key
@@ -123,7 +123,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun addFilter(operator: String, field: String, value: Any?)
+        fun addFilter(operator: String?, field: String?, value: Any?)
 
         /**
          * Add a filter to the builder's QueryFilter
@@ -132,7 +132,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun addFilter(operator: String, field: String, value: Array<Any?>?)
+        fun addFilter(operator: String, field: String?, value: Array<Any?>?)
 
         /**
          * Join the specified Query's filter to the current builder's queryfilter
@@ -140,7 +140,7 @@ interface QueryFilter {
          * @param operator
          * @param newQuery
          */
-        fun joinFilter(operator: String, newQuery: AbstractQuery?)
+        fun joinFilter(operator: String?, newQuery: AbstractQuery?)
 
         /**
          * Add a location filter
@@ -150,7 +150,7 @@ interface QueryFilter {
          * @param point an array of type double[] containing the latitude/longitude points
          * @param distance
          */
-        fun addLocationFilter(field: String, operator: String, point: DoubleArray, distance: Double)
+        fun addLocationFilter(field: String?, operator: String?, point: DoubleArray, distance: Double)
 
         /**
          * Add a location where filter
@@ -159,7 +159,7 @@ interface QueryFilter {
          * @param operator
          * @param points a 2D array of type double[][] containing points for geolocation
          */
-        fun addLocationWhereFilter(field: String, operator: String, points: Array<DoubleArray>)
+        fun addLocationWhereFilter(field: String?, operator: String?, points: Array<DoubleArray>)
 
 
         /**
@@ -173,7 +173,7 @@ interface QueryFilter {
          * @param field
          * @param value
          */
-        fun equals(field: String, value: Any?)
+        fun equals(field: String?, value: Any?)
 
         /**
          * Resets the current filter

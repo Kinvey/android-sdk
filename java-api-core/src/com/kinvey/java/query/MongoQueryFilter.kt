@@ -34,23 +34,29 @@ open class MongoQueryFilter : QueryFilter, Serializable {
     @Key
     override var filter: LinkedHashMap<String, Any?> = LinkedHashMap()
 
-    override fun put(key: String, value: Any?) {
-        filter[key] = value
+    override fun put(key: String?, value: Any?) {
+        if (key != null) {
+            filter[key] = value
+        }
     }
 
-    override fun put(operation: String, key: String, value: Any?) {
+    override fun put(operation: String?, key: String?, value: Any?) {
         val nestedMap: LinkedHashMap<String, Any?> = LinkedHashMap()
-        nestedMap[operation] = value
+        operation?.run { nestedMap[operation] = value }
         if (filter.containsKey(key)) {
             val currentKey = filter[key]
             if (currentKey?.javaClass == String::class.java) {
-                filter[key] = nestedMap
+                if (key != null) {
+                    filter[key] = nestedMap
+                }
             } else {
                 val currentMap = currentKey as LinkedHashMap<String, Any?>
-                currentMap[operation] = value
+                operation?.run { currentMap[operation] = value }
             }
         } else {
-            filter[key] = nestedMap
+            if (key != null) {
+                filter[key] = nestedMap
+            }
         }
     }
 
@@ -70,10 +76,10 @@ open class MongoQueryFilter : QueryFilter, Serializable {
         }
     }
 
-    override fun joinFilters(operation: String, filterToJoin: LinkedHashMap<String, Any?>) {
+    override fun joinFilters(operation: String?, filterToJoin: LinkedHashMap<String, Any?>) {
         val newFilter: LinkedHashMap<String, Any?> = LinkedHashMap()
         val combinedQueries: Array<LinkedHashMap<String, Any?>> = arrayOf(this.filter, filterToJoin)
-        newFilter[operation] = combinedQueries
+        operation?.run { newFilter[operation] = combinedQueries }
         this.filter = newFilter
     }
 
@@ -90,15 +96,15 @@ open class MongoQueryFilter : QueryFilter, Serializable {
         private val query: MongoQueryFilter
         private var operatorMap: HashMap<Operators, String> = HashMap()
 
-        override fun addFilter(operator: String, key: String, value: Any?) {
+        override fun addFilter(operator: String?, key: String?, value: Any?) {
             query.put(operator, key, value)
         }
 
-        override fun addFilter(operator: String, key: String, value: Array<Any?>?) {
+        override fun addFilter(operator: String, key: String?, value: Array<Any?>?) {
             query.put(operator, key, value)
         }
 
-        override fun equals(key: String, value: Any?) {
+        override fun equals(key: String?, value: Any?) {
             query.put(key, value)
         }
 
@@ -106,21 +112,21 @@ open class MongoQueryFilter : QueryFilter, Serializable {
         override val filterMap: AbstractMap<String, Any?>
             get() = query.filter
 
-        override fun joinFilter(operator: String, newQuery: AbstractQuery?) {
+        override fun joinFilter(operator: String?, newQuery: AbstractQuery?) {
             query.joinFilters(operator, newQuery?.queryFilterMap as LinkedHashMap<String, Any?>)
         }
 
-        override fun addLocationFilter(field: String, operator: String, point: DoubleArray, distance: Double) {
+        override fun addLocationFilter(field: String?, operator: String?, point: DoubleArray, distance: Double) {
             val locationFilter = LinkedHashMap<String, Any>()
             val mongoPoint = arrayOf(point[1], point[0])
-            locationFilter[operator] = mongoPoint
+            operator?.run { locationFilter[operator] = mongoPoint }
             if (distance > 0) {
                 locationFilter[getOperator(Operators.MAXDISTANCE)] = distance
             }
             query.put(field, locationFilter)
         }
 
-        override fun addLocationWhereFilter(field: String, operator: String, points: Array<DoubleArray>) {
+        override fun addLocationWhereFilter(field: String?, operator: String?, points: Array<DoubleArray>) {
             val locationFilter = LinkedHashMap<String, Any>()
             val withinFilter = LinkedHashMap<String, Any>()
             val mongoPoints = Array(points.size) { arrayOfNulls<Double?>(2) }
@@ -128,7 +134,7 @@ open class MongoQueryFilter : QueryFilter, Serializable {
                 mongoPoints[i][0] = points[i][1]
                 mongoPoints[i][1] = points[i][0]
             }
-            locationFilter[operator] = mongoPoints
+            operator?.run { locationFilter[operator] = mongoPoints }
             withinFilter[getOperator(Operators.WITHIN)] = locationFilter
             query.put(field, withinFilter)
         }

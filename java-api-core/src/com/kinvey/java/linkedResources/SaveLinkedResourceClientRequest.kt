@@ -56,8 +56,8 @@ open class SaveLinkedResourceClientRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String?,
-                      uriTemplate: String?, jsonContent: GenericJson?, responseClass: Class<T>)
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMethod: String?,
+                      uriTemplate: String?, jsonContent: GenericJson?, responseClass: Class<T>?)
     : AbstractKinveyJsonClientRequest<T>(abstractKinveyJsonClient, requestMethod ?: "",
         uriTemplate ?: "", jsonContent, responseClass) {
     var upload: UploaderProgressListener? = null

@@ -16,11 +16,11 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.util.*
 
-open class KinveyJsonStringClientRequest<T> protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String?,
+open class KinveyJsonStringClientRequest<T> protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMethod: String?,
                                                                   uriTemplate: String?,
                                                                   /** raw json data  */
                                                                   val jsonContent: String?,
-                                                                  responseClass: Class<T>, myClass: Class<*>)
+                                                                  responseClass: Class<T>, myClass: Class<*>?)
     : AbstractKinveyClientRequest<T>(abstractKinveyJsonClient, requestMethod, uriTemplate,
         if (jsonContent == null) null
         else ByteArrayContent(Json.MEDIA_TYPE, jsonContent.toByteArray()), responseClass) {
@@ -28,7 +28,7 @@ open class KinveyJsonStringClientRequest<T> protected constructor(abstractKinvey
      * @return the jsonContent
      */
     var executor: AsyncExecutor<*>? = null
-    private val responseClassType: Type
+    private val responseClassType: Type?
     private fun getType(rawClass: Class<*>, parameter: Class<*>): Type {
         return object : ParameterizedType {
             override fun getActualTypeArguments(): Array<Type> {
@@ -112,6 +112,6 @@ open class KinveyJsonStringClientRequest<T> protected constructor(abstractKinvey
         if (jsonContent != null) {
             super.getRequestHeaders().contentType = Json.MEDIA_TYPE
         }
-        responseClassType = getType(responseClass, myClass)
+        responseClassType = myClass?.run { getType(responseClass, myClass) }
     }
 }

@@ -41,10 +41,12 @@ class AndroidCredentialStore(context: Context?) : CredentialStore {
 
     /** {@inheritDoc}  */
     @Throws(IOException::class)
-    override fun store(userId: String, credential: Credential?) {
+    override fun store(userId: String?, credential: Credential?) {
         Preconditions.checkNotNull(credential, "credential must not be null")
         Preconditions.checkNotNull(userId, "userId must not be null")
-        credential?.run { credentials[userId] = this }
+        if (userId != null) {
+            credential?.run { credentials[userId] = this }
+        }
         persistCredentialStore()
     }
 
