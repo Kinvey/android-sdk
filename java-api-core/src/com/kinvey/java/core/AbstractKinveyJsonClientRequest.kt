@@ -39,7 +39,7 @@ abstract class AbstractKinveyJsonClientRequest<T>
  * @param jsonContent POJO that can be serialized into JSON content or `null` for none
  * @param responseClass response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>,
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>?,
                       requestMethod: String, uriTemplate: String,
      /** raw json data  */
      /**
@@ -48,7 +48,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>,
     val jsonContent: GenericJson?, responseClass: Class<T>?)
     : AbstractKinveyClientRequest<T>(abstractKinveyJsonClient, requestMethod, uriTemplate,
         if (jsonContent == null) null
-        else JsonHttpContent(abstractKinveyJsonClient.jsonFactory, jsonContent), responseClass) {
+        else JsonHttpContent(abstractKinveyJsonClient?.jsonFactory, jsonContent), responseClass) {
 
     var executor: AsyncExecutor<*>? = null
 

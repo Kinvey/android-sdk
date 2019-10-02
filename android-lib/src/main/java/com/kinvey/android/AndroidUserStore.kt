@@ -43,16 +43,15 @@ internal class AndroidUserStore private constructor(context: Context?) : ClientU
         editor?.commit()
     }
 
-    /** {@inheritDoc}  */
-    override fun setUser(userID: String) {
-        this.userID = userID
-        persistData()
-    }
-
-    /** {@inheritDoc}  */
-    override fun getUser(): String? {
-        return userID
-    }
+    override var user: String? = null
+        get() {
+            return userID
+        }
+        set(value) {
+            field = value
+            this.userID = value
+            persistData()
+        }
 
     override fun clear() {
         userID = null

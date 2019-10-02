@@ -14,43 +14,40 @@
  *
  */
 
-package com.kinvey.java.auth;
+package com.kinvey.java.auth
 
-import com.kinvey.java.dto.BaseUser;
-
-import java.io.IOException;
+import com.kinvey.java.dto.BaseUser
+import java.io.IOException
 
 /**
  * @author m0rganic
  * @since 2.0
  */
-public class CredentialManager {
+class CredentialManager {
 
-    private CredentialStore credentialStore;
+    private var credentialStore: CredentialStore? = null
 
-    private CredentialManager() {
+    private constructor() {}
 
-    }
-
-    public CredentialManager(CredentialStore credentialStore)  {
+    constructor(credentialStore: CredentialStore?) {
         if (credentialStore == null) {
-            this.credentialStore = new InMemoryCredentialStore();
+            this.credentialStore = InMemoryCredentialStore()
         } else {
-            this.credentialStore = credentialStore;
+            this.credentialStore = credentialStore
         }
     }
 
     /**
      *
      * @param userId a valid userId to retrieve the credential from storage
-     * @return a credential object if one is found otherwise {@code null} is returned
+     * @return a credential object if one is found otherwise `null` is returned
      * @throws IOException error in access the low-level storage mechanism
      */
-    public Credential loadCredential (String userId) throws IOException {
-        if (credentialStore == null) {
-            return null;
-        }
-        return credentialStore.load(userId);
+    @Throws(IOException::class)
+    fun loadCredential(userId: String?): Credential? {
+        return if (credentialStore == null) {
+            null
+        } else credentialStore?.load(userId)
     }
 
     /**
@@ -59,44 +56,45 @@ public class CredentialManager {
      * @param credential a credential object to store
      * @throws IOException error accessing the low-level storage mechanism
      */
-    public void makePersistent (String userId, Credential credential) throws IOException {
+    @Throws(IOException::class)
+    fun makePersistent(userId: String?, credential: Credential?) {
         if (credentialStore == null) {
-            return;
+            return
         }
-
-        credentialStore.store(userId,  credential);
+        credentialStore?.store(userId ?: "", credential)
     }
 
     /**
      * @param response response received from a new token request
-     * @param userId username or {@code null} if no persistent store is being used
+     * @param userId username or `null` if no persistent store is being used
      * @return new credential object
      */
-    public Credential createAndStoreCredential (KinveyAuthResponse response, String userId) throws IOException {
-        Credential newCredential = Credential.from(response);
+    @Throws(IOException::class)
+    fun createAndStoreCredential(response: KinveyAuthResponse?, userId: String?): Credential {
+        val newCredential: Credential = Credential.from(response)
         if (userId != null && credentialStore != null) {
-            credentialStore.store(userId, newCredential);
+            credentialStore?.store(userId, newCredential)
         }
-
-        return newCredential;
+        return newCredential
     }
 
     /**
      * @param baseUser user
      * @return new credential object
      */
-    public Credential createAndStoreCredential (BaseUser baseUser) throws IOException {
-        String userId = baseUser.getId();
-        Credential newCredential = Credential.from(baseUser);
+    @Throws(IOException::class)
+    fun createAndStoreCredential(baseUser: BaseUser?): Credential? {
+        val userId = baseUser?.id
+        val newCredential = Credential.from(baseUser)
         if (userId != null && credentialStore != null) {
-            credentialStore.store(userId, newCredential);
+            credentialStore?.store(userId, newCredential)
         }
-        return newCredential;
+        return newCredential
     }
 
-    public void removeCredential (String userId)  {
+    fun removeCredential(userId: String?) {
         if (credentialStore != null) {
-            credentialStore.delete(userId);
+            credentialStore?.delete(userId)
         }
     }
 }

@@ -14,40 +14,34 @@
  *
  */
 
-package com.kinvey.java.auth;
+package com.kinvey.java.auth
 
-import com.google.common.base.Preconditions;
-
-import java.util.Map;
-import java.util.HashMap;
+import com.google.common.base.Preconditions
+import java.util.*
 
 /**
  * @author m0rganic
  * @since 2.0
  */
-public class InMemoryCredentialStore implements CredentialStore {
+class InMemoryCredentialStore : CredentialStore {
 
-    private final Map<String, Credential> store = new HashMap<String, Credential>();
+    private val store: MutableMap<String, Credential> = HashMap()
 
-    @Override
-    public Credential load(String userId) {
-        return store.get(userId);
+    override fun load(userId: String?): Credential? {
+        return store[userId]
     }
 
-    @Override
-    public void store(String userId, Credential credential) {
-        Preconditions.checkNotNull(credential, "credential must not be null");
-
-        Credential cred = new Credential(userId, credential.getAuthToken(), credential.getRefreshToken());
+    override fun store(userId: String, credential: Credential?) {
+        Preconditions.checkNotNull(credential, "credential must not be null")
+        val cred = Credential(userId, credential?.authToken, credential?.refreshToken)
         if (userId != null) {
-            store.put(userId, cred);
+            store[userId] = cred
         }
     }
 
-    @Override
-    public void delete(String userId) {
+    override fun delete(userId: String?) {
         if (userId != null) {
-            store.remove(userId);
+            store.remove(userId)
         }
     }
 }

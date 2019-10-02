@@ -14,13 +14,14 @@
  *
  */
 
-package com.kinvey.java.auth;
-
-public interface ClientUser {
-
-    void setUser(String userID);
-
-    String getUser();
-
-    void clear();
-}
+/**
+ * Authentication package containing all of the security methods. CredentialStore is the storage facility for maintaining
+ * users and their auth tokens.
+ *
+ *
+ *
+ * This package was designed with security in mind and deliberately prevents access to sensitive information.
+ *
+ *
+ */
+package com.kinvey.java.auth

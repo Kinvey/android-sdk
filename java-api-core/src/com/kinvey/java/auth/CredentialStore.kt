@@ -14,33 +14,33 @@
  *
  */
 
-package com.kinvey.java.auth;
+package com.kinvey.java.auth
 
-import java.io.IOException;
+import java.io.IOException
 
 /**
  * A mechanism to store, retrieve and purge credentials from memory and disk
  */
-public interface CredentialStore {
-
+interface CredentialStore {
     /**
      * @param userId a unique identifier for the stored credential
-     * @return a credential object retrieved from storage otherwise {@code null} is returned
+     * @return a credential object retrieved from storage otherwise `null` is returned
      * @throws IOException error in retrieving from low-level storage mechanism
      */
-    Credential load (String userId) throws IOException;
+    @Throws(IOException::class)
+    fun load(userId: String?): Credential?
 
     /**
      * @param userId a unique identifier to index the credential in storage
      * @param credential non-null credential to store
      * @throws IOException error in storing to low-level storage mechanism
      */
-    void store (String userId, Credential credential) throws IOException;
+    @Throws(IOException::class)
+    fun store(userId: String, credential: Credential?)
 
     /**
      * @param userId the unique identifier to the credential to purge
      * @throws IOException error in purging the credential from low-level storage
      */
-    void delete (String userId);
-
+    fun delete(userId: String?)
 }

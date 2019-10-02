@@ -51,9 +51,11 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
     @Key("retainReferences")
     private lateinit var retainReferences: String
 
-    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query) : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
+    constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query)
+            : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null,
+            userStoreRequestManager.getClient()?.userArrayClass as Class<Array<T>>) {
         this.userStoreRequestManager = userStoreRequestManager
-        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
+        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient()?.jsonFactory)
         val queryLimit = query.limit
         val querySkip = query.limit
         this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
@@ -67,13 +69,14 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
     }
 
     constructor(userStoreRequestManager: UserStoreRequestManager<T>, query: Query, resolve: Array<String>, resolve_depth: Int, retain: Boolean)
-        : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null, userStoreRequestManager.getClient().userArrayClass as Class<Array<T>>) {
+        : super(userStoreRequestManager.getClient(), "GET", REST_PATH, null,
+            userStoreRequestManager.getClient()?.userArrayClass as Class<Array<T>>) {
         this.userStoreRequestManager = userStoreRequestManager
-        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient().jsonFactory)
+        this.queryFilter = query.getQueryFilterJson(userStoreRequestManager.getClient()?.jsonFactory)
         val queryLimit = query.limit
         val querySkip = query.limit
-        this.limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
-        this.skip = if (querySkip > 0) Integer.toString(querySkip) else null
+        this.limit = if (queryLimit > 0) queryLimit.toString() else null
+        this.skip = if (querySkip > 0) querySkip.toString() else null
         this.sortFilter = query.sortString
 
         this.resolve = Joiner.on(",").join(resolve)
@@ -84,7 +87,6 @@ class RetrieveUsers<T : BaseUser> : AbstractKinveyJsonClientRequest<Array<T>> {
             this.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson()
                     .toJson(userStoreRequestManager.getCustomRequestProperties())
         }
-
     }
 
     companion object {

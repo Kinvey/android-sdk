@@ -1,10 +1,7 @@
 package com.kinvey.android.store
 
-
 import android.content.Intent
-import android.net.Uri
 
-import com.google.api.client.json.GenericJson
 import com.kinvey.android.AsyncClientRequest
 import com.kinvey.android.Client
 import com.kinvey.android.callback.KinveyListCallback
@@ -130,7 +127,7 @@ class UserStore {
         }
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             when (this.type) {
                 UserStoreRequestManager.LoginType.IMPLICIT -> return BaseUserStore.login(client)
                 UserStoreRequestManager.LoginType.KINVEY -> return BaseUserStore.login(username, password, client)
@@ -153,7 +150,7 @@ class UserStore {
     private class Create<T : User> internal constructor(internal var username: String, internal var password: String, private val user: T?, private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             return if (user == null) {
                 BaseUserStore.signUp(username, password, client)
             } else {
@@ -183,20 +180,20 @@ class UserStore {
     private class PostForAccessToken<T : User>(private val client: AbstractClient<T>, private val redirectURI: String?, private val token: String, private val clientId: String?, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             val requestManager = UserStoreRequestManager(client, createBuilder(client))
             requestManager.micRedirectURI = redirectURI
             val result = requestManager.getMICToken(token, clientId).execute()
-
-            val ret = BaseUserStore.loginMobileIdentity(result!!["access_token"]!!.toString(), client)
-
-            val currentCred = client.store?.load(client.activeUser?.id)
-            if (result[REFRESH_TOKEN] != null) {
-                currentCred?.refreshToken = result["refresh_token"]!!.toString()
+            var ret: T? = null
+            result?.let { res ->
+                ret = BaseUserStore.loginMobileIdentity(res["access_token"].toString(), client)
+                val currentCred = client.store?.load(client.activeUser?.id)
+                if (res[REFRESH_TOKEN] != null) {
+                    currentCred?.refreshToken = res["refresh_token"]?.toString()
+                }
+                currentCred?.clientId = clientId
+                client.store?.store(client.activeUser?.id ?: "", currentCred)
             }
-            currentCred?.clientId = clientId
-            client.store?.store(client.activeUser?.id, currentCred)
-
             return ret
         }
     }
@@ -204,21 +201,23 @@ class UserStore {
     private class PostForOAuthToken<T : User>(private val client: AbstractClient<T>, private val clientId: String?, private val redirectURI: String?, internal var username: String, internal var password: String, callback: KinveyUserCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             val requestManager = UserStoreRequestManager(client, createBuilder(client))
             requestManager.micRedirectURI = redirectURI
             val result = requestManager.getOAuthToken(clientId, username, password).execute()
-            val ret = BaseUserStore.loginMobileIdentity(result!![ACCESS_TOKEN]!!.toString(), client)
-            val currentCred = client.store?.load(client.activeUser?.id)
-            if (result[REFRESH_TOKEN] != null) {
-                currentCred?.refreshToken = result[REFRESH_TOKEN]!!.toString()
+            var ret: T? = null
+            result?.let { res ->
+                ret = BaseUserStore.loginMobileIdentity(res[ACCESS_TOKEN]?.toString() ?: "", client)
+                val currentCred = client.store?.load(client.activeUser?.id)
+                if (result[REFRESH_TOKEN] != null) {
+                    currentCred?.refreshToken = result[REFRESH_TOKEN]?.toString()
+                }
+                currentCred?.clientId = clientId
+                client.store?.store(client.activeUser?.id ?: "", currentCred)
             }
-            currentCred?.clientId = clientId
-            client.store?.store(client.activeUser?.id, currentCred)
             return ret
         }
     }
-
 
     private class Retrieve<T : User> : AsyncClientRequest<T> {
 
@@ -291,7 +290,7 @@ class UserStore {
     private class RetrieveMetaData<T : User> internal constructor(private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             return BaseUserStore.convenience(client)
         }
     }
@@ -308,17 +307,15 @@ class UserStore {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
-            return BaseUserStore.save(client!!)
+            return BaseUserStore.save(client)
         }
     }
 
     private class ChangePassword internal constructor(private val password: String, client: AbstractClient<*>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
         internal var client: AbstractClient<*>? = null
 
-
         init {
             this.client = client
-
         }
 
         @Throws(IOException::class)
@@ -327,7 +324,6 @@ class UserStore {
             return null
         }
     }
-
 
     private class ResetPassword internal constructor(internal var usernameOrEmail: String, private val client: AbstractClient<*>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
 
@@ -375,7 +371,7 @@ class UserStore {
     private inner class LoginKinveyAuth<T : User> internal constructor(private val userID: String, private val authToken: String, private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
-        override fun executeAsync(): T {
+        override fun executeAsync(): T? {
             return BaseUserStore.loginKinveyAuthToken(userID, authToken, client)
 
         }
@@ -1112,7 +1108,7 @@ class UserStore {
             val appkey = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
             var host = client.micHostName
             val apiVersion = client.micApiVersion
-            if (apiVersion != null && apiVersion.length > 0) {
+            if (!apiVersion.isNullOrEmpty()) {
                 host = client.micHostName + apiVersion + "/"
             }
             var myURLToRender = host + "oauth/auth?client_id=" + appkey
@@ -1143,9 +1139,9 @@ class UserStore {
                 throw KinveyException("Intent or data from intent from MIC login page is null")
             }
             val uri = intent.data
-            val accessToken = uri!!.getQueryParameter("code")
-            val error = uri.getQueryParameter("error")
-            val errorDescription = uri.getQueryParameter("error_description")
+            val accessToken = uri?.getQueryParameter("code")
+            val error = uri?.getQueryParameter("error")
+            val errorDescription = uri?.getQueryParameter("error_description")
             if (accessToken != null && error == null) {
                 getMICAccessToken(accessToken, clientId, client)
             } else {
@@ -1298,7 +1294,7 @@ class UserStore {
             val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
 
             return KinveyAuthRequest.Builder(client.requestFactory?.transport,
-                    client.jsonFactory, client.baseUrl, appKey, appSecret, null)
+                    client.jsonFactory, client.baseUrl, appKey ?: "", appSecret ?: "", null)
         }
     }
 

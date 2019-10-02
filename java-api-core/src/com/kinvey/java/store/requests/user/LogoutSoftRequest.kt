@@ -23,9 +23,9 @@ import com.kinvey.java.AbstractClient
  * requests. For internal SDK use only.
  */
 
-class LogoutSoftRequest(private val client: AbstractClient<*>) {
+class LogoutSoftRequest(private val client: AbstractClient<*>?) {
 
     fun execute() {
-        client.activeUser = null
+        client?.activeUser = null
     }
 }

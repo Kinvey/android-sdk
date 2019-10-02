@@ -53,11 +53,11 @@ private constructor(response: HttpResponse?, open val details: KinveyJsonError?,
          * @return exception object built up from the raw http response
          */
         @JvmStatic
-        fun from(jsonFactory: JsonFactory, response: HttpResponse): KinveyJsonResponseException {
+        fun from(jsonFactory: JsonFactory, response: HttpResponse?): KinveyJsonResponseException {
             var kinveyJsonResponseException: KinveyJsonResponseException? = null
             var details: KinveyJsonError? = null
             try {
-                if (!response.isSuccessStatusCode
+                if (response?.isSuccessStatusCode == false
                         && HttpMediaType.equalsIgnoreParameters(Json.MEDIA_TYPE, response.contentType)
                         && response.content != null) {
                     var parser: JsonParser? = null

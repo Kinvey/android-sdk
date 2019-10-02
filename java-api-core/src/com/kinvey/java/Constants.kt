@@ -5,6 +5,8 @@ package com.kinvey.java
  */
 object Constants {
 
+    const val DEF_REQUEST_TIMEOUT = 30000
+
     const val COLLECTION = "collection"
     const val UNDERSCORE = "_"
     const val TIME_FORMAT = "%tFT%<tTZ"

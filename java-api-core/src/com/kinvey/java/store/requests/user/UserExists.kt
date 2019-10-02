@@ -22,7 +22,8 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest
 import com.kinvey.java.dto.UserNameExists
 
 
-class UserExists(client: AbstractClient<*>, username: GenericJson) : AbstractKinveyJsonClientRequest<UserNameExists>(client, "POST", REST_PATH, username, UserNameExists::class.java) {
+class UserExists(client: AbstractClient<*>?, username: GenericJson):
+    AbstractKinveyJsonClientRequest<UserNameExists>(client, "POST", REST_PATH, username, UserNameExists::class.java) {
 
     init {
         this.isRequireAppCredentials = true

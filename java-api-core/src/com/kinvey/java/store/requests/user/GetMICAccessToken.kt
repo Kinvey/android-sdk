@@ -28,8 +28,8 @@ import com.kinvey.java.store.UserStoreRequestManager
  */
 class GetMICAccessToken(private val userStoreRequestManager: UserStoreRequestManager<*>, content: HttpContent)
     : AbstractKinveyClientRequest<GenericJson>(userStoreRequestManager.getClient() as AbstractClient<BaseUser>,
-        userStoreRequestManager.getClient().micHostName, "POST",
-        "/" + userStoreRequestManager.getClient().micApiVersion + "/" + BASE_TOKEN_PATH, content, GenericJson::class.java) {
+        userStoreRequestManager.getClient()?.micHostName, "POST",
+        "/" + userStoreRequestManager.getClient()?.micApiVersion + "/" + BASE_TOKEN_PATH, content, GenericJson::class.java) {
     companion object {
         // Base path, without the MIC API version.
         private const val BASE_TOKEN_PATH = "oauth/token"

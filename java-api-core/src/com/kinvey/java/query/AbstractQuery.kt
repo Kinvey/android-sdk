@@ -64,7 +64,7 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
      *
      * @return Query filter as JSon
      */
-    open fun getQueryFilterJson(factory: JsonFactory): String? {
+    open fun getQueryFilterJson(factory: JsonFactory?): String? {
         Preconditions.checkNotNull(factory)
         if (queryString != null) {
             return queryString
@@ -72,10 +72,10 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
         val writer = StringWriter()
         var jsonResult = ""
         try {
-            val generator: JsonGenerator = factory.createJsonGenerator(writer)
+            val generator = factory?.createJsonGenerator(writer)
             val filterMap = queryFilterMap
             buildQueryString(generator, filterMap)
-            generator.flush()
+            generator?.flush()
             jsonResult = writer.toString()
         } catch (ex: Exception) {
             throw KinveyException("Exception thrown during building of query.", "Please inspect the QueryMap for errors: $queryFilterMap", ex.message)
@@ -86,18 +86,18 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
     }
 
     @Throws(IOException::class)
-    private fun buildQueryString(generator: JsonGenerator, filterMap: AbstractMap<String, Any?>) {
+    private fun buildQueryString(generator: JsonGenerator?, filterMap: AbstractMap<String, Any?>) {
         try {
             val filterMapSize = filterMap.entries.size
             var hasMultipleFilters = false
             var i = 0
             for ((key, value) in filterMap) {
                 if (!hasMultipleFilters) {
-                    generator.writeStartObject()
+                    generator?.writeStartObject()
                 }
                 if (value == null) {
-                    generator.writeFieldName(key)
-                    generator.writeNull()
+                    generator?.writeFieldName(key)
+                    generator?.writeNull()
                 } else {
                     generateJsonDataFromValue(generator, key, value)
                 }
@@ -106,7 +106,7 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
                     // there are multiple filters and we have not reached the last one
                     hasMultipleFilters = true
                 } else {
-                    generator.writeEndObject()
+                    generator?.writeEndObject()
                 }
             }
         } catch (e: Exception) {
@@ -114,101 +114,101 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder) : Serial
         }
     }
 
-    private fun generateJsonDataFromValue(generator: JsonGenerator, key: String, value: Any) {
+    private fun generateJsonDataFromValue(generator: JsonGenerator?, key: String, value: Any) {
         val valueClass = value.javaClass
         when {
             valueClass == String::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeString(value as String)
+                generator?.writeFieldName(key)
+                generator?.writeString(value as String)
             }
             valueClass == Array<String>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueStr = value as Array<String>
                 for (str in valueStr) {
-                    generator.writeString(str)
+                    generator?.writeString(str)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == Boolean::class.java || valueClass == java.lang.Boolean::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeBoolean(value as Boolean)
+                generator?.writeFieldName(key)
+                generator?.writeBoolean(value as Boolean)
             }
             valueClass == Array<Boolean>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueBool = value as Array<Boolean>
                 for (bool in valueBool) {
-                    generator.writeBoolean(bool)
+                    generator?.writeBoolean(bool)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == Int::class.java || valueClass == java.lang.Integer::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeNumber(value as Int)
+                generator?.writeFieldName(key)
+                generator?.writeNumber(value as Int)
             }
             valueClass == Array<Int>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueInt = value as Array<Int>
                 for (integer in valueInt) {
-                    generator.writeNumber(integer)
+                    generator?.writeNumber(integer)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == Long::class.java || valueClass == java.lang.Long::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeNumber(value as Long)
+                generator?.writeFieldName(key)
+                generator?.writeNumber(value as Long)
             }
             valueClass == Array<Long>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueLong = value as Array<Long>
                 for (longVal in valueLong) {
-                    generator.writeNumber(longVal)
+                    generator?.writeNumber(longVal)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == Double::class.java || valueClass == java.lang.Double::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeNumber(value as Double)
+                generator?.writeFieldName(key)
+                generator?.writeNumber(value as Double)
             }
             valueClass == Array<Double>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueDouble = value as Array<Double>
                 for (doubleVal in valueDouble) {
-                    generator.writeNumber(doubleVal)
+                    generator?.writeNumber(doubleVal)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == Float::class.java || valueClass == java.lang.Float::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeNumber(value as Float)
+                generator?.writeFieldName(key)
+                generator?.writeNumber(value as Float)
             }
             valueClass == Array<Float>::class.java -> {
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueFloat = value as Array<Float>
                 for (floatVal in valueFloat) {
-                    generator.writeNumber(floatVal)
+                    generator?.writeNumber(floatVal)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             }
             valueClass == LinkedHashMap::class.java -> {
                 // Value is an added filter
-                generator.writeFieldName(key)
+                generator?.writeFieldName(key)
                 buildQueryString(generator, value as LinkedHashMap<String, Any?>)
             }
             valueClass.componentType != null && valueClass.componentType == LinkedHashMap::class.java -> if (valueClass.isArray) {
                 // Value is a map, so this is a nested query. Recursively call into it.
-                generator.writeFieldName(key)
-                generator.writeStartArray()
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
                 val valueMap: Array<LinkedHashMap<String, Any?>> = value as Array<LinkedHashMap<String, Any?>>
                 for (map in valueMap) {
                     buildQueryString(generator, map)
                 }
-                generator.writeEndArray()
+                generator?.writeEndArray()
             } else {
                 // Value is an added filter
                 buildQueryString(generator, value as LinkedHashMap<String, Any?>)

@@ -25,6 +25,8 @@ import com.google.api.client.util.GenericData
 import com.google.api.client.util.Key
 import com.google.common.base.Preconditions
 import com.kinvey.java.AbstractClient
+import com.kinvey.java.Constants
+import com.kinvey.java.Constants.DEF_REQUEST_TIMEOUT
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.auth.KinveyAuthRequest
@@ -46,9 +48,9 @@ protected constructor(
         /**
          * Kinvey JSON client *
          */
-        private val client: AbstractClient<*>,
+        private val client: AbstractClient<*>?,
 
-        private val hostName: String,
+        private val hostName: String?,
         /**
          * HTTP method *
          */
@@ -166,7 +168,7 @@ protected constructor(
     /**
      * @return the abstractKinveyClient
      */
-    open val abstractKinveyClient: AbstractKinveyClient
+    open val abstractKinveyClient: AbstractKinveyClient?
         get() = client
 
     val customerAppVersion: String?
@@ -188,16 +190,16 @@ protected constructor(
      * @param httpContent object to send as the message body or `null` if none
      * @param responseClass expected type in the response of this request
      */
-    protected constructor(abstractKinveyClient: AbstractClient<*>,
+    protected constructor(abstractKinveyClient: AbstractClient<*>?,
                           requestMethod: String?, uriTemplate: String?, httpContent: HttpContent?,
-                          responseClass: Class<T>?) : this(abstractKinveyClient, abstractKinveyClient.baseUrl, requestMethod, uriTemplate, httpContent, responseClass) {
+                          responseClass: Class<T>?) : this(abstractKinveyClient, abstractKinveyClient?.baseUrl, requestMethod, uriTemplate, httpContent, responseClass) {
     }
 
     init {
         Preconditions.checkNotNull(client, "abstractKinveyClient must not be null")
         Preconditions.checkNotNull(requestMethod, "requestMethod must not be null")
         this.uriTemplate = uriTemplate
-        this.requestBackoffPolicy = client.backoffPolicy
+        this.requestBackoffPolicy = client?.backoffPolicy
     }
 
     /**
@@ -232,12 +234,12 @@ protected constructor(
      */
     @Throws(IOException::class)
     fun buildHttpRequest(): HttpRequest? {
-        val httpRequest = abstractKinveyClient
-                .requestFactory?.buildRequest(requestMethod, buildHttpRequestUrl(), httpContent)
-        httpRequest?.parser = abstractKinveyClient.getObjectParser()
+        val httpRequest = abstractKinveyClient?.requestFactory?.
+                buildRequest(requestMethod, buildHttpRequestUrl(), httpContent)
+        httpRequest?.parser = abstractKinveyClient?.getObjectParser()
         httpRequest?.suppressUserAgentSuffix = true
-        httpRequest?.connectTimeout = client.requestTimeout
-        httpRequest?.readTimeout = client.requestTimeout
+        httpRequest?.connectTimeout = client?.requestTimeout ?: DEF_REQUEST_TIMEOUT
+        httpRequest?.readTimeout = client?.requestTimeout ?: DEF_REQUEST_TIMEOUT
         //httpRequest.setRetryOnExecuteIOException(true);
         //httpRequest.setBackOffPolicy(this.requestBackoffPolicy);
         // custom methods may use POST with no content but require a Content-Length header
@@ -249,7 +251,8 @@ protected constructor(
         }
         if (httpRequest?.headers?.containsKey("x-kinvey-custom-request-properties") == true) {
             val customHeaders = httpRequest.headers["x-kinvey-custom-request-properties"] as String?
-            if (customHeaders!!.toByteArray(charset("UTF-8")).size > 2000) {
+            val headersSize = customHeaders?.toByteArray(charset("UTF-8"))?.size ?: 0
+            if (headersSize > 2000) {
                 throw KinveyException("Cannot attach more than 2000 bytes of Custom Request Properties")
             }
         }
@@ -293,7 +296,7 @@ protected constructor(
         throwExceptionOnError = request?.throwExceptionOnExecuteError ?: false
         request?.throwExceptionOnExecuteError = false
         request?.numberOfRetries = 3
-        abstractKinveyClient.getObjectParser()?.run { request?.parser = this }
+        abstractKinveyClient?.getObjectParser()?.run { request?.parser = this }
 
         if (overrideRedirect) {
             request?.followRedirects = false
@@ -307,14 +310,14 @@ protected constructor(
         lastResponseHeaders = response?.headers
 
         if (lastResponseMessage != null && lastResponseMessage == LOCKED_DOWN) {
-            this.client.performLockDown()
+            this.client?.performLockDown()
         }
 
         //process refresh token needed
         if (response?.statusCode == 401 && !hasRetryed) {
             //get the refresh token
             Logger.INFO("get the refresh token")
-            val cred = client.store?.load(client.activeUser?.id)
+            val cred = client?.store?.load(client.activeUser?.id)
             var refreshToken: String? = null
 
             if (cred != null) {
@@ -323,11 +326,11 @@ protected constructor(
 
             if (refreshToken != null) {
                 hasRetryed = true
-                val appKey = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+                val appKey = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
                 val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
 
                 val builder: KinveyAuthRequest.Builder<BaseUser> = KinveyAuthRequest.Builder(client.requestFactory?.transport,
-                        client.jsonFactory, client.baseUrl, appKey, appSecret, null)
+                        client.jsonFactory, client.baseUrl, appKey ?: "", appSecret ?: "", null)
 
                 val userStoreRequestManager = UserStoreRequestManager(client, builder)
 
@@ -343,7 +346,7 @@ protected constructor(
                 //store the new refresh token
                 val currentCred = client.store?.load(client.activeUser?.id)
                 currentCred?.refreshToken = result["refresh_token"]!!.toString()
-                client.store?.store(client.activeUser?.id, currentCred)
+                client.store?.store(client.activeUser?.id ?: "", currentCred)
                 currentCred?.initialize(this)
                 return executeUnparsed()
             }
@@ -399,7 +402,7 @@ protected constructor(
                 return null
 
             } else {
-                return abstractKinveyClient.getObjectParser()?.parseAndClose(response.content, Charsets.UTF_8, responseClass)
+                return abstractKinveyClient?.getObjectParser()?.parseAndClose(response.content, Charsets.UTF_8, responseClass)
             }
 
         } catch (e: IllegalArgumentException) {

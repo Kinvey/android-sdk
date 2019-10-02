@@ -14,16 +14,9 @@
  *
  */
 
-/**
- * Authentication package containing all of the security methods. CredentialStore is the storage facility for maintaining
- * users and their auth tokens.
- *
- * <p>
- * This package was designed with security in mind and deliberately prevents access to sensitive information.
- * </p>
- *
- */
-package com.kinvey.java.auth;
+package com.kinvey.java.auth
 
-
-
+interface ClientUser {
+    var user: String?
+    fun clear()
+}

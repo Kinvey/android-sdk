@@ -16,20 +16,18 @@
 
 package com.kinvey.java.annotations;
 
-import com.google.api.client.json.GenericJson;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.google.api.client.json.GenericJson
+import kotlin.reflect.KClass
 
 /**
  * Created by Prots on 3/11/16.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface KinveyReference {
-    String fieldName();
-    String collection();
-    Class<? extends GenericJson> itemClass();
-}
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD)
+annotation class KinveyReference (
+    val fieldName: String,
+    val collection: String,
+    val itemClass: KClass<out GenericJson>
+)
+
+

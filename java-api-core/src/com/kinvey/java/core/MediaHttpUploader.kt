@@ -606,7 +606,7 @@ constructor (mediaContent: AbstractInputStreamContent,
             throw KinveyException("Uploading Metadata Failed")
         }
         try {
-            val jsonObjectParser = initiationClientRequest.abstractKinveyClient.getObjectParser() as JsonObjectParser
+            val jsonObjectParser = initiationClientRequest.abstractKinveyClient?.getObjectParser() as JsonObjectParser
             meta = initialResponse?.run { parse(jsonObjectParser, this) }
             meta?.let { metadata ->
                 if (metadata.containsKey("_requiredHeaders")) {
