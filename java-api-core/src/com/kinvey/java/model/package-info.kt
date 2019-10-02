@@ -16,9 +16,6 @@
 
 
 /**
- * Contains the basis for all wrappers and api specific services.
+ * Some standard response objects used hold data returned from many Kinvey services.
  */
-package com.kinvey.java.core;
-
-
-
+package com.kinvey.java.model

@@ -14,11 +14,29 @@
  *
  */
 
+package com.kinvey.java.deltaset
+
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
 /**
- * Some standard response objects used hold data returned from many Kinvey services.
+ * Created by Prots on 12/11/15.
  */
-package com.kinvey.java.model;
+class DeltaSetItem : GenericJson() {
 
+    @Key("_id")
+    val id: String? = null
+    @Key("_kmd")
+    val kmd: KMD? = null
 
+    class KMD {
+        @Key("lmt")
+        var lmt: String? = null
+            private set
 
+        constructor() {}
+        constructor(lmt: String?) {
+            this.lmt = lmt
+        }
+    }
+}

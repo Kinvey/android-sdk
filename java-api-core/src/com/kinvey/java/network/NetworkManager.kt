@@ -631,7 +631,7 @@ open class NetworkManager<T : GenericJson>(
                 if (!ids.isNullOrEmpty()) {
                     updatedOnline = fetchIdsWithPaging(ids)
                 }
-                ret.result = listOf(*DeltaSetMerge.merge(items, currentItems, updatedOnline, client.objectParser, myClass))
+                ret.result = listOf(*DeltaSetMerge.merge(items, currentItems, updatedOnline))
             }
             if (ret == null) {
                 ret = super.execute()
