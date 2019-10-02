@@ -14,15 +14,14 @@
  *
  */
 
-package com.kinvey.java.cache;
+package com.kinvey.java.cache
 
-import com.google.api.client.json.GenericJson;
-import com.google.gson.Gson;
+import com.google.api.client.json.GenericJson
 
 /**
  * Created by Prots on 1/26/16.
  */
-public interface ICacheManager {
+interface ICacheManager {
     /**
      * Get cache object for given collection with given collectionItemClass
      * @param collection Name of the collection
@@ -31,15 +30,15 @@ public interface ICacheManager {
      * @param <T> Collection item class that extends GSON object
      * @return Cache object instance that could be queried
      */
-    <T extends GenericJson> ICache<T> getCache(String collection, Class<T> collectionItemClass, Long ttl);
+    fun <T : GenericJson?> getCache(collection: String?, collectionItemClass: Class<T>?, ttl: Long?): ICache<T>?
 
     /**
      * Delete all collections
      */
-    void clear();
+    fun clear()
 
     /**
      * Clear all cached data from the collection
      */
-    <T extends GenericJson> void clearCollection(String collection, Class<T> collectionItemClass, Long ttl);
+    fun <T : GenericJson?> clearCollection(collection: String?, collectionItemClass: Class<T>?, ttl: Long?)
 }

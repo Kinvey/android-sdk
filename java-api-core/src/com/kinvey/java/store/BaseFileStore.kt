@@ -294,7 +294,7 @@ open class BaseFileStore
             ReadPolicy.BOTH -> {
                 if (storeType == StoreType.CACHE && cachedCallback != null) {
                     metaData = cache?.get(id)
-                    cachedCallback.onSuccess(metaData)
+                    cachedCallback.onSuccess(metaData ?: FileMetaData())
                 }
                 metaData = download.execute()
             }
@@ -351,7 +351,7 @@ open class BaseFileStore
                  os: OutputStream,
                  cachedOs: OutputStream? = null,
                  cachedCallback: KinveyCachedClientCallback<FileMetaData>?,
-                 progressListener: DownloaderProgressListener): FileMetaData? {
+                 progressListener: DownloaderProgressListener?): FileMetaData? {
         Preconditions.checkNotNull(metadata, "metadata must not be null")
         Preconditions.checkNotNull(metadata.id, "metadata.getId must not be null")
         Preconditions.checkNotNull(progressListener, "listener must not be null")
@@ -396,7 +396,7 @@ open class BaseFileStore
 
 
     @Throws(IOException::class)
-    private fun getNetworkFile(metadata: FileMetaData?, os: OutputStream, listener: DownloaderProgressListener): FileMetaData? {
+    private fun getNetworkFile(metadata: FileMetaData?, os: OutputStream, listener: DownloaderProgressListener?): FileMetaData? {
         val client = networkFileManager.client
         val downloader = MediaHttpDownloader(client.requestFactory.transport,
                 client.requestFactory.initializer)
@@ -437,7 +437,7 @@ open class BaseFileStore
     private fun getFile(metadata: FileMetaData?,
                         os: OutputStream,
                         readPolicy: ReadPolicy?,
-                        listener: DownloaderProgressListener,
+                        listener: DownloaderProgressListener?,
                         cachedOs: OutputStream?,
                         cachedCallback: KinveyCachedClientCallback<FileMetaData>?): FileMetaData? {
         Preconditions.checkArgument(cachedCallback == null || readPolicy == ReadPolicy.BOTH, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
@@ -464,7 +464,7 @@ open class BaseFileStore
                         } else {
                             metadata?.path = cachedFile.absolutePath
                         }
-                        cachedCallback.onSuccess(metadata)
+                        cachedCallback.onSuccess(metadata ?: FileMetaData())
                     }
                 }
                 val fmd = getNetworkFile(metadata, os, listener)

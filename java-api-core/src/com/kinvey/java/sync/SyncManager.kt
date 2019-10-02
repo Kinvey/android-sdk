@@ -154,7 +154,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     @Throws(IOException::class)
     fun <T : GenericJson> enqueueDeleteRequests(collectionName: String?, networkManager: NetworkManager<T>?, ids: Iterable<String>?) {
         val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
-        val syncRequests = ids?.map { id -> prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, id) }
+        val syncRequests = ids?.mapNotNull { id -> prepareSyncItemRequest(requestCache, collectionName, networkManager, HttpVerb.DELETE, id) }
         syncRequests?.let { requests -> requestCache?.save(requests) }
     }
 
@@ -385,7 +385,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
         }
         entityID.customerVersion = clientRequest.customerAppVersion
         entityID.customheader = clientRequest.customRequestProperties
-        val requestMethod = clientRequest.requestMethod.toUpperCase()
+        val requestMethod = clientRequest.requestMethod?.toUpperCase()
         return SyncRequest(
                 HttpVerb.fromString(requestMethod),
                 entityID, httpRequest.url,

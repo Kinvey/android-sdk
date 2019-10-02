@@ -17,7 +17,4 @@
 /**
  *
  */
-package com.kinvey.java.cache;
-
-
-
+package com.kinvey.java.cache

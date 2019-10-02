@@ -410,8 +410,8 @@ open class NetworkManager<T : GenericJson>(
 
     @Throws(IOException::class)
     open fun saveBatchBlocking(list: List<T>?): SaveBatch? {
-        val responseClassType: Class<*> = KinveySaveBatchResponse::class.java
-        val batch = SaveBatch(list, responseClassType, currentClass, SaveMode.POST)
+        val responseClassType = KinveySaveBatchResponse::class.java
+        val batch = SaveBatch(list, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
         client.initializeRequest(batch)
         return batch
     }
@@ -889,8 +889,8 @@ open class NetworkManager<T : GenericJson>(
      * create multi-insert requests.
      *
      */
-    inner class SaveBatch internal constructor(itemsList: List<T>?, responseClassType: Class<*>?, parClassType: Class<*>?, update: SaveMode?)
-        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<*>?>(client, update.toString(), SAVE_BATCH_REST_PATH, BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
+    inner class SaveBatch internal constructor(itemsList: List<T>?, responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>, update: SaveMode?)
+        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH, BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
         @Key
         private var collectionName: String? = this@NetworkManager.collectionName
 

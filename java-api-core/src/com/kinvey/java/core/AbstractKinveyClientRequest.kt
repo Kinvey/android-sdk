@@ -47,14 +47,18 @@ protected constructor(
         /**
          * Kinvey JSON client *
          */
-        private val client: AbstractClient<*>, private val hostName: String,
+        private val client: AbstractClient<*>,
+
+        private val hostName: String,
         /**
          * HTTP method *
          */
         /**
          * @return the requestMethod
          */
-        val requestMethod: String, uriTemplate: String,
+        val requestMethod: String?,
+
+        uriTemplate: String?,
         /**
          * http content or `null` if none is set *
          */
@@ -77,7 +81,7 @@ protected constructor(
     /**
      * @return the uriTemplate
      */
-    var uriTemplate: String
+    var uriTemplate: String?
 
     /**
      * http headers to be sent along with the request *
@@ -186,7 +190,7 @@ protected constructor(
      * @param responseClass expected type in the response of this request
      */
     protected constructor(abstractKinveyClient: AbstractClient<*>,
-                          requestMethod: String, uriTemplate: String, httpContent: HttpContent?,
+                          requestMethod: String?, uriTemplate: String?, httpContent: HttpContent?,
                           responseClass: Class<T>?) : this(abstractKinveyClient, abstractKinveyClient.baseUrl, requestMethod, uriTemplate, httpContent, responseClass) {
     }
 

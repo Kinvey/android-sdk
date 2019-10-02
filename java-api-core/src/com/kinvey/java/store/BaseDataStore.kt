@@ -118,7 +118,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         var ret: T?
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             ret = ReadSingleRequest(cache, id, ReadPolicy.FORCE_LOCAL, networkManager).execute()
-            cachedCallback.onSuccess(ret)
+            ret?.run { cachedCallback.onSuccess(this) }
         }
         ret = ReadSingleRequest(cache, id, this.storeType.readPolicy, networkManager).execute()
         return ret
@@ -138,7 +138,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(ids, "ids must not be null.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE) {
-            cachedCallback?.onSuccess(ReadIdsRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute())
+            val result = ReadIdsRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, ids).execute()
+            result?.run { cachedCallback?.onSuccess(this) }
             return if (isDeltaSetCachingEnabled) {
                 val query = client.query().`in`("_id", Iterables.toArray(ids, String::class.java) as Array<Any>)
                 findBlockingDeltaSync(query)
@@ -171,7 +172,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         // perform request based on policy
         if (storeType == StoreType.CACHE) {
-            cachedCallback?.onSuccess(ReadQueryRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute())
+            val result = ReadQueryRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute()
+            result?.run { cachedCallback?.onSuccess(this) }
             return if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 findBlockingDeltaSync(query)
             } else {
@@ -199,7 +201,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         // perform request based on policy
         if (storeType == StoreType.CACHE) {
-            cachedCallback?.onSuccess(ReadAllRequest(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute())
+            val result = ReadAllRequest(cache, ReadPolicy.FORCE_LOCAL, networkManager).execute()
+            result?.run { cachedCallback?.onSuccess(this) }
             return if (isDeltaSetCachingEnabled) {
                 findBlockingDeltaSync(client.query())
             } else {
@@ -237,7 +240,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, null, client.syncManager).execute()?.count
-            cachedCallback.onSuccess(ret)
+            ret?.run { cachedCallback.onSuccess(this) }
         }
         return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, null, client.syncManager).execute()?.count ?: 0
     }
@@ -254,7 +257,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         if (storeType == StoreType.CACHE && cachedCallback != null) {
             val ret = ReadCountRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query, client.syncManager).execute()?.count
-            cachedCallback.onSuccess(ret)
+            ret?.run { cachedCallback.onSuccess(this) }
         }
         return ReadCountRequest(cache, networkManager, this.storeType.readPolicy, query, client.syncManager).execute()?.count ?: 0
     }
