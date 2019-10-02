@@ -184,7 +184,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             return context?.getExternalFilesDir("KinveyFiles")?.absolutePath
         }
 
-    override fun getFileStore(storeType: StoreType): FileStore {
+    override fun getFileStore(storeType: StoreType?): FileStore {
         return FileStore(NetworkFileManager(this),
                 cacheManager, 60 * 1000 * 1000L,
                 storeType, fileCacheFolder)
@@ -572,7 +572,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             }
 
             if (super.getString(Option.PORT).isNotEmpty()) {
-                this.baseUrl = String.format("%s:%s", super.getBaseUrl(), super.getString(Option.PORT))
+                this.baseUrl = String.format("%s:%s", super.baseUrl, super.getString(Option.PORT))
             }
 
             if (super.getString(Option.DELTA_SET_CACHE).isNotEmpty()) {
@@ -849,7 +849,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
          * @param factory - the JSON factory for this client to use
          * @return
          */
-        override fun setJsonFactory(factory: JsonFactory): Builder<*> {
+        override fun setJsonFactory(factory: JsonFactory?): Builder<*> {
             super.setJsonFactory(factory)
             return this
         }
@@ -946,7 +946,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
         }
 
         private fun loginWithCredential(client: Client<T>?, credential: Credential) {
-            kinveyClientRequestInitializer.setCredential(credential)
+            kinveyClientRequestInitializer?.setCredential(credential)
             try {
                 BaseUserStore.login(credential, client)
             } catch (ex: IOException) {

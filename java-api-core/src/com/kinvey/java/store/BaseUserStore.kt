@@ -247,7 +247,7 @@ object BaseUserStore {
         client?.let { c ->
             val appKey = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
             val appSecret = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
-            return KinveyAuthRequest.Builder(c.requestFactory.transport,
+            return KinveyAuthRequest.Builder(c.requestFactory?.transport,
                     c.jsonFactory, c.baseUrl, appKey, appSecret, null)
         }
         return null

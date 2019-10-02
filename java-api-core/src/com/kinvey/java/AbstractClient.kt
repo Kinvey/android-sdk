@@ -64,7 +64,8 @@ protected constructor(transport: HttpTransport?,
                       httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?,
                       servicePath: String?, objectParser: JsonObjectParser?,
                       kinveyRequestInitializer: KinveyClientRequestInitializer?, val store: CredentialStore?,
-                      requestPolicy: BackOffPolicy?) : AbstractKinveyJsonClient(transport, httpRequestInitializer,
+                      requestPolicy: BackOffPolicy?)
+    : AbstractKinveyJsonClient(transport, httpRequestInitializer,
                       rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy) {
 
     /** used to synchronized access to the local api wrappers  */
@@ -243,8 +244,8 @@ protected constructor(transport: HttpTransport?,
      * Initializes the Kinvey client request. This method is only used internally to the library.
      */
     @Throws(java.io.IOException::class)
-    override fun initializeRequest(httpClientRequest: AbstractKinveyClientRequest<*>) {
-        super.initializeRequest(httpClientRequest)
+    override fun initializeRequest(request: AbstractKinveyClientRequest<*>?) {
+        super.initializeRequest(request)
     }
 
     /**
@@ -364,8 +365,7 @@ protected constructor(transport: HttpTransport?,
          * setKinveyClientRequestInitializer
          * (com.kinvey.java.core.KinveyRequestInitializer)
          */
-        override fun setKinveyClientRequestInitializer(
-                kinveyRequestInitializer: KinveyClientRequestInitializer): Builder {
+        override fun setKinveyClientRequestInitializer(kinveyRequestInitializer: KinveyClientRequestInitializer?): Builder {
             return super.setKinveyClientRequestInitializer(kinveyRequestInitializer) as Builder
         }
 
@@ -470,7 +470,7 @@ protected constructor(transport: HttpTransport?,
         }
     }
 
-    override fun getFileStore(storeType: StoreType): BaseFileStore {
+    override fun getFileStore(storeType: StoreType?): BaseFileStore {
         return BaseFileStore(NetworkFileManager(this),
                 cacheManager, 60 * 1000 * 1000L,
                 storeType, fileCacheFolder)

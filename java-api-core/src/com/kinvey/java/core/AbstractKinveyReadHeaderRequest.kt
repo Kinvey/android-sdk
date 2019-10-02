@@ -53,15 +53,15 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
     override fun execute(): T? {
         val response = executeUnparsed()
         if (overrideRedirect) {
-            return onRedirect(response.headers.location)
+            return onRedirect(response?.headers?.location ?: "")
         }
         // special class to handle void or empty responses
-        if (response.content == null) {
-            response.ignore()
+        if (response?.content == null) {
+            response?.ignore()
             return null
         }
         try {
-            val ret: T
+            var ret: T? = null
             val statusCode = response.statusCode
             if (response.request.requestMethod == HttpMethods.HEAD || statusCode / 100 == 1
                     || statusCode == HttpStatusCodes.STATUS_CODE_NO_CONTENT
@@ -71,12 +71,14 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
 
             } else {
                 val jsonString = response.parseAsString()
-                val objectParser = abstractKinveyClient.objectParser
-                ret = objectParser.parseAndClose(ByteArrayInputStream(jsonString.toByteArray(Charsets.UTF_8)), Charsets.UTF_8, responseClass)
-                if (response.headers.containsKey(Constants.X_KINVEY_REQUEST_START)) {
-                    ret.lastRequestTime = response.headers.getHeaderStringValues(Constants.X_KINVEY_REQUEST_START)[0].toUpperCase(Locale.US)
-                } else if (response.headers.containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {
-                    ret.lastRequestTime = response.headers.getHeaderStringValues(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)[0].toUpperCase(Locale.US)
+                val objectParser = abstractKinveyClient.getObjectParser()
+                ret = objectParser?.parseAndClose(ByteArrayInputStream(jsonString.toByteArray(Charsets.UTF_8)), Charsets.UTF_8, responseClass)
+                ret?.run {
+                    if (response.headers.containsKey(Constants.X_KINVEY_REQUEST_START)) {
+                        this.lastRequestTime = response.headers.getHeaderStringValues(Constants.X_KINVEY_REQUEST_START)[0].toUpperCase(Locale.US)
+                    } else if (response.headers.containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {
+                        this.lastRequestTime = response.headers.getHeaderStringValues(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)[0].toUpperCase(Locale.US)
+                    }
                 }
                 return ret
             }

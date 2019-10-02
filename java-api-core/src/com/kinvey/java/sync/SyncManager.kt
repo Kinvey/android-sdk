@@ -369,7 +369,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     fun createSaveBatchSyncRequest(collectionName: String?, clientRequest: AbstractKinveyClientRequest<*>): SyncRequest {
         val httpRequest = clientRequest.buildHttpRequest()
         val entityID = SyncMetaData()
-        if (httpRequest.content != null) {
+        if (httpRequest?.content != null) {
             val os = ByteArrayOutputStream()
             httpRequest.content.writeTo(os)
             entityID.data = os.toString(UTF_8)
@@ -388,7 +388,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
         val requestMethod = clientRequest.requestMethod?.toUpperCase()
         return SyncRequest(
                 HttpVerb.fromString(requestMethod),
-                entityID, httpRequest.url,
+                entityID, httpRequest?.url,
                 collectionName
         )
     }

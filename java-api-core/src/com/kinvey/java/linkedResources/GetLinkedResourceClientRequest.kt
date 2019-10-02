@@ -92,11 +92,11 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, uriTemplate: 
                 }
                 val stream = ByteArrayOutputStream()
                 entity.getFile(key)?.output = stream
-                val store: BaseFileStore = abstractKinveyClient.getFileStore(StoreType.SYNC)
+                val store = abstractKinveyClient.getFileStore(StoreType.SYNC)
                 val meta = FileMetaData()
                 if ((entity[key] as Map<*, *>).containsKey("_id")) {
                     meta.id = (entity[key] as Map<*, *>)["_id"].toString()
-                    store.download(meta, stream, null, null, downloadProgressListener)
+                    store?.download(meta, stream, null, null, downloadProgressListener)
                 }
             }
         }

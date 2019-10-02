@@ -35,18 +35,20 @@ abstract class AbstractKinveyQueryCacheReadRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String, jsonContent: GenericJson?, private val queryResponseClass: Class<T>?)
-    : AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String,
+                      jsonContent: GenericJson?, private val queryResponseClass: Class<T>?)
+    : AbstractKinveyJsonClientRequest<KinveyQueryCacheResponse<T>>(abstractKinveyJsonClient,
+        requestMethod, uriTemplate, jsonContent, null) {
 
     @Throws(IOException::class)
     override fun execute(): KinveyQueryCacheResponse<T>? {
         val response = executeUnparsed()
         if (overrideRedirect) {
-            return onRedirect(response.headers.location)
+            return onRedirect(response?.headers?.location ?: "")
         }
         // special class to handle void or empty responses
-        if (response.content == null) {
-            response.ignore()
+        if (response?.content == null) {
+            response?.ignore()
             return null
         }
         try {
@@ -64,13 +66,14 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
                 val jsonParser = JsonParser()
                 val jsonObject = jsonParser.parse(jsonString) as JsonObject
                 val jsonArrayChanged = jsonObject.getAsJsonArray(Constants.CHANGED)
-                val objectParser = abstractKinveyClient.objectParser
+                val objectParser = abstractKinveyClient.getObjectParser()
                 val changed = ArrayList<T>()
                 val exceptions = ArrayList<Exception>()
 
                 jsonArrayChanged.onEach { element ->
                     try {
-                        changed.add(objectParser.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, queryResponseClass))
+                        val item = objectParser?.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, queryResponseClass)
+                        item?.run { changed.add(this) }
                     } catch (e: IllegalArgumentException) {
                         Logger.ERROR("unable to parse response -> $e")
                         exceptions.add(KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()))
@@ -85,7 +88,8 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
                 val deleted = ArrayList<T>()
                 for (element in jsonArrayDeleted) {
                     try {
-                        deleted.add(objectParser.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, queryResponseClass))
+                        val item = objectParser?.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, queryResponseClass)
+                        item?.run { deleted.add(this) }
                     } catch (e: IllegalArgumentException) {
                         Logger.ERROR("unable to parse response -> $e")
                         exceptions.add(KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()))

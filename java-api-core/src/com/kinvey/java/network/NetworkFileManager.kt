@@ -639,8 +639,8 @@ open class NetworkFileManager
          * @param requestFactory request factory to be used
          * @return a valid http uploader with default settings
          */
-        protected fun createMediaHttpUploader(content: AbstractInputStreamContent, requestFactory: HttpRequestFactory): MediaHttpUploader {
-            return MediaHttpUploader(content, requestFactory.transport, requestFactory.initializer)
+        protected fun createMediaHttpUploader(content: AbstractInputStreamContent, requestFactory: HttpRequestFactory?): MediaHttpUploader {
+            return MediaHttpUploader(content, requestFactory?.transport, requestFactory?.initializer)
         }
     }
 

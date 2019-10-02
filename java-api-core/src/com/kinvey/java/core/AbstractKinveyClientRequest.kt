@@ -20,7 +20,6 @@ import java.io.*
 import java.util.Locale
 
 import com.google.api.client.http.*
-import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Charsets
 import com.google.api.client.util.GenericData
 import com.google.api.client.util.Key
@@ -232,24 +231,23 @@ protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun buildHttpRequest(): HttpRequest {
+    fun buildHttpRequest(): HttpRequest? {
         val httpRequest = abstractKinveyClient
-                .requestFactory
-                .buildRequest(requestMethod, buildHttpRequestUrl(), httpContent)
-        httpRequest.parser = abstractKinveyClient.objectParser
-        httpRequest.suppressUserAgentSuffix = true
-        httpRequest.connectTimeout = client.requestTimeout
-        httpRequest.readTimeout = client.requestTimeout
+                .requestFactory?.buildRequest(requestMethod, buildHttpRequestUrl(), httpContent)
+        httpRequest?.parser = abstractKinveyClient.getObjectParser()
+        httpRequest?.suppressUserAgentSuffix = true
+        httpRequest?.connectTimeout = client.requestTimeout
+        httpRequest?.readTimeout = client.requestTimeout
         //httpRequest.setRetryOnExecuteIOException(true);
         //httpRequest.setBackOffPolicy(this.requestBackoffPolicy);
         // custom methods may use POST with no content but require a Content-Length header
         if (httpContent == null && (requestMethod == HttpMethods.POST || requestMethod == HttpMethods.PUT)) {
-            httpRequest.content = EmptyContent()
+            httpRequest?.content = EmptyContent()
         }
         for ((key, value) in requestHeaders) {
-            httpRequest.headers.set(key.toLowerCase(Locale.US), value)
+            httpRequest?.headers?.set(key.toLowerCase(Locale.US), value)
         }
-        if (httpRequest.headers.containsKey("x-kinvey-custom-request-properties")) {
+        if (httpRequest?.headers?.containsKey("x-kinvey-custom-request-properties") == true) {
             val customHeaders = httpRequest.headers["x-kinvey-custom-request-properties"] as String?
             if (customHeaders!!.toByteArray(charset("UTF-8")).size > 2000) {
                 throw KinveyException("Cannot attach more than 2000 bytes of Custom Request Properties")
@@ -286,34 +284,34 @@ protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun executeUnparsed(upload: Boolean = false): HttpResponse {
-        val response: HttpResponse
+    fun executeUnparsed(upload: Boolean = false): HttpResponse? {
+        val response: HttpResponse?
         val throwExceptionOnError: Boolean
 
         // normal request
         val request = buildHttpRequest()
-        throwExceptionOnError = request.throwExceptionOnExecuteError
-        request.throwExceptionOnExecuteError = false
-        request.numberOfRetries = 3
-        request.parser = abstractKinveyClient.objectParser
+        throwExceptionOnError = request?.throwExceptionOnExecuteError ?: false
+        request?.throwExceptionOnExecuteError = false
+        request?.numberOfRetries = 3
+        abstractKinveyClient.getObjectParser()?.run { request?.parser = this }
 
         if (overrideRedirect) {
-            request.followRedirects = false
+            request?.followRedirects = false
         }
 
-        response = request.execute()
+        response = request?.execute()
         Logger.INFO("Getting response for network request")
 
-        lastResponseCode = response.getStatusCode()
-        lastResponseMessage = response.getStatusMessage()
-        lastResponseHeaders = response.getHeaders()
+        lastResponseCode = response?.statusCode ?: 0
+        lastResponseMessage = response?.statusMessage
+        lastResponseHeaders = response?.headers
 
         if (lastResponseMessage != null && lastResponseMessage == LOCKED_DOWN) {
             this.client.performLockDown()
         }
 
         //process refresh token needed
-        if (response.getStatusCode() == 401 && !hasRetryed) {
+        if (response?.statusCode == 401 && !hasRetryed) {
             //get the refresh token
             Logger.INFO("get the refresh token")
             val cred = client.store?.load(client.activeUser?.id)
@@ -328,7 +326,7 @@ protected constructor(
                 val appKey = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
                 val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
 
-                val builder: KinveyAuthRequest.Builder<BaseUser> = KinveyAuthRequest.Builder(client.requestFactory.transport,
+                val builder: KinveyAuthRequest.Builder<BaseUser> = KinveyAuthRequest.Builder(client.requestFactory?.transport,
                         client.jsonFactory, client.baseUrl, appKey, appSecret, null)
 
                 val userStoreRequestManager = UserStoreRequestManager(client, builder)
@@ -353,7 +351,7 @@ protected constructor(
         }
 
         // process any other errors
-        if (throwExceptionOnError && !response.isSuccessStatusCode() && response.getStatusCode() != 302) {
+        if (throwExceptionOnError && response?.isSuccessStatusCode == false && response.statusCode != 302) {
             throw newExceptionOnError(response)
         }
 
@@ -383,12 +381,12 @@ protected constructor(
 
         if (overrideRedirect) {
             Logger.INFO("overrideRedirect == true")
-            return onRedirect(response.headers.location)
+            return onRedirect(response?.headers?.location ?: "")
         }
 
         // special class to handle void or empty responses
-        if (Void::class.java == responseClass || response.content == null) {
-            response.ignore()
+        if (Void::class.java == responseClass || response?.content == null) {
+            response?.ignore()
             return null
         }
 
@@ -401,7 +399,7 @@ protected constructor(
                 return null
 
             } else {
-                return abstractKinveyClient.objectParser.parseAndClose(response.content, Charsets.UTF_8, responseClass)
+                return abstractKinveyClient.getObjectParser()?.parseAndClose(response.content, Charsets.UTF_8, responseClass)
             }
 
         } catch (e: IllegalArgumentException) {
@@ -444,8 +442,8 @@ protected constructor(
      * @return input stream of the response content
      */
     @Throws(IOException::class)
-    fun executeAsInputStream(): InputStream {
-        return executeUnparsed().content
+    fun executeAsInputStream(): InputStream? {
+        return executeUnparsed()?.content
     }
 
     fun setAppKey(appKey: String?): AbstractKinveyClientRequest<T> {

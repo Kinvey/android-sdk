@@ -91,7 +91,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
                             override fun progressChanged(uploader: MediaHttpUploader) {
                             }
                         }
-                        val fileStore: BaseFileStore = abstractKinveyClient.getFileStore(StoreType.SYNC)
+                        val fileStore = abstractKinveyClient.getFileStore(StoreType.SYNC)
                         val linkedFile = jsonContent.getFile(key)
                         val meta = FileMetaData(linkedFile?.id ?: "")
                         meta.fileName = linkedFile?.fileName
@@ -100,7 +100,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
                         }
                         inStream?.run { mimeTypeFinder?.getMimeType(meta, this) }
                         val stream = mediaContent?.inputStream ?: ByteArrayInputStream(byteArrayOf())
-                        val file = fileStore.upload(stream, meta, object : UploaderProgressListener {
+                        val file = fileStore?.upload(stream, meta, object : UploaderProgressListener {
                             @Throws(IOException::class)
                             override fun progressChanged(uploader: MediaHttpUploader) {
                                 if (upload != null) {

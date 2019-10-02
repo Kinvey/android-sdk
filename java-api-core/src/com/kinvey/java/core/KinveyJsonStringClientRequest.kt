@@ -63,12 +63,12 @@ open class KinveyJsonStringClientRequest<T> protected constructor(abstractKinvey
         val response = executeUnparsed()
         if (overrideRedirect) {
             INFO("overrideRedirect == true")
-            return onRedirect(response.headers.location)
+            return onRedirect(response?.headers?.location ?: "")
         }
 
         // special class to handle void or empty responses
-        if (Void::class.java == responseClass || response.content == null) {
-            response.ignore()
+        if (Void::class.java == responseClass || response?.content == null) {
+            response?.ignore()
             return null
         }
         return try {

@@ -398,8 +398,8 @@ open class BaseFileStore
     @Throws(IOException::class)
     private fun getNetworkFile(metadata: FileMetaData?, os: OutputStream, listener: DownloaderProgressListener?): FileMetaData? {
         val client = networkFileManager.client
-        val downloader = MediaHttpDownloader(client.requestFactory.transport,
-                client.requestFactory.initializer)
+        val downloader = MediaHttpDownloader(client.requestFactory?.transport,
+                client.requestFactory?.initializer)
         downloader.progressListener = listener
         setDownloader(downloader)
         return metadata?.let { downloader.download(it, os) }

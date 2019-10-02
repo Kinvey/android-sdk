@@ -1297,7 +1297,7 @@ class UserStore {
             val appKey = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
             val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
 
-            return KinveyAuthRequest.Builder(client.requestFactory.transport,
+            return KinveyAuthRequest.Builder(client.requestFactory?.transport,
                     client.jsonFactory, client.baseUrl, appKey, appSecret, null)
         }
     }
