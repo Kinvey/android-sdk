@@ -25,6 +25,7 @@ import java.util.*
  * Created by Prots on 2/1/16.
  */
 object QueryHelper {
+    @JvmStatic
     fun prepareRealmQuery(realmQuery: RealmQuery<DynamicRealmObject>,
                           queryMap: Map<String, Any>?, isIgnoreIn: Boolean)
             : RealmQuery<DynamicRealmObject> {
@@ -87,6 +88,7 @@ object QueryHelper {
         return realmQuery
     }
 
+    @JvmStatic
     fun prepareRealmQuery(realmQuery: RealmQuery<DynamicRealmObject>, queryMap: Map<String, Any>?): RealmQuery<DynamicRealmObject> {
         return prepareRealmQuery(realmQuery, queryMap, false)
     }

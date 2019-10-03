@@ -172,8 +172,8 @@ class RealmCache<T : GenericJson>(val collection: String, private val mCacheMana
         var ret: MutableList<T> = mutableListOf()
         mRealm.use { mRealm ->
             mRealm.beginTransaction()
-            ret = items?.mapNotNull {
-                it?.put(ID, insertOrUpdate(it, mRealm)) as T
+            ret = items?.onEach {
+                it.put(ID, insertOrUpdate(it, mRealm))
             }?.toMutableList() as MutableList<T>
             mRealm.commitTransaction()
         }

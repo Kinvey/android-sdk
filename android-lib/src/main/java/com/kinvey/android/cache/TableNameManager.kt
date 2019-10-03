@@ -23,25 +23,29 @@ object TableNameManager {
         }
     }
 
+    @JvmStatic
     fun createShortName(originalName: String?, realm: DynamicRealm): String {
         initTable(realm)
         val shortName = UUID.randomUUID().toString()
-        val `object`: DynamicRealmObject = realm.createObject(COLLECTION_NAME, shortName)
-        `object`.set(ORIGINAL_NAME_FIELD, originalName)
+        val obj: DynamicRealmObject = realm.createObject(COLLECTION_NAME, shortName)
+        obj.set(ORIGINAL_NAME_FIELD, originalName)
         return shortName
     }
 
+    @JvmStatic
     fun removeShortName(originalName: String?, realm: DynamicRealm) {
         initTable(realm)
-        realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, originalName).findFirst()!!.deleteFromRealm()
+        realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, originalName).findFirst()?.deleteFromRealm()
     }
 
-    fun getShortName(originalName: String?, realm: DynamicRealm): String {
+    @JvmStatic
+    fun getShortName(originalName: String?, realm: DynamicRealm): String? {
         initTable(realm)
         val realmObject = realm.where(COLLECTION_NAME).equalTo(ORIGINAL_NAME_FIELD, originalName).findFirst()
-        return realmObject?.getString(SHORT_NAME_FIELD) ?: ""
+        return realmObject?.getString(SHORT_NAME_FIELD)
     }
 
+    @JvmStatic
     fun getOriginalName(shortName: String?, realm: DynamicRealm): String? {
         initTable(realm)
         val realmObject = realm.where(COLLECTION_NAME).equalTo(SHORT_NAME_FIELD, shortName).findFirst()

@@ -85,10 +85,10 @@ class RealmCacheManager : ICacheManager {
     override fun <T : GenericJson> getCache(collection: String?, collectionItemClass: Class<T>?, ttl: Long?): ICache<T>? {
         synchronized(LOCK) {
             val mRealm = dynamicRealm
-            var cache: RealmCache<T>
+            var cache: RealmCache<T>?
             try {
                 val cacheKey = clientHash + File.separator + collection
-                cache = mCacheMap[cacheKey] as RealmCache<T>
+                cache = mCacheMap[cacheKey] as RealmCache<T>?
                 if (cache == null) {
                     cache = RealmCache<T>(collection ?: "", this,
                             collectionItemClass ?: GenericJson::class.java as Class<T>, ttl ?: 0)
@@ -260,7 +260,8 @@ class RealmCacheManager : ICacheManager {
             try {
                 realm.beginTransaction()
                 val schemas: MutableList<String> = ArrayList()
-                schemas.add(TableNameManager.getShortName(collection, realm))
+                val table = TableNameManager.getShortName(collection, realm)
+                table?.let { schemas.add(it) }
                 schemas.addAll(getEmbeddedObjectSchemas(collection, realm))
                 removeSchemas(schemas, realm)
                 val cacheKey = clientHash + File.separator + collection
@@ -344,8 +345,8 @@ class RealmCacheManager : ICacheManager {
     /**
      * get Prepared DynamicRealm since realm object can not be shared between threads
      */
-    internal val dynamicRealm: DynamicRealm
-        internal get() = synchronized(LOCK) {
+    val dynamicRealm: DynamicRealm
+        get() = synchronized(LOCK) {
             val realm: DynamicRealm
             try {
                 realm = DynamicRealm.getInstance(realmConfiguration)
