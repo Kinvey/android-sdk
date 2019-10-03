@@ -56,7 +56,7 @@ open class NetworkManager<T : GenericJson>(
      * Gets/Sets the collectionName
      * @param collectionName Name of the appData collection.
      */
-    var collectionName: String?,
+    collectionName: String? = null,
     /**
      * Gets current class that this NetworkManager instance references.
      * @return Current appData class for marshalling data
@@ -67,6 +67,16 @@ open class NetworkManager<T : GenericJson>(
      * @return current client instance
      */
     val client: AbstractClient<*>?) {
+
+    /**
+     * Gets/Sets the collectionName
+     * @param collectionName Name of the appData collection.
+     */
+    var collectionName: String? = collectionName
+        set(value) {
+            Preconditions.checkNotNull(value)
+            field = value
+        }
 
     var clientAppVersion: String? = null
     var customRequestProperties: GenericData? = GenericData()
@@ -355,6 +365,7 @@ open class NetworkManager<T : GenericJson>(
      */
     @Throws(IOException::class)
     open fun saveBlocking(entity: T?): Save? {
+        Preconditions.checkNotNull(entity, "accessToken must not be null")
         INFO("Start saveBlocking for object")
         val save: Save
         val sourceID: String?

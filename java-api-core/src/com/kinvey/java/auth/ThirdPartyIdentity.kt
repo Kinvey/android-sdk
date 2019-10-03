@@ -62,7 +62,7 @@ class ThirdPartyIdentity private constructor(@field:Key("_socialIdentity") priva
 
         init {
             this.accessToken = Preconditions.checkNotNull(accessToken, "accessToken must not be null")
-            Preconditions.checkArgument("" != accessToken, "accessToken must not be empty")
+            Preconditions.checkArgument(accessToken != "", "accessToken must not be empty")
         }
     }
 
@@ -205,46 +205,54 @@ class ThirdPartyIdentity private constructor(@field:Key("_socialIdentity") priva
         @JvmStatic
         fun createThirdPartyIdentity(type: Type?, vararg params: String?): ThirdPartyIdentity {
             Preconditions.checkNotNull(type, "Type argument must not be null")
-            Preconditions.checkNotNull(params, "Params must not be null")
+            Preconditions.checkNotNull(params.contains(null), "Params must not be null")
+            var accessToken = ""
+            var accessTokenSecret = ""
+            var consumerKey = ""
+            var consumerSecret = ""
+            val parCount = params.count()
+            if (parCount > 0) { accessToken = params[0] ?: "" }
+            if (parCount > 1) { accessTokenSecret = params[1] ?: "" }
+            if (parCount > 2) { consumerKey = params[2] ?: "" }
+            if (parCount > 3) { consumerSecret = params[3] ?: "" }
             return when (type) {
                 Type.FACEBOOK -> {
                     Preconditions.checkArgument(params.size == 1, "Expected %s arguments for facebook but found %s", 1, params.size)
-                    val credentialProvider = Provider(type, FacebookCredential(params[0] ?: ""))
+                    val credentialProvider = Provider(type, FacebookCredential(accessToken))
                     ThirdPartyIdentity(credentialProvider)
                 }
                 Type.GOOGLE -> {
-                    Preconditions.checkArgument(params.size > 0, "Expected %s arguments for google but found %s", 1, params.size)
-                    val googleCredentialProvider = Provider(type, GoogleCredential(params[0] ?: ""))
+                    Preconditions.checkArgument(params.isNotEmpty(), "Expected %s arguments for google but found %s", 1, params.size)
+                    val googleCredentialProvider = Provider(type, GoogleCredential(accessToken))
                     ThirdPartyIdentity(googleCredentialProvider)
                 }
                 Type.TWITTER -> {
                     Preconditions.checkArgument(params.size == 4, "Expected %s arguments for twitter but found %s", 4, params.size)
-                    val twitterCredentialProvider = Provider(type, TwitterCredential(params[0] ?: "", params[1] ?: "", params[2] ?: "", params[3] ?: ""))
+                    val twitterCredentialProvider = Provider(type, TwitterCredential(accessToken, accessTokenSecret, consumerKey, consumerSecret))
                     ThirdPartyIdentity(twitterCredentialProvider)
                 }
                 Type.LINKED_IN -> {
                     Preconditions.checkArgument(params.size == 4, "Expected %s arguments for linkedIn but found %s", 4, params.size)
-                    val linkedInCredentialProvider = Provider(type, LinkedInCredential(params[0] ?: "", params[1] ?: "", params[2] ?: "", params[3] ?: ""))
+                    val linkedInCredentialProvider = Provider(type, LinkedInCredential(accessToken, accessTokenSecret, consumerKey, consumerSecret))
                     ThirdPartyIdentity(linkedInCredentialProvider)
                 }
                 Type.AUTH_LINK -> {
                     Preconditions.checkArgument(params.size == 2, "Expected %s arguments for linkedIn but found %s", 2, params.size)
-                    val authLinkCredentialProvider = Provider(type, AuthLinkCredential(params[0] ?: "", params[1] ?: ""))
+                    val authLinkCredentialProvider = Provider(type, AuthLinkCredential(accessToken, accessTokenSecret))
                     ThirdPartyIdentity(authLinkCredentialProvider)
                 }
                 Type.SALESFORCE -> {
                     Preconditions.checkArgument(params.size == 4, "Expected %s arguments for SalesForce but found %s", 4, params.size)
-                    val salesForceCredentialProvider = Provider(type, SalesForceCredential(params[0] ?: "", params[1] ?: "", params[2] ?: "", params[3] ?: ""))
+                    val salesForceCredentialProvider = Provider(type, SalesForceCredential(accessToken, accessTokenSecret, consumerKey, consumerSecret))
                     ThirdPartyIdentity(salesForceCredentialProvider)
                 }
                 Type.MOBILE_IDENTITY -> {
                     Preconditions.checkArgument(params.size == 1, "Expected %s arguments for Mobile Identity but found %s", 1, params.size)
-                    val mobileIdentityCredentialProvider = Provider(type, MobileIdentityCredential(params[0] ?: ""))
+                    val mobileIdentityCredentialProvider = Provider(type, MobileIdentityCredential(accessToken))
                     ThirdPartyIdentity(mobileIdentityCredentialProvider)
                 }
                 else -> throw IllegalArgumentException("Could not recognize type passed in")
             }
         }
     }
-
 }

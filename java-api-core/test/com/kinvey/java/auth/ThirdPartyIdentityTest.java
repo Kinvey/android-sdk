@@ -32,9 +32,7 @@ import static com.kinvey.java.auth.ThirdPartyIdentity.Type.LINKED_IN;
  */
 public class ThirdPartyIdentityTest extends TestCase {
 
-
     public void testNullPassedToCreateIdentity() {
-
         try {
             ThirdPartyIdentity.createThirdPartyIdentity(null, "testtokenstring");
             fail("createThirdPartyIdentity should throw an exception when null is passed in");
@@ -42,13 +40,16 @@ public class ThirdPartyIdentityTest extends TestCase {
             assertEquals("Type argument must not be null", e.getMessage());
         }
 
-        try {
-            ThirdPartyIdentity.createThirdPartyIdentity(FACEBOOK, null);
-            fail("createThirdPartyIdentity should throw an exception when null is passed in");
-        } catch (NullPointerException e) {
-            assertEquals("facebook", "Params must not be null", e.getMessage());
-        }
+        //Ignored, because vararg parameters are, as a rule, never nullable, because in Java there is no good way
+        //to distinguish between passing null as the entire vararg array versus passing null
+        //as a single element of a non-null vararg array.
 
+        //try {
+        //    ThirdPartyIdentity.createThirdPartyIdentity(FACEBOOK, null);
+        //    fail("createThirdPartyIdentity should throw an exception when null is passed in");
+        //} catch (NullPointerException e) {
+        //    assertEquals("facebook", "Params must not be null", e.getMessage());
+        //}
     }
 
     public void testEmptyAccessToken() {

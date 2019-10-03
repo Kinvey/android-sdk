@@ -18,6 +18,7 @@ package com.kinvey.java.model
 
 import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
+import com.google.common.base.Preconditions
 
 import java.util.ArrayList
 import java.util.HashMap
@@ -49,6 +50,12 @@ class AggregateEntity(
     var condition: LinkedHashMap<String, Any>? = null
 
     init {
+        //Preconditions.checkNotNull(fields)
+        Preconditions.checkNotNull(type)
+        //Preconditions.checkNotNull(aggregateField)
+        //Preconditions.checkNotNull(query)
+        //Preconditions.checkNotNull(client)
+
         key = fields?.map { str -> str to true }?.toMap()
         reduce = ""
         condition = query?.queryFilterMap as LinkedHashMap<String, Any>? ?: LinkedHashMap()
