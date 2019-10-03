@@ -43,14 +43,14 @@ interface ICache<T : GenericJson?> {
      * sets current ttl value
      * @param ttl ttl value to be set in milliseconds
      */
-    var ttl: Long
+    open var ttl: Long
 
     /**
      * Query cache for objects matching query
      * @param query
      * @return
      */
-    operator fun get(query: Query): List<T>    //run query
+    operator fun get(query: Query?): List<T>    //run query
 
     /**
      * Query cache for objects with given ids
@@ -78,7 +78,7 @@ interface ICache<T : GenericJson?> {
      * @param items
      * @return ids of saved items
      */
-    fun save(items: Iterable<T>): List<T>
+    fun save(items: Iterable<T>?): List<T>
 
     /**
      * Saving given item
@@ -87,7 +87,7 @@ interface ICache<T : GenericJson?> {
      * @param item
      * @return id of saved items
      */
-    fun save(item: T?): T    //store objects in cache
+    fun save(item: T?): T?    //store objects in cache
 
     /**
      * Delete all object that matches query
