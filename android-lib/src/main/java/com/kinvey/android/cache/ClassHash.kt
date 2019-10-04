@@ -36,7 +36,6 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 /**
  * Created by Prots on 1/27/16.
@@ -88,17 +87,16 @@ object ClassHash {
         }
     }
 
-    private val ALLOWED = arrayOf<Class<out Any>>(
-            Boolean::class.java,
-            Byte::class.java,
-            Short::class.java,
-            Int::class.java,
-            Long::class.java,
-            Float::class.java,
-            Double::class.java,
-            String::class.java,
-            Date::class.java,
-            ByteArray::class.java,
+    private val ALLOWED =
+        arrayOf<Class<out Any>>(
+            java.lang.Boolean::class.java,
+            java.lang.Byte::class.java,
+            java.lang.Short::class.java,
+            java.lang.Integer::class.java,
+            java.lang.Long::class.java,
+            java.lang.Float::class.java,
+            java.lang.Double::class.java,
+            java.lang.String::class.java,
 
             Boolean::class.java,
             Byte::class.java,
@@ -109,8 +107,9 @@ object ClassHash {
             Double::class.java,
             String::class.java,
             Date::class.java,
+            ByteArray::class.java,
             Array<Byte>::class.java
-    )
+        )
 
     @JvmStatic
     fun getClassHash(clazz: Class<out GenericJson>): String {
@@ -187,7 +186,7 @@ object ClassHash {
     @JvmStatic
     fun createScheme(name: String, realm: DynamicRealm, clazz: Class<out GenericJson>): RealmObjectSchema {
         val schema = createSchemeFromClass(name, realm, clazz, SelfReferenceState.DEFAULT, ArrayList())
-        val shortName: String = TableNameManager.getShortName(name, realm)
+        val shortName = TableNameManager.getShortName(name, realm)
         if (!schema.hasField(KinveyMetaData.KMD) && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
                 && !name.endsWith(Constants.UNDERSCORE + AccessControlList.ACL)) {
             val innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD,
@@ -278,7 +277,7 @@ object ClassHash {
             objectSchema?.addRealmObjectField(AccessControlList.ACL, innerScheme)
 
             //get table
-            val results: List<DynamicRealmObject> = realm.where(shortName).findAll()
+            val results = realm.where(shortName).findAll()
 
             //add "_acl" field to each item
             for (realmObject in results) {
@@ -304,9 +303,12 @@ object ClassHash {
     fun checkAclKmdFields(name: String, realm: DynamicRealm, clazz: Class<out GenericJson>) {
         val schema: RealmSchema = realm.schema
         if (schema.contains(name + Constants.UNDERSCORE + AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)) {
-            val objectSchema = schema.get(TableNameManager.getShortName(TableNameManager.getShortName(name, realm) + Constants.UNDERSCORE + AccessControlList.ACL, realm))
-            objectSchema?.removeField(KinveyMetaData.KMD)
-            schema.remove(name + Constants.UNDERSCORE + AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)
+            val table = TableNameManager.getShortName(TableNameManager.getShortName(name, realm) + Constants.UNDERSCORE + AccessControlList.ACL, realm)
+            table?.let { t ->
+                val objectSchema = schema.get(t)
+                objectSchema?.removeField(KinveyMetaData.KMD)
+                schema.remove(name + Constants.UNDERSCORE + AccessControlList.ACL + Constants.UNDERSCORE + KinveyMetaData.KMD)
+            }
         }
         fillNewAclFields(name, false, realm, clazz)
     }
@@ -320,7 +322,7 @@ object ClassHash {
      * @param clazz Class in table
      */
     private fun fillNewAclFields(name: String, isFill: Boolean, realm: DynamicRealm, clazz: Class<out GenericJson>) {
-        val shortName: String = TableNameManager.getShortName(name, realm)
+        val shortName = TableNameManager.getShortName(name, realm)
         val schema: RealmSchema = realm.schema
         val fields = getClassFieldsAndParentClassFields(clazz)
         for (f in fields) {
@@ -336,7 +338,8 @@ object ClassHash {
         }
         if (isFill) {
             // fill _acl table
-            if (schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm))) {
+            val table = TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm) ?: ""
+            if (schema.contains(table)) {
                 val results: List<DynamicRealmObject> = realm.where(shortName).findAll()
                 //add "_acl" field to each item
                 for (realmObject in results) {
@@ -382,8 +385,10 @@ object ClassHash {
                     }
                     if (state != null) {
                         if (selfReferenceState == SelfReferenceState.SUBLIST) {
-                            schema.addRealmObjectField(fieldInfo.name,
-                                    realm.schema.get(TableNameManager.getShortName(TableNameManager.getOriginalName(TableNameManager.getShortName(name, realm), realm), realm)))
+                            val table = TableNameManager.getShortName(TableNameManager.getOriginalName(
+                                    TableNameManager.getShortName(name, realm), realm), realm) ?: ""
+                            val schemaObj = realm.schema.get(table)
+                            schemaObj?.let { schema.addRealmObjectField(fieldInfo.name, it) }
                         } else {
                             val innerScheme = createSchemeFromClass(shortName + Constants.UNDERSCORE + fieldInfo.name, realm,
                                     underlying as Class<out GenericJson>, state, classesList)
@@ -449,7 +454,7 @@ object ClassHash {
     @JvmStatic
     fun saveData(name: String, realm: DynamicRealm, clazz: Class<out GenericJson>?, obj: GenericJson?): DynamicRealmObject? {
         val realmObject = saveClassData(name, realm, clazz, obj, SelfReferenceState.DEFAULT, ArrayList())
-        val shortName: String = TableNameManager.getShortName(name, realm)
+        val shortName = TableNameManager.getShortName(name, realm)
         if (obj?.containsKey(KinveyMetaData.KMD) == false
                 && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
                 && !name.endsWith(Constants.UNDERSCORE + AccessControlList.ACL)) {
@@ -469,7 +474,7 @@ object ClassHash {
         if (obj?.containsKey(AccessControlList.ACL) == false
                 && !name.endsWith(Constants.UNDERSCORE + AccessControlList.ACL)
                 && !name.endsWith(Constants.UNDERSCORE + KinveyMetaData.KMD)
-                && realm.schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm))) {
+                && realm.schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm) ?: "")) {
             val acl = AccessControlList()
             acl.set("creator", sharedInstance().activeUser?.id)
             val innerObject = saveClassData(shortName + Constants.UNDERSCORE + AccessControlList.ACL,
@@ -490,16 +495,14 @@ object ClassHash {
 
     private fun saveClassData(name: String, realm: DynamicRealm, clazz: Class<out GenericJson>?,
                               obj: GenericJson?, selfReferenceState: SelfReferenceState, classes: MutableList<String>): DynamicRealmObject? {
-        val shortName: String = TableNameManager.getShortName(name, realm)
+        val shortName = TableNameManager.getShortName(name, realm)
         val fields = getClassFieldsAndParentClassFields(clazz)
         var dynObject: DynamicRealmObject? = null
         if (obj?.containsKey(ID) == true && obj[ID] != null) {
             dynObject = realm.where(shortName)
                     .equalTo(ID, obj[ID] as String)
                     .findFirst()
-        } else {
-            obj?.run { obj[ID] = TEMP_ID + UUID.randomUUID().toString() }
-        }
+        } else { obj?.run { obj[ID] = TEMP_ID + UUID.randomUUID().toString() } }
         var kmdId: String? = null
         var aclId: String? = null
         if (dynObject == null) {
@@ -515,8 +518,8 @@ object ClassHash {
             }
         }
         if (obj?.containsKey(KinveyMetaData.KMD) == true
-                && realm.schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm))) {
-            val kmd = obj[KinveyMetaData.KMD] as Map<String, Any>
+                && realm.schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + KinveyMetaData.KMD, realm) ?: "")) {
+            val kmd = obj[KinveyMetaData.KMD] as Map<String, Any>?
             if (kmd != null) {
                 val metadata = KinveyMetaData.fromMap(kmd)
                 metadata.set(ID, kmdId)
@@ -530,8 +533,9 @@ object ClassHash {
             }
         }
         if (obj?.containsKey(AccessControlList.ACL) == true
-                && realm.schema.contains(TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm))) {
-            val acl = obj[AccessControlList.ACL] as Map<String, Any>
+            && realm.schema.contains(
+                TableNameManager.getShortName(shortName + Constants.UNDERSCORE + AccessControlList.ACL, realm) ?: "")) {
+            val acl = obj[AccessControlList.ACL] as Map<String, Any>?
             if (acl != null) {
                 val accessControlList = fromMap(acl)
                 accessControlList.set(ID, aclId)
@@ -544,7 +548,7 @@ object ClassHash {
             }
         }
         var state: SelfReferenceState?
-        classes.add(clazz!!.simpleName)
+        clazz?.simpleName?.let { classes.add(it) }
         for (f in fields) {
             val classesList: MutableList<String> = ArrayList(classes)
             val fieldInfo = FieldInfo.of(f) ?: continue
@@ -552,9 +556,9 @@ object ClassHash {
             if (isArrayOrCollection(f.type) && fieldInfo.getValue(obj) != null) {
                 val underlying = getUnderlying(f)
                 val list = RealmList<Any?>()
-                val collection = fieldInfo.getValue(obj) as Array<GenericJson>
+                val collection = fieldInfo.getValue(obj)
                 if (f.type.isArray) {
-                    if (!underlying!!.simpleName.equals(clazz.simpleName, ignoreCase = true)) {
+                    if (!underlying?.simpleName.equals(clazz?.simpleName, ignoreCase = true)) {
                         state = selfReferenceState
                     } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState == SelfReferenceState.SUBCLASS) {
                         state = SelfReferenceState.LIST
@@ -565,18 +569,22 @@ object ClassHash {
                     } else if (selfReferenceState == SelfReferenceState.SUBLIST) {
                         state = SelfReferenceState.SUBLIST
                     }
-                    if (state != null) {
-                        for (i in 0 until collection.size) {
-                            list.add(saveClassData(if (selfReferenceState == SelfReferenceState.SUBLIST) name else shortName + Constants.UNDERSCORE + fieldInfo.name,
-                                    realm,
-                                    underlying as Class<out GenericJson>?,
-                                    collection[i] as GenericJson,
-                                    state, classesList))
+                    state?.let { st ->
+                        collection?.let {
+                            for (element in it as Array<GenericJson>) {
+                                list.add(saveClassData(
+                                        if (selfReferenceState == SelfReferenceState.SUBLIST) name
+                                        else shortName + Constants.UNDERSCORE + fieldInfo.name,
+                                        realm,
+                                        underlying as Class<out GenericJson>?,
+                                        element,
+                                        st, classesList))
+                            }
                         }
                     }
                 } else {
-                    if (GenericJson::class.java.isAssignableFrom(underlying!!)) {
-                        if (!underlying.simpleName.equals(clazz.simpleName, ignoreCase = true)) {
+                    if (underlying != null && GenericJson::class.java.isAssignableFrom(underlying)) {
+                        if (!underlying.simpleName.equals(clazz?.simpleName, ignoreCase = true)) {
                             state = selfReferenceState
                         } else if (selfReferenceState == SelfReferenceState.DEFAULT || selfReferenceState == SelfReferenceState.SUBCLASS) {
                             state = SelfReferenceState.LIST
@@ -601,12 +609,11 @@ object ClassHash {
                     } else {
                         var dynamicRealmObject: DynamicRealmObject? = null
                         for (o in collection as Collection<*>) {
-                            dynamicRealmObject = realm.createObject(TableNameManager
-                                    .getShortName(shortName + Constants.UNDERSCORE + fieldInfo.name, realm),
-                                    UUID.randomUUID().toString())
+                            val table = TableNameManager.getShortName(shortName + Constants.UNDERSCORE + fieldInfo.name, realm)
+                            table?.let { dynamicRealmObject = realm.createObject(table, UUID.randomUUID().toString()) }
                             for (c in ALLOWED) {
                                 if (underlying == c) {
-                                    dynamicRealmObject.set(fieldInfo.name + ITEMS, o)
+                                    dynamicRealmObject?.set(fieldInfo.name + ITEMS, o)
                                     break
                                 }
                             }
@@ -616,7 +623,7 @@ object ClassHash {
                     dynObject?.setList(fieldInfo.name, list)
                 }
             } else if (GenericJson::class.java.isAssignableFrom(fieldInfo.type)) {
-                if (!f.type.simpleName.equals(clazz.simpleName, ignoreCase = true)) {
+                if (!f.type.simpleName.equals(clazz?.simpleName, ignoreCase = true)) {
                     state = selfReferenceState
                 } else if (selfReferenceState == SelfReferenceState.DEFAULT) {
                     state = SelfReferenceState.SUBCLASS
@@ -627,7 +634,7 @@ object ClassHash {
                     if (obj != null && fieldInfo.getValue(obj) != null) {
                         val innerObject = saveClassData(
                                 if (selfReferenceState == SelfReferenceState.SUBCLASS &&
-                                        classes.contains(f.type.simpleName)) name else shortName + Constants.UNDERSCORE + fieldInfo.name,
+                                    classes.contains(f.type.simpleName)) name else shortName + Constants.UNDERSCORE + fieldInfo.name,
                                 realm,
                                 fieldInfo.type as Class<out GenericJson>,
                                 obj[fieldInfo.name] as GenericJson, state, classesList)
@@ -667,7 +674,7 @@ object ClassHash {
 
     private fun deleteClassData(collection: String, realm: DynamicRealm, clazz: Class<out GenericJson>,
                                 id: String, selfReferenceState: SelfReferenceState?, classes: MutableList<String>): Int {
-        val shortName: String = TableNameManager.getShortName(collection, realm)
+        val shortName = TableNameManager.getShortName(collection, realm)
         val realmObject = realm.where(shortName).equalTo(ID, id).findFirst()
         val size = if (realmObject != null) 1 else 0
         if (realmObject == null) {
@@ -741,7 +748,7 @@ object ClassHash {
             ret = objectClass.newInstance()
             val classInfo: ClassInfo = ClassInfo.of(objectClass)
             var info: FieldInfo?
-            var o: Any
+            var o: Any? = null
             for (field in dynamic.fieldNames) {
                 info = classInfo.getFieldInfo(field)
                 if (isAclPermissionField(field) && dynamic.isNull(field)) {
@@ -773,8 +780,9 @@ object ClassHash {
                     val n: Number = dynamic.get(info.name)
                     when {
                         Long::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toLong())
-                        Byte::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toByte())
+                        java.lang.Integer::class.java.isAssignableFrom(info.type) or
                         Int::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toInt())
+                        Byte::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toByte())
                         Short::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toShort())
                         Float::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toFloat())
                         Double::class.java.isAssignableFrom(info.type) -> ret?.put(info.name, n.toDouble())
@@ -800,7 +808,9 @@ object ClassHash {
                     }
                 } else { //if you are here, then the field is a primitive
                     // realm keeps int values as a long, so we need to convert it back
-                    if (info.type.isPrimitive && info.type.simpleName == "int" && o is Long) {
+                    if (info.type.isPrimitive &&
+                       (info.type.simpleName == "int" || info.type.simpleName == "Integer")
+                        && o is Long) {
                         ret?.put(info.name, o.toInt())
                     } else {
                         ret?.put(info.name, o)
@@ -844,9 +854,11 @@ object ClassHash {
 
     private fun getClassFieldsAndParentClassFields(clazz: Class<*>?): List<Field> {
         val fields: MutableList<Field> = ArrayList()
-        fields.addAll(listOf(*clazz!!.declaredFields))
-        if (clazz.superclass != null) {
-            fields.addAll(listOf(*clazz.superclass!!.declaredFields))
+        clazz?.let { cls ->
+            fields.addAll(listOf(*cls.declaredFields))
+            cls.superclass?.let { sCls ->
+                fields.addAll(listOf(*sCls.declaredFields))
+            }
         }
         return fields
     }
