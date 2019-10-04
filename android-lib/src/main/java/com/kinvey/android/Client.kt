@@ -402,7 +402,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
     }
 
 
-    private class Ping (val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
+    private class Ping (val client: Client<*>, callback: KinveyPingCallback?) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {

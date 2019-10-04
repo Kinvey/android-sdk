@@ -14,24 +14,23 @@
  *
  */
 
-package com.kinvey.android.async;
+package com.kinvey.android.async
 
-import com.kinvey.android.AsyncClientRequest;
-import com.kinvey.android.sync.KinveyPullCallback;
-import com.kinvey.java.Query;
-import com.kinvey.java.model.KinveyPullResponse;
-import com.kinvey.java.store.BaseDataStore;
-
-import java.io.IOException;
+import com.kinvey.android.AsyncClientRequest
+import com.kinvey.android.sync.KinveyPullCallback
+import com.kinvey.java.Query
+import com.kinvey.java.model.KinveyPullResponse
+import com.kinvey.java.store.BaseDataStore
+import java.io.IOException
 
 /**
  * Class represents internal implementation of Async pull request that is used to create pull
  */
-public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
-    private final BaseDataStore store;
-    private boolean isAutoPagination = false;
-    private Query query;
-    private int pageSize = 0;
+class AsyncPullRequest : AsyncClientRequest<KinveyPullResponse> {
+    private val store: BaseDataStore<*>
+    private var isAutoPagination = false
+    private var query: Query?
+    private var pageSize = 0
 
     /**
      * Async pull request constructor
@@ -39,12 +38,11 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore  store,
-                            Query query,
-                            KinveyPullCallback callback) {
-        super(callback);
-        this.query = query;
-        this.store = store;
+    constructor(store: BaseDataStore<*>,
+                query: Query?,
+                callback: KinveyPullCallback?) : super(callback) {
+        this.query = query
+        this.store = store
     }
 
     /**
@@ -54,16 +52,14 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore store,
-                            Query query,
-                            int pageSize,
-                            KinveyPullCallback callback) {
-        super(callback);
-        this.query = query;
-        this.store = store;
-        this.pageSize = pageSize;
+    constructor(store: BaseDataStore<*>,
+                query: Query?,
+                pageSize: Int,
+                callback: KinveyPullCallback?) : super(callback) {
+        this.query = query
+        this.store = store
+        this.pageSize = pageSize
     }
-
 
     /**
      * Async pull request constructor
@@ -72,20 +68,17 @@ public class AsyncPullRequest extends AsyncClientRequest<KinveyPullResponse> {
      * @param store Kinvey data store instance to be used to execute network requests
      * @param callback async callbacks to be invoked when job is done
      */
-    public AsyncPullRequest(BaseDataStore store,
-                            Query query,
-                            boolean isAutoPagination,
-                            KinveyPullCallback callback) {
-        super(callback);
-        this.query = query;
-        this.store = store;
-        this.isAutoPagination = isAutoPagination;
+    constructor(store: BaseDataStore<*>,
+                query: Query?,
+                isAutoPagination: Boolean,
+                callback: KinveyPullCallback?) : super(callback) {
+        this.query = query
+        this.store = store
+        this.isAutoPagination = isAutoPagination
     }
 
-
-    @Override
-    protected KinveyPullResponse executeAsync() throws IOException {
-        return pageSize > 0 ? store.pullBlocking(query, pageSize) : store.pullBlocking(query, isAutoPagination);
+    @Throws(IOException::class)
+    override fun executeAsync(): KinveyPullResponse {
+        return if (pageSize > 0) store.pullBlocking(query, pageSize) else store.pullBlocking(query, isAutoPagination)
     }
-
 }

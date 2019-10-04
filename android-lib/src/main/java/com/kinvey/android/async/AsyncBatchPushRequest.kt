@@ -29,6 +29,7 @@ import com.kinvey.java.Constants._ID
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
+import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.KinveySyncSaveBatchResponse
 import com.kinvey.java.model.KinveyUpdateSingleItemError
@@ -46,23 +47,24 @@ import java.security.AccessControlException
  * Class represents internal implementation of Async push request that is used to create push
  */
 class AsyncBatchPushRequest<T : GenericJson>(
-    private val collection: String,
-    private val manager: SyncManager?,
-    private val client: AbstractClient<*>?,
-    private val storeType: StoreType,
-    private val networkManager: NetworkManager<T>,
-    storeItemType: Class<T>?,
-    private val callback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(callback) {
+        private val collection: String,
+        private val manager: SyncManager?,
+        private val client: AbstractClient<*>?,
+        private val storeType: StoreType,
+        private val networkManager: NetworkManager<T>,
+        storeItemType: Class<T>?,
+        val pushCallback: KinveyPushCallback?)
+    : AsyncClientRequest<KinveyPushResponse>(pushCallback) {
 
     private var progress = 0
     private var fullCount = 0
-    private val cache: ICache<T>? = client?.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
+    private val cache = client?.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
 
     private val errors = mutableListOf<Exception>()
     private val batchSyncItems = mutableListOf<SyncItem>()
 
     @Throws(IOException::class, InvocationTargetException::class)
-    override fun executeAsync(): KinveyPushBatchResponse {
+    override fun executeAsync(): KinveyPushBatchResponse? {
 
         checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
 
@@ -134,9 +136,9 @@ class AsyncBatchPushRequest<T : GenericJson>(
                     val err = KinveyUpdateSingleItemError(e, item)
                     errors.add(err)
                 } catch (e: Exception) {
-                    callback.onFailure(e)
+                    callback?.onFailure(e)
                 }
-                callback.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
+                pushCallback?.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
             }
         }
         return resultSingleItems
@@ -208,9 +210,9 @@ class AsyncBatchPushRequest<T : GenericJson>(
                 } catch (e: KinveyException) {
                     errors.add(e)
                 } catch (e: Exception) {
-                    callback.onFailure(e)
+                    callback?.onFailure(e)
                 }
-                callback.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
+                pushCallback?.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
             }
         }
     }

@@ -19,7 +19,7 @@ class AsyncDownloadRequest<T>(scope: Any, method: Method?, callback: AsyncDownlo
             @Throws(IOException::class)
             override fun progressChanged(downloader: MediaHttpDownloader) {
                 val myRunnable = Runnable {
-                    if (getCallback() != null) {
+                    if (callback != null) {
                         Logger.INFO("notifying callback")
                         try {
                             callback?.progressChanged(downloader)
