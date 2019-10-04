@@ -13,44 +13,40 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.sync;
+package com.kinvey.android.sync
 
-
-import com.kinvey.java.model.KinveyPullResponse;
+import com.kinvey.java.model.KinveyPullResponse
 
 /**
  * This class provides callbacks from requests executed by the Sync API.
  *
  * @author edwardf
  */
-public interface KinveySyncCallback {
-
-    void onSuccess(KinveyPushResponse kinveyPushResponse, KinveyPullResponse kinveyPullResponse);
-
+interface KinveySyncCallback {
+    fun onSuccess(kinveyPushResponse: KinveyPushResponse?, kinveyPullResponse: KinveyPullResponse?)
     /**
      * Used to indicate start of pull request by background service
      */
-    void onPullStarted();
+    fun onPullStarted()
 
     /**
      * Used to indicate start of push request by background service
      */
-    void onPushStarted();
+    fun onPushStarted()
 
     /**
      * Used to indicate successful execution of pull request by background service
      */
-    void onPullSuccess(KinveyPullResponse kinveyPullResponse);
+    fun onPullSuccess(kinveyPullResponse: KinveyPullResponse?)
 
     /**
      * Used to indicate successful execution of push request by background service
      */
-    void onPushSuccess(KinveyPushResponse kinveyPushResponse);
-
+    fun onPushSuccess(kinveyPushResponse: KinveyPushResponse?)
 
     /**
      * Used to indicate the failed execution of a request by the background service.
      */
 
-    void onFailure(Throwable t);
+    fun onFailure(t: Throwable?)
 }

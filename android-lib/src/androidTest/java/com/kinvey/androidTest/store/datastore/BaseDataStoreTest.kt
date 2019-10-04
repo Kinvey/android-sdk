@@ -148,7 +148,7 @@ open class BaseDataStoreTest {
         var result: KinveyReadResponse<T>? = null
         var error: Throwable? = null
 
-        override fun onSuccess(result: KinveyReadResponse<T>) {
+        override fun onSuccess(result: KinveyReadResponse<T>?) {
             this.result = result
             finish()
         }
@@ -191,7 +191,7 @@ open class BaseDataStoreTest {
         var kinveyPullResponse: KinveyPullResponse? = null
         var error: Throwable? = null
 
-        override fun onSuccess(kinveyPushResponse: KinveyPushResponse, kinveyPullResponse: KinveyPullResponse) {
+        override fun onSuccess(kinveyPushResponse: KinveyPushResponse?, kinveyPullResponse: KinveyPullResponse?) {
             this.kinveyPushResponse = kinveyPushResponse
             this.kinveyPullResponse = kinveyPullResponse
             finish()
@@ -205,15 +205,15 @@ open class BaseDataStoreTest {
 
         }
 
-        override fun onPullSuccess(kinveyPullResponse: KinveyPullResponse) {
+        override fun onPullSuccess(kinveyPullResponse: KinveyPullResponse?) {
             this.kinveyPullResponse = kinveyPullResponse
         }
 
-        override fun onPushSuccess(kinveyPushResponse: KinveyPushResponse) {
+        override fun onPushSuccess(kinveyPushResponse: KinveyPushResponse?) {
             this.kinveyPushResponse = kinveyPushResponse
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }

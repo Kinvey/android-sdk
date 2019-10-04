@@ -13,29 +13,27 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.model.KinveyDeleteResponse;
+import com.kinvey.java.core.KinveyClientCallback
 
 /** Use this for async callbacks when deleting entities
  *
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyDeleteCallback extends KinveyClientCallback<Integer> {
-
+interface KinveyDeleteCallback : KinveyClientCallback<Int?> {
     /**
      * Used to indicate successful execution of a request by the background service.
      *
      * @param result deleted objects count
      */
-    void onSuccess(Integer result);
+    override fun onSuccess(result: Int?)
 
     /**
      * Used to indicate the failed execution of a request by the background service.
      *
      * @param error error
      */
-    void onFailure(Throwable error);
+    override fun onFailure(error: Throwable)
 }

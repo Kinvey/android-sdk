@@ -13,23 +13,17 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.model.KinveyReadResponse;
+import com.kinvey.java.core.KinveyClientCallback
+import com.kinvey.java.model.KinveyReadResponse
 
 /** Use this for async callbacks when retrieving multiple entities
  *
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyReadCallback<T> extends KinveyClientCallback<KinveyReadResponse<T>> {
-
-
-    @Override
-    public void onSuccess(KinveyReadResponse<T> result);
-
-    @Override
-    public void onFailure(Throwable error);
-
+interface KinveyReadCallback<T> : KinveyClientCallback<KinveyReadResponse<T>?> {
+    override fun onSuccess(result: KinveyReadResponse<T>?)
+    override fun onFailure(error: Throwable)
 }

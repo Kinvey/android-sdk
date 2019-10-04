@@ -13,15 +13,22 @@
  * contents is a violation of applicable laws.
  *
  */
+package com.kinvey.android.callback
 
-package com.kinvey.android.callback;
-
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.android.Client
+import com.kinvey.java.core.KinveyClientCallback
 
 /**
- * Created by Prots on 3/16/16.
+ * This class provides callbacks for an creation of the client.
+ *
+ *
+ * Creating a client requires disc operations which are performed asynchronously.
+ *
+ *
+ * @author mjsalinger
+ * @since 2.0
  */
-public interface KinveyPurgeCallback extends KinveyClientCallback<Void> {
-
-
+interface KinveyClientBuilderCallback : KinveyClientCallback<Client<*>?> {
+    override fun onSuccess(result: Client<*>?)
+    override fun onFailure(error: Throwable)
 }

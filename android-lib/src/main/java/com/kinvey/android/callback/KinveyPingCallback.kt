@@ -13,9 +13,9 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientCallback
 
 /**
  * This class provides callbacks for an asynchronous Ping
@@ -24,11 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback;
  * @author edwardf
  * @since 2.0
  */
-public interface KinveyPingCallback extends KinveyClientCallback<Boolean>{
-
-    @Override
-    public void onSuccess(Boolean result);
-
-    @Override
-    public void onFailure(Throwable error);
+interface KinveyPingCallback : KinveyClientCallback<Boolean?> {
+    override fun onSuccess(result: Boolean?)
+    override fun onFailure(error: Throwable)
 }

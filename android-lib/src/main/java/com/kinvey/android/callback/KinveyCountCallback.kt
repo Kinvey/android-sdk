@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Kinvey, Inc. All rights reserved.
+ *  Copyright (c) 2017, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
  * http://www.kinvey.com/terms-of-use. By downloading, accessing and/or using this
@@ -13,27 +13,22 @@
  * contents is a violation of applicable laws.
  *
  */
+package com.kinvey.android.callback
 
-package com.kinvey.android.sync;
+import com.kinvey.java.core.KinveyClientCallback
 
-import com.kinvey.java.core.KinveyClientCallback;
-
-/**
- * This class provides callbacks from requests executed by the Sync API.
- *
- * @author mvakulich
- */
-public interface KinveyPushCallback extends KinveyClientCallback<KinveyPushResponse> {
-
+interface KinveyCountCallback : KinveyClientCallback<Int?> {
     /**
      * Used to indicate successful execution of a request by the background service.
+     *
+     * @param result count of the number of entities in the collection
      */
-    void onSuccess(KinveyPushResponse result);
+    override fun onSuccess(result: Int?)
 
     /**
      * Used to indicate the failed execution of a request by the background service.
+     *
+     * @param error error
      */
-    void onFailure(Throwable error);
-
-    void onProgress(long current, long all);
+    override fun onFailure(error: Throwable)
 }
