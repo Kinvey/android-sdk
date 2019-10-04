@@ -13,18 +13,11 @@
  * contents is a violation of applicable laws.
  *
  */
-package com.kinvey.android.callback;
+package com.kinvey.android.callback
 
-import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.KinveyClientCallback
 
-import java.util.List;
-
-public interface KinveyListCallback<T> extends KinveyClientCallback<List<T>> {
-
-    @Override
-    public void onSuccess(List<T> result);
-
-    @Override
-    public void onFailure(Throwable error);
-
+interface KinveyListCallback<T> : KinveyClientCallback<List<T>> {
+    override fun onSuccess(result: List<T>)
+    override fun onFailure(error: Throwable)
 }

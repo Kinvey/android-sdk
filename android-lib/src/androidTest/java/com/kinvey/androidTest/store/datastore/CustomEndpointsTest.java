@@ -20,6 +20,7 @@ import com.kinvey.java.CustomEndpoints;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.core.KinveyJsonResponseException;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -291,18 +292,13 @@ public class CustomEndpointsTest {
     private static class DefaultKinveyListCallback<T> implements KinveyListCallback<T> {
 
         private CountDownLatch latch;
-        private List<T> result;
+        private List<?> result;
         private Throwable error;
 
         private DefaultKinveyListCallback(CountDownLatch latch) {
             this.latch = latch;
         }
 
-        @Override
-        public void onSuccess(List<T> result) {
-            this.result = result;
-            finish();
-        }
 
         @Override
         public void onFailure(Throwable error) {
@@ -312,6 +308,12 @@ public class CustomEndpointsTest {
 
         void finish() {
             latch.countDown();
+        }
+
+        @Override
+        public void onSuccess(@NotNull List<? extends T> result) {
+            this.result = result;
+            finish();
         }
     }
 
