@@ -16,11 +16,8 @@
 
 
 /**
- * Maintains classes specific to Offline functionality, including SQLlite 3 access, an Android Service, and various helpers
+ * The main package where you can find the client and the main public interfaces for the android library.
  */
 
 
-package com.kinvey.android.sync;
-
-
-
+package com.kinvey.android

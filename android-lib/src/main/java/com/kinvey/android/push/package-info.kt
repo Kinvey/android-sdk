@@ -17,18 +17,17 @@
 /**
  * Kinvey brings Push Notifications to you through Google Cloud Messaging (GCM).
  *
- * <p>
- * This package encompasses the GCM integration with Kinvey's service.
- * </p>
  *
- * <p>
+ *
+ * This package encompasses the GCM integration with Kinvey's service.
+ *
+ *
+ *
+ *
  * We automatically provision the required security keys in their system to give you a seamless experience in engaging
  * your users with Push Notifications at no extra cost.
- * </p>
+ *
  */
 
 
-package com.kinvey.android.push;
-
-
-
+package com.kinvey.android.push

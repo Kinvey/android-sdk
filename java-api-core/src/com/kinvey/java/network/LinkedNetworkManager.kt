@@ -48,7 +48,7 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
  * @param collectionName Name of the LinkedNetworkManager collection
  * @param myClass        Class Type to marshall data between.
  * @param client        Instance of a Client which manages this API
- */(collectionName: String?, myClass: Class<T>, client: AbstractClient<*>) : NetworkManager<T>(collectionName, myClass, client) {
+ */(collectionName: String?, myClass: Class<T>, client: AbstractClient<*>?) : NetworkManager<T>(collectionName, myClass, client) {
     internal var mimetypeFinder: MimeTypeFinder? = null
     /**
      * Method to get an entity or entities and download ALL associated Linked Resources.
@@ -149,7 +149,8 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query, download: DownloaderProgressListener, attachments: Array<String>, resolves: Array<String?>?, resolve_depth: Int, retain: Boolean): Get {
+    fun getBlocking(query: Query?, download: DownloaderProgressListener?, attachments: Array<String>?,
+                    resolves: Array<String?>?, resolve_depth: Int, retain: Boolean): Get {
         Preconditions.checkNotNull(query)
         val javaClass = currentClass as Class<List<T>>
         val get = Get(query, javaClass, attachments, resolves, resolve_depth, retain)
@@ -355,16 +356,16 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
             sortFilter = query.sortString
         }
 
-        constructor(query: Query, myClass: Class<List<T>>, attachments: Array<String>, resolves: Array<String?>?, resolve_depth: Int, retain: Boolean)
+        constructor(query: Query?, myClass: Class<List<T>>, attachments: Array<String>?, resolves: Array<String?>?, resolve_depth: Int, retain: Boolean)
             : super(client, GET_LIST_REST_PATH, null, myClass) {
             this.attachments = attachments
             this.collectionName = this@LinkedNetworkManager.collectionName
-            queryFilter = query.getQueryFilterJson(client?.jsonFactory)
-            val queryLimit = query.limit
-            val querySkip = query.skip
+            queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
+            val queryLimit = query?.limit ?: 0
+            val querySkip = query?.skip ?: 0
             limit = if (queryLimit > 0) Integer.toString(queryLimit) else null
             skip = if (querySkip > 0) Integer.toString(querySkip) else null
-            sortFilter = query.sortString
+            sortFilter = query?.sortString
             if (resolves != null) {
                 this.resolve = Joiner.on(",").join(resolves)
                 this.resolve_depth = if (resolve_depth > 0) Integer.toString(resolve_depth) else null

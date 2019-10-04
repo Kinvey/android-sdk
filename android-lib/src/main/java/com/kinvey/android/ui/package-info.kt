@@ -17,13 +17,11 @@
 /**
  * Kinvey provides Activities and UI Components to facilitate development of Android Applications.
  *
- * <p>
+ *
+ *
  * This package contains multiple Activities as well as View Objects which provide basic functionality.
- * </p>
+ *
  *
  */
 
-package com.kinvey.android.ui;
-
-
-
+package com.kinvey.android.ui

@@ -16,11 +16,8 @@
 
 
 /**
- * Utility package for all of this libraries callback interfaces.
+ * Maintains classes specific to Offline functionality, including SQLlite 3 access, an Android Service, and various helpers
  */
 
 
-package com.kinvey.android.callback;
-
-
-
+package com.kinvey.android.sync

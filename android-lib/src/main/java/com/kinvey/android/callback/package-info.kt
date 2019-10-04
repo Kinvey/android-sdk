@@ -16,11 +16,8 @@
 
 
 /**
- * The main package where you can find the client and the main public interfaces for the android library.
+ * Utility package for all of this libraries callback interfaces.
  */
 
 
-package com.kinvey.android;
-
-
-
+package com.kinvey.android.callback
