@@ -87,7 +87,7 @@ interface ICache<T : GenericJson?> {
      * @param item
      * @return id of saved items
      */
-    fun save(item: T?): T?    //store objects in cache
+    fun save(item: T?): T    //store objects in cache
 
     /**
      * Delete all object that matches query

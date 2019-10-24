@@ -47,18 +47,17 @@ import java.security.AccessControlException
  * Class represents internal implementation of Async push request that is used to create push
  */
 class AsyncBatchPushRequest<T : GenericJson>(
-        private val collection: String,
-        private val manager: SyncManager?,
-        private val client: AbstractClient<*>?,
-        private val storeType: StoreType,
-        private val networkManager: NetworkManager<T>,
-        storeItemType: Class<T>?,
-        val pushCallback: KinveyPushCallback?)
-    : AsyncClientRequest<KinveyPushResponse>(pushCallback) {
+    private val collection: String,
+    private val manager: SyncManager?,
+    private val client: AbstractClient<*>?,
+    private val storeType: StoreType,
+    private val networkManager: NetworkManager<T>,
+    storeItemType: Class<T>?,
+    private val callback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(callback) {
 
     private var progress = 0
     private var fullCount = 0
-    private val cache = client?.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
+    private val cache: ICache<T>? = client?.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
 
     private val errors = mutableListOf<Exception>()
     private val batchSyncItems = mutableListOf<SyncItem>()
