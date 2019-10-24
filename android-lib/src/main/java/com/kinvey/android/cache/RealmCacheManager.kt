@@ -83,6 +83,7 @@ class RealmCacheManager : ICacheManager {
     }
 
     override fun <T : GenericJson> getCache(collection: String?, collectionItemClass: Class<T>?, ttl: Long?): ICache<T>? {
+
         synchronized(LOCK) {
             val mRealm = dynamicRealm
             var cache: RealmCache<T>?

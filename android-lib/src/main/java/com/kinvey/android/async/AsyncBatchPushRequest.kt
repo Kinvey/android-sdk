@@ -53,7 +53,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private val storeType: StoreType,
     private val networkManager: NetworkManager<T>,
     storeItemType: Class<T>?,
-    private val callback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(callback) {
+    val pushCallback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(pushCallback) {
 
     private var progress = 0
     private var fullCount = 0
