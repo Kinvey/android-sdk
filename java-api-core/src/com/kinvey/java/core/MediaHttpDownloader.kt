@@ -70,7 +70,7 @@ class MediaHttpDownloader
  * @param httpRequestInitializer The initializer to use when creating an [HttpRequest] or
  * `null` for none
  */
-(transport: HttpTransport,
+(transport: HttpTransport?,
  httpRequestInitializer: HttpRequestInitializer?) {
 
     /* Retries after this point do not need to continue increasing backoff time. */
@@ -82,7 +82,7 @@ class MediaHttpDownloader
     /**
      * The request factory for connections to the server.
      */
-    private val requestFactory: HttpRequestFactory
+    private val requestFactory: HttpRequestFactory?
 
     /**
      * The transport to use for requests.
@@ -90,7 +90,7 @@ class MediaHttpDownloader
     /**
      * Returns the transport to use for requests.
      */
-    val transport: HttpTransport
+    val transport: HttpTransport?
 
     /**
      * Determines whether the back off policy is enabled or disabled. If value is set to `false`
@@ -224,10 +224,9 @@ class MediaHttpDownloader
     init {
         this.transport = Preconditions.checkNotNull(transport)
         this.requestFactory = if (httpRequestInitializer == null)
-            transport.createRequestFactory()
+            transport?.createRequestFactory()
         else
-            transport
-                    .createRequestFactory(httpRequestInitializer)
+            transport?.createRequestFactory(httpRequestInitializer)
     }
 
 
@@ -298,8 +297,8 @@ class MediaHttpDownloader
         }
 
         while (!isCancelled) {
-            val currentRequest = requestFactory.buildGetRequest(downloadUrl)
-            currentRequest.suppressUserAgentSuffix = true
+            val currentRequest = requestFactory?.buildGetRequest(downloadUrl)
+            currentRequest?.suppressUserAgentSuffix = true
             var currentRequestLastBytePos = numBytesDownloaded + chunkSize - 1
             if (lastBytePosition != -1L) {
                 // If last byte position has been specified use it iff it is smaller than the chunksize.
@@ -313,17 +312,17 @@ class MediaHttpDownloader
                 if (currentRequestLastBytePos != -1L) {
                     rangeHeader.append(currentRequestLastBytePos)
                 }
-                currentRequest.headers.range = rangeHeader.toString()
+                currentRequest?.headers?.range = rangeHeader.toString()
             }
             if (backOffPolicyEnabled) {
                 // Set ExponentialBackOffPolicy as the BackOffPolicy of the HTTP Request which will
                 // retry the same request again if there is a server error.
-                currentRequest.backOffPolicy = ExponentialBackOffPolicy()
+                currentRequest?.backOffPolicy = ExponentialBackOffPolicy()
             }
 
             var response: HttpResponse? = null
             try {
-                response = currentRequest.execute()
+                response = currentRequest?.execute()
             } catch (e: Exception) {
                 if (retryBackOffCounter < MAXIMUM_BACKOFF_RETRY_CONT) {
                     backOffThreadSleep()

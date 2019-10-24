@@ -43,7 +43,7 @@ import java.util.concurrent.FutureTask
  */
 class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private val networkManager: NetworkManager<T>,
                                        private val writePolicy: WritePolicy, private val objects: Iterable<T>,
-                                       private val syncManager: SyncManager) : IRequest<List<T>> {
+                                       private val syncManager: SyncManager?) : IRequest<List<T>> {
     var exception: IOException? = null
 
     @Throws(IOException::class)
@@ -52,7 +52,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 ret = cache?.save(objects)
-                syncManager.enqueueSaveRequests(networkManager.collectionName, networkManager, ret)
+                syncManager?.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, ret)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 val pushRequest = PushRequest(networkManager.collectionName, cache, networkManager,
@@ -67,12 +67,12 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
                 ret = objects.mapNotNull { item ->
                       var result: T? = null
                       try {
-                          result = networkManager.saveBlocking(item).execute()
+                          result = networkManager.saveBlocking(item)?.execute()
                       } catch (e: IOException) {
                           val requestType = if (networkManager.isTempId(item)) SyncRequest.HttpVerb.POST
                                             else SyncRequest.HttpVerb.PUT
                           val itemId = item[Constants._ID] as String?
-                          syncManager.enqueueRequest(networkManager.collectionName, networkManager, requestType , itemId)
+                          syncManager?.enqueueRequest(networkManager.collectionName, networkManager, requestType , itemId)
                           exception = e
                       }
                       result
@@ -82,7 +82,7 @@ class SaveListRequest<T : GenericJson>(private val cache: ICache<T>?, private va
             }
             WritePolicy.FORCE_NETWORK -> {
                 Logger.INFO("Start saving entities")
-                val executor: ExecutorService = Executors.newFixedThreadPool(networkManager.client.numberThreadsForDataStoreSaveList)
+                val executor: ExecutorService = Executors.newFixedThreadPool(networkManager.client?.numberThreadsForDataStoreSaveList ?: 4)
                 val tasks: MutableList<FutureTask<T>>
                 var ft: FutureTask<T>
                 val items = objects as List<T>

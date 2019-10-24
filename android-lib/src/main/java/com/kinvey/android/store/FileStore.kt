@@ -46,7 +46,7 @@ import java.util.HashMap
  * Created by Prots on 2/22/16.
  */
 class FileStore(networkFileManager: NetworkFileManager,
-                cacheManager: ICacheManager?, ttl: Long?, storeType: StoreType, cacheFolder: String?) : BaseFileStore(networkFileManager, cacheManager, ttl, storeType, cacheFolder) {
+                cacheManager: ICacheManager?, ttl: Long?, storeType: StoreType?, cacheFolder: String?) : BaseFileStore(networkFileManager, cacheManager, ttl, storeType, cacheFolder) {
 
 
     private enum class FileMethods(val method: Method) {

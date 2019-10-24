@@ -21,7 +21,8 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest
 import com.kinvey.java.dto.Email
 
 
-class ForgotUsername(client: AbstractClient<*>, email: Email) : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, email, Void::class.java) {
+class ForgotUsername(client: AbstractClient<*>?, email: Email)
+    : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, email, Void::class.java) {
 
     init {
         this.isRequireAppCredentials = true

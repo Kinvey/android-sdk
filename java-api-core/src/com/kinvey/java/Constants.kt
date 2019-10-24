@@ -5,6 +5,8 @@ package com.kinvey.java
  */
 object Constants {
 
+    const val DEF_REQUEST_TIMEOUT = 30000
+
     const val COLLECTION = "collection"
     const val UNDERSCORE = "_"
     const val TIME_FORMAT = "%tFT%<tTZ"
@@ -16,6 +18,7 @@ object Constants {
     const val _ID = "_id"
     const val AUTH_TOKEN = "authtoken"
     const val _KMD = "_acl"
+    const val _LMT = "_lmt"
     const val _ACL = "_acl"
 
     const val META_ID = "meta.id"

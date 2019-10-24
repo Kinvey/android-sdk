@@ -21,6 +21,7 @@ import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.JsonObjectParser
+import com.google.api.client.util.ObjectParser
 
 /**
  * @author m0rganic
@@ -28,7 +29,7 @@ import com.google.api.client.json.JsonObjectParser
 abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
 
     val jsonFactory: JsonFactory
-        get() = objectParser.jsonFactory
+        get() = (getObjectParser() as JsonObjectParser).jsonFactory
 
     /**
      * @param transport  HTTP transport
@@ -59,7 +60,7 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
                           requestPolicy: BackOffPolicy?)
             : super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, requestPolicy)
 
-    override fun getObjectParser(): JsonObjectParser {
+    override fun getObjectParser(): JsonObjectParser? {
         return super.getObjectParser() as JsonObjectParser
     }
 
@@ -91,13 +92,6 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
         abstract override fun build(): AbstractKinveyClient?
 
         /* (non-Javadoc)
-     * @see com.kinvey.java.core.AbstractKinveyClient.Builder#getObjectParser()
-     */
-        override fun getObjectParser(): JsonObjectParser {
-            return super.getObjectParser() as JsonObjectParser
-        }
-
-        /* (non-Javadoc)
      * @see com.kinvey.java.core.AbstractKinveyClient.Builder#setRootUrl(java.lang.String)
      */
         override fun setBaseUrl(baseUrl: String): Builder {
@@ -122,8 +116,7 @@ abstract class AbstractKinveyJsonClient : AbstractKinveyClient {
         /* (non-Javadoc)
      * @see com.kinvey.java.core.AbstractKinveyClient.Builder#setKinveyClientRequestInitializer(com.kinvey.java.core.KinveyRequestInitializer)
      */
-        override fun setKinveyClientRequestInitializer(
-                kinveyRequestInitializer: KinveyClientRequestInitializer): Builder {
+        override fun setKinveyClientRequestInitializer(kinveyRequestInitializer: KinveyClientRequestInitializer?): Builder {
             return super.setKinveyClientRequestInitializer(kinveyRequestInitializer) as Builder
         }
     }

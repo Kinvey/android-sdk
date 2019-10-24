@@ -5,7 +5,7 @@ import android.os.Handler
 import com.kinvey.java.core.KinveyCancellableCallback
 import com.kinvey.java.core.KinveyClientCallback
 
-class KinveyCallbackHandler<T> : Handler() {
+open class KinveyCallbackHandler<T> : Handler() {
 
     fun onResult(t: T, callback: KinveyClientCallback<T>) {
 

@@ -38,7 +38,7 @@ public class CallableAsyncPushRequestHelper<T extends GenericJson> implements Ca
     public Long call() throws Exception {
         try {
             if (syncRequest.getHttpVerb() == SyncRequest.HttpVerb.POST) {
-                String tempID = syncRequest.getEntityID().id;
+                String tempID = syncRequest.getEntityID().getId();
                 GenericJson result = manager.executeRequest(client, syncRequest);
                 ICache<T> cache = client.getCacheManager().getCache(syncRequest.getCollectionName(), this.storeItemType, Long.MAX_VALUE);
                 T temp = cache.get(tempID);

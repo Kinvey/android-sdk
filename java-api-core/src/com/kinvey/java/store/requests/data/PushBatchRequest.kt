@@ -34,25 +34,25 @@ class PushBatchRequest<T : GenericJson>(
     collectionName: String,
     private val itemsCache: ICache<T>,
     private val networkManager: NetworkManager<T>,
-    private val client: AbstractClient<*>) : AbstractKinveyExecuteRequest<T>() {
+    private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
 
-    private val syncManager: SyncManager
+    private val syncManager: SyncManager?
 
     init {
         this.collection = collectionName
-        this.syncManager = client.syncManager
+        this.syncManager = client?.syncManager
     }
 
     @Throws(IOException::class)
     override fun execute(): Void? {
-        val requests = syncManager.popSingleQueue(collection)
-        requests.onEach { syncRequest -> syncManager.executeRequest(client, syncRequest) }
-        val syncItems = syncManager.popSingleItemQueue(collection)
+        val requests = syncManager?.popSingleQueue(collection)
+        requests?.onEach { syncRequest -> syncManager?.executeRequest(client, syncRequest) }
+        val syncItems = syncManager?.popSingleItemQueue(collection)
         var syncRequest: SyncRequest? = null
         val batchSyncItems = ArrayList<SyncItem>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val httpVerb = syncItem.getRequestMethod()
+                val httpVerb = syncItem.requestMethod
                 val itemId = syncItem.entityID?.id ?: ""
                 when (httpVerb) {
                     SyncRequest.HttpVerb.SAVE, //the SAVE case need for backward compatibility
@@ -61,25 +61,24 @@ class PushBatchRequest<T : GenericJson>(
                         val item = itemsCache.get(itemId)
                         if (item == null) {
                             // check that item wasn't deleted before
-                            syncManager.deleteCachedItems(client.query().equals(META_ID, itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
+                            syncManager?.deleteCachedItems(client?.query()?.equals(META_ID, itemId)?.notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else if (httpVerb != SyncRequest.HttpVerb.POST) {
-                            syncRequest = syncManager.createSyncRequest(collection, networkManager.saveBlocking(item))
+                            syncRequest = syncManager?.createSyncRequest(collection, networkManager.saveBlocking(item))
                         }
                     }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
+                    SyncRequest.HttpVerb.DELETE -> syncRequest = syncManager?.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
                     else -> {}
                 }
                 try {
                     if (SyncRequest.HttpVerb.POST == httpVerb) {
                         batchSyncItems.add(syncItem)
                     } else {
-                        syncManager.executeRequest(client, syncRequest)
+                        syncManager?.executeRequest(client, syncRequest)
                     }
                 } catch (e: KinveyJsonResponseException) {
-                    if (e.statusCode != IGNORED_EXCEPTION_CODE
-                    && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
+                    if (e.statusCode != IGNORED_EXCEPTION_CODE && !e.message.contains(IGNORED_EXCEPTION_MESSAGE)) throw e
                 }
-                syncManager.deleteCachedItem(syncItem[Constants._ID] as String?)
+                syncManager?.deleteCachedItem(syncItem[Constants._ID] as String?)
             }
             if (batchSyncItems.isNotEmpty()) {
                 val saveItems = getSaveItems(batchSyncItems)
@@ -92,8 +91,8 @@ class PushBatchRequest<T : GenericJson>(
 
     @Throws(IOException::class)
     private fun executeSaveRequest(saveItems: List<T>) {
-        val syncRequest = syncManager.createSaveBatchSyncRequest(collection, networkManager, saveItems)
-        val response = syncManager.executeBatchRequest(client as AbstractClient<*>, networkManager, syncRequest)
+        val syncRequest = syncManager?.createSaveBatchSyncRequest(collection, networkManager, saveItems)
+        val response = syncManager?.executeBatchRequest(client as AbstractClient<*>, networkManager, syncRequest)
         val resultItems = response?.entityList
         resultItems?.let { list -> itemsCache.save(list.mapNotNull { it }) }
     }

@@ -27,25 +27,25 @@ import java.io.IOException
 /**
  * Logout Request Class.  Constructs the HTTP request object for Logout requests.
  */
-class LogoutRequest(private val client: AbstractClient<*>)
+class LogoutRequest(private val client: AbstractClient<*>?)
     : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, null, Void::class.java) {
 
     @Throws(IOException::class)
     override fun execute(): Void? {
         try {
-            client.initializeRequest(this)
+            client?.initializeRequest(this)
             super.execute()
         } catch (error: Exception) {
             error.printStackTrace()
         } finally {
-            client.performLockDown()
+            client?.performLockDown()
             if (LiveServiceRouter.instance?.isInitialized == true) {
                 LiveServiceRouter.instance?.uninitialize()
             }
-            val manager = CredentialManager(client.store)
-            manager.removeCredential(client.activeUser?.id)
-            client.activeUser = null
-            (client.kinveyRequestInitializer as KinveyClientRequestInitializer).setCredential(null)
+            val manager = CredentialManager(client?.store)
+            manager.removeCredential(client?.activeUser?.id)
+            client?.activeUser = null
+            (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).setCredential(null)
         }
         return null
     }

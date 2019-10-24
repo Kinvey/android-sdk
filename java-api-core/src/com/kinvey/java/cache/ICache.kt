@@ -26,7 +26,7 @@ import java.util.ArrayList
 /**
  * Created by Prots on 1/26/16.
  */
-interface ICache<T : GenericJson> {
+interface ICache<T : GenericJson?> {
 
 
     /**
@@ -87,13 +87,13 @@ interface ICache<T : GenericJson> {
      * @param item
      * @return id of saved items
      */
-    fun save(item: T): T    //store objects in cache
+    fun save(item: T?): T    //store objects in cache
 
     /**
      * Delete all object that matches query
      * @param query
      */
-    fun delete(query: Query): Int
+    fun delete(query: Query?): Int
 
     /**
      * Delete all object with given ids

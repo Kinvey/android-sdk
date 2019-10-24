@@ -40,19 +40,17 @@ internal class AndroidUserStore private constructor(context: Context?) : ClientU
     private fun persistData() {
         val editor = userPreferences?.edit()
         editor?.putString("userID", userID)
-        editor?.commit()
+        editor?.apply()
     }
 
-    /** {@inheritDoc}  */
-    override fun setUser(userID: String) {
-        this.userID = userID
-        persistData()
-    }
-
-    /** {@inheritDoc}  */
-    override fun getUser(): String? {
-        return userID
-    }
+    override var user: String?
+        get() {
+            return userID
+        }
+        set(value) {
+            this.userID = value
+            persistData()
+        }
 
     override fun clear() {
         userID = null

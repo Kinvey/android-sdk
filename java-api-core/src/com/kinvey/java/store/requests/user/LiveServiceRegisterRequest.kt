@@ -23,10 +23,9 @@ import com.kinvey.java.dto.DeviceId
 import com.kinvey.java.dto.LiveServiceRegisterResponse
 
 
-class LiveServiceRegisterRequest(client: AbstractClient<*>, @field:Key
-private val userID: String, deviceId: DeviceId) : AbstractKinveyJsonClientRequest<LiveServiceRegisterResponse>(client, "POST", REST_PATH, deviceId, LiveServiceRegisterResponse::class.java) {
+class LiveServiceRegisterRequest(client: AbstractClient<*>?, @Key private val userID: String, deviceId: DeviceId)
+    : AbstractKinveyJsonClientRequest<LiveServiceRegisterResponse>(client, "POST", REST_PATH, deviceId, LiveServiceRegisterResponse::class.java) {
     companion object {
-
         private val REST_PATH = "user/{appKey}/{userID}/register-realtime"
     }
 }

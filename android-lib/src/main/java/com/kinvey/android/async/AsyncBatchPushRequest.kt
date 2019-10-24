@@ -47,16 +47,16 @@ import java.security.AccessControlException
  */
 class AsyncBatchPushRequest<T : GenericJson>(
     private val collection: String,
-    private val manager: SyncManager,
-    private val client: AbstractClient<*>,
+    private val manager: SyncManager?,
+    private val client: AbstractClient<*>?,
     private val storeType: StoreType,
     private val networkManager: NetworkManager<T>,
-    storeItemType: Class<T>,
+    storeItemType: Class<T>?,
     private val callback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(callback) {
 
     private var progress = 0
     private var fullCount = 0
-    private val cache: ICache<T>? = client.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
+    private val cache: ICache<T>? = client?.cacheManager?.getCache(collection, storeItemType, java.lang.Long.MAX_VALUE)
 
     private val errors = mutableListOf<Exception>()
     private val batchSyncItems = mutableListOf<SyncItem>()
@@ -67,8 +67,8 @@ class AsyncBatchPushRequest<T : GenericJson>(
         checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
 
         val pushResponse = KinveyPushBatchResponse()
-        val requests = manager.popSingleQueue(collection)
-        val syncItems = manager.popSingleItemQueue(collection)
+        val requests = manager?.popSingleQueue(collection)
+        val syncItems = manager?.popSingleItemQueue(collection)
         val resultAllItems = mutableListOf<GenericJson>()
 
         processQueuedSyncRequests(requests, pushResponse)
@@ -103,7 +103,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
         val resultSingleItems = mutableListOf<GenericJson>()
         syncItems?.let { sItems ->
             for (syncItem in sItems) {
-                val itemId = syncItem.entityID.id
+                val itemId = syncItem.entityID?.id ?: ""
                 val requestMethod = syncItem.requestMethod
                 when (requestMethod) {
                     SyncRequest.HttpVerb.SAVE, // the SAVE case need for backward compatibility
@@ -113,12 +113,12 @@ class AsyncBatchPushRequest<T : GenericJson>(
                         if (item == null) {
                             // check that item wasn't deleted before
                             // if item wasn't found, it means that the item was deleted from the Cache by Delete request and the item will be deleted in case:DELETE
-                            manager.deleteCachedItems(client.query().equals(META_ID, itemId).notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
+                            manager?.deleteCachedItems(client?.query()?.equals(META_ID, itemId)?.notEqual(Constants.REQUEST_METHOD, Constants.DELETE))
                         } else if (requestMethod != SyncRequest.HttpVerb.POST) {
-                            syncRequest = manager.createSyncRequest(collection, networkManager.saveBlocking(item))
+                            syncRequest = manager?.createSyncRequest(collection, networkManager.saveBlocking(item))
                         }
                     }
-                    SyncRequest.HttpVerb.DELETE -> syncRequest = manager.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
+                    SyncRequest.HttpVerb.DELETE -> syncRequest = manager?.createSyncRequest(collection, networkManager.deleteBlocking(itemId))
                     else -> {}
                 }
                 try {
@@ -128,7 +128,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
                         val resultItem = runSingleSyncRequest(syncRequest)
                         resultItem?.let { item -> resultSingleItems.add(item) }
                         pushResponse.successCount = ++progress
-                        manager.deleteCachedItem(syncItem[_ID] as String?)
+                        manager?.deleteCachedItem(syncItem[_ID] as String?)
                     }
                 } catch (e: IOException) {
                     val err = KinveyUpdateSingleItemError(e, item)
@@ -144,10 +144,10 @@ class AsyncBatchPushRequest<T : GenericJson>(
 
     @Throws(IOException::class)
     private fun processBatchSyncRequest(syncItems: List<SyncItem>, saveItems: List<T>): KinveySyncSaveBatchResponse<*>? {
-        val syncRequest = manager.createSaveBatchSyncRequest(collection, networkManager, saveItems)
+        val syncRequest = manager?.createSaveBatchSyncRequest(collection, networkManager, saveItems)
         var resultList: KinveySyncSaveBatchResponse<T>? = null
         try {
-            resultList = manager.executeBatchRequest(client, networkManager, syncRequest)
+            resultList = manager?.executeBatchRequest(client, networkManager, syncRequest)
             removeBatchTempItems(syncItems, resultList)
         } catch (e: IOException) {
             Logger.ERROR(e.message)
@@ -161,21 +161,20 @@ class AsyncBatchPushRequest<T : GenericJson>(
         var resultItem: GenericJson? = null
         try {
             if (syncRequest?.httpVerb == SyncRequest.HttpVerb.POST) {
-                val tempID = syncRequest.entityID.id
-                resultItem = manager.executeRequest(client, syncRequest)
+                val tempID = syncRequest.entityID?.id ?: ""
+                resultItem = manager?.executeRequest(client, syncRequest)
                 val temp = cache?.get(tempID)
-                val resultValue = resultItem[_ID]
+                val resultValue = if (resultItem != null) resultItem[_ID] else ""
                 temp?.let { item ->
                     if (resultItem != null) { item.set(_ID, resultValue) }
                     cache?.delete(tempID)
                     cache?.save(item)
                 }
             } else {
-                resultItem = manager.executeRequest(client, syncRequest)
+                resultItem = manager?.executeRequest(client, syncRequest)
             }
         } catch (e: KinveyJsonResponseException) {
-            if (e.statusCode != IGNORED_EXCEPTION_CODE
-            && e.message?.contains(IGNORED_EXCEPTION_MESSAGE) == false) throw e
+            if (e.statusCode != IGNORED_EXCEPTION_CODE && !e.message.contains(IGNORED_EXCEPTION_MESSAGE)) throw e
         }
         return resultItem
     }
@@ -183,8 +182,8 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private fun removeBatchTempItems(batchSyncItems: List<SyncItem>, result: KinveySyncSaveBatchResponse<T>?) {
         batchSyncItems.onEach { item ->
             val tempID = item[_ID] as String?
-            val entityID = item.entityID.id
-            if (tempID != null) { manager.deleteCachedItem(tempID) }
+            val entityID = item.entityID?.id
+            if (tempID != null) { manager?.deleteCachedItem(tempID) }
             if (entityID != null) { cache?.delete(entityID) }
             result?.entityList?.filterNotNull()?.onEach { resultItem -> cache?.save(resultItem) }
         }
@@ -202,7 +201,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
         if (requests != null) {
             for (syncRequest in requests) {
                 try {
-                    manager.executeRequest(client, syncRequest)
+                    manager?.executeRequest(client, syncRequest)
                     pushResponse.successCount = ++progress
                 } catch (e: AccessControlException) { //TODO check Exception
                     errors.add(e)

@@ -34,8 +34,8 @@ abstract class AbstractKinveyReadRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod: String, uriTemplate: String,
-                      jsonContent: GenericJson?, var requestResponseClass: Class<T>)
+protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMethod: String, uriTemplate: String,
+                      jsonContent: GenericJson?, var requestResponseClass: Class<*>?)
     : AbstractKinveyJsonClientRequest<KinveyReadResponse<T>>(abstractKinveyJsonClient, requestMethod, uriTemplate, jsonContent, null) {
 
     @Throws(IOException::class)
@@ -49,12 +49,12 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
         val ret = KinveyReadResponse<T>()
 
         if (overrideRedirect) {
-            return onRedirect(response.headers.location)
+            return onRedirect(response?.headers?.location ?: "")
         }
 
         // special class to handle void or empty responses
-        if (Void::class.java == requestResponseClass || response.content == null) {
-            response.ignore()
+        if (Void::class.java == requestResponseClass || response?.content == null) {
+            response?.ignore()
             return null
         }
 
@@ -69,10 +69,11 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>, requestMethod
                 val jsonString = response.parseAsString()
                 val jsonParser = JsonParser()
                 val jsonArray = jsonParser.parse(jsonString) as JsonArray
-                val objectParser = abstractKinveyClient.objectParser
+                val objectParser = abstractKinveyClient.getObjectParser()
                 jsonArray.onEach { element ->
                     try {
-                        results.add(objectParser.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, requestResponseClass) as T)
+                        val item = objectParser?.parseAndClose(ByteArrayInputStream(element.toString().toByteArray(Charsets.UTF_8)), Charsets.UTF_8, requestResponseClass) as T?
+                        item?.run { results.add(this) }
                     } catch (e: IllegalArgumentException) {
                         Logger.ERROR("unable to parse response -> $e")
                         exceptions.add(KinveyException("Unable to parse the JSON in the response", "examine BL or DLC to ensure data format is correct. If the exception is caused by `key <somkey>`, then <somekey> might be a different type than is expected (int instead of of string)", e.toString()))

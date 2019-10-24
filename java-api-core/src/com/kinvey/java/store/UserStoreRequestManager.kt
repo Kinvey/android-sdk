@@ -76,18 +76,18 @@ class UserStoreRequestManager<T : BaseUser> {
         @JvmName("setMICRedirectURI")
         set
 
-    private val client: AbstractClient<T>
-    private val builder: KinveyAuthRequest.Builder<T>
+    private val client: AbstractClient<T>?
+    private val builder: KinveyAuthRequest.Builder<T>?
 
     constructor(client: AbstractClient<*>?, builder: KinveyAuthRequest.Builder<T>?) {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkNotNull(builder, "KinveyAuthRequest.Builder should not be null")
-        this.client = client!! as AbstractClient<T>
-        this.builder = builder!!
-        this.myClazz = client.userClass as Class<T>
-        this.builder.setUser(client.activeUser)
-        this.clientAppVersion = client.clientAppVersion
-        this.customRequestProperties = client.customRequestProperties
+        this.client = client as AbstractClient<T>?
+        this.builder = builder
+        this.myClazz = client?.userClass as Class<T>
+        this.builder?.setUser(client?.activeUser)
+        this.clientAppVersion = client?.clientAppVersion
+        this.customRequestProperties = client?.customRequestProperties
     }
 
     fun getBuilder(): KinveyAuthRequest.Builder<*>? {
@@ -111,14 +111,14 @@ class UserStoreRequestManager<T : BaseUser> {
 
 
     fun getCustomRequestProperties(): GenericData? {
-        return client.customRequestProperties
+        return client?.customRequestProperties
     }
 
     fun getClientAppVersion(): String? {
-        return client.clientAppVersion
+        return client?.clientAppVersion
     }
 
-    fun getClient() : AbstractClient<T> {
+    fun getClient() : AbstractClient<T>? {
         return client
     }
 
@@ -158,8 +158,8 @@ class UserStoreRequestManager<T : BaseUser> {
         }
         currentUser.authToken = response.authToken
 
-        val credentialManager = CredentialManager(client.store)
-        (client.kinveyRequestInitializer as KinveyClientRequestInitializer)
+        val credentialManager = CredentialManager(client?.store)
+        (client?.kinveyRequestInitializer as KinveyClientRequestInitializer)
                 .setCredential(credentialManager.createAndStoreCredential(response, userObject.id))
         client.clientUser?.user = currentUser.id
         client.activeUser = currentUser
@@ -174,11 +174,11 @@ class UserStoreRequestManager<T : BaseUser> {
      * @throws IOException exception
      */
     @Throws(IOException::class)
-    fun initUser(userObject: T): T {
-        val credentialManager = CredentialManager(client.store)
-        (client.kinveyRequestInitializer as KinveyClientRequestInitializer)
+    fun initUser(userObject: T?): T? {
+        val credentialManager = CredentialManager(client?.store)
+        (client?.kinveyRequestInitializer as KinveyClientRequestInitializer)
                 .setCredential(credentialManager.createAndStoreCredential(userObject))
-        client.clientUser?.user = userObject.id
+        client.clientUser?.user = userObject?.id
         client.activeUser = userObject
         return userObject
     }
@@ -186,12 +186,12 @@ class UserStoreRequestManager<T : BaseUser> {
     private fun initUser(credential: Credential, userObject: T): T {
         userObject.id = credential.userId
         userObject.authToken = credential.authToken
-        client.activeUser = userObject
+        client?.activeUser = userObject
         return userObject
     }
 
     fun removeFromStore(userID: String) {
-        val credentialManager = CredentialManager(client.store)
+        val credentialManager = CredentialManager(client?.store)
         credentialManager.removeCredential(userID)
     }
 
@@ -258,12 +258,12 @@ class UserStoreRequestManager<T : BaseUser> {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun retrieveMetadataBlocking(): T {
+    fun retrieveMetadataBlocking(): T? {
         val ret = this.retrieveBlocking().execute()
         val currentUser: T
-        if (client.activeUser == null) {
+        currentUser = if (client?.activeUser == null) {
             try {
-                currentUser = myClazz.newInstance()
+                myClazz.newInstance()
             } catch (e: InstantiationException) {
                 e.printStackTrace()
                 throw KinveyException(e.message ?: "")
@@ -272,11 +272,11 @@ class UserStoreRequestManager<T : BaseUser> {
                 throw KinveyException(e.message ?: "")
             }
         } else {
-            currentUser = client.activeUser as T
+            client.activeUser as T
         }
-        currentUser.putAll(ret!!.unknownKeys)
-        currentUser.username = ret.username
-        client.activeUser = currentUser
+        currentUser.putAll(ret?.unknownKeys ?: mapOf<String, Any>())
+        currentUser.username = ret?.username
+        client?.activeUser = currentUser
         return ret
     }
 
@@ -359,10 +359,10 @@ class UserStoreRequestManager<T : BaseUser> {
             throw KinveyException(e.message ?: "")
         }
 
-        currentUser!!.authToken = authToken
+        currentUser?.authToken = authToken
         currentUser.id = userId
         val c = Credential.from(userId, authToken)
-        client.activeUser = currentUser
+        client?.activeUser = currentUser
         return login(c)
 
     }
@@ -457,10 +457,10 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun deleteBlocking(hardDelete: Boolean): Delete {
 
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
-        val delete = Delete(this, client.activeUser?.id ?: "", hardDelete)
-        client.initializeRequest(delete)
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
+        val delete = Delete(this, client?.activeUser?.id ?: "", hardDelete)
+        client?.initializeRequest(delete)
         return delete
     }
 
@@ -472,11 +472,11 @@ class UserStoreRequestManager<T : BaseUser> {
      */
     @Throws(IOException::class)
     fun retrieveBlocking(): Retrieve<T> {
-        val userId = client.activeUser?.id
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
-        val retrieve = Retrieve<T>(this, client.activeUser?.id!!)
-        client.initializeRequest(retrieve)
+        val userId = client?.activeUser?.id
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
+        val retrieve = Retrieve<T>(this, client?.activeUser?.id ?: "")
+        client?.initializeRequest(retrieve)
         return retrieve
     }
 
@@ -489,7 +489,7 @@ class UserStoreRequestManager<T : BaseUser> {
     @Throws(IOException::class)
     fun retrieveBlocking(query: Query): RetrieveUsers<*> {
         val retrieve = RetrieveUsers(this, query)
-        client.initializeRequest(retrieve)
+        client?.initializeRequest(retrieve)
         return retrieve
     }
 
@@ -502,10 +502,10 @@ class UserStoreRequestManager<T : BaseUser> {
      */
     @Throws(IOException::class)
     fun retrieveBlocking(resolves: Array<String>): Retrieve<T> {
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
-        val retrieve = Retrieve(this, client.activeUser?.id!!, resolves, 1, true)
-        client.initializeRequest(retrieve)
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
+        val retrieve = Retrieve(this, client?.activeUser?.id, resolves, 1, true)
+        client?.initializeRequest(retrieve)
         return retrieve
     }
 
@@ -521,7 +521,7 @@ class UserStoreRequestManager<T : BaseUser> {
     fun retrieveBlocking(query: Query, resolves: Array<String>): RetrieveUsers<*> {
         Preconditions.checkNotNull(query, "query must not be null")
         val retrieve = RetrieveUsers(this, query, resolves, 1, true)
-        client.initializeRequest(retrieve)
+        client?.initializeRequest(retrieve)
         return retrieve
     }
 
@@ -533,9 +533,9 @@ class UserStoreRequestManager<T : BaseUser> {
      */
     @Throws(IOException::class)
     fun updateBlocking(): Update<T> {
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
-        val update = Update(this, client.activeUser as T, myClazz)
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
+        val update = Update(this, client?.activeUser as T, myClazz)
         client.initializeRequest(update)
         return update
     }
@@ -552,17 +552,17 @@ class UserStoreRequestManager<T : BaseUser> {
         Preconditions.checkNotNull(baseUser, "currentUser must not be null")
         Preconditions.checkNotNull(baseUser.id, "currentUser ID must not be null")
         val update = Update(this, baseUser, myClazz)
-        client.initializeRequest(update)
+        client?.initializeRequest(update)
         return update
     }
 
     @Throws(IOException::class)
     fun changePassword(newPassword: String): Update<T> {
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
         val passwordRequest = PasswordRequest()
         passwordRequest.password = newPassword
-        val update = Update(this, client.activeUser as T, passwordRequest, myClazz)
+        val update = Update(this, client?.activeUser as T, passwordRequest, myClazz)
         client.initializeRequest(update)
         return update
     }
@@ -573,7 +573,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val name = Username()
         name.username = username
         val userExists = UserExists(client, name)
-        client.initializeRequest(userExists)
+        client?.initializeRequest(userExists)
         return userExists
     }
 
@@ -581,7 +581,7 @@ class UserStoreRequestManager<T : BaseUser> {
     fun getUser(userId: String): Update<T> {
         Preconditions.checkNotNull(userId, "username must not be null")
         val update = Update(this, userId, myClazz)
-        client.initializeRequest(update)
+        client?.initializeRequest(update)
         return update
     }
 
@@ -601,7 +601,7 @@ class UserStoreRequestManager<T : BaseUser> {
     fun resetPasswordBlocking(usernameOrEmail: String?): ResetPassword {
         Preconditions.checkNotNull(usernameOrEmail, "username must not be null!")
         val reset = ResetPassword(this, usernameOrEmail)
-        client.initializeRequest(reset)
+        client?.initializeRequest(reset)
         return reset
     }
 
@@ -613,10 +613,10 @@ class UserStoreRequestManager<T : BaseUser> {
      */
     @Throws(IOException::class)
     fun sendEmailVerificationBlocking(): EmailVerification {
-        Preconditions.checkNotNull(client.activeUser, "currentUser must not be null")
-        Preconditions.checkNotNull(client.activeUser?.id, "currentUser ID must not be null")
-        val verify =  EmailVerification(this, client.activeUser?.id!!)
-        client.initializeRequest(verify)
+        Preconditions.checkNotNull(client?.activeUser, "currentUser must not be null")
+        Preconditions.checkNotNull(client?.activeUser?.id, "currentUser ID must not be null")
+        val verify =  EmailVerification(this, client?.activeUser?.id ?: "")
+        client?.initializeRequest(verify)
         return verify
     }
 
@@ -642,7 +642,7 @@ class UserStoreRequestManager<T : BaseUser> {
         lock["userId"] = userid
         lock["setLockdownStateTo"] = setLockdownStateTo
         val lockdown = LockDownUser(this, lock)
-        client.initializeRequest(lockdown)
+        client?.initializeRequest(lockdown)
         return lockdown
     }
 
@@ -652,7 +652,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val userEmail = Email()
         userEmail.email = email
         val forgotUsername = ForgotUsername(client, userEmail)
-        client.initializeRequest(forgotUsername)
+        client?.initializeRequest(forgotUsername)
         return forgotUsername
     }
 
@@ -668,7 +668,7 @@ class UserStoreRequestManager<T : BaseUser> {
         data["grant_type"] = "authorization_code"
         data["code"] = code
         data["redirect_uri"] = micRedirectURI
-        var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+        var fullClientIdField = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
@@ -689,7 +689,7 @@ class UserStoreRequestManager<T : BaseUser> {
         data[GRANT_TYPE] = PASSWORD_TYPE
         data[USERNAME_PARAM] = username
         data[PASSWORD_PARAM] = password
-        var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+        var fullClientIdField = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
@@ -712,7 +712,7 @@ class UserStoreRequestManager<T : BaseUser> {
         data["grant_type"] = "refresh_token"
         data["refresh_token"] = refreshToken
         data["redirect_uri"] = micRedirectURI
-        var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+        var fullClientIdField = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
         val clientId = client.store?.load(client.activeUser?.id)?.clientId
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
@@ -736,7 +736,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val data = HashMap<String, String?>()
         data["response_type"] = "code"
         data["redirect_uri"] = micRedirectURI
-        var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+        var fullClientIdField = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
@@ -762,7 +762,7 @@ class UserStoreRequestManager<T : BaseUser> {
 
 
         val data = HashMap<String, String?>()
-        var fullClientIdField = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
+        var fullClientIdField = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
         if (clientId != null) {
             fullClientIdField = "$fullClientIdField.$clientId"
         }
@@ -784,31 +784,31 @@ class UserStoreRequestManager<T : BaseUser> {
     inner class LoginRequest {
         internal lateinit var credential: Credential
         internal var type: LoginType
-        internal lateinit var request: KinveyAuthRequest<T>
+        internal var request: KinveyAuthRequest<T>? = null
 
         constructor() {
-            builder.setCreate(true)
+            builder?.create = true
             this.type = LoginType.IMPLICIT
         }
 
         constructor(username: String?, password: String?, setCreate: Boolean) {
-            builder.setUsernameAndPassword(username, password)
-            builder.setCreate(setCreate)
-            builder.setUser(client.activeUser)
+            builder?.setUsernameAndPassword(username, password)
+            builder?.create = setCreate
+            builder?.setUser(client?.activeUser)
             this.type = LoginType.KINVEY
         }
 
         constructor(username: String?, password: String?, user: T, setCreate: Boolean) {
-            builder.setUsernameAndPassword(username, password)
-            builder.setCreate(setCreate)
-            builder.setUser(user)
+            builder?.setUsernameAndPassword(username, password)
+            builder?.create = setCreate
+            builder?.setUser(user)
             this.type = LoginType.KINVEY
         }
 
         constructor(identity: ThirdPartyIdentity) {
-            builder.thirdPartyIdentity = identity
-            builder.setUser(client.activeUser)
-            builder.setCreate(false)
+            builder?.thirdPartyIdentity = identity
+            builder?.setUser(client?.activeUser)
+            builder?.create = false
             this.type = LoginType.THIRDPARTY
         }
 
@@ -818,23 +818,23 @@ class UserStoreRequestManager<T : BaseUser> {
         }
 
         fun buildAuthRequest(): LoginRequest {
-            this.request = builder.build()
-            val kinveyHeaders = (client.kinveyRequestInitializer as KinveyClientRequestInitializer).kinveyHeaders
+            this.request = builder?.build()
+            val kinveyHeaders = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer).kinveyHeaders
             if (clientAppVersion != null) {
                 kinveyHeaders.set("X-Kinvey-Client-App-Version", clientAppVersion)
             }
-            this.request.setKinveyHeaders(kinveyHeaders)
+            this.request?.setKinveyHeaders(kinveyHeaders)
             return this
         }
 
         @Throws(IOException::class)
-        fun execute(): T {
-            if (client.isUserLoggedIn) {
+        fun execute(): T? {
+            if (client?.isUserLoggedIn == true) {
                 throw KinveyException("Attempting to login when a user is already logged in",
                         "call `UserStore.logout(myClient, kinveyClientCallback)` first -or- check `myClient.isUserLoggedIn()` before attempting to login again",
                         "Only one user can be active at a time, and logging in a new user will replace the current user which might not be intended")
             }
-            var loggedUser: T
+            var loggedUser: T?
             try {
                 loggedUser = myClazz.newInstance()
             } catch (e: Exception) {
@@ -846,8 +846,8 @@ class UserStoreRequestManager<T : BaseUser> {
                 initUser(credential, loggedUser) //only token and user_id is initialized here
                 var savedUser: T? = null
                 try {
-                    savedUser = client.userCacheManager?.getCache(ACTIVE_USER_COLLECTION_NAME,
-                                client.userClass, java.lang.Long.MAX_VALUE)?.get(loggedUser.id!!) //getting full user info from cache
+                    savedUser = client?.userCacheManager?.getCache(ACTIVE_USER_COLLECTION_NAME,
+                                client.userClass, java.lang.Long.MAX_VALUE)?.get(loggedUser.id ?: "") //getting full user info from cache
                     if (savedUser != null) {
                         savedUser.authToken = loggedUser.authToken
                         savedUser.setAuthTokenToKmd(loggedUser.authToken!!)
@@ -861,10 +861,10 @@ class UserStoreRequestManager<T : BaseUser> {
 
                 return savedUser?.let { initUser(it) } ?: loggedUser
             }
-            loggedUser = this.request.execute(myClazz)
+            loggedUser = this.request?.execute(myClazz)
             initUser(loggedUser)
             try {
-                if (client.userCacheManager != null) {
+                if (client?.userCacheManager != null) {
                     client.userCacheManager?.getCache(ACTIVE_USER_COLLECTION_NAME,
                             client.userClass, java.lang.Long.MAX_VALUE)?.save(loggedUser)
                 }
@@ -874,7 +874,6 @@ class UserStoreRequestManager<T : BaseUser> {
                     throw e
                 }
             }
-
             return loggedUser
         }
     }
@@ -886,7 +885,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val deviceID = DeviceId()
         deviceID.deviceId = deviceId
         val liveServiceRegisterRequest = LiveServiceRegisterRequest(client, userId, deviceID)
-        client.initializeRequest(liveServiceRegisterRequest)
+        client?.initializeRequest(liveServiceRegisterRequest)
         return liveServiceRegisterRequest
     }
 
@@ -897,7 +896,7 @@ class UserStoreRequestManager<T : BaseUser> {
         val deviceID = DeviceId()
         deviceID.deviceId = deviceId
         val liveServiceUnregisterRequest = LiveServiceUnregisterRequest(client, userId, deviceID)
-        client.initializeRequest(liveServiceUnregisterRequest)
+        client?.initializeRequest(liveServiceUnregisterRequest)
         return liveServiceUnregisterRequest
     }
 

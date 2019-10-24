@@ -37,14 +37,14 @@ import java.io.IOException
 import java.util.ArrayList
 
 import com.kinvey.java.Constants._ID
-import com.kinvey.java.network.NetworkManager.ID_FIELD_NAME
+import com.kinvey.java.network.NetworkManager.Companion.ID_FIELD_NAME
 
 class SaveListBatchRequest<T : GenericJson>(
     private val cache: ICache<T>?,
     private val networkManager: NetworkManager<T>,
     private val writePolicy: WritePolicy,
     private val objects: Iterable<T>,
-    private val syncManager: SyncManager) : IRequest<List<T>> {
+    private val syncManager: SyncManager?) : IRequest<List<T>> {
 
     private var updateList: MutableList<T>? = null
     private var saveList: MutableList<T>? = null
@@ -60,7 +60,7 @@ class SaveListBatchRequest<T : GenericJson>(
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 retList = cache?.save(objects) ?: ArrayList()
-                syncManager.enqueueSaveRequests(networkManager.collectionName, networkManager, retList)
+                syncManager?.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, retList)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
@@ -115,7 +115,7 @@ class SaveListBatchRequest<T : GenericJson>(
         var response: KinveySaveBatchResponse<*>? = null
         try {
             val batchList = prepareSaveItems(SyncRequest.HttpVerb.POST, entities)
-            response = networkManager.saveBatchBlocking(batchList).execute()
+            response = networkManager.saveBatchBlocking(batchList)?.execute()
         } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
         } catch (e: IOException) {
@@ -182,12 +182,12 @@ class SaveListBatchRequest<T : GenericJson>(
     @Throws(IOException::class)
     private fun enqueueSaveRequests(errorItems: List<T>, requestType: SyncRequest.HttpVerb) {
         errorItems.forEach { itm ->
-            syncManager.enqueueRequest(networkManager.collectionName, networkManager, requestType, itm[_ID] as String?)
+            syncManager?.enqueueRequest(networkManager.collectionName, networkManager, requestType, itm[_ID] as String?)
         }
     }
 
     private fun doPushRequest() {
-        val pushRequest = PushBatchRequest(networkManager.collectionName,
+        val pushRequest = PushBatchRequest(networkManager.collectionName ?: "",
         cache as ICache<T>, networkManager, networkManager.client)
         try {
             pushRequest.execute()
@@ -217,14 +217,14 @@ class SaveListBatchRequest<T : GenericJson>(
         val ret = items?.mapNotNull { itm ->
             var res: T? = null
             try {
-                res = networkManager.saveBlocking(itm).execute()
+                res = networkManager.saveBlocking(itm)?.execute()
                 removeFromCache(itm)
             } catch (e: IOException) {
                 if (!useCache || (e is HttpResponseException && e.statusCode == 401)) {
                     wasException = true
                     errors.add(KinveyUpdateSingleItemError(e, itm))
                 }
-                syncManager.enqueueRequest(networkManager.collectionName,
+                syncManager?.enqueueRequest(networkManager.collectionName,
                         networkManager, SyncRequest.HttpVerb.PUT, itm[_ID] as String?)
             }
             res

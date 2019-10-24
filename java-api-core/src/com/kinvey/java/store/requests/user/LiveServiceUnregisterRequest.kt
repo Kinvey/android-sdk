@@ -22,8 +22,8 @@ import com.kinvey.java.core.AbstractKinveyJsonClientRequest
 import com.kinvey.java.dto.DeviceId
 
 
-class LiveServiceUnregisterRequest(client: AbstractClient<*>, @field:Key
-private val userID: String, deviceId: DeviceId) : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, deviceId, Void::class.java) {
+class LiveServiceUnregisterRequest(client: AbstractClient<*>?, @Key private val userID: String, deviceId: DeviceId)
+    : AbstractKinveyJsonClientRequest<Void>(client, "POST", REST_PATH, deviceId, Void::class.java) {
     companion object {
 
         private val REST_PATH = "user/{appKey}/{userID}/unregister-realtime"

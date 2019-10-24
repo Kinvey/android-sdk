@@ -96,15 +96,15 @@ class MediaHttpUploader {
  * `null` for none
  */
 constructor (mediaContent: AbstractInputStreamContent,
-             transport: HttpTransport, httpRequestInitializer: HttpRequestInitializer?) {
+             transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?) {
         this.mediaContent = Preconditions.checkNotNull(mediaContent)
-        this.transport = Preconditions.checkNotNull(transport)
+        this.transport = transport?.run { Preconditions.checkNotNull(this) }
         this.retryBackOffCounter = 0
         this.retry404ErrorCounter = 0
         this.requestFactory = if (httpRequestInitializer == null)
-            transport.createRequestFactory()
+            transport?.createRequestFactory()
         else
-            transport.createRequestFactory(httpRequestInitializer)
+            transport?.createRequestFactory(httpRequestInitializer)
     }
 
     /**
@@ -118,7 +118,7 @@ constructor (mediaContent: AbstractInputStreamContent,
     /**
      * Returns the transport to use for requests.
      */
-    val transport: HttpTransport
+    val transport: HttpTransport?
 
     /**
      * The current state of the uploader.
@@ -134,7 +134,7 @@ constructor (mediaContent: AbstractInputStreamContent,
     /**
      * The request factory for connections to the server.
      */
-    private val requestFactory: HttpRequestFactory
+    private val requestFactory: HttpRequestFactory?
 
     /**
      * HTTP content metadata of the media to be uploaded or `null` for none.
@@ -479,7 +479,7 @@ constructor (mediaContent: AbstractInputStreamContent,
         var statusCode: Int
 
         while (!isCancelled) {
-            currentRequest = requestFactory.buildPutRequest(uploadUrl, null)
+            currentRequest = requestFactory?.buildPutRequest(uploadUrl, null)
             currentRequest?.suppressUserAgentSuffix = true
             setContentAndHeadersOnCurrentRequest(meta?.mimetype)
 
@@ -601,13 +601,13 @@ constructor (mediaContent: AbstractInputStreamContent,
     @Throws(KinveyException::class)
     private fun makeInitiationClientRequest(initiationClientRequest: AbstractKinveyClientRequest<*>) {
         val initialResponse = executeUploadInitiation(initiationClientRequest)
-        if (!initialResponse.isSuccessStatusCode) {
+        if (initialResponse?.isSuccessStatusCode == false) {
             // If the initiation request is not successful return it immediately.
             throw KinveyException("Uploading Metadata Failed")
         }
         try {
-            val jsonObjectParser = initiationClientRequest.abstractKinveyClient.objectParser as JsonObjectParser
-            meta = parse(jsonObjectParser, initialResponse)
+            val jsonObjectParser = initiationClientRequest.abstractKinveyClient?.getObjectParser() as JsonObjectParser
+            meta = initialResponse?.run { parse(jsonObjectParser, this) }
             meta?.let { metadata ->
                 if (metadata.containsKey("_requiredHeaders")) {
                     //then there are special headers to use in the request to google
@@ -623,7 +623,7 @@ constructor (mediaContent: AbstractInputStreamContent,
                 }
             }
         } finally {
-            initialResponse.disconnect()
+            initialResponse?.disconnect()
             fileMetaDataForUploading = meta
         }
     }
@@ -681,14 +681,14 @@ constructor (mediaContent: AbstractInputStreamContent,
     @Throws(IOException::class)
     private fun updateUploadedDataInfo(uploadUrl: GenericUrl): HttpResponse? {
         var response: HttpResponse? = null
-        val httpRequest: HttpRequest
+        val httpRequest: HttpRequest?
         try {
-            httpRequest = requestFactory.buildPutRequest(uploadUrl, null)
-            httpRequest.setContent(EmptyContent())
-            httpRequest.setSuppressUserAgentSuffix(true)
-            httpRequest.getHeaders().contentRange = "bytes */" + getMediaContentLength()
-            httpRequest.setThrowExceptionOnExecuteError(false)
-            response = httpRequest.execute()
+            httpRequest = requestFactory?.buildPutRequest(uploadUrl, null)
+            httpRequest?.content = EmptyContent()
+            httpRequest?.suppressUserAgentSuffix = true
+            httpRequest?.headers?.contentRange = "bytes */" + getMediaContentLength()
+            httpRequest?.throwExceptionOnExecuteError = false
+            response = httpRequest?.execute()
             if (response != null && (response.isSuccessStatusCode || response.statusCode == 308)) {
                 var range = response.headers.range
                 range = range.substring(range.lastIndexOf("-") + 1)
@@ -758,7 +758,7 @@ constructor (mediaContent: AbstractInputStreamContent,
      * This method sends a GET request with empty content to get the unique upload URL.
      */
     @Throws(IOException::class)
-    private fun executeUploadInitiation(abstractKinveyClientRequest: AbstractKinveyClientRequest<*>): HttpResponse {
+    private fun executeUploadInitiation(abstractKinveyClientRequest: AbstractKinveyClientRequest<*>): HttpResponse? {
         updateStateAndNotifyListener(UploadState.INITIATION_STARTED)
         //        abstractKinveyClientRequest.put("uploadType", "resumable");
 
@@ -780,7 +780,7 @@ constructor (mediaContent: AbstractInputStreamContent,
             notificationCompleted = true
         } finally {
             if (!notificationCompleted) {
-                response.disconnect()
+                response?.disconnect()
             }
         }
         return response

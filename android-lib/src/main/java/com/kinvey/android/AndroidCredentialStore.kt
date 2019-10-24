@@ -35,21 +35,23 @@ class AndroidCredentialStore(context: Context?) : CredentialStore {
     private var appContext: Context? = null
     /** {@inheritDoc}  */
     @Throws(IOException::class)
-    override fun load(userId: String): Credential {
+    override fun load(userId: String?): Credential {
         return credentials[userId] ?: Credential.from("", "")
     }
 
     /** {@inheritDoc}  */
     @Throws(IOException::class)
-    override fun store(userId: String, credential: Credential) {
+    override fun store(userId: String?, credential: Credential?) {
         Preconditions.checkNotNull(credential, "credential must not be null")
         Preconditions.checkNotNull(userId, "userId must not be null")
-        credentials[userId] = credential
+        if (userId != null) {
+            credential?.run { credentials[userId] = this }
+        }
         persistCredentialStore()
     }
 
     /** {@inheritDoc}  */
-    override fun delete(userId: String) {
+    override fun delete(userId: String?) {
         credentials.remove(userId)
         persistCredentialStore()
     }

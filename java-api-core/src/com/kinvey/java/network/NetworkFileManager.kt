@@ -37,7 +37,7 @@ import com.kinvey.java.core.UploaderProgressListener
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.model.KinveyDeleteResponse
 import com.kinvey.java.model.SaveMode
-import com.kinvey.java.network.NetworkManager.ID_FIELD_NAME
+import com.kinvey.java.network.NetworkManager.Companion.ID_FIELD_NAME
 import com.kinvey.java.query.AbstractQuery
 
 /**
@@ -639,8 +639,8 @@ open class NetworkFileManager
          * @param requestFactory request factory to be used
          * @return a valid http uploader with default settings
          */
-        protected fun createMediaHttpUploader(content: AbstractInputStreamContent, requestFactory: HttpRequestFactory): MediaHttpUploader {
-            return MediaHttpUploader(content, requestFactory.transport, requestFactory.initializer)
+        protected fun createMediaHttpUploader(content: AbstractInputStreamContent, requestFactory: HttpRequestFactory?): MediaHttpUploader {
+            return MediaHttpUploader(content, requestFactory?.transport, requestFactory?.initializer)
         }
     }
 

@@ -18,13 +18,13 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> signUp(userId: String, password: String, user: T, client: AbstractClient<T>): T {
+    fun <T : BaseUser> signUp(userId: String, password: String, user: T, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).createBlocking(userId, password, user).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> signUp(userId: String, password: String, client: AbstractClient<T>): T {
+    fun <T : BaseUser> signUp(userId: String, password: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).createBlocking(userId, password).execute()
     }
 
@@ -38,28 +38,28 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun <T : BaseUser> login(username: String, password: String,
-                             client: AbstractClient<T>): T {
+                             client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginBlocking(username, password).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> login(client: AbstractClient<T>): T {
+    fun <T : BaseUser> login(client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginBlocking().execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> loginFacebook(accessToken: String, client: AbstractClient<T>): T {
+    fun <T : BaseUser> loginFacebook(accessToken: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginFacebookBlocking(accessToken).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> loginGoogle(accessToken: String, client: AbstractClient<T>): T {
+    fun <T : BaseUser> loginGoogle(accessToken: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginGoogleBlocking(accessToken).execute()
     }
@@ -67,14 +67,14 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun <T : BaseUser> loginTwitter(accessToken: String, accessSecret: String, consumerKey: String,
-                                    consumerSecret: String, client: AbstractClient<T>): T {
+                                    consumerSecret: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).loginTwitterBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
     fun <T : BaseUser> loginLinkedIn(accessToken: String, accessSecret: String, consumerKey: String,
-                                     consumerSecret: String, client: AbstractClient<T>): T {
+                                     consumerSecret: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginLinkedInBlocking(accessToken, accessSecret, consumerKey, consumerSecret).execute()
     }
@@ -82,7 +82,7 @@ object BaseUserStore {
     @Throws(IOException::class)
     @JvmStatic
     fun <T : BaseUser> loginAuthLink(accessToken: String, refreshToken: String,
-                                     client: AbstractClient<T>): T {
+                                     client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginAuthLinkBlocking(accessToken, refreshToken).execute()
     }
@@ -91,27 +91,27 @@ object BaseUserStore {
     @JvmStatic
     fun <T : BaseUser> loginSalesForce(accessToken: String, clientId: String,
                                        refreshToken: String, id: String,
-                                       client: AbstractClient<T>): T {
+                                       client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginSalesForceBlocking(accessToken, clientId, refreshToken, id).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> loginMobileIdentity(authToken: String, client: AbstractClient<T>): T {
+    fun <T : BaseUser> loginMobileIdentity(authToken: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client))
                 .loginMobileIdentityBlocking(authToken).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> login(credential: Credential, client: AbstractClient<T>?): T {
+    fun <T : BaseUser> login(credential: Credential, client: AbstractClient<T>?): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).login(credential).execute()
     }
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> loginKinveyAuthToken(userId: String, authToken: String, client: AbstractClient<T>): T {
+    fun <T : BaseUser> loginKinveyAuthToken(userId: String, authToken: String, client: AbstractClient<T>): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).loginKinveyAuthTokenBlocking(userId, authToken).execute()
     }
 
@@ -141,7 +141,7 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> convenience(client: AbstractClient<T>?): T {
+    fun <T : BaseUser> convenience(client: AbstractClient<T>?): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).retrieveMetadataBlocking()
     }
 
@@ -189,7 +189,7 @@ object BaseUserStore {
 
     @Throws(IOException::class)
     @JvmStatic
-    fun <T : BaseUser> save(client: AbstractClient<T>): T? {
+    fun <T : BaseUser> save(client: AbstractClient<T>?): T? {
         return UserStoreRequestManager<T>(client, createBuilder(client)).save().execute()
     }
 
@@ -247,8 +247,8 @@ object BaseUserStore {
         client?.let { c ->
             val appKey = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appKey
             val appSecret = (c.kinveyRequestInitializer as KinveyClientRequestInitializer).appSecret
-            return KinveyAuthRequest.Builder(c.requestFactory.transport,
-                    c.jsonFactory, c.baseUrl, appKey, appSecret, null)
+            return KinveyAuthRequest.Builder(c.requestFactory?.transport,
+                    c.jsonFactory, c.baseUrl, appKey ?: "", appSecret ?: "", null)
         }
         return null
     }
