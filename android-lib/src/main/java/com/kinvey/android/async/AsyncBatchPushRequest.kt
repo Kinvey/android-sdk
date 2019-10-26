@@ -29,6 +29,7 @@ import com.kinvey.java.Constants._ID
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
+import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.KinveySyncSaveBatchResponse
 import com.kinvey.java.model.KinveyUpdateSingleItemError
@@ -52,7 +53,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private val storeType: StoreType,
     private val networkManager: NetworkManager<T>,
     storeItemType: Class<T>?,
-    private val callback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(callback) {
+    val pushCallback: KinveyPushCallback) : AsyncClientRequest<KinveyPushResponse>(pushCallback) {
 
     private var progress = 0
     private var fullCount = 0
@@ -62,7 +63,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     private val batchSyncItems = mutableListOf<SyncItem>()
 
     @Throws(IOException::class, InvocationTargetException::class)
-    override fun executeAsync(): KinveyPushBatchResponse {
+    override fun executeAsync(): KinveyPushBatchResponse? {
 
         checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
 
@@ -134,9 +135,9 @@ class AsyncBatchPushRequest<T : GenericJson>(
                     val err = KinveyUpdateSingleItemError(e, item)
                     errors.add(err)
                 } catch (e: Exception) {
-                    callback.onFailure(e)
+                    callback?.onFailure(e)
                 }
-                callback.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
+                pushCallback?.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
             }
         }
         return resultSingleItems
@@ -208,9 +209,9 @@ class AsyncBatchPushRequest<T : GenericJson>(
                 } catch (e: KinveyException) {
                     errors.add(e)
                 } catch (e: Exception) {
-                    callback.onFailure(e)
+                    callback?.onFailure(e)
                 }
-                callback.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
+                pushCallback?.onProgress(pushResponse.successCount.toLong(), fullCount.toLong())
             }
         }
     }

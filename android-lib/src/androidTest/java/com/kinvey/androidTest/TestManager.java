@@ -242,7 +242,7 @@ public class TestManager<T extends GenericJson> {
         LooperThread looperThread = new LooperThread(new Runnable() {
             @Override
             public void run() {
-                store.save(persons, callback);
+                store.save(persons, (KinveyClientCallback) callback);
             }
         });
         looperThread.start();

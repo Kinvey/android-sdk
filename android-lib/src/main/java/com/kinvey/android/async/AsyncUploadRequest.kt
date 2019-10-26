@@ -20,7 +20,7 @@ class AsyncUploadRequest<T>(scope: Any, method: Method?, callback: AsyncUploader
             @Throws(IOException::class)
             override fun progressChanged(uploader: MediaHttpUploader) {
                 val myRunnable = Runnable {
-                    if (getCallback() != null) {
+                    if (callback != null) {
                         Logger.INFO("notifying callback")
                         try {
                             callback?.progressChanged(uploader)

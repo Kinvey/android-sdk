@@ -39,6 +39,7 @@ import com.kinvey.java.core.KinveyJsonResponseException;
 import com.kinvey.java.model.UserLookup;
 import com.kinvey.java.store.StoreType;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -106,17 +107,11 @@ public class UserStoreTest {
     private static class DefaultKinveyListCallback implements KinveyListCallback<User> {
 
         private CountDownLatch latch;
-        private List<User> result;
+        private List<?> result;
         private Throwable error;
 
         private DefaultKinveyListCallback(CountDownLatch latch) {
             this.latch = latch;
-        }
-
-        @Override
-        public void onSuccess(List<User> result) {
-            this.result = result;
-            finish();
         }
 
         @Override
@@ -128,6 +123,12 @@ public class UserStoreTest {
 
         private void finish() {
             latch.countDown();
+        }
+
+        @Override
+        public void onSuccess(@NotNull List<? extends User> result) {
+            this.result = result;
+            finish();
         }
     }
 

@@ -362,7 +362,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
      * @param pushServiceClass Service class for handling push notification
      * @return Instance of [AbstractPush] for the defined collection
      */
-    fun push(pushServiceClass: Class<*>): AbstractPush? {
+    fun push(pushServiceClass: Class<*>?): AbstractPush? {
         synchronized(lock) {
             //NOTE:  pushProvider is defined as a FCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create FCMPush inline here)
@@ -402,7 +402,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
     }
 
 
-    private class Ping (val client: Client<*>, callback: KinveyPingCallback) : AsyncClientRequest<Boolean>(callback) {
+    private class Ping (val client: Client<*>, callback: KinveyPingCallback?) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {

@@ -2,6 +2,8 @@ package com.kinvey.androidTest.callback;
 
 import com.kinvey.android.callback.KinveyListCallback;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -12,15 +14,18 @@ import java.util.concurrent.CountDownLatch;
 public class CustomKinveyListCallback<T> implements KinveyListCallback<T> {
 
     private CountDownLatch latch;
-    private List<T> result;
+    private List<?> result;
     private Throwable error;
 
     public CustomKinveyListCallback(CountDownLatch latch) {
         this.latch = latch;
     }
 
+
+
+
     @Override
-    public void onSuccess(List<T> result) {
+    public void onSuccess(@NotNull List<? extends T> result) {
         this.result = result;
         finish();
     }
@@ -36,10 +41,11 @@ public class CustomKinveyListCallback<T> implements KinveyListCallback<T> {
     }
 
     public List<T> getResult() {
-        return result;
+        return (List) result;
     }
 
     public Throwable getError() {
         return error;
     }
+
 }

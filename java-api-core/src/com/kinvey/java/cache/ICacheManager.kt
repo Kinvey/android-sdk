@@ -30,7 +30,7 @@ interface ICacheManager {
      * @param <T> Collection item class that extends GSON object
      * @return Cache object instance that could be queried
      */
-    fun <T : GenericJson?> getCache(collection: String?, collectionItemClass: Class<T>?, ttl: Long?): ICache<T>?
+    fun <T : GenericJson> getCache(collection: String?, collectionItemClass: Class<T>?, ttl: Long?): ICache<T>?
 
     /**
      * Delete all collections
@@ -40,5 +40,5 @@ interface ICacheManager {
     /**
      * Clear all cached data from the collection
      */
-    fun <T : GenericJson?> clearCollection(collection: String?, collectionItemClass: Class<T>?, ttl: Long?)
+    fun <T : GenericJson> clearCollection(collection: String?, collectionItemClass: Class<T>?, ttl: Long?)
 }

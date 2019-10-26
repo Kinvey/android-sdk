@@ -57,8 +57,9 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder?) : Seria
      *
      * @return Query filter as AbstractMap<String></String>, Object>
      */
-    open val queryFilterMap: AbstractMap<String, Any?>?
+    open val queryFilterMap: AbstractMap<String, Any>?
         get() = builder?.filterMap
+                ?.filterNot { it == null } as AbstractMap<String, Any>?
 
     /**
      *
@@ -86,7 +87,7 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder?) : Seria
     }
 
     @Throws(IOException::class)
-    private fun buildQueryString(generator: JsonGenerator?, filterMap: AbstractMap<String, Any?>?) {
+    private fun buildQueryString(generator: JsonGenerator?, filterMap: Map<String, Any>?) {
         try {
             val filterMapSize = filterMap?.entries?.size ?: 0
             var hasMultipleFilters = false
@@ -200,20 +201,20 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder?) : Seria
             valueClass == LinkedHashMap::class.java -> {
                 // Value is an added filter
                 generator?.writeFieldName(key)
-                buildQueryString(generator, value as LinkedHashMap<String, Any?>)
+                buildQueryString(generator, value as LinkedHashMap<String, Any>?)
             }
             valueClass.componentType != null && valueClass.componentType == LinkedHashMap::class.java -> if (valueClass.isArray) {
                 // Value is a map, so this is a nested query. Recursively call into it.
                 generator?.writeFieldName(key)
                 generator?.writeStartArray()
-                val valueMap: Array<LinkedHashMap<String, Any?>> = value as Array<LinkedHashMap<String, Any?>>
+                val valueMap: Array<LinkedHashMap<String, Any>?> = value as Array<LinkedHashMap<String, Any>?>
                 for (map in valueMap) {
                     buildQueryString(generator, map)
                 }
                 generator?.writeEndArray()
             } else {
                 // Value is an added filter
-                buildQueryString(generator, value as LinkedHashMap<String, Any?>)
+                buildQueryString(generator, value as LinkedHashMap<String, Any>?)
             }
         }
     }
