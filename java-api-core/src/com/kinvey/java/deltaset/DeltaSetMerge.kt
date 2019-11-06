@@ -54,7 +54,7 @@ object DeltaSetMerge {
     }
 
     @Throws(IOException::class)
-    private fun <T> listToMap(arr: List<T>?): Map<String, T> {
+    fun <T> listToMap(arr: List<T>?): Map<String, T> {
         return arr?.mapNotNull {
             if (it is GenericJson && (it as GenericJson).containsKey(_ID)) {
                 it[_ID].toString() to it
@@ -63,7 +63,7 @@ object DeltaSetMerge {
     }
 
     @Throws(IOException::class)
-    fun <T> merge(order: List<DeltaSetItem>?, cache: List<T>?, online: List<T>?): Array<T> {
+    fun <T> merge(order: List<DeltaSetItem>?, cache: List<T>?, online: List<T>?): List<T> {
         val cacheMap = listToMap(cache)
         val onlineMap = listToMap(online)
         val orderedResult = order?.map { item ->
@@ -75,7 +75,6 @@ object DeltaSetMerge {
                 else -> null
             }
         }?.filterNot { item -> item == null }?.toMutableList() ?: mutableListOf()
-
-        return (orderedResult as ArrayList).toArray() as Array<T>
+        return orderedResult as List<T>
     }
 }

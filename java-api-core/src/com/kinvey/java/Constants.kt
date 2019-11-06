@@ -17,7 +17,7 @@ object Constants {
 
     const val _ID = "_id"
     const val AUTH_TOKEN = "authtoken"
-    const val _KMD = "_acl"
+    const val _KMD = "_kmd"
     const val _LMT = "_lmt"
     const val _ACL = "_acl"
 
