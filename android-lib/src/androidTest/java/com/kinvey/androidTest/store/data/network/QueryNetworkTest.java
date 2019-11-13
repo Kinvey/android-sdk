@@ -450,11 +450,70 @@ public class QueryNetworkTest {
         assertNull(saveCallback.error);
 
         Query query = client.query();
-        Query geoQuery = (Query) query.withinBox(GEOLOC, 20, 20, 40, 50);
+        Query geoQuery = query.withinBox(GEOLOC, 20, 20, 40, 50);
         DefaultKinveyReadLocCallback kinveyListCallback = findLoc(store, geoQuery, DEFAULT_TIMEOUT);
         assertNull(kinveyListCallback.error);
         assertNotNull(kinveyListCallback.result);
         assertTrue(kinveyListCallback.result.getResult().size() > 0);
+    }
+
+    @Test
+    public void testQueryGeoNearSphere() throws InterruptedException {
+        DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Location.COLLECTION);
+
+        Double[] geo = {30.0, 40.0};
+        Location location = new Location();
+        location.setGeo(geo);
+
+        DefaultKinveyLocationCallback saveCallback = saveLoc(store, location);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Query query1 = client.query();
+        Query geoQueryNearSphere = query1.nearSphere(GEOLOC, 20, 50);
+        Query query2 = client.query();
+        Query geoQueryNearSphereDistance = query2.nearSphere(GEOLOC, 20, 50, 100000);
+
+        DefaultKinveyReadLocCallback kinveyFindCallback1 = findLoc(store, geoQueryNearSphere, DEFAULT_TIMEOUT);
+        DefaultKinveyReadLocCallback kinveyFindCallback2 = findLoc(store, geoQueryNearSphereDistance, DEFAULT_TIMEOUT);
+
+        assertNull(kinveyFindCallback1.error);
+        assertNotNull(kinveyFindCallback1.result);
+        assertTrue(kinveyFindCallback1.result.getResult().size() > 0);
+
+        assertNull(kinveyFindCallback2.error);
+        assertNotNull(kinveyFindCallback2.result);
+        assertTrue(kinveyFindCallback2.result.getResult().size() > 0);
+    }
+
+    @Test
+    public void testQueryGeoWithinPolygon() throws InterruptedException {
+        DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Location.COLLECTION);
+
+        Double[] geo = {30.0, 40.0};
+        Location location = new Location();
+        location.setGeo(geo);
+
+        DefaultKinveyLocationCallback saveCallback = saveLoc(store, location);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Query query1 = client.query();
+        Query geoQueryWithinPolygon = query1.withinPolygon(GEOLOC,
+                30, 20,
+                40, 30,
+                50, 40,
+                60, 50);
+
+        DefaultKinveyReadLocCallback kinveyFindCallback = findLoc(store, geoQueryWithinPolygon, DEFAULT_TIMEOUT);
+
+        assertNull(kinveyFindCallback.error);
+        assertNotNull(kinveyFindCallback.result);
+        assertTrue(kinveyFindCallback.result.getResult().size() > 0);
     }
 
     @After
