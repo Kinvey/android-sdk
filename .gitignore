@@ -13,3 +13,4 @@ release/zipped
 # IntelliJ
 *.iml
 local.properties
+/samples/
