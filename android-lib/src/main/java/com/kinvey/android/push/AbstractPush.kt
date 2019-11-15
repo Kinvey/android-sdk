@@ -67,7 +67,7 @@ abstract class AbstractPush(var client: Client<*>?) {
      * @param callback - a callback with results of registration
      * @param deviceID - the current device's unique id from GCM
      */
-    abstract fun enablePushViaRest(callback: KinveyClientCallback<Any>?, deviceID: String?)
+    abstract fun enablePushViaRest(callback: KinveyClientCallback<Any?>?, deviceID: String?)
 
     /**
      * Async wrapper for disabling push notifications for the current user
@@ -75,7 +75,7 @@ abstract class AbstractPush(var client: Client<*>?) {
      * @param callback - a callback with results of unregistration
      * @param deviceID - the current device's unique id from GCM
      */
-    abstract fun disablePushViaRest(callback: KinveyClientCallback<Any>?, deviceID: String?)
+    abstract fun disablePushViaRest(callback: KinveyClientCallback<Any?>?, deviceID: String?)
 
     /**
      * Request object for posting to the REST endpoint to register a user for push notifications
