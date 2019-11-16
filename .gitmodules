@@ -4,9 +4,6 @@
 [submodule "samples/MICFlow-Android"]
 	path = samples/MICFlow-Android
 	url = https://github.com/KinveyApps/MICFlow-Android.git
-[submodule "samples/StatusShare-Android"]
-	path = samples/StatusShare-Android
-	url = https://github.com/KinveyApps/StatusShare-Android.git
 [submodule "samples/Kitchensink-Android"]
 	path = samples/Kitchensink-Android
 	url = https://github.com/KinveyApps/Kitchensink-Android.git
