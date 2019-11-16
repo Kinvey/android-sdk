@@ -16,6 +16,3 @@
 [submodule "samples/GeoTag-Android"]
 	path = samples/GeoTag-Android
 	url = https://github.com/KinveyApps/GeoTag-Android.git
-[submodule "samples/ContentBox-Android"]
-	path = samples/ContentBox-Android
-	url = https://github.com/KinveyApps/ContentBox-Android.git

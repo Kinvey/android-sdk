@@ -1,1 +1,1 @@
-include ':Samples', ':TestDrive', ':StatusShare', ':SignIn', ':MICFlow', ':KitchenSink', ':GeoTag', ':ContentBox'
+include ':TestDrive', ':StatusShare', ':SignIn', ':MICFlow', ':KitchenSink', ':GeoTag'
