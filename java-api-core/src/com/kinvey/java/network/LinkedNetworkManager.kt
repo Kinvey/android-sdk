@@ -274,9 +274,9 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
     @Throws(IOException::class)
     fun saveBlocking(entity: T, upload: UploaderProgressListener?): Save {
         val save: Save
-        val sourceID: String
+        val sourceID: String?
         val jsonEntity = entity as GenericJson
-        sourceID = jsonEntity[ID_FIELD_NAME] as String
+        sourceID = jsonEntity[ID_FIELD_NAME] as String?
         save = if (sourceID != null) {
             Save(entity, currentClass, sourceID, SaveMode.PUT)
         } else {
@@ -304,9 +304,9 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
     @Throws(IOException::class)
     fun saveBlocking(entity: T, upload: UploaderProgressListener?, attachments: Array<String?>?): Save {
         val save: Save
-        val sourceID: String
+        val sourceID: String?
         val jsonEntity = entity as GenericJson
-        sourceID = jsonEntity[ID_FIELD_NAME] as String
+        sourceID = jsonEntity[ID_FIELD_NAME] as String?
         save = if (sourceID != null) {
             Save(entity, currentClass, sourceID, SaveMode.PUT)
         } else {
