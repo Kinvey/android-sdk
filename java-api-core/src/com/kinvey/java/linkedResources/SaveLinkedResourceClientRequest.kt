@@ -76,7 +76,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMetho
                 if (jsonContent.getFile(key) != null) {
                     INFO("Kinvey - LR, found a LinkedGenericJson: $key")// + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getId());
 
-                    if (jsonContent.getFile(key)!!.isResolve) {
+                    if (jsonContent.getFile(key)?.isResolve == true) {
                         val inStream = jsonContent.getFile(key)?.input
                         var mediaContent: InputStreamContent? = null
                         val mimetype = "application/octet-stream"
