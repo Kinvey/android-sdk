@@ -52,8 +52,9 @@ open class GetLinkedResourceClientRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>?)
-    : AbstractKinveyJsonClientRequest<T>(abstractKinveyJsonClient, "GET", uriTemplate, jsonContent, responseClass) {
+protected constructor(private val abstractClient: AbstractClient<*>?, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>?,
+                      val storeType: StoreType = StoreType.SYNC)
+    : AbstractKinveyJsonClientRequest<T>(abstractClient, "GET", uriTemplate, jsonContent, responseClass) {
     var downloadProgressListener: DownloaderProgressListener? = null
     @Throws(IOException::class)
     override fun execute(): T? {
@@ -92,7 +93,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, uriTemplate:
                 }
                 val stream = ByteArrayOutputStream()
                 entity.getFile(key)?.output = stream
-                val store = abstractKinveyClient.getFileStore(StoreType.SYNC)
+                val store = abstractClient?.getFileStore(storeType)
                 val meta = FileMetaData()
                 if ((entity[key] as Map<*, *>).containsKey("_id")) {
                     meta.id = (entity[key] as Map<*, *>)["_id"].toString()

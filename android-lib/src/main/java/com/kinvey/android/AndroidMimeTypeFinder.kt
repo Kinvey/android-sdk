@@ -43,11 +43,11 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
      * @param meta the [FileMetaData] to populate
      * @param stream the stream of the data
      */
-    override fun getMimeType(meta: FileMetaData, stream: InputStream) {
+    override fun getMimeType(meta: FileMetaData?, stream: InputStream?) {
         var mimetype: String? = null
         try {
             mimetype = URLConnection.guessContentTypeFromStream(stream)
-            Logger.INFO("Kinvey - Client - NetworkFileManager | mimetype from stream found as: " + mimetype!!)
+            Logger.INFO("Kinvey - Client - NetworkFileManager | mimetype from stream found as: $mimetype")
         } catch (e: Exception) {
             Logger.WARNING("Kinvey - Client - NetworkFileManager | content stream mimetype is unreadable, defaulting")
         }
@@ -55,14 +55,14 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
         if (mimetype == null) {
             getMimeType(meta)
         } else {
-            meta.mimetype = mimetype
+            meta?.mimetype = mimetype
         }
 
 
-        stream.mark(0x100000 * 10)  //10MB mark limit
+        stream?.mark(0x100000 * 10)  //10MB mark limit
         var numBytes = 0
         try {
-            while (stream.read() != -1) {
+            while (stream?.read() != -1) {
                 numBytes++
             }
 
@@ -72,7 +72,7 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
         }
 
         try {
-            stream.reset()
+            stream?.reset()
         } catch (e: Exception) {
             Logger.ERROR("error resetting stream!")
 
@@ -81,7 +81,7 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
         Logger.INFO("size is: $numBytes")
 
 
-        meta.setSize(numBytes.toLong())
+        meta?.setSize(numBytes.toLong())
     }
 
     /**
@@ -90,10 +90,10 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
      * @param meta the [FileMetaData] to populate
      * @param file the file of the data
      */
-    override fun getMimeType(meta: FileMetaData, file: File?) {
+    override fun getMimeType(meta: FileMetaData?, file: File?) {
         if (file == null || file.name == null || meta == null) {
             Logger.WARNING("cannot calculate mimetype without a file or filename!")
-            meta.mimetype = "application/octet-stream"
+            meta?.mimetype = "application/octet-stream"
             return
         }
 
@@ -133,13 +133,13 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
      *
      * @param metaData the [FileMetaData] to populate, also containing the filename (with file extension)
      */
-    override fun getMimeType(metaData: FileMetaData) {
-        val metaMimetype = metaData.mimetype ?: ""
+    override fun getMimeType(metaData: FileMetaData?) {
+        val metaMimetype = metaData?.mimetype ?: ""
         var mimetype: String? = null
         if (metaMimetype.isNotEmpty()) {
             return
         }
-        metaData.fileName?.let { metaFileName ->
+        metaData?.fileName?.let { metaFileName ->
             val dotIndex = metaFileName.lastIndexOf("")
             if (dotIndex > 0 && dotIndex + 1 < metaFileName.length) {
                 mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(metaFileName.substring(dotIndex + 1, metaFileName.length))
@@ -148,6 +148,6 @@ open class AndroidMimeTypeFinder : MimeTypeFinder {
         if (mimetype == null) {
             mimetype = "application/octet-stream"
         }
-        metaData.mimetype = mimetype
+        metaData?.mimetype = mimetype
     }
 }

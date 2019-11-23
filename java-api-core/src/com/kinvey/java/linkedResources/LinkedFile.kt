@@ -16,6 +16,8 @@
 
 package com.kinvey.java.linkedResources
 
+import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 import java.io.*
 import java.util.HashMap
 
@@ -31,15 +33,18 @@ import java.util.HashMap
  * @author edwardf
  * @since 2.0
  */
-class LinkedFile() {
+class LinkedFile(): GenericJson() {
 
     /**
      * Get the id of a Linked NetworkFileManager
      *
      * @return  the id
      */
+    @Key("_id")
     var id: String? = null
+    @Key("_filename")
     var fileName: String? = null
+
     var input: ByteArrayInputStream? = null
     var output: ByteArrayOutputStream? = null
     var isResolve = true
@@ -67,7 +72,6 @@ class LinkedFile() {
         this.id = id
         this.fileName = filename
     }
-
 
     /**
      * Add an extra property to this KinveyFile.  When the NetworkFileManager is uploaded through LinkedNetworkManager, any extra properties here
