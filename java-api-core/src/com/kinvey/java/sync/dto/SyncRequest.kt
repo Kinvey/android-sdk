@@ -70,18 +70,17 @@ open class SyncRequest : GenericJson, Serializable {
         private set
 
     constructor() {}
-    constructor(httpVerb: HttpVerb?, entityID: SyncMetaData?, url: GenericUrl?, collectionName: String?) {
-        verb = httpVerb?.name
+
+    constructor(httpVerb: HttpVerb?, entityID: SyncMetaData?, url: GenericUrl?, collectionName: String?) :
+        this(httpVerb, null, null, null, url, collectionName) {
         this.entityID = entityID
-        this.collectionName = collectionName
-        this.url = url.toString()
     }
 
     constructor(httpVerb: HttpVerb?,
-                entityID: String,
-                clientAppVersion: String,
-                customProperties: String,
-                url: GenericUrl,
+                entityID: String?,
+                clientAppVersion: String?,
+                customProperties: String?,
+                url: GenericUrl?,
                 collectionName: String?) {
         verb = httpVerb?.name
         this.collectionName = collectionName
@@ -117,7 +116,7 @@ open class SyncRequest : GenericJson, Serializable {
             this.id = id
         }
 
-        constructor(id: String, customerVersion: String, customHeader: String) {
+        constructor(id: String?, customerVersion: String?, customHeader: String?) {
             this.id = id
             this.customerVersion = customerVersion
             customheader = customHeader
