@@ -31,7 +31,7 @@ object FileUtils {
         val chunk = ByteArray(CHUNK_SIZE)
         var curChunk = 0
         while (`is`.read(chunk, 0, CHUNK_SIZE).also { curChunk = it } > 0) {
-            os.write(chunk, 0, CHUNK_SIZE)
+            os.write(chunk, 0, curChunk)
         }
     }
 }

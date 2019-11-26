@@ -52,27 +52,30 @@ open class GetLinkedResourceClientRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(private val abstractClient: AbstractClient<*>?, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>?,
+constructor(private val abstractClient: AbstractClient<*>?, uriTemplate: String, jsonContent: GenericJson?, responseClass: Class<T>?,
                       val storeType: StoreType = StoreType.SYNC)
     : AbstractKinveyJsonClientRequest<T>(abstractClient, "GET", uriTemplate, jsonContent, responseClass) {
     var downloadProgressListener: DownloaderProgressListener? = null
     @Throws(IOException::class)
     override fun execute(): T? {
-        val entity = super.execute()
-        return if (entity is Array<*>) {
-            INFO("Kinvey - LR, " + "linked resource array found")
-            val casted = entity as Array<LinkedGenericJson>
-            for (ent in casted) {
-                downloadResources(ent)
+        return when (val entity = super.execute()) {
+            is Array<*> -> {
+                INFO("Kinvey - LR, " + "linked resource array found")
+                val casted = entity as Array<LinkedGenericJson>
+                for (ent in casted) {
+                    downloadResources(ent)
+                }
+                entity
             }
-            entity
-        } else if (entity is LinkedGenericJson) {
-            INFO("Kinvey - LR, " + "linked resource instance found")
-            downloadResources(entity as LinkedGenericJson)
-            entity
-        } else {
-            INFO("Kinvey - LR, " + "not a linked resource, behaving as usual!")
-            entity
+            is LinkedGenericJson -> {
+                INFO("Kinvey - LR, " + "linked resource instance found")
+                downloadResources(entity as LinkedGenericJson)
+                entity
+            }
+            else -> {
+                INFO("Kinvey - LR, " + "not a linked resource, behaving as usual!")
+                entity
+            }
         }
     }
 
