@@ -10,12 +10,6 @@
 [submodule "samples/Kitchensink-Android"]
 	path = samples/Kitchensink-Android
 	url = https://github.com/KinveyApps/Kitchensink-Android.git
-[submodule "samples/SignIn-Android"]
-	path = samples/SignIn-Android
-	url = https://github.com/KinveyApps/SignIn-Android.git
 [submodule "samples/GeoTag-Android"]
 	path = samples/GeoTag-Android
 	url = https://github.com/KinveyApps/GeoTag-Android.git
-[submodule "samples/ContentBox-Android"]
-	path = samples/ContentBox-Android
-	url = https://github.com/KinveyApps/ContentBox-Android.git
