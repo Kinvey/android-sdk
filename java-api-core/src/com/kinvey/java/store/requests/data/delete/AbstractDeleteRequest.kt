@@ -74,10 +74,10 @@ abstract class AbstractDeleteRequest<T : GenericJson>(protected val cache: ICach
 
     override fun cancel() {}
 
-    protected abstract fun deleteCached(): Int?
+    abstract fun deleteCached(): Int?
     @Throws(IOException::class)
-    protected abstract fun enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?)
+    abstract fun enqueueRequest(collectionName: String?, networkManager: NetworkManager<T>?)
 
     @Throws(IOException::class)
-    protected abstract fun deleteNetwork(): AbstractKinveyJsonClientRequest<KinveyDeleteResponse>?
+    abstract fun deleteNetwork(): AbstractKinveyJsonClientRequest<KinveyDeleteResponse>?
 }
