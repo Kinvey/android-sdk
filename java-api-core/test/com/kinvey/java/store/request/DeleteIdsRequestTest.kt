@@ -1,6 +1,7 @@
 package com.kinvey.java.store.request
 
 import com.kinvey.java.AbstractClient
+import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.store.WritePolicy
@@ -8,6 +9,7 @@ import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest
 import com.kinvey.java.sync.SyncManager
 import junit.framework.TestCase
 import org.junit.Before
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import java.io.IOException
 
@@ -27,35 +29,42 @@ class DeleteIdsRequestTest : TestCase() {
     }
 
     fun testForceNetwork() {
-        val ids = arrayListOf<String>()
+        val ids = listOf("id1", "id2")
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.FORCE_NETWORK, ids, syncManager))
         request.execute()
+        verify(spyNetworkManager, times(1))?.deleteBlocking(any(Query::class.java))
         verify(request, times(1)).deleteNetwork()
-        verify(request, times(0)).deleteCached()
     }
 
     fun testLocalThenNetwork() {
-        val ids = arrayListOf<String>()
+        val ids = listOf("id1", "id2")
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.LOCAL_THEN_NETWORK, ids, syncManager))
         request.execute()
+        verify(spyNetworkManager, times(1))?.deleteBlocking(any(Query::class.java))
+        verify(cache, times(1))?.delete(ids)
         verify(request, times(1)).deleteNetwork()
         verify(request, times(1)).deleteCached()
     }
 
     fun testForceLocal() {
-        val ids = arrayListOf<String>()
+        val ids = listOf("id1", "id2")
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.FORCE_LOCAL, ids, syncManager))
+        doNothing().`when`(syncManager)?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
         request.execute()
+        verify(syncManager, times(1))?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
+        verify(cache, times(1))?.delete(ids)
         verify(request, times(1)).enqueueRequest(any(), any())
         verify(request, times(1)).deleteCached()
     }
 
     fun testLocalThenNetwork_EnqueueWhenError() {
-        val ids = arrayListOf<String>()
+        val ids = listOf("id1", "id2")
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.LOCAL_THEN_NETWORK, ids, syncManager))
         doThrow(IOException("throw on deleteNetwork")).`when`(request).deleteNetwork()
+        doNothing().`when`(syncManager)?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
         try { request.execute() }
         catch (e: IOException) { print(e) }
+        verify(syncManager, times(1))?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
         verify(request, times(1)).deleteNetwork()
         verify(request, times(1)).enqueueRequest(any(), any())
     }
