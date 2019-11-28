@@ -1,16 +1,21 @@
-package com.kinvey.java.store.request
+package com.kinvey.java.store.request.delete
 
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.store.WritePolicy
+import com.kinvey.java.store.request.Person
 import com.kinvey.java.store.requests.data.delete.DeleteIdsRequest
 import com.kinvey.java.sync.SyncManager
 import junit.framework.TestCase
 import org.junit.Before
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyCollection
 import org.mockito.Mockito.*
+import org.mockito.Mockito.verify
+import org.powermock.api.mockito.PowerMockito
+
 import java.io.IOException
 
 class DeleteIdsRequestTest : TestCase() {
@@ -33,7 +38,6 @@ class DeleteIdsRequestTest : TestCase() {
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.FORCE_NETWORK, ids, syncManager))
         request.execute()
         verify(spyNetworkManager, times(1))?.deleteBlocking(any(Query::class.java))
-        verify(request, times(1)).deleteNetwork()
     }
 
     fun testLocalThenNetwork() {
@@ -42,8 +46,6 @@ class DeleteIdsRequestTest : TestCase() {
         request.execute()
         verify(spyNetworkManager, times(1))?.deleteBlocking(any(Query::class.java))
         verify(cache, times(1))?.delete(ids)
-        verify(request, times(1)).deleteNetwork()
-        verify(request, times(1)).deleteCached()
     }
 
     fun testForceLocal() {
@@ -53,19 +55,15 @@ class DeleteIdsRequestTest : TestCase() {
         request.execute()
         verify(syncManager, times(1))?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
         verify(cache, times(1))?.delete(ids)
-        verify(request, times(1)).enqueueRequest(any(), any())
-        verify(request, times(1)).deleteCached()
     }
 
     fun testLocalThenNetwork_EnqueueWhenError() {
         val ids = listOf("id1", "id2")
         val request = spy(DeleteIdsRequest(cache, spyNetworkManager, WritePolicy.LOCAL_THEN_NETWORK, ids, syncManager))
-        doThrow(IOException("throw on deleteNetwork")).`when`(request).deleteNetwork()
+        PowerMockito.doThrow(IOException()).`when`(request, "deleteNetwork")
         doNothing().`when`(syncManager)?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
         try { request.execute() }
         catch (e: IOException) { print(e) }
         verify(syncManager, times(1))?.enqueueDeleteRequests(any(), any(NetworkManager::class.java), anyCollection())
-        verify(request, times(1)).deleteNetwork()
-        verify(request, times(1)).enqueueRequest(any(), any())
     }
 }
