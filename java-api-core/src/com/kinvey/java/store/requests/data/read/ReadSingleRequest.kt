@@ -38,17 +38,17 @@ class ReadSingleRequest<T : GenericJson>(cache: ICache<T>?, private val id: Stri
     override fun execute(): T? {
         var ret: T? = null
         when (readPolicy) {
-            ReadPolicy.FORCE_LOCAL -> ret = cache?.get(id)
+            ReadPolicy.FORCE_LOCAL -> ret = cached
             ReadPolicy.FORCE_NETWORK ->  // Logic for getting cached data implemented before running Request
-                ret = networkManager?.getEntityBlocking(id)?.execute()
+                ret = network
             ReadPolicy.BOTH -> {
-                ret = networkManager?.getEntityBlocking(id)?.execute()
+                ret = network
                 ret?.let { cache?.save(it) }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
-                    ret = networkManager?.getEntityBlocking(id)?.execute()
+                    ret = network
                     ret?.let { cache?.save(it) }
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
@@ -58,12 +58,23 @@ class ReadSingleRequest<T : GenericJson>(cache: ICache<T>?, private val id: Stri
                 }
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
-                    ret = cache?.get(id)
+                    ret = cached
                 }
             }
         }
         return ret
     }
+
+    protected val cached : T?
+        get() {
+            return cache?.get(id)
+        }
+
+    protected val network : T?
+        @Throws(IOException::class)
+        get() {
+            return networkManager?.getEntityBlocking(id)?.execute()
+        }
 
     override fun cancel() {}
 }

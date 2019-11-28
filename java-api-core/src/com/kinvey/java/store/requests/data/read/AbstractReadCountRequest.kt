@@ -35,16 +35,11 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
     @Throws(IOException::class)
     override fun execute(): KinveyCountResponse? {
         var ret: KinveyCountResponse? = KinveyCountResponse()
-        var request: AbstractKinveyReadHeaderRequest<KinveyCountResponse>? = null
-        try {
-            request = countNetwork()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
         when (readPolicy) {
             ReadPolicy.FORCE_LOCAL -> ret?.count = countCached()
-            ReadPolicy.FORCE_NETWORK -> ret = request?.execute()
+            ReadPolicy.FORCE_NETWORK -> {
+                try { ret = countNetwork() } catch (e: IOException) { e.printStackTrace() }
+            }
             ReadPolicy.BOTH -> {
                 val pushRequest = PushRequest(networkManager?.collectionName,
                         cache, networkManager, networkManager?.client)
@@ -53,7 +48,7 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
                 } catch (t: Throwable) {
                     // silent fall, will be synced next time
                 }
-                ret = request?.execute()
+                try { ret = countNetwork() } catch (e: IOException) { e.printStackTrace() }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 val pushAutoRequest = PushRequest(networkManager?.collectionName,
@@ -65,7 +60,7 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
                 }
                 var networkException: IOException? = null
                 try {
-                    ret = request?.execute()
+                    ret = countNetwork()
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
@@ -86,5 +81,5 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
     protected abstract fun countCached(): Int
 
     @Throws(IOException::class)
-    protected abstract fun countNetwork(): NetworkManager<T>.GetCount?
+    protected abstract fun countNetwork(): KinveyCountResponse?
 }

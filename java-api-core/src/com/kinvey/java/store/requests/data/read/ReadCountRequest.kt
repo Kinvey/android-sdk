@@ -19,6 +19,7 @@ package com.kinvey.java.store.requests.data.read
 import com.google.api.client.json.GenericJson
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
+import com.kinvey.java.model.KinveyCountResponse
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.store.ReadPolicy
 import com.kinvey.java.sync.SyncManager
@@ -34,8 +35,10 @@ class ReadCountRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
     }
 
     @Throws(IOException::class)
-    override fun countNetwork(): NetworkManager<T>.GetCount? {
-        return if (query != null) networkManager?.getCountBlocking(query)
+    override fun countNetwork(): KinveyCountResponse? {
+        val getCount =
+                if (query != null) networkManager?.getCountBlocking(query)
                else networkManager?.countBlocking
+        return getCount?.execute()
     }
 }
