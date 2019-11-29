@@ -142,11 +142,12 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson> enqueueSaveRequests(collectionName: String, networkManager: NetworkManager<T>, ret: List<T>?) {
+    fun <T : GenericJson> enqueueSaveRequests(collectionName: String, networkManager: NetworkManager<T>?, ret: List<T>?) {
         val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         val syncRequests = ret?.mapNotNull { item ->
             val syncItemId = item[ID] as String?
-            prepareSyncItemRequest(requestCache, collectionName, networkManager, if (networkManager.isTempId(item)) HttpVerb.POST else HttpVerb.PUT, syncItemId)
+            prepareSyncItemRequest(requestCache, collectionName, networkManager,
+                    if (networkManager?.isTempId(item) == true) HttpVerb.POST else HttpVerb.PUT, syncItemId)
         }
         syncRequests?.let { requests -> requestCache?.save(requests) }
     }
