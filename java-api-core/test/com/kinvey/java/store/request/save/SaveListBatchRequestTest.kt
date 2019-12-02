@@ -3,6 +3,7 @@ package com.kinvey.java.store.request.save
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyBatchInsertError
+import com.kinvey.java.model.KinveySaveBatchResponse
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.store.WritePolicy
 import com.kinvey.java.store.request.Person
@@ -15,8 +16,11 @@ import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito
+import java.io.IOException
 
 class SaveListBatchRequestTest : TestCase() {
+
+    private val MAX_POST_ITEMS = 100
 
     lateinit var spyNetworkManager: NetworkManager<Person>
     lateinit var syncManager: SyncManager
@@ -32,7 +36,7 @@ class SaveListBatchRequestTest : TestCase() {
     }
 
     fun testForceLocal() {
-        val ids = listOf(Person())
+        val ids = (1..5).map { Person("user $it") }
         val request =
                 Mockito.spy(SaveListBatchRequest(cache, spyNetworkManager, WritePolicy.FORCE_LOCAL, ids, syncManager))
         request.execute()
@@ -42,48 +46,63 @@ class SaveListBatchRequestTest : TestCase() {
     }
 
     fun testForceNetwork() {
-        val ids = listOf(Person())
+        val ids = (1..5).map { Person("user $it") }
         val request =
                 Mockito.spy(SaveListBatchRequest(cache, spyNetworkManager, WritePolicy.FORCE_NETWORK, ids, syncManager))
+        PowerMockito.doReturn(listOf(Person())).`when`(request, "runSaveItemsRequest", ids, false)
         request.execute()
-        verify(spyNetworkManager, times(1))?.saveBatchBlocking(anyList())
         PowerMockito.verifyPrivate(request, times(1))
-                ?.invoke("postSaveBatchRequest", listOf(Person()),
-                        listOf(Person()), listOf(KinveyBatchInsertError()), false)
+                ?.invoke("runSaveItemsRequest", ids, false)
     }
 
     fun testForceNetwork_MultipleRequests() {
         val ids = (1..200).map { Person("user $it") }
         val request =
                 Mockito.spy(SaveListBatchRequest(cache, spyNetworkManager, WritePolicy.FORCE_NETWORK, ids, syncManager))
+        PowerMockito.doReturn(listOf(Person())).`when`(request, "runSaveItemsRequest", ids, false)
         request.execute()
-        verify(spyNetworkManager, times(2))?.saveBatchBlocking(anyList())
-        PowerMockito.verifyPrivate(request, times(2))
-                ?.invoke("postSaveBatchRequest", mutableListOf(Person()),
-                        mutableListOf(Person()), mutableListOf(KinveyBatchInsertError()), false)
+        PowerMockito.verifyPrivate(request, times(1))
+                ?.invoke("runSaveItemsRequest", ids, false)
     }
 
     fun testLocalThenNetwork() {
-        val ids = mutableListOf(Person())
+        val ids = (1..5).map { Person("user $it") }
         val request =
             Mockito.spy(SaveListBatchRequest(cache, spyNetworkManager, WritePolicy.LOCAL_THEN_NETWORK, ids, syncManager))
+        PowerMockito.doReturn(ids).`when`(cache, "save", ids)
+        PowerMockito.doReturn(KinveySaveBatchResponse(listOf(Person()), null)).`when`(request, "postSaveBatchRequest", ids,
+                listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
         request.execute()
-        //PowerMockito.verifyPrivate(request, times(1))?.invoke("doPushRequest")
         verify(cache, times(2))?.save(anyList())
         PowerMockito.verifyPrivate(request, times(1))
-                ?.invoke("postSaveBatchRequest", mutableListOf(Person()),
-                        mutableListOf(Person()), mutableListOf(KinveyBatchInsertError()), false)
+                ?.invoke("postSaveBatchRequest", ids,
+                listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
     }
 
     fun testLocalThenNetwork_MultipleRequests() {
+
         val ids = (1..200).map { Person("user $it") }
+        val chunks = ids.chunked(MAX_POST_ITEMS).toTypedArray() // should be 2 chunks for post items
+
         val request =
                 Mockito.spy(SaveListBatchRequest(cache, spyNetworkManager, WritePolicy.LOCAL_THEN_NETWORK, ids, syncManager))
+        PowerMockito.doReturn(ids).`when`(cache, "save", ids)
+        PowerMockito.doReturn(KinveySaveBatchResponse(listOf<Person>(), listOf())).`when`(request, "postSaveBatchRequest", chunks[0],
+                listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
+        PowerMockito.doReturn(KinveySaveBatchResponse(listOf<Person>(), listOf())).`when`(request, "postSaveBatchRequest", chunks[1],
+                listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
+
         request.execute()
-        //PowerMockito.verifyPrivate(request, times(1))?.invoke("doPushRequest")
+
         verify(cache, times(2))?.save(anyList())
-        PowerMockito.verifyPrivate(request, times(2))
-                ?.invoke("postSaveBatchRequest", mutableListOf(Person()),
-                        mutableListOf(Person()), mutableListOf(KinveyBatchInsertError()), false)
+
+        // test of saving first chunk
+        PowerMockito.verifyPrivate(request, times(1))
+                ?.invoke("postSaveBatchRequest", chunks[0],
+                listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
+        // test of saving second chunk
+        PowerMockito.verifyPrivate(request, times(1))
+                ?.invoke("postSaveBatchRequest", chunks[1],
+                        listOf<Person>(), listOf<KinveyBatchInsertError>(), true)
     }
 }
