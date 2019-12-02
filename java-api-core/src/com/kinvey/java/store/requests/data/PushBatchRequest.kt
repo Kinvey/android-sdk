@@ -36,7 +36,7 @@ class PushBatchRequest<T : GenericJson>(
     private val networkManager: NetworkManager<T>,
     private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
 
-    private val syncManager: SyncManager?
+    var syncManager: SyncManager?
 
     init {
         this.collection = collectionName
@@ -90,7 +90,7 @@ class PushBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun executeSaveRequest(saveItems: List<T>) {
+    protected fun executeSaveRequest(saveItems: List<T>) {
         val syncRequest = syncManager?.createSaveBatchSyncRequest(collection, networkManager, saveItems)
         val response = syncManager?.executeBatchRequest(client as AbstractClient<*>, networkManager, syncRequest)
         val resultItems = response?.entityList
@@ -103,7 +103,7 @@ class PushBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun getSaveItems(batchSyncItems: List<SyncItem>): List<T> {
+    protected fun getSaveItems(batchSyncItems: List<SyncItem>): List<T> {
         return batchSyncItems.mapNotNull { s ->
             val id = s.entityID?.id
             if (id?.isNotEmpty() == true) { itemsCache.get(id) } else null
