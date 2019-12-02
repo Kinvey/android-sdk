@@ -26,12 +26,12 @@ class AggregationRequest(private val type: AggregateType, private val cache: ICa
     protected val network: Array<Aggregation.Result>?
         @Throws(IOException::class)
         get() {
-            when (type) {
-                AggregateType.COUNT -> return networkManager?.countBlocking(fields, Array<Aggregation.Result>::class.java, query)?.execute()
-                AggregateType.SUM -> return networkManager?.sumBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
-                AggregateType.MIN -> return networkManager?.minBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
-                AggregateType.MAX -> return networkManager?.maxBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
-                AggregateType.AVERAGE -> return networkManager?.averageBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+            return when (type) {
+                AggregateType.COUNT -> networkManager?.countBlocking(fields, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.SUM -> networkManager?.sumBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.MIN -> networkManager?.minBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.MAX -> networkManager?.maxBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
+                AggregateType.AVERAGE -> networkManager?.averageBlocking(fields, reduceField, Array<Aggregation.Result>::class.java, query)?.execute()
                 else -> throw KinveyException(type.name + " doesn't supported. Supported types: SUM, MIN, MAX, AVERAGE, COUNT.")
             }
         }
