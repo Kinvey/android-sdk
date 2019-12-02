@@ -1,4 +1,6 @@
 package com.kinvey.java.store.request
 
-class ReadRequestTest {
+import junit.framework.TestCase
+
+class ReadRequestTest : TestCase() {
 }
