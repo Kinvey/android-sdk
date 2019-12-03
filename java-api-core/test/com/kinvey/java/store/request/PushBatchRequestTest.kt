@@ -40,7 +40,6 @@ class PushBatchRequestTest : TestCase() {
         val saveItems = listOf(syncItem1, syncItem2)
         val person1 = Person(id = personId1)
         val person2 = Person(id = personId2)
-        val personItems = listOf(person1, person2)
 
         val request = Mockito.spy(PushBatchRequest(Person.COLLECTION, cache as ICache<Person>,
                 spyNetworkManager as NetworkManager<Person>, client))
@@ -49,7 +48,6 @@ class PushBatchRequestTest : TestCase() {
         PowerMockito.doReturn(saveItems).`when`(syncManager, "popSingleItemQueue", Person.COLLECTION)
         PowerMockito.doReturn(person1).`when`(cache, "get", personId1)
         PowerMockito.doReturn(person2).`when`(cache, "get", personId2)
-        //PowerMockito.doReturn(personItems).`when`(request, "getSaveItems", saveItems)
 
         request.execute()
 
