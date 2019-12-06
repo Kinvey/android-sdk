@@ -4,9 +4,9 @@ import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.sync.KinveyPushBatchResponse
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.model.KinveyBatchInsertError
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 class KinveyPushBatchResponseTest {
