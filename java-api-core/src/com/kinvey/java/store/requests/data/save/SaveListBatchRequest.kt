@@ -82,7 +82,7 @@ class SaveListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun runSaveItemsRequest(objects: Iterable<T>?, useCache: Boolean = true): List<T> {
+    protected fun runSaveItemsRequest(objects: Iterable<T>?, useCache: Boolean = true): List<T> {
         Logger.INFO("Start saving entities")
         filterObjects(objects as List<T>)
         val postEntities = ArrayList<T>()
@@ -110,7 +110,7 @@ class SaveListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun postSaveBatchRequest(entities: List<T>,
+    protected fun postSaveBatchRequest(entities: List<T>,
         batchSaveEntities: MutableList<T>, batchSaveErrors: MutableList<KinveyBatchInsertError>, useCache: Boolean = true): KinveySaveBatchResponse<*>? {
         var response: KinveySaveBatchResponse<*>? = null
         try {

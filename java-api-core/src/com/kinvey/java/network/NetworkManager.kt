@@ -644,7 +644,8 @@ open class NetworkManager<T : GenericJson>(
                 if (!ids.isNullOrEmpty()) {
                     updatedOnline = fetchIdsWithPaging(ids)
                 }
-                ret.result = listOf(*DeltaSetMerge.merge(items, currentItems, updatedOnline))
+                val list = DeltaSetMerge.merge(items, currentItems, updatedOnline)
+                ret.result = list//listOf(*arr)
             }
             if (ret == null) {
                 ret = super.execute()

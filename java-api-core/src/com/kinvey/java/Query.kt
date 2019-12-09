@@ -386,7 +386,7 @@ open class Query
     }
 
     override fun withinBox(field: String?, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
-                           pointTwoLon: Double): AbstractQuery {
+                           pointTwoLon: Double): Query {
         Preconditions.checkNotNull(field)
         Preconditions.checkArgument(pointOneLat >= -90 && pointOneLat <= 90, "Lat must be between -90 and 90")
         Preconditions.checkArgument(pointOneLon >= -180 && pointOneLon <= 180, "Lon must be between -180 and 180")
@@ -403,7 +403,7 @@ open class Query
 
     override fun withinPolygon(field: String?, pointOneLat: Double, pointOneLon: Double, pointTwoLat: Double,
                                pointTwoLon: Double, pointThreeLat: Double, pointThreeLon: Double,
-                               pointFourLat: Double, pointFourLon: Double): AbstractQuery {
+                               pointFourLat: Double, pointFourLon: Double): Query {
         Preconditions.checkNotNull(field)
         Preconditions.checkArgument(pointOneLat >= -90 && pointOneLat <= 90, "Lat must be between -90 and 90")
         Preconditions.checkArgument(pointOneLon >= -180 && pointOneLon <= 180, "Lon must be between -180 and 180")

@@ -7,6 +7,7 @@ import androidx.test.runner.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.google.api.client.json.GenericJson;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyReadCallback;
 import com.kinvey.android.model.User;
@@ -91,13 +92,13 @@ public class QueryNetworkTest {
         }
     }
 
-    private void clearBackend(DataStore<Person> store) throws InterruptedException {
+    private <T extends GenericJson> void clearBackend(DataStore<T> store) throws InterruptedException {
         Query query = client.query();
         query = query.notEqual("age", "100500");
         DefaultKinveyDeleteCallback deleteCallback = delete(store, query);
     }
 
-    private DefaultKinveyDeleteCallback delete(final DataStore<Person> store, final Query query) throws InterruptedException {
+    private <T extends GenericJson> DefaultKinveyDeleteCallback delete(final DataStore<T> store, final Query query) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final DefaultKinveyDeleteCallback callback = new DefaultKinveyDeleteCallback(latch);
         LooperThread looperThread = new LooperThread(new Runnable() {
@@ -325,6 +326,7 @@ public class QueryNetworkTest {
     @Test
     public void testAll() throws InterruptedException {
         DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
         client.getSyncManager().clear(Location.COLLECTION);
         Double[] geo = {3.0, 4.0};
         Location location = new Location();
@@ -344,6 +346,7 @@ public class QueryNetworkTest {
     @Test
     public void testSize() throws InterruptedException {
         DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
         client.getSyncManager().clear(Location.COLLECTION);
         Double[] geo = {3.0, 4.0};
         Location location = new Location();
@@ -363,6 +366,7 @@ public class QueryNetworkTest {
     @Test
     public void testLimit() throws InterruptedException {
         DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
         client.getSyncManager().clear(Location.COLLECTION);
         Double[] geo = {3.0, 4.0};
         Location location = new Location();
@@ -429,6 +433,87 @@ public class QueryNetworkTest {
         assertTrue(kinveyListCallback.result.getResult().size() > 1);
         assertTrue(kinveyListCallback.result.getResult().get(0).getHeight() == heightPersonTwo);
         delete(store, query);
+    }
+
+    @Test
+    public void testQueryGeoWithinBox() throws InterruptedException {
+        DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Location.COLLECTION);
+
+        Double[] geo = {30.0, 40.0};
+        Location location = new Location();
+        location.setGeo(geo);
+
+        DefaultKinveyLocationCallback saveCallback = saveLoc(store, location);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Query query = client.query();
+        Query geoQuery = query.withinBox(GEOLOC, 20, 20, 40, 50);
+        DefaultKinveyReadLocCallback kinveyListCallback = findLoc(store, geoQuery, DEFAULT_TIMEOUT);
+        assertNull(kinveyListCallback.error);
+        assertNotNull(kinveyListCallback.result);
+        assertTrue(kinveyListCallback.result.getResult().size() > 0);
+    }
+
+    @Test
+    public void testQueryGeoNearSphere() throws InterruptedException {
+        DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Location.COLLECTION);
+
+        Double[] geo = {30.0, 40.0};
+        Location location = new Location();
+        location.setGeo(geo);
+
+        DefaultKinveyLocationCallback saveCallback = saveLoc(store, location);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Query query1 = client.query();
+        Query geoQueryNearSphere = query1.nearSphere(GEOLOC, 20, 50);
+        Query query2 = client.query();
+        Query geoQueryNearSphereDistance = query2.nearSphere(GEOLOC, 20, 50, 100000);
+
+        DefaultKinveyReadLocCallback kinveyFindCallback1 = findLoc(store, geoQueryNearSphere, DEFAULT_TIMEOUT);
+        DefaultKinveyReadLocCallback kinveyFindCallback2 = findLoc(store, geoQueryNearSphereDistance, DEFAULT_TIMEOUT);
+
+        assertNull(kinveyFindCallback1.error);
+        assertNotNull(kinveyFindCallback1.result);
+        assertTrue(kinveyFindCallback1.result.getResult().size() > 0);
+
+        assertNull(kinveyFindCallback2.error);
+        assertNotNull(kinveyFindCallback2.result);
+        assertTrue(kinveyFindCallback2.result.getResult().size() > 0);
+    }
+
+    @Test
+    public void testQueryGeoWithinPolygon() throws InterruptedException {
+        DataStore<Location> store = DataStore.collection(Location.COLLECTION, Location.class, StoreType.NETWORK, client);
+        clearBackend(store);
+        client.getSyncManager().clear(Location.COLLECTION);
+
+        Double[] geo = {30.0, 40.0};
+        Location location = new Location();
+        location.setGeo(geo);
+
+        DefaultKinveyLocationCallback saveCallback = saveLoc(store, location);
+        assertNotNull(saveCallback.result);
+        assertNull(saveCallback.error);
+
+        Query query1 = client.query();
+        Query geoQueryWithinPolygon = query1.withinPolygon(GEOLOC,
+                30, 20,
+                40, 30,
+                50, 40,
+                60, 50);
+
+        DefaultKinveyReadLocCallback kinveyFindCallback = findLoc(store, geoQueryWithinPolygon, DEFAULT_TIMEOUT);
+
+        assertNull(kinveyFindCallback.error);
+        assertNotNull(kinveyFindCallback.result);
+        assertTrue(kinveyFindCallback.result.getResult().size() > 0);
     }
 
     @After

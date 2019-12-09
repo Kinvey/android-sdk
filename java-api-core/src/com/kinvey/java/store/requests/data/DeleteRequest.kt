@@ -34,15 +34,16 @@ class DeleteRequest<T : GenericJson>() : AbstractKinveyDataRequest<T>() {
     private var id: String? = null
     private var writePolicy: WritePolicy? = null
 
-    constructor(cache: ICache<T>?, id: String?, writePolicy: WritePolicy?, networkManager: NetworkManager<T>?): this() {
+    constructor(cache: ICache<T>?, id: String?, writePolicy: WritePolicy?,
+                networkManager: NetworkManager<T>?, query: Query? = null): this() {
         this.cache = cache
         this.id = id
         this.writePolicy = writePolicy
         this.networkMgr = networkManager
+        this.query = query
     }
 
-    constructor(client: AbstractClient<*>, collectionName: String, clazz: Class<T>,
-                cache: ICache<T>, query: Query, writePolicy: WritePolicy): this() {
+    constructor(collectionName: String, cache: ICache<T>, query: Query, writePolicy: WritePolicy): this() {
         id = null
         this.collection = collectionName
         this.cache = cache

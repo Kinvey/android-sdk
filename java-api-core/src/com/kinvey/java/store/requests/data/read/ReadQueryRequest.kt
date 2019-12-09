@@ -39,6 +39,7 @@ class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
         }
 
     override val network: KinveyReadResponse<T>?
+        @Throws(IOException::class)
         get() {
             return networkData?.getBlocking(query)?.execute()
         }

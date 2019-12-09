@@ -375,7 +375,7 @@ open class BaseDataStoreTest {
     }
 
     fun createPersonsList(withId: Boolean): List<Person> {
-        return createPersonsList(MAX_PERSONS_COUNT, withId)
+        return createPersonsList(MAX_PERSONS_COUNT, error = false, withId = withId)
     }
 
     fun createEntityList(itemsCount: Int): List<EntitySet> {

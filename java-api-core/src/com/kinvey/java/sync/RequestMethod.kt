@@ -7,12 +7,11 @@ package com.kinvey.java.sync
 enum class RequestMethod (private val query: String) {
     SAVE("SAVE"),
     DELETE("DELETE");
-
     companion object {
         @JvmStatic
         fun fromString(verb: String): RequestMethod? {
             for (v in RequestMethod.values()) {
-                if (v.query == verb) {
+                if (v.query.equals(verb, ignoreCase = true)) {
                     return v
                 }
             }

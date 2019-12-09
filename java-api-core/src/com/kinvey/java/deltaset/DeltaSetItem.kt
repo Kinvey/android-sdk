@@ -22,12 +22,12 @@ import com.google.api.client.util.Key
 /**
  * Created by Prots on 12/11/15.
  */
-class DeltaSetItem : GenericJson() {
+class DeltaSetItem(id: String? = null, kmd: KMD? = null) : GenericJson() {
 
     @Key("_id")
-    val id: String? = null
+    var id: String? = id
     @Key("_kmd")
-    val kmd: KMD? = null
+    var kmd: KMD? = kmd
 
     class KMD {
         @Key("lmt")

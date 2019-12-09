@@ -24,10 +24,10 @@ import com.kinvey.java.auth.ClientUser
  * @author mjsalinger
  * @since 2.0
  */
-internal class AndroidUserStore private constructor(context: Context?) : ClientUser {
+class AndroidUserStore(context: Context?) : ClientUser {
     private var userID: String? = null
-    var userPreferences: SharedPreferences?
-    var appContext: Context? = null
+    private var userPreferences: SharedPreferences?
+    private var appContext: Context? = null
 
     init {
         appContext = context?.applicationContext
@@ -67,5 +67,4 @@ internal class AndroidUserStore private constructor(context: Context?) : ClientU
             return _instance!!
         }
     }
-
 }

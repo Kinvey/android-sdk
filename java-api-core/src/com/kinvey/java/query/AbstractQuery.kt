@@ -185,6 +185,15 @@ abstract class AbstractQuery(protected var builder: QueryFilterBuilder?) : Seria
                 }
                 generator?.writeEndArray()
             }
+            valueClass == Array<DoubleArray>::class.java || valueClass == Array<Array<Double>>::class.java-> {
+                generator?.writeFieldName(key)
+                generator?.writeStartArray()
+                val values = value as Array<Array<Double>>
+                for (doubleArr in values) {
+                     generator?.serialize(doubleArr)
+                }
+                generator?.writeEndArray()
+            }
             valueClass == Float::class.java || valueClass == java.lang.Float::class.java -> {
                 generator?.writeFieldName(key)
                 generator?.writeNumber(value as Float)

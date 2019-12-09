@@ -49,18 +49,17 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
                 response.result = cache?.get(query)
                 ret = response
             }
-            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = networkManager?.getBlocking(query)?.execute()
+            ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = readItem(query)
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
                 var networkException: IOException? = null
                 try {
-                    ret = networkManager?.getBlocking(query)?.execute()
+                    ret = readItem(query)
                 } catch (e: IOException) {
                     if (NetworkManager.checkNetworkRuntimeExceptions(e)) {
                         throw e
                     }
                     networkException = e
                 }
-
                 // if the network request fails, fetch data from local cache
                 if (networkException != null) {
                     val res = KinveyReadResponse<T>()
@@ -70,6 +69,11 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
             }
         }
         return ret
+    }
+
+    @Throws(IOException::class)
+    protected fun readItem(query: Query): KinveyReadResponse<T>? {
+        return networkManager?.getBlocking(query)?.execute()
     }
 
     override fun cancel() {}

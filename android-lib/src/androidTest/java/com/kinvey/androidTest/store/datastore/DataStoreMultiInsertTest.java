@@ -58,6 +58,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Ignore("Ignored: Kotlin migration is done, use Kotlin version")
 public class DataStoreMultiInsertTest {
 
     private static final String TEST_USERNAME = "Test_UserName";

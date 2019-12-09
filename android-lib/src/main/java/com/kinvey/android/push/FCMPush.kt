@@ -76,8 +76,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(currentApp) != ConnectionResult.SUCCESS) {
             throw KinveyException("Google Play Services is not available on the current device", "The device needs Google Play Services", "FCM for push notifications requires Google Play Services")
         }
-        AsyncRegisterFCM(object : KinveyClientCallback<Any> {
-            override fun onSuccess(result: Any) {
+        AsyncRegisterFCM(object : KinveyClientCallback<Any?> {
+            override fun onSuccess(result: Any?) {
                 ERROR("FCM - successful register CGM")
             }
 
@@ -101,19 +101,19 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         if (register) {
             pushServiceClass?.let { cls ->
                 client?.let { c ->
-                    c.push(cls)?.enablePushViaRest(object : KinveyClientCallback<Any> {
-                        override fun onSuccess(result: Any) {
+                    c.push(cls)?.enablePushViaRest(object : KinveyClientCallback<Any?> {
+                        override fun onSuccess(result: Any?) {
                             retrieve(c as AbstractClient<User>, object : KinveyUserCallback<User> {
                                 override fun onSuccess(result: User) {
-                                    client?.activeUser!!["_messaging"] = result["_messaging"]
+                                    client?.activeUser?.let {
+                                        it["_messaging"] = result["_messaging"]
+                                    }
                                 }
-
                                 override fun onFailure(error: Throwable) {
                                     ERROR("FCM - user update error: $error")
                                 }
                             })
                         }
-
                         override fun onFailure(error: Throwable) {
                             ERROR("FCM - user update error: $error")
                         }
@@ -121,8 +121,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
                 }
             }
         } else {
-            client?.push(pushServiceClass)?.disablePushViaRest(object : KinveyClientCallback<Any> {
-                override fun onSuccess(result: Any) {
+            client?.push(pushServiceClass)?.disablePushViaRest(object : KinveyClientCallback<Any?> {
+                override fun onSuccess(result: Any?) {
                     ERROR("FCM - user update success")
                 }
 
@@ -193,8 +193,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         if (regid?.isEmpty() == false) {
             registerWithKinvey(regid, false)
         }
-        AsyncUnRegisterFCM(object : KinveyClientCallback<Any> {
-            override fun onSuccess(result: Any) {
+        AsyncUnRegisterFCM(object : KinveyClientCallback<Any?> {
+            override fun onSuccess(result: Any?) {
                 ERROR("FCM - successful unregister FCM")
             }
             override fun onFailure(error: Throwable) {
@@ -235,16 +235,15 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         var notificationKey: String? = null
     }
 
-    override fun enablePushViaRest(callback: KinveyClientCallback<Any>?, deviceID: String?) {
+    override fun enablePushViaRest(callback: KinveyClientCallback<Any?>?, deviceID: String?) {
         createAsyncEnablePushRequest(callback, deviceID)?.execute()
     }
 
-    override fun disablePushViaRest(callback: KinveyClientCallback<Any>?, deviceID: String?) {
+    override fun disablePushViaRest(callback: KinveyClientCallback<Any?>?, deviceID: String?) {
         createAsyncDisablePushRequest(callback, deviceID)?.execute()
     }
 
-    private inner class AsyncRegisterFCM(callback: KinveyClientCallback<Any>?)
-        : AsyncClientRequest<Any>(callback) {
+    private inner class AsyncRegisterFCM(callback: KinveyClientCallback<Any?>?) : AsyncClientRequest<Any?>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             try {
@@ -270,8 +269,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         }
     }
 
-    private inner class AsyncUnRegisterFCM(callback: KinveyClientCallback<Any>?)
-        : AsyncClientRequest<Any>(callback) {
+    private inner class AsyncUnRegisterFCM(callback: KinveyClientCallback<Any?>?)
+        : AsyncClientRequest<Any?>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             try {
@@ -283,8 +282,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
         }
     }
 
-    private inner class AsyncEnablePush(callback: KinveyClientCallback<Any>?, var deviceID: String?)
-        : AsyncClientRequest<Any>(callback) {
+    private inner class AsyncEnablePush(callback: KinveyClientCallback<Any?>?, var deviceID: String?)
+        : AsyncClientRequest<Any?>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             val ent = PushRegistration(deviceID)
@@ -296,8 +295,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
 
     }
 
-    private inner class AsyncDisablePush(callback: KinveyClientCallback<Any>?, var deviceID: String?)
-        : AsyncClientRequest<Any>(callback) {
+    private inner class AsyncDisablePush(callback: KinveyClientCallback<Any?>?, var deviceID: String?)
+        : AsyncClientRequest<Any?>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             val ent = PushRegistration(deviceID)
@@ -309,11 +308,11 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
 
     }
 
-    private fun createAsyncDisablePushRequest(callback: KinveyClientCallback<Any>?, deviceID: String?): AsyncDisablePush? {
+    private fun createAsyncDisablePushRequest(callback: KinveyClientCallback<Any?>?, deviceID: String?): AsyncDisablePush? {
         return AsyncDisablePush(callback, deviceID)
     }
 
-    private fun createAsyncEnablePushRequest(callback: KinveyClientCallback<Any>?, deviceID: String?): AsyncEnablePush? {
+    private fun createAsyncEnablePushRequest(callback: KinveyClientCallback<Any?>?, deviceID: String?): AsyncEnablePush? {
         return AsyncEnablePush(callback, deviceID)
     }
 

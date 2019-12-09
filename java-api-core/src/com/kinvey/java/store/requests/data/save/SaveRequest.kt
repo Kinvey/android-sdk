@@ -66,7 +66,7 @@ class SaveRequest<T : GenericJson>(private val cache: ICache<T>?, private val ne
                 val bRealmGeneratedId = networkManager?.isTempId(ret)
                 if (bRealmGeneratedId == true) { ret?.set(Constants._ID, null) }
                 try {
-                    ret = networkManager?.saveBlocking(item)?.execute()
+                    ret = saveItem(item)
                     if (bRealmGeneratedId == true) {
                         // The result from the network has the entity with its permanent ID. Need
                         // to remove the entity from the local cache with the temporary ID.
@@ -86,6 +86,11 @@ class SaveRequest<T : GenericJson>(private val cache: ICache<T>?, private val ne
             }
         }
         return ret
+    }
+
+    @Throws(IOException::class)
+    protected fun saveItem(item: T?): T? {
+        return networkManager?.saveBlocking(item)?.execute()
     }
 
     override fun cancel() {}

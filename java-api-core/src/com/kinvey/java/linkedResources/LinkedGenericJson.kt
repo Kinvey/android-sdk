@@ -17,6 +17,7 @@
 package com.kinvey.java.linkedResources
 
 import com.google.api.client.json.GenericJson
+import com.google.api.client.util.Key
 
 /**
  * Use this class as a base Entity instead of `com.google.api.client.json.GenericJson` when using the LinkedNetworkManager API.
@@ -34,7 +35,8 @@ import com.google.api.client.json.GenericJson
  */
 abstract class LinkedGenericJson : GenericJson() {
 
-    val allFiles = mutableMapOf<String, LinkedFile?>()
+    @Key("files")
+    var allFiles = mutableMapOf<String, LinkedFile?>()
 
     /**
      * General constructor, initializes map of LinkedFiles

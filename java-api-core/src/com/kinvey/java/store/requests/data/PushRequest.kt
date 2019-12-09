@@ -34,7 +34,7 @@ import java.io.IOException
 class PushRequest<T : GenericJson>(collectionName: String?, cache: ICache<T>?,
                                    private val networkManager: NetworkManager<T>?,
                                    private val client: AbstractClient<*>?) : AbstractKinveyExecuteRequest<T>() {
-    private val syncManager: SyncManager?
+    var syncManager: SyncManager?
 
     init {
         this.cache = cache

@@ -56,9 +56,9 @@ open class SaveLinkedResourceClientRequest<T>
  * @param jsonContent              POJO that can be serialized into JSON content or `null` for none
  * @param responseClass            response class to parse into
  */
-protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMethod: String?,
+protected constructor(val storeType: StoreType? = StoreType.SYNC, private val abstractClient: AbstractClient<*>?, requestMethod: String?,
                       uriTemplate: String?, jsonContent: GenericJson?, responseClass: Class<T>?)
-    : AbstractKinveyJsonClientRequest<T>(abstractKinveyJsonClient, requestMethod ?: "",
+    : AbstractKinveyJsonClientRequest<T>(abstractClient, requestMethod ?: "",
         uriTemplate ?: "", jsonContent, responseClass) {
     var upload: UploaderProgressListener? = null
     private var mimeTypeFinder: MimeTypeFinder? = null
@@ -76,7 +76,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMetho
                 if (jsonContent.getFile(key) != null) {
                     INFO("Kinvey - LR, found a LinkedGenericJson: $key")// + " -> " + ((LinkedGenericJson) getJsonContent()).getFile(key).getId());
 
-                    if (jsonContent.getFile(key)!!.isResolve) {
+                    if (jsonContent.getFile(key)?.isResolve == true) {
                         val inStream = jsonContent.getFile(key)?.input
                         var mediaContent: InputStreamContent? = null
                         val mimetype = "application/octet-stream"
@@ -91,7 +91,7 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMetho
                             override fun progressChanged(uploader: MediaHttpUploader) {
                             }
                         }
-                        val fileStore = abstractKinveyClient.getFileStore(StoreType.SYNC)
+                        val fileStore = abstractClient?.getFileStore(storeType)
                         val linkedFile = jsonContent.getFile(key)
                         val meta = FileMetaData(linkedFile?.id ?: "")
                         meta.fileName = linkedFile?.fileName

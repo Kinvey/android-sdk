@@ -26,7 +26,6 @@ import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-@Ignore("Ignored tests in Kotlin for now while Kotlin migration is not done")
 class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
 
     // NETWORK STORE
