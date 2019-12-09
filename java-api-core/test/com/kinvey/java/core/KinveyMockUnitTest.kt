@@ -15,119 +15,98 @@
  */
 package com.kinvey.java.core;
 
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.json.MockJsonFactory;
-import com.kinvey.java.*;
-import com.kinvey.java.auth.ClientUser;
-
-import junit.framework.TestCase;
-
-import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.kinvey.java.cache.ICacheManager;
-import com.kinvey.java.dto.BaseUser;
-import com.kinvey.java.network.NetworkManager;
-import com.kinvey.java.query.MongoQueryFilter;
+import com.google.api.client.http.HttpRequestInitializer
+import com.google.api.client.http.HttpTransport
+import com.google.api.client.json.GenericJson
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.JsonObjectParser
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.client.testing.http.MockHttpTransport
+import com.google.api.client.testing.json.MockJsonFactory
+import com.kinvey.java.*
+import com.kinvey.java.auth.ClientUser
+import com.kinvey.java.cache.ICacheManager
+import com.kinvey.java.dto.BaseUser
+import com.kinvey.java.network.NetworkManager
+import com.kinvey.java.query.MongoQueryFilter
+import junit.framework.TestCase
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @author edwardf
  * @since 2.0
  */
-public abstract class KinveyMockUnitTest<T extends BaseUser> extends TestCase {
+abstract class KinveyMockUnitTest<T : BaseUser> : TestCase() {
 
-    private MockTestClient<T> mockClient;
-        
-    public MockTestClient<T> getClient(){
-    	if (mockClient == null){
-    		mockClient = new MockTestClient.Builder(new MockHttpTransport(),new MockJsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
-    	}
-    	return mockClient;
-    }
-    
-    public MockTestClient<T> getClient(HttpTransport transport){
-    	return new MockTestClient.Builder(transport, new GsonFactory(), null, new MockKinveyClientRequestInitializer()).build();
-    }
+    private var mockClient: MockTestClient<T>? = null
 
-
-
-    public KinveyClientRequestInitializer getKinveyRequestInitializer(){
-
-        return (KinveyClientRequestInitializer) mockClient.getKinveyRequestInitializer();
-    }
-
-    protected static class MockTestClient<T extends BaseUser> extends AbstractClient<T> {
-
-        private ConcurrentHashMap<String, NetworkManager> appDataInstanceCache;
-
-
-        MockTestClient(HttpTransport transport, HttpRequestInitializer httpRequestInitializer,
-                       String rootUrl, String servicePath, JsonObjectParser objectParser,
-                       KinveyClientRequestInitializer kinveyRequestInitializer) {
-            super(transport, null, "https://baas.kinvey.com/", "" , objectParser, kinveyRequestInitializer,null,null);
+    val client: MockTestClient<T>?
+        get() {
+            if (mockClient == null) {
+                mockClient = MockTestClient.Builder<T>(MockHttpTransport(), MockJsonFactory(), null, MockKinveyClientRequestInitializer()).build()
+            }
+            return mockClient
         }
 
+    open fun getClient(transport: HttpTransport?): MockTestClient<*> {
+        return MockTestClient.Builder<T>(transport, GsonFactory(), null, MockKinveyClientRequestInitializer()).build()
+    }
 
-        @Override
-        public void performLockDown() {
+    open fun getKinveyRequestInitializer(): KinveyClientRequestInitializer {
+        return mockClient?.kinveyRequestInitializer as KinveyClientRequestInitializer
+    }
+
+    class MockTestClient<T : BaseUser> (transport: HttpTransport?, httpRequestInitializer: HttpRequestInitializer?,
+                                                             rootUrl: String?, servicePath: String?, objectParser: JsonObjectParser?,
+                                                             kinveyRequestInitializer: KinveyClientRequestInitializer?)
+        : AbstractClient<T>(transport, null, "https://baas.kinvey.com/", "",
+            objectParser, kinveyRequestInitializer, null, null) {
+
+        private val appDataInstanceCache: ConcurrentHashMap<String?, NetworkManager<*>>? = null
+        override fun performLockDown() {
             //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
+
         }
 
-
-        @Override
-        public UserDiscovery userDiscovery() {
-            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
+        override fun userDiscovery(): UserDiscovery<*>? {
+            return null  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
         }
 
-        @Override
-        public UserGroup userGroup() {
-            return null;  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
-        }
+        override fun userGroup(): UserGroup? {
+            return null  //To change body of implemented methods use NetworkFileManager | Settings | NetworkFileManager Templates.
+        }// TODO Auto-generated method stub// TODO Auto-generated method stub// TODO Auto-generated method stub
 
-        public ClientUser getClientUser() {
-            return new ClientUser() {
+        // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
+        override var clientUser: ClientUser?
+            get() = object : ClientUser {
+                // TODO Auto-generated method stub
+                // TODO Auto-generated method stub
+                override var user: String?
+                    get() =// TODO Auto-generated method stub
+                        null
+                    set(userID) {
+                        // TODO Auto-generated method stub
+                    }
 
-                @Override
-                public void setUser(String userID) {
+                override fun clear() {
                     // TODO Auto-generated method stub
                 }
-
-                @Override
-                public String getUser() {
-                    // TODO Auto-generated method stub
-                    return null;
-                }
-
-                @Override
-                public void clear() {
-                    // TODO Auto-generated method stub
-                }
-			};
-        }
-
-        @Override
-        public void setActiveUser(T user) {
-            synchronized (getLock()) {
-                this.setUser(user);
             }
-        }
-
-        @Override
-        public T getActiveUser() {
-            synchronized (getLock()) {
-                return this.getUser();
+            set(clientUser) {
+                super.clientUser = clientUser
             }
-        }
 
-        @Override
-        public CustomEndpoints customEndpoints(Class myClass) {
-            return null;
+        override var activeUser: T?
+            get() {
+                synchronized(lock) { return user }
+            }
+            set(user) {
+                synchronized(lock) { this.user = user }
+            }
+
+        override fun <I : GenericJson, O> customEndpoints(myClass: Class<O>?): CustomEndpoints<I, O> {
+            return CustomEndpoints(this)
         }
 
 /*        @Override
@@ -135,114 +114,99 @@ public abstract class KinveyMockUnitTest<T extends BaseUser> extends TestCase {
             return null;
         }*/
 
-        @Override
-        public ICacheManager getCacheManager() {
-            return null;
-        }
 
-        @Override
-        public ICacheManager getUserCacheManager() {
-            return null;
-        }
-
-        @Override
-        public String getFileCacheFolder() {
-            return null;
-        }
-
-        @Override
-        protected ICacheManager getSyncCacheManager() {
-            return null;
-        }
-
-        @Override
-        public String getDeviceId() {
-            return null;
-        }
-
-
-        public static final class Builder extends AbstractClient.Builder {
-
-            public Builder(HttpTransport transport, JsonFactory jsonFactory,
-                           HttpRequestInitializer httpRequestInitializer,
-                           KinveyClientRequestInitializer clientRequestInitializer) {
-                super(transport, null , null);
-                this.setJsonFactory(jsonFactory);
+        override var cacheManager: ICacheManager?
+            get() {
+                return null
+            }
+            set(cacheManager) {
+                super.cacheManager = cacheManager
             }
 
-            @Override
-            public MockTestClient build() {
-                return new MockTestClient(getTransport(), getHttpRequestInitializer(), getBaseUrl(), getServicePath(),
-                        getObjectParser(), new MockKinveyClientRequestInitializer());
+        override var userCacheManager: ICacheManager?
+            get() {
+                return null
+            }
+            set(userCacheManager) {
+                super.userCacheManager = userCacheManager
+            }
+
+        override var fileCacheFolder: String?
+            get() {
+                return null
+            }
+            set(fileCacheFolder) {
+                super.fileCacheFolder = fileCacheFolder
+            }
+
+        override var syncCacheManager: ICacheManager?
+            protected get() {
+                return null
+            }
+            set(syncCacheManager) {
+                super.syncCacheManager = syncCacheManager
+            }
+
+        override val deviceId: String
+            get() {
+                return ""
+            }
+
+        class Builder<T: BaseUser>(transport: HttpTransport?, jsonFactory: JsonFactory?,
+                      httpRequestInitializer: HttpRequestInitializer?,
+                      clientRequestInitializer: KinveyClientRequestInitializer?)
+            : AbstractClient.Builder(transport as HttpTransport, null, null) {
+            override fun build(): MockTestClient<T> {
+                return MockTestClient(transport, httpRequestInitializer, baseUrl, servicePath,
+                        objectParser, MockKinveyClientRequestInitializer())
+            }
+            init {
+                setJsonFactory(jsonFactory)
             }
         }
     }
 
-
-
-    static class MockKinveyClientRequestInitializer extends KinveyClientRequestInitializer {
-
-        boolean isCalled;
-
-        MockKinveyClientRequestInitializer() {
-            super("appkey", "appsecret", new KinveyHeaders());
-        }
-
-        @Override
-        public void initialize(AbstractKinveyClientRequest<?> request) {
-            isCalled = true;
+    class MockKinveyClientRequestInitializer internal constructor() : KinveyClientRequestInitializer("appkey", "appsecret", KinveyHeaders()) {
+        var isCalled = false
+        override fun initialize(request: AbstractKinveyClientRequest<*>) {
+            isCalled = true
         }
     }
 
-    public static class MockQuery extends Query {
-
-        public MockQuery(MockQueryFilter.MockBuilder builder) {
-            super(null);
-        }
-
-        @Override
-        public LinkedHashMap<String, Object> getQueryFilterMap() {
-            LinkedHashMap<String,Object> filter = new LinkedHashMap<String,Object>();
-            LinkedHashMap<String,Object> innerFilter = new LinkedHashMap<String, Object>();
-            filter.put("city", "boston");
-            innerFilter.put("$gt", 18);
-            innerFilter.put("$lt", 21);
-            filter.put("age", innerFilter);
-            return filter;
-        }
-
-        @Override
-        public String getQueryFilterJson(JsonFactory factory) {
-            LinkedHashMap<String,Object> filter = new LinkedHashMap<String,Object>();
-            LinkedHashMap<String,Object> innerFilter = new LinkedHashMap<String, Object>();
-            filter.put("city","boston");
-            innerFilter.put("$gt",18);
-            innerFilter.put("$lt",21);
-            filter.put("age",innerFilter);
-            return filter.toString();
-        }
-    }
-
-    public static class MockQueryFilter extends MongoQueryFilter {
-        public static class MockBuilder extends MongoQueryFilterBuilder {
-            public MockBuilder() {
-                super();
+    class MockQuery(builder: MockQueryFilter.MockBuilder?) : Query(null) {
+        override val queryFilterMap: LinkedHashMap<String, Any>
+            get() {
+                val filter: LinkedHashMap<String, Any> = LinkedHashMap<String, Any>()
+                val innerFilter: LinkedHashMap<String, Any> = LinkedHashMap<String, Any>()
+                filter["city"] = "boston"
+                innerFilter["\$gt"] = 18
+                innerFilter["\$lt"] = 21
+                filter["age"] = innerFilter
+                return filter
             }
 
+        override fun getQueryFilterJson(factory: JsonFactory?): String {
+            val filter: LinkedHashMap<String, Any> = LinkedHashMap<String, Any>()
+            val innerFilter: LinkedHashMap<String, Any> = LinkedHashMap<String, Any>()
+            filter["city"] = "boston"
+            innerFilter["\$gt"] = 18
+            innerFilter["\$lt"] = 21
+            filter["age"] = innerFilter
+            return filter.toString()
         }
     }
 
-    public static class MockNetworkManager extends NetworkManager {
-        /**
-         * Constructor to instantiate the NetworkManager class.
-         *
-         * @param collectionName Name of the appData collection
-         * @param myClass        Class Type to marshall data between.
-         * @param client
-         */
-        protected MockNetworkManager(String collectionName, Class myClass, AbstractClient client) {
-            super(collectionName, myClass, client);
-        }
+    class MockQueryFilter : MongoQueryFilter() {
+        class MockBuilder : MongoQueryFilterBuilder()
     }
 
+    class MockNetworkManager<T : GenericJson>
+    /**
+     * Constructor to instantiate the NetworkManager class.
+     *
+     * @param collectionName Name of the appData collection
+     * @param myClass        Class Type to marshall data between.
+     * @param client
+     */
+    protected constructor(collectionName: String?, myClass: Class<T>?, client: AbstractClient<*>?) : NetworkManager<T>(collectionName, myClass, client)
 }

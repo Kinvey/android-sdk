@@ -88,7 +88,7 @@ protected constructor(val storeType: StoreType? = StoreType.SYNC, private val ab
                         val metaUploadListener: MetaUploadListener = object : MetaUploadListener {
                             override fun metaDataUploaded(metaData: FileMetaData?) {}
                             @Throws(IOException::class)
-                            override fun progressChanged(uploader: MediaHttpUploader) {
+                            override fun progressChanged(uploader: MediaHttpUploader?) {
                             }
                         }
                         val fileStore = abstractClient?.getFileStore(storeType)
@@ -102,7 +102,7 @@ protected constructor(val storeType: StoreType? = StoreType.SYNC, private val ab
                         val stream = mediaContent?.inputStream ?: ByteArrayInputStream(byteArrayOf())
                         val file = fileStore?.upload(stream, meta, object : UploaderProgressListener {
                             @Throws(IOException::class)
-                            override fun progressChanged(uploader: MediaHttpUploader) {
+                            override fun progressChanged(uploader: MediaHttpUploader?) {
                                 if (upload != null) {
                                     upload?.progressChanged(uploader)
                                 }
