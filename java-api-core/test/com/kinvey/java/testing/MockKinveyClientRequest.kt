@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,21 +11,21 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
-package com.kinvey.java.testing;
+package com.kinvey.java.testing
 
-import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent
+import com.kinvey.java.core.AbstractKinveyClientRequest
+import com.kinvey.java.core.MediaHttpUploader
+import com.kinvey.java.testing.MockKinveyJsonClient.Builder
 
 /**
  * @author m0rganic
  * @since 2.0
  */
-public class HttpTesting {
-
-    public static String SIMPLE_URL = "https://baas.kinvey.com";
-
-    public static GenericUrl SIMPLE_GENERIC_URL = new GenericUrl(SIMPLE_URL);
-
-
+class MockKinveyClientRequest<T>(requestMethod: String?, uriTemplate: String?,
+                                 httpContent: HttpContent?, responseClass: Class<T>)
+    : AbstractKinveyClientRequest<T>(Builder().build(), requestMethod, uriTemplate, httpContent, responseClass) {
+    val mockMediaUploader: MediaHttpUploader? = null
 }

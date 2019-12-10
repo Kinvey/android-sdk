@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2014, Kinvey, Inc. All rights reserved.
  *
  * This software is licensed to you under the Kinvey terms of service located at
@@ -11,27 +11,17 @@
  * KINVEY, INC and is subject to applicable licensing agreements.
  * Unauthorized reproduction, transmission or distribution of this file and its
  * contents is a violation of applicable laws.
- * 
+ *
  */
-package com.kinvey.java.testing;
+package com.kinvey.java.testing
 
-import com.kinvey.java.core.AbstractKinveyClientRequest;
-import com.kinvey.java.core.KinveyClientRequestInitializer;
+import com.google.api.client.http.GenericUrl
 
 /**
-* @author m0rganic
-* @since 2.0
-*/
-public class SpyKinveyClientRequestInitializer extends KinveyClientRequestInitializer {
-
-    boolean isCalled;
-
-    public SpyKinveyClientRequestInitializer() {
-        super(null, null, new com.kinvey.java.core.KinveyHeaders());
-    }
-
-    @Override
-    public void initialize(AbstractKinveyClientRequest<?> request) {
-        isCalled = true;
-    }
+ * @author m0rganic
+ * @since 2.0
+ */
+object HttpTesting {
+    var SIMPLE_URL = "https://baas.kinvey.com"
+    var SIMPLE_GENERIC_URL = GenericUrl(SIMPLE_URL)
 }
